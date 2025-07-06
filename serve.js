@@ -27,780 +27,181 @@ app.get('/', (req, res) => {
     <script type="text/babel">
         const { useState } = React;
         
-        // Simple MarketPlace Landing Page
         const MarketPaceLanding = () => {
             const [currentStep, setCurrentStep] = useState('landing');
-            const [signupData, setSignupData] = useState({
-                accountType: '',
-                personalInfo: {},
-                businessInfo: {},
-                preferences: {}
-            });
             
-            // Website integration function
-            const testWebsiteConnection = () => {
-                const websiteUrlInput = document.querySelector('input[placeholder="Enter your website URL"]');
-                const platformSelect = document.querySelector('select[name="platformType"]');
-                
-                if (!websiteUrlInput || !websiteUrlInput.value) {
-                    alert('Please enter your website URL first.');
-                    return;
-                }
-
-                const websiteUrl = websiteUrlInput.value;
-                const platformType = platformSelect ? platformSelect.value : 'shopify';
-                
-                // Simulate successful connection
-                const productCount = Math.floor(Math.random() * 50) + 10;
-                alert('✅ Connection successful! Found ' + productCount + ' products on your ' + platformType + ' website. Products will be imported to your MarketPace shop automatically.');
-            };
-
-            // Social media integration functions
-            const connectFacebookShop = () => {
-                const productCount = Math.floor(Math.random() * 30) + 15;
-                alert('🎉 Facebook Shop connected successfully! ' + productCount + ' products imported from your Facebook catalog. Your MarketPace shop is now synchronized with Facebook.');
-            };
-
-            const connectTikTokShop = () => {
-                const productCount = Math.floor(Math.random() * 25) + 12;
-                alert('🚀 TikTok Shop connected successfully! ' + productCount + ' products imported from your TikTok catalog. Your products are now available to the local MarketPace community.');
-            };
-            
-            // Step 1: Account Type Selection
-            if (currentStep === 'accountType') {
+            if (currentStep === 'community') {
                 return (
-                    <div style={{minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', padding: '40px 20px'}}>
-                        <div style={{maxWidth: '600px', margin: '0 auto', color: 'white'}}>
+                    <div style={{
+                        minHeight: '100vh',
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        color: 'white',
+                        fontFamily: 'system-ui, -apple-system, sans-serif',
+                        paddingBottom: '100px'
+                    }}>
+                        {/* Header */}
+                        <div style={{padding: '20px', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.2)'}}>
+                            <h1 style={{margin: '0', fontSize: '28px'}}>MarketPace Community</h1>
+                            <p style={{margin: '5px 0 0', opacity: 0.8}}>Connecting Your Neighborhood</p>
+                        </div>
+                        
+                        {/* Community Content */}
+                        <div style={{padding: '20px'}}>
+                            <div style={{marginBottom: '30px'}}>
+                                <h2 style={{fontSize: '20px', marginBottom: '15px'}}>Community Feed</h2>
+                                <div style={{background: 'rgba(255,255,255,0.1)', padding: '15px', borderRadius: '10px', marginBottom: '15px'}}>
+                                    <div style={{display: 'flex', alignItems: 'center', marginBottom: '10px'}}>
+                                        <div style={{width: '40px', height: '40px', borderRadius: '50%', background: '#4CAF50', marginRight: '10px'}}></div>
+                                        <div>
+                                            <div style={{fontWeight: 'bold'}}>Sarah M.</div>
+                                            <div style={{fontSize: '12px', opacity: 0.7}}>2 hours ago</div>
+                                        </div>
+                                    </div>
+                                    <p style={{margin: '0', lineHeight: 1.5}}>Just listed a barely used baby stroller! Perfect for local families. Check it out in the marketplace!</p>
+                                </div>
+                                
+                                <div style={{background: 'rgba(255,255,255,0.1)', padding: '15px', borderRadius: '10px', marginBottom: '15px'}}>
+                                    <div style={{display: 'flex', alignItems: 'center', marginBottom: '10px'}}>
+                                        <div style={{width: '40px', height: '40px', borderRadius: '50%', background: '#FF9800', marginRight: '10px'}}></div>
+                                        <div>
+                                            <div style={{fontWeight: 'bold'}}>Mike's Handyman Services</div>
+                                            <div style={{fontSize: '12px', opacity: 0.7}}>4 hours ago</div>
+                                        </div>
+                                    </div>
+                                    <p style={{margin: '0', lineHeight: 1.5}}>Available for home repairs this week! Reasonable rates, local references. Message me for a quote.</p>
+                                </div>
+                            </div>
+                            
                             <button 
                                 onClick={() => setCurrentStep('landing')}
                                 style={{
-                                    background: 'rgba(255,255,255,0.2)', 
-                                    border: 'none', 
-                                    padding: '10px 20px', 
-                                    borderRadius: '8px', 
-                                    color: 'white',
-                                    marginBottom: '30px',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                ← Back
-                            </button>
-                            
-                            <h2 style={{fontSize: '28px', marginBottom: '20px', textAlign: 'center'}}>Choose Your Account Type</h2>
-                            <p style={{textAlign: 'center', marginBottom: '40px', opacity: 0.9}}>
-                                Select how you'd like to participate in your local MarketPace community
-                            </p>
-                            
-                            <div style={{display: 'grid', gap: '20px'}}>
-                                <div 
-                                    onClick={() => {
-                                        setSignupData({...signupData, accountType: 'personal'});
-                                        setCurrentStep('personalInfo');
-                                    }}
-                                    style={{
-                                        background: 'rgba(255,255,255,0.1)',
-                                        padding: '30px',
-                                        borderRadius: '15px',
-                                        cursor: 'pointer',
-                                        border: '2px solid transparent',
-                                        transition: 'all 0.3s'
-                                    }}
-                                    onMouseEnter={(e) => e.target.style.borderColor = '#8B5CF6'}
-                                    onMouseLeave={(e) => e.target.style.borderColor = 'transparent'}
-                                >
-                                    <h3 style={{fontSize: '22px', marginBottom: '10px'}}>🏠 Personal Account</h3>
-                                    <p style={{opacity: 0.9, lineHeight: 1.5}}>
-                                        Perfect for individuals who want to buy, sell, and rent items in their neighborhood. 
-                                        Connect with neighbors and build community relationships.
-                                    </p>
-                                    <div style={{marginTop: '15px', fontSize: '14px', opacity: 0.8}}>
-                                        • Buy and sell personal items
-                                        • Rent equipment and tools
-                                        • Find local services
-                                        • Book entertainment
-                                    </div>
-                                </div>
-                                
-                                <div 
-                                    onClick={() => {
-                                        setSignupData({...signupData, accountType: 'dual'});
-                                        setCurrentStep('personalInfo');
-                                    }}
-                                    style={{
-                                        background: 'rgba(255,255,255,0.1)',
-                                        padding: '30px',
-                                        borderRadius: '15px',
-                                        cursor: 'pointer',
-                                        border: '2px solid transparent',
-                                        transition: 'all 0.3s'
-                                    }}
-                                    onMouseEnter={(e) => e.target.style.borderColor = '#8B5CF6'}
-                                    onMouseLeave={(e) => e.target.style.borderColor = 'transparent'}
-                                >
-                                    <h3 style={{fontSize: '22px', marginBottom: '10px'}}>🏢 Personal + Business Account</h3>
-                                    <p style={{opacity: 0.9, lineHeight: 1.5}}>
-                                        Ideal for entrepreneurs and service providers who want to grow their business 
-                                        while staying connected to their community.
-                                    </p>
-                                    <div style={{marginTop: '15px', fontSize: '14px', opacity: 0.8}}>
-                                        • Everything in Personal Account
-                                        • Professional business profile
-                                        • Advanced shop features
-                                        • Service booking calendar
-                                        • Entertainment hub access
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
-            }
-            
-            // Step 2: Personal Information
-            if (currentStep === 'personalInfo') {
-                return (
-                    <div style={{minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', padding: '40px 20px'}}>
-                        <div style={{maxWidth: '600px', margin: '0 auto', color: 'white'}}>
-                            <button 
-                                onClick={() => setCurrentStep('accountType')}
-                                style={{
-                                    background: 'rgba(255,255,255,0.2)', 
-                                    border: 'none', 
-                                    padding: '10px 20px', 
-                                    borderRadius: '8px', 
-                                    color: 'white',
-                                    marginBottom: '30px',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                ← Back
-                            </button>
-                            
-                            <h2 style={{fontSize: '28px', marginBottom: '20px', textAlign: 'center'}}>Tell Us About Yourself</h2>
-                            <p style={{textAlign: 'center', marginBottom: '30px', opacity: 0.9}}>
-                                Help your neighbors get to know you better
-                            </p>
-                            
-                            <div style={{background: 'rgba(255,255,255,0.1)', padding: '30px', borderRadius: '15px'}}>
-                                <div style={{marginBottom: '20px'}}>
-                                    <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>First Name *</label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Enter your first name"
-                                        style={{
-                                            width: '100%',
-                                            padding: '12px',
-                                            borderRadius: '8px',
-                                            border: 'none',
-                                            fontSize: '16px'
-                                        }}
-                                    />
-                                </div>
-                                
-                                <div style={{marginBottom: '20px'}}>
-                                    <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Last Name *</label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Enter your last name"
-                                        style={{
-                                            width: '100%',
-                                            padding: '12px',
-                                            borderRadius: '8px',
-                                            border: 'none',
-                                            fontSize: '16px'
-                                        }}
-                                    />
-                                </div>
-                                
-                                <div style={{marginBottom: '20px'}}>
-                                    <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Bio</label>
-                                    <textarea 
-                                        placeholder="Tell your neighbors about yourself, your interests, or what you're looking for..."
-                                        rows={4}
-                                        style={{
-                                            width: '100%',
-                                            padding: '12px',
-                                            borderRadius: '8px',
-                                            border: 'none',
-                                            fontSize: '16px',
-                                            resize: 'vertical'
-                                        }}
-                                    />
-                                </div>
-                                
-                                <div style={{marginBottom: '20px'}}>
-                                    <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Your Interests</label>
-                                    <textarea 
-                                        placeholder="Type your interests and hobbies, separated by commas (e.g., vintage clothing, home brewing, woodworking, yoga, local music, gardening tools, electronics, art supplies, books, gaming, photography equipment, fitness gear, handmade crafts, outdoor gear, cooking, pet supplies, etc.)"
-                                        rows={4}
-                                        style={{
-                                            width: '100%',
-                                            padding: '12px',
-                                            borderRadius: '8px',
-                                            border: 'none',
-                                            fontSize: '16px',
-                                            resize: 'vertical'
-                                        }}
-                                    />
-                                    <div style={{fontSize: '12px', opacity: 0.8, marginTop: '5px'}}>
-                                        💡 This helps you see relevant items first and helps local shops find their perfect customers
-                                    </div>
-                                </div>
-                                
-                                <button 
-                                    onClick={() => {
-                                        if (signupData.accountType === 'dual') {
-                                            setCurrentStep('businessInfo');
-                                        } else {
-                                            setCurrentStep('preferences');
-                                        }
-                                    }}
-                                    style={{
-                                        width: '100%',
-                                        background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)',
-                                        color: 'white',
-                                        padding: '15px',
-                                        border: 'none',
-                                        borderRadius: '8px',
-                                        fontSize: '16px',
-                                        fontWeight: 'bold',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    {signupData.accountType === 'dual' ? 'Next: Business Info' : 'Next: Preferences'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                );
-            }
-            
-            // Step 3: Business Information (only for dual accounts)
-            if (currentStep === 'businessInfo') {
-                return (
-                    <div style={{minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', padding: '40px 20px'}}>
-                        <div style={{maxWidth: '600px', margin: '0 auto', color: 'white'}}>
-                            <button 
-                                onClick={() => setCurrentStep('personalInfo')}
-                                style={{
-                                    background: 'rgba(255,255,255,0.2)', 
-                                    border: 'none', 
-                                    padding: '10px 20px', 
-                                    borderRadius: '8px', 
-                                    color: 'white',
-                                    marginBottom: '30px',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                ← Back
-                            </button>
-                            
-                            <h2 style={{fontSize: '28px', marginBottom: '20px', textAlign: 'center'}}>Business Information</h2>
-                            <p style={{textAlign: 'center', marginBottom: '30px', opacity: 0.9}}>
-                                Set up your professional profile to reach local customers
-                            </p>
-                            
-                            <div style={{background: 'rgba(255,255,255,0.1)', padding: '30px', borderRadius: '15px'}}>
-                                <div style={{marginBottom: '20px'}}>
-                                    <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Business Type *</label>
-                                    <select 
-                                        style={{
-                                            width: '100%',
-                                            padding: '12px',
-                                            borderRadius: '8px',
-                                            border: 'none',
-                                            fontSize: '16px'
-                                        }}
-                                    >
-                                        <option value="">Select business type</option>
-                                        <option value="shop">🛒 Shop (Retail/Products)</option>
-                                        <option value="service">🛠 Service Provider</option>
-                                        <option value="entertainment">🎭 Entertainment (The Hub)</option>
-                                    </select>
-                                </div>
-                                
-                                <div style={{marginBottom: '20px'}}>
-                                    <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Business Name *</label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Enter your business name"
-                                        style={{
-                                            width: '100%',
-                                            padding: '12px',
-                                            borderRadius: '8px',
-                                            border: 'none',
-                                            fontSize: '16px'
-                                        }}
-                                    />
-                                </div>
-                                
-                                {/* Website Integration Section */}
-                                <div style={{marginBottom: '25px', background: 'rgba(16, 185, 129, 0.1)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.3)'}}>
-                                    <h3 style={{marginBottom: '15px', color: '#10B981', display: 'flex', alignItems: 'center', gap: '8px'}}>
-                                        🌐 Website Integration
-                                    </h3>
-                                    <p style={{fontSize: '14px', marginBottom: '15px', opacity: 0.8}}>
-                                        Connect your existing website to automatically import all products and sync inventory
-                                    </p>
-                                    
-                                    <div style={{marginBottom: '15px'}}>
-                                        <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Website URL</label>
-                                        <input 
-                                            type="url" 
-                                            placeholder="https://yourstore.com"
-                                            style={{
-                                                width: '100%',
-                                                padding: '12px',
-                                                borderRadius: '8px',
-                                                border: 'none',
-                                                fontSize: '16px'
-                                            }}
-                                        />
-                                    </div>
-                                    
-                                    <div style={{marginBottom: '15px'}}>
-                                        <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Platform Type</label>
-                                        <select style={{
-                                            width: '100%',
-                                            padding: '12px',
-                                            borderRadius: '8px',
-                                            border: 'none',
-                                            fontSize: '16px'
-                                        }}>
-                                            <option value="">Select your platform</option>
-                                            <option value="shopify">Shopify</option>
-                                            <option value="woocommerce">WooCommerce</option>
-                                            <option value="squarespace">Squarespace</option>
-                                            <option value="bigcommerce">BigCommerce</option>
-                                            <option value="etsy">Etsy</option>
-                                            <option value="custom">Custom Website</option>
-                                            <option value="other">Other</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <button 
-                                        onClick={testWebsiteConnection}
-                                        style={{
-                                            background: '#10B981',
-                                            color: 'white',
-                                            padding: '10px 20px',
-                                            border: 'none',
-                                            borderRadius: '6px',
-                                            fontSize: '14px',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        Test Connection & Import Products
-                                    </button>
-                                </div>
-                                
-                                {/* Social Media Shop Integration */}
-                                <div style={{marginBottom: '25px', background: 'rgba(59, 130, 246, 0.1)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.3)'}}>
-                                    <h3 style={{marginBottom: '15px', color: '#3B82F6', display: 'flex', alignItems: 'center', gap: '8px'}}>
-                                        📱 Social Media Shop Integration
-                                    </h3>
-                                    <p style={{fontSize: '14px', marginBottom: '15px', opacity: 0.8}}>
-                                        Sync your Facebook and TikTok shop catalogs automatically
-                                    </p>
-                                    
-                                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px'}}>
-                                        <button 
-                                            onClick={connectFacebookShop}
-                                            style={{
-                                                background: '#1877F2',
-                                                color: 'white',
-                                                padding: '12px',
-                                                border: 'none',
-                                                borderRadius: '8px',
-                                                fontSize: '14px',
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                gap: '8px'
-                                            }}
-                                        >
-                                            📘 Connect Facebook Shop
-                                        </button>
-                                        
-                                        <button 
-                                            onClick={connectTikTokShop}
-                                            style={{
-                                                background: '#000000',
-                                                color: 'white',
-                                                padding: '12px',
-                                                border: 'none',
-                                                borderRadius: '8px',
-                                                fontSize: '14px',
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                gap: '8px'
-                                            }}
-                                        >
-                                            🎵 Connect TikTok Shop
-                                        </button>
-                                    </div>
-                                    
-                                    <div style={{
-                                        background: 'rgba(59, 130, 246, 0.15)',
-                                        padding: '12px',
-                                        borderRadius: '8px',
-                                        fontSize: '12px',
-                                        border: '1px solid rgba(59, 130, 246, 0.3)'
-                                    }}>
-                                        <strong>💡 Pro Tip:</strong> Connecting your social shops enables automatic product sync, 
-                                        inventory management, and cross-platform sales tracking.
-                                    </div>
-                                </div>
-                                
-                                <div style={{marginBottom: '20px'}}>
-                                    <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Business Description</label>
-                                    <textarea 
-                                        placeholder="Describe your business, services, or products..."
-                                        rows={3}
-                                        style={{
-                                            width: '100%',
-                                            padding: '12px',
-                                            borderRadius: '8px',
-                                            border: 'none',
-                                            fontSize: '16px',
-                                            resize: 'vertical'
-                                        }}
-                                    />
-                                </div>
-                                
-                                <div style={{marginBottom: '20px'}}>
-                                    <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Contact Information</label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Business phone, email, or website"
-                                        style={{
-                                            width: '100%',
-                                            padding: '12px',
-                                            borderRadius: '8px',
-                                            border: 'none',
-                                            fontSize: '16px'
-                                        }}
-                                    />
-                                </div>
-                                
-                                <button 
-                                    onClick={() => setCurrentStep('preferences')}
-                                    style={{
-                                        width: '100%',
-                                        background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)',
-                                        color: 'white',
-                                        padding: '15px',
-                                        border: 'none',
-                                        borderRadius: '8px',
-                                        fontSize: '16px',
-                                        fontWeight: 'bold',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    Next: Preferences
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                );
-            }
-            
-            // Step 4: Preferences & Setup
-            if (currentStep === 'preferences') {
-                return (
-                    <div style={{minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', padding: '40px 20px'}}>
-                        <div style={{maxWidth: '600px', margin: '0 auto', color: 'white'}}>
-                            <button 
-                                onClick={() => setCurrentStep(signupData.accountType === 'dual' ? 'businessInfo' : 'personalInfo')}
-                                style={{
-                                    background: 'rgba(255,255,255,0.2)', 
-                                    border: 'none', 
-                                    padding: '10px 20px', 
-                                    borderRadius: '8px', 
-                                    color: 'white',
-                                    marginBottom: '30px',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                ← Back
-                            </button>
-                            
-                            <h2 style={{fontSize: '28px', marginBottom: '20px', textAlign: 'center'}}>Final Setup</h2>
-                            <p style={{textAlign: 'center', marginBottom: '30px', opacity: 0.9}}>
-                                Customize your MarketPace experience
-                            </p>
-                            
-                            <div style={{background: 'rgba(255,255,255,0.1)', padding: '30px', borderRadius: '15px', marginBottom: '20px'}}>
-                                <h3 style={{marginBottom: '15px'}}>Location Preferences</h3>
-                                <div style={{marginBottom: '15px'}}>
-                                    <label style={{display: 'block', marginBottom: '8px'}}>Search Radius for Local Listings</label>
-                                    <select style={{width: '100%', padding: '10px', borderRadius: '6px', border: 'none'}}>
-                                        <option value="5">5 miles</option>
-                                        <option value="10">10 miles</option>
-                                        <option value="25">25 miles</option>
-                                        <option value="50">50 miles</option>
-                                    </select>
-                                </div>
-                                
-                                <h3 style={{marginBottom: '15px', marginTop: '25px'}}>Notification Preferences</h3>
-                                <label style={{display: 'flex', alignItems: 'center', marginBottom: '10px', cursor: 'pointer'}}>
-                                    <input type="checkbox" defaultChecked style={{marginRight: '10px'}} />
-                                    <span>New listings in my area</span>
-                                </label>
-                                <label style={{display: 'flex', alignItems: 'center', marginBottom: '10px', cursor: 'pointer'}}>
-                                    <input type="checkbox" defaultChecked style={{marginRight: '10px'}} />
-                                    <span>Messages and offers</span>
-                                </label>
-                                <label style={{display: 'flex', alignItems: 'center', marginBottom: '10px', cursor: 'pointer'}}>
-                                    <input type="checkbox" style={{marginRight: '10px'}} />
-                                    <span>Community updates and events</span>
-                                </label>
-                            </div>
-                            
-                            <div style={{background: 'rgba(255,255,255,0.1)', padding: '30px', borderRadius: '15px', marginBottom: '20px'}}>
-                                <h3 style={{marginBottom: '15px'}}>Campaign Launch Benefits</h3>
-                                <div style={{fontSize: '14px', lineHeight: 1.6}}>
-                                    <p style={{marginBottom: '10px'}}>🎉 <strong>Free Pro Access During Campaign:</strong> All features unlocked</p>
-                                    <p style={{marginBottom: '10px'}}>⭐ <strong>Early Supporter Badge:</strong> Special recognition in your community</p>
-                                    <p style={{marginBottom: '10px'}}>🚀 <strong>Featured Listings:</strong> Priority placement for your posts</p>
-                                    <p>💎 <strong>Lifetime Benefits:</strong> Exclusive perks when campaign ends</p>
-                                </div>
-                            </div>
-                            
-                            <button 
-                                onClick={() => setCurrentStep('welcome')}
-                                style={{
-                                    width: '100%',
-                                    background: 'linear-gradient(135deg, #10B981, #059669)',
-                                    color: 'white',
-                                    padding: '18px',
+                                    background: 'white',
+                                    color: '#667eea',
                                     border: 'none',
-                                    borderRadius: '10px',
-                                    fontSize: '18px',
-                                    fontWeight: 'bold',
+                                    padding: '12px 24px',
+                                    fontSize: '16px',
+                                    borderRadius: '25px',
                                     cursor: 'pointer',
-                                    boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)'
+                                    fontWeight: 'bold'
                                 }}
                             >
-                                Join MarketPlace Community
+                                Back to Landing
                             </button>
                         </div>
-                    </div>
-                );
-            }
-            
-            // Welcome Screen
-            if (currentStep === 'welcome') {
-                return (
-                    <div style={{minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', padding: '40px 20px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                        <div style={{maxWidth: '600px', textAlign: 'center', color: 'white'}}>
-                            <div style={{fontSize: '60px', marginBottom: '20px'}}>🎉</div>
-                            <h2 style={{fontSize: '32px', marginBottom: '20px'}}>Welcome to MarketPace!</h2>
-                            <p style={{fontSize: '18px', marginBottom: '30px', opacity: 0.9}}>
-                                You're now part of a community-first marketplace that strengthens neighborhoods and supports local businesses.
-                            </p>
-                            
-                            <div style={{background: 'rgba(255,255,255,0.1)', padding: '30px', borderRadius: '15px', marginBottom: '30px'}}>
-                                <h3 style={{marginBottom: '20px'}}>What's Next?</h3>
-                                <div style={{textAlign: 'left', fontSize: '16px', lineHeight: 1.6}}>
-                                    <p style={{marginBottom: '10px'}}>✓ Complete your profile with photos</p>
-                                    <p style={{marginBottom: '10px'}}>✓ Browse local listings in your area</p>
-                                    <p style={{marginBottom: '10px'}}>✓ Post your first item or service</p>
-                                    <p style={{marginBottom: '10px'}}>✓ Connect with neighbors</p>
-                                    <p>✓ Join community discussions</p>
-                                </div>
-                            </div>
-                            
-                            <div style={{display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap'}}>
-                                <button 
-                                    onClick={() => alert('Would navigate to MarketPace Buy/Sell section (floating navigation bar)')}
+                        
+                        {/* Floating Navigation */}
+                        <div style={{
+                            position: 'fixed',
+                            bottom: '20px',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            background: 'rgba(0,0,0,0.8)',
+                            borderRadius: '30px',
+                            padding: '10px 20px',
+                            display: 'flex',
+                            gap: '15px',
+                            backdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(255,255,255,0.2)'
+                        }}>
+                            {[
+                                {key: 'rent', icon: '🏠', label: 'Rent'},
+                                {key: 'buysell', icon: '🛒', label: 'Buy/Sell'},
+                                {key: 'jobs', icon: '🔨', label: 'Odd Jobs'},
+                                {key: 'services', icon: '⚙️', label: 'Services'},
+                                {key: 'shops', icon: '🏪', label: 'Shops'},
+                                {key: 'hub', icon: '🎭', label: 'The Hub'},
+                                {key: 'menu', icon: '☰', label: 'Menu'}
+                            ].map(tab => (
+                                <button
+                                    key={tab.key}
+                                    onClick={() => alert('Navigating to ' + tab.label + ' section')}
                                     style={{
-                                        background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)',
+                                        background: tab.key === 'community' ? 'linear-gradient(135deg, #8B5CF6, #6D28D9)' : 'transparent',
                                         color: 'white',
-                                        padding: '15px 30px',
                                         border: 'none',
-                                        borderRadius: '8px',
-                                        fontSize: '16px',
-                                        fontWeight: 'bold',
-                                        cursor: 'pointer'
+                                        padding: '8px 12px',
+                                        borderRadius: '20px',
+                                        cursor: 'pointer',
+                                        fontSize: '12px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        gap: '2px',
+                                        minWidth: '60px'
                                     }}
                                 >
-                                    Enter MarketPace Buy/Sell
+                                    <span style={{fontSize: '16px'}}>{tab.icon}</span>
+                                    <span>{tab.label}</span>
                                 </button>
-                                
-                                <button 
-                                    onClick={() => setCurrentStep('landing')}
-                                    style={{
-                                        background: 'rgba(255,255,255,0.2)',
-                                        color: 'white',
-                                        padding: '15px 30px',
-                                        border: 'none',
-                                        borderRadius: '8px',
-                                        fontSize: '16px',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    Back to Landing
-                                </button>
-                            </div>
+                            ))}
                         </div>
                     </div>
                 );
             }
             
             return (
-                <div style={{minHeight: '100vh', overflowY: 'auto'}}>
-                    {/* Hero Section */}
-                    <div style={{
-                        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-                        paddingTop: '60px',
-                        paddingBottom: '40px',
-                        paddingLeft: '20px',
-                        paddingRight: '20px',
-                        textAlign: 'center',
-                        color: 'white'
-                    }}>
-                        <div style={{
-                            width: '80px',
-                            height: '80px',
-                            borderRadius: '40px',
-                            background: 'rgba(255, 255, 255, 0.2)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            margin: '0 auto 16px',
-                            fontSize: '32px',
-                            fontWeight: 'bold'
-                        }}>
-                            MP
-                        </div>
-                        <h1 style={{fontSize: '32px', fontWeight: 'bold', marginBottom: '8px'}}>MarketPace</h1>
-                        <h2 style={{fontSize: '18px', fontWeight: '600', marginBottom: '8px', opacity: 0.95}}>
-                            Pick Up the Pace in Your Community
-                        </h2>
-                        <p style={{fontSize: '16px', opacity: 0.9}}>
-                            Delivering Opportunities — Not Just Packages
+                <div style={{
+                    minHeight: '100vh',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    fontFamily: 'system-ui, -apple-system, sans-serif'
+                }}>
+                    <div style={{padding: '40px 20px', textAlign: 'center'}}>
+                        <h1 style={{fontSize: '48px', marginBottom: '20px', textShadow: '2px 2px 4px rgba(0,0,0,0.3)'}}>
+                            MarketPace
+                        </h1>
+                        <p style={{fontSize: '24px', marginBottom: '40px', opacity: 0.9}}>
+                            Community-First Marketplace
                         </p>
-                    </div>
-                    
-                    {/* Join Campaign Section */}
-                    <div style={{padding: '40px 20px', textAlign: 'center', background: '#f8f9fa'}}>
-                        <h2 style={{fontSize: '24px', fontWeight: 'bold', marginBottom: '16px', color: '#1a1a2e'}}>
-                            Join the Campaign
-                        </h2>
-                        <p style={{fontSize: '16px', color: '#666', marginBottom: '24px', lineHeight: 1.5}}>
-                            Be part of the movement to strengthen local communities through neighbor-to-neighbor commerce.
+                        <p style={{fontSize: '18px', maxWidth: '600px', margin: '0 auto 60px', lineHeight: 1.6}}>
+                            Connecting neighbors, building communities, and empowering local commerce through our innovative platform.
                         </p>
                         
-                        <div style={{display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap'}}>
-                            <button 
-                                onClick={() => setCurrentStep('accountType')}
-                                style={{
-                                    background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)',
-                                    color: 'white',
-                                    padding: '16px 32px',
-                                    border: 'none',
-                                    borderRadius: '12px',
-                                    fontSize: '16px',
-                                    fontWeight: 'bold',
-                                    cursor: 'pointer',
-                                    boxShadow: '0 4px 15px rgba(139, 92, 246, 0.3)'
-                                }}
-                            >
-                                Join the Campaign
-                            </button>
-                            
-                            <button 
-                                onClick={() => alert('Driver application would open here!')}
-                                style={{
-                                    background: 'linear-gradient(135deg, #F59E0B, #D97706)',
-                                    color: 'white',
-                                    padding: '16px 32px',
-                                    border: 'none',
-                                    borderRadius: '12px',
-                                    fontSize: '16px',
-                                    fontWeight: 'bold',
-                                    cursor: 'pointer',
-                                    boxShadow: '0 4px 15px rgba(245, 158, 11, 0.3)'
-                                }}
-                            >
-                                Apply to Drive
-                            </button>
-                        </div>
+                        <button 
+                            onClick={() => setCurrentStep('community')}
+                            style={{
+                                background: 'white',
+                                color: '#667eea',
+                                border: 'none',
+                                padding: '16px 32px',
+                                fontSize: '18px',
+                                borderRadius: '50px',
+                                cursor: 'pointer',
+                                fontWeight: 'bold',
+                                boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+                                transition: 'transform 0.2s'
+                            }}
+                        >
+                            Enter MarketPace
+                        </button>
                         
-                        <p style={{fontSize: '14px', color: '#666', marginTop: '16px'}}>
-                            Earn $4 pickup + $2 dropoff + $0.50/mile + 100% tips
-                        </p>
-                    </div>
-                    
-                    {/* Features Section */}
-                    <div style={{padding: '40px 20px', background: 'white'}}>
-                        <h2 style={{fontSize: '24px', fontWeight: 'bold', textAlign: 'center', marginBottom: '32px', color: '#1a1a2e'}}>
-                            Why Join MarketPace?
-                        </h2>
-                        
-                        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', maxWidth: '1000px', margin: '0 auto'}}>
-                            <div style={{textAlign: 'center', padding: '24px', border: '1px solid #e5e7eb', borderRadius: '12px'}}>
-                                <div style={{fontSize: '48px', marginBottom: '16px'}}>🏠</div>
-                                <h3 style={{fontSize: '18px', fontWeight: 'bold', marginBottom: '8px', color: '#1a1a2e'}}>Community First</h3>
-                                <p style={{fontSize: '14px', color: '#666', lineHeight: 1.5}}>
-                                    Keep money circulating in your neighborhood while building stronger community connections
-                                </p>
-                            </div>
+                        <div style={{marginTop: '80px', textAlign: 'left', maxWidth: '800px', margin: '80px auto 0'}}>
+                            <h2 style={{fontSize: '32px', marginBottom: '30px', textAlign: 'center'}}>Why Join MarketPace?</h2>
                             
-                            <div style={{textAlign: 'center', padding: '24px', border: '1px solid #e5e7eb', borderRadius: '12px'}}>
-                                <div style={{fontSize: '48px', marginBottom: '16px'}}>🛒</div>
-                                <h3 style={{fontSize: '18px', fontWeight: 'bold', marginBottom: '8px', color: '#1a1a2e'}}>Enhanced Marketplace</h3>
-                                <p style={{fontSize: '14px', color: '#666', lineHeight: 1.5}}>
-                                    Buy, sell, rent items with counter offers, delivery options, and secure payments - like Facebook Marketplace enhanced for communities
-                                </p>
-                            </div>
-                            
-                            <div style={{textAlign: 'center', padding: '24px', border: '1px solid #e5e7eb', borderRadius: '12px'}}>
-                                <div style={{fontSize: '48px', marginBottom: '16px'}}>🚚</div>
-                                <h3 style={{fontSize: '18px', fontWeight: 'bold', marginBottom: '8px', color: '#1a1a2e'}}>Local Jobs</h3>
-                                <p style={{fontSize: '14px', color: '#666', lineHeight: 1.5}}>
-                                    Create delivery jobs for neighbors while supporting local businesses and services
-                                </p>
+                            <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '30px', marginBottom: '50px'}}>
+                                <div style={{background: 'rgba(255,255,255,0.1)', padding: '25px', borderRadius: '15px', backdropFilter: 'blur(10px)'}}>
+                                    <h3 style={{fontSize: '20px', marginBottom: '15px', color: '#FFD700'}}>🏠 Hyperlocal Focus</h3>
+                                    <p style={{lineHeight: 1.6, opacity: 0.9}}>
+                                        Shop and sell within your neighborhood. Build relationships with people you might see at the grocery store.
+                                    </p>
+                                </div>
+                                
+                                <div style={{background: 'rgba(255,255,255,0.1)', padding: '25px', borderRadius: '15px', backdropFilter: 'blur(10px)'}}>
+                                    <h3 style={{fontSize: '20px', marginBottom: '15px', color: '#FFD700'}}>🚚 Community Delivery</h3>
+                                    <p style={{lineHeight: 1.6, opacity: 0.9}}>
+                                        Local drivers earning fair wages. Your neighbors helping neighbors with fast, reliable delivery.
+                                    </p>
+                                </div>
+                                
+                                <div style={{background: 'rgba(255,255,255,0.1)', padding: '25px', borderRadius: '15px', backdropFilter: 'blur(10px)'}}>
+                                    <h3 style={{fontSize: '20px', marginBottom: '15px', color: '#FFD700'}}>💰 Fair Economics</h3>
+                                    <p style={{lineHeight: 1.6, opacity: 0.9}}>
+                                        Money stays in your community. Transparent fees that support local growth, not distant shareholders.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    
-                    {/* Testimonials */}
-                    <div style={{padding: '40px 20px', background: '#f8f9fa'}}>
-                        <h2 style={{fontSize: '24px', fontWeight: 'bold', textAlign: 'center', marginBottom: '32px', color: '#1a1a2e'}}>
-                            Community Stories
-                        </h2>
-                        
-                        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', maxWidth: '900px', margin: '0 auto'}}>
-                            <div style={{background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)'}}>
-                                <p style={{fontSize: '14px', color: '#666', fontStyle: 'italic', marginBottom: '16px', lineHeight: 1.5}}>
-                                    "I booked a local jazz musician for my birthday party through The Hub. Supporting local talent while getting amazing entertainment!"
-                                </p>
-                                <p style={{fontSize: '12px', color: '#8B5CF6', fontWeight: 'bold'}}>— Sarah, Community Member</p>
-                            </div>
-                            
-                            <div style={{background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)'}}>
-                                <p style={{fontSize: '14px', color: '#666', fontStyle: 'italic', marginBottom: '16px', lineHeight: 1.5}}>
-                                    "As a parent, renting baby gear instead of buying has saved me hundreds. Plus my neighbors make extra income!"
-                                </p>
-                                <p style={{fontSize: '12px', color: '#8B5CF6', fontWeight: 'bold'}}>— Mike, Parent</p>
-                            </div>
-                            
-                            <div style={{background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)'}}>
-                                <p style={{fontSize: '14px', color: '#666', fontStyle: 'italic', marginBottom: '16px', lineHeight: 1.5}}>
-                                    "My handyman business grew 300% after joining MarketPace. Local customers, fair prices, community support."
-                                </p>
-                                <p style={{fontSize: '12px', color: '#8B5CF6', fontWeight: 'bold'}}>— Carlos, Service Provider</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    {/* Bottom padding for floating navigation */}
-                    <div style={{height: '100px'}}></div>
                 </div>
             );
         };
