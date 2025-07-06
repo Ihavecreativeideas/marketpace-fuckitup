@@ -1652,6 +1652,82 @@ const MarketplaceMainScreen = () => {
             ))}
           </View>
         );
+      case 'oddjobs':
+        return (
+          <View style={{ padding: 20 }}>
+            <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 16 }}>
+              Odd Jobs
+            </Text>
+            <Text style={{ fontSize: 16, color: '#9CA3AF', marginBottom: 20 }}>
+              Quick tasks and gig opportunities from neighbors
+            </Text>
+            {/* Demo listings */}
+            {[
+              { name: 'Dog Walking', price: '$20/walk', owner: 'Lisa M.', distance: '0.2 mi', timeframe: 'Weekdays 7-9am' },
+              { name: 'Furniture Assembly', price: '$35/hr', owner: 'Carlos R.', distance: '0.4 mi', timeframe: 'Weekends' },
+              { name: 'Garden Cleanup', price: '$60', owner: 'Bob K.', distance: '0.6 mi', timeframe: 'This weekend' },
+            ].map((item, index) => (
+              <View key={index} style={{
+                backgroundColor: '#1F2937',
+                borderRadius: 12,
+                padding: 16,
+                marginBottom: 12,
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#fff' }}>{item.name}</Text>
+                  <Text style={{ fontSize: 14, color: '#9CA3AF' }}>{item.owner} • {item.distance}</Text>
+                  <Text style={{ fontSize: 12, color: '#10B981' }}>{item.timeframe}</Text>
+                </View>
+                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#10B981' }}>{item.price}</Text>
+              </View>
+            ))}
+          </View>
+        );
+      case 'services':
+        return (
+          <ServiceBookingScreen />
+        );
+      case 'shops':
+        return (
+          <View style={{ padding: 20 }}>
+            <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 16 }}>
+              Local Shops
+            </Text>
+            <Text style={{ fontSize: 16, color: '#9CA3AF', marginBottom: 20 }}>
+              Support local businesses in your community
+            </Text>
+            {/* Demo listings */}
+            {[
+              { name: "Mike's Music Shop", category: 'Instruments & Repair', owner: 'Mike Stevens', distance: '0.2 mi', rating: '4.9★' },
+              { name: 'Corner Bakery', category: 'Fresh Bread & Pastries', owner: 'Maria Santos', distance: '0.3 mi', rating: '4.8★' },
+              { name: 'Tech Repair Hub', category: 'Electronics Repair', owner: 'David Kim', distance: '0.5 mi', rating: '4.7★' },
+            ].map((item, index) => (
+              <View key={index} style={{
+                backgroundColor: '#1F2937',
+                borderRadius: 12,
+                padding: 16,
+                marginBottom: 12,
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#fff' }}>{item.name}</Text>
+                  <Text style={{ fontSize: 14, color: '#9CA3AF' }}>{item.category}</Text>
+                  <Text style={{ fontSize: 12, color: '#9CA3AF' }}>{item.owner} • {item.distance}</Text>
+                </View>
+                <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#EF4444' }}>{item.rating}</Text>
+              </View>
+            ))}
+          </View>
+        );
+      case 'hub':
+        return (
+          <EntertainmentBookingScreen />
+        );
       default:
         return (
           <View style={{ padding: 20, alignItems: 'center' }}>
@@ -1937,7 +2013,7 @@ function MainTabs() {
     >
       <Tab.Screen 
         name="Home" 
-        component={CampaignLandingScreen}
+        component={HomeStack}
         options={{ tabBarLabel: 'Home' }}
       />
       <Tab.Screen 
@@ -2021,6 +2097,306 @@ function MainMenuStack() {
     </Stack.Navigator>
   );
 }
+
+// Service Booking Screen with Calendar
+const ServiceBookingScreen = () => {
+  const [selectedService, setSelectedService] = useState(null);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [selectedDate, setSelectedDate] = useState('');
+
+  const services = [
+    { 
+      id: 1, 
+      name: 'House Cleaning', 
+      provider: 'Maria Santos', 
+      price: '$80/3hrs', 
+      rating: '4.9★', 
+      distance: '0.3 mi',
+      availableDates: ['2025-01-08', '2025-01-09', '2025-01-10', '2025-01-15', '2025-01-16']
+    },
+    { 
+      id: 2, 
+      name: 'Plumbing Repair', 
+      provider: 'Carlos Rodriguez', 
+      price: '$65/hr', 
+      rating: '4.8★', 
+      distance: '0.5 mi',
+      availableDates: ['2025-01-07', '2025-01-08', '2025-01-14', '2025-01-15']
+    },
+    { 
+      id: 3, 
+      name: 'Lawn Care & Maintenance', 
+      provider: 'Green Thumb Services', 
+      price: '$45/visit', 
+      rating: '4.7★', 
+      distance: '0.2 mi',
+      availableDates: ['2025-01-07', '2025-01-09', '2025-01-11', '2025-01-13', '2025-01-16']
+    }
+  ];
+
+  const handleBookService = (service: any) => {
+    setSelectedService(service);
+    setShowCalendar(true);
+  };
+
+  const handleDateSelect = (date: string) => {
+    setSelectedDate(date);
+    // Here would be the actual booking logic
+    alert(`Booking ${selectedService?.name} with ${selectedService?.provider} on ${date}`);
+    setShowCalendar(false);
+    setSelectedService(null);
+  };
+
+  if (showCalendar && selectedService) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#0F0B1F', padding: 20 }}>
+        <TouchableOpacity 
+          onPress={() => setShowCalendar(false)}
+          style={{ marginBottom: 20, flexDirection: 'row', alignItems: 'center' }}
+        >
+          <Ionicons name="arrow-back" size={24} color="#8B5CF6" />
+          <Text style={{ color: '#8B5CF6', marginLeft: 8, fontSize: 16 }}>Back to Services</Text>
+        </TouchableOpacity>
+
+        <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 8 }}>
+          Book {selectedService.name}
+        </Text>
+        <Text style={{ fontSize: 16, color: '#9CA3AF', marginBottom: 20 }}>
+          with {selectedService.provider} • {selectedService.price}
+        </Text>
+
+        <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 16 }}>
+          Available Dates
+        </Text>
+
+        {selectedService.availableDates.map((date: string) => (
+          <TouchableOpacity
+            key={date}
+            onPress={() => handleDateSelect(date)}
+            style={{
+              backgroundColor: '#1F2937',
+              borderRadius: 12,
+              padding: 16,
+              marginBottom: 12,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}
+          >
+            <View>
+              <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#fff' }}>
+                {new Date(date).toLocaleDateString('en-US', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </Text>
+              <Text style={{ fontSize: 14, color: '#10B981' }}>Available all day</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#8B5CF6" />
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
+  }
+
+  return (
+    <View style={{ padding: 20 }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 16 }}>
+        Professional Services
+      </Text>
+      <Text style={{ fontSize: 16, color: '#9CA3AF', marginBottom: 20 }}>
+        Book trusted local service providers
+      </Text>
+
+      {services.map((service) => (
+        <View key={service.id} style={{
+          backgroundColor: '#1F2937',
+          borderRadius: 12,
+          padding: 16,
+          marginBottom: 12
+        }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#fff' }}>{service.name}</Text>
+              <Text style={{ fontSize: 14, color: '#9CA3AF' }}>{service.provider} • {service.distance}</Text>
+              <Text style={{ fontSize: 14, color: '#F59E0B', marginTop: 4 }}>{service.rating}</Text>
+            </View>
+            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#F59E0B' }}>{service.price}</Text>
+          </View>
+          
+          <TouchableOpacity
+            onPress={() => handleBookService(service)}
+            style={{
+              backgroundColor: '#F59E0B',
+              paddingVertical: 12,
+              paddingHorizontal: 20,
+              borderRadius: 8,
+              alignItems: 'center'
+            }}
+          >
+            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 14 }}>
+              Book Service
+            </Text>
+          </TouchableOpacity>
+        </View>
+      ))}
+    </View>
+  );
+};
+
+// Entertainment Booking Screen with Calendar
+const EntertainmentBookingScreen = () => {
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [selectedDate, setSelectedDate] = useState('');
+
+  const entertainers = [
+    { 
+      id: 1, 
+      name: 'Jazz Night with Marcus Blues', 
+      type: 'Live Music', 
+      provider: 'Marcus Johnson', 
+      price: '$150/event', 
+      rating: '4.9★', 
+      distance: '0.4 mi',
+      availableDates: ['2025-01-10', '2025-01-11', '2025-01-17', '2025-01-18', '2025-01-24']
+    },
+    { 
+      id: 2, 
+      name: 'Comedy Night Special', 
+      type: 'Stand-up Comedy', 
+      provider: 'Sarah Laughs', 
+      price: '$120/show', 
+      rating: '4.8★', 
+      distance: '0.6 mi',
+      availableDates: ['2025-01-08', '2025-01-09', '2025-01-15', '2025-01-16', '2025-01-22']
+    },
+    { 
+      id: 3, 
+      name: 'DJ Mix & Party Vibes', 
+      type: 'DJ Services', 
+      provider: 'DJ Spin Master', 
+      price: '$200/4hrs', 
+      rating: '4.7★', 
+      distance: '0.3 mi',
+      availableDates: ['2025-01-11', '2025-01-12', '2025-01-18', '2025-01-19', '2025-01-25']
+    }
+  ];
+
+  const handleBookEvent = (event: any) => {
+    setSelectedEvent(event);
+    setShowCalendar(true);
+  };
+
+  const handleDateSelect = (date: string) => {
+    setSelectedDate(date);
+    // Here would be the actual booking logic
+    alert(`Booking ${selectedEvent?.name} with ${selectedEvent?.provider} on ${date}`);
+    setShowCalendar(false);
+    setSelectedEvent(null);
+  };
+
+  if (showCalendar && selectedEvent) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#0F0B1F', padding: 20 }}>
+        <TouchableOpacity 
+          onPress={() => setShowCalendar(false)}
+          style={{ marginBottom: 20, flexDirection: 'row', alignItems: 'center' }}
+        >
+          <Ionicons name="arrow-back" size={24} color="#8B5CF6" />
+          <Text style={{ color: '#8B5CF6', marginLeft: 8, fontSize: 16 }}>Back to Entertainment</Text>
+        </TouchableOpacity>
+
+        <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 8 }}>
+          Book {selectedEvent.name}
+        </Text>
+        <Text style={{ fontSize: 16, color: '#9CA3AF', marginBottom: 20 }}>
+          with {selectedEvent.provider} • {selectedEvent.price}
+        </Text>
+
+        <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 16 }}>
+          Available Dates
+        </Text>
+
+        {selectedEvent.availableDates.map((date: string) => (
+          <TouchableOpacity
+            key={date}
+            onPress={() => handleDateSelect(date)}
+            style={{
+              backgroundColor: '#1F2937',
+              borderRadius: 12,
+              padding: 16,
+              marginBottom: 12,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}
+          >
+            <View>
+              <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#fff' }}>
+                {new Date(date).toLocaleDateString('en-US', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </Text>
+              <Text style={{ fontSize: 14, color: '#8B5CF6' }}>Available for events</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#8B5CF6" />
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
+  }
+
+  return (
+    <View style={{ padding: 20 }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 16 }}>
+        The Hub - Entertainment
+      </Text>
+      <Text style={{ fontSize: 16, color: '#9CA3AF', marginBottom: 20 }}>
+        Book local artists and entertainers for your events
+      </Text>
+
+      {entertainers.map((entertainer) => (
+        <View key={entertainer.id} style={{
+          backgroundColor: '#1F2937',
+          borderRadius: 12,
+          padding: 16,
+          marginBottom: 12
+        }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#fff' }}>{entertainer.name}</Text>
+              <Text style={{ fontSize: 14, color: '#8B5CF6' }}>{entertainer.type}</Text>
+              <Text style={{ fontSize: 14, color: '#9CA3AF' }}>{entertainer.provider} • {entertainer.distance}</Text>
+              <Text style={{ fontSize: 14, color: '#8B5CF6', marginTop: 4 }}>{entertainer.rating}</Text>
+            </View>
+            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#8B5CF6' }}>{entertainer.price}</Text>
+          </View>
+          
+          <TouchableOpacity
+            onPress={() => handleBookEvent(entertainer)}
+            style={{
+              backgroundColor: '#8B5CF6',
+              paddingVertical: 12,
+              paddingHorizontal: 20,
+              borderRadius: 8,
+              alignItems: 'center'
+            }}
+          >
+            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 14 }}>
+              Book Event
+            </Text>
+          </TouchableOpacity>
+        </View>
+      ))}
+    </View>
+  );
+};
 
 // Main Menu Screen - Enhanced Facebook-style menu
 const MainMenuScreen = ({ navigation }: any) => {
