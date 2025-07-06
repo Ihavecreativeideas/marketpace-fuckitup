@@ -776,6 +776,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     `);
   });
 
+  // Check authentication status
+  app.get('/api/auth-status', (req, res) => {
+    const isLoggedIn = req.isAuthenticated();
+    const user = req.user as any;
+    res.json({ 
+      isAuthenticated: isLoggedIn,
+      user: isLoggedIn ? { 
+        id: user?.claims?.sub, 
+        email: user?.claims?.email,
+        name: user?.claims?.name 
+      } : null 
+    });
+  });
+
   // Make current user admin (for initial setup)
   app.post('/api/make-admin', isAuthenticated, async (req: any, res) => {
     try {
@@ -861,11 +875,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
         </div>
         
         <script>
+          let isLoggedIn = false;
+          let currentUser = null;
+
+          // Check authentication status on page load
+          async function checkAuthStatus() {
+            try {
+              const response = await fetch('/api/auth-status');
+              const authData = await response.json();
+              isLoggedIn = authData.isAuthenticated;
+              currentUser = authData.user;
+              updateUI();
+            } catch (error) {
+              console.log('Auth check failed:', error);
+              updateUI();
+            }
+          }
+
+          function updateUI() {
+            const loginBtn = document.querySelector('[onclick="login()"]');
+            const makeAdminBtn = document.querySelector('[onclick="makeAdmin()"]');
+            const adminLink = document.querySelector('a[href="/admin"]');
+            
+            if (isLoggedIn && currentUser) {
+              loginBtn.innerText = \`Logged in as \${currentUser.name || currentUser.email}\`;
+              loginBtn.style.background = '#28a745';
+              loginBtn.onclick = logout;
+              makeAdminBtn.style.display = 'inline-block';
+              adminLink.style.background = '#007AFF';
+              adminLink.style.color = 'white';
+              adminLink.style.padding = '8px 16px';
+              adminLink.style.borderRadius = '4px';
+              adminLink.style.textDecoration = 'none';
+            } else {
+              loginBtn.innerText = 'Login with Replit';
+              loginBtn.style.background = '#28a745';
+              makeAdminBtn.style.display = 'none';
+            }
+          }
+          
           function login() {
-            window.location.href = '/auth/login';
+            window.location.href = '/api/login';
+          }
+
+          function logout() {
+            window.location.href = '/api/logout';
           }
           
           async function makeAdmin() {
+            const makeAdminBtn = document.querySelector('[onclick="makeAdmin()"]');
             try {
               const response = await fetch('/api/make-admin', {
                 method: 'POST',
@@ -875,14 +933,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
               if (response.ok) {
                 const result = await response.json();
                 alert('Success! You are now an admin. You can access the admin panel.');
+                makeAdminBtn.innerText = 'Admin Access Granted ✓';
+                makeAdminBtn.style.background = '#28a745';
+                makeAdminBtn.disabled = true;
               } else {
                 const error = await response.json();
-                alert('Error: ' + error.message + '\\n\\nPlease login first by clicking "Login with Replit"');
+                alert('Error: ' + error.message);
               }
             } catch (error) {
               alert('Error: Please login first by clicking "Login with Replit"');
             }
           }
+
+          // Check auth status when page loads
+          checkAuthStatus();
         </script>
       </body>
       </html>
