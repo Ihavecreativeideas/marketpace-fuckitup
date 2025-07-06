@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from './src/hooks/useAuth';
 import SimpleLanding from './src/screens/SimpleLanding';
 import SimpleHome from './src/screens/SimpleHome';
+import AuthScreen from './src/screens/AuthScreen';
 import TestScreen from './src/screens/TestScreen';
 import Home from './src/screens/Home';
 import FloatingNavigation from './src/components/FloatingNavigation';
@@ -97,11 +98,25 @@ function MainTabs() {
 }
 
 function AppContent() {
-  const [showLanding, setShowLanding] = React.useState(true);
+  const [currentScreen, setCurrentScreen] = React.useState('landing'); // 'landing', 'auth', 'app'
   const [activeTab, setActiveTab] = React.useState('Home');
 
-  if (showLanding) {
-    return <SimpleLanding onEnterApp={() => setShowLanding(false)} />;
+  if (currentScreen === 'landing') {
+    return (
+      <SimpleLanding 
+        onEnterApp={() => setCurrentScreen('app')}
+        onShowAuth={() => setCurrentScreen('auth')}
+      />
+    );
+  }
+
+  if (currentScreen === 'auth') {
+    return (
+      <AuthScreen
+        onBack={() => setCurrentScreen('landing')}
+        onSuccess={() => setCurrentScreen('app')}
+      />
+    );
   }
 
   const renderScreen = () => {

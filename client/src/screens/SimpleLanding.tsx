@@ -8,9 +8,10 @@ const { width, height } = Dimensions.get('window');
 
 interface LandingProps {
   onEnterApp: () => void;
+  onShowAuth?: () => void;
 }
 
-export default function SimpleLanding({ onEnterApp }: LandingProps) {
+export default function SimpleLanding({ onEnterApp, onShowAuth }: LandingProps) {
   const features = [
     { icon: 'storefront', title: 'Marketplace', desc: 'Buy & sell locally' },
     { icon: 'car', title: 'Delivery', desc: 'Fast like Uber Eats' },
@@ -47,12 +48,48 @@ export default function SimpleLanding({ onEnterApp }: LandingProps) {
           ))}
         </View>
         
-        <View style={styles.buttonContainer}>
+        <View style={styles.authSection}>
+          <Text style={styles.authTitle}>Join MarketPace</Text>
+          
           <Button
-            title="Enter MarketPace"
-            onPress={onEnterApp}
-            style={styles.enterButton}
+            title="Continue with Replit"
+            onPress={() => {
+              // This will redirect to the backend auth endpoint
+              if (typeof window !== 'undefined') {
+                window.location.href = '/api/login';
+              }
+            }}
+            style={[styles.authButton, styles.replitButton]}
           />
+          
+          <Button
+            title="Continue with Google"
+            onPress={() => console.log('Google login')}
+            style={[styles.authButton, styles.googleButton]}
+          />
+          
+          <Button
+            title="Continue with Email"
+            onPress={() => onShowAuth && onShowAuth()}
+            style={[styles.authButton, styles.emailButton]}
+          />
+          
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or</Text>
+            <View style={styles.dividerLine} />
+          </View>
+          
+          <Button
+            title="Browse as Guest"
+            onPress={onEnterApp}
+            style={[styles.authButton, styles.guestButton]}
+            variant="secondary"
+          />
+          
+          <Text style={styles.termsText}>
+            By continuing, you agree to our Terms of Service and Privacy Policy
+          </Text>
         </View>
       </View>
     </View>
@@ -131,12 +168,54 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
   },
-  buttonContainer: {
+  authSection: {
     marginTop: 'auto',
     paddingBottom: 20,
   },
-  enterButton: {
-    paddingVertical: 16,
+  authTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 24,
+    color: '#333',
+  },
+  authButton: {
+    paddingVertical: 14,
     borderRadius: 12,
+    marginBottom: 12,
+  },
+  replitButton: {
+    backgroundColor: '#FF6900',
+  },
+  googleButton: {
+    backgroundColor: '#4285F4',
+  },
+  emailButton: {
+    backgroundColor: '#007AFF',
+  },
+  guestButton: {
+    borderColor: '#007AFF',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E0E0E0',
+  },
+  dividerText: {
+    marginHorizontal: 16,
+    color: '#666',
+    fontSize: 14,
+  },
+  termsText: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 16,
+    lineHeight: 18,
   },
 });
