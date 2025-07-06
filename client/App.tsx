@@ -9,7 +9,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-import { useAuth } from './src/hooks/useAuth';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
 import FullLanding from './src/screens/FullLanding';
 import SimpleHome from './src/screens/SimpleHome';
 import AuthScreen from './src/screens/AuthScreen';
@@ -30,7 +30,12 @@ import CreateListing from './src/screens/CreateListing';
 import Cart from './src/screens/Cart';
 import Checkout from './src/screens/Checkout';
 import Subscribe from './src/screens/Subscribe';
-// import { ToastProvider } from './src/hooks/use-toast';
+
+// New onboarding screens
+import ProfileSetupScreen from './src/screens/onboarding/ProfileSetupScreen';
+import AccountTypeSelectionScreen from './src/screens/onboarding/AccountTypeSelectionScreen';
+import BusinessSetupScreen from './src/screens/onboarding/BusinessSetupScreen';
+import OnboardingCompleteScreen from './src/screens/onboarding/OnboardingCompleteScreen';
 
 const queryClient = new QueryClient();
 const Tab = createBottomTabNavigator();
@@ -99,10 +104,42 @@ function MainTabs() {
   );
 }
 
+// Create the onboarding stack
+function OnboardingStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
+      <Stack.Screen name="AccountTypeSelection" component={AccountTypeSelectionScreen} />
+      <Stack.Screen name="BusinessSetup" component={BusinessSetupScreen} />
+      <Stack.Screen name="OnboardingComplete" component={OnboardingCompleteScreen} />
+    </Stack.Navigator>
+  );
+}
+
 function AppContent() {
+  const { user, isLoading, isAuthenticated } = useAuth();
   const [currentScreen, setCurrentScreen] = React.useState('landing'); // 'landing', 'auth', 'app'
   const [activeTab, setActiveTab] = React.useState('Home');
 
+  // If user is authenticated but hasn't completed onboarding, show onboarding
+  if (isAuthenticated && user && !user.onboardingCompleted) {
+    return (
+      <NavigationContainer>
+        <OnboardingStack />
+      </NavigationContainer>
+    );
+  }
+
+  // If user is authenticated and has completed onboarding, show main app
+  if (isAuthenticated && user && user.onboardingCompleted) {
+    return (
+      <NavigationContainer>
+        <MainTabs />
+      </NavigationContainer>
+    );
+  }
+
+  // Show landing/auth flow for unauthenticated users
   if (currentScreen === 'landing') {
     return (
       <FullLanding 
@@ -154,8 +191,10 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <StatusBar style="auto" />
-          <AppContent />
+          <AuthProvider>
+            <StatusBar style="auto" />
+            <AppContent />
+          </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
