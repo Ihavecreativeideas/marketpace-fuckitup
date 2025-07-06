@@ -8,8 +8,8 @@ import {
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useQuery } from '@tanstack/react-query';
-import { apiRequest } from '../lib/queryClient';
+// Simplified for demo
+const useQuery = (config: any) => ({ data: null, isLoading: false, error: null });
 import { useAuth } from '../hooks/useAuth';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
