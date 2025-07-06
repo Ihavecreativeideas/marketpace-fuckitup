@@ -113,6 +113,7 @@ import DeliveryHub from './src/screens/DeliveryHub';
 import DeliveryTrackingDemo from './src/screens/demo/DeliveryTrackingDemo';
 import EnhancedDriverApplication from './src/screens/driver/EnhancedDriverApplication';
 import UberEatsStyleDashboard from './src/screens/driver/UberEatsStyleDashboard';
+import ProfessionalProfile from './src/screens/ProfessionalProfile';
 
 const queryClient = null; // Simplified for demo
 const Tab = createBottomTabNavigator();
@@ -397,7 +398,11 @@ const MemberQuestionnaireScreen = ({ route, navigation }: any) => {
     } else {
       // Complete onboarding
       console.log('Onboarding complete:', profileData);
-      navigation.navigate('CampaignLanding');
+      if (profileData.accountType === 'dual') {
+        navigation.navigate('ProfessionalProfile');
+      } else {
+        navigation.navigate('CampaignLanding');
+      }
     }
   };
 
@@ -931,6 +936,7 @@ function HomeStack() {
       <Stack.Screen name="CampaignLanding" component={CampaignLandingScreen} options={{ headerShown: false }} />
       <Stack.Screen name="SignUpLogin" component={SignUpLoginScreen} options={{ headerShown: false }} />
       <Stack.Screen name="MemberQuestionnaire" component={MemberQuestionnaireScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="ProfessionalProfile" component={ProfessionalProfile} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
