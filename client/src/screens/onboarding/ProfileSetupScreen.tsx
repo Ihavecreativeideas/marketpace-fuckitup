@@ -14,7 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../../hooks/useAuth';
 import { useApiRequest } from '../../hooks/useApiRequest';
-import ScrollableFuturisticBackground from '../../components/ScrollableFuturisticBackground';
+import { LinearGradient } from 'expo-linear-gradient';
 import FuturisticLogo from '../../components/FuturisticLogo';
 import GlassCard from '../../components/GlassCard';
 import FuturisticButton from '../../components/FuturisticButton';
@@ -98,18 +98,19 @@ export default function ProfileSetupScreen({ navigation }: any) {
   };
 
   return (
-    <ScrollableFuturisticBackground>
-      <SafeAreaView style={styles.container}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <LinearGradient
+        colors={colors.cosmic.gradient.primary}
+        style={StyleSheet.absoluteFillObject}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      />
+      <SafeAreaView style={styles.safeArea}>
         <ScrollView 
           contentContainerStyle={styles.scrollContent}
           style={styles.scrollView}
           showsVerticalScrollIndicator={true}
-          bounces={true}
-          keyboardShouldPersistTaps="handled"
-          nestedScrollEnabled={true}
           scrollEnabled={true}
-          alwaysBounceVertical={true}
-          removeClippedSubviews={false}
         >
           {/* Header */}
           <View style={styles.header}>
@@ -230,21 +231,21 @@ export default function ProfileSetupScreen({ navigation }: any) {
           />
         </ScrollView>
       </SafeAreaView>
-    </ScrollableFuturisticBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
+    flexGrow: 1,
     padding: 20,
-    paddingBottom: 150, // Extra padding at bottom to ensure scrolling to end
-    minHeight: '100%',
+    paddingBottom: 100,
+  },
+  safeArea: {
+    flex: 1,
   },
   header: {
     flexDirection: 'row',
