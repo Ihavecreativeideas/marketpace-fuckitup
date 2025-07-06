@@ -1,16 +1,36 @@
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 
 interface BadgeProps {
-  text: string;
-  variant?: 'success' | 'warning' | 'error' | 'info';
+  label: string;
+  variant?: 'success' | 'warning' | 'error' | 'info' | 'default';
   style?: ViewStyle;
+  textStyle?: TextStyle;
 }
 
-export default function Badge({ text, variant = 'info', style }: BadgeProps) {
+export default function Badge({ label, variant = 'default', style, textStyle }: BadgeProps) {
+  const getVariantStyles = () => {
+    switch (variant) {
+      case 'success':
+        return { backgroundColor: '#4CAF50', color: '#fff' };
+      case 'warning':
+        return { backgroundColor: '#FF9800', color: '#fff' };
+      case 'error':
+        return { backgroundColor: '#F44336', color: '#fff' };
+      case 'info':
+        return { backgroundColor: '#2196F3', color: '#fff' };
+      default:
+        return { backgroundColor: '#f0f0f0', color: '#333' };
+    }
+  };
+
+  const variantStyles = getVariantStyles();
+
   return (
-    <View style={[styles.badge, styles[`${variant}Badge`], style]}>
-      <Text style={[styles.badgeText, styles[`${variant}Text`]]}>{text}</Text>
+    <View style={[styles.badge, { backgroundColor: variantStyles.backgroundColor }, style]}>
+      <Text style={[styles.badgeText, { color: variantStyles.color }, textStyle]}>
+        {label}
+      </Text>
     </View>
   );
 }
@@ -25,34 +45,5 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 12,
     fontWeight: '600',
-    textTransform: 'uppercase',
-  },
-  
-  // Variant styles
-  successBadge: {
-    backgroundColor: '#e8f5e8',
-  },
-  warningBadge: {
-    backgroundColor: '#fff3e0',
-  },
-  errorBadge: {
-    backgroundColor: '#ffebee',
-  },
-  infoBadge: {
-    backgroundColor: '#e3f2fd',
-  },
-  
-  // Text styles
-  successText: {
-    color: '#4CAF50',
-  },
-  warningText: {
-    color: '#FF9800',
-  },
-  errorText: {
-    color: '#F44336',
-  },
-  infoText: {
-    color: '#2196F3',
   },
 });
