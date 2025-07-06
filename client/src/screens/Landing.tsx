@@ -3,8 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  ImageBackground,
-  TouchableOpacity,
   ScrollView,
   Dimensions,
 } from 'react-native';
@@ -14,10 +12,11 @@ import Button from '../components/ui/Button';
 
 const { width, height } = Dimensions.get('window');
 
-export default function Landing() {
-  const handleLogin = () => {
-    // This will redirect to the backend auth endpoint
-    window.location.href = '/api/login';
+export default function Landing({ onEnterApp }: { onEnterApp?: () => void }) {
+  const handleEnterApp = () => {
+    if (onEnterApp) {
+      onEnterApp();
+    }
   };
 
   const features = [
@@ -45,9 +44,9 @@ export default function Landing() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <ImageBackground
-        source={{
-          uri: 'https://pixabay.com/get/g4b02c701fb221a6fc0ba9a0beecefcd9714f81f5068058781d749959c3f2dbdd3bae3a8889ab04d8cefde57a2755b71e4f2be6f007898c6fa0b733c805099de4_1280.jpg',
+      <LinearGradient
+        colors={['#007AFF', '#5856D6', '#AF52DE']}
+        style={styles.hero}
         }}
         style={styles.heroSection}
         resizeMode="cover"

@@ -1,4 +1,5 @@
 import React from 'react';
+import { View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -9,9 +10,11 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useAuth } from './src/hooks/useAuth';
-import Landing from './src/screens/Landing';
+import SimpleLanding from './src/screens/SimpleLanding';
+import SimpleHome from './src/screens/SimpleHome';
 import TestScreen from './src/screens/TestScreen';
 import Home from './src/screens/Home';
+import FloatingNavigation from './src/components/FloatingNavigation';
 import Marketplace from './src/screens/Marketplace';
 import Services from './src/screens/Services';
 import TheHub from './src/screens/TheHub';
@@ -94,11 +97,40 @@ function MainTabs() {
 }
 
 function AppContent() {
-  // For testing, bypass auth and show main interface
+  const [showLanding, setShowLanding] = React.useState(true);
+  const [activeTab, setActiveTab] = React.useState('Home');
+
+  if (showLanding) {
+    return <SimpleLanding onEnterApp={() => setShowLanding(false)} />;
+  }
+
+  const renderScreen = () => {
+    switch (activeTab) {
+      case 'Home':
+        return <SimpleHome />;
+      case 'Marketplace':
+        return <TestScreen />;
+      case 'Services':
+        return <TestScreen />;
+      case 'TheHub':
+        return <TestScreen />;
+      case 'Community':
+        return <TestScreen />;
+      case 'Profile':
+        return <TestScreen />;
+      default:
+        return <SimpleHome />;
+    }
+  };
+
   return (
-    <NavigationContainer>
-      <MainTabs />
-    </NavigationContainer>
+    <View style={{ flex: 1 }}>
+      {renderScreen()}
+      <FloatingNavigation
+        activeTab={activeTab}
+        onTabPress={setActiveTab}
+      />
+    </View>
   );
 }
 
