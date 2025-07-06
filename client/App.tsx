@@ -3,7 +3,9 @@ import { View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+// Create a simple QueryClient for demo
+const QueryClient = () => null;
+const QueryClientProvider = ({ children }: { children: React.ReactNode }) => children;
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -109,7 +111,7 @@ import DeliveryTrackingDemo from './src/screens/demo/DeliveryTrackingDemo';
 import EnhancedDriverApplication from './src/screens/driver/EnhancedDriverApplication';
 import UberEatsStyleDashboard from './src/screens/driver/UberEatsStyleDashboard';
 
-const queryClient = new QueryClient();
+const queryClient = null; // Simplified for demo
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
@@ -233,55 +235,10 @@ function AppContent() {
     );
   }
 
-  // For now, show a futuristic welcome screen
+  // Show main app directly for demo
   return (
     <NavigationContainer>
-      <FuturisticBackground particleCount={30} glowIntensity="strong">
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-          <FuturisticLogo size="large" animated={true} showTagline={true} />
-          
-          <GlassCard style={{ marginTop: 40, alignItems: 'center', width: '100%' }}>
-            <Text style={{ 
-              fontSize: 28, 
-              fontWeight: 'bold', 
-              color: colors.text,
-              textAlign: 'center',
-              marginBottom: 15
-            }}>
-              Welcome to the Future
-            </Text>
-            <Text style={{ 
-              fontSize: 16, 
-              color: colors.textSecondary,
-              textAlign: 'center',
-              marginBottom: 30,
-              lineHeight: 24
-            }}>
-              Experience the next generation of community marketplace with cutting-edge technology
-            </Text>
-            
-            <FuturisticButton
-              title="Start Onboarding"
-              onPress={() => {}}
-              variant="primary"
-              size="large"
-              glowEffect={true}
-              style={{ marginBottom: 15, width: '100%' }}
-            />
-            
-            <FuturisticButton
-              title="Explore as Guest"
-              onPress={() => {}}
-              variant="outline"
-              size="medium"
-              glowEffect={false}
-              style={{ width: '100%' }}
-            />
-          </GlassCard>
-          
-          <OnboardingStack />
-        </View>
-      </FuturisticBackground>
+      <MainTabs />
     </NavigationContainer>
   );
 }
