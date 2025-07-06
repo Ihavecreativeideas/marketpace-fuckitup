@@ -1,7 +1,28 @@
 import express from "express";
+import cors from "cors";
+import helmet from "helmet";
 import { registerRoutes } from "./routes";
 
 const app = express();
+
+// Security and CORS middleware
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+app.use(cors({
+  origin: [
+    'http://localhost:8083',
+    'exp://localhost:8083',
+    /^https:\/\/.*\.replit\.dev$/,
+    /^https:\/\/.*\.replit\.app$/,
+    /^exp:\/\/.*$/
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
+
 app.use(express.json());
 app.use(express.static("client/dist"));
 
