@@ -36,6 +36,62 @@ import {
   type InsertOffer,
   type AppSetting,
   type InsertAppSetting,
+  type DriverTip,
+  type InsertDriverTip,
+  driverTips,
+  // Data collection and analytics types
+  userSessions,
+  userBehavior,
+  userInterests,
+  userConnections,
+  browsingHistory,
+  searchHistory,
+  deviceFingerprints,
+  purchaseHistory,
+  type UserSession,
+  type InsertUserSession,
+  type UserBehavior,
+  type InsertUserBehavior,
+  type UserInterest,
+  type InsertUserInterest,
+  type UserConnection,
+  type InsertUserConnection,
+  type BrowsingHistory,
+  type InsertBrowsingHistory,
+  type SearchHistory,
+  type InsertSearchHistory,
+  type DeviceFingerprint,
+  type InsertDeviceFingerprint,
+  type PurchaseHistory,
+  type InsertPurchaseHistory,
+  // Advertising system types
+  adCampaigns,
+  adCreatives,
+  adImpressions,
+  adClicks,
+  adConversions,
+  audienceSegments,
+  userSegmentMembership,
+  adPerformanceMetrics,
+  dataPrivacySettings,
+  type AdCampaign,
+  type InsertAdCampaign,
+  type AdCreative,
+  type InsertAdCreative,
+  type AdImpression,
+  type InsertAdImpression,
+  type AdClick,
+  type InsertAdClick,
+  type AdConversion,
+  type InsertAdConversion,
+  type AudienceSegment,
+  type InsertAudienceSegment,
+  type UserSegmentMembership,
+  type InsertUserSegmentMembership,
+  type AdPerformanceMetric,
+  type InsertAdPerformanceMetric,
+  type DataPrivacySetting,
+  type InsertDataPrivacySetting,
 } from "../shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, like, sql } from "drizzle-orm";
@@ -108,6 +164,78 @@ export interface IStorage {
   getDriverRoutes(driverId: string): Promise<DeliveryRoute[]>;
   getActiveRoute(driverId: string): Promise<(DeliveryRoute & { routeOrders: any[] }) | undefined>;
   addOrderToRoute(routeId: number, orderId: number, stopOrder: number, stopType: string): Promise<void>;
+
+  // ============ DATA COLLECTION & ANALYTICS OPERATIONS ============
+  
+  // User session tracking
+  createUserSession(session: InsertUserSession): Promise<UserSession>;
+  updateUserSession(sessionId: string, data: Partial<InsertUserSession>): Promise<UserSession>;
+  getUserSessions(userId: string, limit?: number): Promise<UserSession[]>;
+  
+  // Behavior tracking
+  trackUserBehavior(behavior: InsertUserBehavior): Promise<UserBehavior>;
+  getUserBehavior(userId: string, timeframe?: { start: Date; end: Date }): Promise<UserBehavior[]>;
+  
+  // Interest profiling
+  updateUserInterests(userId: string, interests: InsertUserInterest[]): Promise<UserInterest[]>;
+  getUserInterests(userId: string): Promise<UserInterest[]>;
+  
+  // Social connections
+  createUserConnection(connection: InsertUserConnection): Promise<UserConnection>;
+  getUserConnections(userId: string): Promise<UserConnection[]>;
+  
+  // Browsing history
+  trackBrowsingHistory(history: InsertBrowsingHistory): Promise<BrowsingHistory>;
+  getBrowsingHistory(userId: string, limit?: number): Promise<BrowsingHistory[]>;
+  
+  // Search tracking
+  trackSearch(search: InsertSearchHistory): Promise<SearchHistory>;
+  getSearchHistory(userId: string): Promise<SearchHistory[]>;
+  
+  // Device fingerprinting
+  createDeviceFingerprint(fingerprint: InsertDeviceFingerprint): Promise<DeviceFingerprint>;
+  updateDeviceFingerprint(fingerprintHash: string, lastSeen: Date): Promise<DeviceFingerprint>;
+  
+  // Purchase analytics
+  trackPurchase(purchase: InsertPurchaseHistory): Promise<PurchaseHistory>;
+  getPurchaseHistory(userId: string): Promise<PurchaseHistory[]>;
+
+  // ============ ADVERTISING SYSTEM OPERATIONS ============
+  
+  // Campaign management
+  createAdCampaign(campaign: InsertAdCampaign): Promise<AdCampaign>;
+  updateAdCampaign(id: number, updates: Partial<InsertAdCampaign>): Promise<AdCampaign>;
+  getAdCampaigns(businessId: string): Promise<AdCampaign[]>;
+  getAdCampaign(id: number): Promise<AdCampaign | undefined>;
+  
+  // Creative management
+  createAdCreative(creative: InsertAdCreative): Promise<AdCreative>;
+  updateAdCreative(id: number, updates: Partial<InsertAdCreative>): Promise<AdCreative>;
+  getAdCreatives(campaignId: number): Promise<AdCreative[]>;
+  
+  // Ad serving and tracking
+  recordAdImpression(impression: InsertAdImpression): Promise<AdImpression>;
+  recordAdClick(click: InsertAdClick): Promise<AdClick>;
+  recordAdConversion(conversion: InsertAdConversion): Promise<AdConversion>;
+  
+  // Audience management
+  createAudienceSegment(segment: InsertAudienceSegment): Promise<AudienceSegment>;
+  updateAudienceSegment(id: number, updates: Partial<InsertAudienceSegment>): Promise<AudienceSegment>;
+  getAudienceSegments(businessId: string): Promise<AudienceSegment[]>;
+  addUserToSegment(userId: string, segmentId: number, score?: number): Promise<UserSegmentMembership>;
+  
+  // Performance analytics
+  getAdPerformanceMetrics(campaignId: number, dateRange?: { start: Date; end: Date }): Promise<AdPerformanceMetric[]>;
+  updateAdPerformanceMetrics(campaignId: number, date: Date, metrics: Partial<InsertAdPerformanceMetric>): Promise<AdPerformanceMetric>;
+  
+  // Targeting and recommendations
+  getTargetableUsers(criteria: any): Promise<User[]>;
+  calculateAudienceSize(targeting: any): Promise<number>;
+  generateLookalikeAudience(sourceSegmentId: number, size: number): Promise<AudienceSegment>;
+  
+  // Privacy and consent
+  updatePrivacySettings(userId: string, settings: Partial<InsertDataPrivacySetting>): Promise<DataPrivacySetting>;
+  getPrivacySettings(userId: string): Promise<DataPrivacySetting | undefined>;
   
   // Community operations
   getCommunityPosts(limit?: number): Promise<(CommunityPost & { user: User })[]>;
@@ -876,6 +1004,645 @@ export class DatabaseStorage implements IStorage {
     }
 
     return routes;
+  }
+
+  // ============ DATA COLLECTION & ANALYTICS IMPLEMENTATION ============
+
+  // User session tracking
+  async createUserSession(session: InsertUserSession): Promise<UserSession> {
+    await setRLSContext(session.userId, 'user');
+    try {
+      const [result] = await db.insert(userSessions).values(session).returning();
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async updateUserSession(sessionId: string, data: Partial<InsertUserSession>): Promise<UserSession> {
+    try {
+      const [result] = await db.update(userSessions)
+        .set({ ...data, endTime: new Date() })
+        .where(eq(userSessions.sessionId, sessionId))
+        .returning();
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async getUserSessions(userId: string, limit: number = 50): Promise<UserSession[]> {
+    await setRLSContext(userId, 'user');
+    try {
+      return await db.select()
+        .from(userSessions)
+        .where(eq(userSessions.userId, userId))
+        .orderBy(desc(userSessions.startTime))
+        .limit(limit);
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  // Behavior tracking
+  async trackUserBehavior(behavior: InsertUserBehavior): Promise<UserBehavior> {
+    await setRLSContext(behavior.userId, 'user');
+    try {
+      const [result] = await db.insert(userBehavior).values(behavior).returning();
+      
+      // Update user interests based on behavior
+      if (behavior.page && behavior.eventType === 'page_view') {
+        await this.updateUserInterestsFromBehavior(behavior.userId!, behavior.page);
+      }
+      
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async getUserBehavior(userId: string, timeframe?: { start: Date; end: Date }): Promise<UserBehavior[]> {
+    await setRLSContext(userId, 'user');
+    try {
+      if (timeframe) {
+        return await db.select()
+          .from(userBehavior)
+          .where(
+            and(
+              eq(userBehavior.userId, userId),
+              sql`${userBehavior.timestamp} >= ${timeframe.start}`,
+              sql`${userBehavior.timestamp} <= ${timeframe.end}`
+            )
+          )
+          .orderBy(desc(userBehavior.timestamp))
+          .limit(1000);
+      } else {
+        return await db.select()
+          .from(userBehavior)
+          .where(eq(userBehavior.userId, userId))
+          .orderBy(desc(userBehavior.timestamp))
+          .limit(1000);
+      }
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  // Interest profiling
+  async updateUserInterests(userId: string, interests: InsertUserInterest[]): Promise<UserInterest[]> {
+    await setRLSContext(userId, 'user');
+    try {
+      const results = [];
+      for (const interest of interests) {
+        const [result] = await db.insert(userInterests)
+          .values({ ...interest, userId })
+          .onConflictDoUpdate({
+            target: [userInterests.userId, userInterests.category, userInterests.subcategory],
+            set: {
+              score: sql`${userInterests.score} + ${interest.score}`,
+              interactionCount: sql`${userInterests.interactionCount} + 1`,
+              totalTimeSpent: sql`${userInterests.totalTimeSpent} + ${interest.totalTimeSpent || 0}`,
+              updatedAt: new Date(),
+            },
+          })
+          .returning();
+        results.push(result);
+      }
+      return results;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async getUserInterests(userId: string): Promise<UserInterest[]> {
+    await setRLSContext(userId, 'user');
+    try {
+      return await db.select()
+        .from(userInterests)
+        .where(eq(userInterests.userId, userId))
+        .orderBy(desc(userInterests.score));
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  // Social connections
+  async createUserConnection(connection: InsertUserConnection): Promise<UserConnection> {
+    await setRLSContext(connection.userId, 'user');
+    try {
+      const [result] = await db.insert(userConnections).values(connection).returning();
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async getUserConnections(userId: string): Promise<UserConnection[]> {
+    await setRLSContext(userId, 'user');
+    try {
+      return await db.select()
+        .from(userConnections)
+        .where(eq(userConnections.userId, userId))
+        .orderBy(desc(userConnections.strength));
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  // Browsing history
+  async trackBrowsingHistory(history: InsertBrowsingHistory): Promise<BrowsingHistory> {
+    await setRLSContext(history.userId, 'user');
+    try {
+      const [result] = await db.insert(browsingHistory).values(history).returning();
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async getBrowsingHistory(userId: string, limit: number = 100): Promise<BrowsingHistory[]> {
+    await setRLSContext(userId, 'user');
+    try {
+      return await db.select()
+        .from(browsingHistory)
+        .where(eq(browsingHistory.userId, userId))
+        .orderBy(desc(browsingHistory.timestamp))
+        .limit(limit);
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  // Search tracking
+  async trackSearch(search: InsertSearchHistory): Promise<SearchHistory> {
+    await setRLSContext(search.userId, 'user');
+    try {
+      const [result] = await db.insert(searchHistory).values(search).returning();
+      
+      // Update user interests based on search
+      if (search.category) {
+        await this.updateUserInterestsFromSearch(search.userId!, search.category, search.query!);
+      }
+      
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async getSearchHistory(userId: string): Promise<SearchHistory[]> {
+    await setRLSContext(userId, 'user');
+    try {
+      return await db.select()
+        .from(searchHistory)
+        .where(eq(searchHistory.userId, userId))
+        .orderBy(desc(searchHistory.timestamp))
+        .limit(100);
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  // Device fingerprinting
+  async createDeviceFingerprint(fingerprint: InsertDeviceFingerprint): Promise<DeviceFingerprint> {
+    await setRLSContext(fingerprint.userId, 'user');
+    try {
+      const [result] = await db.insert(deviceFingerprints)
+        .values(fingerprint)
+        .onConflictDoUpdate({
+          target: deviceFingerprints.fingerprintHash,
+          set: {
+            lastSeen: new Date(),
+            sessionsCount: sql`${deviceFingerprints.sessionsCount} + 1`,
+          },
+        })
+        .returning();
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async updateDeviceFingerprint(fingerprintHash: string, lastSeen: Date): Promise<DeviceFingerprint> {
+    try {
+      const [result] = await db.update(deviceFingerprints)
+        .set({ lastSeen, sessionsCount: sql`${deviceFingerprints.sessionsCount} + 1` })
+        .where(eq(deviceFingerprints.fingerprintHash, fingerprintHash))
+        .returning();
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  // Purchase analytics
+  async trackPurchase(purchase: InsertPurchaseHistory): Promise<PurchaseHistory> {
+    await setRLSContext(purchase.userId, 'user');
+    try {
+      const [result] = await db.insert(purchaseHistory).values(purchase).returning();
+      
+      // Update user interests based on purchase
+      if (purchase.category) {
+        await this.updateUserInterestsFromPurchase(purchase.userId!, purchase.category, purchase.subcategory);
+      }
+      
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async getPurchaseHistory(userId: string): Promise<PurchaseHistory[]> {
+    await setRLSContext(userId, 'user');
+    try {
+      return await db.select()
+        .from(purchaseHistory)
+        .where(eq(purchaseHistory.userId, userId))
+        .orderBy(desc(purchaseHistory.timestamp));
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  // ============ ADVERTISING SYSTEM IMPLEMENTATION ============
+
+  // Campaign management
+  async createAdCampaign(campaign: InsertAdCampaign): Promise<AdCampaign> {
+    await setRLSContext(campaign.businessId, 'business');
+    try {
+      const [result] = await db.insert(adCampaigns).values(campaign).returning();
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async updateAdCampaign(id: number, updates: Partial<InsertAdCampaign>): Promise<AdCampaign> {
+    try {
+      const [result] = await db.update(adCampaigns)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(adCampaigns.id, id))
+        .returning();
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async getAdCampaigns(businessId: string): Promise<AdCampaign[]> {
+    await setRLSContext(businessId, 'business');
+    try {
+      return await db.select()
+        .from(adCampaigns)
+        .where(eq(adCampaigns.businessId, businessId))
+        .orderBy(desc(adCampaigns.createdAt));
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async getAdCampaign(id: number): Promise<AdCampaign | undefined> {
+    try {
+      const [result] = await db.select()
+        .from(adCampaigns)
+        .where(eq(adCampaigns.id, id));
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  // Creative management
+  async createAdCreative(creative: InsertAdCreative): Promise<AdCreative> {
+    try {
+      const [result] = await db.insert(adCreatives).values(creative).returning();
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async updateAdCreative(id: number, updates: Partial<InsertAdCreative>): Promise<AdCreative> {
+    try {
+      const [result] = await db.update(adCreatives)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(adCreatives.id, id))
+        .returning();
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async getAdCreatives(campaignId: number): Promise<AdCreative[]> {
+    try {
+      return await db.select()
+        .from(adCreatives)
+        .where(eq(adCreatives.campaignId, campaignId))
+        .orderBy(desc(adCreatives.createdAt));
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  // Ad serving and tracking
+  async recordAdImpression(impression: InsertAdImpression): Promise<AdImpression> {
+    try {
+      const [result] = await db.insert(adImpressions).values(impression).returning();
+      
+      // Update campaign spend
+      await this.updateCampaignSpend(impression.campaignId!, Number(impression.cost) || 0);
+      
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async recordAdClick(click: InsertAdClick): Promise<AdClick> {
+    try {
+      const [result] = await db.insert(adClicks).values(click).returning();
+      
+      // Update campaign spend
+      await this.updateCampaignSpend(click.campaignId!, Number(click.cost) || 0);
+      
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async recordAdConversion(conversion: InsertAdConversion): Promise<AdConversion> {
+    try {
+      const [result] = await db.insert(adConversions).values(conversion).returning();
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  // Audience management
+  async createAudienceSegment(segment: InsertAudienceSegment): Promise<AudienceSegment> {
+    await setRLSContext(segment.businessId, 'business');
+    try {
+      const [result] = await db.insert(audienceSegments).values(segment).returning();
+      
+      // Calculate initial user count
+      const userCount = await this.calculateAudienceSize(segment.criteria);
+      await this.updateAudienceSegment(result.id, { userCount });
+      
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async updateAudienceSegment(id: number, updates: Partial<InsertAudienceSegment>): Promise<AudienceSegment> {
+    try {
+      const [result] = await db.update(audienceSegments)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(audienceSegments.id, id))
+        .returning();
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async getAudienceSegments(businessId: string): Promise<AudienceSegment[]> {
+    await setRLSContext(businessId, 'business');
+    try {
+      return await db.select()
+        .from(audienceSegments)
+        .where(eq(audienceSegments.businessId, businessId))
+        .orderBy(desc(audienceSegments.createdAt));
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async addUserToSegment(userId: string, segmentId: number, score: number = 1): Promise<UserSegmentMembership> {
+    try {
+      const [result] = await db.insert(userSegmentMembership)
+        .values({ userId, segmentId, score })
+        .onConflictDoUpdate({
+          target: [userSegmentMembership.userId, userSegmentMembership.segmentId],
+          set: { score, lastUpdated: new Date() },
+        })
+        .returning();
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  // Performance analytics
+  async getAdPerformanceMetrics(campaignId: number, dateRange?: { start: Date; end: Date }): Promise<AdPerformanceMetric[]> {
+    try {
+      if (dateRange) {
+        return await db.select()
+          .from(adPerformanceMetrics)
+          .where(
+            and(
+              eq(adPerformanceMetrics.campaignId, campaignId),
+              sql`${adPerformanceMetrics.date} >= ${dateRange.start}`,
+              sql`${adPerformanceMetrics.date} <= ${dateRange.end}`
+            )
+          )
+          .orderBy(desc(adPerformanceMetrics.date));
+      } else {
+        return await db.select()
+          .from(adPerformanceMetrics)
+          .where(eq(adPerformanceMetrics.campaignId, campaignId))
+          .orderBy(desc(adPerformanceMetrics.date));
+      }
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async updateAdPerformanceMetrics(campaignId: number, date: Date, metrics: Partial<InsertAdPerformanceMetric>): Promise<AdPerformanceMetric> {
+    try {
+      const [result] = await db.insert(adPerformanceMetrics)
+        .values({ campaignId, date: date.toISOString().split('T')[0], ...metrics })
+        .onConflictDoUpdate({
+          target: [adPerformanceMetrics.campaignId, adPerformanceMetrics.date],
+          set: metrics,
+        })
+        .returning();
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  // Targeting and recommendations
+  async getTargetableUsers(criteria: any): Promise<User[]> {
+    try {
+      // Build dynamic query based on targeting criteria
+      const filters = [];
+      
+      if (criteria.age) {
+        // Calculate age from birth date (if available)
+        filters.push(sql`EXTRACT(YEAR FROM AGE(CURRENT_DATE, birth_date)) BETWEEN ${criteria.age.min} AND ${criteria.age.max}`);
+      }
+      
+      if (criteria.location) {
+        // Location-based targeting (requires location data)
+        filters.push(sql`location->>'country' = ${criteria.location.country}`);
+      }
+      
+      if (criteria.interests?.length > 0) {
+        // Interest-based targeting
+        const interestUserIds = await db.select({ userId: userInterests.userId })
+          .from(userInterests)
+          .where(sql`${userInterests.category} = ANY(${criteria.interests})`);
+        
+        const userIds = interestUserIds.map(u => u.userId);
+        if (userIds.length > 0) {
+          filters.push(sql`${users.id} = ANY(${userIds})`);
+        }
+      }
+      
+      if (filters.length > 0) {
+        return await db.select()
+          .from(users)
+          .where(and(...filters))
+          .limit(1000);
+      } else {
+        return await db.select()
+          .from(users)
+          .limit(1000);
+      }
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async calculateAudienceSize(targeting: any): Promise<number> {
+    try {
+      const users = await this.getTargetableUsers(targeting);
+      return users.length;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async generateLookalikeAudience(sourceSegmentId: number, size: number): Promise<AudienceSegment> {
+    try {
+      // Get source segment users
+      const sourceUsers = await db.select({ userId: userSegmentMembership.userId })
+        .from(userSegmentMembership)
+        .where(eq(userSegmentMembership.segmentId, sourceSegmentId));
+      
+      // Analyze their interests and behaviors to create lookalike criteria
+      const interests = await db.select({ category: userInterests.category })
+        .from(userInterests)
+        .where(sql`${userInterests.userId} = ANY(${sourceUsers.map(u => u.userId)})`);
+      
+      const lookalikeSegment = await this.createAudienceSegment({
+        businessId: 'system', // or get from source segment
+        name: `Lookalike of Segment ${sourceSegmentId}`,
+        type: 'lookalike',
+        criteria: {
+          interests: interests.map(i => i.category),
+          similarity_threshold: 0.7,
+        },
+      });
+      
+      return lookalikeSegment;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  // Privacy and consent
+  async updatePrivacySettings(userId: string, settings: Partial<InsertDataPrivacySetting>): Promise<DataPrivacySetting> {
+    await setRLSContext(userId, 'user');
+    try {
+      const [result] = await db.insert(dataPrivacySettings)
+        .values({ userId, ...settings })
+        .onConflictDoUpdate({
+          target: dataPrivacySettings.userId,
+          set: { ...settings, updatedAt: new Date() },
+        })
+        .returning();
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  async getPrivacySettings(userId: string): Promise<DataPrivacySetting | undefined> {
+    await setRLSContext(userId, 'user');
+    try {
+      const [result] = await db.select()
+        .from(dataPrivacySettings)
+        .where(eq(dataPrivacySettings.userId, userId));
+      return result;
+    } finally {
+      await clearRLSContext();
+    }
+  }
+
+  // Helper methods for interest calculation
+  private async updateUserInterestsFromBehavior(userId: string, page: string): Promise<void> {
+    const category = this.categorizePageView(page);
+    if (category) {
+      await this.updateUserInterests(userId, [{
+        category,
+        score: 0.1,
+        source: 'behavior_derived',
+        totalTimeSpent: 30, // average page view time
+      }]);
+    }
+  }
+
+  private async updateUserInterestsFromSearch(userId: string, category: string, query: string): Promise<void> {
+    await this.updateUserInterests(userId, [{
+      category,
+      subcategory: query.substring(0, 100),
+      score: 0.2,
+      source: 'search_behavior',
+      totalTimeSpent: 60,
+    }]);
+  }
+
+  private async updateUserInterestsFromPurchase(userId: string, category: string, subcategory?: string): Promise<void> {
+    await this.updateUserInterests(userId, [{
+      category,
+      subcategory,
+      score: 1.0, // High weight for purchases
+      source: 'purchase_history',
+      totalTimeSpent: 0,
+    }]);
+  }
+
+  private categorizePageView(page: string): string | null {
+    const categoryMap: Record<string, string> = {
+      'marketplace': 'shopping',
+      'electronics': 'electronics',
+      'fashion': 'fashion',
+      'automotive': 'automotive',
+      'home': 'home_garden',
+      'sports': 'sports',
+      'books': 'books_media',
+      'food': 'food_beverages',
+    };
+    
+    for (const [key, category] of Object.entries(categoryMap)) {
+      if (page.includes(key)) {
+        return category;
+      }
+    }
+    
+    return null;
+  }
+
+  private async updateCampaignSpend(campaignId: number, cost: number): Promise<void> {
+    await db.update(adCampaigns)
+      .set({ spent: sql`${adCampaigns.spent} + ${cost}` })
+      .where(eq(adCampaigns.id, campaignId));
   }
 }
 

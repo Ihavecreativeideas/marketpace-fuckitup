@@ -1126,6 +1126,486 @@ export async function registerRoutes(app: Express): Promise<Server> {
     `);
   });
 
+  // ============ DATA COLLECTION & ANALYTICS ENDPOINTS ============
+
+  // User behavior tracking
+  app.post('/api/track/behavior', async (req, res) => {
+    try {
+      const { eventType, page, element, data, sessionId } = req.body;
+      const userId = req.user?.claims?.sub;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'User must be logged in to track behavior' });
+      }
+
+      const behavior = await storage.trackUserBehavior({
+        userId,
+        sessionId,
+        eventType,
+        page,
+        element,
+        data,
+        timestamp: new Date(),
+      });
+
+      res.json(behavior);
+    } catch (error) {
+      console.error('Error tracking behavior:', error);
+      res.status(500).json({ message: 'Failed to track behavior' });
+    }
+  });
+
+  // User session management
+  app.post('/api/track/session', async (req, res) => {
+    try {
+      const { sessionId, deviceType, browser, location } = req.body;
+      const userId = req.user?.claims?.sub;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'User must be logged in' });
+      }
+
+      const session = await storage.createUserSession({
+        userId,
+        sessionId,
+        deviceType,
+        browser,
+        location,
+        startTime: new Date(),
+      });
+
+      res.json(session);
+    } catch (error) {
+      console.error('Error creating session:', error);
+      res.status(500).json({ message: 'Failed to create session' });
+    }
+  });
+
+  // Search tracking
+  app.post('/api/track/search', async (req, res) => {
+    try {
+      const { query, category, resultsShown, timeSpent } = req.body;
+      const userId = req.user?.claims?.sub;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'User must be logged in' });
+      }
+
+      const search = await storage.trackSearch({
+        userId,
+        query,
+        category,
+        resultsShown,
+        timeSpent,
+        timestamp: new Date(),
+      });
+
+      res.json(search);
+    } catch (error) {
+      console.error('Error tracking search:', error);
+      res.status(500).json({ message: 'Failed to track search' });
+    }
+  });
+
+  // Purchase tracking
+  app.post('/api/track/purchase', async (req, res) => {
+    try {
+      const { orderId, category, subcategory, priceRange } = req.body;
+      const userId = req.user?.claims?.sub;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'User must be logged in' });
+      }
+
+      const purchase = await storage.trackPurchase({
+        userId,
+        orderId,
+        category,
+        subcategory,
+        priceRange,
+        dayOfWeek: new Date().getDay(),
+        hourOfDay: new Date().getHours(),
+        timestamp: new Date(),
+      });
+
+      res.json(purchase);
+    } catch (error) {
+      console.error('Error tracking purchase:', error);
+      res.status(500).json({ message: 'Failed to track purchase' });
+    }
+  });
+
+  // Get user analytics data for business profiles
+  app.get('/api/analytics/user/:userId', isAuthenticated, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const requestingUserId = req.user?.claims?.sub;
+
+      // Only allow businesses to access user analytics or users to access their own
+      if (requestingUserId !== userId && req.user?.claims?.userType !== 'business') {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+
+      const [interests, behavior, sessions, searches, purchases] = await Promise.all([
+        storage.getUserInterests(userId),
+        storage.getUserBehavior(userId, { 
+          start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
+          end: new Date() 
+        }),
+        storage.getUserSessions(userId, 10),
+        storage.getSearchHistory(userId),
+        storage.getPurchaseHistory(userId),
+      ]);
+
+      res.json({
+        interests,
+        recentBehavior: behavior.slice(0, 100),
+        sessions: sessions.slice(0, 10),
+        searches: searches.slice(0, 50),
+        purchases: purchases.slice(0, 20),
+      });
+    } catch (error) {
+      console.error('Error fetching user analytics:', error);
+      res.status(500).json({ message: 'Failed to fetch analytics' });
+    }
+  });
+
+  // ============ FACEBOOK-STYLE ADVERTISING ENDPOINTS ============
+
+  // Create advertising campaign
+  app.post('/api/advertising/campaigns', isAuthenticated, async (req, res) => {
+    try {
+      const {
+        name,
+        objective,
+        type,
+        dailyBudget,
+        lifetimeBudget,
+        targeting,
+        schedule
+      } = req.body;
+      
+      const businessId = req.user?.claims?.sub;
+
+      if (!businessId) {
+        return res.status(401).json({ message: 'Business account required' });
+      }
+
+      const campaign = await storage.createAdCampaign({
+        businessId,
+        name,
+        objective,
+        type,
+        dailyBudget,
+        lifetimeBudget,
+        targeting,
+        schedule,
+        status: 'draft',
+      });
+
+      res.json(campaign);
+    } catch (error) {
+      console.error('Error creating campaign:', error);
+      res.status(500).json({ message: 'Failed to create campaign' });
+    }
+  });
+
+  // Get business campaigns
+  app.get('/api/advertising/campaigns', isAuthenticated, async (req, res) => {
+    try {
+      const businessId = req.user?.claims?.sub;
+      const campaigns = await storage.getAdCampaigns(businessId!);
+      res.json(campaigns);
+    } catch (error) {
+      console.error('Error fetching campaigns:', error);
+      res.status(500).json({ message: 'Failed to fetch campaigns' });
+    }
+  });
+
+  // Update campaign
+  app.put('/api/advertising/campaigns/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      const campaign = await storage.updateAdCampaign(parseInt(id), updates);
+      res.json(campaign);
+    } catch (error) {
+      console.error('Error updating campaign:', error);
+      res.status(500).json({ message: 'Failed to update campaign' });
+    }
+  });
+
+  // Create ad creative
+  app.post('/api/advertising/campaigns/:campaignId/creatives', isAuthenticated, async (req, res) => {
+    try {
+      const { campaignId } = req.params;
+      const {
+        name,
+        format,
+        headline,
+        primaryText,
+        description,
+        callToAction,
+        mediaUrls,
+        linkUrl
+      } = req.body;
+
+      const creative = await storage.createAdCreative({
+        campaignId: parseInt(campaignId),
+        name,
+        format,
+        headline,
+        primaryText,
+        description,
+        callToAction,
+        mediaUrls,
+        linkUrl,
+      });
+
+      res.json(creative);
+    } catch (error) {
+      console.error('Error creating creative:', error);
+      res.status(500).json({ message: 'Failed to create creative' });
+    }
+  });
+
+  // Get campaign creatives
+  app.get('/api/advertising/campaigns/:campaignId/creatives', isAuthenticated, async (req, res) => {
+    try {
+      const { campaignId } = req.params;
+      const creatives = await storage.getAdCreatives(parseInt(campaignId));
+      res.json(creatives);
+    } catch (error) {
+      console.error('Error fetching creatives:', error);
+      res.status(500).json({ message: 'Failed to fetch creatives' });
+    }
+  });
+
+  // Audience estimation (Facebook-style)
+  app.post('/api/advertising/audience/estimate', isAuthenticated, async (req, res) => {
+    try {
+      const { targeting } = req.body;
+      
+      const estimatedSize = await storage.calculateAudienceSize(targeting);
+      const potentialReach = Math.floor(estimatedSize * 0.8); // 80% reach rate
+      
+      res.json({
+        estimatedSize,
+        potentialReach,
+        targeting,
+        costEstimate: {
+          dailyMin: potentialReach * 0.01, // $0.01 per impression
+          dailyMax: potentialReach * 0.05, // $0.05 per impression
+        }
+      });
+    } catch (error) {
+      console.error('Error estimating audience:', error);
+      res.status(500).json({ message: 'Failed to estimate audience' });
+    }
+  });
+
+  // Create custom audience segment
+  app.post('/api/advertising/audiences', isAuthenticated, async (req, res) => {
+    try {
+      const { name, description, criteria, type } = req.body;
+      const businessId = req.user?.claims?.sub;
+
+      const segment = await storage.createAudienceSegment({
+        businessId: businessId!,
+        name,
+        description,
+        criteria,
+        type: type || 'custom',
+      });
+
+      res.json(segment);
+    } catch (error) {
+      console.error('Error creating audience segment:', error);
+      res.status(500).json({ message: 'Failed to create audience segment' });
+    }
+  });
+
+  // Get business audience segments
+  app.get('/api/advertising/audiences', isAuthenticated, async (req, res) => {
+    try {
+      const businessId = req.user?.claims?.sub;
+      const segments = await storage.getAudienceSegments(businessId!);
+      res.json(segments);
+    } catch (error) {
+      console.error('Error fetching audience segments:', error);
+      res.status(500).json({ message: 'Failed to fetch audience segments' });
+    }
+  });
+
+  // Generate lookalike audience
+  app.post('/api/advertising/audiences/:id/lookalike', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { size = 1000 } = req.body;
+      
+      const lookalikeAudience = await storage.generateLookalikeAudience(parseInt(id), size);
+      res.json(lookalikeAudience);
+    } catch (error) {
+      console.error('Error generating lookalike audience:', error);
+      res.status(500).json({ message: 'Failed to generate lookalike audience' });
+    }
+  });
+
+  // Campaign performance metrics
+  app.get('/api/advertising/campaigns/:id/performance', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { startDate, endDate } = req.query;
+      
+      const dateRange = startDate && endDate ? {
+        start: new Date(startDate as string),
+        end: new Date(endDate as string)
+      } : undefined;
+      
+      const metrics = await storage.getAdPerformanceMetrics(parseInt(id), dateRange);
+      res.json(metrics);
+    } catch (error) {
+      console.error('Error fetching performance metrics:', error);
+      res.status(500).json({ message: 'Failed to fetch performance metrics' });
+    }
+  });
+
+  // Record ad impression (for internal ad serving)
+  app.post('/api/advertising/impression', async (req, res) => {
+    try {
+      const { campaignId, creativeId, userId, placement, cost } = req.body;
+      
+      const impression = await storage.recordAdImpression({
+        campaignId,
+        creativeId,
+        userId,
+        placement,
+        cost: cost || 0.001, // Default CPM
+        timestamp: new Date(),
+      });
+
+      res.json(impression);
+    } catch (error) {
+      console.error('Error recording impression:', error);
+      res.status(500).json({ message: 'Failed to record impression' });
+    }
+  });
+
+  // Record ad click
+  app.post('/api/advertising/click', async (req, res) => {
+    try {
+      const { impressionId, campaignId, creativeId, userId, clickType, cost } = req.body;
+      
+      const click = await storage.recordAdClick({
+        impressionId,
+        campaignId,
+        creativeId,
+        userId,
+        clickType: clickType || 'link_click',
+        cost: cost || 0.25, // Default CPC
+        timestamp: new Date(),
+      });
+
+      res.json(click);
+    } catch (error) {
+      console.error('Error recording click:', error);
+      res.status(500).json({ message: 'Failed to record click' });
+    }
+  });
+
+  // Record ad conversion
+  app.post('/api/advertising/conversion', async (req, res) => {
+    try {
+      const { campaignId, clickId, userId, conversionType, value } = req.body;
+      
+      const conversion = await storage.recordAdConversion({
+        campaignId,
+        clickId,
+        userId,
+        conversionType,
+        value: value || 0,
+        timestamp: new Date(),
+      });
+
+      res.json(conversion);
+    } catch (error) {
+      console.error('Error recording conversion:', error);
+      res.status(500).json({ message: 'Failed to record conversion' });
+    }
+  });
+
+  // Privacy settings management
+  app.get('/api/privacy/settings', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const settings = await storage.getPrivacySettings(userId!);
+      
+      // Default privacy settings if none exist
+      const defaultSettings = {
+        allowDataCollection: true,
+        allowTargetedAds: true,
+        allowDataSharing: false,
+        allowLocationTracking: true,
+        allowBehaviorTracking: true,
+        allowCrossDeviceTracking: true,
+        allowThirdPartyData: false,
+        dataRetentionPeriod: 730,
+      };
+
+      res.json(settings || defaultSettings);
+    } catch (error) {
+      console.error('Error fetching privacy settings:', error);
+      res.status(500).json({ message: 'Failed to fetch privacy settings' });
+    }
+  });
+
+  app.put('/api/privacy/settings', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const settings = await storage.updatePrivacySettings(userId!, req.body);
+      res.json(settings);
+    } catch (error) {
+      console.error('Error updating privacy settings:', error);
+      res.status(500).json({ message: 'Failed to update privacy settings' });
+    }
+  });
+
+  // Data export (GDPR compliance)
+  app.get('/api/privacy/export', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      
+      const [user, interests, behavior, sessions, searches, purchases, connections] = await Promise.all([
+        storage.getUser(userId!),
+        storage.getUserInterests(userId!),
+        storage.getUserBehavior(userId!),
+        storage.getUserSessions(userId!),
+        storage.getSearchHistory(userId!),
+        storage.getPurchaseHistory(userId!),
+        storage.getUserConnections(userId!),
+      ]);
+
+      const exportData = {
+        user,
+        interests,
+        behavior,
+        sessions,
+        searches,
+        purchases,
+        connections,
+        exportedAt: new Date(),
+      };
+
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename="marketpace-data-${userId}.json"`);
+      res.json(exportData);
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      res.status(500).json({ message: 'Failed to export data' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
