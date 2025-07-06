@@ -126,7 +126,15 @@ export const deliveryRoutes = pgTable("delivery_routes", {
   driverId: varchar("driver_id").notNull(),
   status: varchar("status").notNull().default("active"), // active, completed, cancelled
   maxOrders: integer("max_orders").default(6),
+  timeSlot: varchar("time_slot").notNull(), // "9am-12pm", "12pm-3pm", "3pm-6pm", "6pm-9pm"
   colorCode: varchar("color_code"), // For UI organization
+  routeOptimization: jsonb("route_optimization"), // Optimized stop order
+  totalDistance: decimal("total_distance", { precision: 8, scale: 2 }), // in miles
+  estimatedDuration: integer("estimated_duration"), // in minutes
+  totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 }).default("0.00"),
+  basePay: decimal("base_pay", { precision: 10, scale: 2 }).default("0.00"),
+  mileagePay: decimal("mileage_pay", { precision: 10, scale: 2 }).default("0.00"),
+  tips: decimal("tips", { precision: 10, scale: 2 }).default("0.00"),
   createdAt: timestamp("created_at").defaultNow(),
   completedAt: timestamp("completed_at"),
 });
@@ -148,13 +156,28 @@ export const driverApplications = pgTable("driver_applications", {
   id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
   userId: varchar("user_id").notNull(),
   licenseNumber: varchar("license_number").notNull(),
+  licenseExpirationDate: timestamp("license_expiration_date"),
   licenseImageUrl: varchar("license_image_url"),
+  insuranceCompany: varchar("insurance_company"),
+  insurancePolicyNumber: varchar("insurance_policy_number"),
+  insuranceExpirationDate: timestamp("insurance_expiration_date"),
   insuranceImageUrl: varchar("insurance_image_url"),
+  backgroundCheckProvider: varchar("background_check_provider"),
+  backgroundCheckDate: timestamp("background_check_date"),
+  backgroundCheckPassed: boolean("background_check_passed"),
   backgroundCheckUrl: varchar("background_check_url"),
-  vehicleInfo: jsonb("vehicle_info"), // make, model, year, plate
+  vehicleInfo: jsonb("vehicle_info"), // make, model, year, plate, color
+  bankAccountNumber: varchar("bank_account_number"),
+  bankRoutingNumber: varchar("bank_routing_number"),
   status: varchar("status").notNull().default("pending"), // pending, approved, rejected
+  rejectionReason: text("rejection_reason"),
+  isActive: boolean("is_active").default(false), // driver online/offline status
+  averageRating: decimal("average_rating", { precision: 3, scale: 2 }).default("5.00"),
+  totalDeliveries: integer("total_deliveries").default(0),
+  totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 }).default("0.00"),
   reviewedBy: varchar("reviewed_by"),
   reviewedAt: timestamp("reviewed_at"),
+  approvedAt: timestamp("approved_at"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -333,6 +356,19 @@ export const offersRelations = relations(offers, ({ one }) => ({
   }),
 }));
 
+// Tips tracking
+export const driverTips = pgTable("driver_tips", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  orderId: integer("order_id").notNull(),
+  driverId: varchar("driver_id").notNull(),
+  buyerId: varchar("buyer_id").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  tipType: varchar("tip_type").notNull(), // "checkout", "post_delivery"
+  paymentIntentId: varchar("payment_intent_id"), // Stripe payment intent
+  status: varchar("status").default("pending"), // pending, completed, failed
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // App settings table for admin configuration
 export const appSettings = pgTable("app_settings", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
@@ -376,5 +412,7 @@ export type Comment = typeof comments.$inferSelect;
 export type InsertComment = typeof comments.$inferInsert;
 export type Offer = typeof offers.$inferSelect;
 export type InsertOffer = typeof offers.$inferInsert;
+export type DriverTip = typeof driverTips.$inferSelect;
+export type InsertDriverTip = typeof driverTips.$inferInsert;
 export type AppSetting = typeof appSettings.$inferSelect;
 export type InsertAppSetting = typeof appSettings.$inferInsert;

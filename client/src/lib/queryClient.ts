@@ -1,6 +1,10 @@
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000';
 
-export async function apiRequest(method: string, endpoint: string, body?: any): Promise<any> {
+export async function apiRequest(
+  method: string,
+  endpoint: string,
+  data?: any
+): Promise<any> {
   const url = `${API_BASE_URL}${endpoint}`;
   
   const config: RequestInit = {
@@ -8,25 +12,25 @@ export async function apiRequest(method: string, endpoint: string, body?: any): 
     headers: {
       'Content-Type': 'application/json',
     },
-    credentials: 'include', // Important for session cookies
+    credentials: 'include', // Include cookies for session management
   };
 
-  if (body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
-    config.body = JSON.stringify(body);
+  if (data && method !== 'GET') {
+    config.body = JSON.stringify(data);
   }
 
-  const response = await fetch(url, config);
+  try {
+    const response = await fetch(url, config);
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `HTTP Error: ${response.status}`);
+    }
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`${response.status}: ${errorText}`);
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error(`API Request failed: ${method} ${endpoint}`, error);
+    throw error;
   }
-
-  // Handle empty responses
-  const contentType = response.headers.get('content-type');
-  if (contentType && contentType.includes('application/json')) {
-    return response.json();
-  }
-  
-  return response.text();
 }
