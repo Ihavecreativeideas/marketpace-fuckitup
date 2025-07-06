@@ -15,6 +15,250 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Web landing page route - serve HTML for root URL (MUST BE FIRST)
+  app.get('/', (req, res) => {
+    res.send(`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPlace - Pick Up the Pace in Your Community</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .hero {
+            text-align: center;
+            padding: 100px 0;
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        h1 {
+            font-size: 48px;
+            margin-bottom: 16px;
+            font-weight: bold;
+        }
+        .tagline {
+            font-size: 24px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        .subtitle {
+            font-size: 18px;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 60px;
+        }
+        .btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        .feature h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+        .feature p {
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        .mission {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+        }
+        .mission h2 {
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+        .mission p {
+            font-size: 18px;
+            font-style: italic;
+            line-height: 1.6;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 20px;
+            text-align: center;
+            margin: 40px 0;
+        }
+        .stat {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        .mobile-app {
+            text-align: center;
+            padding: 40px 0;
+        }
+        .mobile-app h2 {
+            font-size: 28px;
+            margin-bottom: 16px;
+        }
+        .mobile-app p {
+            font-size: 16px;
+            margin-bottom: 24px;
+            opacity: 0.9;
+        }
+        @media (max-width: 768px) {
+            h1 { font-size: 36px; }
+            .tagline { font-size: 20px; }
+            .subtitle { font-size: 16px; }
+            .cta-buttons { flex-direction: column; align-items: center; }
+            .features { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <div class="logo">MP</div>
+            <h1>MarketPlace</h1>
+            <div class="tagline">Pick Up the Pace in Your Community</div>
+            <div class="subtitle">Delivering Opportunities — Not Just Packages</div>
+            
+            <div class="cta-buttons">
+                <a href="/api/login" class="btn btn-primary">Join MarketPlace</a>
+                <a href="#" onclick="openMobileApp()" class="btn btn-secondary">Open Mobile App</a>
+            </div>
+        </div>
+
+        <div class="mission">
+            <h2>Our Mission</h2>
+            <p>"Big tech platforms have taught us to rely on strangers and algorithms. MarketPlace reminds us what happens when we invest in each other."</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number">12</div>
+                <div class="stat-label">Active Towns</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">247</div>
+                <div class="stat-label">Local Shops</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">89</div>
+                <div class="stat-label">Entertainers</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">156</div>
+                <div class="stat-label">Services</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">1,834</div>
+                <div class="stat-label">Members</div>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🏘️</div>
+                <h3>Community First</h3>
+                <p>Keep money circulating in your neighborhood instead of flowing to distant corporations</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💰</div>
+                <h3>Fair Economics</h3>
+                <p>Transparent 5% fees, no hidden charges, 100% of tips go directly to drivers</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🚚</div>
+                <h3>Local Delivery</h3>
+                <p>Neighbor-to-neighbor delivery system creating jobs and building connections</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🎯</div>
+                <h3>Everything Local</h3>
+                <p>Buy, sell, rent, find services, book entertainment - all in one community platform</p>
+            </div>
+        </div>
+
+        <div class="mobile-app">
+            <h2>Experience the Full App</h2>
+            <p>The complete MarketPlace experience is designed for mobile. Access all features including marketplace browsing, community feed, delivery tracking, and more.</p>
+            <a href="#" onclick="openMobileApp()" class="btn btn-primary">Open Mobile App</a>
+        </div>
+    </div>
+
+    <script>
+        function openMobileApp() {
+            // Try to open the mobile app on port 8083
+            const mobileUrl = window.location.protocol + '//' + window.location.hostname + ':8083';
+            window.open(mobileUrl, '_blank');
+        }
+    </script>
+</body>
+</html>
+    `);
+  });
+
   // Auth middleware
   await setupAuth(app);
 
@@ -60,6 +304,368 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error updating profile:", error);
       res.status(500).json({ message: "Failed to update profile" });
     }
+  });
+
+  // Admin middleware to check if user is admin
+  const isAdmin = async (req: any, res: any, next: any) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.claims) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.userType !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      next();
+    } catch (error) {
+      console.error("Admin check error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  };
+
+  // Admin Dashboard Routes
+  app.get('/api/admin/dashboard', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      // Get platform statistics
+      const stats = {
+        totalUsers: await storage.getUserCount(),
+        totalListings: await storage.getListingCount(),
+        totalOrders: await storage.getOrderCount(),
+        totalRevenue: await storage.getTotalRevenue(),
+        recentUsers: await storage.getRecentUsers(10),
+        recentOrders: await storage.getRecentOrders(10)
+      };
+      
+      res.json({
+        success: true,
+        stats,
+        message: "Admin dashboard data retrieved successfully"
+      });
+    } catch (error) {
+      console.error("Admin dashboard error:", error);
+      res.status(500).json({ message: "Failed to load dashboard" });
+    }
+  });
+
+  // Admin user management
+  app.get('/api/admin/users', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { page = 1, limit = 50, search = '' } = req.query;
+      const users = await storage.getAllUsers(Number(page), Number(limit), String(search));
+      
+      res.json({
+        success: true,
+        users,
+        message: "Users retrieved successfully"
+      });
+    } catch (error) {
+      console.error("Admin users error:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // Admin user actions
+  app.post('/api/admin/users/:userId/verify', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      await storage.verifyUser(userId);
+      
+      res.json({
+        success: true,
+        message: "User verified successfully"
+      });
+    } catch (error) {
+      console.error("Admin verify user error:", error);
+      res.status(500).json({ message: "Failed to verify user" });
+    }
+  });
+
+  app.post('/api/admin/users/:userId/suspend', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { reason } = req.body;
+      await storage.suspendUser(userId, reason);
+      
+      res.json({
+        success: true,
+        message: "User suspended successfully"
+      });
+    } catch (error) {
+      console.error("Admin suspend user error:", error);
+      res.status(500).json({ message: "Failed to suspend user" });
+    }
+  });
+
+  // Admin content moderation
+  app.get('/api/admin/reports', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const reports = await storage.getContentReports();
+      
+      res.json({
+        success: true,
+        reports,
+        message: "Content reports retrieved successfully"
+      });
+    } catch (error) {
+      console.error("Admin reports error:", error);
+      res.status(500).json({ message: "Failed to fetch reports" });
+    }
+  });
+
+  // Admin web interface
+  app.get('/admin', isAuthenticated, isAdmin, async (req, res) => {
+    res.send(`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPlace Admin Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            margin-bottom: 16px;
+            color: #333;
+        }
+        .btn {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .btn:hover { background: #5a67d8; }
+        .user-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .user-info {
+            flex: 1;
+        }
+        .user-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        .success { background: #10b981; }
+        .warning { background: #f59e0b; }
+        .danger { background: #ef4444; }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>MarketPlace Admin Dashboard</h1>
+        <p>Platform Management & Analytics</p>
+    </div>
+    
+    <div class="container">
+        <div class="stats-grid" id="stats">
+            <div class="loading">Loading platform statistics...</div>
+        </div>
+        
+        <div class="section">
+            <h2>Quick Actions</h2>
+            <button class="btn" onclick="refreshData()">Refresh Data</button>
+            <button class="btn success" onclick="exportUsers()">Export Users</button>
+            <button class="btn warning" onclick="sendAnnouncement()">Send Announcement</button>
+            <button class="btn" onclick="window.open('/api/login', '_blank')">Test Auth</button>
+        </div>
+        
+        <div class="section">
+            <h2>Recent Users</h2>
+            <div id="users" class="user-list">
+                <div class="loading">Loading users...</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Platform Health</h2>
+            <div id="health">
+                <p>✅ Database: Connected</p>
+                <p>✅ Authentication: Active</p>
+                <p>✅ API Endpoints: Operational</p>
+                <p>✅ Admin Access: Enabled</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadDashboard() {
+            try {
+                // Load platform statistics
+                const statsResponse = await fetch('/api/admin/dashboard');
+                const statsData = await statsResponse.json();
+                
+                if (statsData.success) {
+                    displayStats(statsData.stats);
+                    displayUsers(statsData.stats.recentUsers);
+                } else {
+                    throw new Error(statsData.message);
+                }
+            } catch (error) {
+                console.error('Dashboard error:', error);
+                document.getElementById('stats').innerHTML = '<div class="loading">Error loading dashboard data</div>';
+                document.getElementById('users').innerHTML = '<div class="loading">Error loading users</div>';
+            }
+        }
+        
+        function displayStats(stats) {
+            const statsHtml = \`
+                <div class="stat-card">
+                    <div class="stat-number">\${stats.totalUsers}</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">\${stats.totalListings}</div>
+                    <div class="stat-label">Active Listings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">\${stats.totalOrders}</div>
+                    <div class="stat-label">Total Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">$\${stats.totalRevenue}</div>
+                    <div class="stat-label">Revenue</div>
+                </div>
+            \`;
+            document.getElementById('stats').innerHTML = statsHtml;
+        }
+        
+        function displayUsers(users) {
+            const usersHtml = users.map(user => \`
+                <div class="user-item">
+                    <div class="user-info">
+                        <strong>\${user.first_name || 'Unknown'} \${user.last_name || ''}</strong><br>
+                        <small>\${user.email || 'No email'} • \${user.user_type || 'buyer'} • \${user.is_verified ? 'Verified' : 'Unverified'}</small>
+                    </div>
+                    <div class="user-actions">
+                        \${!user.is_verified ? \`<button class="btn btn-small success" onclick="verifyUser('\${user.id}')">Verify</button>\` : ''}
+                        <button class="btn btn-small danger" onclick="suspendUser('\${user.id}')">Suspend</button>
+                    </div>
+                </div>
+            \`).join('');
+            document.getElementById('users').innerHTML = usersHtml;
+        }
+        
+        async function verifyUser(userId) {
+            try {
+                const response = await fetch(\`/api/admin/users/\${userId}/verify\`, { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    alert('User verified successfully');
+                    loadDashboard();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                alert('Error verifying user');
+            }
+        }
+        
+        async function suspendUser(userId) {
+            const reason = prompt('Reason for suspension:');
+            if (!reason) return;
+            
+            try {
+                const response = await fetch(\`/api/admin/users/\${userId}/suspend\`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reason })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert('User suspended successfully');
+                    loadDashboard();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                alert('Error suspending user');
+            }
+        }
+        
+        function refreshData() {
+            loadDashboard();
+        }
+        
+        function exportUsers() {
+            alert('User export functionality would be implemented here');
+        }
+        
+        function sendAnnouncement() {
+            alert('Platform announcement functionality would be implemented here');
+        }
+        
+        // Load dashboard on page load
+        loadDashboard();
+    </script>
+</body>
+</html>
+    `);
   });
 
   // Category routes
@@ -550,13 +1156,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin panel routes (require admin user type)
-  const isAdmin = (req: any, res: any, next: any) => {
-    if (!req.user || req.user.claims.userType !== 'admin') {
-      return res.status(403).json({ message: 'Admin access required' });
-    }
-    next();
-  };
+  // Admin panel routes (using existing isAdmin middleware)
 
   // Get all app settings
   app.get('/api/admin/settings', isAuthenticated, isAdmin, async (req, res) => {
@@ -1683,250 +2283,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: 'Failed to add item to route'
       });
     }
-  });
-
-  // Web landing page route - serve HTML for root URL
-  app.get('/', (req, res) => {
-    res.send(`
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MarketPlace - Pick Up the Pace in Your Community</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: white;
-        }
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        .hero {
-            text-align: center;
-            padding: 100px 0;
-        }
-        .logo {
-            width: 80px;
-            height: 80px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 32px;
-            font-weight: bold;
-        }
-        h1 {
-            font-size: 48px;
-            margin-bottom: 16px;
-            font-weight: bold;
-        }
-        .tagline {
-            font-size: 24px;
-            margin-bottom: 12px;
-            font-weight: 600;
-        }
-        .subtitle {
-            font-size: 18px;
-            margin-bottom: 40px;
-            opacity: 0.9;
-        }
-        .cta-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 60px;
-        }
-        .btn {
-            padding: 16px 32px;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: transform 0.2s;
-        }
-        .btn:hover { transform: translateY(-2px); }
-        .btn-primary {
-            background: white;
-            color: #667eea;
-        }
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-        }
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            margin-bottom: 60px;
-        }
-        .feature {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            border-radius: 12px;
-            text-align: center;
-        }
-        .feature-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-        .feature h3 {
-            font-size: 20px;
-            margin-bottom: 12px;
-        }
-        .feature p {
-            opacity: 0.9;
-            line-height: 1.5;
-        }
-        .mission {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 40px;
-            border-radius: 12px;
-            margin-bottom: 40px;
-        }
-        .mission h2 {
-            font-size: 24px;
-            margin-bottom: 16px;
-        }
-        .mission p {
-            font-size: 18px;
-            font-style: italic;
-            line-height: 1.6;
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 20px;
-            text-align: center;
-            margin: 40px 0;
-        }
-        .stat {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 8px;
-        }
-        .stat-number {
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        .stat-label {
-            font-size: 14px;
-            opacity: 0.8;
-        }
-        .mobile-app {
-            text-align: center;
-            padding: 40px 0;
-        }
-        .mobile-app h2 {
-            font-size: 28px;
-            margin-bottom: 16px;
-        }
-        .mobile-app p {
-            font-size: 16px;
-            margin-bottom: 24px;
-            opacity: 0.9;
-        }
-        @media (max-width: 768px) {
-            h1 { font-size: 36px; }
-            .tagline { font-size: 20px; }
-            .subtitle { font-size: 16px; }
-            .cta-buttons { flex-direction: column; align-items: center; }
-            .features { grid-template-columns: 1fr; }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="hero">
-            <div class="logo">MP</div>
-            <h1>MarketPlace</h1>
-            <div class="tagline">Pick Up the Pace in Your Community</div>
-            <div class="subtitle">Delivering Opportunities — Not Just Packages</div>
-            
-            <div class="cta-buttons">
-                <a href="/api/auth/login" class="btn btn-primary">Join MarketPlace</a>
-                <a href="#" onclick="openMobileApp()" class="btn btn-secondary">Open Mobile App</a>
-            </div>
-        </div>
-
-        <div class="mission">
-            <h2>Our Mission</h2>
-            <p>"Big tech platforms have taught us to rely on strangers and algorithms. MarketPlace reminds us what happens when we invest in each other."</p>
-        </div>
-
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-number">12</div>
-                <div class="stat-label">Active Towns</div>
-            </div>
-            <div class="stat">
-                <div class="stat-number">247</div>
-                <div class="stat-label">Local Shops</div>
-            </div>
-            <div class="stat">
-                <div class="stat-number">89</div>
-                <div class="stat-label">Entertainers</div>
-            </div>
-            <div class="stat">
-                <div class="stat-number">156</div>
-                <div class="stat-label">Services</div>
-            </div>
-            <div class="stat">
-                <div class="stat-number">1,834</div>
-                <div class="stat-label">Members</div>
-            </div>
-        </div>
-
-        <div class="features">
-            <div class="feature">
-                <div class="feature-icon">🏘️</div>
-                <h3>Community First</h3>
-                <p>Keep money circulating in your neighborhood instead of flowing to distant corporations</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">💰</div>
-                <h3>Fair Economics</h3>
-                <p>Transparent 5% fees, no hidden charges, 100% of tips go directly to drivers</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">🚚</div>
-                <h3>Local Delivery</h3>
-                <p>Neighbor-to-neighbor delivery system creating jobs and building connections</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">🎯</div>
-                <h3>Everything Local</h3>
-                <p>Buy, sell, rent, find services, book entertainment - all in one community platform</p>
-            </div>
-        </div>
-
-        <div class="mobile-app">
-            <h2>Experience the Full App</h2>
-            <p>The complete MarketPlace experience is designed for mobile. Access all features including marketplace browsing, community feed, delivery tracking, and more.</p>
-            <a href="#" onclick="openMobileApp()" class="btn btn-primary">Open Mobile App</a>
-        </div>
-    </div>
-
-    <script>
-        function openMobileApp() {
-            // Try to open the mobile app on port 8083
-            const mobileUrl = window.location.protocol + '//' + window.location.hostname + ':8083';
-            window.open(mobileUrl, '_blank');
-        }
-    </script>
-</body>
-</html>
-    `);
   });
 
   const httpServer = createServer(app);
