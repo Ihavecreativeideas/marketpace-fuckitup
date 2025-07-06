@@ -144,19 +144,14 @@ export class DatabaseStorage implements IStorage {
 
   // Listing operations
   async getListings(categoryId?: number, search?: string, limit: number = 20): Promise<(Listing & { user: User; category: Category })[]> {
-    let query = db
-      .select()
-      .from(listings)
-      .innerJoin(users, eq(listings.userId, users.id))
-      .innerJoin(categories, eq(listings.categoryId, categories.id))
-      .where(eq(listings.isActive, true));
+    let whereConditions = [eq(listings.isActive, true)];
 
     if (categoryId) {
-      query = query.where(eq(listings.categoryId, categoryId));
+      whereConditions.push(eq(listings.categoryId, categoryId));
     }
 
     if (search) {
-      query = query.where(
+      whereConditions.push(
         or(
           like(listings.title, `%${search}%`),
           like(listings.description, `%${search}%`)
@@ -164,7 +159,12 @@ export class DatabaseStorage implements IStorage {
       );
     }
 
-    const results = await query
+    const results = await db
+      .select()
+      .from(listings)
+      .innerJoin(users, eq(listings.userId, users.id))
+      .innerJoin(categories, eq(listings.categoryId, categories.id))
+      .where(and(...whereConditions))
       .orderBy(desc(listings.createdAt))
       .limit(limit);
 
@@ -334,8 +334,8 @@ export class DatabaseStorage implements IStorage {
     return updatedOrder;
   }
 
-  async addOrderItems(orderItems: InsertOrderItem[]): Promise<OrderItem[]> {
-    return await db.insert(orderItems).values(orderItems).returning();
+  async addOrderItems(orderItemsData: InsertOrderItem[]): Promise<OrderItem[]> {
+    return await db.insert(orderItems).values(orderItemsData).returning();
   }
 
   // Driver operations

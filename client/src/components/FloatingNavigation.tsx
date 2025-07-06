@@ -11,10 +11,9 @@ export default function FloatingNavigation({ activeTab, onTabPress }: Navigation
   const tabs = [
     { name: 'Home', icon: 'home' },
     { name: 'Marketplace', icon: 'storefront' },
-    { name: 'Services', icon: 'construct' },
-    { name: 'TheHub', icon: 'videocam' },
     { name: 'Community', icon: 'people' },
-    { name: 'Profile', icon: 'person' },
+    { name: 'Deliveries', icon: 'car' },
+    { name: 'Menu', icon: 'menu' },
   ];
 
   return (
@@ -32,7 +31,7 @@ export default function FloatingNavigation({ activeTab, onTabPress }: Navigation
             <Ionicons
               name={tab.icon as any}
               size={20}
-              color={activeTab === tab.name ? '#007AFF' : '#8E8E93'}
+              color={activeTab === tab.name ? '#6B46C1' : '#8E8E93'}
             />
             <Text
               style={[
@@ -80,7 +79,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   activeTab: {
-    backgroundColor: '#F0F8FF',
+    backgroundColor: '#E0E7FF',
   },
   tabText: {
     fontSize: 10,
@@ -89,6 +88,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   activeTabText: {
-    color: '#007AFF',
+    color: '#6B46C1',
   },
 });
