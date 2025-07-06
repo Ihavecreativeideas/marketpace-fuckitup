@@ -231,6 +231,17 @@ MarketPace is a React Native mobile application that prioritizes community empow
 ✓ Updated database schema with new user profile fields
 ✓ Built onboarding UI components and navigation flow
 
+✓ **CUSTOM DELIVERY INTEGRATION FOR EXISTING BUSINESSES** (July 06, 2025)
+✓ Added "Use Existing Carrier" option in professional dashboard delivery settings
+✓ Supports FedEx, UPS, and USPS integration for businesses with existing shipping arrangements
+✓ MarketPace maintains 5% commission on all sales regardless of delivery method
+✓ Businesses keep their current shipping workflows without disruption
+✓ Integrated billing options for automatic shipping cost inclusion in checkout
+✓ Created calculateCustomDeliveryFee function to handle all delivery scenarios
+✓ Added comprehensive examples demonstrating revenue calculations for each delivery method
+✓ Built intuitive UI with carrier selection, account number input, and integration confirmation
+✓ Enhanced professional profile with multiple delivery options: MarketPace delivery, customer pickup, existing carrier, custom shipping rates
+
 ## Changelog
 
 - July 06, 2025: Implemented enhanced onboarding flow with questionnaire-based member setup
