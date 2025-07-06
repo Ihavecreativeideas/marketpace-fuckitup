@@ -285,7 +285,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     <h3 class="login-title">Join as Member</h3>
                     <p class="login-description">Shop local, support your community, and discover amazing products and services from your neighbors</p>
                     <a href="/api/login" class="btn btn-primary">Join MarketPlace</a>
-                    <a href="#" onclick="openMobileApp()" class="btn btn-secondary">Mobile App</a>
+                    <a href="#" onclick="openMobileApp()" class="btn btn-secondary">Open Mobile App</a>
+                    <a href="#" onclick="redirectToMobileApp()" class="btn btn-secondary" style="font-size: 14px;">Direct Link to Mobile</a>
                 </div>
                 
                 <div class="login-card">
@@ -336,8 +337,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     <script>
         function openMobileApp() {
-            const mobileUrl = window.location.protocol + '//' + window.location.hostname + ':8083';
-            window.open(mobileUrl, '_blank');
+            // Get the current domain and construct mobile app URL
+            const protocol = window.location.protocol;
+            const hostname = window.location.hostname;
+            
+            // For Replit environment, use the proper domain format
+            let mobileUrl;
+            if (hostname.includes('replit.dev')) {
+                // Replace port 5000 with 8083 in Replit domain
+                const replitDomain = window.location.host.replace('-00-', '-01-').replace('5000', '8083');
+                mobileUrl = protocol + '//' + replitDomain;
+            } else {
+                // For local development
+                mobileUrl = protocol + '//' + hostname + ':8083';
+            }
+            
+            console.log('Opening mobile app at:', mobileUrl);
+            
+            // Try to open in new tab first
+            const newWindow = window.open(mobileUrl, '_blank');
+            
+            // If popup was blocked, redirect current window
+            if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+                alert('Popup blocked. Redirecting to mobile app...');
+                window.location.href = mobileUrl;
+            }
+        }
+        
+        // Alternative function to redirect in same window
+        function redirectToMobileApp() {
+            const protocol = window.location.protocol;
+            const hostname = window.location.hostname;
+            
+            let mobileUrl;
+            if (hostname.includes('replit.dev')) {
+                const replitDomain = window.location.host.replace('-00-', '-01-').replace('5000', '8083');
+                mobileUrl = protocol + '//' + replitDomain;
+            } else {
+                mobileUrl = protocol + '//' + hostname + ':8083';
+            }
+            
+            window.location.href = mobileUrl;
         }
     </script>
 </body>
