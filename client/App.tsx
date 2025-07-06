@@ -12,7 +12,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-// Create a simple demo auth context
+// Create a simple demo auth context with guest mode support
 interface User {
   id: string;
   email: string;
@@ -26,6 +26,12 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isGuest: boolean;
+  location: { latitude: number; longitude: number } | null;
+  enterGuestMode: () => void;
+  exitGuestMode: () => void;
+  requestLocationPermission: () => Promise<boolean>;
+  showSignUpPrompt: (action: string) => void;
 }
 
 const demoUser: User = {
@@ -41,16 +47,116 @@ const AuthContext = React.createContext<AuthContextType>({
   user: demoUser,
   isLoading: false,
   isAuthenticated: true,
+  isGuest: false,
+  location: null,
+  enterGuestMode: () => {},
+  exitGuestMode: () => {},
+  requestLocationPermission: async () => false,
+  showSignUpPrompt: () => {},
 });
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [isGuest, setIsGuest] = useState(false);
+  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [showSignUpModal, setShowSignUpModal] = useState(false);
+  const [signUpAction, setSignUpAction] = useState('');
+
+  const enterGuestMode = async () => {
+    console.log('Entering guest mode...');
+    setIsGuest(true);
+    // Request location permission for guest users
+    await requestLocationPermission();
+  };
+
+  const exitGuestMode = () => {
+    setIsGuest(false);
+    setLocation(null);
+  };
+
+  const requestLocationPermission = async (): Promise<boolean> => {
+    try {
+      // For demo purposes, simulate location permission
+      // In real app, use expo-location
+      console.log('Requesting location permission...');
+      // Simulate getting user location (Seattle coordinates for demo)
+      setLocation({ latitude: 47.6062, longitude: -122.3321 });
+      return true;
+    } catch (error) {
+      console.error('Location permission denied:', error);
+      return false;
+    }
+  };
+
+  const showSignUpPrompt = (action: string) => {
+    setSignUpAction(action);
+    setShowSignUpModal(true);
+  };
+
   return (
     <AuthContext.Provider value={{
-      user: demoUser,
+      user: isGuest ? null : demoUser,
       isLoading: false,
-      isAuthenticated: true,
+      isAuthenticated: !isGuest,
+      isGuest,
+      location,
+      enterGuestMode,
+      exitGuestMode,
+      requestLocationPermission,
+      showSignUpPrompt,
     }}>
       {children}
+      {/* Sign Up Prompt Modal for Guest Users */}
+      {showSignUpModal && (
+        <View style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+        }}>
+          <GlassCard style={{ margin: 20, padding: 20, alignItems: 'center' }}>
+            <Text style={{ 
+              fontSize: 24, 
+              fontWeight: 'bold', 
+              color: colors.text,
+              textAlign: 'center',
+              marginBottom: 15
+            }}>
+              Sign Up Required
+            </Text>
+            <Text style={{ 
+              fontSize: 16, 
+              color: colors.textSecondary,
+              textAlign: 'center',
+              marginBottom: 20
+            }}>
+              To {signUpAction}, you need to create an account. Join MarketPlace to support your local community!
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <FuturisticButton
+                title="Sign Up"
+                onPress={() => {
+                  setShowSignUpModal(false);
+                  // Navigate to sign up
+                }}
+                variant="primary"
+                size="medium"
+                glowEffect={true}
+              />
+              <FuturisticButton
+                title="Continue as Guest"
+                onPress={() => setShowSignUpModal(false)}
+                variant="secondary"
+                size="medium"
+              />
+            </View>
+          </GlassCard>
+        </View>
+      )}
     </AuthContext.Provider>
   );
 };
@@ -115,6 +221,10 @@ import EnhancedDriverApplication from './src/screens/driver/EnhancedDriverApplic
 import UberEatsStyleDashboard from './src/screens/driver/UberEatsStyleDashboard';
 import ProfessionalProfile from './src/screens/ProfessionalProfile';
 
+// Guest mode screens
+import GuestLocationSetup from './src/screens/GuestLocationSetup';
+import GuestMarketplace from './src/screens/GuestMarketplace';
+
 const queryClient = null; // Simplified for demo
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -125,16 +235,18 @@ const SignUpLoginScreen = ({ route, navigation }: any) => {
   const isSignUp = mode === 'signup';
   const [showEmailForm, setShowEmailForm] = React.useState(false);
   const [selectedMethod, setSelectedMethod] = React.useState('');
+  const { enterGuestMode } = useAuth();
 
-  const handleAuthMethod = (method: string) => {
+  const handleAuthMethod = async (method: string) => {
     setSelectedMethod(method);
     
     if (method === 'email') {
       setShowEmailForm(true);
     } else if (method === 'guest') {
-      // Guest mode - just go back to landing page with limited access
+      // Guest mode - enter guest mode and navigate to location-aware experience
       console.log('Entering guest mode...');
-      navigation.navigate('CampaignLanding');
+      await enterGuestMode();
+      navigation.navigate('GuestLocationSetup');
     } else {
       setShowEmailForm(false);
       // Simulate authentication success for demo
@@ -1422,6 +1534,9 @@ function HomeStack() {
       <Stack.Screen name="DriverJobDescription" component={DriverJobDescriptionScreen} options={{ headerShown: false }} />
       <Stack.Screen name="DriverApplication" component={DriverApplicationScreen} options={{ headerShown: false }} />
       <Stack.Screen name="ApplicationSuccess" component={ApplicationSuccessScreen} options={{ headerShown: false }} />
+      {/* Guest Mode Screens */}
+      <Stack.Screen name="GuestLocationSetup" component={GuestLocationSetup} options={{ headerShown: false }} />
+      <Stack.Screen name="GuestMarketplace" component={GuestMarketplace} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
