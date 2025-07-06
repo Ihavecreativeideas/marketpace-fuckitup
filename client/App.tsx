@@ -10,14 +10,47 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { AuthProvider, useAuth } from './src/context/AuthContext';
+import FuturisticBackground from './src/components/FuturisticBackground';
+import FuturisticLogo from './src/components/FuturisticLogo';
+import GlassCard from './src/components/GlassCard';
+import FuturisticButton from './src/components/FuturisticButton';
+import { colors } from '../src/utils/colors';
 
 // Simple placeholder screens to prevent import errors
 import { Text } from 'react-native';
 
 const SimpleScreen = ({ title }: { title: string }) => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{title}</Text>
-  </View>
+  <FuturisticBackground>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+      <FuturisticLogo size="medium" animated={true} />
+      <GlassCard style={{ marginTop: 30, alignItems: 'center' }}>
+        <Text style={{ 
+          fontSize: 24, 
+          fontWeight: 'bold', 
+          color: colors.text,
+          textAlign: 'center',
+          marginBottom: 15
+        }}>
+          {title}
+        </Text>
+        <Text style={{ 
+          fontSize: 16, 
+          color: colors.textSecondary,
+          textAlign: 'center',
+          marginBottom: 20
+        }}>
+          Coming soon with futuristic features
+        </Text>
+        <FuturisticButton
+          title="Explore Features"
+          onPress={() => console.log(`${title} features`)}
+          variant="primary"
+          size="medium"
+          glowEffect={true}
+        />
+      </GlassCard>
+    </View>
+  </FuturisticBackground>
 );
 
 // New onboarding screens
@@ -69,8 +102,22 @@ function MainTabs() {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#007AFF',
-        tabBarInactiveTintColor: 'gray',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
+        tabBarStyle: {
+          backgroundColor: colors.backgroundSecondary,
+          borderTopColor: colors.border,
+          borderTopWidth: 1,
+          shadowColor: colors.shadowColor,
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+          elevation: 10,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
         headerShown: false,
       })}
     >
@@ -125,18 +172,55 @@ function AppContent() {
     );
   }
 
-  // For now, show a simple screen with button to trigger onboarding
+  // For now, show a futuristic welcome screen
   return (
     <NavigationContainer>
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-        <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20 }}>
-          Welcome to MarketPace
-        </Text>
-        <Text style={{ textAlign: 'center', marginBottom: 30 }}>
-          Test the new onboarding flow by clicking below
-        </Text>
-        <OnboardingStack />
-      </View>
+      <FuturisticBackground particleCount={30} glowIntensity="strong">
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <FuturisticLogo size="large" animated={true} showTagline={true} />
+          
+          <GlassCard style={{ marginTop: 40, alignItems: 'center', width: '100%' }}>
+            <Text style={{ 
+              fontSize: 28, 
+              fontWeight: 'bold', 
+              color: colors.text,
+              textAlign: 'center',
+              marginBottom: 15
+            }}>
+              Welcome to the Future
+            </Text>
+            <Text style={{ 
+              fontSize: 16, 
+              color: colors.textSecondary,
+              textAlign: 'center',
+              marginBottom: 30,
+              lineHeight: 24
+            }}>
+              Experience the next generation of community marketplace with cutting-edge technology
+            </Text>
+            
+            <FuturisticButton
+              title="Start Onboarding"
+              onPress={() => {}}
+              variant="primary"
+              size="large"
+              glowEffect={true}
+              style={{ marginBottom: 15, width: '100%' }}
+            />
+            
+            <FuturisticButton
+              title="Explore as Guest"
+              onPress={() => {}}
+              variant="outline"
+              size="medium"
+              glowEffect={false}
+              style={{ width: '100%' }}
+            />
+          </GlassCard>
+          
+          <OnboardingStack />
+        </View>
+      </FuturisticBackground>
     </NavigationContainer>
   );
 }
@@ -147,7 +231,7 @@ export default function App() {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <StatusBar style="auto" />
+            <StatusBar style="light" backgroundColor={colors.background} />
             <AppContent />
           </AuthProvider>
         </QueryClientProvider>

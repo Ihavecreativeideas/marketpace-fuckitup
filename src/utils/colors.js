@@ -1,107 +1,129 @@
-// Color palette for MarketPace app - Community-focused cosmic theme
+// MarketPace Futuristic Dark Purple Theme
 export const colors = {
-  // Primary brand colors - Deep purples for community focus
-  primary: '#6B46C1',      // Deep purple
+  // Primary brand colors - Futuristic dark purple gradient
+  primary: '#8B5CF6',      // Bright purple
   primaryLight: '#A78BFA', // Light purple
-  primaryDark: '#4C1D95',  // Dark purple
+  primaryDark: '#6366F1',  // Deep purple blue
   
   // Secondary colors - Cosmic gradient accents
-  secondary: '#8B5CF6',    // Medium purple
-  secondaryLight: '#C4B5FD', // Very light purple
-  secondaryDark: '#5B21B6', // Very dark purple
+  secondary: '#C084FC',    // Medium light purple
+  secondaryLight: '#DDD6FE', // Very light purple
+  secondaryDark: '#7C3AED', // Dark purple
   
-  // Semantic colors
-  success: '#34C759',      // iOS green
-  warning: '#FF9500',      // iOS orange  
-  error: '#FF3B30',        // iOS red
-  info: '#007AFF',         // iOS blue
+  // Semantic colors with futuristic glow
+  success: '#10B981',      // Emerald green
+  warning: '#F59E0B',      // Amber  
+  error: '#EF4444',        // Red
+  info: '#3B82F6',         // Blue
   
-  // Neutral colors
+  // Core theme colors
   white: '#FFFFFF',
   black: '#000000',
   
-  // Gray scale
-  gray: '#8E8E93',         // iOS gray
-  lightGray: '#F2F2F7',    // iOS light gray
-  darkGray: '#48484A',     // iOS dark gray
+  // Dark theme grayscale
+  gray: '#6B7280',         // Medium gray
+  lightGray: '#9CA3AF',    // Light gray
+  darkGray: '#374151',     // Dark gray
   
-  // Text colors
-  text: '#1C1C1E',         // iOS label
-  textSecondary: '#3A3A3C', // iOS secondary label
-  textTertiary: '#48484A',  // iOS tertiary label
+  // Text colors for dark theme
+  text: '#F9FAFB',         // Very light text
+  textSecondary: '#E5E7EB', // Secondary light text
+  textTertiary: '#D1D5DB',  // Tertiary light text
+  textMuted: '#9CA3AF',    // Muted text
   
-  // Background colors
-  background: '#F2F2F7',   // iOS system background
-  backgroundSecondary: '#FFFFFF', // iOS secondary system background
-  backgroundTertiary: '#F2F2F7',  // iOS tertiary system background
+  // Dark background colors
+  background: '#0F0B1F',   // Very dark purple
+  backgroundSecondary: '#1A1625', // Dark purple
+  backgroundTertiary: '#2D1B52',  // Medium dark purple
   
-  // Surface colors (for cards, modals, etc.)
-  surface: '#FFFFFF',
-  surfaceSecondary: '#F2F2F7',
+  // Glass morphism surfaces
+  surface: 'rgba(139, 92, 246, 0.1)',     // Semi-transparent purple
+  surfaceSecondary: 'rgba(99, 102, 241, 0.08)', // Semi-transparent purple blue
+  surfaceGlass: 'rgba(255, 255, 255, 0.05)', // Glass effect
   
-  // Border colors
-  border: '#C6C6C8',       // iOS separator
-  borderLight: '#E5E5EA',  // iOS light separator
+  // Border colors for dark theme
+  border: 'rgba(139, 92, 246, 0.3)',       // Purple border
+  borderLight: 'rgba(139, 92, 246, 0.2)',  // Light purple border
   
-  // Community-focused marketplace colors
+  // Futuristic marketplace categories
   marketplace: {
-    shops: '#6366F1',      // Indigo for shops
+    shops: '#6366F1',      // Purple blue for shops
     services: '#10B981',   // Emerald for services
     events: '#F59E0B',     // Amber for events/hub
     community: '#8B5CF6',  // Purple for community features
     delivery: '#3B82F6',   // Blue for delivery
+    rentals: '#C084FC',    // Light purple for rentals
   },
   
-  // Cosmic theme specific colors
+  // Futuristic theme specific colors
   cosmic: {
+    // Main gradient backgrounds
     gradient: {
-      start: '#1E1B4B',    // Dark navy
-      middle: '#4C1D95',   // Dark purple  
-      end: '#6B21A8',      // Purple
+      primary: ['#0F0B1F', '#1A1625', '#2D1B52'],   // Dark to medium purple
+      secondary: ['#1A1625', '#2D1B52', '#4C1D95'], // Medium purple gradient
+      accent: ['#6366F1', '#8B5CF6', '#C084FC'],     // Bright purple gradient
     },
-    particle: '#A78BFA',   // Light purple for floating particles
-    glow: '#C4B5FD',       // Very light purple for glowing effects
-    starfield: '#E0E7FF',  // Very light blue for star effects
-  },
-    rentals: '#5856D6',    // Purple for rentals
+    // Floating particles
+    particles: {
+      primary: '#A78BFA',    // Light purple particles
+      secondary: '#C084FC',  // Medium light purple
+      glow: '#DDD6FE',       // Very light purple glow
+      trail: 'rgba(139, 92, 246, 0.6)', // Particle trails
+    },
+    // Glass morphism effects
+    glass: {
+      light: 'rgba(255, 255, 255, 0.1)',
+      medium: 'rgba(255, 255, 255, 0.05)',
+      dark: 'rgba(0, 0, 0, 0.2)',
+      border: 'rgba(139, 92, 246, 0.3)',
+    },
+    // Neon glow effects
+    neon: {
+      purple: '#8B5CF6',
+      blue: '#6366F1',
+      pink: '#EC4899',
+      cyan: '#06B6D4',
+    },
   },
   
-  // Delivery status colors
+  // Delivery status colors with futuristic theme
   delivery: {
-    pending: '#FF9500',    // Orange
-    inProgress: '#007AFF', // Blue
-    completed: '#34C759',  // Green
-    cancelled: '#FF3B30',  // Red
+    pending: '#F59E0B',    // Amber
+    inProgress: '#3B82F6', // Blue
+    completed: '#10B981',  // Emerald
+    cancelled: '#EF4444',  // Red
   },
   
   // Driver status colors
   driver: {
-    offline: '#8E8E93',    // Gray
-    online: '#34C759',     // Green
-    busy: '#FF9500',       // Orange
+    offline: '#6B7280',    // Gray
+    online: '#10B981',     // Emerald
+    busy: '#F59E0B',       // Amber
   },
   
   // Rating/review colors
   rating: {
-    excellent: '#34C759',  // Green (4.5-5 stars)
-    good: '#FFCC00',       // Yellow (3.5-4.4 stars)
-    average: '#FF9500',    // Orange (2.5-3.4 stars)
-    poor: '#FF3B30',       // Red (1-2.4 stars)
+    excellent: '#10B981',  // Emerald (4.5-5 stars)
+    good: '#F59E0B',       // Amber (3.5-4.4 stars)
+    average: '#FB923C',    // Orange (2.5-3.4 stars)
+    poor: '#EF4444',       // Red (1-2.4 stars)
   },
   
-  // Overlay colors
-  overlay: 'rgba(0, 0, 0, 0.4)',
-  overlayLight: 'rgba(0, 0, 0, 0.2)',
-  overlayDark: 'rgba(0, 0, 0, 0.6)',
+  // Dark theme overlay colors
+  overlay: 'rgba(15, 11, 31, 0.8)',         // Dark purple overlay
+  overlayLight: 'rgba(15, 11, 31, 0.6)',    // Light dark overlay
+  overlayDark: 'rgba(15, 11, 31, 0.9)',     // Heavy dark overlay
+  overlayGlass: 'rgba(139, 92, 246, 0.1)',  // Glass overlay
   
   // Transparent colors for subtle effects
   transparent: 'transparent',
   
-  // Shadow colors
-  shadowColor: '#000000',
-  shadowLight: 'rgba(0, 0, 0, 0.1)',
-  shadowMedium: 'rgba(0, 0, 0, 0.2)',
-  shadowDark: 'rgba(0, 0, 0, 0.3)',
+  // Futuristic shadow colors with purple tint
+  shadowColor: '#8B5CF6',
+  shadowLight: 'rgba(139, 92, 246, 0.2)',
+  shadowMedium: 'rgba(139, 92, 246, 0.4)',
+  shadowDark: 'rgba(139, 92, 246, 0.6)',
+  shadowGlow: 'rgba(139, 92, 246, 0.8)',
 };
 
 // Color utility functions
