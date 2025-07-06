@@ -242,6 +242,12 @@ MarketPace is a React Native mobile application that prioritizes community empow
 ✓ Built intuitive UI with carrier selection, account number input, and integration confirmation
 ✓ Enhanced professional profile with multiple delivery options: MarketPace delivery, customer pickup, existing carrier, custom shipping rates
 
+✓ **IMPROVED CAMPAIGN LANDING PAGE LAYOUT** (July 06, 2025)
+✓ Moved "Join the Campaign" section above "Why Join MarketPlace?" for better user flow
+✓ Added prominent "Apply to Drive" button with earnings breakdown ($4 pickup + $2 dropoff + $0.50/mile + 100% tips)
+✓ Enhanced call-to-action section with orange gradient driver recruitment button
+✓ Improved page structure to prioritize immediate action over explanatory content
+
 ## Changelog
 
 - July 06, 2025: Implemented enhanced onboarding flow with questionnaire-based member setup

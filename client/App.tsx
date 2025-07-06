@@ -857,6 +857,52 @@ const CampaignLandingScreen = ({ navigation }: any) => (
       </Text>
     </LinearGradient>
 
+    {/* Call to Action */}
+    <View style={{ padding: 24, alignItems: 'center' }}>
+      <TouchableOpacity 
+        style={{ width: '100%', marginBottom: 16 }}
+        onPress={() => navigation.navigate('SignUpLogin', { mode: 'signup' })}
+      >
+        <LinearGradient
+          colors={['#4CAF50', '#45a049']}
+          style={{ paddingVertical: 16, paddingHorizontal: 32, borderRadius: 12, alignItems: 'center' }}
+        >
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 4 }}>
+            Join the Campaign
+          </Text>
+          <Text style={{ fontSize: 14, color: 'rgba(255, 255, 255, 0.9)' }}>
+            Get Lifetime Pro Access
+          </Text>
+        </LinearGradient>
+      </TouchableOpacity>
+
+      <TouchableOpacity 
+        style={{ width: '100%', marginBottom: 16 }}
+        onPress={() => navigation.navigate('SignUpLogin', { mode: 'driver' })}
+      >
+        <LinearGradient
+          colors={['#ff9800', '#f57c00']}
+          style={{ paddingVertical: 16, paddingHorizontal: 32, borderRadius: 12, alignItems: 'center' }}
+        >
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 4 }}>
+            Apply to Drive
+          </Text>
+          <Text style={{ fontSize: 14, color: 'rgba(255, 255, 255, 0.9)' }}>
+            Earn $4 pickup + $2 dropoff + $0.50/mile + 100% tips
+          </Text>
+        </LinearGradient>
+      </TouchableOpacity>
+
+      <TouchableOpacity 
+        style={{ paddingVertical: 12, paddingHorizontal: 24 }}
+        onPress={() => navigation.navigate('SignUpLogin', { mode: 'login' })}
+      >
+        <Text style={{ fontSize: 16, color: '#667eea', textAlign: 'center' }}>
+          Already a Member? Log In
+        </Text>
+      </TouchableOpacity>
+    </View>
+
     {/* Core Reasons */}
     <View style={{ padding: 24, backgroundColor: '#fff', marginVertical: 8 }}>
       <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#333', marginBottom: 16, textAlign: 'center' }}>
@@ -894,35 +940,6 @@ const CampaignLandingScreen = ({ navigation }: any) => (
           <Text style={{ fontSize: 14, color: '#666', lineHeight: 20 }}>Buy, sell, rent, find services, book entertainment - all in one community platform</Text>
         </View>
       </View>
-    </View>
-
-    {/* Call to Action */}
-    <View style={{ padding: 24, alignItems: 'center' }}>
-      <TouchableOpacity 
-        style={{ width: '100%', marginBottom: 16 }}
-        onPress={() => navigation.navigate('SignUpLogin', { mode: 'signup' })}
-      >
-        <LinearGradient
-          colors={['#4CAF50', '#45a049']}
-          style={{ paddingVertical: 16, paddingHorizontal: 32, borderRadius: 12, alignItems: 'center' }}
-        >
-          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 4 }}>
-            Join the Campaign
-          </Text>
-          <Text style={{ fontSize: 14, color: 'rgba(255, 255, 255, 0.9)' }}>
-            Get Lifetime Pro Access
-          </Text>
-        </LinearGradient>
-      </TouchableOpacity>
-
-      <TouchableOpacity 
-        style={{ paddingVertical: 12, paddingHorizontal: 24 }}
-        onPress={() => navigation.navigate('SignUpLogin', { mode: 'login' })}
-      >
-        <Text style={{ fontSize: 16, color: '#667eea', textAlign: 'center' }}>
-          Already a Member? Log In
-        </Text>
-      </TouchableOpacity>
     </View>
 
     <View style={{ height: 40 }} />
