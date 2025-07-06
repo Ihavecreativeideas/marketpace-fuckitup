@@ -9,7 +9,51 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-import { AuthProvider, useAuth } from './src/context/AuthContext';
+// Create a simple demo auth context
+interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  userType: string;
+  onboardingCompleted: boolean;
+}
+
+interface AuthContextType {
+  user: User | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+}
+
+const demoUser: User = {
+  id: 'demo-user',
+  email: 'demo@marketpace.com',
+  firstName: 'Demo',
+  lastName: 'User',
+  userType: 'buyer',
+  onboardingCompleted: true,
+};
+
+const AuthContext = React.createContext<AuthContextType>({
+  user: demoUser,
+  isLoading: false,
+  isAuthenticated: true,
+});
+
+const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <AuthContext.Provider value={{
+      user: demoUser,
+      isLoading: false,
+      isAuthenticated: true,
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+const useAuth = () => React.useContext(AuthContext);
+
 import FuturisticBackground from './src/components/FuturisticBackground';
 import FuturisticLogo from './src/components/FuturisticLogo';
 import GlassCard from './src/components/GlassCard';
@@ -59,6 +103,12 @@ import AccountTypeSelectionScreen from './src/screens/onboarding/AccountTypeSele
 import BusinessSetupScreen from './src/screens/onboarding/BusinessSetupScreen';
 import OnboardingCompleteScreen from './src/screens/onboarding/OnboardingCompleteScreen';
 
+// Delivery and driver screens
+import DeliveryHub from './src/screens/DeliveryHub';
+import DeliveryTrackingDemo from './src/screens/demo/DeliveryTrackingDemo';
+import EnhancedDriverApplication from './src/screens/driver/EnhancedDriverApplication';
+import UberEatsStyleDashboard from './src/screens/driver/UberEatsStyleDashboard';
+
 const queryClient = new QueryClient();
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -67,6 +117,17 @@ function MarketplaceStack() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="MarketplaceHome" component={() => <SimpleScreen title="Marketplace" />} options={{ headerShown: false }} />
+    </Stack.Navigator>
+  );
+}
+
+function DeliveryStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="DeliveryHub" component={DeliveryHub} options={{ headerShown: false }} />
+      <Stack.Screen name="DeliveryTrackingDemo" component={DeliveryTrackingDemo} options={{ title: 'Route Demo' }} />
+      <Stack.Screen name="EnhancedDriverApplication" component={EnhancedDriverApplication} options={{ title: 'Driver Application' }} />
+      <Stack.Screen name="UberEatsStyleDashboard" component={UberEatsStyleDashboard} options={{ title: 'Driver Dashboard' }} />
     </Stack.Navigator>
   );
 }
@@ -124,7 +185,7 @@ function MainTabs() {
       <Tab.Screen name="Home" component={() => <SimpleScreen title="Home" />} />
       <Tab.Screen name="Marketplace" component={MarketplaceStack} />
       <Tab.Screen name="Community" component={() => <SimpleScreen title="Community" />} />
-      <Tab.Screen name="Deliveries" component={() => <SimpleScreen title="Deliveries" />} />
+      <Tab.Screen name="Deliveries" component={DeliveryStack} />
       <Tab.Screen name="Profile" component={ProfileStack} />
     </Tab.Navigator>
   );

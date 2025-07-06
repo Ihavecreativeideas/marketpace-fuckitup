@@ -200,8 +200,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const applicationData = { ...req.body, userId };
+      
+      // Enhanced application processing with immediate approval logic
       const application = await storage.submitDriverApplication(applicationData);
-      res.json(application);
+      
+      // Auto-approve if all requirements are met
+      if (
+        applicationData.licenseNumber &&
+        applicationData.licenseExpirationDate &&
+        applicationData.insuranceCompany &&
+        applicationData.backgroundCheckPassed &&
+        applicationData.vehicleInfo?.make &&
+        applicationData.bankAccountNumber
+      ) {
+        // Immediate approval for valid applications
+        await storage.updateDriverApplicationStatus(application.id, 'approved', 'system');
+        
+        // Update user type to include driver role
+        const user = await storage.getUser(userId);
+        if (user) {
+          await storage.updateUserProfile(userId, { 
+            userType: user.userType === 'buyer' ? 'driver' : `${user.userType},driver`
+          });
+        }
+        
+        res.json({ ...application, status: 'approved' });
+      } else {
+        res.json(application);
+      }
     } catch (error) {
       console.error("Error submitting driver application:", error);
       res.status(500).json({ message: "Failed to submit application" });
@@ -216,6 +242,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching driver application:", error);
       res.status(500).json({ message: "Failed to fetch application" });
+    }
+  });
+
+  // Driver status and dashboard routes
+  app.post('/api/driver-status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { isOnline } = req.body;
+      
+      await storage.updateDriverStatus(userId, isOnline);
+      res.json({ success: true, isOnline });
+    } catch (error) {
+      console.error("Error updating driver status:", error);
+      res.status(500).json({ message: "Failed to update driver status" });
+    }
+  });
+
+  app.get('/api/driver-stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const stats = await storage.getDriverStats(userId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching driver stats:", error);
+      res.status(500).json({ message: "Failed to fetch driver stats" });
+    }
+  });
+
+  app.get('/api/driver-active-routes', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const routes = await storage.getDriverActiveRoutes(userId);
+      res.json(routes);
+    } catch (error) {
+      console.error("Error fetching active routes:", error);
+      res.status(500).json({ message: "Failed to fetch active routes" });
+    }
+  });
+
+  app.get('/api/available-routes', isAuthenticated, async (req: any, res) => {
+    try {
+      const { timeSlot } = req.query;
+      const routes = await storage.getAvailableRoutes(timeSlot as string);
+      res.json(routes);
+    } catch (error) {
+      console.error("Error fetching available routes:", error);
+      res.status(500).json({ message: "Failed to fetch available routes" });
+    }
+  });
+
+  app.post('/api/accept-route/:routeId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { routeId } = req.params;
+      
+      const route = await storage.acceptDeliveryRoute(parseInt(routeId), userId);
+      res.json(route);
+    } catch (error) {
+      console.error("Error accepting route:", error);
+      res.status(500).json({ message: "Failed to accept route" });
+    }
+  });
+
+  app.post('/api/complete-stop/:routeId/:stopIndex', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { routeId, stopIndex } = req.params;
+      
+      const result = await storage.completeRouteStop(
+        parseInt(routeId), 
+        parseInt(stopIndex), 
+        userId
+      );
+      res.json(result);
+    } catch (error) {
+      console.error("Error completing stop:", error);
+      res.status(500).json({ message: "Failed to complete stop" });
+    }
+  });
+
+  // Tip routes
+  app.post('/api/tips/checkout', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { orderId, amount } = req.body;
+      
+      const tip = await storage.addDriverTip({
+        orderId: parseInt(orderId),
+        buyerId: userId,
+        amount: parseFloat(amount),
+        tipType: 'checkout',
+        status: 'pending'
+      });
+      
+      res.json(tip);
+    } catch (error) {
+      console.error("Error adding checkout tip:", error);
+      res.status(500).json({ message: "Failed to add tip" });
+    }
+  });
+
+  app.post('/api/tips/post-delivery', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { orderId, amount } = req.body;
+      
+      const tip = await storage.addDriverTip({
+        orderId: parseInt(orderId),
+        buyerId: userId,
+        amount: parseFloat(amount),
+        tipType: 'post_delivery',
+        status: 'pending'
+      });
+      
+      res.json(tip);
+    } catch (error) {
+      console.error("Error adding post-delivery tip:", error);
+      res.status(500).json({ message: "Failed to add tip" });
+    }
+  });
+
+  // Demo route for showcasing delivery optimization
+  app.get('/api/delivery-demo', async (req, res) => {
+    try {
+      const demoData = await storage.generateDeliveryDemo();
+      res.json(demoData);
+    } catch (error) {
+      console.error("Error generating delivery demo:", error);
+      res.status(500).json({ message: "Failed to generate demo" });
     }
   });
 

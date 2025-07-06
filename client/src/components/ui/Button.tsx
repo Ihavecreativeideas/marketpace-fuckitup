@@ -7,61 +7,66 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
-import { Colors } from '../../constants/Colors';
 
 interface ButtonProps {
   title: string;
   onPress: () => void;
+  variant?: 'primary' | 'outline' | 'secondary';
+  size?: 'small' | 'medium' | 'large';
   loading?: boolean;
   disabled?: boolean;
-  variant?: 'primary' | 'secondary' | 'outline';
-  size?: 'small' | 'medium' | 'large';
-  style?: ViewStyle;
-  textStyle?: TextStyle;
+  style?: ViewStyle | ViewStyle[];
 }
 
-export function Button({
+export default function Button({
   title,
   onPress,
-  loading = false,
-  disabled = false,
   variant = 'primary',
   size = 'medium',
+  loading = false,
+  disabled = false,
   style,
-  textStyle,
 }: ButtonProps) {
-  const isDisabled = disabled || loading;
+  const getButtonStyle = (): ViewStyle => {
+    const baseStyle = styles.button;
+    const sizeStyle = styles[`${size}Button` as keyof typeof styles] as ViewStyle;
+    const variantStyle = styles[`${variant}Button` as keyof typeof styles] as ViewStyle;
+    
+    return {
+      ...baseStyle,
+      ...sizeStyle,
+      ...variantStyle,
+      ...(disabled && styles.disabledButton),
+    };
+  };
 
-  const buttonStyles = [
-    styles.button,
-    styles[size],
-    styles[variant],
-    isDisabled && styles.disabled,
-    style,
-  ];
-
-  const textStyles = [
-    styles.text,
-    styles[`${variant}Text`],
-    styles[`${size}Text`],
-    isDisabled && styles.disabledText,
-    textStyle,
-  ];
+  const getTextStyle = (): TextStyle => {
+    const baseStyle = styles.buttonText;
+    const sizeStyle = styles[`${size}Text` as keyof typeof styles] as TextStyle;
+    const variantStyle = styles[`${variant}Text` as keyof typeof styles] as TextStyle;
+    
+    return {
+      ...baseStyle,
+      ...sizeStyle,
+      ...variantStyle,
+      ...(disabled && styles.disabledText),
+    };
+  };
 
   return (
     <TouchableOpacity
-      style={buttonStyles}
+      style={[getButtonStyle(), style]}
       onPress={onPress}
-      disabled={isDisabled}
+      disabled={disabled || loading}
       activeOpacity={0.8}
     >
       {loading ? (
         <ActivityIndicator 
+          color={variant === 'outline' ? '#007AFF' : '#fff'} 
           size="small" 
-          color={variant === 'primary' ? 'white' : Colors.primary} 
         />
       ) : (
-        <Text style={textStyles}>{title}</Text>
+        <Text style={getTextStyle()}>{title}</Text>
       )}
     </TouchableOpacity>
   );
@@ -69,40 +74,57 @@ export function Button({
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 12,
-    alignItems: 'center',
+    borderRadius: 8,
     justifyContent: 'center',
+    alignItems: 'center',
     flexDirection: 'row',
   },
   
-  // Sizes
-  small: {
+  // Size styles
+  smallButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
+    minHeight: 36,
   },
-  medium: {
+  mediumButton: {
     paddingVertical: 12,
     paddingHorizontal: 20,
+    minHeight: 44,
   },
-  large: {
+  largeButton: {
     paddingVertical: 16,
     paddingHorizontal: 24,
+    minHeight: 52,
   },
 
-  // Variants
-  primary: {
-    backgroundColor: Colors.primary,
+  // Variant styles
+  primaryButton: {
+    backgroundColor: '#007AFF',
   },
-  secondary: {
-    backgroundColor: Colors.gray,
-  },
-  outline: {
+  outlineButton: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: Colors.primary,
+    borderColor: '#007AFF',
+  },
+  secondaryButton: {
+    backgroundColor: '#f8f9fa',
+    borderWidth: 1,
+    borderColor: '#e1e8ed',
   },
 
-  // Text sizes
+  // Disabled styles
+  disabledButton: {
+    backgroundColor: '#e1e8ed',
+    borderColor: '#e1e8ed',
+  },
+
+  // Text styles
+  buttonText: {
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  
+  // Size text styles
   smallText: {
     fontSize: 14,
   },
@@ -113,25 +135,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
 
-  // Text variants
-  text: {
-    fontWeight: '600',
-  },
+  // Variant text styles
   primaryText: {
-    color: 'white',
-  },
-  secondaryText: {
-    color: 'white',
+    color: '#fff',
   },
   outlineText: {
-    color: Colors.primary,
+    color: '#007AFF',
+  },
+  secondaryText: {
+    color: '#333',
   },
 
-  // Disabled states
-  disabled: {
-    opacity: 0.6,
-  },
+  // Disabled text
   disabledText: {
-    opacity: 0.8,
+    color: '#999',
   },
 });

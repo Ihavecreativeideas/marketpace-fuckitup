@@ -1,90 +1,58 @@
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 
 interface BadgeProps {
   text: string;
-  variant?: 'default' | 'success' | 'warning' | 'error' | 'info';
-  size?: 'small' | 'medium' | 'large';
+  variant?: 'success' | 'warning' | 'error' | 'info';
   style?: ViewStyle;
-  textStyle?: TextStyle;
 }
 
-export default function Badge({
-  text,
-  variant = 'default',
-  size = 'medium',
-  style,
-  textStyle,
-}: BadgeProps) {
+export default function Badge({ text, variant = 'info', style }: BadgeProps) {
   return (
-    <View style={[styles.badge, styles[variant], styles[size], style]}>
-      <Text style={[styles.text, styles[`${variant}Text`], styles[`${size}Text`], textStyle]}>
-        {text}
-      </Text>
+    <View style={[styles.badge, styles[`${variant}Badge`], style]}>
+      <Text style={[styles.badgeText, styles[`${variant}Text`]]}>{text}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   badge: {
-    borderRadius: 12,
     paddingHorizontal: 8,
     paddingVertical: 4,
+    borderRadius: 12,
     alignSelf: 'flex-start',
   },
-  default: {
-    backgroundColor: '#f0f0f0',
-  },
-  success: {
-    backgroundColor: '#4CAF50',
-  },
-  warning: {
-    backgroundColor: '#FF9800',
-  },
-  error: {
-    backgroundColor: '#F44336',
-  },
-  info: {
-    backgroundColor: '#2196F3',
-  },
-  small: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  medium: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  large: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  text: {
+  badgeText: {
     fontSize: 12,
     fontWeight: '600',
+    textTransform: 'uppercase',
   },
-  defaultText: {
-    color: '#333',
+  
+  // Variant styles
+  successBadge: {
+    backgroundColor: '#e8f5e8',
   },
+  warningBadge: {
+    backgroundColor: '#fff3e0',
+  },
+  errorBadge: {
+    backgroundColor: '#ffebee',
+  },
+  infoBadge: {
+    backgroundColor: '#e3f2fd',
+  },
+  
+  // Text styles
   successText: {
-    color: 'white',
+    color: '#4CAF50',
   },
   warningText: {
-    color: 'white',
+    color: '#FF9800',
   },
   errorText: {
-    color: 'white',
+    color: '#F44336',
   },
   infoText: {
-    color: 'white',
-  },
-  smallText: {
-    fontSize: 10,
-  },
-  mediumText: {
-    fontSize: 12,
-  },
-  largeText: {
-    fontSize: 14,
+    color: '#2196F3',
   },
 });
