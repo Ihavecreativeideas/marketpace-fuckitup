@@ -1618,6 +1618,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Password recovery routes
   registerPasswordRecoveryRoutes(app);
 
+  // Enhanced delivery system test routes
+  app.post('/api/delivery/calculate-fee', async (req, res) => {
+    try {
+      const { itemSize, vehicleType, distance, tip } = req.body;
+      
+      const { calculateEnhancedDeliveryFee } = await import('./revenue.js');
+      const result = calculateEnhancedDeliveryFee(itemSize, vehicleType, distance || 5, tip || 0);
+      
+      res.json({
+        success: true,
+        calculation: result
+      });
+    } catch (error) {
+      console.error('Delivery fee calculation error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to calculate delivery fee'
+      });
+    }
+  });
+
+  app.post('/api/delivery/create-route', async (req, res) => {
+    try {
+      const { driverId } = req.body;
+      
+      const { DeliveryRouteManager } = await import('./revenue.js');
+      const routeId = DeliveryRouteManager.createRoute(driverId);
+      
+      res.json({
+        success: true,
+        routeId,
+        message: 'Route created successfully'
+      });
+    } catch (error) {
+      console.error('Route creation error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create route'
+      });
+    }
+  });
+
+  app.post('/api/delivery/add-item', async (req, res) => {
+    try {
+      const { routeId, item } = req.body;
+      
+      const { DeliveryRouteManager } = await import('./revenue.js');
+      const result = DeliveryRouteManager.addItemToRoute(routeId, item);
+      
+      res.json({
+        success: result.success,
+        message: result.message,
+        route: result.route
+      });
+    } catch (error) {
+      console.error('Add item to route error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to add item to route'
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

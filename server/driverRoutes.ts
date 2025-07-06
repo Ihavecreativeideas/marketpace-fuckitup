@@ -9,11 +9,17 @@ export interface DriverApplication {
   email: string;
   phone: string;
   licenseNumber: string;
+  vehicleType: 'car' | 'suv' | 'truck' | 'van' | 'motorcycle' | 'bicycle';
   vehicleYear: string;
   vehicleMake: string;
   vehicleModel: string;
   vehicleColor: string;
   licensePlate: string;
+  itemSizePreferences: {
+    small: boolean;    // Envelopes, small packages
+    medium: boolean;   // Standard boxes, groceries
+    large: boolean;    // Furniture, appliances (requires truck/trailer)
+  };
   documentsUploaded: {
     driversLicense: boolean;
     insurance: boolean;
@@ -138,11 +144,17 @@ export function registerDriverRoutes(app: Express): void {
         email: req.body.email,
         phone: req.body.phone,
         licenseNumber: req.body.licenseNumber,
+        vehicleType: req.body.vehicleType || 'car',
         vehicleYear: req.body.vehicleYear,
         vehicleMake: req.body.vehicleMake,
         vehicleModel: req.body.vehicleModel,
         vehicleColor: req.body.vehicleColor,
         licensePlate: req.body.licensePlate,
+        itemSizePreferences: {
+          small: req.body.itemSizePreferences?.small || false,
+          medium: req.body.itemSizePreferences?.medium || false,
+          large: req.body.itemSizePreferences?.large || false
+        },
         documentsUploaded: {
           driversLicense: req.body.documentsUploaded?.driversLicense || false,
           insurance: req.body.documentsUploaded?.insurance || false,
