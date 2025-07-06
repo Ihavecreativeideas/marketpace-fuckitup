@@ -2573,8 +2573,8 @@ const MainMenuScreen = ({ navigation }: any) => {
             borderColor: 'rgba(239, 68, 68, 0.3)'
           }}
           onPress={() => {
-            // Handle logout
-            window.location.href = '/api/logout';
+            // Demo logout - just refresh the page to reset state
+            alert('Logout functionality - in production this would redirect to login');
           }}
         >
           <Ionicons name="log-out" size={20} color="#EF4444" style={{ marginRight: 12 }} />
