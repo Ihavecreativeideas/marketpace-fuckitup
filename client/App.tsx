@@ -1584,7 +1584,7 @@ const CommunityFeedScreen = ({ navigation }: any) => (
       colors={['#1a1a2e', '#16213e', '#0f3460']}
       style={{ paddingTop: 60, paddingBottom: 20, paddingHorizontal: 20 }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'between' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
