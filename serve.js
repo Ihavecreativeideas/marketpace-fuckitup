@@ -13,7 +13,7 @@ app.get('/', (req, res) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MarketPlace - Community First Marketplace</title>
+    <title>MarketPace - Community First Marketplace</title>
     <style>
         body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         * { box-sizing: border-box; }
@@ -28,7 +28,7 @@ app.get('/', (req, res) => {
         const { useState } = React;
         
         // Simple MarketPlace Landing Page
-        const MarketPlaceLanding = () => {
+        const MarketPaceLanding = () => {
             const [currentStep, setCurrentStep] = useState('landing');
             const [signupData, setSignupData] = useState({
                 accountType: '',
@@ -59,7 +59,7 @@ app.get('/', (req, res) => {
                             
                             <h2 style={{fontSize: '28px', marginBottom: '20px', textAlign: 'center'}}>Choose Your Account Type</h2>
                             <p style={{textAlign: 'center', marginBottom: '40px', opacity: 0.9}}>
-                                Select how you'd like to participate in your local MarketPlace community
+                                Select how you'd like to participate in your local MarketPace community
                             </p>
                             
                             <div style={{display: 'grid', gap: '20px'}}>
@@ -200,14 +200,21 @@ app.get('/', (req, res) => {
                                 </div>
                                 
                                 <div style={{marginBottom: '20px'}}>
-                                    <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Interests (Select all that apply)</label>
-                                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px', marginTop: '10px'}}>
-                                        {['Home & Garden', 'Electronics', 'Fashion', 'Sports', 'Music', 'Art', 'Food', 'DIY Projects', 'Books', 'Gaming', 'Fitness', 'Photography'].map(interest => (
-                                            <label key={interest} style={{display: 'flex', alignItems: 'center', cursor: 'pointer'}}>
-                                                <input type="checkbox" style={{marginRight: '8px'}} />
-                                                <span style={{fontSize: '14px'}}>{interest}</span>
-                                            </label>
-                                        ))}
+                                    <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Your Interests</label>
+                                    <textarea 
+                                        placeholder="Type your interests and hobbies, separated by commas (e.g., vintage clothing, home brewing, woodworking, yoga, local music, gardening tools, electronics, art supplies, books, gaming, photography equipment, fitness gear, handmade crafts, outdoor gear, cooking, pet supplies, etc.)"
+                                        rows={4}
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px',
+                                            borderRadius: '8px',
+                                            border: 'none',
+                                            fontSize: '16px',
+                                            resize: 'vertical'
+                                        }}
+                                    />
+                                    <div style={{fontSize: '12px', opacity: 0.8, marginTop: '5px'}}>
+                                        💡 This helps you see relevant items first and helps local shops find their perfect customers
                                     </div>
                                 </div>
                                 
@@ -373,7 +380,7 @@ app.get('/', (req, res) => {
                             
                             <h2 style={{fontSize: '28px', marginBottom: '20px', textAlign: 'center'}}>Final Setup</h2>
                             <p style={{textAlign: 'center', marginBottom: '30px', opacity: 0.9}}>
-                                Customize your MarketPlace experience
+                                Customize your MarketPace experience
                             </p>
                             
                             <div style={{background: 'rgba(255,255,255,0.1)', padding: '30px', borderRadius: '15px', marginBottom: '20px'}}>
@@ -441,7 +448,7 @@ app.get('/', (req, res) => {
                     <div style={{minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', padding: '40px 20px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                         <div style={{maxWidth: '600px', textAlign: 'center', color: 'white'}}>
                             <div style={{fontSize: '60px', marginBottom: '20px'}}>🎉</div>
-                            <h2 style={{fontSize: '32px', marginBottom: '20px'}}>Welcome to MarketPlace!</h2>
+                            <h2 style={{fontSize: '32px', marginBottom: '20px'}}>Welcome to MarketPace!</h2>
                             <p style={{fontSize: '18px', marginBottom: '30px', opacity: 0.9}}>
                                 You're now part of a community-first marketplace that strengthens neighborhoods and supports local businesses.
                             </p>
@@ -459,7 +466,7 @@ app.get('/', (req, res) => {
                             
                             <div style={{display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap'}}>
                                 <button 
-                                    onClick={() => alert('Would navigate to app home screen')}
+                                    onClick={() => alert('Would navigate to MarketPace Buy/Sell section (floating navigation bar)')}
                                     style={{
                                         background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)',
                                         color: 'white',
@@ -471,7 +478,7 @@ app.get('/', (req, res) => {
                                         cursor: 'pointer'
                                     }}
                                 >
-                                    Enter MarketPlace
+                                    Enter MarketPace Buy/Sell
                                 </button>
                                 
                                 <button 
@@ -520,7 +527,7 @@ app.get('/', (req, res) => {
                         }}>
                             MP
                         </div>
-                        <h1 style={{fontSize: '32px', fontWeight: 'bold', marginBottom: '8px'}}>MarketPlace</h1>
+                        <h1 style={{fontSize: '32px', fontWeight: 'bold', marginBottom: '8px'}}>MarketPace</h1>
                         <h2 style={{fontSize: '18px', fontWeight: '600', marginBottom: '8px', opacity: 0.95}}>
                             Pick Up the Pace in Your Community
                         </h2>
@@ -582,7 +589,7 @@ app.get('/', (req, res) => {
                     {/* Features Section */}
                     <div style={{padding: '40px 20px', background: 'white'}}>
                         <h2 style={{fontSize: '24px', fontWeight: 'bold', textAlign: 'center', marginBottom: '32px', color: '#1a1a2e'}}>
-                            Why Join MarketPlace?
+                            Why Join MarketPace?
                         </h2>
                         
                         <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', maxWidth: '1000px', margin: '0 auto'}}>
@@ -596,9 +603,9 @@ app.get('/', (req, res) => {
                             
                             <div style={{textAlign: 'center', padding: '24px', border: '1px solid #e5e7eb', borderRadius: '12px'}}>
                                 <div style={{fontSize: '48px', marginBottom: '16px'}}>🛒</div>
-                                <h3 style={{fontSize: '18px', fontWeight: 'bold', marginBottom: '8px', color: '#1a1a2e'}}>Everything Local</h3>
+                                <h3 style={{fontSize: '18px', fontWeight: 'bold', marginBottom: '8px', color: '#1a1a2e'}}>Enhanced Marketplace</h3>
                                 <p style={{fontSize: '14px', color: '#666', lineHeight: 1.5}}>
-                                    Buy, sell, rent, find services, book entertainment - all in one community platform
+                                    Buy, sell, rent items with counter offers, delivery options, and secure payments - like Facebook Marketplace enhanced for communities
                                 </p>
                             </div>
                             
@@ -635,20 +642,20 @@ app.get('/', (req, res) => {
                             
                             <div style={{background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)'}}>
                                 <p style={{fontSize: '14px', color: '#666', fontStyle: 'italic', marginBottom: '16px', lineHeight: 1.5}}>
-                                    "My handyman business grew 300% after joining MarketPlace. Local customers, fair prices, community support."
+                                    "My handyman business grew 300% after joining MarketPace. Local customers, fair prices, community support."
                                 </p>
                                 <p style={{fontSize: '12px', color: '#8B5CF6', fontWeight: 'bold'}}>— Carlos, Service Provider</p>
                             </div>
                         </div>
                     </div>
                     
-                    {/* Bottom padding for scrolling */}
-                    <div style={{height: '40px'}}></div>
+                    {/* Bottom padding for floating navigation */}
+                    <div style={{height: '100px'}}></div>
                 </div>
             );
         };
         
-        ReactDOM.render(<MarketPlaceLanding />, document.getElementById('root'));
+        ReactDOM.render(<MarketPaceLanding />, document.getElementById('root'));
     </script>
 </body>
 </html>
@@ -657,5 +664,5 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`MarketPlace demo running on port ${PORT}`);
+  console.log(`MarketPace demo running on port ${PORT}`);
 });
