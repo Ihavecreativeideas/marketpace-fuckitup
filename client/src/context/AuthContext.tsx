@@ -88,16 +88,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       
-      const response = await fetch('/api/auth/user', {
-        credentials: 'include',
-      });
-
-      if (response.ok) {
-        const user = await response.json();
-        dispatch({ type: 'SET_USER', payload: user });
-      } else {
-        dispatch({ type: 'SET_USER', payload: null });
-      }
+      // For testing, create a mock user with onboarding not completed
+      const mockUser: User = {
+        id: 'test-user',
+        email: 'test@example.com',
+        firstName: 'Test',
+        lastName: 'User',
+        userType: 'buyer',
+        accountType: 'personal',
+        isVerified: false,
+        isPro: false,
+        onboardingCompleted: false,
+      };
+      
+      // Simulate API call delay
+      setTimeout(() => {
+        dispatch({ type: 'SET_USER', payload: mockUser });
+      }, 1000);
+      
     } catch (error) {
       console.error('Error refreshing user:', error);
       dispatch({ type: 'SET_USER', payload: null });
@@ -108,8 +116,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       
-      // Handle OAuth login through Replit Auth
-      window.location.href = '/auth/login';
+      // For now, just set a mock user
+      const mockUser: User = {
+        id: 'test-user',
+        email: credentials.email || 'test@example.com',
+        firstName: 'Test',
+        lastName: 'User',
+        userType: 'buyer',
+        accountType: 'personal',
+        isVerified: false,
+        isPro: false,
+        onboardingCompleted: false,
+      };
+      
+      dispatch({ type: 'SET_USER', payload: mockUser });
     } catch (error) {
       console.error('Login error:', error);
       dispatch({ type: 'SET_LOADING', payload: false });
@@ -121,8 +141,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       
-      // Handle OAuth registration through Replit Auth
-      window.location.href = '/auth/login';
+      // For now, just set a mock user
+      const mockUser: User = {
+        id: 'test-user',
+        email: userData.email || 'test@example.com',
+        firstName: userData.firstName || 'Test',
+        lastName: userData.lastName || 'User',
+        userType: 'buyer',
+        accountType: 'personal',
+        isVerified: false,
+        isPro: false,
+        onboardingCompleted: false,
+      };
+      
+      dispatch({ type: 'SET_USER', payload: mockUser });
     } catch (error) {
       console.error('Registration error:', error);
       dispatch({ type: 'SET_LOADING', payload: false });
@@ -133,12 +165,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      
-      await fetch('/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      
       dispatch({ type: 'LOGOUT' });
     } catch (error) {
       console.error('Logout error:', error);
