@@ -11,6 +11,7 @@ import {
   communityPosts,
   comments,
   offers,
+  appSettings,
   type User,
   type UpsertUser,
   type Category,
@@ -33,6 +34,8 @@ import {
   type InsertComment,
   type Offer,
   type InsertOffer,
+  type AppSetting,
+  type InsertAppSetting,
 } from "../shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, like, sql } from "drizzle-orm";
@@ -92,6 +95,13 @@ export interface IStorage {
   getListingOffers(listingId: number): Promise<(Offer & { buyer: User })[]>;
   getUserOffers(userId: string, type: 'buyer' | 'seller'): Promise<(Offer & { listing: Listing; buyer: User; seller: User })[]>;
   updateOfferStatus(id: number, status: string): Promise<Offer>;
+  
+  // App settings operations
+  getAppSettings(): Promise<AppSetting[]>;
+  getAppSettingsByCategory(category: string): Promise<AppSetting[]>;
+  getAppSetting(key: string): Promise<AppSetting | undefined>;
+  updateAppSetting(key: string, value: string, updatedBy: string): Promise<AppSetting>;
+  createAppSetting(setting: InsertAppSetting): Promise<AppSetting>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -528,6 +538,41 @@ export class DatabaseStorage implements IStorage {
       .where(eq(offers.id, id))
       .returning();
     return updatedOffer;
+  }
+
+  // App settings operations
+  async getAppSettings(): Promise<AppSetting[]> {
+    return await db.select().from(appSettings).orderBy(appSettings.category, appSettings.label);
+  }
+
+  async getAppSettingsByCategory(category: string): Promise<AppSetting[]> {
+    return await db.select().from(appSettings).where(eq(appSettings.category, category));
+  }
+
+  async getAppSetting(key: string): Promise<AppSetting | undefined> {
+    const [setting] = await db.select().from(appSettings).where(eq(appSettings.key, key));
+    return setting;
+  }
+
+  async updateAppSetting(key: string, value: string, updatedBy: string): Promise<AppSetting> {
+    const [updatedSetting] = await db
+      .update(appSettings)
+      .set({ 
+        value, 
+        updatedBy, 
+        updatedAt: new Date() 
+      })
+      .where(eq(appSettings.key, key))
+      .returning();
+    return updatedSetting;
+  }
+
+  async createAppSetting(setting: InsertAppSetting): Promise<AppSetting> {
+    const [newSetting] = await db
+      .insert(appSettings)
+      .values(setting)
+      .returning();
+    return newSetting;
   }
 }
 

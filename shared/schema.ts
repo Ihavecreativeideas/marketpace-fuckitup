@@ -333,6 +333,26 @@ export const offersRelations = relations(offers, ({ one }) => ({
   }),
 }));
 
+// App settings table for admin configuration
+export const appSettings = pgTable("app_settings", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  key: varchar("key").unique().notNull(), // setting identifier
+  value: text("value").notNull(), // setting value
+  type: varchar("type").notNull().default("text"), // text, number, boolean, json
+  category: varchar("category").notNull(), // general, pricing, driver, subscription, content
+  label: varchar("label").notNull(), // display name for admin panel
+  description: text("description"), // help text
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedBy: varchar("updated_by").references(() => users.id),
+});
+
+export const appSettingsRelations = relations(appSettings, ({ one }) => ({
+  updatedByUser: one(users, {
+    fields: [appSettings.updatedBy],
+    references: [users.id],
+  }),
+}));
+
 // Type exports
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -356,3 +376,5 @@ export type Comment = typeof comments.$inferSelect;
 export type InsertComment = typeof comments.$inferInsert;
 export type Offer = typeof offers.$inferSelect;
 export type InsertOffer = typeof offers.$inferInsert;
+export type AppSetting = typeof appSettings.$inferSelect;
+export type InsertAppSetting = typeof appSettings.$inferInsert;
