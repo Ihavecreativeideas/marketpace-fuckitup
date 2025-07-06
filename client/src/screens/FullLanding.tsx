@@ -50,9 +50,66 @@ export default function FullLanding({ onEnterApp, onShowAuth }: LandingProps) {
             <Text style={styles.featureDesc}>Connect with your local area</Text>
           </View>
           <View style={styles.featureCard}>
-            <Ionicons name="star" size={40} color="#007AFF" />
-            <Text style={styles.featureTitle}>Pro Features</Text>
-            <Text style={styles.featureDesc}>Unlock premium benefits</Text>
+            <Ionicons name="business" size={40} color="#007AFF" />
+            <Text style={styles.featureTitle}>Business Integration</Text>
+            <Text style={styles.featureDesc}>Connect your website & showcase products</Text>
+          </View>
+          <View style={styles.featureCard}>
+            <Ionicons name="musical-notes" size={40} color="#007AFF" />
+            <Text style={styles.featureTitle}>Entertainment Profiles</Text>
+            <Text style={styles.featureDesc}>Integrate with Bandzoogle & sell music/merch</Text>
+          </View>
+          <View style={styles.featureCard}>
+            <Ionicons name="share-social" size={40} color="#007AFF" />
+            <Text style={styles.featureTitle}>Social Media Integration</Text>
+            <Text style={styles.featureDesc}>Connect Facebook, Instagram & more</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Business & Entertainment Integration */}
+      <View style={styles.businessSection}>
+        <Text style={styles.sectionTitle}>Business & Entertainment Integration</Text>
+        
+        <View style={styles.integrationCard}>
+          <Ionicons name="business-outline" size={32} color="#007AFF" />
+          <Text style={styles.integrationTitle}>Business Profiles</Text>
+          <Text style={styles.integrationDesc}>
+            Connect your personal website to showcase your shop's products and prices. 
+            Sync inventory and automatically update pricing from your existing web store.
+          </Text>
+          <View style={styles.platformsList}>
+            <Text style={styles.platformItem}>• Shopify Integration</Text>
+            <Text style={styles.platformItem}>• WooCommerce Sync</Text>
+            <Text style={styles.platformItem}>• Custom Website API</Text>
+          </View>
+        </View>
+
+        <View style={styles.integrationCard}>
+          <Ionicons name="musical-notes-outline" size={32} color="#007AFF" />
+          <Text style={styles.integrationTitle}>Entertainment Profiles</Text>
+          <Text style={styles.integrationDesc}>
+            Link with Bandzoogle and other music platforms to sell your merch and music directly. 
+            Fans can discover and purchase from your complete catalog.
+          </Text>
+          <View style={styles.platformsList}>
+            <Text style={styles.platformItem}>• Bandzoogle Integration</Text>
+            <Text style={styles.platformItem}>• Bandcamp Sync</Text>
+            <Text style={styles.platformItem}>• SoundCloud Connect</Text>
+          </View>
+        </View>
+
+        <View style={styles.integrationCard}>
+          <Ionicons name="share-social-outline" size={32} color="#007AFF" />
+          <Text style={styles.integrationTitle}>Social Media Integration</Text>
+          <Text style={styles.integrationDesc}>
+            Cross-post your listings to Facebook Marketplace, Instagram Shopping, and more. 
+            Manage everything from one dashboard.
+          </Text>
+          <View style={styles.platformsList}>
+            <Text style={styles.platformItem}>• Facebook Marketplace</Text>
+            <Text style={styles.platformItem}>• Instagram Shopping</Text>
+            <Text style={styles.platformItem}>• TikTok Shop</Text>
           </View>
         </View>
       </View>
@@ -93,8 +150,8 @@ export default function FullLanding({ onEnterApp, onShowAuth }: LandingProps) {
 
       {/* Authentication Section */}
       <View style={styles.authSection}>
-        <Text style={styles.authTitle}>Get Started Today</Text>
-        <Text style={styles.authSubtitle}>Join thousands of users in your local community</Text>
+        <Text style={styles.authTitle}>Join MarketPace Today</Text>
+        <Text style={styles.authSubtitle}>Connect with your community and grow your business</Text>
         
         <View style={styles.authButtons}>
           <Button
@@ -111,6 +168,12 @@ export default function FullLanding({ onEnterApp, onShowAuth }: LandingProps) {
             title="🔍 Continue with Google"
             onPress={() => console.log('Google login')}
             style={[styles.authButton, styles.googleButton]}
+          />
+          
+          <Button
+            title="📘 Continue with Facebook"
+            onPress={() => console.log('Facebook login')}
+            style={[styles.authButton, styles.facebookButton]}
           />
           
           <Button
@@ -194,19 +257,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    gap: 12,
   },
   featureCard: {
-    width: '48%',
+    width: '47%',
     backgroundColor: 'white',
-    padding: 20,
+    padding: 16,
     borderRadius: 16,
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    minHeight: 140,
   },
   featureTitle: {
     fontSize: 16,
@@ -222,9 +287,42 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
   },
-  howItWorksSection: {
+  businessSection: {
     padding: 20,
     backgroundColor: '#fff',
+  },
+  integrationCard: {
+    backgroundColor: '#f8f9fa',
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: '#007AFF',
+  },
+  integrationTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  integrationDesc: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  platformsList: {
+    gap: 4,
+  },
+  platformItem: {
+    fontSize: 13,
+    color: '#007AFF',
+    fontWeight: '500',
+  },
+  howItWorksSection: {
+    padding: 20,
+    backgroundColor: '#f8f9fa',
   },
   stepsList: {
     gap: 20,
@@ -263,7 +361,7 @@ const styles = StyleSheet.create({
   },
   authSection: {
     padding: 20,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#fff',
   },
   authTitle: {
     fontSize: 28,
@@ -290,6 +388,9 @@ const styles = StyleSheet.create({
   },
   googleButton: {
     backgroundColor: '#4285F4',
+  },
+  facebookButton: {
+    backgroundColor: '#1877F2',
   },
   emailButton: {
     backgroundColor: '#007AFF',
