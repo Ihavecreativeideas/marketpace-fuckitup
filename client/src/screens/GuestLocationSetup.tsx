@@ -5,7 +5,7 @@ import FuturisticBackground from '../components/FuturisticBackground';
 import FuturisticLogo from '../components/FuturisticLogo';
 import GlassCard from '../components/GlassCard';
 import FuturisticButton from '../components/FuturisticButton';
-import { colors } from '../../src/utils/colors';
+import { colors } from '../../../src/utils/colors';
 
 interface GuestLocationSetupProps {
   navigation: any;

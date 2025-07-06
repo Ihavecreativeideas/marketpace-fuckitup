@@ -1570,6 +1570,168 @@ function ProfileStack() {
   );
 }
 
+// Create screens for all marketplace categories
+const RentScreen = () => <SimpleScreen title="Rent Items" />;
+const BuySellScreen = () => <SimpleScreen title="Buy & Sell" />;
+const OddJobsScreen = () => <SimpleScreen title="Odd Jobs" />;
+const ServicesScreen = () => <SimpleScreen title="Services" />;
+const ShopsScreen = () => <SimpleScreen title="Local Shops" />;
+const TheHubScreen = () => <SimpleScreen title="The Hub - Entertainment" />;
+const CommunityFeedScreen = ({ navigation }: any) => (
+  <ScrollView style={{ flex: 1, backgroundColor: '#0F0B1F' }}>
+    {/* Header */}
+    <LinearGradient
+      colors={['#1a1a2e', '#16213e', '#0f3460']}
+      style={{ paddingTop: 60, paddingBottom: 20, paddingHorizontal: 20 }}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'between' }}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff', marginLeft: 15 }}>
+          Community Feed
+        </Text>
+        <View style={{ flex: 1 }} />
+      </View>
+    </LinearGradient>
+
+    {/* Create Post Section */}
+    <View style={{ padding: 20 }}>
+      <View style={{ 
+        backgroundColor: 'rgba(139, 92, 246, 0.1)', 
+        borderRadius: 12, 
+        padding: 16,
+        borderWidth: 1,
+        borderColor: 'rgba(139, 92, 246, 0.3)'
+      }}>
+        <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 12 }}>
+          What's happening in your community?
+        </Text>
+        
+        {/* Post Type Buttons */}
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          {[
+            { label: 'General Post', icon: 'chatbubble', color: '#8B5CF6' },
+            { label: 'Live Stream', icon: 'videocam', color: '#EF4444' },
+            { label: 'Poll', icon: 'bar-chart', color: '#10B981' },
+            { label: 'Local Event', icon: 'calendar', color: '#F59E0B' }
+          ].map((item, index) => (
+            <TouchableOpacity 
+              key={index}
+              style={{
+                backgroundColor: `${item.color}20`,
+                borderRadius: 8,
+                padding: 8,
+                flexDirection: 'row',
+                alignItems: 'center',
+                borderWidth: 1,
+                borderColor: `${item.color}50`
+              }}
+            >
+              <Ionicons name={item.icon as any} size={16} color={item.color} style={{ marginRight: 6 }} />
+              <Text style={{ color: item.color, fontSize: 12, fontWeight: '600' }}>
+                {item.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      {/* Community Feed Posts */}
+      <View style={{ marginTop: 20 }}>
+        <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 16 }}>
+          Recent Community Posts
+        </Text>
+
+        {/* Sample Posts */}
+        {[
+          {
+            user: 'Sarah M.',
+            time: '2 hours ago',
+            type: 'event',
+            content: 'Community BBQ this Saturday at Riverside Park! Bring your family and neighbors. Food trucks and live music starting at 2 PM.',
+            icon: 'calendar',
+            color: '#F59E0B'
+          },
+          {
+            user: 'Mike D.',
+            time: '4 hours ago', 
+            type: 'poll',
+            content: 'Should we petition the city for a new bike lane on Main Street?',
+            icon: 'bar-chart',
+            color: '#10B981'
+          },
+          {
+            user: 'Local Coffee Shop',
+            time: '6 hours ago',
+            type: 'general',
+            content: 'New seasonal menu is here! Try our pumpkin spice latte and apple cider donuts. 20% off for MarketPlace members!',
+            icon: 'chatbubble',
+            color: '#8B5CF6'
+          }
+        ].map((post, index) => (
+          <View 
+            key={index}
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: 12,
+              padding: 16,
+              marginBottom: 12,
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.1)'
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+              <View style={{
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                backgroundColor: `${post.color}30`,
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginRight: 12
+              }}>
+                <Ionicons name={post.icon as any} size={20} color={post.color} />
+              </View>
+              <View>
+                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#fff' }}>
+                  {post.user}
+                </Text>
+                <Text style={{ fontSize: 12, color: '#B8B8B8' }}>
+                  {post.time}
+                </Text>
+              </View>
+            </View>
+            
+            <Text style={{ fontSize: 14, color: '#E5E5E5', lineHeight: 20 }}>
+              {post.content}
+            </Text>
+
+            {/* Interaction Buttons */}
+            <View style={{ flexDirection: 'row', marginTop: 12, gap: 16 }}>
+              <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Ionicons name="heart-outline" size={18} color="#B8B8B8" />
+                <Text style={{ color: '#B8B8B8', marginLeft: 4, fontSize: 12 }}>Like</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Ionicons name="chatbubble-outline" size={18} color="#B8B8B8" />
+                <Text style={{ color: '#B8B8B8', marginLeft: 4, fontSize: 12 }}>Comment</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Ionicons name="share-outline" size={18} color="#B8B8B8" />
+                <Text style={{ color: '#B8B8B8', marginLeft: 4, fontSize: 12 }}>Share</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))}
+      </View>
+    </View>
+
+    {/* Bottom padding for floating navigation */}
+    <View style={{ height: 100 }} />
+  </ScrollView>
+);
+
 function MainTabs() {
   return (
     <Tab.Navigator
@@ -1577,49 +1739,209 @@ function MainTabs() {
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap;
 
-          if (route.name === 'Home') {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Marketplace') {
+          if (route.name === 'Rent') {
+            iconName = focused ? 'key' : 'key-outline';
+          } else if (route.name === 'BuySell') {
             iconName = focused ? 'storefront' : 'storefront-outline';
-          } else if (route.name === 'Community') {
-            iconName = focused ? 'people' : 'people-outline';
-          } else if (route.name === 'Deliveries') {
-            iconName = focused ? 'car' : 'car-outline';
-          } else if (route.name === 'Profile') {
-            iconName = focused ? 'person' : 'person-outline';
+          } else if (route.name === 'OddJobs') {
+            iconName = focused ? 'hammer' : 'hammer-outline';
+          } else if (route.name === 'Services') {
+            iconName = focused ? 'construct' : 'construct-outline';
+          } else if (route.name === 'Shops') {
+            iconName = focused ? 'business' : 'business-outline';
+          } else if (route.name === 'TheHub') {
+            iconName = focused ? 'musical-notes' : 'musical-notes-outline';
+          } else if (route.name === 'Menu') {
+            iconName = focused ? 'menu' : 'menu-outline';
           } else {
-            iconName = 'circle';
+            iconName = 'home-outline';
           }
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textMuted,
+        tabBarActiveTintColor: '#8B5CF6', // Purple theme
+        tabBarInactiveTintColor: '#6B7280', // Gray
         tabBarStyle: {
-          backgroundColor: colors.backgroundSecondary,
-          borderTopColor: colors.border,
+          backgroundColor: '#1F2937', // Dark background
+          borderTopColor: 'rgba(139, 92, 246, 0.3)',
           borderTopWidth: 1,
-          shadowColor: colors.shadowColor,
-          shadowOffset: { width: 0, height: -2 },
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          elevation: 20,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -5 },
           shadowOpacity: 0.3,
-          shadowRadius: 8,
-          elevation: 10,
+          shadowRadius: 10,
+          paddingBottom: 10,
+          paddingTop: 8,
+          height: 85,
         },
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 10,
           fontWeight: '600',
+          marginBottom: 5,
         },
         headerShown: false,
       })}
     >
-      <Tab.Screen name="Home" component={HomeStack} />
-      <Tab.Screen name="Marketplace" component={MarketplaceStack} />
-      <Tab.Screen name="Community" component={() => <SimpleScreen title="Community" />} />
-      <Tab.Screen name="Deliveries" component={DeliveryStack} />
-      <Tab.Screen name="Profile" component={ProfileStack} />
+      <Tab.Screen 
+        name="Rent" 
+        component={RentScreen}
+        options={{ tabBarLabel: 'Rent' }}
+      />
+      <Tab.Screen 
+        name="BuySell" 
+        component={BuySellScreen}
+        options={{ tabBarLabel: 'Buy/Sell' }}
+      />
+      <Tab.Screen 
+        name="OddJobs" 
+        component={OddJobsScreen}
+        options={{ tabBarLabel: 'Odd Jobs' }}
+      />
+      <Tab.Screen 
+        name="Services" 
+        component={ServicesScreen}
+        options={{ tabBarLabel: 'Services' }}
+      />
+      <Tab.Screen 
+        name="Shops" 
+        component={ShopsScreen}
+        options={{ tabBarLabel: 'Shops' }}
+      />
+      <Tab.Screen 
+        name="TheHub" 
+        component={TheHubScreen}
+        options={{ tabBarLabel: 'The Hub' }}
+      />
+      <Tab.Screen 
+        name="Menu" 
+        component={MainMenuStack}
+        options={{ tabBarLabel: 'Menu' }}
+      />
     </Tab.Navigator>
   );
 }
+
+// Main Menu Stack with Community Feed and other options
+function MainMenuStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen 
+        name="MainMenu" 
+        component={MainMenuScreen} 
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen 
+        name="CommunityFeed" 
+        component={CommunityFeedScreen} 
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen 
+        name="Profile" 
+        component={() => <SimpleScreen title="Profile" />} 
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen 
+        name="Settings" 
+        component={() => <SimpleScreen title="Settings" />} 
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen 
+        name="Deliveries" 
+        component={() => <SimpleScreen title="Deliveries" />} 
+        options={{ headerShown: false }} 
+      />
+    </Stack.Navigator>
+  );
+}
+
+// Main Menu Screen - Facebook-style menu
+const MainMenuScreen = ({ navigation }: any) => (
+  <ScrollView style={{ flex: 1, backgroundColor: '#0F0B1F' }}>
+    {/* Header */}
+    <LinearGradient
+      colors={['#1a1a2e', '#16213e', '#0f3460']}
+      style={{ paddingTop: 60, paddingBottom: 20, paddingHorizontal: 20 }}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
+        <View style={{ 
+          width: 60, height: 60, borderRadius: 30, backgroundColor: 'rgba(255, 255, 255, 0.2)',
+          justifyContent: 'center', alignItems: 'center', marginRight: 15
+        }}>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff' }}>MP</Text>
+        </View>
+        <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff' }}>MarketPlace Menu</Text>
+      </View>
+    </LinearGradient>
+
+    {/* Menu Options */}
+    <View style={{ padding: 20 }}>
+      {/* Community Section */}
+      <TouchableOpacity 
+        style={{ 
+          backgroundColor: 'rgba(139, 92, 246, 0.1)', 
+          borderRadius: 12, 
+          padding: 16, 
+          marginBottom: 16,
+          borderWidth: 1,
+          borderColor: 'rgba(139, 92, 246, 0.3)'
+        }}
+        onPress={() => navigation.navigate('CommunityFeed')}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Ionicons name="people" size={24} color="#8B5CF6" style={{ marginRight: 12 }} />
+          <View>
+            <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 4 }}>
+              Community Feed
+            </Text>
+            <Text style={{ fontSize: 14, color: '#B8B8B8' }}>
+              Local posts, live streams, polls, events
+            </Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+
+      {/* Quick Access Categories */}
+      <View style={{ marginBottom: 20 }}>
+        <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 12 }}>
+          Quick Access
+        </Text>
+        
+        {[
+          { name: 'Profile', icon: 'person', description: 'Your profile and settings' },
+          { name: 'Deliveries', icon: 'car', description: 'Track your deliveries' },
+          { name: 'Settings', icon: 'settings', description: 'App preferences' },
+        ].map((item, index) => (
+          <TouchableOpacity 
+            key={index}
+            style={{ 
+              backgroundColor: 'rgba(255, 255, 255, 0.05)', 
+              borderRadius: 8, 
+              padding: 14, 
+              marginBottom: 8,
+              flexDirection: 'row',
+              alignItems: 'center'
+            }}
+            onPress={() => navigation.navigate(item.name)}
+          >
+            <Ionicons name={item.icon as any} size={20} color="#8B5CF6" style={{ marginRight: 12 }} />
+            <View>
+              <Text style={{ fontSize: 16, fontWeight: '600', color: '#fff' }}>
+                {item.name}
+              </Text>
+              <Text style={{ fontSize: 12, color: '#B8B8B8' }}>
+                {item.description}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  </ScrollView>
+);
 
 // Create the onboarding stack
 function OnboardingStack() {
