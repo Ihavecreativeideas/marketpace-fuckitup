@@ -1870,6 +1870,11 @@ function MainMenuStack() {
         options={{ headerShown: false }} 
       />
       <Stack.Screen 
+        name="DeliveryTracking" 
+        component={DeliveryTrackingScreen} 
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen 
         name="DeliveryDemo" 
         component={DeliveryDemoScreen} 
         options={{ headerShown: false }} 
@@ -2005,7 +2010,7 @@ const MainMenuScreen = ({ navigation }: any) => {
           
           {[
             { name: 'Profile', icon: 'person', description: 'View your public profile' },
-            { name: 'Deliveries', icon: 'car', description: 'Track your deliveries' },
+            { name: 'DeliveryTracking', icon: 'car', description: 'Track your deliveries' },
             { name: 'DeliveryDemo', icon: 'map', description: 'See how delivery routes work' },
             { name: 'SecurityPolicies', icon: 'shield-checkmark', description: 'Platform security & safety' },
             { name: 'Settings', icon: 'settings', description: 'App preferences' },
@@ -2459,6 +2464,413 @@ function AppContent() {
     </NavigationContainer>
   );
 }
+
+// Delivery Tracking Screen - Track current and past deliveries with color-coded route positions
+const DeliveryTrackingScreen = ({ navigation }: any) => {
+  const [activeTab, setActiveTab] = useState('current');
+
+  const currentDeliveries = [
+    {
+      id: 'DEL001',
+      type: 'purchase',
+      item: 'Vintage Guitar',
+      seller: 'Mike\'s Music Shop',
+      buyer: 'You',
+      trackingColor: '#2563EB', // Dark Blue
+      routePosition: 3,
+      totalStops: 6,
+      estimatedArrival: '2:30 PM',
+      status: 'In Transit',
+      driver: 'Sarah M.',
+      cost: '$8.50'
+    },
+    {
+      id: 'DEL002', 
+      type: 'sale',
+      item: 'Coffee Table',
+      seller: 'You',
+      buyer: 'Jennifer K.',
+      trackingColor: '#DC2626', // Dark Red
+      routePosition: 1,
+      totalStops: 6,
+      estimatedArrival: '1:45 PM',
+      status: 'Picked Up',
+      driver: 'Sarah M.',
+      cost: '$12.25'
+    }
+  ];
+
+  const pastDeliveries = [
+    {
+      id: 'DEL003',
+      type: 'purchase',
+      item: 'Standing Desk',
+      seller: 'Office Solutions',
+      buyer: 'You',
+      deliveredDate: 'Yesterday, 4:20 PM',
+      driver: 'Marcus T.',
+      cost: '$15.75',
+      rating: 5
+    },
+    {
+      id: 'DEL004',
+      type: 'sale', 
+      item: 'Exercise Bike',
+      seller: 'You',
+      buyer: 'David R.',
+      deliveredDate: 'Dec 23, 2:10 PM',
+      driver: 'Lisa P.',
+      cost: '$18.50',
+      rating: 5
+    },
+    {
+      id: 'DEL005',
+      type: 'purchase',
+      item: 'Gaming Chair',
+      seller: 'TechStore Plus',
+      buyer: 'You',
+      deliveredDate: 'Dec 20, 11:30 AM',
+      driver: 'James W.',
+      cost: '$9.25',
+      rating: 4
+    }
+  ];
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Picked Up': return '#F59E0B';
+      case 'In Transit': return '#10B981';
+      case 'Delivered': return '#059669';
+      default: return '#6B7280';
+    }
+  };
+
+  const getCurrentDeliveryCard = (delivery: any) => (
+    <View key={delivery.id} style={{
+      backgroundColor: '#1F2937',
+      borderRadius: 15,
+      padding: 20,
+      marginBottom: 15,
+      borderLeftWidth: 4,
+      borderLeftColor: delivery.trackingColor
+    }}>
+      {/* Header */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
+        <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>
+          {delivery.item}
+        </Text>
+        <View style={{
+          backgroundColor: getStatusColor(delivery.status),
+          paddingHorizontal: 8,
+          paddingVertical: 4,
+          borderRadius: 8
+        }}>
+          <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>
+            {delivery.status}
+          </Text>
+        </View>
+      </View>
+
+      {/* Details */}
+      <View style={{ marginBottom: 15 }}>
+        <Text style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 8 }}>
+          {delivery.type === 'purchase' ? `From: ${delivery.seller}` : `To: ${delivery.buyer}`}
+        </Text>
+        <Text style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 8 }}>
+          Driver: {delivery.driver} • Cost: {delivery.cost}
+        </Text>
+        <Text style={{ color: '#E5E7EB', fontSize: 14, fontWeight: 'bold' }}>
+          Estimated Arrival: {delivery.estimatedArrival}
+        </Text>
+      </View>
+
+      {/* Route Progress */}
+      <View style={{ marginBottom: 15 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <Text style={{ color: '#fff', fontSize: 14, fontWeight: 'bold' }}>
+            Route Progress
+          </Text>
+          <Text style={{ color: delivery.trackingColor, fontSize: 12, fontWeight: 'bold' }}>
+            Stop {delivery.routePosition} of {delivery.totalStops}
+          </Text>
+        </View>
+        
+        {/* Progress bar */}
+        <View style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          marginBottom: 8
+        }}>
+          {Array.from({ length: delivery.totalStops }, (_, index) => (
+            <View key={index} style={{
+              width: 30,
+              height: 8,
+              borderRadius: 4,
+              backgroundColor: index < delivery.routePosition ? delivery.trackingColor : '#374151'
+            }} />
+          ))}
+        </View>
+        
+        <Text style={{ color: '#9CA3AF', fontSize: 12, textAlign: 'center' }}>
+          Your {delivery.type === 'purchase' ? 'purchase' : 'sale'} tracking color: 
+          <Text style={{ color: delivery.trackingColor, fontWeight: 'bold' }}>
+            {delivery.trackingColor === '#2563EB' ? ' Dark Blue → Light Blue' : ' Dark Red → Light Red'}
+          </Text>
+        </Text>
+      </View>
+
+      {/* Action Buttons */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <TouchableOpacity style={{
+          backgroundColor: 'rgba(59, 130, 246, 0.2)',
+          paddingVertical: 8,
+          paddingHorizontal: 16,
+          borderRadius: 8,
+          flex: 1,
+          marginRight: 8
+        }}>
+          <Text style={{ color: '#3B82F6', fontSize: 12, textAlign: 'center', fontWeight: 'bold' }}>
+            Contact Driver
+          </Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={{
+          backgroundColor: 'rgba(16, 185, 129, 0.2)',
+          paddingVertical: 8,
+          paddingHorizontal: 16,
+          borderRadius: 8,
+          flex: 1,
+          marginLeft: 8
+        }}>
+          <Text style={{ color: '#10B981', fontSize: 12, textAlign: 'center', fontWeight: 'bold' }}>
+            Track Live
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  const getPastDeliveryCard = (delivery: any) => (
+    <View key={delivery.id} style={{
+      backgroundColor: '#1F2937',
+      borderRadius: 15,
+      padding: 20,
+      marginBottom: 15
+    }}>
+      {/* Header */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>
+          {delivery.item}
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          {Array.from({ length: 5 }, (_, index) => (
+            <Ionicons 
+              key={index}
+              name={index < delivery.rating ? 'star' : 'star-outline'} 
+              size={16} 
+              color={index < delivery.rating ? '#F59E0B' : '#6B7280'}
+            />
+          ))}
+        </View>
+      </View>
+
+      {/* Details */}
+      <Text style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 8 }}>
+        {delivery.type === 'purchase' ? `From: ${delivery.seller}` : `To: ${delivery.buyer}`}
+      </Text>
+      <Text style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 8 }}>
+        Driver: {delivery.driver} • Cost: {delivery.cost}
+      </Text>
+      <Text style={{ color: '#10B981', fontSize: 14, fontWeight: 'bold' }}>
+        Delivered: {delivery.deliveredDate}
+      </Text>
+
+      {/* Action */}
+      <TouchableOpacity style={{
+        backgroundColor: 'rgba(107, 114, 128, 0.2)',
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        marginTop: 12
+      }}>
+        <Text style={{ color: '#9CA3AF', fontSize: 12, textAlign: 'center' }}>
+          View Receipt
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  return (
+    <View style={{ flex: 1, backgroundColor: '#0F0B1F' }}>
+      {/* Header */}
+      <LinearGradient
+        colors={['#1a1a2e', '#16213e', '#0f3460']}
+        style={{ paddingTop: 60, paddingBottom: 20, paddingHorizontal: 20 }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={{
+              padding: 8,
+              borderRadius: 20,
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              marginRight: 15
+            }}
+          >
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff' }}>
+            Delivery Tracking
+          </Text>
+        </View>
+        <Text style={{ color: '#B0B0B0', fontSize: 16 }}>
+          Track your purchases and sales in real-time
+        </Text>
+      </LinearGradient>
+
+      {/* Tab Navigation */}
+      <View style={{ 
+        flexDirection: 'row', 
+        margin: 20, 
+        backgroundColor: '#1F2937',
+        borderRadius: 12,
+        padding: 4
+      }}>
+        <TouchableOpacity
+          onPress={() => setActiveTab('current')}
+          style={{
+            flex: 1,
+            paddingVertical: 12,
+            borderRadius: 8,
+            backgroundColor: activeTab === 'current' ? '#3B82F6' : 'transparent'
+          }}
+        >
+          <Text style={{ 
+            color: activeTab === 'current' ? '#fff' : '#9CA3AF',
+            textAlign: 'center',
+            fontWeight: 'bold'
+          }}>
+            Current Deliveries ({currentDeliveries.length})
+          </Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          onPress={() => setActiveTab('past')}
+          style={{
+            flex: 1,
+            paddingVertical: 12,
+            borderRadius: 8,
+            backgroundColor: activeTab === 'past' ? '#3B82F6' : 'transparent'
+          }}
+        >
+          <Text style={{ 
+            color: activeTab === 'past' ? '#fff' : '#9CA3AF',
+            textAlign: 'center',
+            fontWeight: 'bold'
+          }}>
+            Past Deliveries ({pastDeliveries.length})
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Content */}
+      <ScrollView style={{ flex: 1, paddingHorizontal: 20 }}>
+        {activeTab === 'current' ? (
+          <>
+            {/* Color Legend */}
+            <View style={{
+              backgroundColor: '#1F2937',
+              borderRadius: 12,
+              padding: 16,
+              marginBottom: 20
+            }}>
+              <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold', marginBottom: 12 }}>
+                📍 Color Tracking System
+              </Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <View style={{ alignItems: 'center', flex: 1 }}>
+                  <View style={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: 10,
+                    backgroundColor: '#2563EB',
+                    marginBottom: 8
+                  }} />
+                  <Text style={{ color: '#E5E7EB', fontSize: 12, textAlign: 'center' }}>
+                    Your Purchases
+                  </Text>
+                  <Text style={{ color: '#9CA3AF', fontSize: 11, textAlign: 'center' }}>
+                    Dark Blue → Light Blue
+                  </Text>
+                </View>
+                <View style={{ alignItems: 'center', flex: 1 }}>
+                  <View style={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: 10,
+                    backgroundColor: '#DC2626',
+                    marginBottom: 8
+                  }} />
+                  <Text style={{ color: '#E5E7EB', fontSize: 12, textAlign: 'center' }}>
+                    Your Sales
+                  </Text>
+                  <Text style={{ color: '#9CA3AF', fontSize: 11, textAlign: 'center' }}>
+                    Dark Red → Light Red
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Current Deliveries */}
+            {currentDeliveries.length > 0 ? (
+              currentDeliveries.map(delivery => getCurrentDeliveryCard(delivery))
+            ) : (
+              <View style={{
+                backgroundColor: '#1F2937',
+                borderRadius: 15,
+                padding: 30,
+                alignItems: 'center'
+              }}>
+                <Ionicons name="car-outline" size={48} color="#6B7280" />
+                <Text style={{ color: '#9CA3AF', fontSize: 16, textAlign: 'center', marginTop: 16 }}>
+                  No active deliveries
+                </Text>
+                <Text style={{ color: '#6B7280', fontSize: 14, textAlign: 'center', marginTop: 8 }}>
+                  Your purchases and sales will appear here when in transit
+                </Text>
+              </View>
+            )}
+          </>
+        ) : (
+          <>
+            {/* Past Deliveries */}
+            {pastDeliveries.length > 0 ? (
+              pastDeliveries.map(delivery => getPastDeliveryCard(delivery))
+            ) : (
+              <View style={{
+                backgroundColor: '#1F2937',
+                borderRadius: 15,
+                padding: 30,
+                alignItems: 'center'
+              }}>
+                <Ionicons name="checkmark-circle-outline" size={48} color="#6B7280" />
+                <Text style={{ color: '#9CA3AF', fontSize: 16, textAlign: 'center', marginTop: 16 }}>
+                  No delivery history
+                </Text>
+                <Text style={{ color: '#6B7280', fontSize: 14, textAlign: 'center', marginTop: 8 }}>
+                  Completed deliveries will appear here
+                </Text>
+              </View>
+            )}
+          </>
+        )}
+
+        {/* Bottom Padding */}
+        <View style={{ height: 100 }} />
+      </ScrollView>
+    </View>
+  );
+};
 
 // Delivery Demo Screen - Interactive route system demonstration
 const DeliveryDemoScreen = ({ navigation }: any) => {
