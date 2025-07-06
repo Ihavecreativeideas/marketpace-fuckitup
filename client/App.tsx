@@ -130,13 +130,21 @@ const SignUpLoginScreen = ({ route, navigation }: any) => {
     
     if (method === 'email') {
       setShowEmailForm(true);
+    } else if (method === 'guest') {
+      // Guest mode - just go back to landing page with limited access
+      console.log('Entering guest mode...');
+      navigation.navigate('CampaignLanding');
     } else {
       setShowEmailForm(false);
       // Simulate authentication success for demo
       console.log(`Authenticating with ${method}...`);
-      // Here you would integrate with actual auth providers
-      // For now, just navigate back to show the campaign page
-      navigation.navigate('CampaignLanding');
+      // Navigate to member questionnaire for new sign-ups
+      if (isSignUp) {
+        navigation.navigate('MemberQuestionnaire', { authMethod: method });
+      } else {
+        // For login, go back to campaign landing
+        navigation.navigate('CampaignLanding');
+      }
     }
   };
 
@@ -203,7 +211,13 @@ const SignUpLoginScreen = ({ route, navigation }: any) => {
           {/* Email Submit Button */}
           <TouchableOpacity 
             style={{ width: '100%', marginBottom: 16 }}
-            onPress={() => handleAuthMethod('email-submit')}
+            onPress={() => {
+              if (isSignUp) {
+                navigation.navigate('MemberQuestionnaire', { authMethod: 'email' });
+              } else {
+                navigation.navigate('CampaignLanding');
+              }
+            }}
           >
             <LinearGradient
               colors={isSignUp ? ['#4CAF50', '#45a049'] : ['#667eea', '#764ba2']}
@@ -339,6 +353,341 @@ const SignUpLoginScreen = ({ route, navigation }: any) => {
         )}
         </View>
       )}
+
+      <View style={{ height: 40 }} />
+    </ScrollView>
+  );
+};
+
+// Member Questionnaire Flow
+const MemberQuestionnaireScreen = ({ route, navigation }: any) => {
+  const authMethod = route?.params?.authMethod || 'unknown';
+  const [currentStep, setCurrentStep] = React.useState(1);
+  const [profileData, setProfileData] = React.useState({
+    bio: '',
+    interests: [],
+    accountType: '', // 'personal' or 'dual'
+    businessType: '', // 'shops', 'services', 'entertainment'
+    businessName: '',
+    businessDescription: ''
+  });
+
+  const interests = [
+    'Electronics', 'Clothing', 'Home & Garden', 'Sports & Outdoors', 'Books & Media',
+    'Baby & Kids', 'Tools & Equipment', 'Art & Crafts', 'Music & Entertainment',
+    'Food & Beverages', 'Health & Beauty', 'Automotive', 'Collectibles',
+    'Gaming', 'Photography', 'Fitness', 'Travel', 'Pets', 'Technology', 'Fashion'
+  ];
+
+  const toggleInterest = (interest: string) => {
+    setProfileData(prev => ({
+      ...prev,
+      interests: prev.interests.includes(interest)
+        ? prev.interests.filter(i => i !== interest)
+        : [...prev.interests, interest]
+    }));
+  };
+
+  const nextStep = () => {
+    if (currentStep < 3) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      // Complete onboarding
+      console.log('Onboarding complete:', profileData);
+      navigation.navigate('CampaignLanding');
+    }
+  };
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <>
+            <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#333', textAlign: 'center', marginBottom: 8 }}>
+              Welcome to MarketPlace! 🎉
+            </Text>
+            <Text style={{ fontSize: 16, color: '#666', textAlign: 'center', marginBottom: 24 }}>
+              Let's personalize your experience
+            </Text>
+
+            <Text style={{ fontSize: 18, fontWeight: '600', color: '#333', marginBottom: 16 }}>
+              Tell us about yourself
+            </Text>
+
+            <View style={{ marginBottom: 20 }}>
+              <Text style={{ fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8 }}>
+                Write a short bio (Optional)
+              </Text>
+              <View style={{ 
+                borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12, backgroundColor: '#fff',
+                minHeight: 80
+              }}>
+                <Text style={{ color: profileData.bio ? '#333' : '#999' }}>
+                  {profileData.bio || 'Tell your neighbors about yourself, your interests, or what you\'re looking for...'}
+                </Text>
+              </View>
+            </View>
+
+            <TouchableOpacity 
+              style={{ width: '100%' }}
+              onPress={nextStep}
+            >
+              <LinearGradient
+                colors={['#667eea', '#764ba2']}
+                style={{ paddingVertical: 16, paddingHorizontal: 32, borderRadius: 12, alignItems: 'center' }}
+              >
+                <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff' }}>
+                  Continue
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </>
+        );
+
+      case 2:
+        return (
+          <>
+            <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#333', textAlign: 'center', marginBottom: 8 }}>
+              What interests you?
+            </Text>
+            <Text style={{ fontSize: 16, color: '#666', textAlign: 'center', marginBottom: 24 }}>
+              Select categories you're interested in buying, selling, or exploring
+            </Text>
+
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 24 }}>
+              {interests.map((interest) => (
+                <TouchableOpacity
+                  key={interest}
+                  style={{
+                    paddingHorizontal: 12,
+                    paddingVertical: 8,
+                    borderRadius: 20,
+                    marginRight: 8,
+                    marginBottom: 8,
+                    backgroundColor: profileData.interests.includes(interest) ? '#667eea' : '#f0f0f0',
+                    borderWidth: 1,
+                    borderColor: profileData.interests.includes(interest) ? '#667eea' : '#ddd'
+                  }}
+                  onPress={() => toggleInterest(interest)}
+                >
+                  <Text style={{
+                    color: profileData.interests.includes(interest) ? '#fff' : '#333',
+                    fontSize: 14,
+                    fontWeight: profileData.interests.includes(interest) ? '600' : '400'
+                  }}>
+                    {interest}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={{ fontSize: 12, color: '#666', textAlign: 'center', marginBottom: 20 }}>
+              Selected: {profileData.interests.length} interests
+            </Text>
+
+            <TouchableOpacity 
+              style={{ width: '100%' }}
+              onPress={nextStep}
+            >
+              <LinearGradient
+                colors={['#667eea', '#764ba2']}
+                style={{ paddingVertical: 16, paddingHorizontal: 32, borderRadius: 12, alignItems: 'center' }}
+              >
+                <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff' }}>
+                  Continue
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </>
+        );
+
+      case 3:
+        return (
+          <>
+            <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#333', textAlign: 'center', marginBottom: 8 }}>
+              Choose your account type
+            </Text>
+            <Text style={{ fontSize: 16, color: '#666', textAlign: 'center', marginBottom: 24 }}>
+              You can always upgrade later
+            </Text>
+
+            {/* Personal Account Option */}
+            <TouchableOpacity
+              style={{
+                borderWidth: 2,
+                borderColor: profileData.accountType === 'personal' ? '#667eea' : '#ddd',
+                borderRadius: 12,
+                padding: 20,
+                marginBottom: 16,
+                backgroundColor: profileData.accountType === 'personal' ? 'rgba(102, 126, 234, 0.05)' : '#fff'
+              }}
+              onPress={() => setProfileData(prev => ({ ...prev, accountType: 'personal', businessType: '' }))}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                <Text style={{ fontSize: 20, marginRight: 12 }}>👤</Text>
+                <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#333' }}>Personal Account</Text>
+              </View>
+              <Text style={{ fontSize: 14, color: '#666', lineHeight: 20 }}>
+                Perfect for buying, selling personal items, and connecting with neighbors
+              </Text>
+            </TouchableOpacity>
+
+            {/* Dual Account Option */}
+            <TouchableOpacity
+              style={{
+                borderWidth: 2,
+                borderColor: profileData.accountType === 'dual' ? '#667eea' : '#ddd',
+                borderRadius: 12,
+                padding: 20,
+                marginBottom: 20,
+                backgroundColor: profileData.accountType === 'dual' ? 'rgba(102, 126, 234, 0.05)' : '#fff'
+              }}
+              onPress={() => setProfileData(prev => ({ ...prev, accountType: 'dual' }))}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                <Text style={{ fontSize: 20, marginRight: 12 }}>💼</Text>
+                <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#333' }}>Personal + Business</Text>
+                <View style={{ backgroundColor: '#ff6b6b', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12, marginLeft: 8 }}>
+                  <Text style={{ color: '#fff', fontSize: 10, fontWeight: 'bold' }}>PRO</Text>
+                </View>
+              </View>
+              <Text style={{ fontSize: 14, color: '#666', lineHeight: 20 }}>
+                Run a business! Shops, services, or entertainment with advanced features
+              </Text>
+            </TouchableOpacity>
+
+            {/* Business Type Selection - Only show if dual account selected */}
+            {profileData.accountType === 'dual' && (
+              <View style={{ marginBottom: 20 }}>
+                <Text style={{ fontSize: 16, fontWeight: '600', color: '#333', marginBottom: 12 }}>
+                  What type of business?
+                </Text>
+                
+                <TouchableOpacity
+                  style={{
+                    flexDirection: 'row', alignItems: 'center', padding: 12,
+                    borderWidth: 1, borderColor: profileData.businessType === 'shops' ? '#667eea' : '#ddd',
+                    borderRadius: 8, marginBottom: 8,
+                    backgroundColor: profileData.businessType === 'shops' ? 'rgba(102, 126, 234, 0.05)' : '#fff'
+                  }}
+                  onPress={() => setProfileData(prev => ({ ...prev, businessType: 'shops' }))}
+                >
+                  <Text style={{ fontSize: 18, marginRight: 12 }}>🛒</Text>
+                  <View>
+                    <Text style={{ fontSize: 16, fontWeight: '600', color: '#333' }}>Shops</Text>
+                    <Text style={{ fontSize: 12, color: '#666' }}>Retail, products, online store</Text>
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    flexDirection: 'row', alignItems: 'center', padding: 12,
+                    borderWidth: 1, borderColor: profileData.businessType === 'services' ? '#667eea' : '#ddd',
+                    borderRadius: 8, marginBottom: 8,
+                    backgroundColor: profileData.businessType === 'services' ? 'rgba(102, 126, 234, 0.05)' : '#fff'
+                  }}
+                  onPress={() => setProfileData(prev => ({ ...prev, businessType: 'services' }))}
+                >
+                  <Text style={{ fontSize: 18, marginRight: 12 }}>🛠️</Text>
+                  <View>
+                    <Text style={{ fontSize: 16, fontWeight: '600', color: '#333' }}>Services</Text>
+                    <Text style={{ fontSize: 12, color: '#666' }}>Labor, professional services, handyman</Text>
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    flexDirection: 'row', alignItems: 'center', padding: 12,
+                    borderWidth: 1, borderColor: profileData.businessType === 'entertainment' ? '#667eea' : '#ddd',
+                    borderRadius: 8, marginBottom: 16,
+                    backgroundColor: profileData.businessType === 'entertainment' ? 'rgba(102, 126, 234, 0.05)' : '#fff'
+                  }}
+                  onPress={() => setProfileData(prev => ({ ...prev, businessType: 'entertainment' }))}
+                >
+                  <Text style={{ fontSize: 18, marginRight: 12 }}>🎭</Text>
+                  <View>
+                    <Text style={{ fontSize: 16, fontWeight: '600', color: '#333' }}>Entertainment (The Hub)</Text>
+                    <Text style={{ fontSize: 12, color: '#666' }}>DJs, bands, comedians, performers</Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            <TouchableOpacity 
+              style={{ 
+                width: '100%',
+                opacity: profileData.accountType ? 1 : 0.6
+              }}
+              onPress={nextStep}
+              disabled={!profileData.accountType}
+            >
+              <LinearGradient
+                colors={['#4CAF50', '#45a049']}
+                style={{ paddingVertical: 16, paddingHorizontal: 32, borderRadius: 12, alignItems: 'center' }}
+              >
+                <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff' }}>
+                  Complete Setup
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+
+            {profileData.accountType === 'dual' && (
+              <View style={{ marginTop: 20, padding: 16, backgroundColor: '#e8f5e8', borderRadius: 8 }}>
+                <Text style={{ fontSize: 14, color: '#2e7d32', textAlign: 'center', fontWeight: '600', marginBottom: 4 }}>
+                  🎁 Business Account Benefits
+                </Text>
+                <Text style={{ fontSize: 12, color: '#2e7d32', textAlign: 'center', lineHeight: 18 }}>
+                  • Website integration • Custom profile design • Advanced analytics • Livestreaming capabilities • Event management tools
+                </Text>
+              </View>
+            )}
+          </>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <ScrollView style={{ flex: 1, backgroundColor: '#f8f9fa' }}>
+      {/* Header */}
+      <LinearGradient
+        colors={['#667eea', '#764ba2']}
+        style={{ paddingTop: 60, paddingBottom: 30, paddingHorizontal: 20, alignItems: 'center' }}
+      >
+        <View style={{ 
+          width: 60, height: 60, borderRadius: 30, backgroundColor: 'rgba(255, 255, 255, 0.2)',
+          justifyContent: 'center', alignItems: 'center', marginBottom: 12
+        }}>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff' }}>MP</Text>
+        </View>
+        
+        {/* Progress Indicator */}
+        <View style={{ flexDirection: 'row', marginBottom: 12 }}>
+          {[1, 2, 3].map((step) => (
+            <View
+              key={step}
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: step <= currentStep ? '#fff' : 'rgba(255, 255, 255, 0.3)',
+                marginHorizontal: 4
+              }}
+            />
+          ))}
+        </View>
+        
+        <Text style={{ fontSize: 16, color: 'rgba(255, 255, 255, 0.9)', textAlign: 'center' }}>
+          Step {currentStep} of 3
+        </Text>
+      </LinearGradient>
+
+      {/* Content */}
+      <View style={{ padding: 24 }}>
+        {renderStep()}
+      </View>
 
       <View style={{ height: 40 }} />
     </ScrollView>
@@ -500,6 +849,7 @@ function HomeStack() {
     <Stack.Navigator>
       <Stack.Screen name="CampaignLanding" component={CampaignLandingScreen} options={{ headerShown: false }} />
       <Stack.Screen name="SignUpLogin" component={SignUpLoginScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="MemberQuestionnaire" component={MemberQuestionnaireScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
