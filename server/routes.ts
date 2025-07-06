@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { storage } from "./storage";
+import { storage, setRLSContext, clearRLSContext } from "./storage";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -14,6 +14,24 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
+
+  // RLS Context middleware - sets user context for database security policies
+  app.use(async (req: any, res, next) => {
+    try {
+      if (req.isAuthenticated() && req.user?.claims) {
+        const userId = req.user.claims.sub;
+        const user = await storage.getUser(userId);
+        await setRLSContext(userId, user?.userType || 'buyer');
+      } else {
+        await clearRLSContext();
+      }
+      next();
+    } catch (error) {
+      console.error('RLS Context error:', error);
+      await clearRLSContext();
+      next();
+    }
+  });
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {

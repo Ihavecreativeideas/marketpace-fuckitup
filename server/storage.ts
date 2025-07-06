@@ -40,6 +40,21 @@ import {
 import { db } from "./db";
 import { eq, desc, and, or, like, sql } from "drizzle-orm";
 
+// RLS Context management
+export async function setRLSContext(userId?: string, userType?: string) {
+  if (userId) {
+    await db.execute(sql`SELECT set_config('app.current_user_id', ${userId}, true)`);
+  }
+  if (userType) {
+    await db.execute(sql`SELECT set_config('app.user_type', ${userType}, true)`);
+  }
+}
+
+export async function clearRLSContext() {
+  await db.execute(sql`SELECT set_config('app.current_user_id', '', true)`);
+  await db.execute(sql`SELECT set_config('app.user_type', '', true)`);
+}
+
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
