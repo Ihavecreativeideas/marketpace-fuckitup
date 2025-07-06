@@ -1,5 +1,6 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -118,10 +119,153 @@ const queryClient = null; // Simplified for demo
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
+const CampaignLandingScreen = () => (
+  <ScrollView style={{ flex: 1, backgroundColor: '#f8f9fa' }}>
+    {/* Hero Section */}
+    <LinearGradient
+      colors={['#667eea', '#764ba2']}
+      style={{ paddingTop: 60, paddingBottom: 40, paddingHorizontal: 20, alignItems: 'center' }}
+    >
+      <View style={{ 
+        width: 80, height: 80, borderRadius: 40, backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        justifyContent: 'center', alignItems: 'center', marginBottom: 16
+      }}>
+        <Text style={{ fontSize: 32, fontWeight: 'bold', color: '#fff' }}>MP</Text>
+      </View>
+      <Text style={{ fontSize: 32, fontWeight: 'bold', color: '#fff', marginBottom: 8 }}>MarketPlace</Text>
+      <Text style={{ fontSize: 18, fontWeight: '600', color: 'rgba(255, 255, 255, 0.95)', marginBottom: 8, textAlign: 'center' }}>
+        Pick Up the Pace in Your Community
+      </Text>
+      <Text style={{ fontSize: 16, color: 'rgba(255, 255, 255, 0.9)', textAlign: 'center' }}>
+        Delivering Opportunities — Not Just Packages
+      </Text>
+    </LinearGradient>
+
+    {/* Mission */}
+    <View style={{ padding: 24, backgroundColor: '#fff', marginVertical: 8 }}>
+      <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#333', marginBottom: 16, textAlign: 'center' }}>
+        Our Mission
+      </Text>
+      <Text style={{ fontSize: 16, color: '#555', fontStyle: 'italic', textAlign: 'center', lineHeight: 24 }}>
+        "Big tech platforms have taught us to rely on strangers and algorithms. MarketPlace reminds us what happens when we invest in each other."
+      </Text>
+    </View>
+
+    {/* Campaign Tracker */}
+    <View style={{ padding: 24, backgroundColor: '#fff', marginVertical: 8 }}>
+      <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#333', marginBottom: 16, textAlign: 'center' }}>
+        🚀 Campaign Progress
+      </Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around' }}>
+        <View style={{ alignItems: 'center', marginBottom: 16, minWidth: '18%' }}>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#667eea', marginBottom: 4 }}>12</Text>
+          <Text style={{ fontSize: 12, color: '#666' }}>Towns</Text>
+        </View>
+        <View style={{ alignItems: 'center', marginBottom: 16, minWidth: '18%' }}>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#667eea', marginBottom: 4 }}>247</Text>
+          <Text style={{ fontSize: 12, color: '#666' }}>Shops</Text>
+        </View>
+        <View style={{ alignItems: 'center', marginBottom: 16, minWidth: '18%' }}>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#667eea', marginBottom: 4 }}>89</Text>
+          <Text style={{ fontSize: 12, color: '#666' }}>Entertainers</Text>
+        </View>
+        <View style={{ alignItems: 'center', marginBottom: 16, minWidth: '18%' }}>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#667eea', marginBottom: 4 }}>156</Text>
+          <Text style={{ fontSize: 12, color: '#666' }}>Services</Text>
+        </View>
+        <View style={{ alignItems: 'center', marginBottom: 16, minWidth: '18%' }}>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#667eea', marginBottom: 4 }}>1,834</Text>
+          <Text style={{ fontSize: 12, color: '#666' }}>Members</Text>
+        </View>
+      </View>
+    </View>
+
+    {/* Early Member Benefits */}
+    <LinearGradient
+      colors={['#ff6b6b', '#ffa726']}
+      style={{ margin: 20, borderRadius: 16, padding: 24 }}
+    >
+      <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#fff', textAlign: 'center', marginBottom: 8 }}>
+        🎁 Early Member Exclusive
+      </Text>
+      <Text style={{ fontSize: 16, color: 'rgba(255, 255, 255, 0.9)', textAlign: 'center', marginBottom: 16 }}>
+        Join the Campaign, Get Lifetime Benefits
+      </Text>
+      <Text style={{ fontSize: 14, color: 'rgba(255, 255, 255, 0.9)', textAlign: 'center', lineHeight: 20 }}>
+        Campaign members who join during our city-by-city rollout will never pay the $3.99/month Pro subscription fee. Lock in your lifetime access now!
+      </Text>
+    </LinearGradient>
+
+    {/* Core Reasons */}
+    <View style={{ padding: 24, backgroundColor: '#fff', marginVertical: 8 }}>
+      <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#333', marginBottom: 16, textAlign: 'center' }}>
+        Why Join MarketPlace?
+      </Text>
+      
+      <View style={{ flexDirection: 'row', backgroundColor: '#f8f9fa', borderRadius: 12, padding: 16, marginBottom: 12, borderLeftWidth: 4, borderLeftColor: '#667eea' }}>
+        <Text style={{ fontSize: 20, marginRight: 12, marginTop: 2 }}>🏘️</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 16, fontWeight: '600', color: '#333', marginBottom: 4 }}>Community First</Text>
+          <Text style={{ fontSize: 14, color: '#666', lineHeight: 20 }}>Keep money circulating in your neighborhood instead of flowing to distant corporations</Text>
+        </View>
+      </View>
+
+      <View style={{ flexDirection: 'row', backgroundColor: '#f8f9fa', borderRadius: 12, padding: 16, marginBottom: 12, borderLeftWidth: 4, borderLeftColor: '#667eea' }}>
+        <Text style={{ fontSize: 20, marginRight: 12, marginTop: 2 }}>💰</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 16, fontWeight: '600', color: '#333', marginBottom: 4 }}>Fair Economics</Text>
+          <Text style={{ fontSize: 14, color: '#666', lineHeight: 20 }}>Transparent 5% fees, no hidden charges, 100% of tips go directly to drivers</Text>
+        </View>
+      </View>
+
+      <View style={{ flexDirection: 'row', backgroundColor: '#f8f9fa', borderRadius: 12, padding: 16, marginBottom: 12, borderLeftWidth: 4, borderLeftColor: '#667eea' }}>
+        <Text style={{ fontSize: 20, marginRight: 12, marginTop: 2 }}>🚚</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 16, fontWeight: '600', color: '#333', marginBottom: 4 }}>Local Delivery</Text>
+          <Text style={{ fontSize: 14, color: '#666', lineHeight: 20 }}>Neighbor-to-neighbor delivery system creating jobs and building connections</Text>
+        </View>
+      </View>
+
+      <View style={{ flexDirection: 'row', backgroundColor: '#f8f9fa', borderRadius: 12, padding: 16, marginBottom: 12, borderLeftWidth: 4, borderLeftColor: '#667eea' }}>
+        <Text style={{ fontSize: 20, marginRight: 12, marginTop: 2 }}>🎯</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 16, fontWeight: '600', color: '#333', marginBottom: 4 }}>Everything Local</Text>
+          <Text style={{ fontSize: 14, color: '#666', lineHeight: 20 }}>Buy, sell, rent, find services, book entertainment - all in one community platform</Text>
+        </View>
+      </View>
+    </View>
+
+    {/* Call to Action */}
+    <View style={{ padding: 24, alignItems: 'center' }}>
+      <TouchableOpacity style={{ width: '100%', marginBottom: 16 }}>
+        <LinearGradient
+          colors={['#4CAF50', '#45a049']}
+          style={{ paddingVertical: 16, paddingHorizontal: 32, borderRadius: 12, alignItems: 'center' }}
+        >
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 4 }}>
+            Join the Campaign
+          </Text>
+          <Text style={{ fontSize: 14, color: 'rgba(255, 255, 255, 0.9)' }}>
+            Get Lifetime Pro Access
+          </Text>
+        </LinearGradient>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={{ paddingVertical: 12, paddingHorizontal: 24 }}>
+        <Text style={{ fontSize: 16, color: '#667eea', textAlign: 'center' }}>
+          Already a Member? Log In
+        </Text>
+      </TouchableOpacity>
+    </View>
+
+    <View style={{ height: 40 }} />
+  </ScrollView>
+);
+
 function MarketplaceStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="MarketplaceHome" component={SimpleLandingPage} options={{ headerShown: false }} />
+      <Stack.Screen name="MarketplaceHome" component={CampaignLandingScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
