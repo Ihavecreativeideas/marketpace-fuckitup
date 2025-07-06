@@ -372,6 +372,183 @@ export const driverTips = pgTable("driver_tips", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// ============ REVENUE SYSTEM TABLES ============
+
+// User wallet for in-app credits
+export const userWallets = pgTable("user_wallets", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  userId: varchar("user_id").references(() => users.id).unique().notNull(),
+  balance: decimal("balance", { precision: 10, scale: 2 }).default("0.00"),
+  totalLoaded: decimal("total_loaded", { precision: 10, scale: 2 }).default("0.00"),
+  totalSpent: decimal("total_spent", { precision: 10, scale: 2 }).default("0.00"),
+  bonusEarned: decimal("bonus_earned", { precision: 10, scale: 2 }).default("0.00"), // 10% bonus tracking
+  lastTransaction: timestamp("last_transaction"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Wallet transaction history
+export const walletTransactions = pgTable("wallet_transactions", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  walletId: integer("wallet_id").references(() => userWallets.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  type: varchar("type").notNull(), // load, spend, bonus, refund, transfer_in, transfer_out
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  description: text("description"),
+  relatedOrderId: integer("related_order_id").references(() => orders.id),
+  relatedListingId: integer("related_listing_id").references(() => listings.id),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  balanceBefore: decimal("balance_before", { precision: 10, scale: 2 }).notNull(),
+  balanceAfter: decimal("balance_after", { precision: 10, scale: 2 }).notNull(),
+  status: varchar("status").default("completed"), // pending, completed, failed, cancelled
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Subscription management
+export const subscriptions = pgTable("subscriptions", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  userId: varchar("user_id").references(() => users.id).unique().notNull(),
+  tier: varchar("tier").notNull().default("basic"), // basic, pro
+  status: varchar("status").notNull().default("active"), // active, cancelled, expired, trial
+  stripeSubscriptionId: varchar("stripe_subscription_id").unique(),
+  stripeCustomerId: varchar("stripe_customer_id"),
+  monthlyFee: decimal("monthly_fee", { precision: 10, scale: 2 }).default("0.00"),
+  trialEndsAt: timestamp("trial_ends_at"),
+  currentPeriodStart: timestamp("current_period_start"),
+  currentPeriodEnd: timestamp("current_period_end"),
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false),
+  isEarlySupporter: boolean("is_early_supporter").default(false), // lifetime benefits
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Transaction fees tracking
+export const transactionFees = pgTable("transaction_fees", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  orderId: integer("order_id").references(() => orders.id),
+  listingId: integer("listing_id").references(() => listings.id),
+  sellerId: varchar("seller_id").references(() => users.id),
+  buyerId: varchar("buyer_id").references(() => users.id),
+  feeType: varchar("fee_type").notNull(), // product_sale, service_rental, damage_insurance, verification, delivery_platform
+  percentage: decimal("percentage", { precision: 5, scale: 4 }), // 0.0500 for 5%
+  fixedAmount: decimal("fixed_amount", { precision: 10, scale: 2 }).default("0.00"),
+  baseAmount: decimal("base_amount", { precision: 10, scale: 2 }).notNull(), // amount fee is calculated on
+  feeAmount: decimal("fee_amount", { precision: 10, scale: 2 }).notNull(),
+  paidBy: varchar("paid_by").notNull(), // seller, buyer, platform
+  status: varchar("status").default("collected"), // pending, collected, waived, refunded
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Promotions and boosts
+export const promotions = pgTable("promotions", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  listingId: integer("listing_id").references(() => listings.id),
+  communityPostId: integer("community_post_id").references(() => communityPosts.id),
+  type: varchar("type").notNull(), // boost_listing, pin_to_top, sponsor_spotlight
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  duration: integer("duration").default(1), // days
+  status: varchar("status").default("active"), // active, expired, cancelled
+  impressions: integer("impressions").default(0),
+  clicks: integer("clicks").default(0),
+  paidWithWallet: boolean("paid_with_wallet").default(false),
+  startDate: timestamp("start_date").defaultNow(),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Sponsorships from local businesses
+export const sponsorships = pgTable("sponsorships", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  businessId: varchar("business_id").references(() => users.id), // if registered user
+  businessName: varchar("business_name").notNull(),
+  contactEmail: varchar("contact_email"),
+  contactPhone: varchar("contact_phone"),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  message: text("message"),
+  logoUrl: varchar("logo_url"),
+  website: varchar("website"),
+  sponsorshipType: varchar("sponsorship_type").notNull(), // delivery_fees, events, general_support
+  duration: integer("duration").default(7), // days
+  status: varchar("status").default("active"), // active, expired, pending_approval
+  impressions: integer("impressions").default(0),
+  clicks: integer("clicks").default(0),
+  startDate: timestamp("start_date").defaultNow(),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Local business partners
+export const localPartners = pgTable("local_partners", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  businessId: varchar("business_id").references(() => users.id), // if registered user
+  name: varchar("name").notNull(),
+  description: text("description"),
+  website: varchar("website"),
+  logoUrl: varchar("logo_url"),
+  contactEmail: varchar("contact_email"),
+  contactPhone: varchar("contact_phone"),
+  address: text("address"),
+  category: varchar("category"), // restaurant, retail, service, entertainment
+  specialOffers: jsonb("special_offers"), // exclusive deals for app users
+  isActive: boolean("is_active").default(true),
+  joinedAt: timestamp("joined_at").defaultNow(),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+});
+
+// Driver payments tracking
+export const driverPayments = pgTable("driver_payments", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  driverId: varchar("driver_id").references(() => users.id).notNull(),
+  routeId: integer("route_id").references(() => deliveryRoutes.id),
+  orderId: integer("order_id").references(() => orders.id),
+  paymentType: varchar("payment_type").notNull(), // pickup, dropoff, mileage, tip, bonus
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  description: text("description"),
+  stripeTransferId: varchar("stripe_transfer_id"), // for payouts
+  status: varchar("status").default("completed"), // pending, completed, failed
+  paidAt: timestamp("paid_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Platform revenue analytics
+export const revenueMetrics = pgTable("revenue_metrics", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  date: date("date").notNull(),
+  productSaleFees: decimal("product_sale_fees", { precision: 10, scale: 2 }).default("0.00"),
+  serviceFees: decimal("service_fees", { precision: 10, scale: 2 }).default("0.00"),
+  deliveryFees: decimal("delivery_fees", { precision: 10, scale: 2 }).default("0.00"),
+  promotionRevenue: decimal("promotion_revenue", { precision: 10, scale: 2 }).default("0.00"),
+  subscriptionRevenue: decimal("subscription_revenue", { precision: 10, scale: 2 }).default("0.00"),
+  sponsorshipRevenue: decimal("sponsorship_revenue", { precision: 10, scale: 2 }).default("0.00"),
+  totalRevenue: decimal("total_revenue", { precision: 10, scale: 2 }).default("0.00"),
+  driverPayouts: decimal("driver_payouts", { precision: 10, scale: 2 }).default("0.00"),
+  netRevenue: decimal("net_revenue", { precision: 10, scale: 2 }).default("0.00"),
+  totalUsers: integer("total_users").default(0),
+  activeUsers: integer("active_users").default(0),
+  proSubscribers: integer("pro_subscribers").default(0),
+  totalOrders: integer("total_orders").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Return handling
+export const returns = pgTable("returns", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  orderId: integer("order_id").references(() => orders.id).notNull(),
+  buyerId: varchar("buyer_id").references(() => users.id).notNull(),
+  sellerId: varchar("seller_id").references(() => users.id).notNull(),
+  driverId: varchar("driver_id").references(() => users.id),
+  reason: varchar("reason").notNull(), // refused_on_delivery, damaged, wrong_item, quality_issues
+  refusalTimeMinutes: integer("refusal_time_minutes"), // time taken to refuse
+  refundAmount: decimal("refund_amount", { precision: 10, scale: 2 }).notNull(),
+  returnFee: decimal("return_fee", { precision: 10, scale: 2 }).default("0.00"),
+  driverCompensation: decimal("driver_compensation", { precision: 10, scale: 2 }).default("0.00"),
+  status: varchar("status").default("processing"), // processing, approved, rejected, completed
+  stripeRefundId: varchar("stripe_refund_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+  processedAt: timestamp("processed_at"),
+});
+
 // App settings table for admin configuration
 export const appSettings = pgTable("app_settings", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
@@ -709,6 +886,167 @@ export type DeviceFingerprint = typeof deviceFingerprints.$inferSelect;
 export type InsertDeviceFingerprint = typeof deviceFingerprints.$inferInsert;
 export type PurchaseHistory = typeof purchaseHistory.$inferSelect;
 export type InsertPurchaseHistory = typeof purchaseHistory.$inferInsert;
+
+// ============ REVENUE SYSTEM RELATIONS ============
+
+export const userWalletsRelations = relations(userWallets, ({ one, many }) => ({
+  user: one(users, {
+    fields: [userWallets.userId],
+    references: [users.id],
+  }),
+  transactions: many(walletTransactions),
+}));
+
+export const walletTransactionsRelations = relations(walletTransactions, ({ one }) => ({
+  wallet: one(userWallets, {
+    fields: [walletTransactions.walletId],
+    references: [userWallets.id],
+  }),
+  user: one(users, {
+    fields: [walletTransactions.userId],
+    references: [users.id],
+  }),
+  relatedOrder: one(orders, {
+    fields: [walletTransactions.relatedOrderId],
+    references: [orders.id],
+  }),
+  relatedListing: one(listings, {
+    fields: [walletTransactions.relatedListingId],
+    references: [listings.id],
+  }),
+}));
+
+export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
+  user: one(users, {
+    fields: [subscriptions.userId],
+    references: [users.id],
+  }),
+}));
+
+export const transactionFeesRelations = relations(transactionFees, ({ one }) => ({
+  order: one(orders, {
+    fields: [transactionFees.orderId],
+    references: [orders.id],
+  }),
+  listing: one(listings, {
+    fields: [transactionFees.listingId],
+    references: [listings.id],
+  }),
+  seller: one(users, {
+    fields: [transactionFees.sellerId],
+    references: [users.id],
+    relationName: "sellerFees",
+  }),
+  buyer: one(users, {
+    fields: [transactionFees.buyerId],
+    references: [users.id],
+    relationName: "buyerFees",
+  }),
+}));
+
+export const promotionsRelations = relations(promotions, ({ one }) => ({
+  user: one(users, {
+    fields: [promotions.userId],
+    references: [users.id],
+  }),
+  listing: one(listings, {
+    fields: [promotions.listingId],
+    references: [listings.id],
+  }),
+  communityPost: one(communityPosts, {
+    fields: [promotions.communityPostId],
+    references: [communityPosts.id],
+  }),
+}));
+
+export const sponsorshipsRelations = relations(sponsorships, ({ one }) => ({
+  business: one(users, {
+    fields: [sponsorships.businessId],
+    references: [users.id],
+  }),
+}));
+
+export const localPartnersRelations = relations(localPartners, ({ one }) => ({
+  business: one(users, {
+    fields: [localPartners.businessId],
+    references: [users.id],
+  }),
+}));
+
+export const driverPaymentsRelations = relations(driverPayments, ({ one }) => ({
+  driver: one(users, {
+    fields: [driverPayments.driverId],
+    references: [users.id],
+  }),
+  route: one(deliveryRoutes, {
+    fields: [driverPayments.routeId],
+    references: [deliveryRoutes.id],
+  }),
+  order: one(orders, {
+    fields: [driverPayments.orderId],
+    references: [orders.id],
+  }),
+}));
+
+export const returnsRelations = relations(returns, ({ one }) => ({
+  order: one(orders, {
+    fields: [returns.orderId],
+    references: [orders.id],
+  }),
+  buyer: one(users, {
+    fields: [returns.buyerId],
+    references: [users.id],
+    relationName: "buyerReturns",
+  }),
+  seller: one(users, {
+    fields: [returns.sellerId],
+    references: [users.id],
+    relationName: "sellerReturns",
+  }),
+  driver: one(users, {
+    fields: [returns.driverId],
+    references: [users.id],
+    relationName: "driverReturns",
+  }),
+}));
+
+// Update user relations to include revenue-related tables
+export const usersRevenueRelations = relations(users, ({ many }) => ({
+  wallet: many(userWallets),
+  walletTransactions: many(walletTransactions),
+  subscription: many(subscriptions),
+  sellerFees: many(transactionFees, { relationName: "sellerFees" }),
+  buyerFees: many(transactionFees, { relationName: "buyerFees" }),
+  promotions: many(promotions),
+  sponsorships: many(sponsorships),
+  partnerBusinesses: many(localPartners),
+  driverPayments: many(driverPayments),
+  buyerReturns: many(returns, { relationName: "buyerReturns" }),
+  sellerReturns: many(returns, { relationName: "sellerReturns" }),
+  driverReturns: many(returns, { relationName: "driverReturns" }),
+}));
+
+// Type exports for revenue system tables
+export type UserWallet = typeof userWallets.$inferSelect;
+export type InsertUserWallet = typeof userWallets.$inferInsert;
+export type WalletTransaction = typeof walletTransactions.$inferSelect;
+export type InsertWalletTransaction = typeof walletTransactions.$inferInsert;
+export type Subscription = typeof subscriptions.$inferSelect;
+export type InsertSubscription = typeof subscriptions.$inferInsert;
+export type TransactionFee = typeof transactionFees.$inferSelect;
+export type InsertTransactionFee = typeof transactionFees.$inferInsert;
+export type Promotion = typeof promotions.$inferSelect;
+export type InsertPromotion = typeof promotions.$inferInsert;
+export type Sponsorship = typeof sponsorships.$inferSelect;
+export type InsertSponsorship = typeof sponsorships.$inferInsert;
+export type LocalPartner = typeof localPartners.$inferSelect;
+export type InsertLocalPartner = typeof localPartners.$inferInsert;
+export type DriverPayment = typeof driverPayments.$inferSelect;
+export type InsertDriverPayment = typeof driverPayments.$inferInsert;
+export type RevenueMetric = typeof revenueMetrics.$inferSelect;
+export type InsertRevenueMetric = typeof revenueMetrics.$inferInsert;
+export type Return = typeof returns.$inferSelect;
+export type InsertReturn = typeof returns.$inferInsert;
 
 // Type exports for advertising system tables
 export type AdCampaign = typeof adCampaigns.$inferSelect;
