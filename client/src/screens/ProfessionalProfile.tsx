@@ -33,7 +33,11 @@ const ProfessionalProfile = ({ navigation, route }: any) => {
     allowsDelivery: true,
     allowsPickup: true,
     customShipping: false,
-    shippingFee: '25.00'
+    shippingFee: '25.00',
+    useExistingCarrier: false,
+    existingCarrier: 'fedex',
+    carrierAccountNumber: '',
+    integratedShipping: true
   });
 
   const TabButton = ({ id, title, icon }: { id: string; title: string; icon: any }) => (
@@ -191,9 +195,81 @@ const ProfessionalProfile = ({ navigation, route }: any) => {
         <Text style={{ fontSize: 12, color: '#666' }}>Allow customers to pick up directly from your location</Text>
       </View>
 
+      {/* New Existing Carrier Integration Option */}
       <View style={{ backgroundColor: '#fff', padding: 16, borderRadius: 12, marginBottom: 16, borderWidth: 1, borderColor: '#eee' }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <Text style={{ fontSize: 16, fontWeight: '600', color: '#333' }}>Custom Shipping</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 16, fontWeight: '600', color: '#333' }}>Use Existing Carrier</Text>
+            <Text style={{ fontSize: 12, color: '#666', marginTop: 2 }}>FedEx, UPS, USPS - Keep your current shipping process</Text>
+          </View>
+          <Switch
+            value={deliverySettings.useExistingCarrier}
+            onValueChange={(value) => setDeliverySettings(prev => ({ ...prev, useExistingCarrier: value }))}
+          />
+        </View>
+        
+        {deliverySettings.useExistingCarrier && (
+          <View style={{ marginTop: 12 }}>
+            <View style={{ backgroundColor: '#e8f5e8', padding: 12, borderRadius: 8, marginBottom: 12, borderLeftWidth: 4, borderLeftColor: '#4CAF50' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                <Ionicons name="checkmark-circle" size={16} color="#4CAF50" style={{ marginRight: 6 }} />
+                <Text style={{ fontSize: 14, fontWeight: '600', color: '#2e7d32' }}>MarketPace Integration</Text>
+              </View>
+              <Text style={{ fontSize: 12, color: '#2e7d32', lineHeight: 18 }}>
+                You keep your existing shipping process. MarketPace still receives 5% commission on all sales. No changes to your workflow.
+              </Text>
+            </View>
+
+            <Text style={{ fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8 }}>Carrier Selection</Text>
+            <View style={{ flexDirection: 'row', marginBottom: 12 }}>
+              {['fedex', 'ups', 'usps'].map((carrier) => (
+                <TouchableOpacity
+                  key={carrier}
+                  style={{
+                    backgroundColor: deliverySettings.existingCarrier === carrier ? '#667eea' : '#f0f0f0',
+                    paddingHorizontal: 16,
+                    paddingVertical: 8,
+                    borderRadius: 6,
+                    marginRight: 8
+                  }}
+                  onPress={() => setDeliverySettings(prev => ({ ...prev, existingCarrier: carrier }))}
+                >
+                  <Text style={{
+                    color: deliverySettings.existingCarrier === carrier ? '#fff' : '#666',
+                    fontSize: 12,
+                    fontWeight: '600'
+                  }}>
+                    {carrier.toUpperCase()}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={{ fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8 }}>Account Number (Optional)</Text>
+            <TextInput
+              style={{ borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12, fontSize: 14, marginBottom: 12 }}
+              placeholder="Enter your carrier account number"
+              value={deliverySettings.carrierAccountNumber}
+              onChangeText={(text) => setDeliverySettings(prev => ({ ...prev, carrierAccountNumber: text }))}
+            />
+
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+              <Text style={{ fontSize: 14, fontWeight: '600', color: '#333' }}>Integrated Billing</Text>
+              <Switch
+                value={deliverySettings.integratedShipping}
+                onValueChange={(value) => setDeliverySettings(prev => ({ ...prev, integratedShipping: value }))}
+              />
+            </View>
+            <Text style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
+              Automatically include shipping costs in customer checkout
+            </Text>
+          </View>
+        )}
+      </View>
+
+      <View style={{ backgroundColor: '#fff', padding: 16, borderRadius: 12, marginBottom: 16, borderWidth: 1, borderColor: '#eee' }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <Text style={{ fontSize: 16, fontWeight: '600', color: '#333' }}>Custom Shipping Rates</Text>
           <Switch
             value={deliverySettings.customShipping}
             onValueChange={(value) => setDeliverySettings(prev => ({ ...prev, customShipping: value }))}
