@@ -13,10 +13,13 @@ app.use(helmet({
 app.use(cors({
   origin: [
     'http://localhost:8083',
+    'https://localhost:8083',
     'exp://localhost:8083',
+    'exp://172.31.128.31:8083',
     /^https:\/\/.*\.replit\.dev$/,
     /^https:\/\/.*\.replit\.app$/,
-    /^exp:\/\/.*$/
+    /^exp:\/\/.*$/,
+    /^https:\/\/.*\.spock\.replit\.dev$/
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
