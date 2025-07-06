@@ -1358,7 +1358,11 @@ const ApplicationSuccessScreen = ({ navigation }: any) => (
 );
 
 const CampaignLandingScreen = ({ navigation }: any) => (
-  <ScrollView style={{ flex: 1, backgroundColor: '#f8f9fa' }}>
+  <ScrollView 
+    style={{ flex: 1, backgroundColor: '#f8f9fa' }}
+    contentContainerStyle={{ flexGrow: 1 }}
+    showsVerticalScrollIndicator={false}
+  >
     {/* Hero Section */}
     <LinearGradient
       colors={['#1a1a2e', '#16213e', '#0f3460']}
@@ -1519,7 +1523,8 @@ const CampaignLandingScreen = ({ navigation }: any) => (
       </View>
     </View>
 
-    <View style={{ height: 40 }} />
+    {/* Bottom padding for floating navigation */}
+    <View style={{ height: 100 }} />
   </ScrollView>
 );
 
