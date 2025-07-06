@@ -285,8 +285,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     <h3 class="login-title">Join as Member</h3>
                     <p class="login-description">Shop local, support your community, and discover amazing products and services from your neighbors</p>
                     <a href="/api/login" class="btn btn-primary">Join MarketPlace</a>
-                    <a href="#" onclick="openMobileApp()" class="btn btn-secondary">Open Mobile App</a>
-                    <a href="#" onclick="redirectToMobileApp()" class="btn btn-secondary" style="font-size: 14px;">Direct Link to Mobile</a>
                 </div>
                 
                 <div class="login-card">
