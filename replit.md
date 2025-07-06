@@ -185,19 +185,6 @@ MarketPace is a React Native mobile application that prioritizes community empow
 
 ## Recent Changes
 
-✓ **ADMIN ACCESS AND REPLIT AUTHENTICATION SETUP** (July 06, 2025)
-✓ Fixed critical route ordering issue preventing web landing page display
-✓ Created PostgreSQL database with users and sessions tables
-✓ Implemented admin user account with proper user type and verification
-✓ Built comprehensive admin middleware with role-based access control
-✓ Added admin dashboard with user management, statistics, and platform monitoring
-✓ Created admin web interface at /admin with real-time data and user actions
-✓ Integrated Replit Auth using OpenID Connect for secure authentication
-✓ Added admin-specific storage methods for user management and analytics
-✓ Established admin routes for user verification, suspension, and content moderation
-✓ Configured session management with PostgreSQL storage for security
-✓ Built admin statistics tracking with user counts and platform metrics
-
 ✓ **COMPREHENSIVE REVENUE SYSTEM IMPLEMENTATION** (July 06, 2025)
 ✓ Built complete ethical revenue model based on user specifications
 ✓ Implemented in-app wallet system with 10% bonus on credit loads
@@ -342,17 +329,6 @@ MarketPace is a React Native mobile application that prioritizes community empow
 ✓ Added color legend explaining Dark Blue → Light Blue (purchases) and Dark Red → Light Red (sales)
 ✓ Implemented transparent cost display and driver information for all deliveries
 ✓ Enhanced user experience with tabbed navigation and comprehensive delivery insights
-
-✓ **WEB LANDING PAGE IMPLEMENTATION** (July 06, 2025)
-✓ Added professional HTML landing page served at root URL (/) on port 5000
-✓ Created beautiful gradient design matching MarketPlace brand colors
-✓ Implemented responsive layout with mobile-friendly breakpoints
-✓ Added hero section with logo, taglines, and call-to-action buttons
-✓ Integrated mission statement and community statistics display
-✓ Built feature showcase highlighting community-first approach
-✓ Added "Open Mobile App" functionality to redirect to port 8083
-✓ Included authentication link for user login integration
-✓ Designed professional web presence for marketing and user acquisition
 
 ## Changelog
 
