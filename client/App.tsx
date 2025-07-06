@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NavigationContainer } from '@react-navigation/native';
@@ -780,11 +780,476 @@ const MemberQuestionnaireScreen = ({ route, navigation }: any) => {
   );
 };
 
+// Driver Job Description Screen
+const DriverJobDescriptionScreen = ({ navigation }: any) => {
+  return (
+    <ScrollView style={{ flex: 1, backgroundColor: '#0f0f23' }}>
+      {/* Header */}
+      <LinearGradient
+        colors={['#1a1a2e', '#16213e', '#0f3460']}
+        style={{ paddingTop: 60, paddingBottom: 30, paddingHorizontal: 20 }}
+      >
+        <TouchableOpacity 
+          onPress={() => navigation.goBack()}
+          style={{ marginBottom: 20 }}
+        >
+          <Text style={{ fontSize: 16, color: '#9c27b0' }}>← Back</Text>
+        </TouchableOpacity>
+        
+        <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#fff', marginBottom: 8 }}>
+          Drive for MarketPlace
+        </Text>
+        <Text style={{ fontSize: 16, color: 'rgba(255, 255, 255, 0.9)' }}>
+          Independent Contractor Opportunity
+        </Text>
+      </LinearGradient>
+
+      {/* Job Details */}
+      <View style={{ padding: 24 }}>
+        {/* Position Type */}
+        <LinearGradient
+          colors={['#6a1b9a', '#8e24aa']}
+          style={{ borderRadius: 12, padding: 20, marginBottom: 20 }}
+        >
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 8 }}>
+            🚗 Independent Contractor Position
+          </Text>
+          <Text style={{ fontSize: 14, color: 'rgba(255, 255, 255, 0.9)', lineHeight: 20 }}>
+            You will be hired as an independent contractor, not an employee. You control your schedule, work when you want, and are responsible for your own taxes and expenses.
+          </Text>
+        </LinearGradient>
+
+        {/* Earnings */}
+        <View style={{ backgroundColor: '#1a1a2e', borderRadius: 12, padding: 20, marginBottom: 20 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#9c27b0', marginBottom: 12 }}>
+            💰 Earnings Breakdown
+          </Text>
+          <View style={{ marginBottom: 8 }}>
+            <Text style={{ fontSize: 16, color: '#fff', fontWeight: '600' }}>$4 per pickup</Text>
+            <Text style={{ fontSize: 14, color: '#ccc' }}>Collect items from sellers</Text>
+          </View>
+          <View style={{ marginBottom: 8 }}>
+            <Text style={{ fontSize: 16, color: '#fff', fontWeight: '600' }}>$2 per dropoff</Text>
+            <Text style={{ fontSize: 14, color: '#ccc' }}>Deliver items to buyers</Text>
+          </View>
+          <View style={{ marginBottom: 8 }}>
+            <Text style={{ fontSize: 16, color: '#fff', fontWeight: '600' }}>$0.50 per mile</Text>
+            <Text style={{ fontSize: 14, color: '#ccc' }}>Mileage compensation</Text>
+          </View>
+          <View style={{ marginBottom: 8 }}>
+            <Text style={{ fontSize: 16, color: '#fff', fontWeight: '600' }}>100% of tips</Text>
+            <Text style={{ fontSize: 14, color: '#ccc' }}>Keep all customer tips</Text>
+          </View>
+        </View>
+
+        {/* Schedule */}
+        <View style={{ backgroundColor: '#1a1a2e', borderRadius: 12, padding: 20, marginBottom: 20 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#9c27b0', marginBottom: 12 }}>
+            ⏰ Flexible Schedule
+          </Text>
+          <Text style={{ fontSize: 14, color: '#ccc', marginBottom: 8 }}>Choose your time blocks:</Text>
+          <Text style={{ fontSize: 14, color: '#fff' }}>• 9am - 12pm</Text>
+          <Text style={{ fontSize: 14, color: '#fff' }}>• 12pm - 3pm</Text>
+          <Text style={{ fontSize: 14, color: '#fff' }}>• 3pm - 6pm</Text>
+          <Text style={{ fontSize: 14, color: '#fff' }}>• 6pm - 9pm</Text>
+          <Text style={{ fontSize: 12, color: '#999', marginTop: 8 }}>
+            Maximum 2 routes per time block, 6 deliveries per route
+          </Text>
+        </View>
+
+        {/* Requirements */}
+        <View style={{ backgroundColor: '#1a1a2e', borderRadius: 12, padding: 20, marginBottom: 20 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#9c27b0', marginBottom: 12 }}>
+            📋 Requirements
+          </Text>
+          <Text style={{ fontSize: 14, color: '#fff', marginBottom: 4 }}>✓ Valid driver's license</Text>
+          <Text style={{ fontSize: 14, color: '#fff', marginBottom: 4 }}>✓ Current auto insurance</Text>
+          <Text style={{ fontSize: 14, color: '#fff', marginBottom: 4 }}>✓ Clean background check</Text>
+          <Text style={{ fontSize: 14, color: '#fff', marginBottom: 4 }}>✓ Reliable vehicle</Text>
+          <Text style={{ fontSize: 14, color: '#fff', marginBottom: 4 }}>✓ Smartphone for app</Text>
+        </View>
+
+        {/* Action Button */}
+        <TouchableOpacity 
+          style={{ width: '100%', marginBottom: 20 }}
+          onPress={() => navigation.navigate('DriverApplication')}
+        >
+          <LinearGradient
+            colors={['#3f51b5', '#2196f3', '#00bcd4']}
+            style={{ paddingVertical: 16, paddingHorizontal: 32, borderRadius: 12, alignItems: 'center' }}
+          >
+            <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff' }}>
+              Start Application
+            </Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+};
+
+// Driver Application Screen
+const DriverApplicationScreen = ({ navigation }: any) => {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    licenseNumber: '',
+    vehicleYear: '',
+    vehicleMake: '',
+    vehicleModel: '',
+    vehicleColor: '',
+    licensePlate: '',
+    driversLicense: null,
+    insurance: null,
+    backgroundCheck: null
+  });
+
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const nextStep = () => {
+    if (currentStep < 3) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    // Simulate processing
+    setTimeout(() => {
+      setIsSubmitting(false);
+      navigation.navigate('ApplicationSuccess');
+    }, 3000);
+  };
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <View>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#fff', marginBottom: 20 }}>
+              Personal Information
+            </Text>
+            
+            <View style={{ marginBottom: 16 }}>
+              <Text style={{ fontSize: 14, color: '#ccc', marginBottom: 8 }}>First Name *</Text>
+              <TextInput
+                style={{ backgroundColor: '#1a1a2e', borderRadius: 8, padding: 12, color: '#fff', fontSize: 16 }}
+                value={formData.firstName}
+                onChangeText={(text) => setFormData({...formData, firstName: text})}
+                placeholder="Enter first name"
+                placeholderTextColor="#666"
+              />
+            </View>
+
+            <View style={{ marginBottom: 16 }}>
+              <Text style={{ fontSize: 14, color: '#ccc', marginBottom: 8 }}>Last Name *</Text>
+              <TextInput
+                style={{ backgroundColor: '#1a1a2e', borderRadius: 8, padding: 12, color: '#fff', fontSize: 16 }}
+                value={formData.lastName}
+                onChangeText={(text) => setFormData({...formData, lastName: text})}
+                placeholder="Enter last name"
+                placeholderTextColor="#666"
+              />
+            </View>
+
+            <View style={{ marginBottom: 16 }}>
+              <Text style={{ fontSize: 14, color: '#ccc', marginBottom: 8 }}>Email *</Text>
+              <TextInput
+                style={{ backgroundColor: '#1a1a2e', borderRadius: 8, padding: 12, color: '#fff', fontSize: 16 }}
+                value={formData.email}
+                onChangeText={(text) => setFormData({...formData, email: text})}
+                placeholder="Enter email address"
+                placeholderTextColor="#666"
+                keyboardType="email-address"
+              />
+            </View>
+
+            <View style={{ marginBottom: 16 }}>
+              <Text style={{ fontSize: 14, color: '#ccc', marginBottom: 8 }}>Phone Number *</Text>
+              <TextInput
+                style={{ backgroundColor: '#1a1a2e', borderRadius: 8, padding: 12, color: '#fff', fontSize: 16 }}
+                value={formData.phone}
+                onChangeText={(text) => setFormData({...formData, phone: text})}
+                placeholder="(555) 123-4567"
+                placeholderTextColor="#666"
+                keyboardType="phone-pad"
+              />
+            </View>
+          </View>
+        );
+
+      case 2:
+        return (
+          <View>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#fff', marginBottom: 20 }}>
+              Vehicle Information
+            </Text>
+            
+            <View style={{ marginBottom: 16 }}>
+              <Text style={{ fontSize: 14, color: '#ccc', marginBottom: 8 }}>Driver's License Number *</Text>
+              <TextInput
+                style={{ backgroundColor: '#1a1a2e', borderRadius: 8, padding: 12, color: '#fff', fontSize: 16 }}
+                value={formData.licenseNumber}
+                onChangeText={(text) => setFormData({...formData, licenseNumber: text})}
+                placeholder="Enter license number"
+                placeholderTextColor="#666"
+              />
+            </View>
+
+            <View style={{ flexDirection: 'row', gap: 12, marginBottom: 16 }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, color: '#ccc', marginBottom: 8 }}>Year *</Text>
+                <TextInput
+                  style={{ backgroundColor: '#1a1a2e', borderRadius: 8, padding: 12, color: '#fff', fontSize: 16 }}
+                  value={formData.vehicleYear}
+                  onChangeText={(text) => setFormData({...formData, vehicleYear: text})}
+                  placeholder="2020"
+                  placeholderTextColor="#666"
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, color: '#ccc', marginBottom: 8 }}>Make *</Text>
+                <TextInput
+                  style={{ backgroundColor: '#1a1a2e', borderRadius: 8, padding: 12, color: '#fff', fontSize: 16 }}
+                  value={formData.vehicleMake}
+                  onChangeText={(text) => setFormData({...formData, vehicleMake: text})}
+                  placeholder="Toyota"
+                  placeholderTextColor="#666"
+                />
+              </View>
+            </View>
+
+            <View style={{ flexDirection: 'row', gap: 12, marginBottom: 16 }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, color: '#ccc', marginBottom: 8 }}>Model *</Text>
+                <TextInput
+                  style={{ backgroundColor: '#1a1a2e', borderRadius: 8, padding: 12, color: '#fff', fontSize: 16 }}
+                  value={formData.vehicleModel}
+                  onChangeText={(text) => setFormData({...formData, vehicleModel: text})}
+                  placeholder="Camry"
+                  placeholderTextColor="#666"
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, color: '#ccc', marginBottom: 8 }}>Color *</Text>
+                <TextInput
+                  style={{ backgroundColor: '#1a1a2e', borderRadius: 8, padding: 12, color: '#fff', fontSize: 16 }}
+                  value={formData.vehicleColor}
+                  onChangeText={(text) => setFormData({...formData, vehicleColor: text})}
+                  placeholder="Blue"
+                  placeholderTextColor="#666"
+                />
+              </View>
+            </View>
+
+            <View style={{ marginBottom: 16 }}>
+              <Text style={{ fontSize: 14, color: '#ccc', marginBottom: 8 }}>License Plate *</Text>
+              <TextInput
+                style={{ backgroundColor: '#1a1a2e', borderRadius: 8, padding: 12, color: '#fff', fontSize: 16 }}
+                value={formData.licensePlate}
+                onChangeText={(text) => setFormData({...formData, licensePlate: text})}
+                placeholder="ABC-1234"
+                placeholderTextColor="#666"
+              />
+            </View>
+          </View>
+        );
+
+      case 3:
+        return (
+          <View>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#fff', marginBottom: 20 }}>
+              Required Documents
+            </Text>
+
+            {/* Driver's License Upload */}
+            <View style={{ backgroundColor: '#1a1a2e', borderRadius: 8, padding: 16, marginBottom: 16 }}>
+              <Text style={{ fontSize: 16, color: '#9c27b0', fontWeight: '600', marginBottom: 8 }}>
+                📄 Driver's License
+              </Text>
+              <Text style={{ fontSize: 14, color: '#ccc', marginBottom: 12 }}>
+                Upload a clear photo of your valid driver's license
+              </Text>
+              <TouchableOpacity style={{ backgroundColor: '#3f51b5', padding: 12, borderRadius: 8, alignItems: 'center' }}>
+                <Text style={{ color: '#fff', fontWeight: '600' }}>
+                  {formData.driversLicense ? 'License Uploaded ✓' : 'Upload License'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Insurance Upload */}
+            <View style={{ backgroundColor: '#1a1a2e', borderRadius: 8, padding: 16, marginBottom: 16 }}>
+              <Text style={{ fontSize: 16, color: '#9c27b0', fontWeight: '600', marginBottom: 8 }}>
+                🛡️ Auto Insurance
+              </Text>
+              <Text style={{ fontSize: 14, color: '#ccc', marginBottom: 12 }}>
+                Upload current auto insurance proof (declaration page)
+              </Text>
+              <TouchableOpacity style={{ backgroundColor: '#3f51b5', padding: 12, borderRadius: 8, alignItems: 'center' }}>
+                <Text style={{ color: '#fff', fontWeight: '600' }}>
+                  {formData.insurance ? 'Insurance Uploaded ✓' : 'Upload Insurance'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Background Check */}
+            <View style={{ backgroundColor: '#1a1a2e', borderRadius: 8, padding: 16, marginBottom: 16 }}>
+              <Text style={{ fontSize: 16, color: '#9c27b0', fontWeight: '600', marginBottom: 8 }}>
+                🔍 Background Check
+              </Text>
+              <Text style={{ fontSize: 14, color: '#ccc', marginBottom: 12 }}>
+                Upload recent background check (applicant responsibility - $29.99)
+              </Text>
+              <TouchableOpacity style={{ backgroundColor: '#3f51b5', padding: 12, borderRadius: 8, alignItems: 'center' }}>
+                <Text style={{ color: '#fff', fontWeight: '600' }}>
+                  {formData.backgroundCheck ? 'Background Check Uploaded ✓' : 'Upload Background Check'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={{ backgroundColor: '#2d1b69', borderRadius: 8, padding: 16, marginBottom: 20 }}>
+              <Text style={{ fontSize: 14, color: '#fff', textAlign: 'center', lineHeight: 20 }}>
+                ⚡ Once all documents are verified, you'll receive driver dashboard credentials via email within 24 hours.
+              </Text>
+            </View>
+          </View>
+        );
+    }
+  };
+
+  return (
+    <ScrollView style={{ flex: 1, backgroundColor: '#0f0f23' }}>
+      {/* Header */}
+      <LinearGradient
+        colors={['#1a1a2e', '#16213e', '#0f3460']}
+        style={{ paddingTop: 60, paddingBottom: 30, paddingHorizontal: 20 }}
+      >
+        <TouchableOpacity 
+          onPress={() => navigation.goBack()}
+          style={{ marginBottom: 20 }}
+        >
+          <Text style={{ fontSize: 16, color: '#9c27b0' }}>← Back</Text>
+        </TouchableOpacity>
+        
+        <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 8 }}>
+          Driver Application
+        </Text>
+        
+        {/* Progress Indicator */}
+        <View style={{ flexDirection: 'row', marginTop: 12 }}>
+          {[1, 2, 3].map((step) => (
+            <View
+              key={step}
+              style={{
+                flex: 1,
+                height: 4,
+                backgroundColor: step <= currentStep ? '#9c27b0' : 'rgba(255, 255, 255, 0.3)',
+                marginHorizontal: 2,
+                borderRadius: 2
+              }}
+            />
+          ))}
+        </View>
+        <Text style={{ fontSize: 14, color: 'rgba(255, 255, 255, 0.9)', marginTop: 8 }}>
+          Step {currentStep} of 3
+        </Text>
+      </LinearGradient>
+
+      {/* Content */}
+      <View style={{ padding: 24 }}>
+        {renderStep()}
+
+        {/* Navigation Buttons */}
+        <View style={{ flexDirection: 'row', gap: 12, marginTop: 24 }}>
+          {currentStep > 1 && (
+            <TouchableOpacity 
+              style={{ flex: 1, backgroundColor: '#1a1a2e', padding: 16, borderRadius: 8, alignItems: 'center' }}
+              onPress={prevStep}
+            >
+              <Text style={{ color: '#9c27b0', fontWeight: '600' }}>Previous</Text>
+            </TouchableOpacity>
+          )}
+          
+          <TouchableOpacity 
+            style={{ 
+              flex: 1, 
+              opacity: isSubmitting ? 0.6 : 1
+            }}
+            onPress={currentStep === 3 ? handleSubmit : nextStep}
+            disabled={isSubmitting}
+          >
+            <LinearGradient
+              colors={['#3f51b5', '#2196f3', '#00bcd4']}
+              style={{ padding: 16, borderRadius: 8, alignItems: 'center' }}
+            >
+              <Text style={{ color: '#fff', fontWeight: '600' }}>
+                {isSubmitting ? 'Submitting...' : currentStep === 3 ? 'Submit Application' : 'Next'}
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ScrollView>
+  );
+};
+
+// Application Success Screen
+const ApplicationSuccessScreen = ({ navigation }: any) => (
+  <ScrollView style={{ flex: 1, backgroundColor: '#0f0f23' }}>
+    <LinearGradient
+      colors={['#1a1a2e', '#16213e', '#0f3460']}
+      style={{ paddingTop: 60, paddingBottom: 40, paddingHorizontal: 20, alignItems: 'center', minHeight: 400 }}
+    >
+      <View style={{ 
+        width: 100, height: 100, borderRadius: 50, backgroundColor: 'rgba(156, 39, 176, 0.2)',
+        justifyContent: 'center', alignItems: 'center', marginBottom: 24, marginTop: 60
+      }}>
+        <Text style={{ fontSize: 48, color: '#9c27b0' }}>✓</Text>
+      </View>
+      
+      <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#fff', marginBottom: 12, textAlign: 'center' }}>
+        Application Submitted!
+      </Text>
+      
+      <Text style={{ fontSize: 16, color: 'rgba(255, 255, 255, 0.9)', textAlign: 'center', lineHeight: 24, marginBottom: 32 }}>
+        We're reviewing your application and documents. If approved, you'll receive your driver dashboard login credentials via email within 24 hours.
+      </Text>
+
+      <TouchableOpacity 
+        style={{ width: '100%', marginBottom: 16 }}
+        onPress={() => navigation.navigate('CampaignLanding')}
+      >
+        <LinearGradient
+          colors={['#673ab7', '#9c27b0', '#e91e63']}
+          style={{ paddingVertical: 16, paddingHorizontal: 32, borderRadius: 12, alignItems: 'center' }}
+        >
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff' }}>
+            Return to Home
+          </Text>
+        </LinearGradient>
+      </TouchableOpacity>
+    </LinearGradient>
+  </ScrollView>
+);
+
 const CampaignLandingScreen = ({ navigation }: any) => (
   <ScrollView style={{ flex: 1, backgroundColor: '#f8f9fa' }}>
     {/* Hero Section */}
     <LinearGradient
-      colors={['#667eea', '#764ba2']}
+      colors={['#1a1a2e', '#16213e', '#0f3460']}
       style={{ paddingTop: 60, paddingBottom: 40, paddingHorizontal: 20, alignItems: 'center' }}
     >
       <View style={{ 
@@ -843,7 +1308,7 @@ const CampaignLandingScreen = ({ navigation }: any) => (
 
     {/* Early Member Benefits */}
     <LinearGradient
-      colors={['#ff6b6b', '#ffa726']}
+      colors={['#6a1b9a', '#8e24aa', '#ab47bc']}
       style={{ margin: 20, borderRadius: 16, padding: 24 }}
     >
       <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#fff', textAlign: 'center', marginBottom: 8 }}>
@@ -864,7 +1329,7 @@ const CampaignLandingScreen = ({ navigation }: any) => (
         onPress={() => navigation.navigate('SignUpLogin', { mode: 'signup' })}
       >
         <LinearGradient
-          colors={['#4CAF50', '#45a049']}
+          colors={['#673ab7', '#9c27b0', '#e91e63']}
           style={{ paddingVertical: 16, paddingHorizontal: 32, borderRadius: 12, alignItems: 'center' }}
         >
           <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 4 }}>
@@ -878,10 +1343,10 @@ const CampaignLandingScreen = ({ navigation }: any) => (
 
       <TouchableOpacity 
         style={{ width: '100%', marginBottom: 16 }}
-        onPress={() => navigation.navigate('SignUpLogin', { mode: 'driver' })}
+        onPress={() => navigation.navigate('DriverJobDescription')}
       >
         <LinearGradient
-          colors={['#ff9800', '#f57c00']}
+          colors={['#3f51b5', '#2196f3', '#00bcd4']}
           style={{ paddingVertical: 16, paddingHorizontal: 32, borderRadius: 12, alignItems: 'center' }}
         >
           <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 4 }}>
@@ -897,7 +1362,7 @@ const CampaignLandingScreen = ({ navigation }: any) => (
         style={{ paddingVertical: 12, paddingHorizontal: 24 }}
         onPress={() => navigation.navigate('SignUpLogin', { mode: 'login' })}
       >
-        <Text style={{ fontSize: 16, color: '#667eea', textAlign: 'center' }}>
+        <Text style={{ fontSize: 16, color: '#9c27b0', textAlign: 'center' }}>
           Already a Member? Log In
         </Text>
       </TouchableOpacity>
@@ -954,6 +1419,9 @@ function HomeStack() {
       <Stack.Screen name="SignUpLogin" component={SignUpLoginScreen} options={{ headerShown: false }} />
       <Stack.Screen name="MemberQuestionnaire" component={MemberQuestionnaireScreen} options={{ headerShown: false }} />
       <Stack.Screen name="ProfessionalProfile" component={ProfessionalProfile} options={{ headerShown: false }} />
+      <Stack.Screen name="DriverJobDescription" component={DriverJobDescriptionScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="DriverApplication" component={DriverApplicationScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="ApplicationSuccess" component={ApplicationSuccessScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
