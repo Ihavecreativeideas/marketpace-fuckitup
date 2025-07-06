@@ -29,48 +29,465 @@ app.get('/', (req, res) => {
         
         // Simple MarketPlace Landing Page
         const MarketPlaceLanding = () => {
-            const [showDemo, setShowDemo] = useState(false);
+            const [currentStep, setCurrentStep] = useState('landing');
+            const [signupData, setSignupData] = useState({
+                accountType: '',
+                personalInfo: {},
+                businessInfo: {},
+                preferences: {}
+            });
             
-            if (showDemo) {
+            // Step 1: Account Type Selection
+            if (currentStep === 'accountType') {
                 return (
-                    <div style={{minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)'}}>
-                        <div style={{padding: '20px', color: 'white'}}>
+                    <div style={{minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', padding: '40px 20px'}}>
+                        <div style={{maxWidth: '600px', margin: '0 auto', color: 'white'}}>
                             <button 
-                                onClick={() => setShowDemo(false)}
+                                onClick={() => setCurrentStep('landing')}
                                 style={{
                                     background: 'rgba(255,255,255,0.2)', 
                                     border: 'none', 
                                     padding: '10px 20px', 
                                     borderRadius: '8px', 
                                     color: 'white',
-                                    marginBottom: '20px',
+                                    marginBottom: '30px',
                                     cursor: 'pointer'
                                 }}
                             >
-                                ← Back to Landing
+                                ← Back
                             </button>
-                            <h2>MarketPlace Demo Features</h2>
-                            <div style={{display: 'grid', gap: '20px', maxWidth: '800px'}}>
-                                <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '12px'}}>
-                                    <h3>✓ Fixed Landing Page Scrolling</h3>
-                                    <p>Proper ScrollView with bottom padding for floating navigation</p>
+                            
+                            <h2 style={{fontSize: '28px', marginBottom: '20px', textAlign: 'center'}}>Choose Your Account Type</h2>
+                            <p style={{textAlign: 'center', marginBottom: '40px', opacity: 0.9}}>
+                                Select how you'd like to participate in your local MarketPlace community
+                            </p>
+                            
+                            <div style={{display: 'grid', gap: '20px'}}>
+                                <div 
+                                    onClick={() => {
+                                        setSignupData({...signupData, accountType: 'personal'});
+                                        setCurrentStep('personalInfo');
+                                    }}
+                                    style={{
+                                        background: 'rgba(255,255,255,0.1)',
+                                        padding: '30px',
+                                        borderRadius: '15px',
+                                        cursor: 'pointer',
+                                        border: '2px solid transparent',
+                                        transition: 'all 0.3s'
+                                    }}
+                                    onMouseEnter={(e) => e.target.style.borderColor = '#8B5CF6'}
+                                    onMouseLeave={(e) => e.target.style.borderColor = 'transparent'}
+                                >
+                                    <h3 style={{fontSize: '22px', marginBottom: '10px'}}>🏠 Personal Account</h3>
+                                    <p style={{opacity: 0.9, lineHeight: 1.5}}>
+                                        Perfect for individuals who want to buy, sell, and rent items in their neighborhood. 
+                                        Connect with neighbors and build community relationships.
+                                    </p>
+                                    <div style={{marginTop: '15px', fontSize: '14px', opacity: 0.8}}>
+                                        • Buy and sell personal items
+                                        • Rent equipment and tools
+                                        • Find local services
+                                        • Book entertainment
+                                    </div>
                                 </div>
-                                <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '12px'}}>
-                                    <h3>✓ Working "Join the Campaign" Button</h3>
-                                    <p>Fixed navigation structure with HomeStack implementation</p>
+                                
+                                <div 
+                                    onClick={() => {
+                                        setSignupData({...signupData, accountType: 'dual'});
+                                        setCurrentStep('personalInfo');
+                                    }}
+                                    style={{
+                                        background: 'rgba(255,255,255,0.1)',
+                                        padding: '30px',
+                                        borderRadius: '15px',
+                                        cursor: 'pointer',
+                                        border: '2px solid transparent',
+                                        transition: 'all 0.3s'
+                                    }}
+                                    onMouseEnter={(e) => e.target.style.borderColor = '#8B5CF6'}
+                                    onMouseLeave={(e) => e.target.style.borderColor = 'transparent'}
+                                >
+                                    <h3 style={{fontSize: '22px', marginBottom: '10px'}}>🏢 Personal + Business Account</h3>
+                                    <p style={{opacity: 0.9, lineHeight: 1.5}}>
+                                        Ideal for entrepreneurs and service providers who want to grow their business 
+                                        while staying connected to their community.
+                                    </p>
+                                    <div style={{marginTop: '15px', fontSize: '14px', opacity: 0.8}}>
+                                        • Everything in Personal Account
+                                        • Professional business profile
+                                        • Advanced shop features
+                                        • Service booking calendar
+                                        • Entertainment hub access
+                                    </div>
                                 </div>
-                                <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '12px'}}>
-                                    <h3>✓ Complete Marketplace Categories</h3>
-                                    <p>Rent, Buy/Sell, Odd Jobs, Services, Shops, The Hub - all with listings</p>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+            
+            // Step 2: Personal Information
+            if (currentStep === 'personalInfo') {
+                return (
+                    <div style={{minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', padding: '40px 20px'}}>
+                        <div style={{maxWidth: '600px', margin: '0 auto', color: 'white'}}>
+                            <button 
+                                onClick={() => setCurrentStep('accountType')}
+                                style={{
+                                    background: 'rgba(255,255,255,0.2)', 
+                                    border: 'none', 
+                                    padding: '10px 20px', 
+                                    borderRadius: '8px', 
+                                    color: 'white',
+                                    marginBottom: '30px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                ← Back
+                            </button>
+                            
+                            <h2 style={{fontSize: '28px', marginBottom: '20px', textAlign: 'center'}}>Tell Us About Yourself</h2>
+                            <p style={{textAlign: 'center', marginBottom: '30px', opacity: 0.9}}>
+                                Help your neighbors get to know you better
+                            </p>
+                            
+                            <div style={{background: 'rgba(255,255,255,0.1)', padding: '30px', borderRadius: '15px'}}>
+                                <div style={{marginBottom: '20px'}}>
+                                    <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>First Name *</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Enter your first name"
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px',
+                                            borderRadius: '8px',
+                                            border: 'none',
+                                            fontSize: '16px'
+                                        }}
+                                    />
                                 </div>
-                                <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '12px'}}>
-                                    <h3>✓ Calendar Booking Systems</h3>
-                                    <p>Interactive date selection for Services and Entertainment providers</p>
+                                
+                                <div style={{marginBottom: '20px'}}>
+                                    <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Last Name *</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Enter your last name"
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px',
+                                            borderRadius: '8px',
+                                            border: 'none',
+                                            fontSize: '16px'
+                                        }}
+                                    />
                                 </div>
-                                <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '12px'}}>
-                                    <h3>✓ Network Error Fixed</h3>
-                                    <p>CORS configuration updated and problematic API calls removed</p>
+                                
+                                <div style={{marginBottom: '20px'}}>
+                                    <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Bio</label>
+                                    <textarea 
+                                        placeholder="Tell your neighbors about yourself, your interests, or what you're looking for..."
+                                        rows={4}
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px',
+                                            borderRadius: '8px',
+                                            border: 'none',
+                                            fontSize: '16px',
+                                            resize: 'vertical'
+                                        }}
+                                    />
                                 </div>
+                                
+                                <div style={{marginBottom: '20px'}}>
+                                    <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Interests (Select all that apply)</label>
+                                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px', marginTop: '10px'}}>
+                                        {['Home & Garden', 'Electronics', 'Fashion', 'Sports', 'Music', 'Art', 'Food', 'DIY Projects', 'Books', 'Gaming', 'Fitness', 'Photography'].map(interest => (
+                                            <label key={interest} style={{display: 'flex', alignItems: 'center', cursor: 'pointer'}}>
+                                                <input type="checkbox" style={{marginRight: '8px'}} />
+                                                <span style={{fontSize: '14px'}}>{interest}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                <button 
+                                    onClick={() => {
+                                        if (signupData.accountType === 'dual') {
+                                            setCurrentStep('businessInfo');
+                                        } else {
+                                            setCurrentStep('preferences');
+                                        }
+                                    }}
+                                    style={{
+                                        width: '100%',
+                                        background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)',
+                                        color: 'white',
+                                        padding: '15px',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        fontSize: '16px',
+                                        fontWeight: 'bold',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    {signupData.accountType === 'dual' ? 'Next: Business Info' : 'Next: Preferences'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+            
+            // Step 3: Business Information (only for dual accounts)
+            if (currentStep === 'businessInfo') {
+                return (
+                    <div style={{minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', padding: '40px 20px'}}>
+                        <div style={{maxWidth: '600px', margin: '0 auto', color: 'white'}}>
+                            <button 
+                                onClick={() => setCurrentStep('personalInfo')}
+                                style={{
+                                    background: 'rgba(255,255,255,0.2)', 
+                                    border: 'none', 
+                                    padding: '10px 20px', 
+                                    borderRadius: '8px', 
+                                    color: 'white',
+                                    marginBottom: '30px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                ← Back
+                            </button>
+                            
+                            <h2 style={{fontSize: '28px', marginBottom: '20px', textAlign: 'center'}}>Business Information</h2>
+                            <p style={{textAlign: 'center', marginBottom: '30px', opacity: 0.9}}>
+                                Set up your professional profile to reach local customers
+                            </p>
+                            
+                            <div style={{background: 'rgba(255,255,255,0.1)', padding: '30px', borderRadius: '15px'}}>
+                                <div style={{marginBottom: '20px'}}>
+                                    <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Business Type *</label>
+                                    <select 
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px',
+                                            borderRadius: '8px',
+                                            border: 'none',
+                                            fontSize: '16px'
+                                        }}
+                                    >
+                                        <option value="">Select business type</option>
+                                        <option value="shop">🛒 Shop (Retail/Products)</option>
+                                        <option value="service">🛠 Service Provider</option>
+                                        <option value="entertainment">🎭 Entertainment (The Hub)</option>
+                                    </select>
+                                </div>
+                                
+                                <div style={{marginBottom: '20px'}}>
+                                    <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Business Name *</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Enter your business name"
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px',
+                                            borderRadius: '8px',
+                                            border: 'none',
+                                            fontSize: '16px'
+                                        }}
+                                    />
+                                </div>
+                                
+                                <div style={{marginBottom: '20px'}}>
+                                    <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Business Description</label>
+                                    <textarea 
+                                        placeholder="Describe your business, services, or products..."
+                                        rows={3}
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px',
+                                            borderRadius: '8px',
+                                            border: 'none',
+                                            fontSize: '16px',
+                                            resize: 'vertical'
+                                        }}
+                                    />
+                                </div>
+                                
+                                <div style={{marginBottom: '20px'}}>
+                                    <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Contact Information</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Business phone, email, or website"
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px',
+                                            borderRadius: '8px',
+                                            border: 'none',
+                                            fontSize: '16px'
+                                        }}
+                                    />
+                                </div>
+                                
+                                <button 
+                                    onClick={() => setCurrentStep('preferences')}
+                                    style={{
+                                        width: '100%',
+                                        background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)',
+                                        color: 'white',
+                                        padding: '15px',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        fontSize: '16px',
+                                        fontWeight: 'bold',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Next: Preferences
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+            
+            // Step 4: Preferences & Setup
+            if (currentStep === 'preferences') {
+                return (
+                    <div style={{minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', padding: '40px 20px'}}>
+                        <div style={{maxWidth: '600px', margin: '0 auto', color: 'white'}}>
+                            <button 
+                                onClick={() => setCurrentStep(signupData.accountType === 'dual' ? 'businessInfo' : 'personalInfo')}
+                                style={{
+                                    background: 'rgba(255,255,255,0.2)', 
+                                    border: 'none', 
+                                    padding: '10px 20px', 
+                                    borderRadius: '8px', 
+                                    color: 'white',
+                                    marginBottom: '30px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                ← Back
+                            </button>
+                            
+                            <h2 style={{fontSize: '28px', marginBottom: '20px', textAlign: 'center'}}>Final Setup</h2>
+                            <p style={{textAlign: 'center', marginBottom: '30px', opacity: 0.9}}>
+                                Customize your MarketPlace experience
+                            </p>
+                            
+                            <div style={{background: 'rgba(255,255,255,0.1)', padding: '30px', borderRadius: '15px', marginBottom: '20px'}}>
+                                <h3 style={{marginBottom: '15px'}}>Location Preferences</h3>
+                                <div style={{marginBottom: '15px'}}>
+                                    <label style={{display: 'block', marginBottom: '8px'}}>Search Radius for Local Listings</label>
+                                    <select style={{width: '100%', padding: '10px', borderRadius: '6px', border: 'none'}}>
+                                        <option value="5">5 miles</option>
+                                        <option value="10">10 miles</option>
+                                        <option value="25">25 miles</option>
+                                        <option value="50">50 miles</option>
+                                    </select>
+                                </div>
+                                
+                                <h3 style={{marginBottom: '15px', marginTop: '25px'}}>Notification Preferences</h3>
+                                <label style={{display: 'flex', alignItems: 'center', marginBottom: '10px', cursor: 'pointer'}}>
+                                    <input type="checkbox" defaultChecked style={{marginRight: '10px'}} />
+                                    <span>New listings in my area</span>
+                                </label>
+                                <label style={{display: 'flex', alignItems: 'center', marginBottom: '10px', cursor: 'pointer'}}>
+                                    <input type="checkbox" defaultChecked style={{marginRight: '10px'}} />
+                                    <span>Messages and offers</span>
+                                </label>
+                                <label style={{display: 'flex', alignItems: 'center', marginBottom: '10px', cursor: 'pointer'}}>
+                                    <input type="checkbox" style={{marginRight: '10px'}} />
+                                    <span>Community updates and events</span>
+                                </label>
+                            </div>
+                            
+                            <div style={{background: 'rgba(255,255,255,0.1)', padding: '30px', borderRadius: '15px', marginBottom: '20px'}}>
+                                <h3 style={{marginBottom: '15px'}}>Campaign Launch Benefits</h3>
+                                <div style={{fontSize: '14px', lineHeight: 1.6}}>
+                                    <p style={{marginBottom: '10px'}}>🎉 <strong>Free Pro Access During Campaign:</strong> All features unlocked</p>
+                                    <p style={{marginBottom: '10px'}}>⭐ <strong>Early Supporter Badge:</strong> Special recognition in your community</p>
+                                    <p style={{marginBottom: '10px'}}>🚀 <strong>Featured Listings:</strong> Priority placement for your posts</p>
+                                    <p>💎 <strong>Lifetime Benefits:</strong> Exclusive perks when campaign ends</p>
+                                </div>
+                            </div>
+                            
+                            <button 
+                                onClick={() => setCurrentStep('welcome')}
+                                style={{
+                                    width: '100%',
+                                    background: 'linear-gradient(135deg, #10B981, #059669)',
+                                    color: 'white',
+                                    padding: '18px',
+                                    border: 'none',
+                                    borderRadius: '10px',
+                                    fontSize: '18px',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)'
+                                }}
+                            >
+                                Join MarketPlace Community
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+            
+            // Welcome Screen
+            if (currentStep === 'welcome') {
+                return (
+                    <div style={{minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', padding: '40px 20px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        <div style={{maxWidth: '600px', textAlign: 'center', color: 'white'}}>
+                            <div style={{fontSize: '60px', marginBottom: '20px'}}>🎉</div>
+                            <h2 style={{fontSize: '32px', marginBottom: '20px'}}>Welcome to MarketPlace!</h2>
+                            <p style={{fontSize: '18px', marginBottom: '30px', opacity: 0.9}}>
+                                You're now part of a community-first marketplace that strengthens neighborhoods and supports local businesses.
+                            </p>
+                            
+                            <div style={{background: 'rgba(255,255,255,0.1)', padding: '30px', borderRadius: '15px', marginBottom: '30px'}}>
+                                <h3 style={{marginBottom: '20px'}}>What's Next?</h3>
+                                <div style={{textAlign: 'left', fontSize: '16px', lineHeight: 1.6}}>
+                                    <p style={{marginBottom: '10px'}}>✓ Complete your profile with photos</p>
+                                    <p style={{marginBottom: '10px'}}>✓ Browse local listings in your area</p>
+                                    <p style={{marginBottom: '10px'}}>✓ Post your first item or service</p>
+                                    <p style={{marginBottom: '10px'}}>✓ Connect with neighbors</p>
+                                    <p>✓ Join community discussions</p>
+                                </div>
+                            </div>
+                            
+                            <div style={{display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap'}}>
+                                <button 
+                                    onClick={() => alert('Would navigate to app home screen')}
+                                    style={{
+                                        background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)',
+                                        color: 'white',
+                                        padding: '15px 30px',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        fontSize: '16px',
+                                        fontWeight: 'bold',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Enter MarketPlace
+                                </button>
+                                
+                                <button 
+                                    onClick={() => setCurrentStep('landing')}
+                                    style={{
+                                        background: 'rgba(255,255,255,0.2)',
+                                        color: 'white',
+                                        padding: '15px 30px',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        fontSize: '16px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Back to Landing
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -123,7 +540,7 @@ app.get('/', (req, res) => {
                         
                         <div style={{display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap'}}>
                             <button 
-                                onClick={() => setShowDemo(true)}
+                                onClick={() => setCurrentStep('accountType')}
                                 style={{
                                     background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)',
                                     color: 'white',
@@ -136,7 +553,7 @@ app.get('/', (req, res) => {
                                     boxShadow: '0 4px 15px rgba(139, 92, 246, 0.3)'
                                 }}
                             >
-                                View Demo Features
+                                Join the Campaign
                             </button>
                             
                             <button 
