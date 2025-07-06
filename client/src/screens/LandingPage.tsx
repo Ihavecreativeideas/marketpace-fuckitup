@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import FuturisticLogo from '../components/FuturisticLogo';
 
 const { width } = Dimensions.get('window');
 
@@ -70,7 +69,9 @@ export const LandingPage: React.FC = () => {
         end={{ x: 1, y: 1 }}
       >
         <View style={styles.heroContent}>
-          <FuturisticLogo />
+          <View style={styles.logoPlaceholder}>
+            <Text style={styles.logoText}>MP</Text>
+          </View>
           <Text style={styles.heroTitle}>MarketPlace</Text>
           <Text style={styles.heroTagline}>Pick Up the Pace in Your Community</Text>
           <Text style={styles.heroSubtitle}>Delivering Opportunities — Not Just Packages</Text>
@@ -212,6 +213,20 @@ const styles = StyleSheet.create({
   },
   heroContent: {
     alignItems: 'center',
+  },
+  logoPlaceholder: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  logoText: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#fff',
   },
   heroTitle: {
     fontSize: 32,

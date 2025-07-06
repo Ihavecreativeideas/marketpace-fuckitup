@@ -63,7 +63,7 @@ import FuturisticButton from './src/components/FuturisticButton';
 import { colors } from '../src/utils/colors';
 import { RevenueDashboard } from './src/screens/RevenueDashboard';
 import { RevenueDemo } from './src/components/revenue/RevenueDemo';
-import { LandingPage } from './src/screens/LandingPage';
+import { SimpleLandingPage } from './src/screens/SimpleLandingPage';
 
 // Simple placeholder screens to prevent import errors
 import { Text } from 'react-native';
@@ -121,7 +121,7 @@ const Stack = createStackNavigator();
 function MarketplaceStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="MarketplaceHome" component={LandingPage} options={{ headerShown: false }} />
+      <Stack.Screen name="MarketplaceHome" component={SimpleLandingPage} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
