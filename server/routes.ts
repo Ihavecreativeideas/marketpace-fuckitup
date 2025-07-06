@@ -256,11 +256,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             <h2 class="campaign-title">Join the Campaign</h2>
             <p class="campaign-subtitle">Be part of the movement to build stronger, more connected communities</p>
             
-            <!-- Main Campaign Button -->
-            <div style="text-align: center; margin: 30px 0;">
-                <a href="/api/login" class="btn btn-primary" style="font-size: 20px; padding: 16px 40px; margin: 0 10px;">Join Campaign</a>
-                <a href="#" onclick="openMobileApp()" class="btn btn-secondary" style="font-size: 18px; padding: 14px 32px; margin: 0 10px;">Open Mobile App</a>
-            </div>
+
             
             <div class="campaign-stats">
                 <div class="campaign-stat">
