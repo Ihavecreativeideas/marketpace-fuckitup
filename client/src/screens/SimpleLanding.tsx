@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   hero: {
-    height: height * 0.4,
+    height: height * 0.35,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
@@ -132,8 +132,9 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   featuresSection: {
-    flex: 1,
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
   },
   featuresTitle: {
     fontSize: 24,
@@ -146,7 +147,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: 40,
+    marginBottom: 24,
   },
   featureCard: {
     width: '48%',
@@ -169,8 +170,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   authSection: {
-    marginTop: 'auto',
-    paddingBottom: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    backgroundColor: '#fff',
   },
   authTitle: {
     fontSize: 20,

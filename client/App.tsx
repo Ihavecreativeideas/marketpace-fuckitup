@@ -10,7 +10,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useAuth } from './src/hooks/useAuth';
-import SimpleLanding from './src/screens/SimpleLanding';
+import FullLanding from './src/screens/FullLanding';
 import SimpleHome from './src/screens/SimpleHome';
 import AuthScreen from './src/screens/AuthScreen';
 import TestScreen from './src/screens/TestScreen';
@@ -103,7 +103,7 @@ function AppContent() {
 
   if (currentScreen === 'landing') {
     return (
-      <SimpleLanding 
+      <FullLanding 
         onEnterApp={() => setCurrentScreen('app')}
         onShowAuth={() => setCurrentScreen('auth')}
       />
