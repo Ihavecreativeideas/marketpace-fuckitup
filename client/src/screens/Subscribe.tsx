@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { StripeProvider, useStripe, CardField } from '@stripe/stripe-react-native';
+import { StripeProvider, useStripe, CardField } from '../components/web/StripeWeb';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '../lib/queryClient';
 import { useAuth } from '../hooks/useAuth';
