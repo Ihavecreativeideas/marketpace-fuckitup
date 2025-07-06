@@ -360,6 +360,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Health check route
+  app.get('/health', (req, res) => {
+    res.json({ status: 'OK', message: 'MarketPace API is running' });
+  });
+
+  // Root route for web access
+  app.get('/', (req, res) => {
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>MarketPace</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+          .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+          h1 { color: #007AFF; margin-bottom: 20px; }
+          .status { background: #e8f5e8; padding: 15px; border-radius: 5px; margin: 20px 0; }
+          .endpoints { background: #f8f9fa; padding: 20px; border-radius: 5px; }
+          .endpoint { margin: 10px 0; font-family: monospace; }
+          a { color: #007AFF; text-decoration: none; }
+          a:hover { text-decoration: underline; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>🚀 MarketPace API</h1>
+          <div class="status">
+            <strong>✅ Server Status:</strong> Running successfully on port ${process.env.PORT || 5000}
+          </div>
+          <p>Welcome to MarketPace - a marketplace delivery service platform similar to "Facebook Marketplace meets Uber Eats".</p>
+          
+          <h3>📱 Mobile App</h3>
+          <p>This is the backend API for the MarketPace React Native mobile application. The mobile app provides:</p>
+          <ul>
+            <li>Marketplace for buying and selling items</li>
+            <li>On-demand delivery services</li>
+            <li>Driver applications and route management</li>
+            <li>Community features and posts</li>
+            <li>Stripe payment integration</li>
+          </ul>
+
+          <h3>🔗 API Endpoints</h3>
+          <div class="endpoints">
+            <div class="endpoint"><a href="/health">GET /health</a> - Server health check</div>
+            <div class="endpoint"><a href="/api/categories">GET /api/categories</a> - Available categories</div>
+            <div class="endpoint">GET /api/listings - Marketplace listings</div>
+            <div class="endpoint">POST /api/auth/login - User authentication</div>
+            <div class="endpoint">GET /api/community-posts - Community posts</div>
+            <div class="endpoint">POST /api/orders - Create orders</div>
+          </div>
+
+          <h3>🛠 Development</h3>
+          <p>Database: PostgreSQL with ${Object.keys(process.env).filter(k => k.includes('DATABASE')).length > 0 ? '✅ Connected' : '❌ Not Connected'}</p>
+          <p>Stripe: ${process.env.STRIPE_SECRET_KEY ? '✅ Configured' : '❌ Not Configured'}</p>
+        </div>
+      </body>
+      </html>
+    `);
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
