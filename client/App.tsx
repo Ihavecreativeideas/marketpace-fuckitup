@@ -122,6 +122,23 @@ const Stack = createStackNavigator();
 const SignUpLoginScreen = ({ route, navigation }: any) => {
   const mode = route?.params?.mode || 'signup';
   const isSignUp = mode === 'signup';
+  const [showEmailForm, setShowEmailForm] = React.useState(false);
+  const [selectedMethod, setSelectedMethod] = React.useState('');
+
+  const handleAuthMethod = (method: string) => {
+    setSelectedMethod(method);
+    
+    if (method === 'email') {
+      setShowEmailForm(true);
+    } else {
+      setShowEmailForm(false);
+      // Simulate authentication success for demo
+      console.log(`Authenticating with ${method}...`);
+      // Here you would integrate with actual auth providers
+      // For now, just navigate back to show the campaign page
+      navigation.navigate('CampaignLanding');
+    }
+  };
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: '#f8f9fa' }}>
@@ -153,79 +170,161 @@ const SignUpLoginScreen = ({ route, navigation }: any) => {
         )}
       </LinearGradient>
 
-      {/* Form */}
-      <View style={{ padding: 24 }}>
-        {isSignUp && (
-          <View style={{ marginBottom: 16 }}>
-            <Text style={{ fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8 }}>Full Name</Text>
-            <View style={{ borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 12, backgroundColor: '#fff' }}>
-              <Text style={{ color: '#999' }}>Enter your full name</Text>
-            </View>
-          </View>
-        )}
-        
-        <View style={{ marginBottom: 16 }}>
-          <Text style={{ fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8 }}>Email Address</Text>
-          <View style={{ borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 12, backgroundColor: '#fff' }}>
-            <Text style={{ color: '#999' }}>Enter your email</Text>
-          </View>
-        </View>
-
-        <View style={{ marginBottom: 24 }}>
-          <Text style={{ fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8 }}>Password</Text>
-          <View style={{ borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 12, backgroundColor: '#fff' }}>
-            <Text style={{ color: '#999' }}>Enter your password</Text>
-          </View>
-        </View>
-
-        {/* Action Button */}
-        <TouchableOpacity style={{ width: '100%', marginBottom: 16 }}>
-          <LinearGradient
-            colors={isSignUp ? ['#4CAF50', '#45a049'] : ['#667eea', '#764ba2']}
-            style={{ paddingVertical: 16, paddingHorizontal: 32, borderRadius: 12, alignItems: 'center' }}
-          >
-            <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff' }}>
-              {isSignUp ? 'Join Campaign & Get Pro Access' : 'Log In'}
-            </Text>
-          </LinearGradient>
-        </TouchableOpacity>
-
-        {/* Switch Mode */}
-        <TouchableOpacity 
-          style={{ paddingVertical: 12, paddingHorizontal: 24, alignItems: 'center' }}
-          onPress={() => navigation.navigate('SignUpLogin', { mode: isSignUp ? 'login' : 'signup' })}
-        >
-          <Text style={{ fontSize: 16, color: '#667eea', textAlign: 'center' }}>
-            {isSignUp ? 'Already have an account? Log in' : "Don't have an account? Join the campaign"}
-          </Text>
-        </TouchableOpacity>
-
-        {/* Social Login Options */}
-        <View style={{ marginTop: 24 }}>
-          <Text style={{ fontSize: 14, color: '#666', textAlign: 'center', marginBottom: 16 }}>
-            Or continue with
+      {/* Email Form - Only show when email option is selected */}
+      {showEmailForm && (
+        <View style={{ padding: 24, backgroundColor: '#fff', margin: 20, borderRadius: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 16, textAlign: 'center' }}>
+            {isSignUp ? 'Create Your Account' : 'Welcome Back'}
           </Text>
           
-          <TouchableOpacity style={{ 
-            flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-            borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingVertical: 12, marginBottom: 12, backgroundColor: '#fff'
-          }}>
-            <Text style={{ fontSize: 16, color: '#333', marginLeft: 8 }}>Continue with Google</Text>
+          {isSignUp && (
+            <View style={{ marginBottom: 16 }}>
+              <Text style={{ fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8 }}>Full Name</Text>
+              <View style={{ borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 12, backgroundColor: '#fff' }}>
+                <Text style={{ color: '#999' }}>Enter your full name</Text>
+              </View>
+            </View>
+          )}
+          
+          <View style={{ marginBottom: 16 }}>
+            <Text style={{ fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8 }}>Email Address</Text>
+            <View style={{ borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 12, backgroundColor: '#fff' }}>
+              <Text style={{ color: '#999' }}>Enter your email</Text>
+            </View>
+          </View>
+
+          <View style={{ marginBottom: 24 }}>
+            <Text style={{ fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8 }}>Password</Text>
+            <View style={{ borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 12, backgroundColor: '#fff' }}>
+              <Text style={{ color: '#999' }}>Enter your password</Text>
+            </View>
+          </View>
+
+          {/* Email Submit Button */}
+          <TouchableOpacity 
+            style={{ width: '100%', marginBottom: 16 }}
+            onPress={() => handleAuthMethod('email-submit')}
+          >
+            <LinearGradient
+              colors={isSignUp ? ['#4CAF50', '#45a049'] : ['#667eea', '#764ba2']}
+              style={{ paddingVertical: 16, paddingHorizontal: 32, borderRadius: 12, alignItems: 'center' }}
+            >
+              <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff' }}>
+                {isSignUp ? 'Join Campaign & Get Pro Access' : 'Log In'}
+              </Text>
+            </LinearGradient>
           </TouchableOpacity>
 
-          <TouchableOpacity style={{ 
-            flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-            borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingVertical: 12, marginBottom: 12, backgroundColor: '#fff'
-          }}>
-            <Text style={{ fontSize: 16, color: '#333', marginLeft: 8 }}>Continue with Facebook</Text>
+          {/* Back to Options */}
+          <TouchableOpacity 
+            style={{ paddingVertical: 12, paddingHorizontal: 24, alignItems: 'center' }}
+            onPress={() => setShowEmailForm(false)}
+          >
+            <Text style={{ fontSize: 16, color: '#667eea', textAlign: 'center' }}>
+              ← Back to sign-in options
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Auth Method Selection - Only show when email form is not visible */}
+      {!showEmailForm && (
+        <View style={{ padding: 24 }}>
+          {/* Switch Mode */}
+          <TouchableOpacity 
+            style={{ paddingVertical: 12, paddingHorizontal: 24, alignItems: 'center', marginBottom: 16 }}
+            onPress={() => navigation.navigate('SignUpLogin', { mode: isSignUp ? 'login' : 'signup' })}
+          >
+            <Text style={{ fontSize: 16, color: '#667eea', textAlign: 'center' }}>
+              {isSignUp ? 'Already have an account? Log in' : "Don't have an account? Join the campaign"}
+            </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={{ 
-            flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-            borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingVertical: 12, backgroundColor: '#fff'
-          }}>
-            <Text style={{ fontSize: 16, color: '#333', marginLeft: 8 }}>Continue with Apple</Text>
+          {/* Social Login Options */}
+          <View style={{ marginTop: 24 }}>
+            <Text style={{ fontSize: 14, color: '#666', textAlign: 'center', marginBottom: 16 }}>
+              Choose your sign-in method
+            </Text>
+          
+          {/* Guest Mode */}
+          <TouchableOpacity 
+            style={{ 
+              flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+              backgroundColor: '#f8f9fa', borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingVertical: 14, marginBottom: 12
+            }}
+            onPress={() => handleAuthMethod('guest')}
+          >
+            <Text style={{ fontSize: 20, marginRight: 12 }}>👤</Text>
+            <Text style={{ fontSize: 16, color: '#333', fontWeight: '600' }}>Continue as Guest</Text>
+            <Text style={{ fontSize: 12, color: '#666', marginLeft: 8 }}>(view only)</Text>
           </TouchableOpacity>
+
+          {/* Google */}
+          <TouchableOpacity 
+            style={{ 
+              flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+              borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingVertical: 14, marginBottom: 12, backgroundColor: '#fff'
+            }}
+            onPress={() => handleAuthMethod('google')}
+          >
+            <Text style={{ fontSize: 20, marginRight: 12 }}>🔍</Text>
+            <Text style={{ fontSize: 16, color: '#333', fontWeight: '600' }}>Continue with Google</Text>
+          </TouchableOpacity>
+
+          {/* Gmail (separate from Google account) */}
+          <TouchableOpacity 
+            style={{ 
+              flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+              borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingVertical: 14, marginBottom: 12, backgroundColor: '#fff'
+            }}
+            onPress={() => handleAuthMethod('gmail')}
+          >
+            <Text style={{ fontSize: 20, marginRight: 12 }}>📧</Text>
+            <Text style={{ fontSize: 16, color: '#333', fontWeight: '600' }}>Sign in with Gmail</Text>
+          </TouchableOpacity>
+
+          {/* Facebook */}
+          <TouchableOpacity 
+            style={{ 
+              flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+              backgroundColor: '#1877F2', borderRadius: 8, paddingVertical: 14, marginBottom: 12
+            }}
+            onPress={() => handleAuthMethod('facebook')}
+          >
+            <Text style={{ fontSize: 20, marginRight: 12 }}>📘</Text>
+            <Text style={{ fontSize: 16, color: '#fff', fontWeight: '600' }}>Continue with Facebook</Text>
+          </TouchableOpacity>
+
+          {/* Apple ID */}
+          <TouchableOpacity 
+            style={{ 
+              flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+              backgroundColor: '#000', borderRadius: 8, paddingVertical: 14, marginBottom: 12
+            }}
+            onPress={() => handleAuthMethod('apple')}
+          >
+            <Text style={{ fontSize: 20, marginRight: 12 }}>🍎</Text>
+            <Text style={{ fontSize: 16, color: '#fff', fontWeight: '600' }}>Continue with Apple</Text>
+          </TouchableOpacity>
+
+          {/* Email Option */}
+          <View style={{ marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: '#eee' }}>
+            <Text style={{ fontSize: 14, color: '#666', textAlign: 'center', marginBottom: 12 }}>
+              Or use email address
+            </Text>
+            <TouchableOpacity 
+              style={{ 
+                flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+                borderWidth: 1, borderColor: '#667eea', borderRadius: 8, paddingVertical: 14, backgroundColor: 'rgba(102, 126, 234, 0.05)'
+              }}
+              onPress={() => handleAuthMethod('email')}
+            >
+              <Text style={{ fontSize: 20, marginRight: 12 }}>✉️</Text>
+              <Text style={{ fontSize: 16, color: '#667eea', fontWeight: '600' }}>
+                {isSignUp ? 'Sign up with Email' : 'Log in with Email'}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {isSignUp && (
@@ -238,7 +337,8 @@ const SignUpLoginScreen = ({ route, navigation }: any) => {
             </Text>
           </View>
         )}
-      </View>
+        </View>
+      )}
 
       <View style={{ height: 40 }} />
     </ScrollView>
