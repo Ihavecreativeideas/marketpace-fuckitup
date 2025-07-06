@@ -30,9 +30,19 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  bio: text("bio"),
+  interests: jsonb("interests"), // Array of interest categories
   userType: varchar("user_type").notNull().default("buyer"), // buyer, seller, driver, admin
-  accountType: varchar("account_type").notNull().default("personal"), // personal, business
+  accountType: varchar("account_type").notNull().default("personal"), // personal, dual
   businessName: varchar("business_name"),
+  businessType: varchar("business_type"), // shop, service, entertainment
+  businessDescription: text("business_description"),
+  businessLocation: text("business_location"),
+  businessCategories: jsonb("business_categories"), // Array of category IDs
+  businessPricing: jsonb("business_pricing"), // Price list for services/products
+  allowsDelivery: boolean("allows_delivery").default(true),
+  allowsPickup: boolean("allows_pickup").default(true),
+  customShipping: boolean("custom_shipping").default(false),
   phoneNumber: varchar("phone_number"),
   address: text("address"),
   isVerified: boolean("is_verified").default(false),
@@ -40,6 +50,7 @@ export const users = pgTable("users", {
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
   isPro: boolean("is_pro").default(false),
+  onboardingCompleted: boolean("onboarding_completed").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

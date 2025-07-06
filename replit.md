@@ -183,9 +183,20 @@ MarketPace is a React Native mobile application that prioritizes community empow
 - CORS configuration for API access
 - Helmet.js for security headers
 
+## Recent Changes
+
+✓ Enhanced member sign-up questionnaire system (July 06, 2025)
+✓ Added comprehensive onboarding flow with 3 steps
+✓ Implemented account type selection (personal vs dual)  
+✓ Created business profile setup for dual accounts
+✓ Added bio, interests, and contact information collection
+✓ Updated database schema with new user profile fields
+✓ Built onboarding UI components and navigation flow
+
 ## Changelog
 
-- July 05, 2025. Initial setup
+- July 06, 2025: Implemented enhanced onboarding flow with questionnaire-based member setup
+- July 05, 2025: Initial setup
 
 ## User Preferences
 
