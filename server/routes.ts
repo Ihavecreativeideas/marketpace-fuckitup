@@ -33,9 +33,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             color: white;
         }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        
         .hero {
             text-align: center;
-            padding: 100px 0;
+            padding: 80px 0 60px;
         }
         .logo {
             width: 80px;
@@ -64,23 +65,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
             margin-bottom: 40px;
             opacity: 0.9;
         }
-        .cta-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 60px;
+        
+        /* Join Campaign Section */
+        .campaign-section {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 50px;
+            border-radius: 20px;
+            margin: 40px 0;
+            text-align: center;
+            backdrop-filter: blur(10px);
         }
-        .btn {
-            padding: 16px 32px;
-            border: none;
+        .campaign-title {
+            font-size: 36px;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+        }
+        .campaign-subtitle {
+            font-size: 20px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        .campaign-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .campaign-stat {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
             border-radius: 12px;
-            font-size: 18px;
+        }
+        .campaign-stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .campaign-stat-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .login-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+        .login-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s, background 0.3s;
+        }
+        .login-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .login-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        .login-title {
+            font-size: 24px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        .login-description {
+            font-size: 16px;
+            margin-bottom: 20px;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
-            transition: transform 0.2s;
+            transition: all 0.3s;
+            margin: 5px;
         }
         .btn:hover { transform: translateY(-2px); }
         .btn-primary {
@@ -92,11 +167,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
             color: white;
             border: 2px solid rgba(255, 255, 255, 0.3);
         }
+        .btn-orange {
+            background: linear-gradient(135deg, #ff7a18, #af002d);
+            color: white;
+        }
+        .btn-admin {
+            background: linear-gradient(135deg, #1e3a8a, #3730a3);
+            color: white;
+        }
+        
         .features {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 30px;
-            margin-bottom: 60px;
+            margin: 60px 0;
         }
         .feature {
             background: rgba(255, 255, 255, 0.1);
@@ -116,61 +200,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
             opacity: 0.9;
             line-height: 1.5;
         }
-        .mission {
-            text-align: center;
+        
+        .why-join {
             background: rgba(255, 255, 255, 0.1);
             padding: 40px;
-            border-radius: 12px;
-            margin-bottom: 40px;
-        }
-        .mission h2 {
-            font-size: 24px;
-            margin-bottom: 16px;
-        }
-        .mission p {
-            font-size: 18px;
-            font-style: italic;
-            line-height: 1.6;
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 20px;
-            text-align: center;
+            border-radius: 16px;
             margin: 40px 0;
         }
-        .stat {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 8px;
-        }
-        .stat-number {
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        .stat-label {
-            font-size: 14px;
-            opacity: 0.8;
-        }
-        .mobile-app {
-            text-align: center;
-            padding: 40px 0;
-        }
-        .mobile-app h2 {
+        .why-join h2 {
             font-size: 28px;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+            text-align: center;
         }
-        .mobile-app p {
-            font-size: 16px;
-            margin-bottom: 24px;
+        .why-join-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        .why-item {
+            text-align: center;
+        }
+        .why-item h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: #ffd700;
+        }
+        .why-item p {
+            line-height: 1.6;
             opacity: 0.9;
         }
+        
         @media (max-width: 768px) {
             h1 { font-size: 36px; }
             .tagline { font-size: 20px; }
             .subtitle { font-size: 16px; }
-            .cta-buttons { flex-direction: column; align-items: center; }
+            .campaign-title { font-size: 28px; }
+            .campaign-section { padding: 30px 20px; }
+            .login-options { grid-template-columns: 1fr; }
             .features { grid-template-columns: 1fr; }
         }
     </style>
@@ -182,74 +249,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
             <h1>MarketPlace</h1>
             <div class="tagline">Pick Up the Pace in Your Community</div>
             <div class="subtitle">Delivering Opportunities — Not Just Packages</div>
+        </div>
+
+        <!-- Join Campaign Section -->
+        <div class="campaign-section">
+            <h2 class="campaign-title">Join the Campaign</h2>
+            <p class="campaign-subtitle">Be part of the movement to build stronger, more connected communities</p>
             
-            <div class="cta-buttons">
-                <a href="/api/login" class="btn btn-primary">Join MarketPlace</a>
-                <a href="#" onclick="openMobileApp()" class="btn btn-secondary">Open Mobile App</a>
+            <div class="campaign-stats">
+                <div class="campaign-stat">
+                    <div class="campaign-stat-number">12</div>
+                    <div class="campaign-stat-label">Active Towns</div>
+                </div>
+                <div class="campaign-stat">
+                    <div class="campaign-stat-number">247</div>
+                    <div class="campaign-stat-label">Local Shops</div>
+                </div>
+                <div class="campaign-stat">
+                    <div class="campaign-stat-number">89</div>
+                    <div class="campaign-stat-label">Entertainers</div>
+                </div>
+                <div class="campaign-stat">
+                    <div class="campaign-stat-number">156</div>
+                    <div class="campaign-stat-label">Services</div>
+                </div>
+                <div class="campaign-stat">
+                    <div class="campaign-stat-number">1,834</div>
+                    <div class="campaign-stat-label">Members</div>
+                </div>
+            </div>
+            
+            <div class="login-options">
+                <div class="login-card">
+                    <div class="login-icon">👥</div>
+                    <h3 class="login-title">Join as Member</h3>
+                    <p class="login-description">Shop local, support your community, and discover amazing products and services from your neighbors</p>
+                    <a href="/api/login" class="btn btn-primary">Join MarketPlace</a>
+                    <a href="#" onclick="openMobileApp()" class="btn btn-secondary">Mobile App</a>
+                </div>
+                
+                <div class="login-card">
+                    <div class="login-icon">🚗</div>
+                    <h3 class="login-title">Drive & Earn</h3>
+                    <p class="login-description">Earn $4 per pickup + $2 per dropoff + $0.50/mile + 100% tips. Flexible schedule, daily pay</p>
+                    <a href="/api/login?role=driver" class="btn btn-orange">Apply to Drive</a>
+                    <div style="margin-top: 10px; font-size: 14px; opacity: 0.8;">Weekly potential: $125+</div>
+                </div>
+                
+                <div class="login-card">
+                    <div class="login-icon">⚙️</div>
+                    <h3 class="login-title">Admin Access</h3>
+                    <p class="login-description">Platform management, user oversight, analytics dashboard, and community moderation tools</p>
+                    <a href="/admin" class="btn btn-admin">Admin Dashboard</a>
+                    <a href="/api/login?role=admin" class="btn btn-secondary">Admin Login</a>
+                </div>
             </div>
         </div>
 
-        <div class="mission">
-            <h2>Our Mission</h2>
-            <p>"Big tech platforms have taught us to rely on strangers and algorithms. MarketPlace reminds us what happens when we invest in each other."</p>
-        </div>
-
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-number">12</div>
-                <div class="stat-label">Active Towns</div>
+        <!-- Why Join Section -->
+        <div class="why-join">
+            <h2>Why Join MarketPlace?</h2>
+            <div class="why-join-grid">
+                <div class="why-item">
+                    <h3>🏘️ Community First</h3>
+                    <p>Keep money circulating in your neighborhood instead of flowing to distant corporations. Every transaction strengthens your local economy.</p>
+                </div>
+                <div class="why-item">
+                    <h3>💰 Fair Economics</h3>
+                    <p>Transparent 5% fees, no hidden charges, 100% of tips go directly to drivers. We believe in honest, ethical business practices.</p>
+                </div>
+                <div class="why-item">
+                    <h3>🚚 Local Delivery</h3>
+                    <p>Neighbor-to-neighbor delivery system creating jobs and building connections. Support local drivers while getting fast, reliable service.</p>
+                </div>
+                <div class="why-item">
+                    <h3>🎯 Everything Local</h3>
+                    <p>Buy, sell, rent, find services, book entertainment - all in one community platform designed to bring neighbors together.</p>
+                </div>
             </div>
-            <div class="stat">
-                <div class="stat-number">247</div>
-                <div class="stat-label">Local Shops</div>
+            
+            <div style="text-align: center; margin-top: 30px; font-style: italic; font-size: 18px;">
+                "Big tech platforms have taught us to rely on strangers and algorithms. MarketPlace reminds us what happens when we invest in each other."
             </div>
-            <div class="stat">
-                <div class="stat-number">89</div>
-                <div class="stat-label">Entertainers</div>
-            </div>
-            <div class="stat">
-                <div class="stat-number">156</div>
-                <div class="stat-label">Services</div>
-            </div>
-            <div class="stat">
-                <div class="stat-number">1,834</div>
-                <div class="stat-label">Members</div>
-            </div>
-        </div>
-
-        <div class="features">
-            <div class="feature">
-                <div class="feature-icon">🏘️</div>
-                <h3>Community First</h3>
-                <p>Keep money circulating in your neighborhood instead of flowing to distant corporations</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">💰</div>
-                <h3>Fair Economics</h3>
-                <p>Transparent 5% fees, no hidden charges, 100% of tips go directly to drivers</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">🚚</div>
-                <h3>Local Delivery</h3>
-                <p>Neighbor-to-neighbor delivery system creating jobs and building connections</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">🎯</div>
-                <h3>Everything Local</h3>
-                <p>Buy, sell, rent, find services, book entertainment - all in one community platform</p>
-            </div>
-        </div>
-
-        <div class="mobile-app">
-            <h2>Experience the Full App</h2>
-            <p>The complete MarketPlace experience is designed for mobile. Access all features including marketplace browsing, community feed, delivery tracking, and more.</p>
-            <a href="#" onclick="openMobileApp()" class="btn btn-primary">Open Mobile App</a>
         </div>
     </div>
 
     <script>
         function openMobileApp() {
-            // Try to open the mobile app on port 8083
             const mobileUrl = window.location.protocol + '//' + window.location.hostname + ':8083';
             window.open(mobileUrl, '_blank');
         }
