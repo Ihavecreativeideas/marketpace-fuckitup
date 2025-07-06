@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { useAuth } from './src/hooks/useAuth';
 import Landing from './src/screens/Landing';
+import TestScreen from './src/screens/TestScreen';
 import Home from './src/screens/Home';
 import Marketplace from './src/screens/Marketplace';
 import Services from './src/screens/Services';
@@ -23,7 +24,7 @@ import CreateListing from './src/screens/CreateListing';
 import Cart from './src/screens/Cart';
 import Checkout from './src/screens/Checkout';
 import Subscribe from './src/screens/Subscribe';
-import { ToastProvider } from './src/hooks/use-toast';
+// import { ToastProvider } from './src/hooks/use-toast';
 
 const queryClient = new QueryClient();
 const Tab = createBottomTabNavigator();
@@ -93,21 +94,10 @@ function MainTabs() {
 }
 
 function AppContent() {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return <Landing />;
-  }
-
+  // For testing, bypass auth and show main interface
   return (
     <NavigationContainer>
-      {!isAuthenticated ? (
-        <Stack.Navigator>
-          <Stack.Screen name="Landing" component={Landing} options={{ headerShown: false }} />
-        </Stack.Navigator>
-      ) : (
-        <MainTabs />
-      )}
+      <MainTabs />
     </NavigationContainer>
   );
 }
@@ -117,10 +107,8 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <ToastProvider>
-            <StatusBar style="auto" />
-            <AppContent />
-          </ToastProvider>
+          <StatusBar style="auto" />
+          <AppContent />
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
