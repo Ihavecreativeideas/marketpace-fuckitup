@@ -41,12 +41,12 @@ export default function FuturisticLogo({
           Animated.timing(pulseAnim, {
             toValue: 1.05,
             duration: 3000,
-            useNativeDriver: true,
+            useNativeDriver: false,
           }),
           Animated.timing(pulseAnim, {
             toValue: 1,
             duration: 3000,
-            useNativeDriver: true,
+            useNativeDriver: false,
           }),
         ])
       ).start();

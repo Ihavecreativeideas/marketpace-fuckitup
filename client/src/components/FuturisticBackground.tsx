@@ -43,17 +43,17 @@ export default function FuturisticBackground({
     // Animate particles
     const animateParticles = () => {
       particles.current.forEach((particle) => {
-        // Float animation
+        // Float animation - simplified for web compatibility
         Animated.loop(
           Animated.sequence([
             Animated.timing(particle.y, {
-              toValue: particle.y._value - 20,
-              duration: 3000 + Math.random() * 2000,
+              toValue: particle.y._value - 15,
+              duration: 4000,
               useNativeDriver: false,
             }),
             Animated.timing(particle.y, {
-              toValue: particle.y._value + 40,
-              duration: 3000 + Math.random() * 2000,
+              toValue: particle.y._value + 30,
+              duration: 4000,
               useNativeDriver: false,
             }),
           ])
@@ -63,29 +63,13 @@ export default function FuturisticBackground({
         Animated.loop(
           Animated.sequence([
             Animated.timing(particle.opacity, {
-              toValue: 0.2,
-              duration: 2000 + Math.random() * 1000,
+              toValue: 0.3,
+              duration: 3000,
               useNativeDriver: false,
             }),
             Animated.timing(particle.opacity, {
-              toValue: 0.8,
-              duration: 2000 + Math.random() * 1000,
-              useNativeDriver: false,
-            }),
-          ])
-        ).start();
-
-        // Scale pulse
-        Animated.loop(
-          Animated.sequence([
-            Animated.timing(particle.scale, {
-              toValue: 0.5,
-              duration: 1500 + Math.random() * 1000,
-              useNativeDriver: false,
-            }),
-            Animated.timing(particle.scale, {
-              toValue: 1.2,
-              duration: 1500 + Math.random() * 1000,
+              toValue: 0.7,
+              duration: 3000,
               useNativeDriver: false,
             }),
           ])

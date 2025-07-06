@@ -52,7 +52,7 @@ export default function FuturisticButton({
     if (!disabled && !loading) {
       Animated.spring(scaleAnim, {
         toValue: 0.95,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }).start();
     }
   };
@@ -61,7 +61,7 @@ export default function FuturisticButton({
     if (!disabled && !loading) {
       Animated.spring(scaleAnim, {
         toValue: 1,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }).start();
     }
   };
