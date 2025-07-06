@@ -6,6 +6,7 @@ import { storage, setRLSContext, clearRLSContext } from "./storage";
 import revenueRoutes from "./revenueRoutes.js";
 import { registerDriverRoutes } from "./driverRoutes";
 import { registerPasswordRecoveryRoutes } from "./passwordRecovery";
+import { registerIntegrationRoutes } from "./integrationRoutes";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -1684,6 +1685,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Integration routes for website and social media shop connections
+  registerIntegrationRoutes(app);
 
   const httpServer = createServer(app);
   return httpServer;
