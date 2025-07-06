@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -369,7 +369,10 @@ const MemberQuestionnaireScreen = ({ route, navigation }: any) => {
     accountType: '', // 'personal' or 'dual'
     businessType: '', // 'shops', 'services', 'entertainment'
     businessName: '',
-    businessDescription: ''
+    businessDescription: '',
+    businessWebsite: '',
+    businessPhone: '',
+    hasWebsiteIntegration: false
   });
 
   const interests = [
@@ -418,14 +421,17 @@ const MemberQuestionnaireScreen = ({ route, navigation }: any) => {
               <Text style={{ fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8 }}>
                 Write a short bio (Optional)
               </Text>
-              <View style={{ 
-                borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12, backgroundColor: '#fff',
-                minHeight: 80
-              }}>
-                <Text style={{ color: profileData.bio ? '#333' : '#999' }}>
-                  {profileData.bio || 'Tell your neighbors about yourself, your interests, or what you\'re looking for...'}
-                </Text>
-              </View>
+              <TextInput
+                style={{ 
+                  borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12, backgroundColor: '#fff',
+                  minHeight: 80, textAlignVertical: 'top'
+                }}
+                multiline
+                placeholder="Tell your neighbors about yourself, your interests, or what you're looking for..."
+                placeholderTextColor="#999"
+                value={profileData.bio}
+                onChangeText={(text) => setProfileData(prev => ({ ...prev, bio: text }))}
+              />
             </View>
 
             <TouchableOpacity 
@@ -610,6 +616,81 @@ const MemberQuestionnaireScreen = ({ route, navigation }: any) => {
                     <Text style={{ fontSize: 12, color: '#666' }}>DJs, bands, comedians, performers</Text>
                   </View>
                 </TouchableOpacity>
+
+                {/* Business Details Form - Only show if business type selected */}
+                {profileData.businessType && (
+                  <View style={{ marginBottom: 20 }}>
+                    <Text style={{ fontSize: 16, fontWeight: '600', color: '#333', marginBottom: 12 }}>
+                      Business Information
+                    </Text>
+
+                    <View style={{ marginBottom: 12 }}>
+                      <Text style={{ fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8 }}>
+                        Business Name (Optional)
+                      </Text>
+                      <TextInput
+                        style={{ 
+                          borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12, backgroundColor: '#fff'
+                        }}
+                        placeholder="Enter your business name"
+                        placeholderTextColor="#999"
+                        value={profileData.businessName}
+                        onChangeText={(text) => setProfileData(prev => ({ ...prev, businessName: text }))}
+                      />
+                    </View>
+
+                    <View style={{ marginBottom: 12 }}>
+                      <Text style={{ fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8 }}>
+                        Business Website (Optional)
+                      </Text>
+                      <TextInput
+                        style={{ 
+                          borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12, backgroundColor: '#fff'
+                        }}
+                        placeholder="https://yourwebsite.com"
+                        placeholderTextColor="#999"
+                        value={profileData.businessWebsite}
+                        onChangeText={(text) => setProfileData(prev => ({ ...prev, businessWebsite: text }))}
+                        keyboardType="url"
+                        autoCapitalize="none"
+                      />
+                    </View>
+
+                    <TouchableOpacity
+                      style={{
+                        flexDirection: 'row', alignItems: 'center', padding: 12,
+                        borderWidth: 1, borderColor: profileData.hasWebsiteIntegration ? '#4CAF50' : '#ddd',
+                        borderRadius: 8, marginBottom: 12,
+                        backgroundColor: profileData.hasWebsiteIntegration ? 'rgba(76, 175, 80, 0.05)' : '#fff'
+                      }}
+                      onPress={() => setProfileData(prev => ({ ...prev, hasWebsiteIntegration: !prev.hasWebsiteIntegration }))}
+                    >
+                      <Text style={{ fontSize: 18, marginRight: 12 }}>
+                        {profileData.hasWebsiteIntegration ? '✅' : '⬜'}
+                      </Text>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 16, fontWeight: '600', color: '#333' }}>Website Integration</Text>
+                        <Text style={{ fontSize: 12, color: '#666' }}>Sync inventory, orders, and analytics with your existing website</Text>
+                      </View>
+                    </TouchableOpacity>
+
+                    <View style={{ marginBottom: 12 }}>
+                      <Text style={{ fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8 }}>
+                        Business Phone (Optional)
+                      </Text>
+                      <TextInput
+                        style={{ 
+                          borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12, backgroundColor: '#fff'
+                        }}
+                        placeholder="(555) 123-4567"
+                        placeholderTextColor="#999"
+                        value={profileData.businessPhone}
+                        onChangeText={(text) => setProfileData(prev => ({ ...prev, businessPhone: text }))}
+                        keyboardType="phone-pad"
+                      />
+                    </View>
+                  </View>
+                )}
               </View>
             )}
 
