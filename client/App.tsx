@@ -1854,94 +1854,561 @@ function MainMenuStack() {
         component={() => <SimpleScreen title="Deliveries" />} 
         options={{ headerShown: false }} 
       />
+      <Stack.Screen 
+        name="EditProfile" 
+        component={EditProfileScreen} 
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen 
+        name="Subscription" 
+        component={SubscriptionScreen} 
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen 
+        name="SecurityPolicies" 
+        component={SecurityPoliciesScreen} 
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen 
+        name="DeliveryDemo" 
+        component={DeliveryDemoScreen} 
+        options={{ headerShown: false }} 
+      />
     </Stack.Navigator>
   );
 }
 
-// Main Menu Screen - Facebook-style menu
-const MainMenuScreen = ({ navigation }: any) => (
-  <ScrollView style={{ flex: 1, backgroundColor: '#0F0B1F' }}>
-    {/* Header */}
-    <LinearGradient
-      colors={['#1a1a2e', '#16213e', '#0f3460']}
-      style={{ paddingTop: 60, paddingBottom: 20, paddingHorizontal: 20 }}
-    >
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
-        <View style={{ 
-          width: 60, height: 60, borderRadius: 30, backgroundColor: 'rgba(255, 255, 255, 0.2)',
-          justifyContent: 'center', alignItems: 'center', marginRight: 15
-        }}>
-          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff' }}>MP</Text>
-        </View>
-        <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff' }}>MarketPlace Menu</Text>
-      </View>
-    </LinearGradient>
-
-    {/* Menu Options */}
-    <View style={{ padding: 20 }}>
-      {/* Community Section */}
-      <TouchableOpacity 
-        style={{ 
-          backgroundColor: 'rgba(139, 92, 246, 0.1)', 
-          borderRadius: 12, 
-          padding: 16, 
-          marginBottom: 16,
-          borderWidth: 1,
-          borderColor: 'rgba(139, 92, 246, 0.3)'
-        }}
-        onPress={() => navigation.navigate('CommunityFeed')}
+// Main Menu Screen - Enhanced Facebook-style menu
+const MainMenuScreen = ({ navigation }: any) => {
+  const { user, isAuthenticated } = useAuth();
+  
+  return (
+    <ScrollView style={{ flex: 1, backgroundColor: '#0F0B1F' }}>
+      {/* Header */}
+      <LinearGradient
+        colors={['#1a1a2e', '#16213e', '#0f3460']}
+        style={{ paddingTop: 60, paddingBottom: 20, paddingHorizontal: 20 }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Ionicons name="people" size={24} color="#8B5CF6" style={{ marginRight: 12 }} />
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
+          <View style={{ 
+            width: 60, height: 60, borderRadius: 30, backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            justifyContent: 'center', alignItems: 'center', marginRight: 15
+          }}>
+            {user?.profileImageUrl ? (
+              <Image 
+                source={{ uri: user.profileImageUrl }} 
+                style={{ width: 60, height: 60, borderRadius: 30 }}
+              />
+            ) : (
+              <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff' }}>
+                {user?.firstName?.charAt(0) || 'U'}
+              </Text>
+            )}
+          </View>
           <View>
-            <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 4 }}>
-              Community Feed
+            <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff' }}>
+              {user?.firstName || 'User'} {user?.lastName || ''}
             </Text>
             <Text style={{ fontSize: 14, color: '#B8B8B8' }}>
-              Local posts, live streams, polls, events
+              {user?.userType === 'dual' ? 'Personal + Business Account' : 'Personal Account'}
             </Text>
           </View>
         </View>
-      </TouchableOpacity>
+      </LinearGradient>
 
-      {/* Quick Access Categories */}
-      <View style={{ marginBottom: 20 }}>
-        <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 12 }}>
-          Quick Access
-        </Text>
-        
-        {[
-          { name: 'Profile', icon: 'person', description: 'Your profile and settings' },
-          { name: 'Deliveries', icon: 'car', description: 'Track your deliveries' },
-          { name: 'Settings', icon: 'settings', description: 'App preferences' },
-        ].map((item, index) => (
-          <TouchableOpacity 
-            key={index}
-            style={{ 
-              backgroundColor: 'rgba(255, 255, 255, 0.05)', 
-              borderRadius: 8, 
-              padding: 14, 
-              marginBottom: 8,
-              flexDirection: 'row',
-              alignItems: 'center'
-            }}
-            onPress={() => navigation.navigate(item.name)}
-          >
-            <Ionicons name={item.icon as any} size={20} color="#8B5CF6" style={{ marginRight: 12 }} />
+      {/* Menu Options */}
+      <View style={{ padding: 20 }}>
+        {/* Account Management Section */}
+        <View style={{ marginBottom: 20 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 12 }}>
+            Account Management
+          </Text>
+          
+          {[
+            { name: 'EditProfile', icon: 'person-circle', label: 'Edit Profile', description: 'Name, bio, address, payment methods' },
+            { name: 'Subscription', icon: 'diamond', label: 'MarketPlace Pro', description: user?.userType === 'dual' ? 'Pro features active' : 'Upgrade to dual account' },
+          ].map((item, index) => (
+            <TouchableOpacity 
+              key={index}
+              style={{ 
+                backgroundColor: item.name === 'Subscription' ? 'rgba(251, 191, 36, 0.1)' : 'rgba(255, 255, 255, 0.05)', 
+                borderRadius: 12, 
+                padding: 16, 
+                marginBottom: 12,
+                borderWidth: 1,
+                borderColor: item.name === 'Subscription' ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255, 255, 255, 0.1)',
+                flexDirection: 'row',
+                alignItems: 'center'
+              }}
+              onPress={() => navigation.navigate(item.name)}
+            >
+              <Ionicons 
+                name={item.icon as any} 
+                size={24} 
+                color={item.name === 'Subscription' ? '#FBB800' : '#8B5CF6'} 
+                style={{ marginRight: 12 }} 
+              />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#fff', marginBottom: 2 }}>
+                  {item.label}
+                </Text>
+                <Text style={{ fontSize: 12, color: '#B8B8B8' }}>
+                  {item.description}
+                </Text>
+              </View>
+              {item.name === 'Subscription' && user?.userType !== 'dual' && (
+                <View style={{
+                  backgroundColor: '#FBB800',
+                  paddingHorizontal: 8,
+                  paddingVertical: 4,
+                  borderRadius: 6
+                }}>
+                  <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#000' }}>
+                    FREE
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Community Section */}
+        <TouchableOpacity 
+          style={{ 
+            backgroundColor: 'rgba(139, 92, 246, 0.1)', 
+            borderRadius: 12, 
+            padding: 16, 
+            marginBottom: 16,
+            borderWidth: 1,
+            borderColor: 'rgba(139, 92, 246, 0.3)'
+          }}
+          onPress={() => navigation.navigate('CommunityFeed')}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Ionicons name="people" size={24} color="#8B5CF6" style={{ marginRight: 12 }} />
             <View>
-              <Text style={{ fontSize: 16, fontWeight: '600', color: '#fff' }}>
-                {item.name}
+              <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 4 }}>
+                Community Feed
               </Text>
-              <Text style={{ fontSize: 12, color: '#B8B8B8' }}>
-                {item.description}
+              <Text style={{ fontSize: 14, color: '#B8B8B8' }}>
+                Local posts, live streams, polls, events
               </Text>
             </View>
-          </TouchableOpacity>
-        ))}
+          </View>
+        </TouchableOpacity>
+
+        {/* Quick Access Categories */}
+        <View style={{ marginBottom: 20 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 12 }}>
+            Quick Access
+          </Text>
+          
+          {[
+            { name: 'Profile', icon: 'person', description: 'View your public profile' },
+            { name: 'Deliveries', icon: 'car', description: 'Track your deliveries' },
+            { name: 'DeliveryDemo', icon: 'map', description: 'See how delivery routes work' },
+            { name: 'SecurityPolicies', icon: 'shield-checkmark', description: 'Platform security & safety' },
+            { name: 'Settings', icon: 'settings', description: 'App preferences' },
+          ].map((item, index) => (
+            <TouchableOpacity 
+              key={index}
+              style={{ 
+                backgroundColor: 'rgba(255, 255, 255, 0.05)', 
+                borderRadius: 8, 
+                padding: 14, 
+                marginBottom: 8,
+                flexDirection: 'row',
+                alignItems: 'center'
+              }}
+              onPress={() => navigation.navigate(item.name)}
+            >
+              <Ionicons name={item.icon as any} size={20} color="#8B5CF6" style={{ marginRight: 12 }} />
+              <View>
+                <Text style={{ fontSize: 16, fontWeight: '600', color: '#fff' }}>
+                  {item.name}
+                </Text>
+                <Text style={{ fontSize: 12, color: '#B8B8B8' }}>
+                  {item.description}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Logout */}
+        <TouchableOpacity 
+          style={{ 
+            backgroundColor: 'rgba(239, 68, 68, 0.1)', 
+            borderRadius: 8, 
+            padding: 14, 
+            marginBottom: 8,
+            flexDirection: 'row',
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: 'rgba(239, 68, 68, 0.3)'
+          }}
+          onPress={() => {
+            // Handle logout
+            window.location.href = '/api/logout';
+          }}
+        >
+          <Ionicons name="log-out" size={20} color="#EF4444" style={{ marginRight: 12 }} />
+          <Text style={{ fontSize: 16, fontWeight: '600', color: '#EF4444' }}>
+            Log Out
+          </Text>
+        </TouchableOpacity>
       </View>
-    </View>
-  </ScrollView>
-);
+
+      {/* Bottom padding for floating navigation */}
+      <View style={{ height: 100 }} />
+    </ScrollView>
+  );
+};
+
+// Edit Profile Screen
+const EditProfileScreen = ({ navigation }: any) => {
+  const { user } = useAuth();
+  const [firstName, setFirstName] = useState(user?.firstName || '');
+  const [lastName, setLastName] = useState(user?.lastName || '');
+  const [bio, setBio] = useState('');
+  const [address, setAddress] = useState('');
+  
+  return (
+    <ScrollView style={{ flex: 1, backgroundColor: '#0F0B1F' }}>
+      {/* Header */}
+      <LinearGradient
+        colors={['#1a1a2e', '#16213e', '#0f3460']}
+        style={{ paddingTop: 60, paddingBottom: 20, paddingHorizontal: 20 }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff' }}>
+            Edit Profile
+          </Text>
+          <TouchableOpacity>
+            <Text style={{ fontSize: 16, fontWeight: '600', color: '#8B5CF6' }}>
+              Save
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
+
+      <View style={{ padding: 20 }}>
+        {/* Profile Picture Section */}
+        <View style={{ alignItems: 'center', marginBottom: 30 }}>
+          <View style={{
+            width: 100,
+            height: 100,
+            borderRadius: 50,
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: 15
+          }}>
+            <Text style={{ fontSize: 36, fontWeight: 'bold', color: '#fff' }}>
+              {firstName.charAt(0) || 'U'}
+            </Text>
+          </View>
+          <TouchableOpacity style={{
+            backgroundColor: 'rgba(139, 92, 246, 0.2)',
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: 'rgba(139, 92, 246, 0.5)'
+          }}>
+            <Text style={{ color: '#8B5CF6', fontSize: 14, fontWeight: '600' }}>
+              Change Photo
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Personal Information */}
+        <View style={{ marginBottom: 30 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 15 }}>
+            Personal Information
+          </Text>
+          
+          <View style={{ marginBottom: 15 }}>
+            <Text style={{ fontSize: 14, color: '#B8B8B8', marginBottom: 8 }}>First Name</Text>
+            <TextInput
+              value={firstName}
+              onChangeText={setFirstName}
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: 8,
+                padding: 12,
+                color: '#fff',
+                borderWidth: 1,
+                borderColor: 'rgba(255, 255, 255, 0.1)'
+              }}
+              placeholderTextColor="#666"
+            />
+          </View>
+
+          <View style={{ marginBottom: 15 }}>
+            <Text style={{ fontSize: 14, color: '#B8B8B8', marginBottom: 8 }}>Last Name</Text>
+            <TextInput
+              value={lastName}
+              onChangeText={setLastName}
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: 8,
+                padding: 12,
+                color: '#fff',
+                borderWidth: 1,
+                borderColor: 'rgba(255, 255, 255, 0.1)'
+              }}
+              placeholderTextColor="#666"
+            />
+          </View>
+
+          <View style={{ marginBottom: 15 }}>
+            <Text style={{ fontSize: 14, color: '#B8B8B8', marginBottom: 8 }}>Bio</Text>
+            <TextInput
+              value={bio}
+              onChangeText={setBio}
+              multiline
+              numberOfLines={3}
+              placeholder="Tell your community about yourself..."
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: 8,
+                padding: 12,
+                color: '#fff',
+                borderWidth: 1,
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+                textAlignVertical: 'top'
+              }}
+              placeholderTextColor="#666"
+            />
+          </View>
+        </View>
+
+        {/* Private Address */}
+        <View style={{ marginBottom: 30 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 8 }}>
+            Private Address
+          </Text>
+          <Text style={{ fontSize: 12, color: '#B8B8B8', marginBottom: 15 }}>
+            Only you can see this. Used for deliveries and local search.
+          </Text>
+          
+          <TextInput
+            value={address}
+            onChangeText={setAddress}
+            placeholder="123 Main St, Your City, State 12345"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: 8,
+              padding: 12,
+              color: '#fff',
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.1)'
+            }}
+            placeholderTextColor="#666"
+          />
+        </View>
+
+        {/* Payment Methods */}
+        <View style={{ marginBottom: 30 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 15 }}>
+            Payment Methods
+          </Text>
+          
+          <TouchableOpacity style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: 8,
+            padding: 16,
+            marginBottom: 12,
+            borderWidth: 1,
+            borderColor: 'rgba(255, 255, 255, 0.1)',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name="card" size={20} color="#8B5CF6" style={{ marginRight: 12 }} />
+              <Text style={{ color: '#fff', fontSize: 16 }}>Add Payment Method</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#B8B8B8" />
+          </TouchableOpacity>
+
+          <Text style={{ fontSize: 12, color: '#B8B8B8', textAlign: 'center' }}>
+            Securely add credit cards, debit cards, or bank accounts
+          </Text>
+        </View>
+      </View>
+
+      {/* Bottom padding for floating navigation */}
+      <View style={{ height: 100 }} />
+    </ScrollView>
+  );
+};
+
+// Subscription Screen
+const SubscriptionScreen = ({ navigation }: any) => {
+  const { user } = useAuth();
+  const [isUpgrading, setIsUpgrading] = useState(false);
+  
+  return (
+    <ScrollView style={{ flex: 1, backgroundColor: '#0F0B1F' }}>
+      {/* Header */}
+      <LinearGradient
+        colors={['#1a1a2e', '#16213e', '#0f3460']}
+        style={{ paddingTop: 60, paddingBottom: 20, paddingHorizontal: 20 }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff' }}>
+            MarketPlace Pro
+          </Text>
+          <View style={{ width: 24 }} />
+        </View>
+      </LinearGradient>
+
+      <View style={{ padding: 20 }}>
+        {/* Current Status */}
+        <View style={{
+          backgroundColor: user?.userType === 'dual' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(251, 191, 36, 0.1)',
+          borderRadius: 12,
+          padding: 20,
+          marginBottom: 24,
+          borderWidth: 1,
+          borderColor: user?.userType === 'dual' ? 'rgba(34, 197, 94, 0.3)' : 'rgba(251, 191, 36, 0.3)',
+        }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+            <Ionicons 
+              name={user?.userType === 'dual' ? 'checkmark-circle' : 'diamond'} 
+              size={24} 
+              color={user?.userType === 'dual' ? '#22C55E' : '#FBB800'} 
+              style={{ marginRight: 12 }}
+            />
+            <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff' }}>
+              {user?.userType === 'dual' ? 'Pro Active' : 'Upgrade Available'}
+            </Text>
+          </View>
+          <Text style={{ fontSize: 14, color: '#E5E5E5' }}>
+            {user?.userType === 'dual' 
+              ? 'You have access to all Pro features including business profiles, analytics, and premium tools.'
+              : 'Join our launch campaign and get lifetime Pro access for FREE! Upgrade now to unlock business features.'
+            }
+          </Text>
+        </View>
+
+        {/* Campaign Notice */}
+        {user?.userType !== 'dual' && (
+          <View style={{
+            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+            borderRadius: 12,
+            padding: 16,
+            marginBottom: 24,
+            borderWidth: 1,
+            borderColor: 'rgba(139, 92, 246, 0.3)'
+          }}>
+            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#8B5CF6', marginBottom: 8 }}>
+              🎉 Launch Campaign Special
+            </Text>
+            <Text style={{ fontSize: 14, color: '#E5E5E5', lineHeight: 20 }}>
+              Sign up now and lock in FREE lifetime Pro access! When the campaign ends, new members will pay $3.99/month. 
+              Be part of building stronger communities.
+            </Text>
+          </View>
+        )}
+
+        {/* Pro Features */}
+        <View style={{ marginBottom: 24 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 16 }}>
+            Pro Features Included
+          </Text>
+          
+          {[
+            { icon: 'business', title: 'Business Profile', desc: 'Create shops, services, and entertainment listings' },
+            { icon: 'trending-up', title: 'Advanced Analytics', desc: 'Track views, engagement, and sales performance' },
+            { icon: 'megaphone', title: 'Promotion Tools', desc: 'Boost listings and pin to top of local feeds' },
+            { icon: 'videocam', title: 'Live Streaming', desc: 'Stream events and engage with your community' },
+            { icon: 'globe', title: 'Website Integration', desc: 'Connect your existing business website' },
+            { icon: 'star', title: 'Priority Support', desc: 'Get faster help and feature requests' }
+          ].map((feature, index) => (
+            <View key={index} style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingVertical: 12,
+              borderBottomWidth: 1,
+              borderBottomColor: 'rgba(255, 255, 255, 0.05)'
+            }}>
+              <View style={{
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginRight: 12
+              }}>
+                <Ionicons name={feature.icon as any} size={20} color="#8B5CF6" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 16, fontWeight: '600', color: '#fff', marginBottom: 2 }}>
+                  {feature.title}
+                </Text>
+                <Text style={{ fontSize: 12, color: '#B8B8B8' }}>
+                  {feature.desc}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {/* Upgrade Button */}
+        {user?.userType !== 'dual' && (
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#FBB800',
+              borderRadius: 12,
+              padding: 16,
+              alignItems: 'center',
+              shadowColor: '#FBB800',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 5
+            }}
+            onPress={async () => {
+              setIsUpgrading(true);
+              // Handle upgrade logic here
+              setTimeout(() => setIsUpgrading(false), 2000);
+            }}
+            disabled={isUpgrading}
+          >
+            <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#000', marginBottom: 4 }}>
+              {isUpgrading ? 'Upgrading...' : 'Upgrade to Pro - FREE'}
+            </Text>
+            <Text style={{ fontSize: 12, color: '#000', opacity: 0.8 }}>
+              Lifetime access during launch campaign
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Billing Info */}
+        <View style={{ marginTop: 24, padding: 16, backgroundColor: 'rgba(255, 255, 255, 0.02)', borderRadius: 8 }}>
+          <Text style={{ fontSize: 14, color: '#B8B8B8', textAlign: 'center', lineHeight: 20 }}>
+            Regular price: $3.99/month recurring subscription.{'\n'}
+            Cancel anytime. No hidden fees.{'\n'}
+            Campaign pricing available for limited time only.
+          </Text>
+        </View>
+      </View>
+
+      {/* Bottom padding for floating navigation */}
+      <View style={{ height: 100 }} />
+    </ScrollView>
+  );
+};
 
 // Create the onboarding stack
 function OnboardingStack() {
@@ -1992,6 +2459,531 @@ function AppContent() {
     </NavigationContainer>
   );
 }
+
+// Delivery Demo Screen - Interactive route system demonstration
+const DeliveryDemoScreen = ({ navigation }: any) => {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const demoSteps = [
+    {
+      title: "Driver Accepts Route",
+      description: "Sarah accepts a 6-item route for the 12pm-3pm time slot",
+      earnings: "$32.50",
+      details: "6 pickups × $4 + 6 dropoffs × $2 + 8.5 miles × $0.50 = $32.50"
+    },
+    {
+      title: "Optimized Route Planning", 
+      description: "AI creates the most efficient path through all 12 stops",
+      earnings: "$32.50",
+      details: "Route covers: Electronics store → Marketplace pickup → 3 homes → Coffee shop"
+    },
+    {
+      title: "Real-Time Tracking",
+      description: "Buyers and sellers see live updates as items move through the route",
+      earnings: "$32.50 + tips",
+      details: "Color-coded tracking: Dark Blue → Light Blue, Dark Red → Light Red"
+    },
+    {
+      title: "Route Complete",
+      description: "All deliveries finished, payment released instantly to driver",
+      earnings: "$37.25 total",
+      details: "$32.50 base + $4.75 in tips (100% goes to driver)"
+    }
+  ];
+
+  const animateStep = () => {
+    setIsAnimating(true);
+    setTimeout(() => {
+      setCurrentStep((prev) => (prev + 1) % demoSteps.length);
+      setIsAnimating(false);
+    }, 500);
+  };
+
+  return (
+    <ScrollView style={{ flex: 1, backgroundColor: '#0F0B1F' }}>
+      {/* Header */}
+      <LinearGradient
+        colors={['#1a1a2e', '#16213e', '#0f3460']}
+        style={{ paddingTop: 60, paddingBottom: 20, paddingHorizontal: 20 }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={{
+              padding: 8,
+              borderRadius: 20,
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              marginRight: 15
+            }}
+          >
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff' }}>
+            Delivery Demo
+          </Text>
+        </View>
+        <Text style={{ color: '#B0B0B0', fontSize: 16 }}>
+          See how our transparent delivery system works
+        </Text>
+      </LinearGradient>
+
+      {/* Interactive Demo Map */}
+      <View style={{ margin: 20 }}>
+        <LinearGradient
+          colors={['#2D1B69', '#1E1E3F']}
+          style={{
+            borderRadius: 15,
+            padding: 20,
+            marginBottom: 20
+          }}
+        >
+          <Text style={{ color: '#fff', fontSize: 18, fontWeight: 'bold', marginBottom: 15 }}>
+            Route Simulation
+          </Text>
+          
+          {/* Mock Map Area */}
+          <View style={{
+            backgroundColor: '#0F0F1F',
+            borderRadius: 10,
+            height: 200,
+            padding: 15,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: 15
+          }}>
+            <Text style={{ color: '#888', fontSize: 16, textAlign: 'center', marginBottom: 10 }}>
+              🗺️ Interactive Route Map
+            </Text>
+            <Text style={{ color: '#666', fontSize: 14, textAlign: 'center' }}>
+              Step {currentStep + 1} of {demoSteps.length}
+            </Text>
+            
+            {/* Route visualization */}
+            <View style={{ 
+              flexDirection: 'row', 
+              justifyContent: 'space-around',
+              width: '100%',
+              marginTop: 20
+            }}>
+              {[1,2,3,4,5,6].map((stop, index) => (
+                <View key={index} style={{
+                  width: 20,
+                  height: 20,
+                  borderRadius: 10,
+                  backgroundColor: index <= currentStep ? '#4CAF50' : '#333',
+                  opacity: isAnimating ? 0.5 : 1
+                }} />
+              ))}
+            </View>
+          </View>
+
+          <TouchableOpacity
+            onPress={animateStep}
+            style={{
+              backgroundColor: '#FF6B35',
+              padding: 12,
+              borderRadius: 10,
+              alignItems: 'center'
+            }}
+          >
+            <Text style={{ color: '#fff', fontWeight: 'bold' }}>
+              Next Step in Route
+            </Text>
+          </TouchableOpacity>
+        </LinearGradient>
+
+        {/* Current Step Details */}
+        <LinearGradient
+          colors={['#1E3A8A', '#1E40AF']}
+          style={{
+            borderRadius: 15,
+            padding: 20,
+            marginBottom: 20
+          }}
+        >
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <Text style={{ color: '#fff', fontSize: 18, fontWeight: 'bold' }}>
+              {demoSteps[currentStep].title}
+            </Text>
+            <Text style={{ color: '#4ADE80', fontSize: 16, fontWeight: 'bold' }}>
+              {demoSteps[currentStep].earnings}
+            </Text>
+          </View>
+          <Text style={{ color: '#E5E7EB', fontSize: 14, marginBottom: 10 }}>
+            {demoSteps[currentStep].description}
+          </Text>
+          <Text style={{ color: '#9CA3AF', fontSize: 12 }}>
+            {demoSteps[currentStep].details}
+          </Text>
+        </LinearGradient>
+
+        {/* Pricing Transparency */}
+        <View style={{
+          backgroundColor: '#1F2937',
+          borderRadius: 15,
+          padding: 20,
+          marginBottom: 20
+        }}>
+          <Text style={{ color: '#fff', fontSize: 18, fontWeight: 'bold', marginBottom: 15 }}>
+            💰 Transparent Pricing
+          </Text>
+          
+          {[
+            { label: 'Pickup Fee', amount: '$4.00', detail: 'Per item collected' },
+            { label: 'Dropoff Fee', amount: '$2.00', detail: 'Per item delivered' },
+            { label: 'Mileage', amount: '$0.50', detail: 'Per mile driven' },
+            { label: 'Tips', amount: '100%', detail: 'Go directly to driver' },
+            { label: 'Large Items', amount: '+$25', detail: 'Truck/van required' }
+          ].map((item, index) => (
+            <View key={index} style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              paddingVertical: 8,
+              borderBottomWidth: index < 4 ? 1 : 0,
+              borderBottomColor: '#374151'
+            }}>
+              <View>
+                <Text style={{ color: '#fff', fontSize: 14, fontWeight: 'bold' }}>
+                  {item.label}
+                </Text>
+                <Text style={{ color: '#9CA3AF', fontSize: 12 }}>
+                  {item.detail}
+                </Text>
+              </View>
+              <Text style={{ color: '#4ADE80', fontSize: 14, fontWeight: 'bold' }}>
+                {item.amount}
+              </Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Delivery Split Info */}
+        <View style={{
+          backgroundColor: '#065F46',
+          borderRadius: 15,
+          padding: 20,
+          marginBottom: 20
+        }}>
+          <Text style={{ color: '#fff', fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>
+            🤝 Cost Sharing
+          </Text>
+          <Text style={{ color: '#D1FAE5', fontSize: 14, lineHeight: 20 }}>
+            Delivery costs are split 50/50 between buyer and seller. This ensures everyone shares the cost of bringing the community together through local delivery.
+          </Text>
+          
+          <View style={{ 
+            flexDirection: 'row', 
+            justifyContent: 'space-around',
+            marginTop: 15,
+            paddingTop: 15,
+            borderTopWidth: 1,
+            borderTopColor: '#047857'
+          }}>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ color: '#4ADE80', fontSize: 16, fontWeight: 'bold' }}>
+                Buyer Pays
+              </Text>
+              <Text style={{ color: '#D1FAE5', fontSize: 14 }}>
+                50% of delivery
+              </Text>
+            </View>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ color: '#4ADE80', fontSize: 16, fontWeight: 'bold' }}>
+                Seller Pays  
+              </Text>
+              <Text style={{ color: '#D1FAE5', fontSize: 14 }}>
+                50% of delivery
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Community Impact */}
+        <View style={{
+          backgroundColor: '#7C2D12',
+          borderRadius: 15,
+          padding: 20
+        }}>
+          <Text style={{ color: '#fff', fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>
+            🏘️ Community Impact
+          </Text>
+          <Text style={{ color: '#FED7AA', fontSize: 14, lineHeight: 20, marginBottom: 15 }}>
+            Every delivery keeps money circulating in your neighborhood and creates local jobs for your neighbors.
+          </Text>
+          
+          <View style={{ 
+            flexDirection: 'row', 
+            justifyContent: 'space-between',
+            marginTop: 10
+          }}>
+            <View style={{ alignItems: 'center', flex: 1 }}>
+              <Text style={{ color: '#FB923C', fontSize: 20, fontWeight: 'bold' }}>
+                $125
+              </Text>
+              <Text style={{ color: '#FED7AA', fontSize: 12, textAlign: 'center' }}>
+                Average weekly driver earnings
+              </Text>
+            </View>
+            <View style={{ alignItems: 'center', flex: 1 }}>
+              <Text style={{ color: '#FB923C', fontSize: 20, fontWeight: 'bold' }}>
+                6 items
+              </Text>
+              <Text style={{ color: '#FED7AA', fontSize: 12, textAlign: 'center' }}>
+                Max items per route
+              </Text>
+            </View>
+            <View style={{ alignItems: 'center', flex: 1 }}>
+              <Text style={{ color: '#FB923C', fontSize: 20, fontWeight: 'bold' }}>
+                3 hours
+              </Text>
+              <Text style={{ color: '#FED7AA', fontSize: 12, textAlign: 'center' }}>
+                Time slot duration
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
+  );
+};
+
+// Security Policies Screen
+const SecurityPoliciesScreen = ({ navigation }: any) => {
+  return (
+    <ScrollView style={{ flex: 1, backgroundColor: '#0F0B1F' }}>
+      {/* Header */}
+      <LinearGradient
+        colors={['#1a1a2e', '#16213e', '#0f3460']}
+        style={{ paddingTop: 60, paddingBottom: 20, paddingHorizontal: 20 }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff' }}>
+            Security Policies
+          </Text>
+          <View style={{ width: 24 }} />
+        </View>
+      </LinearGradient>
+
+      <View style={{ padding: 20 }}>
+        {/* Security Badge */}
+        <View style={{
+          backgroundColor: 'rgba(34, 197, 94, 0.1)',
+          borderRadius: 12,
+          padding: 20,
+          marginBottom: 24,
+          borderWidth: 1,
+          borderColor: 'rgba(34, 197, 94, 0.3)',
+          alignItems: 'center'
+        }}>
+          <View style={{
+            width: 80,
+            height: 80,
+            borderRadius: 40,
+            backgroundColor: 'rgba(34, 197, 94, 0.2)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: 16
+          }}>
+            <Ionicons name="shield-checkmark" size={40} color="#22C55E" />
+          </View>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#fff', marginBottom: 8, textAlign: 'center' }}>
+            Secure & Trusted Platform
+          </Text>
+          <Text style={{ fontSize: 14, color: '#E5E5E5', textAlign: 'center', lineHeight: 20 }}>
+            MarketPlace prioritizes your safety and security. We've implemented multiple layers of protection to ensure a safe trading environment.
+          </Text>
+        </View>
+
+        {/* Security Features */}
+        <View style={{ marginBottom: 24 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 16 }}>
+            Security Features
+          </Text>
+          
+          {[
+            {
+              icon: 'lock-closed',
+              title: 'End-to-End Encryption',
+              description: 'All your personal data and communications are encrypted using industry-standard protocols.'
+            },
+            {
+              icon: 'card',
+              title: 'Secure Payments',
+              description: 'Payments processed through Stripe with PCI DSS compliance and fraud protection.'
+            },
+            {
+              icon: 'eye',
+              title: 'Identity Verification',
+              description: 'Optional verification system for drivers and businesses to build trust in the community.'
+            },
+            {
+              icon: 'people',
+              title: 'Community Moderation',
+              description: 'Active community reporting and moderation to maintain a safe environment.'
+            },
+            {
+              icon: 'shield',
+              title: 'Data Protection',
+              description: 'Your personal information is never sold to third parties. Full GDPR compliance.'
+            },
+            {
+              icon: 'location',
+              title: 'Location Privacy',
+              description: 'Your exact location is private. Only general area is shared for local discovery.'
+            }
+          ].map((feature, index) => (
+            <View key={index} style={{
+              flexDirection: 'row',
+              alignItems: 'flex-start',
+              paddingVertical: 16,
+              borderBottomWidth: 1,
+              borderBottomColor: 'rgba(255, 255, 255, 0.05)'
+            }}>
+              <View style={{
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginRight: 12
+              }}>
+                <Ionicons name={feature.icon as any} size={20} color="#22C55E" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 16, fontWeight: '600', color: '#fff', marginBottom: 4 }}>
+                  {feature.title}
+                </Text>
+                <Text style={{ fontSize: 14, color: '#B8B8B8', lineHeight: 20 }}>
+                  {feature.description}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {/* Safety Guidelines */}
+        <View style={{ marginBottom: 24 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 16 }}>
+            Safety Guidelines
+          </Text>
+          
+          <View style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.02)',
+            borderRadius: 8,
+            padding: 16,
+            marginBottom: 16
+          }}>
+            <Text style={{ fontSize: 16, fontWeight: '600', color: '#fff', marginBottom: 12 }}>
+              For Buyers & Sellers:
+            </Text>
+            <Text style={{ fontSize: 14, color: '#E5E5E5', lineHeight: 22 }}>
+              • Meet in public places for item exchanges{'\n'}
+              • Use our in-app messaging system{'\n'}
+              • Report suspicious behavior immediately{'\n'}
+              • Verify items before completing transactions{'\n'}
+              • Trust your instincts - if something feels wrong, walk away
+            </Text>
+          </View>
+
+          <View style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.02)',
+            borderRadius: 8,
+            padding: 16
+          }}>
+            <Text style={{ fontSize: 16, fontWeight: '600', color: '#fff', marginBottom: 12 }}>
+              For Drivers:
+            </Text>
+            <Text style={{ fontSize: 14, color: '#E5E5E5', lineHeight: 22 }}>
+              • Background checks required for all drivers{'\n'}
+              • Valid driver's license and insurance verification{'\n'}
+              • Real-time delivery tracking for safety{'\n'}
+              • Emergency contact system available{'\n'}
+              • Regular safety training and updates
+            </Text>
+          </View>
+        </View>
+
+        {/* Privacy Policy */}
+        <View style={{ marginBottom: 24 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 16 }}>
+            Privacy & Data
+          </Text>
+          
+          <View style={{
+            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+            borderRadius: 8,
+            padding: 16,
+            borderWidth: 1,
+            borderColor: 'rgba(139, 92, 246, 0.3)'
+          }}>
+            <Text style={{ fontSize: 14, color: '#E5E5E5', lineHeight: 22, marginBottom: 12 }}>
+              We collect only the minimum data necessary to provide our services:
+            </Text>
+            <Text style={{ fontSize: 14, color: '#E5E5E5', lineHeight: 22 }}>
+              • Profile information for community trust{'\n'}
+              • Location data for local discovery (never exact address){'\n'}
+              • Transaction data for order processing{'\n'}
+              • Communication logs for safety and support
+            </Text>
+          </View>
+        </View>
+
+        {/* Contact Support */}
+        <View style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: 12,
+          padding: 20,
+          marginBottom: 24,
+          borderWidth: 1,
+          borderColor: 'rgba(255, 255, 255, 0.1)'
+        }}>
+          <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#fff', marginBottom: 12 }}>
+            Need Help or Want to Report Something?
+          </Text>
+          <Text style={{ fontSize: 14, color: '#B8B8B8', marginBottom: 16 }}>
+            Our safety team is available 24/7 to help with any security concerns or policy questions.
+          </Text>
+          
+          <TouchableOpacity style={{
+            backgroundColor: '#22C55E',
+            borderRadius: 8,
+            padding: 12,
+            alignItems: 'center'
+          }}>
+            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#fff' }}>
+              Contact Security Team
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Community Promise */}
+        <View style={{
+          backgroundColor: 'rgba(251, 191, 36, 0.1)',
+          borderRadius: 12,
+          padding: 20,
+          borderWidth: 1,
+          borderColor: 'rgba(251, 191, 36, 0.3)'
+        }}>
+          <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#FBB800', marginBottom: 12 }}>
+            Our Community Promise
+          </Text>
+          <Text style={{ fontSize: 14, color: '#E5E5E5', lineHeight: 22 }}>
+            MarketPlace is built on trust, safety, and community support. We're committed to creating a platform where neighbors can trade, work, and connect with confidence. Your security is our top priority.
+          </Text>
+        </View>
+      </View>
+
+      {/* Bottom padding for floating navigation */}
+      <View style={{ height: 100 }} />
+    </ScrollView>
+  );
+};
 
 export default function App() {
   return (

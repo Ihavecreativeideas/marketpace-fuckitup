@@ -134,6 +134,9 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   updateUserProfile(userId: string, updateData: Partial<UpsertUser>): Promise<User>;
   updateUserStripeInfo(userId: string, stripeCustomerId: string, stripeSubscriptionId?: string): Promise<User>;
+  updateUserType(userId: string, userType: string): Promise<User>;
+  updateStripeCustomerId(userId: string, stripeCustomerId: string): Promise<User>;
+  updateUserSubscription(userId: string, subscriptionData: { userType: string; stripeSubscriptionId: string; subscriptionStatus: string }): Promise<User>;
   
   // Category operations
   getCategories(): Promise<Category[]>;
@@ -1660,6 +1663,38 @@ export class DatabaseStorage implements IStorage {
     await db.update(adCampaigns)
       .set({ spent: sql`${adCampaigns.spent} + ${cost}` })
       .where(eq(adCampaigns.id, campaignId));
+  }
+
+  // Subscription-related methods
+  async updateUserType(userId: string, userType: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ userType, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async updateStripeCustomerId(userId: string, stripeCustomerId: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ stripeCustomerId, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async updateUserSubscription(userId: string, subscriptionData: { userType: string; stripeSubscriptionId: string; subscriptionStatus: string }): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        userType: subscriptionData.userType,
+        stripeSubscriptionId: subscriptionData.stripeSubscriptionId,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
   }
 }
 
