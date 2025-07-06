@@ -4,6 +4,8 @@ import Stripe from "stripe";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { storage, setRLSContext, clearRLSContext } from "./storage";
 import revenueRoutes from "./revenueRoutes.js";
+import { registerDriverRoutes } from "./driverRoutes";
+import { registerPasswordRecoveryRoutes } from "./passwordRecovery";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -1609,6 +1611,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Revenue system routes
   app.use('/api/revenue', revenueRoutes);
+
+  // Driver application routes
+  registerDriverRoutes(app);
+
+  // Password recovery routes
+  registerPasswordRecoveryRoutes(app);
 
   const httpServer = createServer(app);
   return httpServer;
