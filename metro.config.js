@@ -19,4 +19,15 @@ config.watchFolders = [
   path.resolve(__dirname, 'client'),
 ];
 
+// Platform-specific resolver for web compatibility
+config.resolver.platforms = ['web', 'ios', 'android'];
+config.resolver.resolverMainFields = ['react-native', 'browser', 'main'];
+
+// Block problematic native modules on web
+if (process.env.EXPO_PLATFORM === 'web') {
+  config.resolver.blockList = [
+    /@stripe\/stripe-react-native/,
+  ];
+}
+
 module.exports = config;

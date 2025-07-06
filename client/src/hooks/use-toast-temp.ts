@@ -1,3 +1,4 @@
+// Simple toast hook without JSX to avoid compilation issues
 import { useState, useCallback } from 'react';
 
 interface ToastOptions {
