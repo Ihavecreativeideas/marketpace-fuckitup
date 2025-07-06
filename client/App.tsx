@@ -67,7 +67,6 @@ import { RevenueDemo } from './src/components/revenue/RevenueDemo';
 import { SimpleLandingPage } from './src/screens/SimpleLandingPage';
 
 // Simple placeholder screens to prevent import errors
-import { Text } from 'react-native';
 
 const SimpleScreen = ({ title }: { title: string }) => (
   <FuturisticBackground>
@@ -333,7 +332,7 @@ function MainTabs() {
         headerShown: false,
       })}
     >
-      <Tab.Screen name="Home" component={() => <SimpleScreen title="Home" />} />
+      <Tab.Screen name="Home" component={CampaignLandingScreen} />
       <Tab.Screen name="Marketplace" component={MarketplaceStack} />
       <Tab.Screen name="Community" component={() => <SimpleScreen title="Community" />} />
       <Tab.Screen name="Deliveries" component={DeliveryStack} />
