@@ -826,7 +826,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             <p>Manage app settings, pricing, and content without coding</p>
             <a href="/admin">Access Admin Panel</a>
             <br><br>
-            <small>Note: You need to be logged in and have admin privileges. <a href="/auth/login" style="color: #FFD700;">Login with Replit</a> first.</small>
+            <div style="margin-top: 15px;">
+              <button onclick="makeAdmin()" style="background: #FFD700; color: #333; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold;">Make Me Admin</button>
+              <button onclick="login()" style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-left: 10px;">Login with Replit</button>
+            </div>
+            <small style="display: block; margin-top: 10px;">First login, then click "Make Me Admin" to get admin access.</small>
           </div>
           
           <p>Welcome to MarketPace - a marketplace delivery service platform similar to "Facebook Marketplace meets Uber Eats".</p>
@@ -855,6 +859,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
           <p>Database: PostgreSQL with ${Object.keys(process.env).filter(k => k.includes('DATABASE')).length > 0 ? '✅ Connected' : '❌ Not Connected'}</p>
           <p>Stripe: ${process.env.STRIPE_SECRET_KEY ? '✅ Configured' : '❌ Not Configured'}</p>
         </div>
+        
+        <script>
+          function login() {
+            window.location.href = '/auth/login';
+          }
+          
+          async function makeAdmin() {
+            try {
+              const response = await fetch('/api/make-admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+              });
+              
+              if (response.ok) {
+                const result = await response.json();
+                alert('Success! You are now an admin. You can access the admin panel.');
+              } else {
+                const error = await response.json();
+                alert('Error: ' + error.message + '\\n\\nPlease login first by clicking "Login with Replit"');
+              }
+            } catch (error) {
+              alert('Error: Please login first by clicking "Login with Replit"');
+            }
+          }
+        </script>
       </body>
       </html>
     `);
