@@ -118,7 +118,134 @@ const queryClient = null; // Simplified for demo
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-const CampaignLandingScreen = () => (
+// Sign Up / Login Screen
+const SignUpLoginScreen = ({ route, navigation }: any) => {
+  const mode = route?.params?.mode || 'signup';
+  const isSignUp = mode === 'signup';
+
+  return (
+    <ScrollView style={{ flex: 1, backgroundColor: '#f8f9fa' }}>
+      {/* Header */}
+      <LinearGradient
+        colors={['#667eea', '#764ba2']}
+        style={{ paddingTop: 60, paddingBottom: 30, paddingHorizontal: 20, alignItems: 'center' }}
+      >
+        <TouchableOpacity 
+          style={{ position: 'absolute', left: 20, top: 60, zIndex: 10 }}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={{ fontSize: 24, color: '#fff', fontWeight: 'bold' }}>←</Text>
+        </TouchableOpacity>
+        
+        <View style={{ 
+          width: 60, height: 60, borderRadius: 30, backgroundColor: 'rgba(255, 255, 255, 0.2)',
+          justifyContent: 'center', alignItems: 'center', marginBottom: 12
+        }}>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff' }}>MP</Text>
+        </View>
+        <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 8 }}>
+          {isSignUp ? 'Join MarketPlace' : 'Welcome Back'}
+        </Text>
+        {isSignUp && (
+          <Text style={{ fontSize: 14, color: 'rgba(255, 255, 255, 0.9)', textAlign: 'center' }}>
+            Get lifetime Pro access as an early campaign member
+          </Text>
+        )}
+      </LinearGradient>
+
+      {/* Form */}
+      <View style={{ padding: 24 }}>
+        {isSignUp && (
+          <View style={{ marginBottom: 16 }}>
+            <Text style={{ fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8 }}>Full Name</Text>
+            <View style={{ borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 12, backgroundColor: '#fff' }}>
+              <Text style={{ color: '#999' }}>Enter your full name</Text>
+            </View>
+          </View>
+        )}
+        
+        <View style={{ marginBottom: 16 }}>
+          <Text style={{ fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8 }}>Email Address</Text>
+          <View style={{ borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 12, backgroundColor: '#fff' }}>
+            <Text style={{ color: '#999' }}>Enter your email</Text>
+          </View>
+        </View>
+
+        <View style={{ marginBottom: 24 }}>
+          <Text style={{ fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8 }}>Password</Text>
+          <View style={{ borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 12, backgroundColor: '#fff' }}>
+            <Text style={{ color: '#999' }}>Enter your password</Text>
+          </View>
+        </View>
+
+        {/* Action Button */}
+        <TouchableOpacity style={{ width: '100%', marginBottom: 16 }}>
+          <LinearGradient
+            colors={isSignUp ? ['#4CAF50', '#45a049'] : ['#667eea', '#764ba2']}
+            style={{ paddingVertical: 16, paddingHorizontal: 32, borderRadius: 12, alignItems: 'center' }}
+          >
+            <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff' }}>
+              {isSignUp ? 'Join Campaign & Get Pro Access' : 'Log In'}
+            </Text>
+          </LinearGradient>
+        </TouchableOpacity>
+
+        {/* Switch Mode */}
+        <TouchableOpacity 
+          style={{ paddingVertical: 12, paddingHorizontal: 24, alignItems: 'center' }}
+          onPress={() => navigation.navigate('SignUpLogin', { mode: isSignUp ? 'login' : 'signup' })}
+        >
+          <Text style={{ fontSize: 16, color: '#667eea', textAlign: 'center' }}>
+            {isSignUp ? 'Already have an account? Log in' : "Don't have an account? Join the campaign"}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Social Login Options */}
+        <View style={{ marginTop: 24 }}>
+          <Text style={{ fontSize: 14, color: '#666', textAlign: 'center', marginBottom: 16 }}>
+            Or continue with
+          </Text>
+          
+          <TouchableOpacity style={{ 
+            flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+            borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingVertical: 12, marginBottom: 12, backgroundColor: '#fff'
+          }}>
+            <Text style={{ fontSize: 16, color: '#333', marginLeft: 8 }}>Continue with Google</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={{ 
+            flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+            borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingVertical: 12, marginBottom: 12, backgroundColor: '#fff'
+          }}>
+            <Text style={{ fontSize: 16, color: '#333', marginLeft: 8 }}>Continue with Facebook</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={{ 
+            flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+            borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingVertical: 12, backgroundColor: '#fff'
+          }}>
+            <Text style={{ fontSize: 16, color: '#333', marginLeft: 8 }}>Continue with Apple</Text>
+          </TouchableOpacity>
+        </View>
+
+        {isSignUp && (
+          <View style={{ marginTop: 24, padding: 16, backgroundColor: '#e8f5e8', borderRadius: 8 }}>
+            <Text style={{ fontSize: 14, color: '#2e7d32', textAlign: 'center', fontWeight: '600', marginBottom: 4 }}>
+              🎁 Campaign Member Benefit
+            </Text>
+            <Text style={{ fontSize: 12, color: '#2e7d32', textAlign: 'center', lineHeight: 18 }}>
+              As an early campaign member, you'll receive lifetime Pro access (normally $3.99/month) completely free!
+            </Text>
+          </View>
+        )}
+      </View>
+
+      <View style={{ height: 40 }} />
+    </ScrollView>
+  );
+};
+
+const CampaignLandingScreen = ({ navigation }: any) => (
   <ScrollView style={{ flex: 1, backgroundColor: '#f8f9fa' }}>
     {/* Hero Section */}
     <LinearGradient
@@ -236,7 +363,10 @@ const CampaignLandingScreen = () => (
 
     {/* Call to Action */}
     <View style={{ padding: 24, alignItems: 'center' }}>
-      <TouchableOpacity style={{ width: '100%', marginBottom: 16 }}>
+      <TouchableOpacity 
+        style={{ width: '100%', marginBottom: 16 }}
+        onPress={() => navigation.navigate('SignUpLogin', { mode: 'signup' })}
+      >
         <LinearGradient
           colors={['#4CAF50', '#45a049']}
           style={{ paddingVertical: 16, paddingHorizontal: 32, borderRadius: 12, alignItems: 'center' }}
@@ -250,7 +380,10 @@ const CampaignLandingScreen = () => (
         </LinearGradient>
       </TouchableOpacity>
 
-      <TouchableOpacity style={{ paddingVertical: 12, paddingHorizontal: 24 }}>
+      <TouchableOpacity 
+        style={{ paddingVertical: 12, paddingHorizontal: 24 }}
+        onPress={() => navigation.navigate('SignUpLogin', { mode: 'login' })}
+      >
         <Text style={{ fontSize: 16, color: '#667eea', textAlign: 'center' }}>
           Already a Member? Log In
         </Text>
@@ -261,10 +394,20 @@ const CampaignLandingScreen = () => (
   </ScrollView>
 );
 
+// Home Stack with Campaign Landing and Sign Up
+function HomeStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="CampaignLanding" component={CampaignLandingScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="SignUpLogin" component={SignUpLoginScreen} options={{ headerShown: false }} />
+    </Stack.Navigator>
+  );
+}
+
 function MarketplaceStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="MarketplaceHome" component={CampaignLandingScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="MarketplaceHome" component={() => <SimpleScreen title="Marketplace" />} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
@@ -332,7 +475,7 @@ function MainTabs() {
         headerShown: false,
       })}
     >
-      <Tab.Screen name="Home" component={CampaignLandingScreen} />
+      <Tab.Screen name="Home" component={HomeStack} />
       <Tab.Screen name="Marketplace" component={MarketplaceStack} />
       <Tab.Screen name="Community" component={() => <SimpleScreen title="Community" />} />
       <Tab.Screen name="Deliveries" component={DeliveryStack} />
