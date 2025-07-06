@@ -1,0 +1,89 @@
+// Revenue logic for MarketPace app
+// Paste into a Replit app backend (Node.js environment recommended)
+
+// Subscription Plans
+const SUBSCRIPTION_FEE = 3.99;
+const BASIC_MEMBER = 'basic';
+const DUAL_MEMBER = 'dual';
+
+// Fees & Charges
+const PRODUCT_SALE_FEE_PERCENT = 0.05; // 5% fee from each product sold
+const SERVICE_RENTAL_FEE_PERCENT = 0.05; // 5% fee from service/rental
+const DAMAGE_INSURANCE_OPTIONAL_FEE = 2.00; // Optional damage insurance
+const VERIFICATION_FEE = 1.00; // Optional verification fee
+
+// In-App Currency Logic
+let userWallets = {}; // Store user balances by userID
+
+function addCredits(userId, amount) {
+  if (!userWallets[userId]) userWallets[userId] = 0;
+  userWallets[userId] += amount;
+}
+
+function deductCredits(userId, amount) {
+  if (!userWallets[userId] || userWallets[userId] < amount) {
+    throw new Error("Insufficient balance");
+  }
+  userWallets[userId] -= amount;
+}
+
+function getWalletBalance(userId) {
+  return userWallets[userId] || 0;
+}
+
+// Charge sale fee
+function calculateProductSaleFee(price) {
+  return price * PRODUCT_SALE_FEE_PERCENT;
+}
+
+// Charge rental/service fee
+function calculateRentalOrServiceFee(price, includeInsurance = false, includeVerification = false) {
+  let baseFee = price * SERVICE_RENTAL_FEE_PERCENT;
+  if (includeInsurance) baseFee += DAMAGE_INSURANCE_OPTIONAL_FEE;
+  if (includeVerification) baseFee += VERIFICATION_FEE;
+  return baseFee;
+}
+
+// Subscription handler
+function isSubscribed(userType, hasPaidSubscription) {
+  if (userType === BASIC_MEMBER) return true; // Free
+  if (userType === DUAL_MEMBER) return hasPaidSubscription; // Must pay
+  return false;
+}
+
+// Promotion Tools
+function promoteListing(userId, boostAmount) {
+  const promotionFee = boostAmount;
+  deductCredits(userId, promotionFee);
+  return `User ${userId} promoted listing with $${boostAmount}`;
+}
+
+// Sponsorship system
+let sponsorships = [];
+
+function addSponsorship(businessName, amount, message = '') {
+  sponsorships.push({ businessName, amount, message, date: new Date() });
+}
+
+function getSponsors() {
+  return sponsorships;
+}
+
+// Partner businesses
+let localPartners = [];
+
+function addLocalBusinessPartner(name, website, logoUrl) {
+  localPartners.push({ name, website, logoUrl });
+}
+
+function getLocalBusinessPartners() {
+  return localPartners;
+}
+
+// Example Usage
+addCredits('user123', 20); // Add in-app credits
+console.log(getWalletBalance('user123')); // Show balance
+console.log(calculateProductSaleFee(100)); // 5% fee = $5
+console.log(calculateRentalOrServiceFee(200, true, true)); // Fee + insurance + verification
+addSponsorship('Joe’s Auto', 50, 'Proud to support local delivery!');
+addLocalBusinessPartner('Main St. Coffee', 'https://mainstcoffee.com', 'logo.png');
