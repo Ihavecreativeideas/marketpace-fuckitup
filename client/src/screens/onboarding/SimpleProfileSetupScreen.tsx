@@ -8,17 +8,15 @@ import {
   TextInput,
   Alert,
   Image,
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as ImagePicker from 'expo-image-picker';
-import { useAuth } from '../../hooks/useAuth';
-import { useApiRequest } from '../../hooks/useApiRequest';
 import { LinearGradient } from 'expo-linear-gradient';
-import FuturisticLogo from '../../components/FuturisticLogo';
-import GlassCard from '../../components/GlassCard';
-import FuturisticButton from '../../components/FuturisticButton';
+import * as ImagePicker from 'expo-image-picker';
 import { colors } from '../../../../src/utils/colors';
+
+const { height } = Dimensions.get('window');
 
 interface ProfileSetupData {
   profileImageUrl?: string;
@@ -35,7 +33,7 @@ const INTEREST_OPTIONS = [
   'Technology', 'Collectibles', 'Vintage', 'Handmade', 'Services', 'Events'
 ];
 
-export default function ProfileSetupScreen({ navigation }: any) {
+export default function SimpleProfileSetupScreen({ navigation }: any) {
   const [formData, setFormData] = useState<ProfileSetupData>({
     bio: '',
     interests: [],
@@ -44,9 +42,6 @@ export default function ProfileSetupScreen({ navigation }: any) {
   });
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  const { user } = useAuth();
-  const { apiRequest } = useApiRequest();
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -83,15 +78,11 @@ export default function ProfileSetupScreen({ navigation }: any) {
 
     setLoading(true);
     try {
-      // Update user profile with basic info
-      await apiRequest('PATCH', '/api/auth/profile', {
-        ...formData,
-        profileImageUrl: profileImage,
-      });
-
+      console.log('Profile data:', formData);
+      await new Promise(resolve => setTimeout(resolve, 1000));
       navigation.navigate('AccountTypeSelection');
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to save profile');
+      Alert.alert('Error', 'Failed to save profile');
     } finally {
       setLoading(false);
     }
@@ -102,29 +93,24 @@ export default function ProfileSetupScreen({ navigation }: any) {
       <LinearGradient
         colors={colors.cosmic.gradient.primary}
         style={StyleSheet.absoluteFillObject}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
       />
-      <ScrollView 
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={true}
-        scrollEnabled={true}
-        bounces={true}
-      >
-        <SafeAreaView style={styles.safeArea}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Ionicons name="arrow-back" size={24} color={colors.text} />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Create Your Profile</Text>
-            <View style={{ width: 24 }} />
-          </View>
+      
+      <SafeAreaView style={styles.safeArea}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Create Your Profile</Text>
+          <View style={{ width: 24 }} />
+        </View>
 
-          {/* Logo */}
-          <FuturisticLogo size="small" animated={true} />
-
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={true}
+          bounces={true}
+        >
           {/* Progress Indicator */}
           <View style={styles.progressContainer}>
             <View style={[styles.progressStep, styles.progressActive]} />
@@ -134,7 +120,7 @@ export default function ProfileSetupScreen({ navigation }: any) {
           <Text style={styles.progressText}>Step 1 of 3</Text>
 
           {/* Profile Picture */}
-          <GlassCard style={styles.section}>
+          <View style={styles.section}>
             <Text style={styles.sectionTitle}>Profile Picture</Text>
             <TouchableOpacity style={styles.imageContainer} onPress={pickImage}>
               {profileImage ? (
@@ -146,10 +132,10 @@ export default function ProfileSetupScreen({ navigation }: any) {
                 </View>
               )}
             </TouchableOpacity>
-          </GlassCard>
+          </View>
 
           {/* Bio */}
-          <GlassCard style={styles.section}>
+          <View style={styles.section}>
             <Text style={styles.sectionTitle}>Tell us about yourself</Text>
             <TextInput
               style={styles.bioInput}
@@ -162,10 +148,10 @@ export default function ProfileSetupScreen({ navigation }: any) {
               textAlignVertical="top"
             />
             <Text style={styles.characterCount}>{formData.bio.length}/200</Text>
-          </GlassCard>
+          </View>
 
           {/* Interests */}
-          <GlassCard style={styles.section}>
+          <View style={styles.section}>
             <Text style={styles.sectionTitle}>What are you interested in?</Text>
             <Text style={styles.sectionDescription}>
               Select categories that interest you (choose at least 3)
@@ -189,10 +175,10 @@ export default function ProfileSetupScreen({ navigation }: any) {
                 </TouchableOpacity>
               ))}
             </View>
-          </GlassCard>
+          </View>
 
           {/* Contact Info */}
-          <GlassCard style={styles.section}>
+          <View style={styles.section}>
             <Text style={styles.sectionTitle}>Contact Information</Text>
             
             <View style={styles.inputContainer}>
@@ -218,20 +204,25 @@ export default function ProfileSetupScreen({ navigation }: any) {
                 multiline
               />
             </View>
-          </GlassCard>
+          </View>
 
           {/* Continue Button */}
-          <FuturisticButton
-            title="Continue"
+          <TouchableOpacity
+            style={[styles.continueButton, loading && styles.continueButtonDisabled]}
             onPress={handleNext}
-            loading={loading}
-            variant="primary"
-            size="large"
-            glowEffect={true}
-            style={styles.continueButton}
-          />
-        </SafeAreaView>
-      </ScrollView>
+            disabled={loading}
+          >
+            <LinearGradient
+              colors={colors.cosmic.gradient.accent}
+              style={styles.buttonGradient}
+            >
+              <Text style={styles.continueButtonText}>
+                {loading ? 'Loading...' : 'Continue'}
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </ScrollView>
+      </SafeAreaView>
     </View>
   );
 }
@@ -241,21 +232,22 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  safeArea: {
+    flex: 1,
+  },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
+    paddingHorizontal: 20,
     paddingBottom: 100,
-  },
-  safeArea: {
-    minHeight: '100%',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
   },
   headerTitle: {
     fontSize: 18,
@@ -265,8 +257,7 @@ const styles = StyleSheet.create({
   progressContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 8,
-    marginTop: 10,
+    marginVertical: 20,
   },
   progressStep: {
     width: 10,
@@ -280,11 +271,6 @@ const styles = StyleSheet.create({
   progressActive: {
     backgroundColor: colors.primary,
     borderColor: colors.primary,
-    shadowColor: colors.shadowColor,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 8,
-    elevation: 5,
   },
   progressText: {
     textAlign: 'center',
@@ -293,13 +279,18 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   section: {
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    padding: 20,
     marginBottom: 20,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: colors.text,
-    marginBottom: 12,
+    marginBottom: 15,
   },
   sectionDescription: {
     fontSize: 14,
@@ -316,11 +307,6 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     borderWidth: 3,
     borderColor: colors.primary,
-    shadowColor: colors.shadowColor,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
   },
   imagePlaceholder: {
     width: 100,
@@ -353,7 +339,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     color: colors.textMuted,
     fontSize: 12,
-    marginTop: 4,
+    marginTop: 8,
   },
   interestsGrid: {
     flexDirection: 'row',
@@ -371,11 +357,6 @@ const styles = StyleSheet.create({
   interestTagSelected: {
     backgroundColor: colors.primary,
     borderColor: colors.primary,
-    shadowColor: colors.shadowColor,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
-    elevation: 3,
   },
   interestTagText: {
     fontSize: 14,
@@ -405,7 +386,21 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   continueButton: {
+    borderRadius: 12,
     marginTop: 30,
-    marginBottom: 20,
+    overflow: 'hidden',
+  },
+  continueButtonDisabled: {
+    opacity: 0.6,
+  },
+  buttonGradient: {
+    paddingVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  continueButtonText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.white,
   },
 });

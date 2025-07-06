@@ -54,7 +54,7 @@ const SimpleScreen = ({ title }: { title: string }) => (
 );
 
 // New onboarding screens
-import ProfileSetupScreen from './src/screens/onboarding/ProfileSetupScreen';
+import SimpleProfileSetupScreen from './src/screens/onboarding/SimpleProfileSetupScreen';
 import AccountTypeSelectionScreen from './src/screens/onboarding/AccountTypeSelectionScreen';
 import BusinessSetupScreen from './src/screens/onboarding/BusinessSetupScreen';
 import OnboardingCompleteScreen from './src/screens/onboarding/OnboardingCompleteScreen';
@@ -134,7 +134,7 @@ function MainTabs() {
 function OnboardingStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
+      <Stack.Screen name="ProfileSetup" component={SimpleProfileSetupScreen} />
       <Stack.Screen name="AccountTypeSelection" component={AccountTypeSelectionScreen} />
       <Stack.Screen name="BusinessSetup" component={BusinessSetupScreen} />
       <Stack.Screen name="OnboardingComplete" component={OnboardingCompleteScreen} />
