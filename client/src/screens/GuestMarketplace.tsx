@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import FuturisticBackground from '../components/FuturisticBackground';
 import GlassCard from '../components/GlassCard';
 import FuturisticButton from '../components/FuturisticButton';
-import { colors } from '../../src/utils/colors';
+import { colors } from '../../../src/utils/colors';
 
 interface GuestMarketplaceProps {
   navigation: any;
