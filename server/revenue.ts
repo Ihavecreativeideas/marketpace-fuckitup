@@ -70,8 +70,9 @@ export const FEE_STRUCTURE = {
   SERVICE_RENTAL_PERCENT: 0.05, // 5% fee from service/rental
   DAMAGE_INSURANCE_FEE: 2.00, // Optional damage insurance
   VERIFICATION_FEE: 1.00, // Optional verification fee
+  LARGE_ITEM_FEE: 25.00, // $25 fee for large items requiring truck/trailer
   WALLET_BONUS_PERCENT: 0.10, // 10% bonus when loading wallet ($10 = $11 in app)
-  DELIVERY_PLATFORM_PERCENT: 0.05 // 5% of delivery/order total
+  DELIVERY_PLATFORM_PERCENT: 0.05 // 5% of delivery/order total (except tips)
 };
 
 // Driver Payment Structure
@@ -392,4 +393,229 @@ export function runRevenueExamples(): void {
   
   console.log('Active sponsors:', SponsorshipManager.getActiveSponsors().length);
   console.log('Local partners:', SponsorshipManager.getLocalPartners().length);
+}
+
+// Enhanced delivery fee calculation with vehicle types and item sizes
+export function calculateEnhancedDeliveryFee(
+  itemSize: 'small' | 'medium' | 'large',
+  driverVehicleType: 'car' | 'suv' | 'truck' | 'van' | 'motorcycle' | 'bicycle',
+  distance: number = 5,
+  tip: number = 0
+): {
+  baseFee: number;
+  largeItemFee: number;
+  platformCommission: number;
+  driverPayout: number;
+  buyerShare: number;
+  sellerShare: number;
+  totalDeliveryFee: number;
+  details: string;
+} {
+  // Base delivery calculation
+  const baseFee = DRIVER_PAYMENTS.PICKUP_FEE + DRIVER_PAYMENTS.DROPOFF_FEE + (DRIVER_PAYMENTS.MILEAGE_RATE * distance);
+  
+  // Large item fee (only for large items requiring truck/trailer)
+  const largeItemFee = (itemSize === 'large' && (driverVehicleType === 'truck' || driverVehicleType === 'van')) ? FEE_STRUCTURE.LARGE_ITEM_FEE : 0;
+  
+  // Total delivery fee before tips
+  const totalDeliveryFee = baseFee + largeItemFee;
+  
+  // Platform commission (5% of delivery fee, excluding tips)
+  const platformCommission = totalDeliveryFee * FEE_STRUCTURE.DELIVERY_PLATFORM_PERCENT;
+  
+  // Driver payout (delivery fee minus platform commission + 100% of tips)
+  const driverPayout = totalDeliveryFee - platformCommission + tip;
+  
+  // Split delivery fee between buyer and seller (50/50)
+  const buyerShare = totalDeliveryFee / 2;
+  const sellerShare = totalDeliveryFee / 2;
+  
+  // Validate vehicle can handle item size
+  const canHandle = validateVehicleItemCompatibility(driverVehicleType, itemSize);
+  
+  const details = `
+Item Size: ${itemSize.charAt(0).toUpperCase() + itemSize.slice(1)}
+Vehicle: ${driverVehicleType.charAt(0).toUpperCase() + driverVehicleType.slice(1)}
+Compatible: ${canHandle ? 'Yes' : 'No'}
+
+Base Delivery: $${baseFee.toFixed(2)} ($${DRIVER_PAYMENTS.PICKUP_FEE} pickup + $${DRIVER_PAYMENTS.DROPOFF_FEE} dropoff + $${(DRIVER_PAYMENTS.MILEAGE_RATE * distance).toFixed(2)} mileage)
+Large Item Fee: $${largeItemFee.toFixed(2)}
+Total Delivery Fee: $${totalDeliveryFee.toFixed(2)}
+
+Fee Split:
+- Buyer pays: $${buyerShare.toFixed(2)}
+- Seller pays: $${sellerShare.toFixed(2)}
+- Platform commission: $${platformCommission.toFixed(2)} (5%)
+- Driver receives: $${driverPayout.toFixed(2)} (includes $${tip.toFixed(2)} tip)
+  `.trim();
+  
+  return {
+    baseFee,
+    largeItemFee,
+    platformCommission,
+    driverPayout,
+    buyerShare,
+    sellerShare,
+    totalDeliveryFee,
+    details
+  };
+}
+
+// Vehicle and item size compatibility checker
+export function validateVehicleItemCompatibility(
+  vehicleType: 'car' | 'suv' | 'truck' | 'van' | 'motorcycle' | 'bicycle',
+  itemSize: 'small' | 'medium' | 'large'
+): boolean {
+  const compatibility = {
+    bicycle: ['small'],
+    motorcycle: ['small'],
+    car: ['small', 'medium'],
+    suv: ['small', 'medium', 'large'],
+    van: ['small', 'medium', 'large'],
+    truck: ['small', 'medium', 'large']
+  };
+  
+  return compatibility[vehicleType]?.includes(itemSize) || false;
+}
+
+// Delivery route management with large item restriction
+export interface DeliveryItem {
+  id: string;
+  size: 'small' | 'medium' | 'large';
+  pickupAddress: string;
+  dropoffAddress: string;
+  weight?: number;
+  description?: string;
+}
+
+export interface DeliveryRoute {
+  id: string;
+  driverId: string;
+  items: DeliveryItem[];
+  totalDistance: number;
+  hasLargeItem: boolean;
+  maxCapacityReached: boolean;
+}
+
+export class DeliveryRouteManager {
+  private static routes: Map<string, DeliveryRoute> = new Map();
+  
+  static createRoute(driverId: string): string {
+    const routeId = `ROUTE_${Date.now()}`;
+    const route: DeliveryRoute = {
+      id: routeId,
+      driverId,
+      items: [],
+      totalDistance: 0,
+      hasLargeItem: false,
+      maxCapacityReached: false
+    };
+    
+    this.routes.set(routeId, route);
+    return routeId;
+  }
+  
+  static addItemToRoute(routeId: string, item: DeliveryItem): { 
+    success: boolean; 
+    message: string; 
+    route?: DeliveryRoute 
+  } {
+    const route = this.routes.get(routeId);
+    if (!route) {
+      return { success: false, message: 'Route not found' };
+    }
+    
+    // Check if route already has 6 items (max capacity)
+    if (route.items.length >= 6) {
+      return { success: false, message: 'Route at maximum capacity (6 items)' };
+    }
+    
+    // Check large item restriction - only one large item per route
+    if (item.size === 'large') {
+      if (route.hasLargeItem) {
+        return { success: false, message: 'Route already contains a large item. Only one large item per route allowed.' };
+      }
+      route.hasLargeItem = true;
+    }
+    
+    // Add item to route
+    route.items.push(item);
+    
+    // Update capacity status
+    route.maxCapacityReached = route.items.length >= 6;
+    
+    this.routes.set(routeId, route);
+    
+    return { 
+      success: true, 
+      message: `Item added successfully. Route now has ${route.items.length}/6 items.`,
+      route 
+    };
+  }
+  
+  static getRouteInfo(routeId: string): DeliveryRoute | undefined {
+    return this.routes.get(routeId);
+  }
+  
+  static calculateRouteEarnings(routeId: string, tip: number = 0): {
+    totalEarnings: number;
+    breakdown: {
+      pickups: number;
+      dropoffs: number;
+      mileage: number;
+      largeItemFees: number;
+      tips: number;
+    };
+    details: string;
+  } {
+    const route = this.routes.get(routeId);
+    if (!route) {
+      throw new Error('Route not found');
+    }
+    
+    const pickupFees = route.items.length * DRIVER_PAYMENTS.PICKUP_FEE;
+    const dropoffFees = route.items.length * DRIVER_PAYMENTS.DROPOFF_FEE;
+    const mileageFees = route.totalDistance * DRIVER_PAYMENTS.MILEAGE_RATE;
+    const largeItemFees = route.hasLargeItem ? FEE_STRUCTURE.LARGE_ITEM_FEE : 0;
+    
+    const totalBeforeTip = pickupFees + dropoffFees + mileageFees + largeItemFees;
+    const platformCommission = (totalBeforeTip - largeItemFees) * FEE_STRUCTURE.DELIVERY_PLATFORM_PERCENT;
+    const driverEarnings = totalBeforeTip - platformCommission + tip;
+    
+    const breakdown = {
+      pickups: pickupFees,
+      dropoffs: dropoffFees,
+      mileage: mileageFees,
+      largeItemFees: largeItemFees,
+      tips: tip
+    };
+    
+    const details = `
+Route ${routeId} Earnings:
+- ${route.items.length} pickups: $${pickupFees.toFixed(2)}
+- ${route.items.length} dropoffs: $${dropoffFees.toFixed(2)}
+- ${route.totalDistance} miles: $${mileageFees.toFixed(2)}
+- Large item fees: $${largeItemFees.toFixed(2)}
+- Tips: $${tip.toFixed(2)}
+- Platform commission: -$${platformCommission.toFixed(2)}
+Total Driver Earnings: $${driverEarnings.toFixed(2)}
+    `.trim();
+    
+    return {
+      totalEarnings: driverEarnings,
+      breakdown,
+      details
+    };
+  }
+}
+
+// Get compatible drivers for specific item size
+export function getCompatibleDrivers(
+  itemSize: 'small' | 'medium' | 'large',
+  allDrivers: { vehicleType: string; itemSizePreferences: any }[]
+): any[] {
+  return allDrivers.filter(driver => 
+    validateVehicleItemCompatibility(driver.vehicleType as any, itemSize) &&
+    driver.itemSizePreferences[itemSize]
+  );
 }
