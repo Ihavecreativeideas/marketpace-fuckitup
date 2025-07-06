@@ -374,6 +374,420 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin panel routes (require admin user type)
+  const isAdmin = (req: any, res: any, next: any) => {
+    if (!req.user || req.user.claims.userType !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+    next();
+  };
+
+  // Get all app settings
+  app.get('/api/admin/settings', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const settings = await storage.getAppSettings();
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching app settings:", error);
+      res.status(500).json({ message: "Failed to fetch app settings" });
+    }
+  });
+
+  // Get settings by category
+  app.get('/api/admin/settings/:category', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { category } = req.params;
+      const settings = await storage.getAppSettingsByCategory(category);
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching settings by category:", error);
+      res.status(500).json({ message: "Failed to fetch settings" });
+    }
+  });
+
+  // Update app setting
+  app.put('/api/admin/settings/:key', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { key } = req.params;
+      const { value } = req.body;
+      const userId = req.user.claims.sub;
+      
+      const updatedSetting = await storage.updateAppSetting(key, value, userId);
+      res.json(updatedSetting);
+    } catch (error) {
+      console.error("Error updating app setting:", error);
+      res.status(500).json({ message: "Failed to update setting" });
+    }
+  });
+
+  // Create new app setting
+  app.post('/api/admin/settings', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const settingData = { ...req.body, updatedBy: userId };
+      
+      const newSetting = await storage.createAppSetting(settingData);
+      res.json(newSetting);
+    } catch (error) {
+      console.error("Error creating app setting:", error);
+      res.status(500).json({ message: "Failed to create setting" });
+    }
+  });
+
+  // Admin panel web interface
+  app.get('/admin', isAuthenticated, async (req: any, res) => {
+    const user = await storage.getUser(req.user.claims.sub);
+    if (!user || user.userType !== 'admin') {
+      return res.status(403).send('Admin access required');
+    }
+
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>MarketPace Admin Panel</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+          }
+          .header {
+            background: #007AFF;
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,122,255,0.1);
+          }
+          .header h1 { font-size: 24px; font-weight: 600; }
+          .header p { opacity: 0.9; margin-top: 5px; }
+          
+          .container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+          
+          .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+          }
+          
+          .settings-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            border: 1px solid #e1e8ed;
+          }
+          
+          .settings-card h3 {
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+          }
+          
+          .setting-item {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+          }
+          
+          .setting-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+          }
+          
+          .setting-label {
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #333;
+          }
+          
+          .setting-description {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+          }
+          
+          .setting-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: #fff;
+          }
+          
+          .setting-input:focus {
+            outline: none;
+            border-color: #007AFF;
+            box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
+          }
+          
+          .btn {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+          }
+          
+          .btn:hover { background: #0056cc; }
+          .btn-success { background: #34c759; }
+          .btn-success:hover { background: #28a745; }
+          
+          .save-indicator {
+            display: none;
+            color: #34c759;
+            font-size: 12px;
+            margin-top: 5px;
+          }
+          
+          .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e1e8ed;
+          }
+          
+          .tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            border-bottom: 2px solid transparent;
+          }
+          
+          .tab.active {
+            color: #007AFF;
+            border-bottom-color: #007AFF;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>MarketPace Admin Panel</h1>
+          <p>Manage app settings, pricing, and content</p>
+        </div>
+        
+        <div class="container">
+          <div class="tabs">
+            <button class="tab active" onclick="showCategory('general')">General</button>
+            <button class="tab" onclick="showCategory('pricing')">Pricing</button>
+            <button class="tab" onclick="showCategory('driver')">Driver Settings</button>
+            <button class="tab" onclick="showCategory('subscription')">Subscriptions</button>
+            <button class="tab" onclick="showCategory('content')">Content</button>
+          </div>
+          
+          <div id="settings-content">
+            <p>Loading settings...</p>
+          </div>
+        </div>
+
+        <script>
+          let allSettings = [];
+          
+          async function loadSettings() {
+            try {
+              const response = await fetch('/api/admin/settings');
+              allSettings = await response.json();
+              showCategory('general');
+            } catch (error) {
+              console.error('Error loading settings:', error);
+              document.getElementById('settings-content').innerHTML = '<p style="color: red;">Error loading settings</p>';
+            }
+          }
+          
+          function showCategory(category) {
+            // Update active tab
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelector(\`[onclick="showCategory('\${category}')"]\`).classList.add('active');
+            
+            // Get settings for this category
+            const categorySettings = allSettings.filter(s => s.category === category);
+            
+            if (categorySettings.length === 0) {
+              // Show default settings for this category
+              showDefaultSettings(category);
+            } else {
+              renderSettings(categorySettings, category);
+            }
+          }
+          
+          function showDefaultSettings(category) {
+            const defaultSettings = getDefaultSettingsForCategory(category);
+            const content = \`
+              <div class="settings-card">
+                <h3>\${getCategoryIcon(category)} \${getCategoryTitle(category)}</h3>
+                \${defaultSettings.map(setting => \`
+                  <div class="setting-item">
+                    <div class="setting-label">\${setting.label}</div>
+                    <div class="setting-description">\${setting.description}</div>
+                    <input 
+                      type="\${setting.type === 'number' ? 'number' : 'text'}" 
+                      class="setting-input" 
+                      value="\${setting.value}"
+                      onchange="saveSetting('\${setting.key}', this.value, '\${setting.type}', '\${category}', '\${setting.label}', '\${setting.description}')"
+                    >
+                    <div class="save-indicator">Saved!</div>
+                  </div>
+                \`).join('')}
+              </div>
+            \`;
+            document.getElementById('settings-content').innerHTML = content;
+          }
+          
+          function renderSettings(settings, category) {
+            const content = \`
+              <div class="settings-card">
+                <h3>\${getCategoryIcon(category)} \${getCategoryTitle(category)}</h3>
+                \${settings.map(setting => \`
+                  <div class="setting-item">
+                    <div class="setting-label">\${setting.label}</div>
+                    <div class="setting-description">\${setting.description}</div>
+                    <input 
+                      type="\${setting.type === 'number' ? 'number' : 'text'}" 
+                      class="setting-input" 
+                      value="\${setting.value}"
+                      onchange="updateSetting('\${setting.key}', this.value)"
+                    >
+                    <div class="save-indicator">Saved!</div>
+                  </div>
+                \`).join('')}
+              </div>
+            \`;
+            document.getElementById('settings-content').innerHTML = content;
+          }
+          
+          async function updateSetting(key, value) {
+            try {
+              const response = await fetch(\`/api/admin/settings/\${key}\`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ value })
+              });
+              
+              if (response.ok) {
+                showSaveIndicator();
+                // Update local settings
+                const setting = allSettings.find(s => s.key === key);
+                if (setting) setting.value = value;
+              }
+            } catch (error) {
+              console.error('Error updating setting:', error);
+            }
+          }
+          
+          async function saveSetting(key, value, type, category, label, description) {
+            try {
+              const response = await fetch('/api/admin/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key, value, type, category, label, description })
+              });
+              
+              if (response.ok) {
+                showSaveIndicator();
+                // Add to local settings
+                const newSetting = await response.json();
+                allSettings.push(newSetting);
+              }
+            } catch (error) {
+              console.error('Error saving setting:', error);
+            }
+          }
+          
+          function showSaveIndicator() {
+            const indicators = document.querySelectorAll('.save-indicator');
+            indicators.forEach(indicator => {
+              indicator.style.display = 'block';
+              setTimeout(() => indicator.style.display = 'none', 2000);
+            });
+          }
+          
+          function getCategoryIcon(category) {
+            const icons = {
+              general: '⚙️',
+              pricing: '💰',
+              driver: '🚚',
+              subscription: '💳',
+              content: '📝'
+            };
+            return icons[category] || '📋';
+          }
+          
+          function getCategoryTitle(category) {
+            const titles = {
+              general: 'General Settings',
+              pricing: 'Pricing & Fees',
+              driver: 'Driver Settings',
+              subscription: 'Subscription Plans',
+              content: 'App Content'
+            };
+            return titles[category] || 'Settings';
+          }
+          
+          function getDefaultSettingsForCategory(category) {
+            const defaults = {
+              general: [
+                { key: 'app_name', label: 'App Name', value: 'MarketPace', type: 'text', description: 'Display name of the application' },
+                { key: 'app_tagline', label: 'App Tagline', value: 'Delivering Opportunities. Building Local Power.', type: 'text', description: 'Main tagline shown in the app' },
+                { key: 'default_delivery_radius', label: 'Default Delivery Radius (miles)', value: '10', type: 'number', description: 'Default radius for delivery services' }
+              ],
+              pricing: [
+                { key: 'delivery_fee_per_mile', label: 'Delivery Fee per Mile', value: '0.50', type: 'number', description: 'Amount charged per mile for delivery' },
+                { key: 'platform_commission_rate', label: 'Platform Commission (%)', value: '5', type: 'number', description: 'Percentage commission taken from sales' },
+                { key: 'minimum_order_amount', label: 'Minimum Order Amount', value: '10.00', type: 'number', description: 'Minimum amount required for orders' }
+              ],
+              driver: [
+                { key: 'driver_pickup_fee', label: 'Driver Pickup Fee', value: '4.00', type: 'number', description: 'Amount paid to driver for each pickup' },
+                { key: 'driver_dropoff_fee', label: 'Driver Drop-off Fee', value: '2.00', type: 'number', description: 'Amount paid to driver for each drop-off' },
+                { key: 'driver_fee_per_mile', label: 'Driver Fee per Mile', value: '0.50', type: 'number', description: 'Amount paid to driver per mile' },
+                { key: 'max_deliveries_per_route', label: 'Max Deliveries per Route', value: '6', type: 'number', description: 'Maximum number of deliveries per route' }
+              ],
+              subscription: [
+                { key: 'silver_monthly_price', label: 'Silver Plan Monthly Price', value: '15.00', type: 'number', description: 'Monthly price for Silver membership' },
+                { key: 'gold_monthly_price', label: 'Gold Plan Monthly Price', value: '25.00', type: 'number', description: 'Monthly price for Gold membership' },
+                { key: 'platinum_monthly_price', label: 'Platinum Plan Monthly Price', value: '50.00', type: 'number', description: 'Monthly price for Platinum membership' }
+              ],
+              content: [
+                { key: 'welcome_message', label: 'Welcome Message', value: 'Welcome to MarketPace! Start buying, selling, and earning in your community.', type: 'text', description: 'Message shown to new users' },
+                { key: 'driver_application_message', label: 'Driver Application Message', value: 'Join our driver network and start earning today!', type: 'text', description: 'Message shown on driver application page' }
+              ]
+            };
+            return defaults[category] || [];
+          }
+          
+          // Load settings when page loads
+          loadSettings();
+        </script>
+      </body>
+      </html>
+    `);
+  });
+
+  // Make current user admin (for initial setup)
+  app.post('/api/make-admin', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      await storage.updateUserProfile(userId, { userType: 'admin' });
+      res.json({ message: 'User successfully promoted to admin', userId });
+    } catch (error) {
+      console.error("Error making user admin:", error);
+      res.status(500).json({ message: "Failed to make user admin" });
+    }
+  });
+
   // Health check route
   app.get('/health', (req, res) => {
     res.json({ status: 'OK', message: 'MarketPace API is running' });
@@ -391,6 +805,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
           h1 { color: #007AFF; margin-bottom: 20px; }
           .status { background: #e8f5e8; padding: 15px; border-radius: 5px; margin: 20px 0; }
+          .admin-panel { background: #007AFF; color: white; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: center; }
+          .admin-panel a { color: white; text-decoration: none; font-weight: bold; }
+          .admin-panel a:hover { text-decoration: underline; }
           .endpoints { background: #f8f9fa; padding: 20px; border-radius: 5px; }
           .endpoint { margin: 10px 0; font-family: monospace; }
           a { color: #007AFF; text-decoration: none; }
@@ -403,6 +820,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           <div class="status">
             <strong>✅ Server Status:</strong> Running successfully on port ${process.env.PORT || 5000}
           </div>
+          
+          <div class="admin-panel">
+            <h3>🛠 Admin Panel</h3>
+            <p>Manage app settings, pricing, and content without coding</p>
+            <a href="/admin">Access Admin Panel</a>
+            <br><br>
+            <small>Note: You need to be logged in and have admin privileges. <a href="/auth/login" style="color: #FFD700;">Login with Replit</a> first.</small>
+          </div>
+          
           <p>Welcome to MarketPace - a marketplace delivery service platform similar to "Facebook Marketplace meets Uber Eats".</p>
           
           <h3>📱 Mobile App</h3>
