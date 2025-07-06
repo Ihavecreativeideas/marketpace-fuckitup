@@ -14,7 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../../hooks/useAuth';
 import { useApiRequest } from '../../hooks/useApiRequest';
-import FuturisticBackground from '../../components/FuturisticBackground';
+import ScrollableFuturisticBackground from '../../components/ScrollableFuturisticBackground';
 import FuturisticLogo from '../../components/FuturisticLogo';
 import GlassCard from '../../components/GlassCard';
 import FuturisticButton from '../../components/FuturisticButton';
@@ -98,14 +98,18 @@ export default function ProfileSetupScreen({ navigation }: any) {
   };
 
   return (
-    <FuturisticBackground particleCount={20} glowIntensity="medium">
+    <ScrollableFuturisticBackground>
       <SafeAreaView style={styles.container}>
         <ScrollView 
           contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={true}
           bounces={true}
           keyboardShouldPersistTaps="handled"
           nestedScrollEnabled={true}
+          scrollEnabled={true}
+          alwaysBounceVertical={true}
+          removeClippedSubviews={false}
         >
           {/* Header */}
           <View style={styles.header}>
@@ -226,7 +230,7 @@ export default function ProfileSetupScreen({ navigation }: any) {
           />
         </ScrollView>
       </SafeAreaView>
-    </FuturisticBackground>
+    </ScrollableFuturisticBackground>
   );
 }
 
@@ -234,10 +238,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     padding: 20,
-    paddingBottom: 120, // Extra padding at bottom to ensure scrolling to end
-    flexGrow: 1,
+    paddingBottom: 150, // Extra padding at bottom to ensure scrolling to end
+    minHeight: '100%',
   },
   header: {
     flexDirection: 'row',
