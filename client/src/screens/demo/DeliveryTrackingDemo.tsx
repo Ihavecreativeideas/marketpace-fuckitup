@@ -9,8 +9,8 @@ import {
   Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Card from '../components/ui/Card';
-import Button from '../components/ui/Button';
+import Card from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
 
 const { width } = Dimensions.get('window');
 
