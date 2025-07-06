@@ -61,6 +61,8 @@ import FuturisticLogo from './src/components/FuturisticLogo';
 import GlassCard from './src/components/GlassCard';
 import FuturisticButton from './src/components/FuturisticButton';
 import { colors } from '../src/utils/colors';
+import { RevenueDashboard } from './src/screens/RevenueDashboard';
+import { RevenueDemo } from './src/components/revenue/RevenueDemo';
 
 // Simple placeholder screens to prevent import errors
 import { Text } from 'react-native';
@@ -138,6 +140,8 @@ function ProfileStack() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="ProfileHome" component={() => <SimpleScreen title="Profile" />} options={{ headerShown: false }} />
+      <Stack.Screen name="RevenueDashboard" component={RevenueDashboard} options={{ title: 'Revenue Center' }} />
+      <Stack.Screen name="RevenueDemo" component={RevenueDemo} options={{ title: 'Revenue System Demo' }} />
     </Stack.Navigator>
   );
 }

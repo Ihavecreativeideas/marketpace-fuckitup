@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { storage, setRLSContext, clearRLSContext } from "./storage";
+import revenueRoutes from "./revenueRoutes.js";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -1605,6 +1606,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: 'Failed to export data' });
     }
   });
+
+  // Revenue system routes
+  app.use('/api/revenue', revenueRoutes);
 
   const httpServer = createServer(app);
   return httpServer;
