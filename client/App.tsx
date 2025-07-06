@@ -20,6 +20,8 @@ import Marketplace from './src/screens/Marketplace';
 import Services from './src/screens/Services';
 import TheHub from './src/screens/TheHub';
 import Community from './src/screens/Community';
+import Deliveries from './src/screens/Deliveries';
+import CommunityHome from './src/screens/CommunityHome';
 import Profile from './src/screens/Profile';
 import DriverDashboard from './src/screens/DriverDashboard';
 import AdminDashboard from './src/screens/AdminDashboard';
@@ -122,19 +124,17 @@ function AppContent() {
   const renderScreen = () => {
     switch (activeTab) {
       case 'Home':
-        return <SimpleHome />;
+        return <CommunityHome />;
       case 'Marketplace':
         return <TestScreen />;
-      case 'Services':
-        return <TestScreen />;
-      case 'TheHub':
-        return <TestScreen />;
       case 'Community':
-        return <TestScreen />;
-      case 'Profile':
+        return <Community />;
+      case 'Deliveries':
+        return <Deliveries />;
+      case 'Menu':
         return <TestScreen />;
       default:
-        return <SimpleHome />;
+        return <CommunityHome />;
     }
   };
 

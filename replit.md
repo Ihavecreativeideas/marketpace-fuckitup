@@ -1,8 +1,12 @@
-# MarketPace - Marketplace Delivery Service
+# MarketPace - Community-First Marketplace
 
 ## Overview
 
-MarketPace is a React Native mobile application that combines marketplace functionality with on-demand delivery services, similar to "Facebook Marketplace meets Uber Eats." The application serves multiple user types including buyers, sellers, drivers, and administrators, providing a comprehensive platform for local commerce with integrated delivery services.
+MarketPace is a React Native mobile application that prioritizes community empowerment and local commerce over global reach. It's designed as a "neighborhood-first" platform where locals can sell, buy, rent items, find odd jobs, book entertainment, and support each other through integrated delivery services. Unlike traditional marketplaces, MarketPace focuses on circulating money within communities, creating local jobs, and building stronger neighborhoods.
+
+**Tagline:** "Delivering Opportunities. Building Local Power."
+
+**Core Concept:** Community + Marketplace + Delivery platform designed to uplift neighborhoods
 
 ## System Architecture
 
@@ -29,39 +33,93 @@ MarketPace is a React Native mobile application that combines marketplace functi
 - Role-based access control (buyer, seller, driver, admin)
 - Automatic session management and token refresh
 
-## Key Components
+## Key Features & Community Focus
 
-### User Management
-- Multi-role user system supporting buyers, sellers, drivers, and administrators
-- Profile management with business account options
-- Driver application system with document verification requirements
-- Admin dashboard for user management and analytics
+### 🏠 Bottom Navigation Structure (Facebook-Style)
+- **Home:** Personalized local feed with nearby listings and community updates
+- **Marketplace:** Core buying/selling hub with tabs for Sale, Rent, Services, Events
+- **Community:** Local-only feed for status updates, polls, ISOs, hiring posts, events
+- **Deliveries:** Driver dashboard and delivery tracking for all users
+- **Menu:** Profile, settings, business account switching, logout
 
-### Marketplace Features
-- Category-based listing system (shops, services, entertainment)
-- Item condition tracking and rental capabilities
-- Shopping cart functionality with quantity management
-- Advanced search and filtering capabilities
-- Image upload and management for listings
+### 👥 User Account System
+**Dual Profile Options:**
+- **Personal:** Individual buyers/sellers for personal items and services
+- **Personal + Business:** Enhanced accounts supporting:
+  - 🛒 **Shops:** Non-food retail businesses
+  - 🛠 **Services:** Labor and professional services
+  - 🎭 **Entertainment (The Hub):** DJs, comedians, bands, musicians, theaters
 
-### Delivery System
-- Driver route optimization and management
-- Real-time delivery tracking
-- Independent contractor model for drivers
-- Route assignment and completion tracking
-- Delivery fee calculation and driver compensation
+**Sign-up Options:**
+- Facebook, Google, Apple ID, Email
+- Guest Mode (view only, no posting/purchasing)
+- Personalized questionnaire: profile pic, bio, interests, address, profile type
 
-### Payment Processing
-- Stripe integration for secure payment processing
-- Multiple payment methods (cards, PayPal, Apple Pay, Google Pay)
-- Subscription management for premium features
-- Driver payout system after delivery completion
+### 🛍 Marketplace Categories
+**Four Main Tabs:**
+1. **For Sale:** Traditional marketplace items
+2. **For Rent:** "Rent Anything" - baby gear, tools, tents, equipment
+3. **Services:** Odd jobs, quick tasks, gig opportunities
+4. **Events:** Local entertainment and community events
 
-### Community Features
-- Community posts and announcements
-- Comment system for user engagement
-- Event listing and management
-- User-generated content moderation
+**Key Features:**
+- Counter-offer system for negotiations
+- Add to cart functionality
+- Location-based filtering by radius
+- Facebook-style feed layout with grid system
+
+### 📍 Community-First Features
+**Local Community Feed:**
+- Status updates and local announcements
+- Polls for community decisions
+- ISO (In Search Of) posts
+- "Hiring Now" business postings
+- Local event listings
+- Livestreaming (Pro feature)
+
+**The Hub (Entertainment):**
+- Dedicated space for local artists and entertainers
+- Booking system for events
+- Event calendar integration
+- Live stream capabilities
+- Review and rating system
+
+### 🚚 Simplified Delivery System
+**Driver Structure:**
+- Independent contractor model
+- Required documentation: Driver's License, Insurance, Background Check
+- Immediate onboarding upon approval
+- 4 daily time slots: 9am-12pm, 12pm-3pm, 3pm-6pm, 6pm-9pm
+
+**Route Logic:**
+- Maximum 6 deliveries per route (12 stops: pickup + drop-off)
+- Drivers can accept max 2 routes per time block
+- AI-optimized routing for efficiency
+- Color-coded tracking: Dark Blue → Light Blue, Dark Red → Light Red
+- No GPS tracking - simplified status-based system
+
+**Payment Structure:**
+- $4 per pickup, $2 per drop-off, $0.50 per mile
+- 100% of tips go to drivers
+- Immediate payment via Stripe after route completion
+- 50/50 delivery cost split between buyer and seller
+
+### 💳 Subscription Tiers
+**Free Basic Membership:**
+- Post, browse, buy basic features
+- MarketPace delivery only
+
+**Pro Memberships:**
+- **Silver ($15/month):** Website integration, self pick-up, color tracking, live posting
+- **Gold ($25/month):** AI analysis, product import, event tools, custom profile design
+- **Platinum ($50/month):** Livestreaming, advanced analytics, "For You" page ads
+
+### 🎁 Campaign Launch Features
+**Free Trial Period:**
+- All features available free during launch
+- Early users receive lifetime Pro benefits
+- Special "Early Supporter" badge and featured tab
+- Campaign tracker showing total towns, shops, services, members
 
 ## Data Flow
 

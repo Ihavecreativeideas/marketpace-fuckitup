@@ -3,275 +3,196 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
+  ScrollView,
   TouchableOpacity,
-  Image,
   TextInput,
-  RefreshControl,
+  FlatList,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '../lib/queryClient';
-import { useAuth } from '../hooks/useAuth';
-import { useToast } from '../hooks/use-toast';
-import Card from '../components/ui/Card';
-import Button from '../components/ui/Button';
-import Badge from '../components/ui/Badge';
 
-export default function Community({ navigation }: any) {
-  const [selectedType, setSelectedType] = useState('all');
-  const [refreshing, setRefreshing] = useState(false);
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+interface CommunityPost {
+  id: string;
+  type: 'status' | 'poll' | 'iso' | 'hiring' | 'event';
+  user: {
+    name: string;
+    avatar: string;
+    location: string;
+  };
+  content: string;
+  timestamp: string;
+  likes: number;
+  comments: number;
+}
 
-  const { data: communityPosts = [], isLoading, refetch } = useQuery({
-    queryKey: ['/api/community-posts'],
-    queryFn: () => apiRequest('GET', '/api/community-posts'),
-  });
+export default function Community() {
+  const [activeTab, setActiveTab] = useState('all');
+  const [postText, setPostText] = useState('');
 
-  const likePostMutation = useMutation({
-    mutationFn: async (postId: number) => {
-      // For now, just optimistically update
-      return { success: true };
+  // Mock community posts for demonstration
+  const communityPosts: CommunityPost[] = [
+    {
+      id: '1',
+      type: 'hiring',
+      user: {
+        name: 'Sarah\'s Bakery',
+        avatar: 'https://via.placeholder.com/40x40',
+        location: '0.3 miles away',
+      },
+      content: 'Hiring part-time baker! Flexible hours, experience preferred but will train the right person. Great way to earn extra income in our community.',
+      timestamp: '2 hours ago',
+      likes: 12,
+      comments: 5,
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/community-posts'] });
+    {
+      id: '2',
+      type: 'iso',
+      user: {
+        name: 'Mike Johnson',
+        avatar: 'https://via.placeholder.com/40x40',
+        location: '0.8 miles away',
+      },
+      content: 'ISO: Looking for someone to help move a couch this weekend. Will pay $50 and provide pizza! Supporting local helpers over big companies.',
+      timestamp: '4 hours ago',
+      likes: 8,
+      comments: 3,
     },
-  });
-
-  const postTypes = [
-    { id: 'all', name: 'All Posts', icon: 'grid' },
-    { id: 'general', name: 'General', icon: 'chatbubble' },
-    { id: 'event', name: 'Events', icon: 'calendar' },
-    { id: 'announcement', name: 'News', icon: 'megaphone' },
-    { id: 'question', name: 'Questions', icon: 'help-circle' },
+    {
+      id: '3',
+      type: 'event',
+      user: {
+        name: 'Community Center',
+        avatar: 'https://via.placeholder.com/40x40',
+        location: '1.2 miles away',
+      },
+      content: 'Local artisan market this Saturday! Come support our neighborhood creators, artists, and small businesses. Building our community together!',
+      timestamp: '6 hours ago',
+      likes: 25,
+      comments: 8,
+    },
   ];
 
-  const filteredPosts = communityPosts.filter((post: any) => 
-    selectedType === 'all' || post.postType === selectedType
-  );
+  const tabs = [
+    { id: 'all', label: 'All Posts', icon: 'grid' },
+    { id: 'status', label: 'Updates', icon: 'chatbubble' },
+    { id: 'iso', label: 'ISO', icon: 'search' },
+    { id: 'hiring', label: 'Hiring', icon: 'briefcase' },
+    { id: 'events', label: 'Events', icon: 'calendar' },
+  ];
 
-  const renderPostItem = ({ item }: { item: any }) => (
-    <Card style={styles.postCard}>
-      <View style={styles.postHeader}>
-        <Image
-          source={{
-            uri: item.user?.profileImageUrl || 'https://via.placeholder.com/40x40',
-          }}
-          style={styles.userAvatar}
-        />
-        <View style={styles.postInfo}>
-          <Text style={styles.userName}>
-            {item.user?.firstName} {item.user?.lastName}
-          </Text>
-          <Text style={styles.postTime}>
-            {new Date(item.createdAt).toLocaleDateString()} • {item.location}
-          </Text>
-        </View>
-        <Badge 
-          text={item.postType} 
-          variant={getPostTypeVariant(item.postType)} 
-          size="small" 
-        />
-      </View>
-
-      <Text style={styles.postTitle}>{item.title}</Text>
-      <Text style={styles.postContent}>{item.content}</Text>
-
-      {item.images && item.images.length > 0 && (
-        <View style={styles.postImages}>
-          <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            data={item.images}
-            keyExtractor={(image, index) => index.toString()}
-            renderItem={({ item: image }) => (
-              <Image source={{ uri: image }} style={styles.postImage} />
-            )}
-          />
-        </View>
-      )}
-
-      <View style={styles.postActions}>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => handleLikePost(item.id)}
-        >
-          <Ionicons name="heart-outline" size={20} color="#666" />
-          <Text style={styles.actionText}>{item.likes || 0}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => handleCommentPress(item)}
-        >
-          <Ionicons name="chatbubble-outline" size={20} color="#666" />
-          <Text style={styles.actionText}>Comment</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => handleSharePost(item)}
-        >
-          <Ionicons name="share-outline" size={20} color="#666" />
-          <Text style={styles.actionText}>Share</Text>
-        </TouchableOpacity>
-      </View>
-    </Card>
-  );
-
-  const getPostTypeVariant = (type: string) => {
+  const getPostTypeColor = (type: string) => {
     switch (type) {
-      case 'event':
-        return 'warning';
-      case 'announcement':
-        return 'info';
-      case 'question':
-        return 'error';
-      default:
-        return 'default';
+      case 'hiring': return '#10B981';
+      case 'iso': return '#3B82F6';
+      case 'event': return '#F59E0B';
+      case 'poll': return '#8B5CF6';
+      default: return '#6B46C1';
     }
   };
 
-  const handleLikePost = (postId: number) => {
-    likePostMutation.mutate(postId);
+  const getPostTypeLabel = (type: string) => {
+    switch (type) {
+      case 'hiring': return 'HIRING NOW';
+      case 'iso': return 'IN SEARCH OF';
+      case 'event': return 'LOCAL EVENT';
+      case 'poll': return 'COMMUNITY POLL';
+      default: return 'UPDATE';
+    }
   };
 
-  const handleCommentPress = (post: any) => {
-    // Navigate to post detail with comments
-    console.log('Open comments for:', post.title);
-  };
-
-  const handleSharePost = (post: any) => {
-    // Implement share functionality
-    console.log('Share post:', post.title);
-  };
-
-  const handleCreatePost = () => {
-    // Navigate to create post screen
-    console.log('Create new post');
-  };
-
-  const handleTypePress = (typeId: string) => {
-    setSelectedType(typeId);
-  };
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await refetch();
-    setRefreshing(false);
-  };
+  const renderPost = ({ item }: { item: CommunityPost }) => (
+    <View style={styles.postCard}>
+      <View style={styles.postHeader}>
+        <Image source={{ uri: item.user.avatar }} style={styles.avatar} />
+        <View style={styles.userInfo}>
+          <Text style={styles.userName}>{item.user.name}</Text>
+          <Text style={styles.userLocation}>{item.user.location}</Text>
+        </View>
+        <View style={[styles.typeTag, { backgroundColor: getPostTypeColor(item.type) }]}>
+          <Text style={styles.typeTagText}>{getPostTypeLabel(item.type)}</Text>
+        </View>
+      </View>
+      
+      <Text style={styles.postContent}>{item.content}</Text>
+      
+      <View style={styles.postFooter}>
+        <Text style={styles.timestamp}>{item.timestamp}</Text>
+        <View style={styles.postActions}>
+          <TouchableOpacity style={styles.actionButton}>
+            <Ionicons name="heart-outline" size={16} color="#8E8E93" />
+            <Text style={styles.actionText}>{item.likes}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionButton}>
+            <Ionicons name="chatbubble-outline" size={16} color="#8E8E93" />
+            <Text style={styles.actionText}>{item.comments}</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Community</Text>
-        <TouchableOpacity 
-          style={styles.createButton}
-          onPress={handleCreatePost}
-        >
-          <Ionicons name="add" size={24} color="#007AFF" />
+        <Text style={styles.headerSubtitle}>Building stronger neighborhoods together</Text>
+      </View>
+
+      {/* Tab Navigation */}
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false} 
+        style={styles.tabContainer}
+      >
+        {tabs.map((tab) => (
+          <TouchableOpacity
+            key={tab.id}
+            style={[
+              styles.tab,
+              activeTab === tab.id && styles.activeTab,
+            ]}
+            onPress={() => setActiveTab(tab.id)}
+          >
+            <Ionicons
+              name={tab.icon as any}
+              size={16}
+              color={activeTab === tab.id ? '#6B46C1' : '#8E8E93'}
+            />
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === tab.id && styles.activeTabText,
+              ]}
+            >
+              {tab.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      {/* Create Post */}
+      <View style={styles.createPostContainer}>
+        <TextInput
+          style={styles.createPostInput}
+          placeholder="Share something with your community..."
+          value={postText}
+          onChangeText={setPostText}
+          multiline
+        />
+        <TouchableOpacity style={styles.postButton}>
+          <Ionicons name="send" size={20} color="white" />
         </TouchableOpacity>
       </View>
 
-      {/* Community Stats */}
-      <Card style={styles.statsCard}>
-        <View style={styles.statsContainer}>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>1.2K</Text>
-            <Text style={styles.statLabel}>Members</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{communityPosts.length}</Text>
-            <Text style={styles.statLabel}>Posts</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>45</Text>
-            <Text style={styles.statLabel}>Active</Text>
-          </View>
-        </View>
-      </Card>
-
-      {/* Post Type Filter */}
-      <View style={styles.filterSection}>
-        <FlatList
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          data={postTypes}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[
-                styles.typeButton,
-                selectedType === item.id && styles.selectedTypeButton,
-              ]}
-              onPress={() => handleTypePress(item.id)}
-            >
-              <Ionicons
-                name={item.icon as any}
-                size={16}
-                color={selectedType === item.id ? 'white' : '#666'}
-              />
-              <Text
-                style={[
-                  styles.typeButtonText,
-                  selectedType === item.id && styles.selectedTypeButtonText,
-                ]}
-              >
-                {item.name}
-              </Text>
-            </TouchableOpacity>
-          )}
-        />
-      </View>
-
-      {/* Posts Feed */}
+      {/* Community Posts Feed */}
       <FlatList
-        data={filteredPosts}
-        renderItem={renderPostItem}
-        keyExtractor={(item) => item.id.toString()}
+        data={communityPosts}
+        renderItem={renderPost}
+        keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.postsContainer}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Ionicons name="people-outline" size={64} color="#ccc" />
-            <Text style={styles.emptyStateTitle}>No posts yet</Text>
-            <Text style={styles.emptyStateSubtitle}>
-              Be the first to share something with your community
-            </Text>
-            <Button
-              title="Create Post"
-              onPress={handleCreatePost}
-              style={styles.createPostButton}
-            />
-          </View>
-        }
+        contentContainerStyle={styles.feedContainer}
       />
-
-      {/* Quick Post Input */}
-      {user && (
-        <View style={styles.quickPostContainer}>
-          <Image
-            source={{
-              uri: user.profileImageUrl || 'https://via.placeholder.com/32x32',
-            }}
-            style={styles.quickPostAvatar}
-          />
-          <TouchableOpacity
-            style={styles.quickPostInput}
-            onPress={handleCreatePost}
-          >
-            <Text style={styles.quickPostPlaceholder}>
-              What's happening in your neighborhood?
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
     </View>
   );
 }
@@ -279,194 +200,146 @@ export default function Community({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#F2F2F7',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    paddingTop: 50,
+    padding: 20,
+    paddingTop: 60,
     backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#1C1C1E',
   },
-  createButton: {
-    padding: 8,
-  },
-  statsCard: {
-    margin: 16,
-    backgroundColor: '#007AFF',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-  statItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.8)',
+  headerSubtitle: {
+    fontSize: 14,
+    color: '#8E8E93',
     marginTop: 4,
   },
-  statDivider: {
-    width: 1,
-    height: 30,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  filterSection: {
+  tabContainer: {
     backgroundColor: 'white',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    paddingHorizontal: 20,
+    paddingBottom: 15,
   },
-  typeButton: {
+  tab: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    marginHorizontal: 4,
-    borderRadius: 16,
-    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginRight: 10,
+    borderRadius: 20,
+    backgroundColor: '#F2F2F7',
   },
-  selectedTypeButton: {
-    backgroundColor: '#007AFF',
+  activeTab: {
+    backgroundColor: '#E0E7FF',
   },
-  typeButtonText: {
-    fontSize: 12,
-    color: '#666',
+  tabText: {
+    fontSize: 14,
+    color: '#8E8E93',
+    marginLeft: 6,
     fontWeight: '500',
-    marginLeft: 4,
   },
-  selectedTypeButtonText: {
-    color: 'white',
+  activeTabText: {
+    color: '#6B46C1',
   },
-  postsContainer: {
-    padding: 16,
+  createPostContainer: {
+    flexDirection: 'row',
+    padding: 20,
+    backgroundColor: 'white',
+    alignItems: 'flex-end',
+    marginBottom: 10,
+  },
+  createPostInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#E5E5EA',
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    marginRight: 10,
+    maxHeight: 80,
+    fontSize: 16,
+  },
+  postButton: {
+    backgroundColor: '#6B46C1',
+    borderRadius: 20,
+    padding: 10,
+  },
+  feedContainer: {
+    paddingBottom: 100,
   },
   postCard: {
-    marginBottom: 16,
+    backgroundColor: 'white',
+    marginHorizontal: 20,
+    marginBottom: 10,
+    borderRadius: 12,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   postHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
   },
-  userAvatar: {
+  avatar: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    marginRight: 12,
   },
-  postInfo: {
+  userInfo: {
     flex: 1,
+    marginLeft: 12,
   },
   userName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: '#1C1C1E',
   },
-  postTime: {
+  userLocation: {
     fontSize: 12,
-    color: '#666',
-    marginTop: 2,
+    color: '#8E8E93',
   },
-  postTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
+  typeTag: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  typeTagText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: 'white',
   },
   postContent: {
-    fontSize: 14,
-    color: '#333',
-    lineHeight: 20,
+    fontSize: 16,
+    lineHeight: 22,
+    color: '#1C1C1E',
     marginBottom: 12,
   },
-  postImages: {
-    marginBottom: 12,
+  postFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  postImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 8,
-    marginRight: 8,
+  timestamp: {
+    fontSize: 12,
+    color: '#8E8E93',
   },
   postActions: {
     flexDirection: 'row',
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-    paddingTop: 12,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-    paddingVertical: 8,
+    marginLeft: 15,
   },
   actionText: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 12,
+    color: '#8E8E93',
     marginLeft: 4,
-  },
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: 60,
-  },
-  emptyStateTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptyStateSubtitle: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-    paddingHorizontal: 40,
-    marginBottom: 20,
-  },
-  createPostButton: {
-    marginTop: 10,
-  },
-  quickPostContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-  },
-  quickPostAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    marginRight: 12,
-  },
-  quickPostInput: {
-    flex: 1,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
-  quickPostPlaceholder: {
-    fontSize: 14,
-    color: '#666',
   },
 });

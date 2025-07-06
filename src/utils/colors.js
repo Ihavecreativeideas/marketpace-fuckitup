@@ -1,14 +1,14 @@
-// Color palette for MarketPace app
+// Color palette for MarketPace app - Community-focused cosmic theme
 export const colors = {
-  // Primary brand colors
-  primary: '#007AFF',      // iOS blue
-  primaryLight: '#66B2FF', 
-  primaryDark: '#0056CC',
+  // Primary brand colors - Deep purples for community focus
+  primary: '#6B46C1',      // Deep purple
+  primaryLight: '#A78BFA', // Light purple
+  primaryDark: '#4C1D95',  // Dark purple
   
-  // Secondary colors
-  secondary: '#5856D6',    // iOS purple
-  secondaryLight: '#8E8CE8',
-  secondaryDark: '#3634A3',
+  // Secondary colors - Cosmic gradient accents
+  secondary: '#8B5CF6',    // Medium purple
+  secondaryLight: '#C4B5FD', // Very light purple
+  secondaryDark: '#5B21B6', // Very dark purple
   
   // Semantic colors
   success: '#34C759',      // iOS green
@@ -43,11 +43,26 @@ export const colors = {
   border: '#C6C6C8',       // iOS separator
   borderLight: '#E5E5EA',  // iOS light separator
   
-  // Marketplace specific colors
+  // Community-focused marketplace colors
   marketplace: {
-    shops: '#007AFF',      // Blue for shops
-    services: '#34C759',   // Green for services
-    events: '#FF9500',     // Orange for events/hub
+    shops: '#6366F1',      // Indigo for shops
+    services: '#10B981',   // Emerald for services
+    events: '#F59E0B',     // Amber for events/hub
+    community: '#8B5CF6',  // Purple for community features
+    delivery: '#3B82F6',   // Blue for delivery
+  },
+  
+  // Cosmic theme specific colors
+  cosmic: {
+    gradient: {
+      start: '#1E1B4B',    // Dark navy
+      middle: '#4C1D95',   // Dark purple  
+      end: '#6B21A8',      // Purple
+    },
+    particle: '#A78BFA',   // Light purple for floating particles
+    glow: '#C4B5FD',       // Very light purple for glowing effects
+    starfield: '#E0E7FF',  // Very light blue for star effects
+  },
     rentals: '#5856D6',    // Purple for rentals
   },
   
