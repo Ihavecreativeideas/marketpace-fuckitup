@@ -60,7 +60,7 @@ export default function CommunityHome() {
     },
     {
       id: '3',
-      title: 'Rent Equipment',
+      title: 'Rent Anything',
       icon: 'construct',
       color: '#F59E0B',
       description: 'Borrow tools from community',
