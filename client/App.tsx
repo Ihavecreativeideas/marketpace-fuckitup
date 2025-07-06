@@ -1571,12 +1571,165 @@ function ProfileStack() {
 }
 
 // Create screens for all marketplace categories
-const RentScreen = () => <SimpleScreen title="Rent Items" />;
-const BuySellScreen = () => <SimpleScreen title="Buy & Sell" />;
-const OddJobsScreen = () => <SimpleScreen title="Odd Jobs" />;
-const ServicesScreen = () => <SimpleScreen title="Services" />;
-const ShopsScreen = () => <SimpleScreen title="Local Shops" />;
-const TheHubScreen = () => <SimpleScreen title="The Hub - Entertainment" />;
+// Unified Marketplace Screen with Category Navigation
+const MarketplaceMainScreen = () => {
+  const [selectedCategory, setSelectedCategory] = useState('rent');
+
+  const categories = [
+    { id: 'rent', name: 'Rent', icon: 'key', color: '#8B5CF6' },
+    { id: 'buysell', name: 'Buy/Sell', icon: 'storefront', color: '#3B82F6' },
+    { id: 'oddjobs', name: 'Odd Jobs', icon: 'hammer', color: '#10B981' },
+    { id: 'services', name: 'Services', icon: 'construct', color: '#F59E0B' },
+    { id: 'shops', name: 'Shops', icon: 'business', color: '#EF4444' },
+    { id: 'hub', name: 'The Hub', icon: 'musical-notes', color: '#8B5CF6' },
+  ];
+
+  const renderCategoryContent = () => {
+    switch (selectedCategory) {
+      case 'rent':
+        return (
+          <View style={{ padding: 20 }}>
+            <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 16 }}>
+              Rent Anything
+            </Text>
+            <Text style={{ fontSize: 16, color: '#9CA3AF', marginBottom: 20 }}>
+              From tools to baby gear, rent what you need from neighbors
+            </Text>
+            {/* Demo listings */}
+            {[
+              { name: 'Power Drill Set', price: '$15/day', owner: 'Mike S.', distance: '0.3 mi' },
+              { name: 'Baby Stroller', price: '$8/day', owner: 'Sarah L.', distance: '0.5 mi' },
+              { name: 'Camping Tent', price: '$25/day', owner: 'David R.', distance: '0.8 mi' },
+            ].map((item, index) => (
+              <View key={index} style={{
+                backgroundColor: '#1F2937',
+                borderRadius: 12,
+                padding: 16,
+                marginBottom: 12,
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <View>
+                  <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#fff' }}>{item.name}</Text>
+                  <Text style={{ fontSize: 14, color: '#9CA3AF' }}>{item.owner} • {item.distance}</Text>
+                </View>
+                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#8B5CF6' }}>{item.price}</Text>
+              </View>
+            ))}
+          </View>
+        );
+      case 'buysell':
+        return (
+          <View style={{ padding: 20 }}>
+            <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 16 }}>
+              Buy & Sell
+            </Text>
+            <Text style={{ fontSize: 16, color: '#9CA3AF', marginBottom: 20 }}>
+              Local marketplace for buying and selling items
+            </Text>
+            {/* Demo listings */}
+            {[
+              { name: 'Vintage Guitar', price: '$450', owner: "Mike's Music", distance: '0.2 mi' },
+              { name: 'Coffee Table', price: '$75', owner: 'Jennifer K.', distance: '0.4 mi' },
+              { name: 'Exercise Bike', price: '$200', owner: 'Tom B.', distance: '0.7 mi' },
+            ].map((item, index) => (
+              <View key={index} style={{
+                backgroundColor: '#1F2937',
+                borderRadius: 12,
+                padding: 16,
+                marginBottom: 12,
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <View>
+                  <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#fff' }}>{item.name}</Text>
+                  <Text style={{ fontSize: 14, color: '#9CA3AF' }}>{item.owner} • {item.distance}</Text>
+                </View>
+                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#3B82F6' }}>{item.price}</Text>
+              </View>
+            ))}
+          </View>
+        );
+      default:
+        return (
+          <View style={{ padding: 20, alignItems: 'center' }}>
+            <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 16 }}>
+              {categories.find(c => c.id === selectedCategory)?.name}
+            </Text>
+            <Text style={{ fontSize: 16, color: '#9CA3AF', textAlign: 'center' }}>
+              This section is coming soon. Join the campaign to be notified when it launches!
+            </Text>
+          </View>
+        );
+    }
+  };
+
+  return (
+    <View style={{ flex: 1, backgroundColor: '#0F0B1F' }}>
+      {/* Header */}
+      <LinearGradient
+        colors={['#1a1a2e', '#16213e', '#0f3460']}
+        style={{ paddingTop: 60, paddingBottom: 20, paddingHorizontal: 20 }}
+      >
+        <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#fff', marginBottom: 8 }}>
+          MarketPlace
+        </Text>
+        <Text style={{ fontSize: 16, color: '#B0B0B0' }}>
+          Your local community marketplace
+        </Text>
+      </LinearGradient>
+
+      {/* Category Navigation */}
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false}
+        style={{ backgroundColor: '#1F2937', paddingVertical: 16 }}
+        contentContainerStyle={{ paddingHorizontal: 20 }}
+      >
+        {categories.map((category) => (
+          <TouchableOpacity
+            key={category.id}
+            onPress={() => setSelectedCategory(category.id)}
+            style={{
+              alignItems: 'center',
+              marginRight: 20,
+              paddingVertical: 8,
+              paddingHorizontal: 16,
+              borderRadius: 20,
+              backgroundColor: selectedCategory === category.id ? category.color : 'transparent',
+              minWidth: 80
+            }}
+          >
+            <Ionicons 
+              name={category.icon as any} 
+              size={24} 
+              color={selectedCategory === category.id ? '#fff' : '#9CA3AF'} 
+            />
+            <Text style={{ 
+              fontSize: 12, 
+              fontWeight: '600',
+              color: selectedCategory === category.id ? '#fff' : '#9CA3AF',
+              marginTop: 4,
+              textAlign: 'center'
+            }}>
+              {category.name}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      {/* Content */}
+      <ScrollView style={{ flex: 1 }}>
+        {renderCategoryContent()}
+        <View style={{ height: 100 }} />
+      </ScrollView>
+    </View>
+  );
+};
+
+// Community Feed Screen  
 const CommunityFeedScreen = ({ navigation }: any) => (
   <ScrollView style={{ flex: 1, backgroundColor: '#0F0B1F' }}>
     {/* Header */}
@@ -1739,18 +1892,14 @@ function MainTabs() {
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap;
 
-          if (route.name === 'Rent') {
-            iconName = focused ? 'key' : 'key-outline';
-          } else if (route.name === 'BuySell') {
+          if (route.name === 'Home') {
+            iconName = focused ? 'home' : 'home-outline';
+          } else if (route.name === 'Marketplace') {
             iconName = focused ? 'storefront' : 'storefront-outline';
-          } else if (route.name === 'OddJobs') {
-            iconName = focused ? 'hammer' : 'hammer-outline';
-          } else if (route.name === 'Services') {
-            iconName = focused ? 'construct' : 'construct-outline';
-          } else if (route.name === 'Shops') {
-            iconName = focused ? 'business' : 'business-outline';
-          } else if (route.name === 'TheHub') {
-            iconName = focused ? 'musical-notes' : 'musical-notes-outline';
+          } else if (route.name === 'Community') {
+            iconName = focused ? 'people' : 'people-outline';
+          } else if (route.name === 'Deliveries') {
+            iconName = focused ? 'car' : 'car-outline';
           } else if (route.name === 'Menu') {
             iconName = focused ? 'menu' : 'menu-outline';
           } else {
@@ -1787,34 +1936,24 @@ function MainTabs() {
       })}
     >
       <Tab.Screen 
-        name="Rent" 
-        component={RentScreen}
-        options={{ tabBarLabel: 'Rent' }}
+        name="Home" 
+        component={CampaignLandingScreen}
+        options={{ tabBarLabel: 'Home' }}
       />
       <Tab.Screen 
-        name="BuySell" 
-        component={BuySellScreen}
-        options={{ tabBarLabel: 'Buy/Sell' }}
+        name="Marketplace" 
+        component={MarketplaceMainScreen}
+        options={{ tabBarLabel: 'Marketplace' }}
       />
       <Tab.Screen 
-        name="OddJobs" 
-        component={OddJobsScreen}
-        options={{ tabBarLabel: 'Odd Jobs' }}
+        name="Community" 
+        component={CommunityFeedScreen}
+        options={{ tabBarLabel: 'Community' }}
       />
       <Tab.Screen 
-        name="Services" 
-        component={ServicesScreen}
-        options={{ tabBarLabel: 'Services' }}
-      />
-      <Tab.Screen 
-        name="Shops" 
-        component={ShopsScreen}
-        options={{ tabBarLabel: 'Shops' }}
-      />
-      <Tab.Screen 
-        name="TheHub" 
-        component={TheHubScreen}
-        options={{ tabBarLabel: 'The Hub' }}
+        name="Deliveries" 
+        component={DeliveryTrackingScreen}
+        options={{ tabBarLabel: 'Deliveries' }}
       />
       <Tab.Screen 
         name="Menu" 
