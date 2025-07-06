@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 class ApiService {
   constructor() {
@@ -164,7 +164,22 @@ class ApiService {
       
       return await response.text();
     } catch (error) {
-      console.error('API request failed:', error);
+      console.error('API request failed:', {
+        url,
+        endpoint,
+        error: error.message,
+        config
+      });
+      
+      // Handle specific network errors
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        throw new Error('Network connection failed. Please check your internet connection and try again.');
+      }
+      
+      if (error.message.includes('CORS')) {
+        throw new Error('Connection blocked by browser security. Please try refreshing the page.');
+      }
+      
       throw error;
     }
   }
