@@ -1685,6 +1685,250 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Web landing page route - serve HTML for root URL
+  app.get('/', (req, res) => {
+    res.send(`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPlace - Pick Up the Pace in Your Community</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .hero {
+            text-align: center;
+            padding: 100px 0;
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        h1 {
+            font-size: 48px;
+            margin-bottom: 16px;
+            font-weight: bold;
+        }
+        .tagline {
+            font-size: 24px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        .subtitle {
+            font-size: 18px;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 60px;
+        }
+        .btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        .feature h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+        .feature p {
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        .mission {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+        }
+        .mission h2 {
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+        .mission p {
+            font-size: 18px;
+            font-style: italic;
+            line-height: 1.6;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 20px;
+            text-align: center;
+            margin: 40px 0;
+        }
+        .stat {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        .mobile-app {
+            text-align: center;
+            padding: 40px 0;
+        }
+        .mobile-app h2 {
+            font-size: 28px;
+            margin-bottom: 16px;
+        }
+        .mobile-app p {
+            font-size: 16px;
+            margin-bottom: 24px;
+            opacity: 0.9;
+        }
+        @media (max-width: 768px) {
+            h1 { font-size: 36px; }
+            .tagline { font-size: 20px; }
+            .subtitle { font-size: 16px; }
+            .cta-buttons { flex-direction: column; align-items: center; }
+            .features { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <div class="logo">MP</div>
+            <h1>MarketPlace</h1>
+            <div class="tagline">Pick Up the Pace in Your Community</div>
+            <div class="subtitle">Delivering Opportunities — Not Just Packages</div>
+            
+            <div class="cta-buttons">
+                <a href="/api/auth/login" class="btn btn-primary">Join MarketPlace</a>
+                <a href="#" onclick="openMobileApp()" class="btn btn-secondary">Open Mobile App</a>
+            </div>
+        </div>
+
+        <div class="mission">
+            <h2>Our Mission</h2>
+            <p>"Big tech platforms have taught us to rely on strangers and algorithms. MarketPlace reminds us what happens when we invest in each other."</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number">12</div>
+                <div class="stat-label">Active Towns</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">247</div>
+                <div class="stat-label">Local Shops</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">89</div>
+                <div class="stat-label">Entertainers</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">156</div>
+                <div class="stat-label">Services</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">1,834</div>
+                <div class="stat-label">Members</div>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🏘️</div>
+                <h3>Community First</h3>
+                <p>Keep money circulating in your neighborhood instead of flowing to distant corporations</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💰</div>
+                <h3>Fair Economics</h3>
+                <p>Transparent 5% fees, no hidden charges, 100% of tips go directly to drivers</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🚚</div>
+                <h3>Local Delivery</h3>
+                <p>Neighbor-to-neighbor delivery system creating jobs and building connections</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🎯</div>
+                <h3>Everything Local</h3>
+                <p>Buy, sell, rent, find services, book entertainment - all in one community platform</p>
+            </div>
+        </div>
+
+        <div class="mobile-app">
+            <h2>Experience the Full App</h2>
+            <p>The complete MarketPlace experience is designed for mobile. Access all features including marketplace browsing, community feed, delivery tracking, and more.</p>
+            <a href="#" onclick="openMobileApp()" class="btn btn-primary">Open Mobile App</a>
+        </div>
+    </div>
+
+    <script>
+        function openMobileApp() {
+            // Try to open the mobile app on port 8083
+            const mobileUrl = window.location.protocol + '//' + window.location.hostname + ':8083';
+            window.open(mobileUrl, '_blank');
+        }
+    </script>
+</body>
+</html>
+    `);
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
