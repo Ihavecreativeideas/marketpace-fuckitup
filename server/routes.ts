@@ -1618,6 +1618,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Password recovery routes
   registerPasswordRecoveryRoutes(app);
 
+  // Subscription routes
+  const { registerSubscriptionRoutes } = await import('./subscriptionRoutes.js');
+  registerSubscriptionRoutes(app);
+
   // Enhanced delivery system test routes
   app.post('/api/delivery/calculate-fee', async (req, res) => {
     try {
