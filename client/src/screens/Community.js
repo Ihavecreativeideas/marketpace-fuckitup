@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,9 +8,90 @@ import {
   FlatList,
   TextInput,
   Modal,
-  Image
+  Image,
+  Animated,
+  Dimensions
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+
+// Dark Purple Futuristic Theme Colors
+const colors = {
+  background: '#0d0221',
+  backgroundSecondary: '#1a0633', 
+  backgroundTertiary: '#2d1b4e',
+  primary: '#00FFFF',
+  secondary: '#8A2BE2',
+  accent: '#00BFFF',
+  text: '#FFFFFF',
+  textSecondary: 'rgba(255, 255, 255, 0.8)',
+  card: 'rgba(255, 255, 255, 0.04)',
+  cardBorder: 'rgba(255, 255, 255, 0.08)',
+};
+
+// Floating Particles Component
+const FloatingParticles = () => {
+  const { width, height } = Dimensions.get('window');
+  const [particles] = useState(() => 
+    Array.from({ length: 25 }, (_, i) => ({
+      id: i,
+      animValue: new Animated.Value(0),
+      x: Math.random() * width,
+      y: Math.random() * height,
+      size: Math.random() * 3 + 1,
+      opacity: Math.random() * 0.6 + 0.2,
+    }))
+  );
+
+  useEffect(() => {
+    particles.forEach((particle, index) => {
+      const animate = () => {
+        Animated.loop(
+          Animated.timing(particle.animValue, {
+            toValue: 1,
+            duration: 8000 + (index * 200),
+            useNativeDriver: true,
+          })
+        ).start();
+      };
+      setTimeout(animate, index * 100);
+    });
+  }, [particles]);
+
+  return (
+    <View style={{ 
+      position: 'absolute', 
+      top: 0, 
+      left: 0, 
+      right: 0, 
+      bottom: 0, 
+      pointerEvents: 'none',
+      zIndex: 1
+    }}>
+      {particles.map((particle) => (
+        <Animated.View
+          key={particle.id}
+          style={{
+            position: 'absolute',
+            left: particle.x,
+            top: particle.y,
+            width: particle.size,
+            height: particle.size,
+            backgroundColor: Math.random() > 0.5 ? colors.primary : colors.secondary,
+            borderRadius: particle.size / 2,
+            opacity: particle.opacity,
+            transform: [{
+              translateY: particle.animValue.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, -height - 100],
+              }),
+            }],
+          }}
+        />
+      ))}
+    </View>
+  );
+};
 
 const Community = () => {
   const [activeTab, setActiveTab] = useState('all');
@@ -276,9 +357,13 @@ const Community = () => {
     : posts.filter(post => post.type === activeTab);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <FloatingParticles />
       {/* Header */}
-      <View style={styles.header}>
+      <LinearGradient
+        colors={[colors.backgroundSecondary, colors.backgroundTertiary, colors.background]}
+        style={styles.header}
+      >
         <Text style={styles.headerTitle}>Community Feed</Text>
         <TouchableOpacity 
           style={styles.createButton}
@@ -286,7 +371,7 @@ const Community = () => {
         >
           <Ionicons name="add" size={24} color="white" />
         </TouchableOpacity>
-      </View>
+      </LinearGradient>
 
       {/* Tab Navigation */}
       <ScrollView 
@@ -377,7 +462,7 @@ const Community = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -435,16 +520,18 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   postCard: {
-    backgroundColor: 'white',
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
     marginHorizontal: 16,
     marginBottom: 16,
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   postHeader: {
     flexDirection: 'row',
