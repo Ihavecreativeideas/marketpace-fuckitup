@@ -30,8 +30,9 @@ export default function FloatingNavigation({ activeTab, onTabPress }: Navigation
           >
             <Ionicons
               name={tab.icon as any}
-              size={20}
+              size={22}
               color={activeTab === tab.name ? '#6B46C1' : '#8E8E93'}
+              style={{ fontWeight: '600' }}
             />
             <Text
               style={[
@@ -52,16 +53,16 @@ const styles = StyleSheet.create({
   container: {
     position: 'absolute',
     bottom: 20,
-    left: 20,
-    right: 20,
+    left: 10,
+    right: 10,
     zIndex: 1000,
   },
   navBar: {
     flexDirection: 'row',
     backgroundColor: 'white',
     borderRadius: 25,
-    paddingVertical: 8,
-    paddingHorizontal: 4,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -70,22 +71,24 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 8,
+    justifyContent: 'space-around',
   },
   tab: {
-    flex: 1,
     alignItems: 'center',
     paddingVertical: 8,
-    paddingHorizontal: 4,
+    paddingHorizontal: 12,
     borderRadius: 20,
+    minWidth: 60,
   },
   activeTab: {
     backgroundColor: '#E0E7FF',
   },
   tabText: {
-    fontSize: 10,
+    fontSize: 11,
     color: '#8E8E93',
-    marginTop: 2,
-    fontWeight: '500',
+    marginTop: 3,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   activeTabText: {
     color: '#6B46C1',
