@@ -118,18 +118,29 @@ app.post('/api/integrations/test-stored', async (req, res) => {
 // Test with specific token from user
 app.post('/api/integrations/test-specific', async (req, res) => {
     try {
-        const specificToken = "27a57cd1ebe4468fdd16545b236449b2-1751859749";
+        const specificToken = "cc68bfa81bc1e88a3327daf9ff777596";
         
+        // Comprehensive list of potential store URL patterns
         const storeUrls = [
             "https://myshop-marketpace-com.myshopify.com",
             "https://marketpace-com.myshopify.com", 
             "https://myshop-marketpace.myshopify.com",
             "https://marketpace.myshopify.com",
-            "https://myshop.myshopify.com"
+            "https://myshop.myshopify.com",
+            "https://shop-marketpace.myshopify.com",
+            "https://marketpace-shop.myshopify.com",
+            "https://test-marketpace.myshopify.com",
+            "https://demo-marketpace.myshopify.com",
+            "https://marketpace-demo.myshopify.com",
+            "https://marketpace-test.myshopify.com",
+            "https://dev-marketpace.myshopify.com",
+            "https://marketpace-dev.myshopify.com"
         ];
 
-        const apiVersions = ["2023-10", "2024-01", "2024-04", "2024-07"];
+        const apiVersions = ["2023-10", "2024-01", "2024-04", "2024-07", "2024-10"];
 
+        let lastError = '';
+        
         for (const storeUrl of storeUrls) {
             for (const apiVersion of apiVersions) {
                 try {
@@ -147,13 +158,18 @@ app.post('/api/integrations/test-specific', async (req, res) => {
                             store: data.shop?.name || 'Unknown Store',
                             plan: data.shop?.plan_name || 'Unknown Plan',
                             domain: data.shop?.domain || data.shop?.myshopify_domain,
-                            tokenUsed: specificToken.substring(0, 15) + '...',
+                            tokenUsed: specificToken.substring(0, 10) + '...',
                             storeUrl: storeUrl,
                             apiVersion: apiVersion,
-                            message: 'Successfully connected to your Shopify store!'
+                            message: 'Successfully connected to your Shopify store!',
+                            totalAttempts: storeUrls.length * apiVersions.length
                         });
+                    } else {
+                        const errorText = await response.text();
+                        lastError = `${response.status}: ${errorText}`;
                     }
                 } catch (e) {
+                    lastError = e.message;
                     continue;
                 }
             }
@@ -161,10 +177,12 @@ app.post('/api/integrations/test-specific', async (req, res) => {
 
         return res.json({ 
             success: false, 
-            error: 'Token appears to be invalid or store not found',
-            tokenUsed: specificToken.substring(0, 15) + '...',
-            attemptedUrls: storeUrls,
-            suggestion: 'Please verify your Shopify store URL and regenerate your access token'
+            error: 'Could not find a matching store for your access token',
+            tokenUsed: specificToken.substring(0, 10) + '...',
+            totalAttempts: storeUrls.length * apiVersions.length,
+            lastError: lastError,
+            suggestion: 'Your access token may be for a different store URL. Try the manual connection and enter your exact store URL.',
+            nextSteps: 'Check your Shopify admin for the exact store URL format'
         });
     } catch (error) {
         res.json({ success: false, error: error.message });
@@ -305,7 +323,7 @@ app.get('/', (req, res) => {
         }
 
         async function testSpecificToken() {
-            showStatus('shopify-status', 'Testing with your specific token: 27a57cd1ebe4468fdd16545b236449b2-1751859749...', 'info');
+            showStatus('shopify-status', 'Testing with your new token: cc68bfa81bc1e88a3327daf9ff777596...', 'info');
             
             try {
                 const response = await fetch('/api/integrations/test-specific', {
