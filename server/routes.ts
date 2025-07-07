@@ -8,6 +8,7 @@ import { registerDriverRoutes } from "./driverRoutes";
 import { registerPasswordRecoveryRoutes } from "./passwordRecovery";
 import { registerIntegrationRoutes } from "./integrationRoutes";
 import { registerScammerProtectionRoutes } from "./antiScammerProtection";
+import { registerFacebookRoutes } from "./facebookIntegration";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -1692,6 +1693,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Scammer protection and security routes
   registerScammerProtectionRoutes(app);
+
+  // Register Facebook marketing integration routes  
+  registerFacebookRoutes(app);
 
   const httpServer = createServer(app);
   return httpServer;

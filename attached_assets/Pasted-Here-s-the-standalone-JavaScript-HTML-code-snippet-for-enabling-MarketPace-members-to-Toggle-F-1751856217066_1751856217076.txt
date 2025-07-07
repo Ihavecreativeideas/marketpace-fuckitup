@@ -1,0 +1,95 @@
+Here’s the standalone JavaScript + HTML code snippet for enabling MarketPace members to:
+
+✅ Toggle Facebook sharing
+
+✅ Share a product with a “Deliver Now” link
+
+✅ Enable auto-replies to “Is this still available?” messages
+
+You can paste this into your Replit App Builder frontend and connect it to your database/backend logic.
+
+✅ Frontend HTML + JS
+html
+Copy
+Edit
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MarketPace Facebook Tools</title>
+</head>
+<body>
+  <h2>Facebook Sharing Tools</h2>
+
+  <button onclick="toggleFacebookShare('user123')">Enable Facebook Sharing</button>
+  <button onclick="shareNow('user123')">Share Product to Facebook</button>
+  <button onclick="enableAutoReply('user123')">Enable Auto-Reply to Messages</button>
+
+  <script>
+    const users = {
+      'user123': {
+        id: 'user123',
+        emailVerified: true,
+        phoneVerified: true,
+        facebookSharingEnabled: false,
+        autoReplyEnabled: false
+      }
+    };
+
+    function enableFacebookSharing(userId) {
+      users[userId].facebookSharingEnabled = true;
+      console.log(`Facebook sharing enabled for ${userId}`);
+    }
+
+    function shareProductToFacebook(userId, product) {
+      if (!users[userId]?.facebookSharingEnabled) {
+        alert("Facebook sharing is not enabled.");
+        return;
+      }
+
+      const fbPost = {
+        message: `${product.title}\n\n${product.description}\n\nPrice: $${product.price}\n\nClick below to Deliver Now!`,
+        link: `https://marketpace.app/product/${product.id}?deliver_now=true`
+      };
+
+      // Simulated FB post
+      console.log(`Shared to Facebook for ${userId}:`, fbPost);
+      alert("Product shared to Facebook (simulated).");
+    }
+
+    function enableFacebookAutoReply(userId) {
+      users[userId].autoReplyEnabled = true;
+      console.log(`Auto-reply enabled for ${userId}`);
+      alert("Auto-reply enabled.");
+    }
+
+    function simulateFacebookMessageTrigger(userId, message) {
+      if (message.toLowerCase().includes("is this still available") && users[userId]?.autoReplyEnabled) {
+        const autoReply = "Yes it is! Purchase now and have it delivered to you at the next available delivery route from MarketPace.";
+        console.log(`Auto-reply sent: ${autoReply}`);
+        return autoReply;
+      }
+      return null;
+    }
+
+    // Button Handlers
+    function toggleFacebookShare(userId) {
+      enableFacebookSharing(userId);
+      alert("Facebook sharing enabled.");
+    }
+
+    function shareNow(userId) {
+      const sampleProduct = {
+        id: 'p001',
+        title: 'Vintage Chair',
+        description: 'Gently used, perfect for home office.',
+        price: 40.00
+      };
+      shareProductToFacebook(userId, sampleProduct);
+    }
+
+    function enableAutoReply(userId) {
+      enableFacebookAutoReply(userId);
+    }
+  </script>
+</body>
+</html>

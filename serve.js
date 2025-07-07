@@ -195,6 +195,55 @@ app.get('/', (req, res) => {
                 }
             };
 
+            // Facebook Marketing functions
+            const connectFacebook = async () => {
+                const accessToken = prompt('Enter your Facebook Page Access Token:');
+                if (!accessToken) return;
+
+                try {
+                    const response = await fetch('/api/facebook/connect', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ accessToken })
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('Facebook account connected successfully! You can now auto-post products.');
+                    } else {
+                        alert('Failed to connect Facebook: ' + result.error);
+                    }
+                } catch (error) {
+                    alert('Error connecting Facebook: ' + error.message);
+                }
+            };
+
+            const shareToFacebook = async () => {
+                const sampleProduct = {
+                    id: 'p001',
+                    title: 'Vintage Chair',
+                    description: 'Beautiful vintage chair in excellent condition. Perfect for home office or dining room.',
+                    price: 75
+                };
+
+                try {
+                    const response = await fetch('/api/facebook/post', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ productData: sampleProduct })
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('Product shared to Facebook successfully! Auto-replies are now active.');
+                    } else {
+                        alert('Failed to share product: ' + result.error);
+                    }
+                } catch (error) {
+                    alert('Error sharing to Facebook: ' + error.message);
+                }
+            };
+
             const PostForm = ({ onClose }) => {
                 const [formData, setFormData] = useState({
                     title: '',
@@ -1576,6 +1625,28 @@ app.get('/', (req, res) => {
                                             <button style={{background: 'rgba(29,161,242,0.2)', color: 'white', border: '1px solid rgba(29,161,242,0.3)', padding: '8px 15px', borderRadius: '20px', cursor: 'pointer'}}>
                                                 + Instagram Shop
                                             </button>
+                                        </div>
+                                    </div>
+
+                                    <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
+                                        <h4 style={{margin: '0 0 10px 0'}}>🤖 Facebook Marketing Automation</h4>
+                                        <p style={{margin: '0 0 15px 0', opacity: 0.8}}>Auto-post products and respond to messages</p>
+                                        <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '15px'}}>
+                                            <button 
+                                                onClick={() => connectFacebook()}
+                                                style={{background: 'rgba(59,89,152,0.3)', color: 'white', border: '1px solid rgba(59,89,152,0.5)', padding: '8px 15px', borderRadius: '20px', cursor: 'pointer'}}>
+                                                Connect Facebook Page
+                                            </button>
+                                            <button 
+                                                onClick={() => shareToFacebook()}
+                                                style={{background: 'rgba(76,175,80,0.3)', color: 'white', border: '1px solid rgba(76,175,80,0.5)', padding: '8px 15px', borderRadius: '20px', cursor: 'pointer'}}>
+                                                Share Product Demo
+                                            </button>
+                                        </div>
+                                        <div style={{fontSize: '12px', opacity: 0.7}}>
+                                            <div>✅ Auto-post with "Deliver Now" links</div>
+                                            <div>✅ Webhook listener for availability questions</div>
+                                            <div>✅ Automated Messenger replies</div>
                                         </div>
                                     </div>
 
