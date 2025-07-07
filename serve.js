@@ -176,13 +176,42 @@ app.get('/', (req, res) => {
                 }
             };
 
-            // E-commerce platform connections
-            const connectShopify = () => {
-                alert('✅ Shopify Connected!\n\n' +
-                      '🛒 Imported 47 products from your store\n' +
-                      '📦 All inventory synced with MarketPace\n' +
-                      '🚚 Products now available for local delivery\n\n' +
-                      'Your Shopify customers can now get same-day delivery!');
+            // Real Shopify integration
+            const connectShopify = async () => {
+                // Shopify store URL (you'll need to provide this)
+                const storeUrl = prompt('Enter your Shopify store URL (e.g., https://your-store.myshopify.com):');
+                
+                if (!storeUrl) {
+                    alert('Store URL is required for Shopify integration');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('/api/integrations/website/test', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            websiteUrl: storeUrl,
+                            platformType: 'shopify',
+                            accessToken: '27a57cd1ebe4468fdd16545b236449b2'
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert(`✅ Shopify Connected Successfully!\n\n` +
+                              `🏪 Store: ${result.store || 'Your Store'}\n` +
+                              `📦 Plan: ${result.plan || 'Unknown Plan'}\n` +
+                              `🛒 Products: ${result.productCount || 0} imported\n` +
+                              `🌐 Domain: ${result.domain || storeUrl}\n\n` +
+                              `Your Shopify customers can now get same-day delivery through MarketPace!`);
+                    } else {
+                        alert(`❌ Shopify Connection Failed:\n\n${result.error}\n\nPlease check your store URL and access token.`);
+                    }
+                } catch (error) {
+                    alert(`❌ Connection Error: ${error.message}`);
+                }
             };
 
             const connectWooCommerce = () => {
