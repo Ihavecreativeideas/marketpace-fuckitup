@@ -11,6 +11,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Community from './src/screens/Community';
 
 // Create a simple demo auth context with guest mode support
 interface User {
@@ -2028,7 +2029,7 @@ function MainTabs() {
       />
       <Tab.Screen 
         name="Community" 
-        component={CommunityFeedScreen}
+        component={Community}
         options={{ tabBarLabel: 'Community' }}
       />
       <Tab.Screen 

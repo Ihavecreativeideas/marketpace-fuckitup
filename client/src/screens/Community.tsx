@@ -44,7 +44,7 @@ interface Comment {
   avatar: string;
 }
 
-export default function Community() {
+function Community() {
   const [activeTab, setActiveTab] = useState('all');
   const [postText, setPostText] = useState('');
   const [posts, setPosts] = useState<CommunityPost[]>([]);
@@ -806,3 +806,5 @@ const styles = StyleSheet.create({
     padding: 10,
   },
 });
+
+export default Community;
