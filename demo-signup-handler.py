@@ -15,6 +15,7 @@ from twilio.rest import Client
 TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
 TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
+TWILIO_MESSAGING_SERVICE_SID = os.environ.get("TWILIO_MESSAGING_SERVICE_SID", "MGdd6a8f807bac2edc217477af4f57f856")
 
 class DemoSignupManager:
     def __init__(self, db_path="demo_users.db"):
@@ -122,34 +123,32 @@ class DemoSignupManager:
     def send_welcome_notifications(self, user_data):
         """Send welcome SMS and email notifications"""
         # Send SMS welcome message if enabled
-        if user_data.get('smsNotifications') and self.twilio_client and TWILIO_PHONE_NUMBER:
+        if user_data.get('smsNotifications') and self.twilio_client:
             try:
                 formatted_phone = self.format_phone_number(user_data['phone'])
                 
-                welcome_sms = f"""🎉 Welcome to MarketPace, {user_data['fullName'].split()[0]}!
-
-Your demo access is ready. You're now part of the movement to build stronger communities through local commerce.
-
-🎁 EARLY SUPPORTER BENEFITS:
-• Lifetime Pro features
-• Special supporter badge
-• First access when we launch in {user_data['city']}
-• Priority driver opportunities
-
-We'll text you when MarketPace goes live in your area!
-
-Reply STOP to opt out anytime.
-- The MarketPace Team"""
+                welcome_sms = f"🎉 Welcome to MarketPace, {user_data['fullName'].split()[0]}! Your demo access is ready. You're now part of the movement to build stronger communities through local commerce. We'll text you when MarketPace goes live in {user_data['city']}! Reply STOP to opt out anytime. - The MarketPace Team"
                 
-                message = self.twilio_client.messages.create(
-                    body=welcome_sms,
-                    from_=TWILIO_PHONE_NUMBER,
-                    to=formatted_phone
-                )
+                # Use Messaging Service SID for better delivery
+                message_params = {
+                    'body': welcome_sms,
+                    'to': formatted_phone
+                }
+                
+                if TWILIO_MESSAGING_SERVICE_SID:
+                    message_params['messaging_service_sid'] = TWILIO_MESSAGING_SERVICE_SID
+                elif TWILIO_PHONE_NUMBER:
+                    message_params['from_'] = TWILIO_PHONE_NUMBER
+                else:
+                    print("No Twilio phone number or messaging service configured")
+                    return
+                
+                message = self.twilio_client.messages.create(**message_params)
                 print(f"Welcome SMS sent to {formatted_phone} - SID: {message.sid}")
                 
             except Exception as e:
                 print(f"Failed to send SMS to {user_data['phone']}: {e}")
+                # Continue with account creation even if SMS fails
     
     def send_launch_notification(self, city, user_phone=None):
         """Send launch notification to users in specific city"""
@@ -177,28 +176,19 @@ Reply STOP to opt out anytime.
         
         for name, phone in users:
             try:
-                launch_sms = f"""
-🚀 MARKETPACE IS LIVE in {city.upper()}!
-
-Hi {name.split()[0]}, the wait is over! MarketPace is now available in your area.
-
-🎉 Your Early Supporter Benefits Are Active:
-• Lifetime Pro membership
-• Special founder badge
-• All features unlocked
-• Priority delivery opportunities
-
-Download the app or visit MarketPace.shop to start connecting with your community!
-
-Thanks for believing in local commerce.
-- Brooke & The MarketPace Team
-                """.strip()
+                launch_sms = f"🚀 MARKETPACE IS LIVE in {city.upper()}! Hi {name.split()[0]}, the wait is over! MarketPace is now available in your area. Your Early Supporter Benefits Are Active: Lifetime Pro membership, Special founder badge, All features unlocked. Download the app or visit MarketPace.shop! - Brooke & The MarketPace Team"
                 
-                self.twilio_client.messages.create(
-                    body=launch_sms,
-                    from_=TWILIO_PHONE_NUMBER,
-                    to=phone
-                )
+                message_params = {
+                    'body': launch_sms,
+                    'to': phone
+                }
+                
+                if TWILIO_MESSAGING_SERVICE_SID:
+                    message_params['messaging_service_sid'] = TWILIO_MESSAGING_SERVICE_SID
+                elif TWILIO_PHONE_NUMBER:
+                    message_params['from_'] = TWILIO_PHONE_NUMBER
+                
+                self.twilio_client.messages.create(**message_params)
                 
                 # Mark as notified
                 cursor.execute('''
