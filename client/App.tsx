@@ -11,7 +11,29 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { Linking } from 'react-native';
 import Community from './src/screens/Community.js';
+
+// Facebook Share Component
+const FacebookShareButton = () => {
+  const shareToFacebook = () => {
+    const shareUrl = encodeURIComponent('https://MarketPace.shop');
+    const shareText = encodeURIComponent('Join the community-first marketplace revolution! MarketPace is building stronger neighborhoods through local commerce. #MarketPace #CommunityFirst #LocalCommerce');
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}&quote=${shareText}`;
+    
+    Linking.openURL(facebookUrl);
+  };
+
+  return (
+    <TouchableOpacity 
+      style={styles.facebookShare} 
+      onPress={shareToFacebook}
+      accessibilityLabel="Share MarketPace to Facebook"
+    >
+      <Text style={styles.facebookShareText}>📘 Share to Facebook</Text>
+    </TouchableOpacity>
+  );
+};
 
 // Create a simple demo auth context with guest mode support
 interface User {
