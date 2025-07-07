@@ -31,6 +31,8 @@ app.get('/', (req, res) => {
             const [currentStep, setCurrentStep] = useState('landing');
             const [currentFilter, setCurrentFilter] = useState('all');
             const [showPostForm, setShowPostForm] = useState(false);
+            const [expandedComments, setExpandedComments] = useState({});
+            const [commentTexts, setCommentTexts] = useState({});
             const [posts, setPosts] = useState([
                 {
                     id: 1,
@@ -392,12 +394,8 @@ app.get('/', (req, res) => {
                                     <p>No posts yet in this section. Be the first to post!</p>
                                 </div>
                             ) : (
-                                filteredPosts.map(post => {
-                                    const [showComments, setShowComments] = React.useState(false);
-                                    const [newComment, setNewComment] = React.useState('');
-                                    
-                                    return (
-                                        <div key={post.id} style={{
+                                filteredPosts.map(post => (
+                                    <div key={post.id} style={{
                                             background: 'rgba(255,255,255,0.1)', 
                                             padding: '20px', 
                                             borderRadius: '15px', 
@@ -455,7 +453,10 @@ app.get('/', (req, res) => {
                                                 </button>
                                                 
                                                 <button
-                                                    onClick={() => setShowComments(!showComments)}
+                                                    onClick={() => setExpandedComments({
+                                                        ...expandedComments, 
+                                                        [post.id]: !expandedComments[post.id]
+                                                    })}
                                                     style={{
                                                         background: 'none',
                                                         border: 'none',
@@ -487,7 +488,7 @@ app.get('/', (req, res) => {
                                             </div>
                                             
                                             {/* Comments Section */}
-                                            {showComments && (
+                                            {expandedComments[post.id] && (
                                                 <div style={{marginTop: '15px'}}>
                                                     <div style={{
                                                         background: 'rgba(0,0,0,0.2)',
@@ -518,12 +519,18 @@ app.get('/', (req, res) => {
                                                             <input
                                                                 type="text"
                                                                 placeholder="Write a comment..."
-                                                                value={newComment}
-                                                                onChange={(e) => setNewComment(e.target.value)}
+                                                                value={commentTexts[post.id] || ''}
+                                                                onChange={(e) => setCommentTexts({
+                                                                    ...commentTexts,
+                                                                    [post.id]: e.target.value
+                                                                })}
                                                                 onKeyPress={(e) => {
                                                                     if (e.key === 'Enter') {
-                                                                        addComment(post.id, newComment);
-                                                                        setNewComment('');
+                                                                        addComment(post.id, commentTexts[post.id] || '');
+                                                                        setCommentTexts({
+                                                                            ...commentTexts,
+                                                                            [post.id]: ''
+                                                                        });
                                                                     }
                                                                 }}
                                                                 style={{
@@ -538,8 +545,11 @@ app.get('/', (req, res) => {
                                                             />
                                                             <button
                                                                 onClick={() => {
-                                                                    addComment(post.id, newComment);
-                                                                    setNewComment('');
+                                                                    addComment(post.id, commentTexts[post.id] || '');
+                                                                    setCommentTexts({
+                                                                        ...commentTexts,
+                                                                        [post.id]: ''
+                                                                    });
                                                                 }}
                                                                 style={{
                                                                     background: 'linear-gradient(135deg, #4CAF50, #45a049)',
@@ -558,8 +568,7 @@ app.get('/', (req, res) => {
                                                 </div>
                                             )}
                                         </div>
-                                    );
-                                })
+                                ))
                             )}
                         </div>
                     </div>
