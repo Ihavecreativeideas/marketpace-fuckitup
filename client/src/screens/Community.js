@@ -455,6 +455,40 @@ const Community = () => {
           </View>
         </View>
       </Modal>
+      
+      {/* Facebook Share Button */}
+      <TouchableOpacity 
+        style={{
+          position: 'absolute',
+          bottom: 100,
+          right: 20,
+          backgroundColor: '#1877F2',
+          paddingHorizontal: 20,
+          paddingVertical: 12,
+          borderRadius: 25,
+          elevation: 5,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+          shadowColor: '#1877F2',
+          zIndex: 1000,
+        }}
+        onPress={() => {
+          const shareUrl = encodeURIComponent('https://MarketPace.shop');
+          const shareText = encodeURIComponent('Join the community-first marketplace revolution! MarketPace is building stronger neighborhoods through local commerce. #MarketPace #CommunityFirst #LocalCommerce');
+          const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}&quote=${shareText}`;
+          
+          if (typeof window !== 'undefined') {
+            window.open(facebookUrl, '_blank');
+          }
+        }}
+      >
+        <Text style={{
+          color: '#FFFFFF',
+          fontWeight: '600',
+          fontSize: 14,
+        }}>📘 Share to Facebook</Text>
+      </TouchableOpacity>
     </View>
   );
 };
