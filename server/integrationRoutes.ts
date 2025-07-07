@@ -68,15 +68,18 @@ class WebsiteIntegrationManager {
   private static integrations: Map<string, WebsiteIntegration> = new Map();
   private static products: Map<string, ImportedProduct[]> = new Map();
 
-  static async testConnection(websiteUrl: string, platformType: string): Promise<{
+  static async testConnection(websiteUrl: string, platformType: string, accessToken?: string): Promise<{
     success: boolean;
     productCount?: number;
     error?: string;
+    store?: string;
+    plan?: string;
+    domain?: string;
   }> {
     try {
-      // Simulate connection testing based on platform
+      // Handle real integrations based on platform
       const platformHandlers = {
-        shopify: () => this.testShopifyConnection(websiteUrl),
+        shopify: () => this.testShopifyConnection(websiteUrl, accessToken),
         woocommerce: () => this.testWooCommerceConnection(websiteUrl),
         squarespace: () => this.testSquarespaceConnection(websiteUrl),
         bigcommerce: () => this.testBigCommerceConnection(websiteUrl),
@@ -91,14 +94,54 @@ class WebsiteIntegrationManager {
       }
 
       return await handler();
-    } catch (error) {
-      return { success: false, error: 'Connection test failed' };
+    } catch (error: any) {
+      return { success: false, error: 'Connection test failed: ' + error.message };
     }
   }
 
-  private static async testShopifyConnection(websiteUrl: string) {
-    // Shopify API integration simulation
-    return { success: true, productCount: 127 };
+  private static async testShopifyConnection(websiteUrl: string, accessToken?: string) {
+    try {
+      if (!accessToken) {
+        return { success: false, error: 'Access token required' };
+      }
+
+      const response = await fetch(`${websiteUrl}/admin/api/2023-10/shop.json`, {
+        headers: {
+          'X-Shopify-Access-Token': accessToken,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        return { success: false, error: `HTTP ${response.status}: ${response.statusText}` };
+      }
+
+      const data = await response.json();
+      
+      // Get product count
+      const productsResponse = await fetch(`${websiteUrl}/admin/api/2023-10/products/count.json`, {
+        headers: {
+          'X-Shopify-Access-Token': accessToken,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      let productCount = 0;
+      if (productsResponse.ok) {
+        const productsData = await productsResponse.json();
+        productCount = productsData.count || 0;
+      }
+
+      return {
+        success: true,
+        productCount,
+        store: data.shop?.name || 'Unknown Store',
+        plan: data.shop?.plan_name || 'Unknown Plan',
+        domain: data.shop?.domain
+      };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
   }
 
   private static async testWooCommerceConnection(websiteUrl: string) {
@@ -506,7 +549,7 @@ export function registerIntegrationRoutes(app: Express): void {
   // Website Integration Routes
   app.post('/api/integrations/website/test', async (req, res) => {
     try {
-      const { websiteUrl, platformType } = req.body;
+      const { websiteUrl, platformType, accessToken } = req.body;
       
       if (!websiteUrl || !platformType) {
         return res.status(400).json({ 
@@ -515,7 +558,7 @@ export function registerIntegrationRoutes(app: Express): void {
         });
       }
 
-      const result = await WebsiteIntegrationManager.testConnection(websiteUrl, platformType);
+      const result = await WebsiteIntegrationManager.testConnection(websiteUrl, platformType, accessToken);
       res.json(result);
     } catch (error) {
       res.status(500).json({ 
