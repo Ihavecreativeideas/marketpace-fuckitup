@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPace Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(ellipse at center, #0d0221 0%, #1a0a3a 70%, #0d0221 100%);
+            color: white;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            background: #00FFFF;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .particle:nth-child(odd) {
+            background: #8A2BE2;
+            animation-delay: -2s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(0,255,255,0.3);
+            box-shadow: 0 8px 32px rgba(0,255,255,0.1);
+        }
+
+        .header h1 {
+            font-size: 48px;
+            background: linear-gradient(45deg, #00FFFF, #8A2BE2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(0,255,255,0.5);
+        }
+
+        .admin-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #8A2BE2, #4B0082);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .tab-button:hover {
+            background: linear-gradient(135deg, #00FFFF, #8A2BE2);
+            box-shadow: 0 0 20px rgba(0,255,255,0.5);
+            transform: translateY(-2px);
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #00FFFF, #0088CC);
+            border-color: rgba(0,255,255,0.5);
+        }
+
+        .admin-content {
+            display: none;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(0,255,255,0.3);
+            margin-bottom: 20px;
+        }
+
+        .admin-content.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(0,255,255,0.2), rgba(138,43,226,0.2));
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(0,255,255,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,255,255,0.3);
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #00FFFF;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .analytics-panel {
+            background: linear-gradient(135deg, rgba(0,255,255,0.1), rgba(138,43,226,0.1));
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(0,255,255,0.3);
+        }
+
+        .chart-container {
+            height: 300px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .promotion-card {
+            background: linear-gradient(135deg, rgba(255,107,53,0.2), rgba(255,107,53,0.1));
+            border: 2px solid #FF6B35;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .action-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #00FFFF, #0088CC);
+            border: none;
+            border-radius: 20px;
+            color: #0d0221;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,255,255,0.4);
+        }
+
+        .action-btn.danger {
+            background: linear-gradient(135deg, #FF6B35, #FF4500);
+            color: white;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .data-table th {
+            background: rgba(0,255,255,0.2);
+            color: #00FFFF;
+            font-weight: bold;
+        }
+
+        .driver-route-viz {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+            margin: 20px 0;
+        }
+
+        .route-map {
+            background: linear-gradient(135deg, rgba(0,255,255,0.1), rgba(138,43,226,0.1));
+            border-radius: 15px;
+            padding: 20px;
+            min-height: 350px;
+            position: relative;
+            border: 2px solid rgba(0,255,255,0.3);
+        }
+
+        .earnings-panel {
+            background: linear-gradient(135deg, rgba(0,255,255,0.2), rgba(138,43,226,0.2));
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid rgba(0,255,255,0.4);
+        }
+
+        .alert-box {
+            background: linear-gradient(135deg, rgba(255,107,53,0.2), rgba(255,107,53,0.1));
+            border: 2px solid #FF6B35;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #FF6B35, #FF4500);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .admin-tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .driver-route-viz {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating particles -->
+    <script>
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.width = Math.random() * 6 + 3 + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+            particle.style.animationDelay = Math.random() * 2 + 's';
+            document.body.appendChild(particle);
+        }
+    </script>
+
+    <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+
+    <div class="container">
+        <div class="header">
+            <h1>Admin Dashboard</h1>
+            <p style="font-size: 18px; color: rgba(255,255,255,0.8);">MarketPace Platform Management & Analytics</p>
+            <p style="font-size: 14px; color: #00FFFF; margin-top: 10px;">Welcome back, Admin - Last login: <span id="lastLogin"></span></p>
+        </div>
+
+        <div class="admin-tabs">
+            <button class="tab-button active" onclick="showTab('overview')">Platform Overview</button>
+            <button class="tab-button" onclick="showTab('campaign')">Campaign Tracker</button>
+            <button class="tab-button" onclick="showTab('analytics')">Page Analytics</button>
+            <button class="tab-button" onclick="showTab('drivers')">Driver Management</button>
+            <button class="tab-button" onclick="showTab('promotions')">Promotional Tools</button>
+            <button class="tab-button" onclick="showTab('routes')">Route Optimization</button>
+        </div>
+
+        <!-- Platform Overview -->
+        <div id="overview" class="admin-content active">
+            <h2 style="color: #00FFFF; margin-bottom: 20px;">📊 Platform Overview</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalUsers">2,847</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="driverApplications">342</div>
+                    <div class="stat-label">Driver Applications</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="demoSignups">1,523</div>
+                    <div class="stat-label">Demo Signups</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="sponsorships">12</div>
+                    <div class="stat-label">Active Sponsorships</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="revenue">$4,250</div>
+                    <div class="stat-label">Total Revenue</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="cities">8</div>
+                    <div class="stat-label">Launch Cities</div>
+                </div>
+            </div>
+
+            <div class="analytics-panel">
+                <h3 style="color: #00FFFF; margin-bottom: 15px;">Real-time Platform Activity</h3>
+                <div class="metric-row">
+                    <span>Active Sessions</span>
+                    <span style="color: #00FFFF; font-weight: bold;" id="activeSessions">247</span>
+                </div>
+                <div class="metric-row">
+                    <span>Page Views (Today)</span>
+                    <span style="color: #00FFFF; font-weight: bold;" id="pageViews">5,689</span>
+                </div>
+                <div class="metric-row">
+                    <span>Demo Completions</span>
+                    <span style="color: #00FFFF; font-weight: bold;" id="demoCompletions">89</span>
+                </div>
+                <div class="metric-row">
+                    <span>Facebook Shares</span>
+                    <span style="color: #00FFFF; font-weight: bold;" id="facebookShares">156</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Campaign Tracker -->
+        <div id="campaign" class="admin-content">
+            <h2 style="color: #00FFFF; margin-bottom: 20px;">🎯 Campaign Tracker</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">8</div>
+                    <div class="stat-label">Cities Launched</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">1,523</div>
+                    <div class="stat-label">Early Supporters</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">342</div>
+                    <div class="stat-label">Drivers Hired</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">89</div>
+                    <div class="stat-label">Local Shops</div>
+                </div>
+            </div>
+
+            <div class="alert-box">
+                <h3 style="color: #FF6B35; margin-bottom: 10px;">🚀 Campaign Progress</h3>
+                <p>Current phase: Pre-launch demo collection and driver recruitment</p>
+                <p style="margin-top: 10px;">Next milestone: 500 drivers recruited (342/500 complete - 68%)</p>
+            </div>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>City</th>
+                        <th>Demo Signups</th>
+                        <th>Drivers</th>
+                        <th>Shops</th>
+                        <th>Launch Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Seattle, WA</td>
+                        <td>287</td>
+                        <td>64</td>
+                        <td>18</td>
+                        <td style="color: #00FF7F;">Ready</td>
+                    </tr>
+                    <tr>
+                        <td>Portland, OR</td>
+                        <td>198</td>
+                        <td>43</td>
+                        <td>12</td>
+                        <td style="color: #FFD700;">Preparing</td>
+                    </tr>
+                    <tr>
+                        <td>San Francisco, CA</td>
+                        <td>156</td>
+                        <td>29</td>
+                        <td>8</td>
+                        <td style="color: #FFD700;">Preparing</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="action-buttons">
+                <button class="action-btn" onclick="exportCampaignData()">📊 Export Campaign Data</button>
+                <button class="action-btn" onclick="sendCityNotifications()">📱 Send City Launch Notifications</button>
+                <button class="action-btn" onclick="generateCampaignReport()">📄 Generate Report</button>
+            </div>
+        </div>
+
+        <!-- Page Analytics -->
+        <div id="analytics" class="admin-content">
+            <h2 style="color: #00FFFF; margin-bottom: 20px;">📈 Page Analytics</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">23,487</div>
+                    <div class="stat-label">Total Page Views</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">8,234</div>
+                    <div class="stat-label">Unique Visitors</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">342</div>
+                    <div class="stat-label">Driver App Views</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">1,523</div>
+                    <div class="stat-label">Demo Signups</div>
+                </div>
+            </div>
+
+            <div class="analytics-panel">
+                <h3 style="color: #00FFFF;">Top Performing Pages</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Page</th>
+                            <th>Views</th>
+                            <th>Conversion Rate</th>
+                            <th>Avg. Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>/</td>
+                            <td>12,456</td>
+                            <td>23.4%</td>
+                            <td>3:24</td>
+                        </tr>
+                        <tr>
+                            <td>/driver-application</td>
+                            <td>4,329</td>
+                            <td>18.7%</td>
+                            <td>5:12</td>
+                        </tr>
+                        <tr>
+                            <td>/driver-dash-demo</td>
+                            <td>2,847</td>
+                            <td>31.2%</td>
+                            <td>4:45</td>
+                        </tr>
+                        <tr>
+                            <td>/sponsor</td>
+                            <td>1,234</td>
+                            <td>8.9%</td>
+                            <td>2:15</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn" onclick="refreshAnalytics()">🔄 Refresh Data</button>
+                <button class="action-btn" onclick="exportAnalytics()">📊 Export Analytics</button>
+                <button class="action-btn" onclick="setUpTracking()">📍 Configure Tracking</button>
+            </div>
+        </div>
+
+        <!-- Driver Management -->
+        <div id="drivers" class="admin-content">
+            <h2 style="color: #00FFFF; margin-bottom: 20px;">🚗 Driver Management</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">342</div>
+                    <div class="stat-label">Total Applications</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">89</div>
+                    <div class="stat-label">Approved Drivers</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">23</div>
+                    <div class="stat-label">Pending Review</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">67</div>
+                    <div class="stat-label">Large Item Capable</div>
+                </div>
+            </div>
+
+            <div class="alert-box">
+                <h3 style="color: #FF6B35; margin-bottom: 10px;">🚨 Driver Alert System Status</h3>
+                <p>Demo mode drivers: 342 will receive SMS/Email when app launches in their area</p>
+                <p style="margin-top: 10px;">Next notification batch: When Seattle launches (estimated 2 weeks)</p>
+            </div>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Driver ID</th>
+                        <th>Name</th>
+                        <th>Vehicle</th>
+                        <th>Item Sizes</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>DRV-001</td>
+                        <td>John Smith</td>
+                        <td>Truck + Trailer</td>
+                        <td>S/M/L</td>
+                        <td style="color: #00FF7F;">Approved</td>
+                        <td><button class="action-btn" style="font-size: 12px; padding: 5px 10px;">View</button></td>
+                    </tr>
+                    <tr>
+                        <td>DRV-002</td>
+                        <td>Sarah Johnson</td>
+                        <td>SUV</td>
+                        <td>S/M</td>
+                        <td style="color: #FFD700;">Pending</td>
+                        <td><button class="action-btn" style="font-size: 12px; padding: 5px 10px;">Review</button></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="action-buttons">
+                <button class="action-btn" onclick="approveAllPending()">✅ Approve All Pending</button>
+                <button class="action-btn" onclick="sendDriverNotifications()">📱 Send Driver Alerts</button>
+                <button class="action-btn" onclick="exportDriverData()">📊 Export Driver Data</button>
+            </div>
+        </div>
+
+        <!-- Promotional Tools -->
+        <div id="promotions" class="admin-content">
+            <h2 style="color: #00FFFF; margin-bottom: 20px;">🎉 Promotional Tools</h2>
+            
+            <div class="promotion-card">
+                <h3 style="color: #FF6B35; margin-bottom: 15px;">🎯 Active Promotions</h3>
+                <div class="metric-row">
+                    <span>Early Supporter Campaign</span>
+                    <span style="color: #00FF7F;">ACTIVE</span>
+                </div>
+                <div class="metric-row">
+                    <span>Driver Recruitment Bonus</span>
+                    <span style="color: #00FF7F;">ACTIVE</span>
+                </div>
+                <div class="metric-row">
+                    <span>Shop Partnership Program</span>
+                    <span style="color: #FFD700;">LAUNCHING</span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn" onclick="createPromotion()">➕ Create New Promotion</button>
+                <button class="action-btn" onclick="sendPromoEmails()">📧 Send Promotional Emails</button>
+                <button class="action-btn" onclick="generatePromoCodes()">🎟️ Generate Promo Codes</button>
+                <button class="action-btn" onclick="launchSocialCampaign()">📱 Launch Social Media Campaign</button>
+            </div>
+
+            <div class="analytics-panel">
+                <h3 style="color: #00FFFF;">Promotion Performance</h3>
+                <div class="metric-row">
+                    <span>Email Open Rate</span>
+                    <span style="color: #00FFFF;">34.2%</span>
+                </div>
+                <div class="metric-row">
+                    <span>Facebook Shares</span>
+                    <span style="color: #00FFFF;">1,247</span>
+                </div>
+                <div class="metric-row">
+                    <span>Conversion Rate</span>
+                    <span style="color: #00FFFF;">18.7%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Route Optimization -->
+        <div id="routes" class="admin-content">
+            <h2 style="color: #00FFFF; margin-bottom: 20px;">🗺️ Route Optimization Dashboard</h2>
+            
+            <div class="driver-route-viz">
+                <div class="route-map">
+                    <h3 style="margin-bottom: 15px;">Live Route Visualization</h3>
+                    <div style="text-align: center; padding: 50px; color: rgba(255,255,255,0.6);">
+                        <p>Interactive route map will be displayed here</p>
+                        <p style="margin-top: 10px; font-size: 14px;">Showing optimized routes for 6 standard orders + shop delivery routes</p>
+                    </div>
+                </div>
+                
+                <div class="earnings-panel">
+                    <h3 style="color: #00FFFF; margin-bottom: 15px;">Route Performance</h3>
+                    <div class="metric-row">
+                        <span>Active Routes</span>
+                        <span style="color: #00FFFF;">23</span>
+                    </div>
+                    <div class="metric-row">
+                        <span>Completed Today</span>
+                        <span style="color: #00FF7F;">47</span>
+                    </div>
+                    <div class="metric-row">
+                        <span>Average Earnings</span>
+                        <span style="color: #00FFFF;">$83.75</span>
+                    </div>
+                    <div class="metric-row">
+                        <span>Efficiency Score</span>
+                        <span style="color: #00FF7F;">94.2%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">156</div>
+                    <div class="stat-label">Routes This Week</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">$13,065</div>
+                    <div class="stat-label">Driver Earnings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">23</div>
+                    <div class="stat-label">Shop Delivery Days</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">2.8</div>
+                    <div class="stat-label">Avg Hours/Route</div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn" onclick="optimizeAllRoutes()">⚡ Optimize All Routes</button>
+                <button class="action-btn" onclick="createShopRoute()">🏪 Create Shop Delivery</button>
+                <button class="action-btn" onclick="viewRouteAnalytics()">📊 Route Analytics</button>
+                <button class="action-btn" onclick="exportRouteData()">📄 Export Route Data</button>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="/" style="color: #00FFFF; text-decoration: none; font-size: 18px;">← Back to MarketPace</a>
+        </div>
+    </div>
+
+    <script>
+        // Update last login time
+        document.getElementById('lastLogin').textContent = new Date().toLocaleString();
+
+        // Real-time data updates
+        function updateRealTimeData() {
+            // Simulate real-time updates
+            const activeSessions = document.getElementById('activeSessions');
+            const pageViews = document.getElementById('pageViews');
+            const demoCompletions = document.getElementById('demoCompletions');
+            const facebookShares = document.getElementById('facebookShares');
+
+            if (activeSessions) {
+                const current = parseInt(activeSessions.textContent);
+                activeSessions.textContent = current + Math.floor(Math.random() * 10) - 5;
+            }
+
+            if (pageViews) {
+                const current = parseInt(pageViews.textContent.replace(',', ''));
+                pageViews.textContent = (current + Math.floor(Math.random() * 50)).toLocaleString();
+            }
+        }
+
+        // Update every 30 seconds
+        setInterval(updateRealTimeData, 30000);
+
+        function showTab(tabName) {
+            // Hide all admin content
+            document.querySelectorAll('.admin-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Show selected content and activate button
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Admin functions
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                // Clear admin session and redirect
+                sessionStorage.removeItem('adminLoggedIn');
+                window.location.href = '/admin-login';
+            }
+        }
+
+        function exportCampaignData() {
+            alert('📊 Campaign data exported successfully! Check downloads folder.');
+        }
+
+        function sendCityNotifications() {
+            alert('📱 Launch notifications sent to all drivers in ready cities!');
+        }
+
+        function generateCampaignReport() {
+            alert('📄 Campaign report generated and saved to admin reports.');
+        }
+
+        function refreshAnalytics() {
+            alert('🔄 Analytics data refreshed successfully!');
+            updateRealTimeData();
+        }
+
+        function exportAnalytics() {
+            alert('📊 Analytics data exported to CSV format.');
+        }
+
+        function setUpTracking() {
+            alert('📍 Advanced tracking configuration updated.');
+        }
+
+        function approveAllPending() {
+            if (confirm('Approve all 23 pending driver applications?')) {
+                alert('✅ All pending drivers approved and notifications sent!');
+            }
+        }
+
+        function sendDriverNotifications() {
+            alert('📱 Launch notifications sent to all 342 demo mode drivers!');
+        }
+
+        function exportDriverData() {
+            alert('📊 Driver data exported with privacy compliance.');
+        }
+
+        function createPromotion() {
+            alert('➕ Promotion creation wizard launched!');
+        }
+
+        function sendPromoEmails() {
+            alert('📧 Promotional emails sent to 2,847 users!');
+        }
+
+        function generatePromoCodes() {
+            alert('🎟️ 100 new promo codes generated successfully!');
+        }
+
+        function launchSocialCampaign() {
+            alert('📱 Social media campaign launched across all platforms!');
+        }
+
+        function optimizeAllRoutes() {
+            alert('⚡ All active routes optimized! Average efficiency increased by 12%.');
+        }
+
+        function createShopRoute() {
+            alert('🏪 New shop delivery route created for bulk orders.');
+        }
+
+        function viewRouteAnalytics() {
+            alert('📊 Detailed route analytics dashboard opened.');
+        }
+
+        function exportRouteData() {
+            alert('📄 Route performance data exported successfully.');
+        }
+
+        // Check admin authentication on page load
+        window.addEventListener('load', function() {
+            if (!sessionStorage.getItem('adminLoggedIn')) {
+                window.location.href = '/admin-login';
+            }
+        });
+    </script>
+</body>
+</html>
