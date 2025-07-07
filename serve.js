@@ -5,7 +5,7 @@ const app = express();
 // Serve static files from the current directory
 app.use(express.static('.'));
 
-// Simple HTML page that includes our React Native Web app
+// Unified MarketPace landing page with pitch content and app demo
 app.get('/', (req, res) => {
   res.send(`
 <!DOCTYPE html>
@@ -13,7 +13,7 @@ app.get('/', (req, res) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MarketPace - Community First Marketplace</title>
+    <title>MarketPace - Delivering Opportunities | Community-First Marketplace</title>
     <style>
         body { 
             margin: 0; 
@@ -47,6 +47,136 @@ app.get('/', (req, res) => {
                 radial-gradient(circle at 40% 40%, rgba(0, 191, 255, 0.08) 0%, transparent 50%);
             pointer-events: none;
             z-index: 1;
+        }
+
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00FFFF, #8A2BE2);
+            opacity: 0.6;
+            animation: float 6s infinite ease-in-out;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
+
+        /* Header styles */
+        .hero-section {
+            text-align: center;
+            padding: 80px 20px 40px;
+            position: relative;
+            z-index: 10;
+        }
+        .hero-title {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #00FFFF, #FFFFFF, #8A2BE2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            filter: drop-shadow(0 0 10px rgba(138, 43, 226, 0.4));
+        }
+        .hero-subtitle {
+            font-size: 20px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto 30px;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 40px 0;
+        }
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 10;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #00FFFF, #8A2BE2);
+            color: white;
+        }
+        .btn-secondary {
+            background: linear-gradient(45deg, #FF6B35, #F7931E);
+            color: white;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.3);
+        }
+
+        /* Founder's message */
+        .founder-section {
+            max-width: 900px;
+            margin: 60px auto;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 10;
+        }
+        .founder-title {
+            font-size: 28px;
+            color: #00FFFF;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .founder-message {
+            font-size: 16px;
+            line-height: 1.8;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        .founder-signature {
+            text-align: right;
+            font-style: italic;
+            font-size: 18px;
+            color: #8A2BE2;
+            margin-top: 20px;
+        }
+
+        /* Section styling */
+        .section {
+            max-width: 1200px;
+            margin: 60px auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+        .section-title {
+            font-size: 32px;
+            text-align: center;
+            margin-bottom: 40px;
+            color: #00FFFF;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
         }
         
         .particles {
@@ -98,7 +228,43 @@ app.get('/', (req, res) => {
 </head>
 <body>
     <div class="particles" id="particles"></div>
-    <div id="root"></div>
+    
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <h1 class="hero-title">MarketPace</h1>
+        <p class="hero-subtitle">Delivering Opportunities. Building Local Power.</p>
+        <p style="font-size: 18px; margin-bottom: 40px; opacity: 0.8;">
+            More than a marketplace. We deliver opportunity — supporting local shops, services, and entertainers in your community. You set the pace, we make it happen!
+        </p>
+        
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="scrollToDemo()">Try MarketPace Demo</button>
+            <a href="/sponsorship" class="btn btn-secondary">Partner With Us</a>
+        </div>
+    </section>
+
+    <!-- Founder's Pledge Section -->
+    <section class="founder-section">
+        <h2 class="founder-title">A Personal Pledge from Our Founder</h2>
+        <div class="founder-message">
+            <p>I started MarketPace after years of frustration with Facebook Marketplace and other platforms designed more for data harvesting than community building.</p>
+            
+            <p>I watched talented musicians lose money to ticket scammers. I saw local businesses struggle to compete with algorithms that prioritize engagement over authenticity. I experienced firsthand how platforms designed to "connect" us often leave us feeling more isolated and manipulated.</p>
+            
+            <p>The breaking point came when I realized these platforms aren't broken — they're working exactly as designed. They extract value from our communities and give little back.</p>
+            
+            <p>MarketPace is different. We're building a platform where your data stays yours, where algorithms serve community needs instead of corporate profits, and where every transaction strengthens your neighborhood rather than depleting it.</p>
+            
+            <p>This isn't just another app. It's a movement toward community-first technology that puts people before profits and neighbors before algorithms.</p>
+        </div>
+        <div class="founder-signature">— Brooke Brown, Founder</div>
+    </section>
+
+    <!-- Interactive Demo Section -->
+    <section class="section" id="demo">
+        <h2 class="section-title">Experience MarketPace</h2>
+        <div id="root"></div>
+    </section>
     <script type="text/babel">
         const { useState } = React;
         
@@ -2375,7 +2541,24 @@ app.get('/', (req, res) => {
         
         // Initialize particles
         createParticles();
+
+        // Scroll to demo function
+        function scrollToDemo() {
+            document.getElementById('demo').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
     </script>
+
+    <!-- Footer -->
+    <footer style="background: rgba(0, 0, 0, 0.3); text-align: center; padding: 30px; font-size: 14px; color: #ccc; border-top: 1px solid rgba(255, 255, 255, 0.1); margin-top: 60px;">
+        <p>&copy; 2025 MarketPace · Delivering Opportunities, Building Local Power</p>
+        <p style="font-size: 12px; opacity: 0.7; margin-top: 10px;">
+            "Big tech platforms have taught us to rely on strangers and algorithms.<br>
+            MarketPace reminds us what happens when we invest in each other."
+        </p>
+    </footer>
 </body>
 </html>
 `);
