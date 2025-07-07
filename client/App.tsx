@@ -11,7 +11,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import Community from './src/screens/Community';
+import Community from './src/screens/Community.js';
 
 // Create a simple demo auth context with guest mode support
 interface User {
