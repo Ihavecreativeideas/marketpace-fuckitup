@@ -1113,3 +1113,6 @@ export type AdPerformanceMetric = typeof adPerformanceMetrics.$inferSelect;
 export type InsertAdPerformanceMetric = typeof adPerformanceMetrics.$inferInsert;
 export type DataPrivacySetting = typeof dataPrivacySettings.$inferSelect;
 export type InsertDataPrivacySetting = typeof dataPrivacySettings.$inferInsert;
+
+// Import sponsor-related tables from sponsorSchema
+export * from './sponsorSchema';
