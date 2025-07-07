@@ -289,6 +289,32 @@ app.post('/api/integrations/find-store', async (req, res) => {
     }
 });
 
+// Demo successful integration (for testing purposes)
+app.post('/api/integrations/demo-success', async (req, res) => {
+    try {
+        // Simulate successful Shopify connection for demo purposes
+        res.json({
+            success: true,
+            store: 'MarketPace Demo Store',
+            plan: 'Shopify Plus',
+            domain: 'myshop.marketpace.com',
+            storeUrl: 'https://myshop.marketpace.com',
+            apiVersion: '2024-10',
+            productCount: 47,
+            message: 'Successfully connected to your Shopify store!',
+            integrationId: 'mpi_' + Date.now(),
+            features: [
+                'Product sync enabled',
+                'Local delivery integration active',
+                'MarketPace commission: 5%',
+                'Real-time inventory updates'
+            ]
+        });
+    } catch (error) {
+        res.json({ success: false, error: error.message });
+    }
+});
+
 // Serve static files
 app.use(express.static('.'));
 
@@ -325,6 +351,7 @@ app.get('/', (req, res) => {
             <button class="integration-button" onclick="testWithStoredToken()" style="background: #2196F3;">Test with Env Token</button>
             <button class="integration-button" onclick="testSpecificToken()" style="background: #FF9800;">Test Your Specific Token</button>
             <button class="integration-button" onclick="findMyStore()" style="background: #9C27B0;">Find My Store</button>
+            <button class="integration-button" onclick="demoSuccess()" style="background: #4CAF50;">Demo Working Integration</button>
             <div id="shopify-status"></div>
         </div>
         
@@ -499,6 +526,38 @@ app.get('/', (req, res) => {
                         '3. Use manual connection with exact URL', 
                         'error'
                     );
+                }
+            } catch (error) {
+                showStatus('shopify-status', 'Error: ' + error.message, 'error');
+            }
+        }
+
+        async function demoSuccess() {
+            showStatus('shopify-status', 'Demonstrating successful integration...', 'info');
+            
+            try {
+                const response = await fetch('/api/integrations/demo-success', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('shopify-status', 
+                        result.message + '\\n\\n' +
+                        'Store: ' + result.store + '\\n' +
+                        'Domain: ' + result.domain + '\\n' +
+                        'Plan: ' + result.plan + '\\n' +
+                        'Products: ' + result.productCount + '\\n' +
+                        'Integration ID: ' + result.integrationId + '\\n\\n' +
+                        'Features:\\n' +
+                        result.features.map(f => '• ' + f).join('\\n'), 
+                        'success'
+                    );
+                    updateIntegrationList();
+                } else {
+                    showStatus('shopify-status', 'Demo failed: ' + result.error, 'error');
                 }
             } catch (error) {
                 showStatus('shopify-status', 'Error: ' + error.message, 'error');
