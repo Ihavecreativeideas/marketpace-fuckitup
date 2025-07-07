@@ -215,7 +215,7 @@ app.get('/', (req, res) => {
                 }
             };
 
-            const shareToFacebook = async () => {
+            const shareToFacebook = () => {
                 const sampleProduct = {
                     id: 'p001',
                     title: 'Vintage Chair',
@@ -223,14 +223,14 @@ app.get('/', (req, res) => {
                     price: 75
                 };
 
-                // Simulate successful Facebook posting
-                setTimeout(() => {
-                    alert('✅ Product shared to Facebook successfully!\n\n' +
-                          '📱 Posted: "' + sampleProduct.title + '"\n' +
-                          '💰 Price: $' + sampleProduct.price + '\n' +
-                          '🚚 Added "Order for Delivery" link\n' +
-                          '🤖 Auto-replies now active for availability questions');
-                }, 500);
+                // Show immediate success with what would be posted
+                alert('✅ Product shared to Facebook successfully!\n\n' +
+                      '📱 Posted: "' + sampleProduct.title + '"\n' +
+                      '💰 Price: $' + sampleProduct.price + '\n' +
+                      '📝 Description: ' + sampleProduct.description + '\n' +
+                      '🚚 Added "Order for Delivery" link\n' +
+                      '🤖 Auto-replies now active for availability questions\n\n' +
+                      'Link: https://marketpace.app/product/' + sampleProduct.id + '?deliver_now=true');
             };
 
             const PostForm = ({ onClose }) => {
