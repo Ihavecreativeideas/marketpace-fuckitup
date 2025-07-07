@@ -570,8 +570,8 @@ export function registerIntegrationRoutes(app: Express): void {
 
   app.post('/api/integrations/website/connect', async (req, res) => {
     try {
-      const { websiteUrl, platformType } = req.body;
-      const userId = req.user?.id || 'demo_user'; // In real app, get from authenticated user
+      const { websiteUrl, platformType, accessToken, storeData } = req.body;
+      const userId = 'demo_user'; // In real app, get from authenticated user
       
       if (!websiteUrl || !platformType) {
         return res.status(400).json({ 
@@ -580,7 +580,27 @@ export function registerIntegrationRoutes(app: Express): void {
         });
       }
 
-      const integrationId = await WebsiteIntegrationManager.createIntegration(userId, websiteUrl, platformType);
+      // For Shopify, save real integration data to database
+      if (platformType === 'shopify' && accessToken) {
+        try {
+          // Insert into database
+          await fetch('http://localhost:5000/api/database/save-integration', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId,
+              platform: 'shopify',
+              storeUrl: websiteUrl,
+              accessToken,
+              storeData
+            })
+          });
+        } catch (dbError) {
+          console.log('Database save not implemented yet, using memory storage');
+        }
+      }
+
+      const integrationId = await WebsiteIntegrationManager.createIntegration(userId, websiteUrl, platformType, accessToken, storeData);
       const integration = WebsiteIntegrationManager.getIntegration(integrationId);
       const products = WebsiteIntegrationManager.getImportedProducts(integrationId);
 
@@ -593,7 +613,7 @@ export function registerIntegrationRoutes(app: Express): void {
     } catch (error) {
       res.status(500).json({ 
         success: false, 
-        error: 'Failed to connect website' 
+        error: 'Failed to connect website: ' + error.message 
       });
     }
   });

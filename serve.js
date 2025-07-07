@@ -27,7 +27,10 @@ app.get('/', (req, res) => {
     <script type="text/babel">
         const { useState } = React;
         
+        console.log('React and ReactDOM loaded:', typeof React, typeof ReactDOM);
+        
         const MarketPaceLanding = () => {
+            console.log('MarketPaceLanding component rendering');
             const [currentStep, setCurrentStep] = useState('landing');
             const [currentFilter, setCurrentFilter] = useState('all');
             const [showPostForm, setShowPostForm] = useState(false);
@@ -178,29 +181,19 @@ app.get('/', (req, res) => {
 
             // User-friendly Shopify integration
             const connectShopify = async () => {
-                // Step 1: Get store URL
-                const storeUrl = prompt('Enter your Shopify store URL:\n(e.g., https://your-store.myshopify.com)');
-                
+                const storeUrl = prompt('Enter your Shopify store URL (e.g., https://your-store.myshopify.com):');
                 if (!storeUrl) {
                     alert('Store URL is required for Shopify integration');
                     return;
                 }
                 
-                // Step 2: Get access token
-                const accessToken = prompt(`Enter your Shopify Private App Access Token:\n\n` +
-                    `To get this:\n` +
-                    `1. Go to your Shopify Admin\n` +
-                    `2. Settings → Apps and sales channels\n` +
-                    `3. Develop apps → Create an app\n` +
-                    `4. Configure Admin API scopes (read_products)\n` +
-                    `5. Install app → Generate access token`);
-                
+                const accessToken = prompt('Enter your Shopify Private App Access Token. To get this: Go to Shopify Admin > Settings > Apps > Develop apps > Create app > Generate token');
                 if (!accessToken) {
                     alert('Access token is required for Shopify integration');
                     return;
                 }
                 
-                alert('🔄 Connecting to your Shopify store...\nThis may take a few seconds.');
+                alert('Connecting to your Shopify store...');
                 
                 try {
                     const response = await fetch('/api/integrations/website/test', {
@@ -216,29 +209,13 @@ app.get('/', (req, res) => {
                     const result = await response.json();
                     
                     if (result.success) {
-                        alert(`✅ Shopify Store Connected Successfully!\n\n` +
-                              `🏪 Store: ${result.store}\n` +
-                              `📦 Plan: ${result.plan}\n` +
-                              `🛒 Products: ${result.productCount} imported\n` +
-                              `🌐 Domain: ${result.domain}\n\n` +
-                              `Your Shopify products are now available for local delivery through MarketPace!\n\n` +
-                              `Next: Your customers can choose MarketPace delivery at checkout.`);
-                        
-                        // Save credentials for future use
-                        localStorage.setItem('shopify_store_url', storeUrl);
+                        alert('Shopify Connected! Store: ' + result.store + ', Products: ' + result.productCount + ', Plan: ' + result.plan);
                         localStorage.setItem('shopify_connected', 'true');
-                        
                     } else {
-                        alert(`❌ Shopify Connection Failed:\n\n${result.error}\n\n` +
-                              `Common solutions:\n` +
-                              `• Check your store URL format\n` +
-                              `• Verify your access token\n` +
-                              `• Ensure app has read_products permission\n\n` +
-                              `Need help? Contact MarketPace support.`);
+                        alert('Connection Failed: ' + result.error);
                     }
                 } catch (error) {
-                    alert(`❌ Connection Error: ${error.message}\n\n` +
-                          `Please check your internet connection and try again.`);
+                    alert('Error: ' + error.message);
                 }
             };
 
@@ -2288,7 +2265,14 @@ app.get('/', (req, res) => {
             );
         };
         
-        ReactDOM.render(<MarketPaceLanding />, document.getElementById('root'));
+        try {
+            console.log('About to render MarketPaceLanding');
+            ReactDOM.render(<MarketPaceLanding />, document.getElementById('root'));
+            console.log('Render successful');
+        } catch (error) {
+            console.error('Render error:', error);
+            document.getElementById('root').innerHTML = '<h1>Loading Error: ' + error.message + '</h1>';
+        }
     </script>
 </body>
 </html>

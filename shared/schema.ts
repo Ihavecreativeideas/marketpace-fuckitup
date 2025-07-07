@@ -372,6 +372,52 @@ export const driverTips = pgTable("driver_tips", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Platform Integrations for e-commerce stores
+export const platformIntegrations = pgTable("platform_integrations", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  platform: varchar("platform").notNull(), // shopify, woocommerce, etsy, tiktok_shop, facebook_shop, etc.
+  storeName: varchar("store_name"),
+  storeUrl: varchar("store_url").notNull(),
+  accessToken: text("access_token"), // Encrypted API credentials
+  refreshToken: text("refresh_token"),
+  secretKey: text("secret_key"),
+  shopId: varchar("shop_id"),
+  lastSync: timestamp("last_sync"),
+  syncStatus: varchar("sync_status").default("connected"), // connected, syncing, error, disconnected
+  productCount: integer("product_count").default(0),
+  totalRevenue: decimal("total_revenue", { precision: 10, scale: 2 }).default("0.00"),
+  syncErrors: jsonb("sync_errors"), // Error logs from sync attempts
+  webhookUrl: varchar("webhook_url"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Imported products from platform integrations
+export const importedProducts = pgTable("imported_products", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  integrationId: integer("integration_id").references(() => platformIntegrations.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  externalId: varchar("external_id").notNull(), // Product ID from external platform
+  name: varchar("name", { length: 300 }).notNull(),
+  description: text("description"),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  compareAtPrice: decimal("compare_at_price", { precision: 10, scale: 2 }),
+  images: jsonb("images"), // Array of image URLs
+  category: varchar("category"),
+  tags: jsonb("tags"), // Array of tags
+  inventory: integer("inventory").default(0),
+  sku: varchar("sku"),
+  weight: decimal("weight", { precision: 8, scale: 2 }),
+  dimensions: jsonb("dimensions"), // {length, width, height}
+  isActive: boolean("is_active").default(true),
+  isAvailableForDelivery: boolean("is_available_for_delivery").default(true),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  lastSynced: timestamp("last_synced").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // ============ REVENUE SYSTEM TABLES ============
 
 // User wallet for in-app credits
