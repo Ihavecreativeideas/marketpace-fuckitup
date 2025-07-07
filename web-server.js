@@ -114,6 +114,37 @@ app.post('/api/integrations/tickets/connect', (req, res) => {
   }, 1000);
 });
 
+// Sponsorship routes
+app.get('/sponsorship', (req, res) => {
+  try {
+    const pitchContent = fs.readFileSync('pitch-page.js', 'utf8');
+    const sponsorshipMatch = pitchContent.match(/app\.get\('\/sponsorship', \(req, res\) => \{[\s\S]*?res\.send\(`([\s\S]*?)`\);[\s\S]*?\}\);/);
+    if (sponsorshipMatch) {
+      res.send(sponsorshipMatch[1]);
+    } else {
+      res.redirect('/');
+    }
+  } catch (error) {
+    console.error('Error serving sponsorship page:', error);
+    res.redirect('/');
+  }
+});
+
+app.get('/sponsorship/success', (req, res) => {
+  try {
+    const pitchContent = fs.readFileSync('pitch-page.js', 'utf8');
+    const successMatch = pitchContent.match(/app\.get\('\/sponsorship\/success', \(req, res\) => \{[\s\S]*?res\.send\(`([\s\S]*?)`\);[\s\S]*?\}\);/);
+    if (successMatch) {
+      res.send(successMatch[1]);
+    } else {
+      res.redirect('/');
+    }
+  } catch (error) {
+    console.error('Error serving sponsorship success page:', error);
+    res.redirect('/');
+  }
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy', timestamp: new Date().toISOString() });
