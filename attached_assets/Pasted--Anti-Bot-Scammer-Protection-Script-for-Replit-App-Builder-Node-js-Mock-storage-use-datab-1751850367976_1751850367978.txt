@@ -1,0 +1,98 @@
+// Anti-Bot & Scammer Protection Script for Replit App Builder (Node.js)
+
+// Mock storage (use database in real deployment)
+let users = {}; // userId => userData
+let reports = {}; // userId => number of reports
+let trustScores = {}; // userId => score
+let messages = {}; // userId => recent actions
+
+// Constants
+const MAX_ACTIONS_PER_MINUTE = 60;
+const MIN_TIME_BETWEEN_ACTIONS_MS = 500;
+const REPORT_THRESHOLD = 3;
+const TRUST_SCORE_DEFAULT = 50;
+
+// Utility: Log action with timestamp
+function logAction(userId) {
+  const now = Date.now();
+  if (!messages[userId]) messages[userId] = [];
+  messages[userId].push(now);
+  messages[userId] = messages[userId].filter(ts => now - ts <= 60000); // Keep only last 1 minute
+}
+
+// Detect Bot-Like Behavior
+function isBot(userId) {
+  const times = messages[userId] || [];
+  const rapidActions = times.filter((t, i, arr) => i > 0 && (t - arr[i - 1]) < MIN_TIME_BETWEEN_ACTIONS_MS);
+  return (times.length > MAX_ACTIONS_PER_MINUTE || rapidActions.length > 5);
+}
+
+// Trust Score Calculation
+function initializeTrustScore(userId) {
+  trustScores[userId] = TRUST_SCORE_DEFAULT;
+}
+
+function adjustTrustScore(userId, delta) {
+  if (!trustScores[userId]) initializeTrustScore(userId);
+  trustScores[userId] += delta;
+}
+
+function getTrustScore(userId) {
+  return trustScores[userId] || TRUST_SCORE_DEFAULT;
+}
+
+// Reporting System
+function reportUser(reportedId) {
+  if (!reports[reportedId]) reports[reportedId] = 0;
+  reports[reportedId]++;
+  adjustTrustScore(reportedId, -10);
+  if (reports[reportedId] >= REPORT_THRESHOLD) {
+    flagForReview(reportedId);
+  }
+}
+
+function flagForReview(userId) {
+  console.warn(`User ${userId} flagged for review.`);
+  users[userId].status = "under_review";
+}
+
+// Phone & Email Verification Flags
+function verifyEmail(userId) {
+  users[userId].emailVerified = true;
+  adjustTrustScore(userId, 5);
+}
+
+function verifyPhone(userId) {
+  users[userId].phoneVerified = true;
+  adjustTrustScore(userId, 10);
+}
+
+// Check if User is Allowed to Post
+function canPost(userId) {
+  const trust = getTrustScore(userId);
+  const verified = users[userId]?.emailVerified && users[userId]?.phoneVerified;
+  return trust > 30 && verified;
+}
+
+// Example: Simulate posting
+function tryToPost(userId) {
+  logAction(userId);
+  if (isBot(userId)) {
+    console.log(`User ${userId} blocked due to bot-like behavior.`);
+    return false;
+  }
+  if (!canPost(userId)) {
+    console.log(`User ${userId} can't post. Trust score too low or not verified.`);
+    return false;
+  }
+  console.log(`User ${userId} posted successfully.`);
+  return true;
+}
+
+// --- Example Usage ---
+users['user123'] = { id: 'user123', emailVerified: false, phoneVerified: false };
+initializeTrustScore('user123');
+verifyEmail('user123');
+verifyPhone('user123');
+
+tryToPost('user123'); // Should work after both verifications

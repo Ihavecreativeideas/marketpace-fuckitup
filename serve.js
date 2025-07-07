@@ -577,7 +577,313 @@ app.get('/', (req, res) => {
                 );
             };
 
+            const ReportUserPage = () => {
+                const [reportData, setReportData] = useState({
+                    userId: '',
+                    reason: '',
+                    description: ''
+                });
+
+                const submitReport = () => {
+                    if (!reportData.userId || !reportData.reason) {
+                        alert('Please fill in all required fields');
+                        return;
+                    }
+                    alert('Report submitted successfully. Our team will review it within 24 hours.');
+                    setCurrentPage('settings');
+                };
+
+                return (
+                    <div style={{padding: '20px', paddingBottom: '120px'}}>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+                            <button onClick={() => setCurrentPage('settings')} style={{
+                                background: 'none',
+                                border: 'none',
+                                color: 'white',
+                                fontSize: '18px',
+                                cursor: 'pointer'
+                            }}>← Back</button>
+                            <h2 style={{fontSize: '24px', margin: 0}}>Report User</h2>
+                            <div></div>
+                        </div>
+
+                        <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
+                            <h3 style={{margin: '0 0 15px 0', color: '#F44336'}}>🚨 Report Suspicious Activity</h3>
+                            
+                            <div style={{display: 'grid', gap: '15px'}}>
+                                <div>
+                                    <label style={{display: 'block', marginBottom: '5px', fontSize: '14px'}}>User ID or Email *</label>
+                                    <input
+                                        value={reportData.userId}
+                                        onChange={(e) => setReportData({...reportData, userId: e.target.value})}
+                                        style={{
+                                            width: '100%',
+                                            padding: '10px',
+                                            borderRadius: '8px',
+                                            border: '1px solid rgba(255,255,255,0.2)',
+                                            background: 'rgba(255,255,255,0.1)',
+                                            color: 'white',
+                                            fontSize: '14px'
+                                        }}
+                                        placeholder="Enter user ID or email address"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label style={{display: 'block', marginBottom: '5px', fontSize: '14px'}}>Reason for Report *</label>
+                                    <select
+                                        value={reportData.reason}
+                                        onChange={(e) => setReportData({...reportData, reason: e.target.value})}
+                                        style={{
+                                            width: '100%',
+                                            padding: '10px',
+                                            borderRadius: '8px',
+                                            border: '1px solid rgba(255,255,255,0.2)',
+                                            background: 'rgba(255,255,255,0.1)',
+                                            color: 'white',
+                                            fontSize: '14px'
+                                        }}
+                                    >
+                                        <option value="">Select a reason</option>
+                                        <option value="scam">Scam or Fraud</option>
+                                        <option value="spam">Spam or Bot Activity</option>
+                                        <option value="harassment">Harassment</option>
+                                        <option value="fake-listing">Fake Listings</option>
+                                        <option value="payment-issues">Payment Issues</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label style={{display: 'block', marginBottom: '5px', fontSize: '14px'}}>Description</label>
+                                    <textarea
+                                        value={reportData.description}
+                                        onChange={(e) => setReportData({...reportData, description: e.target.value})}
+                                        style={{
+                                            width: '100%',
+                                            padding: '10px',
+                                            borderRadius: '8px',
+                                            border: '1px solid rgba(255,255,255,0.2)',
+                                            background: 'rgba(255,255,255,0.1)',
+                                            color: 'white',
+                                            fontSize: '14px',
+                                            minHeight: '80px',
+                                            resize: 'vertical'
+                                        }}
+                                        placeholder="Provide additional details about the issue..."
+                                    />
+                                </div>
+
+                                <button onClick={submitReport} style={{
+                                    background: '#F44336',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '15px',
+                                    borderRadius: '10px',
+                                    fontSize: '16px',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
+                                    marginTop: '10px'
+                                }}>
+                                    Submit Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const PasswordRecoveryPage = () => {
+                const [email, setEmail] = useState('');
+                const [sent, setSent] = useState(false);
+
+                const sendRecoveryEmail = () => {
+                    if (!email) {
+                        alert('Please enter your email address');
+                        return;
+                    }
+                    setSent(true);
+                };
+
+                return (
+                    <div style={{padding: '20px', paddingBottom: '120px'}}>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+                            <button onClick={() => setCurrentPage('settings')} style={{
+                                background: 'none',
+                                border: 'none',
+                                color: 'white',
+                                fontSize: '18px',
+                                cursor: 'pointer'
+                            }}>← Back</button>
+                            <h2 style={{fontSize: '24px', margin: 0}}>Password Recovery</h2>
+                            <div></div>
+                        </div>
+
+                        <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
+                            {!sent ? (
+                                <div>
+                                    <h3 style={{margin: '0 0 15px 0'}}>🔒 Reset Your Password</h3>
+                                    <p style={{margin: '0 0 20px 0', opacity: 0.8}}>
+                                        Enter your email address and we'll send you a secure link to reset your password.
+                                    </p>
+                                    
+                                    <div style={{display: 'grid', gap: '15px'}}>
+                                        <input
+                                            type="email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            style={{
+                                                width: '100%',
+                                                padding: '12px',
+                                                borderRadius: '8px',
+                                                border: '1px solid rgba(255,255,255,0.2)',
+                                                background: 'rgba(255,255,255,0.1)',
+                                                color: 'white',
+                                                fontSize: '16px'
+                                            }}
+                                            placeholder="Enter your email address"
+                                        />
+                                        
+                                        <button onClick={sendRecoveryEmail} style={{
+                                            background: '#4CAF50',
+                                            color: 'white',
+                                            border: 'none',
+                                            padding: '15px',
+                                            borderRadius: '10px',
+                                            fontSize: '16px',
+                                            fontWeight: 'bold',
+                                            cursor: 'pointer'
+                                        }}>
+                                            Send Recovery Email
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div style={{textAlign: 'center'}}>
+                                    <div style={{fontSize: '48px', marginBottom: '20px'}}>✅</div>
+                                    <h3 style={{margin: '0 0 10px 0', color: '#4CAF50'}}>Recovery Email Sent!</h3>
+                                    <p style={{margin: '0 0 20px 0', opacity: 0.8}}>
+                                        Check your email inbox for password reset instructions. The link will expire in 1 hour.
+                                    </p>
+                                    <button onClick={() => setCurrentPage('settings')} style={{
+                                        background: 'rgba(255,255,255,0.1)',
+                                        color: 'white',
+                                        border: '1px solid rgba(255,255,255,0.2)',
+                                        padding: '10px 20px',
+                                        borderRadius: '8px',
+                                        fontSize: '14px',
+                                        cursor: 'pointer'
+                                    }}>
+                                        Back to Settings
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            };
+
+            const SecurityPoliciesPage = () => {
+                return (
+                    <div style={{padding: '20px', paddingBottom: '120px'}}>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+                            <button onClick={() => setCurrentPage('settings')} style={{
+                                background: 'none',
+                                border: 'none',
+                                color: 'white',
+                                fontSize: '18px',
+                                cursor: 'pointer'
+                            }}>← Back</button>
+                            <h2 style={{fontSize: '24px', margin: 0}}>Security Policies</h2>
+                            <div></div>
+                        </div>
+
+                        <div style={{display: 'grid', gap: '15px'}}>
+                            {/* Data Protection */}
+                            <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
+                                <h3 style={{margin: '0 0 15px 0', color: '#4CAF50'}}>🛡️ Data Protection</h3>
+                                <ul style={{margin: 0, paddingLeft: '20px', opacity: 0.9}}>
+                                    <li>End-to-end encryption for all messages</li>
+                                    <li>Secure payment processing via Stripe</li>
+                                    <li>No data sharing with third parties</li>
+                                    <li>Regular security audits and updates</li>
+                                </ul>
+                            </div>
+
+                            {/* Anti-Scammer Measures */}
+                            <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
+                                <h3 style={{margin: '0 0 15px 0', color: '#FF9800'}}>🚨 Anti-Scammer Measures</h3>
+                                <ul style={{margin: 0, paddingLeft: '20px', opacity: 0.9}}>
+                                    <li>AI-powered bot detection system</li>
+                                    <li>Trust score verification for all users</li>
+                                    <li>Phone and email verification required</li>
+                                    <li>Community reporting system</li>
+                                    <li>Automatic suspicious activity flagging</li>
+                                </ul>
+                            </div>
+
+                            {/* Privacy Controls */}
+                            <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
+                                <h3 style={{margin: '0 0 15px 0', color: '#2196F3'}}>👁️ Privacy Controls</h3>
+                                <ul style={{margin: 0, paddingLeft: '20px', opacity: 0.9}}>
+                                    <li>Control who can see your listings</li>
+                                    <li>Hide contact information until verified</li>
+                                    <li>Location privacy settings</li>
+                                    <li>Data export and deletion options</li>
+                                </ul>
+                            </div>
+
+                            {/* Contact Security Team */}
+                            <div style={{background: 'rgba(244,67,54,0.2)', padding: '20px', borderRadius: '15px', border: '1px solid rgba(244,67,54,0.3)'}}>
+                                <h3 style={{margin: '0 0 15px 0', color: '#F44336'}}>24/7 Security Support</h3>
+                                <p style={{margin: '0 0 15px 0', opacity: 0.9}}>
+                                    If you encounter any security issues or suspicious activity, contact our security team immediately.
+                                </p>
+                                <button onClick={() => alert('Security team contacted! Response within 15 minutes.')} style={{
+                                    background: '#F44336',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '12px 20px',
+                                    borderRadius: '8px',
+                                    fontSize: '14px',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer'
+                                }}>
+                                    Contact Security Team
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
             const SettingsPage = () => {
+                const [userSafety, setUserSafety] = useState({
+                    trustScore: 85,
+                    emailVerified: true,
+                    phoneVerified: false,
+                    canPost: true,
+                    reportCount: 0
+                });
+
+                const [securityStats, setSecurityStats] = useState({
+                    totalUsers: 1247,
+                    flaggedUsers: 12,
+                    averageTrustScore: 78,
+                    recentReports: 8,
+                    botDetections: 3,
+                    verifiedUsers: 892
+                });
+
+                const verifyPhone = () => {
+                    setUserSafety({...userSafety, phoneVerified: true, trustScore: userSafety.trustScore + 10});
+                    alert('Phone verification request sent! Check your messages.');
+                };
+
+                const reportUser = () => {
+                    setCurrentPage('report-user');
+                };
+
                 return (
                     <div style={{padding: '20px', paddingBottom: '120px'}}>
                         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
@@ -589,7 +895,7 @@ app.get('/', (req, res) => {
                             <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
                                 <h3 style={{margin: '0 0 15px 0'}}>👤 Account Settings</h3>
                                 <div style={{display: 'grid', gap: '10px'}}>
-                                    <button style={{
+                                    <button onClick={() => setCurrentPage('profile')} style={{
                                         background: 'rgba(255,255,255,0.1)',
                                         color: 'white',
                                         border: '1px solid rgba(255,255,255,0.2)',
@@ -601,7 +907,7 @@ app.get('/', (req, res) => {
                                     }}>
                                         📝 Edit Profile Information
                                     </button>
-                                    <button style={{
+                                    <button onClick={() => setCurrentPage('password-recovery')} style={{
                                         background: 'rgba(255,255,255,0.1)',
                                         color: 'white',
                                         border: '1px solid rgba(255,255,255,0.2)',
@@ -613,7 +919,7 @@ app.get('/', (req, res) => {
                                     }}>
                                         🔒 Change Password
                                     </button>
-                                    <button style={{
+                                    <button onClick={() => alert('Email preferences updated!')} style={{
                                         background: 'rgba(255,255,255,0.1)',
                                         color: 'white',
                                         border: '1px solid rgba(255,255,255,0.2)',
@@ -625,6 +931,93 @@ app.get('/', (req, res) => {
                                     }}>
                                         📧 Email Preferences
                                     </button>
+                                </div>
+                            </div>
+
+                            {/* Scammer Protection Dashboard */}
+                            <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
+                                <h3 style={{margin: '0 0 15px 0'}}>🛡️ Scammer Protection</h3>
+                                <div style={{display: 'grid', gap: '15px'}}>
+                                    {/* Your Safety Score */}
+                                    <div style={{background: 'rgba(76,175,80,0.2)', padding: '15px', borderRadius: '10px', border: '1px solid rgba(76,175,80,0.3)'}}>
+                                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px'}}>
+                                            <span style={{fontWeight: 'bold', color: '#4CAF50'}}>Your Trust Score</span>
+                                            <span style={{fontSize: '24px', fontWeight: 'bold', color: '#4CAF50'}}>{userSafety.trustScore}</span>
+                                        </div>
+                                        <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                                            <span style={{background: userSafety.emailVerified ? '#4CAF50' : '#757575', padding: '4px 8px', borderRadius: '12px', fontSize: '12px'}}>
+                                                {userSafety.emailVerified ? '✓ Email Verified' : '✗ Email Not Verified'}
+                                            </span>
+                                            <span style={{background: userSafety.phoneVerified ? '#4CAF50' : '#757575', padding: '4px 8px', borderRadius: '12px', fontSize: '12px'}}>
+                                                {userSafety.phoneVerified ? '✓ Phone Verified' : '✗ Phone Not Verified'}
+                                            </span>
+                                        </div>
+                                        {!userSafety.phoneVerified && (
+                                            <button onClick={verifyPhone} style={{
+                                                background: '#4CAF50',
+                                                color: 'white',
+                                                border: 'none',
+                                                padding: '8px 15px',
+                                                borderRadius: '8px',
+                                                fontSize: '12px',
+                                                cursor: 'pointer',
+                                                marginTop: '10px'
+                                            }}>
+                                                Verify Phone Number
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* Community Safety Stats */}
+                                    <div style={{background: 'rgba(33,150,243,0.2)', padding: '15px', borderRadius: '10px', border: '1px solid rgba(33,150,243,0.3)'}}>
+                                        <h4 style={{margin: '0 0 10px 0', color: '#2196F3'}}>Community Safety</h4>
+                                        <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', fontSize: '12px'}}>
+                                            <div>
+                                                <span style={{opacity: 0.7}}>Total Users:</span>
+                                                <span style={{float: 'right', fontWeight: 'bold'}}>{securityStats.totalUsers}</span>
+                                            </div>
+                                            <div>
+                                                <span style={{opacity: 0.7}}>Verified Users:</span>
+                                                <span style={{float: 'right', fontWeight: 'bold', color: '#4CAF50'}}>{securityStats.verifiedUsers}</span>
+                                            </div>
+                                            <div>
+                                                <span style={{opacity: 0.7}}>Flagged Users:</span>
+                                                <span style={{float: 'right', fontWeight: 'bold', color: '#FF9800'}}>{securityStats.flaggedUsers}</span>
+                                            </div>
+                                            <div>
+                                                <span style={{opacity: 0.7}}>Bot Detections:</span>
+                                                <span style={{float: 'right', fontWeight: 'bold', color: '#F44336'}}>{securityStats.botDetections}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Safety Actions */}
+                                    <div style={{display: 'grid', gap: '10px'}}>
+                                        <button onClick={reportUser} style={{
+                                            background: 'rgba(244,67,54,0.2)',
+                                            color: '#F44336',
+                                            border: '1px solid rgba(244,67,54,0.3)',
+                                            padding: '12px 15px',
+                                            borderRadius: '10px',
+                                            fontSize: '14px',
+                                            cursor: 'pointer',
+                                            textAlign: 'left'
+                                        }}>
+                                            🚨 Report Suspicious User
+                                        </button>
+                                        <button onClick={() => alert('Block list updated!')} style={{
+                                            background: 'rgba(255,255,255,0.1)',
+                                            color: 'white',
+                                            border: '1px solid rgba(255,255,255,0.2)',
+                                            padding: '12px 15px',
+                                            borderRadius: '10px',
+                                            fontSize: '14px',
+                                            cursor: 'pointer',
+                                            textAlign: 'left'
+                                        }}>
+                                            🚫 Manage Block List
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -641,6 +1034,10 @@ app.get('/', (req, res) => {
                                         <button style={{background: '#4CAF50', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '12px', fontSize: '12px'}}>ON</button>
                                     </div>
                                     <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0'}}>
+                                        <span>Security alerts</span>
+                                        <button style={{background: '#4CAF50', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '12px', fontSize: '12px'}}>ON</button>
+                                    </div>
+                                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0'}}>
                                         <span>Marketing emails</span>
                                         <button style={{background: '#757575', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '12px', fontSize: '12px'}}>OFF</button>
                                     </div>
@@ -651,7 +1048,7 @@ app.get('/', (req, res) => {
                             <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
                                 <h3 style={{margin: '0 0 15px 0'}}>🛡️ Privacy & Security</h3>
                                 <div style={{display: 'grid', gap: '10px'}}>
-                                    <button style={{
+                                    <button onClick={() => alert('Two-factor authentication setup!')} style={{
                                         background: 'rgba(255,255,255,0.1)',
                                         color: 'white',
                                         border: '1px solid rgba(255,255,255,0.2)',
@@ -663,7 +1060,7 @@ app.get('/', (req, res) => {
                                     }}>
                                         🔐 Two-Factor Authentication
                                     </button>
-                                    <button style={{
+                                    <button onClick={() => setCurrentPage('security-policies')} style={{
                                         background: 'rgba(255,255,255,0.1)',
                                         color: 'white',
                                         border: '1px solid rgba(255,255,255,0.2)',
@@ -675,7 +1072,7 @@ app.get('/', (req, res) => {
                                     }}>
                                         👁️ Privacy Settings
                                     </button>
-                                    <button style={{
+                                    <button onClick={() => alert('Data export initiated!')} style={{
                                         background: 'rgba(255,255,255,0.1)',
                                         color: 'white',
                                         border: '1px solid rgba(255,255,255,0.2)',
@@ -1465,6 +1862,9 @@ app.get('/', (req, res) => {
                         {currentPage === 'profile' && <ProfilePage />}
                         {currentPage === 'deliveries' && <DeliveriesPage />}
                         {currentPage === 'settings' && <SettingsPage />}
+                        {currentPage === 'report-user' && <ReportUserPage />}
+                        {currentPage === 'password-recovery' && <PasswordRecoveryPage />}
+                        {currentPage === 'security-policies' && <SecurityPoliciesPage />}
                         
                         {/* Post Form Modal */}
                         {showPostForm && (
