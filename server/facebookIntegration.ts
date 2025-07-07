@@ -194,7 +194,7 @@ class FacebookMarketingManager {
 
 export function registerFacebookRoutes(app: Express): void {
   // Connect Facebook account
-  app.post('/api/facebook/connect', async (req: Request, res: Response) => {
+  app.post('/api/facebook/connect', async (req: any, res: any) => {
     try {
       const { accessToken } = req.body;
       const userId = 'demo_user'; // In real app, get from session
@@ -215,7 +215,7 @@ export function registerFacebookRoutes(app: Express): void {
   });
 
   // Post product to Facebook
-  app.post('/api/facebook/post', async (req: Request, res: Response) => {
+  app.post('/api/facebook/post', async (req: any, res: any) => {
     try {
       const { productData } = req.body;
       const userId = 'demo_user'; // In real app, get from session
@@ -237,7 +237,7 @@ export function registerFacebookRoutes(app: Express): void {
   });
 
   // Facebook webhook endpoint
-  app.post('/api/facebook/webhook', (req: Request, res: Response) => {
+  app.post('/api/facebook/webhook', (req: any, res: any) => {
     try {
       const webhookData = req.body;
       
