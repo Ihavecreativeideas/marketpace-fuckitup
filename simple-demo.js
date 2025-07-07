@@ -18,7 +18,8 @@ app.post('/api/integrations/website/test', async (req, res) => {
             });
 
             if (!response.ok) {
-                return res.json({ success: false, error: `HTTP ${response.status}: ${response.statusText}` });
+                const errorText = await response.text();
+                return res.json({ success: false, error: `HTTP ${response.status}: ${errorText}` });
             }
 
             const data = await response.json();
@@ -47,6 +48,62 @@ app.post('/api/integrations/website/test', async (req, res) => {
         } else {
             res.json({ success: false, error: 'Invalid platform or missing access token' });
         }
+    } catch (error) {
+        res.json({ success: false, error: error.message });
+    }
+});
+
+// Test with stored token
+app.post('/api/integrations/test-stored', async (req, res) => {
+    try {
+        const accessToken = process.env.SHOPIFY_ACCESS_TOKEN;
+        if (!accessToken) {
+            return res.json({ success: false, error: 'No access token in environment' });
+        }
+
+        // Try multiple potential store URLs and API versions
+        const storeUrls = [
+            "https://myshop-marketpace-com.myshopify.com",
+            "https://marketpace-com.myshopify.com",
+            "https://myshop-marketpace.myshopify.com"
+        ];
+
+        const apiVersions = ["2023-10", "2024-01", "2024-04"];
+
+        for (const storeUrl of storeUrls) {
+            for (const apiVersion of apiVersions) {
+                try {
+                    const response = await fetch(`${storeUrl}/admin/api/${apiVersion}/shop.json`, {
+                        headers: {
+                            'X-Shopify-Access-Token': accessToken,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        return res.json({
+                            success: true,
+                            store: data.shop?.name || 'Unknown Store',
+                            plan: data.shop?.plan_name || 'Unknown Plan',
+                            domain: data.shop?.domain || data.shop?.myshopify_domain,
+                            tokenUsed: accessToken.substring(0, 10) + '...',
+                            storeUrl: storeUrl,
+                            apiVersion: apiVersion
+                        });
+                    }
+                } catch (e) {
+                    continue;
+                }
+            }
+        }
+
+        return res.json({ 
+            success: false, 
+            error: 'Could not connect to any store URL with the provided token. Please verify your store URL and access token are correct.',
+            tokenUsed: accessToken.substring(0, 10) + '...',
+            attemptedUrls: storeUrls
+        });
     } catch (error) {
         res.json({ success: false, error: error.message });
     }
@@ -85,6 +142,7 @@ app.get('/', (req, res) => {
             <h2>🛒 Shopify Integration</h2>
             <p>Connect your Shopify store to MarketPace for local delivery services.</p>
             <button class="integration-button" onclick="connectShopify()">Connect Shopify Store</button>
+            <button class="integration-button" onclick="testWithStoredToken()" style="background: #2196F3;">Test with Your Token</button>
             <div id="shopify-status"></div>
         </div>
         
@@ -148,6 +206,35 @@ app.get('/', (req, res) => {
                     updateIntegrationList();
                 } else {
                     showStatus('shopify-status', 'Connection Failed: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showStatus('shopify-status', 'Error: ' + error.message, 'error');
+            }
+        }
+
+        async function testWithStoredToken() {
+            showStatus('shopify-status', 'Testing with stored access token...', 'info');
+            
+            try {
+                const response = await fetch('/api/integrations/test-stored', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('shopify-status', 
+                        'Store Connection Successful!\\n' +
+                        'Store: ' + result.store + '\\n' +
+                        'Plan: ' + result.plan + '\\n' +
+                        'Domain: ' + result.domain + '\\n' +
+                        'Token: ' + result.tokenUsed, 
+                        'success'
+                    );
+                    updateIntegrationList();
+                } else {
+                    showStatus('shopify-status', 'Connection Test Failed: ' + result.error, 'error');
                 }
             } catch (error) {
                 showStatus('shopify-status', 'Error: ' + error.message, 'error');
