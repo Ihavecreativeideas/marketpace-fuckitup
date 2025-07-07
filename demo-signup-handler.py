@@ -15,7 +15,7 @@ from twilio.rest import Client
 TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
 TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
-TWILIO_MESSAGING_SERVICE_SID = os.environ.get("TWILIO_MESSAGING_SERVICE_SID", "MGdd6a8f807bac2edc217477af4f57f856")
+TWILIO_MESSAGING_SERVICE_SID = os.environ.get("TWILIO_MESSAGING_SERVICE_SID")
 
 class DemoSignupManager:
     def __init__(self, db_path="demo_users.db"):
@@ -128,7 +128,7 @@ class DemoSignupManager:
             try:
                 formatted_phone = self.format_phone_number(user_data['phone'])
                 
-                welcome_sms = f"🎉 Welcome to MarketPace, {user_data['fullName'].split()[0]}! Your demo access is ready. You're now part of the movement to build stronger communities through local commerce. We'll text you when MarketPace goes live in {user_data['city']}! Reply STOP to opt out anytime. - The MarketPace Team"
+                welcome_sms = f"Welcome to MarketPace, {user_data['fullName'].split()[0]}! Your demo access is ready. You're part of building stronger communities through local commerce. We'll text you when MarketPace goes live in {user_data['city']}! Reply STOP to opt out. - MarketPace Team"
                 
                 # Use Messaging Service SID for better delivery
                 message_params = {
