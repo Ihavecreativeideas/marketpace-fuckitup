@@ -11,12 +11,21 @@ MarketPace is a React Native mobile application that prioritizes community empow
 ## System Architecture
 
 ### Frontend Architecture
+**Main MarketPace App (iOS/Android):**
 - **React Native** with Expo framework for cross-platform mobile development
 - **React Navigation** for routing with stack and tab navigation patterns
 - **React Query (TanStack Query)** for server state management and caching
 - **Context API** for global state management (Auth, Cart)
 - **Stripe React Native** for payment processing
 - **Expo modules** for camera, location, image picker, and document picker functionality
+
+**Dedicated Driver Dashboard App (iOS/Android):**
+- Separate React Native app optimized specifically for driver workflow
+- Real-time route tracking and GPS navigation integration
+- Push notifications for new route assignments and updates
+- Offline capability for areas with poor connectivity
+- Driver-specific authentication and session management
+- Streamlined interface focused on pickup/dropoff operations
 
 ### Backend Architecture
 - **Express.js** server with TypeScript support
@@ -165,16 +174,30 @@ MarketPace is a React Native mobile application that prioritizes community empow
 ## Deployment Strategy
 
 ### Development Environment
-- Replit-based development with hot reloading
+- Replit-based development with hot reloading for web demo
 - Metro bundler configuration for monorepo structure
 - Shared code between client and server through workspace structure
+
+### Mobile App Deployment Strategy
+**Main MarketPace App:**
+- iOS App Store and Google Play Store deployment
+- Consumer-focused with marketplace, community, and shopping features
+- Standard app store optimization and user acquisition flows
+
+**Dedicated Driver Dashboard App:**
+- Separate iOS/Android app specifically for drivers
+- Driver recruitment portal integration for easy download
+- Direct link from driver application approval process
+- Optimized for driver workflow with route management focus
+- Push notification system for real-time route assignments
 
 ### Production Considerations
 - Environment variable management for API keys and secrets
 - Database connection pooling for scalability
 - Session store optimization for high traffic
 - Image CDN integration for performance
-- Push notification setup for delivery updates
+- Dual push notification setup: consumer app + driver app
+- Cross-app data synchronization for order/delivery status
 
 ### Security Measures
 - Secure session management with HTTP-only cookies
@@ -562,6 +585,15 @@ MarketPace is a React Native mobile application that prioritizes community empow
 ✓ Added API health monitoring and usage tracking for all external services
 ✓ Implemented emergency disconnect functionality for security incidents
 ✓ Created comprehensive integration status reporting with uptime and performance metrics
+
+✓ **DUAL APP ARCHITECTURE STRATEGY** (July 07, 2025)
+✓ Planned separation of main MarketPace app and dedicated Driver Dashboard app for iOS/Android launch
+✓ Main app focuses on consumer marketplace, community features, and shopping experience
+✓ Dedicated driver app optimized for route management, GPS tracking, and driver workflow
+✓ Driver app will be distributed through driver recruitment and application approval process
+✓ Cross-app synchronization planned for order status and delivery tracking
+✓ Push notification systems designed for both consumer and driver apps
+✓ Current web demo serves as foundation for both mobile app experiences
 
 ## Changelog
 
