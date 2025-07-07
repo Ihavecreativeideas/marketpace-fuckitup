@@ -176,9 +176,31 @@ app.get('/', (req, res) => {
                 }
             };
 
-            // Real Shopify integration
+            // User-friendly Shopify integration
             const connectShopify = async () => {
-                const storeUrl = 'https://myshop-marketpace-com.myshopify.com';
+                // Step 1: Get store URL
+                const storeUrl = prompt('Enter your Shopify store URL:\n(e.g., https://your-store.myshopify.com)');
+                
+                if (!storeUrl) {
+                    alert('Store URL is required for Shopify integration');
+                    return;
+                }
+                
+                // Step 2: Get access token
+                const accessToken = prompt(`Enter your Shopify Private App Access Token:\n\n` +
+                    `To get this:\n` +
+                    `1. Go to your Shopify Admin\n` +
+                    `2. Settings → Apps and sales channels\n` +
+                    `3. Develop apps → Create an app\n` +
+                    `4. Configure Admin API scopes (read_products)\n` +
+                    `5. Install app → Generate access token`);
+                
+                if (!accessToken) {
+                    alert('Access token is required for Shopify integration');
+                    return;
+                }
+                
+                alert('🔄 Connecting to your Shopify store...\nThis may take a few seconds.');
                 
                 try {
                     const response = await fetch('/api/integrations/website/test', {
@@ -187,24 +209,36 @@ app.get('/', (req, res) => {
                         body: JSON.stringify({
                             websiteUrl: storeUrl,
                             platformType: 'shopify',
-                            accessToken: '27a57cd1ebe4468fdd16545b236449b2'
+                            accessToken: accessToken
                         })
                     });
                     
                     const result = await response.json();
                     
                     if (result.success) {
-                        alert(`✅ Real Shopify Store Connected!\n\n` +
+                        alert(`✅ Shopify Store Connected Successfully!\n\n` +
                               `🏪 Store: ${result.store}\n` +
                               `📦 Plan: ${result.plan}\n` +
                               `🛒 Products: ${result.productCount} imported\n` +
                               `🌐 Domain: ${result.domain}\n\n` +
-                              `Your actual Shopify products are now available for local delivery!`);
+                              `Your Shopify products are now available for local delivery through MarketPace!\n\n` +
+                              `Next: Your customers can choose MarketPace delivery at checkout.`);
+                        
+                        // Save credentials for future use
+                        localStorage.setItem('shopify_store_url', storeUrl);
+                        localStorage.setItem('shopify_connected', 'true');
+                        
                     } else {
-                        alert(`❌ Shopify Connection Failed:\n\n${result.error}\n\nThis will help us debug the API connection.`);
+                        alert(`❌ Shopify Connection Failed:\n\n${result.error}\n\n` +
+                              `Common solutions:\n` +
+                              `• Check your store URL format\n` +
+                              `• Verify your access token\n` +
+                              `• Ensure app has read_products permission\n\n` +
+                              `Need help? Contact MarketPace support.`);
                     }
                 } catch (error) {
-                    alert(`❌ Connection Error: ${error.message}`);
+                    alert(`❌ Connection Error: ${error.message}\n\n` +
+                          `Please check your internet connection and try again.`);
                 }
             };
 
