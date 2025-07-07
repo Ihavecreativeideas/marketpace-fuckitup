@@ -106,13 +106,27 @@ class DemoSignupManager:
                 'error': str(e)
             }
     
+    def format_phone_number(self, phone):
+        """Format phone number for Twilio"""
+        # Remove all non-digit characters
+        digits = ''.join(filter(str.isdigit, phone))
+        
+        # Add +1 if it's a US number without country code
+        if len(digits) == 10:
+            return f"+1{digits}"
+        elif len(digits) == 11 and digits.startswith('1'):
+            return f"+{digits}"
+        else:
+            return phone  # Return as-is if format is unclear
+
     def send_welcome_notifications(self, user_data):
         """Send welcome SMS and email notifications"""
         # Send SMS welcome message if enabled
         if user_data.get('smsNotifications') and self.twilio_client and TWILIO_PHONE_NUMBER:
             try:
-                welcome_sms = f"""
-🎉 Welcome to MarketPace, {user_data['fullName'].split()[0]}!
+                formatted_phone = self.format_phone_number(user_data['phone'])
+                
+                welcome_sms = f"""🎉 Welcome to MarketPace, {user_data['fullName'].split()[0]}!
 
 Your demo access is ready. You're now part of the movement to build stronger communities through local commerce.
 
@@ -125,15 +139,14 @@ Your demo access is ready. You're now part of the movement to build stronger com
 We'll text you when MarketPace goes live in your area!
 
 Reply STOP to opt out anytime.
-- The MarketPace Team
-                """.strip()
+- The MarketPace Team"""
                 
-                self.twilio_client.messages.create(
+                message = self.twilio_client.messages.create(
                     body=welcome_sms,
                     from_=TWILIO_PHONE_NUMBER,
-                    to=user_data['phone']
+                    to=formatted_phone
                 )
-                print(f"Welcome SMS sent to {user_data['phone']}")
+                print(f"Welcome SMS sent to {formatted_phone} - SID: {message.sid}")
                 
             except Exception as e:
                 print(f"Failed to send SMS to {user_data['phone']}: {e}")
