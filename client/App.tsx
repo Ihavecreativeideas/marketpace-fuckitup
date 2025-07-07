@@ -2637,6 +2637,7 @@ const MainMenuScreen = ({ navigation }: any) => {
             { name: 'Profile', icon: 'person', description: 'View your public profile' },
             { name: 'DeliveryTracking', icon: 'car', description: 'Track your deliveries' },
             { name: 'DeliveryDemo', icon: 'map', description: 'See how delivery routes work' },
+            { name: 'DriverJobDescription', icon: 'speedometer', description: 'Apply to drive and earn money' },
             { name: 'SecurityPolicies', icon: 'shield-checkmark', description: 'Platform security & safety' },
             { name: 'Settings', icon: 'settings', description: 'App preferences' },
           ].map((item, index) => (
