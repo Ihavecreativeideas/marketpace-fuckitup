@@ -1,0 +1,83 @@
+// Facebook API Integration (Graph API) for MarketPace
+// This requires user access tokens and Facebook App setup with necessary permissions
+
+const fetch = require('node-fetch');
+
+const FACEBOOK_GRAPH_URL = 'https://graph.facebook.com/v18.0';
+
+/**
+ * Share product to Facebook user feed or page
+ * @param {string} accessToken - Facebook user/page access token
+ * @param {string} pageId - Page ID or 'me' for user
+ * @param {object} product - Product data
+ */
+async function postToFacebook(accessToken, pageId, product) {
+  try {
+    const message = `${product.title}\n\n${product.description}\n\nPrice: $${product.price}\n\nClick below to Deliver Now!`;
+    const link = `https://marketpace.app/product/${product.id}?deliver_now=true`;
+
+    const response = await fetch(`${FACEBOOK_GRAPH_URL}/${pageId}/feed`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: message,
+        link: link,
+        access_token: accessToken
+      })
+    });
+
+    const data = await response.json();
+    if (data.id) {
+      console.log(`✅ Post successful: ${data.id}`);
+    } else {
+      console.error('❌ Facebook post failed:', data);
+    }
+  } catch (error) {
+    console.error('❌ Error posting to Facebook:', error);
+  }
+}
+
+/**
+ * Set up webhook listener for Facebook message replies
+ * Example webhook endpoint to detect "Is this still available?"
+ */
+function handleFacebookWebhook(event) {
+  const message = event.entry?.[0]?.messaging?.[0]?.message?.text;
+  const senderId = event.entry?.[0]?.messaging?.[0]?.sender?.id;
+
+  if (message && message.toLowerCase().includes('is this still available')) {
+    sendAutoReply(senderId);
+  }
+}
+
+/**
+ * Send automated reply through Facebook Messenger
+ * @param {string} recipientId - PSID of the user who messaged
+ */
+async function sendAutoReply(recipientId) {
+  const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
+  const replyText = "Yes it is! Purchase now and have it delivered to you at the next available delivery route from MarketPace.";
+
+  try {
+    const response = await fetch(`${FACEBOOK_GRAPH_URL}/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        recipient: { id: recipientId },
+        message: { text: replyText }
+      })
+    });
+
+    const data = await response.json();
+    if (data.message_id) {
+      console.log('✅ Auto-reply sent successfully.');
+    } else {
+      console.error('❌ Auto-reply failed:', data);
+    }
+  } catch (error) {
+    console.error('❌ Error sending auto-reply:', error);
+  }
+}
+
+// Example usage:
+// postToFacebook('<ACCESS_TOKEN>', 'me', { id: 'p001', title: 'Desk', description: 'Great condition', price: 50 });
