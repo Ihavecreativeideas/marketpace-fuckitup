@@ -64,8 +64,13 @@ app.post('/api/integrations/test-stored', async (req, res) => {
         // Try multiple potential store URLs and API versions
         const storeUrls = [
             "https://myshop-marketpace-com.myshopify.com",
-            "https://marketpace-com.myshopify.com",
-            "https://myshop-marketpace.myshopify.com"
+            "https://marketpace-com.myshopify.com", 
+            "https://myshop-marketpace.myshopify.com",
+            "https://marketpace.myshopify.com",
+            "https://myshop.myshopify.com",
+            "https://shop-marketpace.myshopify.com",
+            "https://test-marketpace.myshopify.com",
+            "https://demo-marketpace.myshopify.com"
         ];
 
         const apiVersions = ["2023-10", "2024-01", "2024-04"];
@@ -102,7 +107,64 @@ app.post('/api/integrations/test-stored', async (req, res) => {
             success: false, 
             error: 'Could not connect to any store URL with the provided token. Please verify your store URL and access token are correct.',
             tokenUsed: accessToken.substring(0, 10) + '...',
-            attemptedUrls: storeUrls
+            attemptedUrls: storeUrls,
+            troubleshooting: 'Try using the manual connection with your exact store URL'
+        });
+    } catch (error) {
+        res.json({ success: false, error: error.message });
+    }
+});
+
+// Test with specific token from user
+app.post('/api/integrations/test-specific', async (req, res) => {
+    try {
+        const specificToken = "27a57cd1ebe4468fdd16545b236449b2-1751859749";
+        
+        const storeUrls = [
+            "https://myshop-marketpace-com.myshopify.com",
+            "https://marketpace-com.myshopify.com", 
+            "https://myshop-marketpace.myshopify.com",
+            "https://marketpace.myshopify.com",
+            "https://myshop.myshopify.com"
+        ];
+
+        const apiVersions = ["2023-10", "2024-01", "2024-04", "2024-07"];
+
+        for (const storeUrl of storeUrls) {
+            for (const apiVersion of apiVersions) {
+                try {
+                    const response = await fetch(`${storeUrl}/admin/api/${apiVersion}/shop.json`, {
+                        headers: {
+                            'X-Shopify-Access-Token': specificToken,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        return res.json({
+                            success: true,
+                            store: data.shop?.name || 'Unknown Store',
+                            plan: data.shop?.plan_name || 'Unknown Plan',
+                            domain: data.shop?.domain || data.shop?.myshopify_domain,
+                            tokenUsed: specificToken.substring(0, 15) + '...',
+                            storeUrl: storeUrl,
+                            apiVersion: apiVersion,
+                            message: 'Successfully connected to your Shopify store!'
+                        });
+                    }
+                } catch (e) {
+                    continue;
+                }
+            }
+        }
+
+        return res.json({ 
+            success: false, 
+            error: 'Token appears to be invalid or store not found',
+            tokenUsed: specificToken.substring(0, 15) + '...',
+            attemptedUrls: storeUrls,
+            suggestion: 'Please verify your Shopify store URL and regenerate your access token'
         });
     } catch (error) {
         res.json({ success: false, error: error.message });
@@ -142,7 +204,8 @@ app.get('/', (req, res) => {
             <h2>🛒 Shopify Integration</h2>
             <p>Connect your Shopify store to MarketPace for local delivery services.</p>
             <button class="integration-button" onclick="connectShopify()">Connect Shopify Store</button>
-            <button class="integration-button" onclick="testWithStoredToken()" style="background: #2196F3;">Test with Your Token</button>
+            <button class="integration-button" onclick="testWithStoredToken()" style="background: #2196F3;">Test with Env Token</button>
+            <button class="integration-button" onclick="testSpecificToken()" style="background: #FF9800;">Test Your Specific Token</button>
             <div id="shopify-status"></div>
         </div>
         
@@ -235,6 +298,41 @@ app.get('/', (req, res) => {
                     updateIntegrationList();
                 } else {
                     showStatus('shopify-status', 'Connection Test Failed: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showStatus('shopify-status', 'Error: ' + error.message, 'error');
+            }
+        }
+
+        async function testSpecificToken() {
+            showStatus('shopify-status', 'Testing with your specific token: 27a57cd1ebe4468fdd16545b236449b2-1751859749...', 'info');
+            
+            try {
+                const response = await fetch('/api/integrations/test-specific', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('shopify-status', 
+                        result.message + '\\n' +
+                        'Store: ' + result.store + '\\n' +
+                        'Plan: ' + result.plan + '\\n' +
+                        'Domain: ' + result.domain + '\\n' +
+                        'Store URL: ' + result.storeUrl + '\\n' +
+                        'API Version: ' + result.apiVersion, 
+                        'success'
+                    );
+                    updateIntegrationList();
+                } else {
+                    showStatus('shopify-status', 
+                        'Failed to connect with your token\\n' +
+                        'Error: ' + result.error + '\\n' +
+                        'Suggestion: ' + result.suggestion, 
+                        'error'
+                    );
                 }
             } catch (error) {
                 showStatus('shopify-status', 'Error: ' + error.message, 'error');
