@@ -2654,7 +2654,7 @@ const MainMenuScreen = ({ navigation }: any) => {
               onPress={() => navigation.navigate(item.name)}
             >
               <Ionicons name={item.icon as any} size={20} color="#8B5CF6" style={{ marginRight: 12 }} />
-              <View>
+              <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 16, fontWeight: '600', color: '#fff' }}>
                   {item.name}
                 </Text>
@@ -2662,6 +2662,26 @@ const MainMenuScreen = ({ navigation }: any) => {
                   {item.description}
                 </Text>
               </View>
+              <TouchableOpacity
+                onPress={() => {
+                  const shareUrl = encodeURIComponent('https://MarketPace.shop');
+                  const shareText = encodeURIComponent(`Check out MarketPace ${item.name === 'DriverJobDescription' ? '- Apply to Drive and earn money in your community!' : '- the community-first marketplace revolution!'} #MarketPace #CommunityFirst #LocalCommerce`);
+                  const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}&quote=${shareText}`;
+                  
+                  if (typeof window !== 'undefined') {
+                    window.open(facebookUrl, '_blank');
+                  }
+                }}
+                style={{
+                  backgroundColor: '#1877F2',
+                  paddingHorizontal: 8,
+                  paddingVertical: 4,
+                  borderRadius: 12,
+                  marginLeft: 8,
+                }}
+              >
+                <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '600' }}>📘</Text>
+              </TouchableOpacity>
             </TouchableOpacity>
           ))}
         </View>
