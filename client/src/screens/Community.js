@@ -487,7 +487,7 @@ const Community = () => {
           color: '#FFFFFF',
           fontWeight: '600',
           fontSize: 14,
-        }}>📘 Share to Facebook</Text>
+        }}>📘 Share Community</Text>
       </TouchableOpacity>
     </View>
   );
