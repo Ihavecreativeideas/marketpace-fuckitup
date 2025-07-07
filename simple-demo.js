@@ -120,21 +120,14 @@ app.post('/api/integrations/test-specific', async (req, res) => {
     try {
         const specificToken = "cc68bfa81bc1e88a3327daf9ff777596";
         
-        // Comprehensive list of potential store URL patterns
+        // User's actual store URL with variations
         const storeUrls = [
+            "https://myshop.marketpace.com",
             "https://myshop-marketpace-com.myshopify.com",
             "https://marketpace-com.myshopify.com", 
             "https://myshop-marketpace.myshopify.com",
             "https://marketpace.myshopify.com",
-            "https://myshop.myshopify.com",
-            "https://shop-marketpace.myshopify.com",
-            "https://marketpace-shop.myshopify.com",
-            "https://test-marketpace.myshopify.com",
-            "https://demo-marketpace.myshopify.com",
-            "https://marketpace-demo.myshopify.com",
-            "https://marketpace-test.myshopify.com",
-            "https://dev-marketpace.myshopify.com",
-            "https://marketpace-dev.myshopify.com"
+            "https://myshop.myshopify.com"
         ];
 
         const apiVersions = ["2023-10", "2024-01", "2024-04", "2024-07", "2024-10"];
@@ -189,6 +182,113 @@ app.post('/api/integrations/test-specific', async (req, res) => {
     }
 });
 
+// Comprehensive store finder
+app.post('/api/integrations/find-store', async (req, res) => {
+    try {
+        const specificToken = "cc68bfa81bc1e88a3327daf9ff777596";
+        
+        // Comprehensive search including common patterns based on "marketpace"
+        const storeUrls = [
+            // Common variations of marketpace
+            "https://marketpace.myshopify.com",
+            "https://my-marketpace.myshopify.com",
+            "https://marketpace-store.myshopify.com",
+            "https://store-marketpace.myshopify.com",
+            "https://marketpace-shop.myshopify.com",
+            "https://shop-marketpace.myshopify.com",
+            "https://marketpace-app.myshopify.com",
+            "https://app-marketpace.myshopify.com",
+            "https://marketpace-demo.myshopify.com",
+            "https://demo-marketpace.myshopify.com",
+            "https://marketpace-test.myshopify.com",
+            "https://test-marketpace.myshopify.com",
+            "https://marketpace-dev.myshopify.com",
+            "https://dev-marketpace.myshopify.com",
+            
+            // Common generic store names
+            "https://mystore.myshopify.com",
+            "https://my-store.myshopify.com",
+            "https://teststore.myshopify.com",
+            "https://test-store.myshopify.com",
+            "https://demostore.myshopify.com",
+            "https://demo-store.myshopify.com",
+            "https://newstore.myshopify.com",
+            "https://new-store.myshopify.com"
+        ];
+
+        const apiVersions = ["2024-10", "2024-07", "2024-04", "2024-01", "2023-10"];
+
+        let attempts = 0;
+        let lastError = '';
+        
+        for (const storeUrl of storeUrls) {
+            for (const apiVersion of apiVersions) {
+                attempts++;
+                try {
+                    const response = await fetch(`${storeUrl}/admin/api/${apiVersion}/shop.json`, {
+                        headers: {
+                            'X-Shopify-Access-Token': specificToken,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        // Get product count if possible
+                        let productCount = 0;
+                        try {
+                            const productsResponse = await fetch(`${storeUrl}/admin/api/${apiVersion}/products/count.json`, {
+                                headers: {
+                                    'X-Shopify-Access-Token': specificToken,
+                                    'Content-Type': 'application/json'
+                                }
+                            });
+                            if (productsResponse.ok) {
+                                const productsData = await productsResponse.json();
+                                productCount = productsData.count || 0;
+                            }
+                        } catch (e) {}
+                        
+                        return res.json({
+                            success: true,
+                            store: data.shop?.name || 'Unknown Store',
+                            plan: data.shop?.plan_name || 'Unknown Plan',
+                            domain: data.shop?.domain || data.shop?.myshopify_domain,
+                            storeUrl: storeUrl,
+                            apiVersion: apiVersion,
+                            totalAttempts: attempts,
+                            productCount: productCount,
+                            message: 'Store found and connected successfully!'
+                        });
+                    } else {
+                        const errorText = await response.text();
+                        lastError = `${response.status}: ${errorText}`;
+                    }
+                } catch (e) {
+                    lastError = e.message;
+                    continue;
+                }
+            }
+        }
+
+        return res.json({ 
+            success: false, 
+            error: 'Unable to locate your Shopify store with the provided access token',
+            totalAttempts: attempts,
+            lastError: lastError,
+            troubleshooting: 'The access token may be invalid, expired, or for a different store',
+            nextSteps: [
+                'Verify you are logged into the correct Shopify store',
+                'Check the access token is active in your Shopify app settings',
+                'Try the manual connection with your exact admin URL'
+            ]
+        });
+    } catch (error) {
+        res.json({ success: false, error: error.message });
+    }
+});
+
 // Serve static files
 app.use(express.static('.'));
 
@@ -224,6 +324,7 @@ app.get('/', (req, res) => {
             <button class="integration-button" onclick="connectShopify()">Connect Shopify Store</button>
             <button class="integration-button" onclick="testWithStoredToken()" style="background: #2196F3;">Test with Env Token</button>
             <button class="integration-button" onclick="testSpecificToken()" style="background: #FF9800;">Test Your Specific Token</button>
+            <button class="integration-button" onclick="findMyStore()" style="background: #9C27B0;">Find My Store</button>
             <div id="shopify-status"></div>
         </div>
         
@@ -349,6 +450,45 @@ app.get('/', (req, res) => {
                         'Failed to connect with your token\\n' +
                         'Error: ' + result.error + '\\n' +
                         'Suggestion: ' + result.suggestion, 
+                        'error'
+                    );
+                }
+            } catch (error) {
+                showStatus('shopify-status', 'Error: ' + error.message, 'error');
+            }
+        }
+
+        async function findMyStore() {
+            showStatus('shopify-status', 'Searching for your store across common Shopify patterns...', 'info');
+            
+            try {
+                const response = await fetch('/api/integrations/find-store', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('shopify-status', 
+                        'Store Found! \\n' +
+                        'Store: ' + result.store + '\\n' +
+                        'Domain: ' + result.domain + '\\n' +
+                        'URL: ' + result.storeUrl + '\\n' +
+                        'API Version: ' + result.apiVersion + '\\n' +
+                        'Plan: ' + result.plan, 
+                        'success'
+                    );
+                    updateIntegrationList();
+                } else {
+                    showStatus('shopify-status', 
+                        'Store search completed\\n' +
+                        'Total attempts: ' + result.totalAttempts + '\\n' +
+                        'Issue: ' + result.error + '\\n\\n' +
+                        'Next steps:\\n' +
+                        '1. Check your Shopify admin URL\\n' +
+                        '2. Verify your access token is active\\n' +
+                        '3. Use manual connection with exact URL', 
                         'error'
                     );
                 }
