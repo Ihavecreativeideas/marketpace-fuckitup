@@ -33,6 +33,63 @@ app.get('/', (req, res) => {
             const [showPostForm, setShowPostForm] = useState(false);
             const [expandedComments, setExpandedComments] = useState({});
             const [commentTexts, setCommentTexts] = useState({});
+            const [currentPage, setCurrentPage] = useState('marketplace');
+            const [profileSection, setProfileSection] = useState('items');
+            // User's own items/posts
+            const [userItems, setUserItems] = useState([
+                {
+                    id: 1,
+                    title: 'MacBook Pro 2021',
+                    description: 'Excellent condition, barely used. Perfect for students or professionals.',
+                    price: 1200,
+                    category: 'sell',
+                    status: 'active',
+                    views: 45,
+                    likes: 8,
+                    offers: [
+                        { id: 1, amount: 1000, buyer: 'John D.', status: 'pending' },
+                        { id: 2, amount: 1100, buyer: 'Sarah M.', status: 'declined' }
+                    ],
+                    deliveryOption: 'marketpace',
+                    promoted: true,
+                    createdAt: '2 days ago'
+                },
+                {
+                    id: 2,
+                    title: 'Guitar Lessons',
+                    description: 'Professional guitar instructor with 10+ years experience. All skill levels welcome.',
+                    price: 50,
+                    category: 'services',
+                    status: 'active',
+                    views: 23,
+                    likes: 12,
+                    offers: [],
+                    deliveryOption: 'pickup',
+                    promoted: false,
+                    createdAt: '5 days ago'
+                }
+            ]);
+
+            // User analytics and profile data
+            const [userAnalytics, setUserAnalytics] = useState({
+                totalViews: 68,
+                totalLikes: 20,
+                totalOffers: 2,
+                conversionRate: 15.2,
+                topPerformingItem: 'MacBook Pro 2021',
+                recentActivity: [
+                    { type: 'view', item: 'MacBook Pro 2021', time: '2 hours ago' },
+                    { type: 'offer', item: 'MacBook Pro 2021', amount: 1000, time: '1 day ago' },
+                    { type: 'like', item: 'Guitar Lessons', time: '2 days ago' }
+                ]
+            });
+
+            const [notifications, setNotifications] = useState([
+                { id: 1, type: 'offer', message: 'New offer of $1,000 on MacBook Pro 2021', time: '1 day ago', read: false },
+                { id: 2, type: 'like', message: 'Someone liked your Guitar Lessons post', time: '2 days ago', read: false },
+                { id: 3, type: 'view', message: 'Your MacBook Pro 2021 got 5 new views', time: '3 days ago', read: true }
+            ]);
+
             const [posts, setPosts] = useState([
                 {
                     id: 1,
@@ -314,6 +371,820 @@ app.get('/', (req, res) => {
                 }));
             };
 
+            const DeliveriesPage = () => {
+                const [deliveryTab, setDeliveryTab] = useState('current');
+                const [currentDeliveries] = useState([
+                    {
+                        id: 1,
+                        item: 'MacBook Pro 2021',
+                        buyer: 'John D.',
+                        seller: 'You',
+                        status: 'In Transit',
+                        driver: 'Mike Wilson',
+                        estimatedArrival: '2:30 PM',
+                        trackingColor: 'Dark Blue',
+                        cost: '$15.50'
+                    }
+                ]);
+                
+                const [pastDeliveries] = useState([
+                    {
+                        id: 2,
+                        item: 'Guitar Lessons',
+                        buyer: 'Sarah M.',
+                        seller: 'You',
+                        status: 'Delivered',
+                        completedAt: '2 days ago',
+                        rating: 5,
+                        cost: '$8.00'
+                    }
+                ]);
+
+                return (
+                    <div style={{padding: '20px', paddingBottom: '120px'}}>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+                            <h2 style={{fontSize: '24px', margin: 0}}>My Deliveries</h2>
+                        </div>
+
+                        {/* Delivery Tabs */}
+                        <div style={{
+                            display: 'flex', 
+                            gap: '8px', 
+                            marginBottom: '25px', 
+                            flexWrap: 'wrap',
+                            padding: '10px',
+                            background: 'rgba(255,255,255,0.05)',
+                            borderRadius: '15px'
+                        }}>
+                            {[
+                                {key: 'current', icon: '🚚', label: 'Current'},
+                                {key: 'past', icon: '📦', label: 'Past Deliveries'}
+                            ].map(tab => (
+                                <button
+                                    key={tab.key}
+                                    onClick={() => setDeliveryTab(tab.key)}
+                                    style={{
+                                        background: tab.key === deliveryTab 
+                                            ? 'linear-gradient(135deg, #8B5CF6, #6D28D9)' 
+                                            : 'rgba(255,255,255,0.1)',
+                                        color: 'white',
+                                        border: 'none',
+                                        padding: '8px 12px',
+                                        borderRadius: '20px',
+                                        cursor: 'pointer',
+                                        fontSize: '12px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        minWidth: 'fit-content',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    <span>{tab.icon}</span>
+                                    <span>{tab.label}</span>
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Color Legend */}
+                        <div style={{
+                            background: 'rgba(255,255,255,0.1)',
+                            padding: '15px',
+                            borderRadius: '10px',
+                            marginBottom: '20px'
+                        }}>
+                            <h4 style={{margin: '0 0 10px 0', fontSize: '14px'}}>📍 Tracking Legend</h4>
+                            <div style={{display: 'flex', gap: '20px', flexWrap: 'wrap', fontSize: '12px'}}>
+                                <div style={{display: 'flex', alignItems: 'center', gap: '5px'}}>
+                                    <div style={{width: '12px', height: '12px', background: 'linear-gradient(45deg, #1565C0, #42A5F5)', borderRadius: '50%'}}></div>
+                                    <span>Dark Blue → Light Blue (Your Purchases)</span>
+                                </div>
+                                <div style={{display: 'flex', alignItems: 'center', gap: '5px'}}>
+                                    <div style={{width: '12px', height: '12px', background: 'linear-gradient(45deg, #C62828, #EF5350)', borderRadius: '50%'}}></div>
+                                    <span>Dark Red → Light Red (Your Sales)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Current Deliveries */}
+                        {deliveryTab === 'current' && (
+                            <div>
+                                <h3 style={{marginBottom: '15px'}}>Current Deliveries ({currentDeliveries.length})</h3>
+                                {currentDeliveries.map(delivery => (
+                                    <div key={delivery.id} style={{
+                                        background: 'rgba(255,255,255,0.1)',
+                                        padding: '20px',
+                                        borderRadius: '15px',
+                                        marginBottom: '15px',
+                                        border: '1px solid rgba(21,101,192,0.3)'
+                                    }}>
+                                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px'}}>
+                                            <div>
+                                                <h4 style={{margin: '0 0 5px 0', fontSize: '18px'}}>{delivery.item}</h4>
+                                                <p style={{margin: '0 0 8px 0', opacity: 0.8}}>Buyer: {delivery.buyer}</p>
+                                                <div style={{display: 'flex', gap: '15px', fontSize: '14px'}}>
+                                                    <span style={{color: '#42A5F5'}}>🚚 {delivery.status}</span>
+                                                    <span style={{opacity: 0.7}}>👨‍🚗 {delivery.driver}</span>
+                                                    <span style={{opacity: 0.7}}>⏰ ETA: {delivery.estimatedArrival}</span>
+                                                </div>
+                                            </div>
+                                            <span style={{color: '#4CAF50', fontWeight: 'bold'}}>{delivery.cost}</span>
+                                        </div>
+                                        
+                                        <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                                            <button style={{
+                                                background: 'rgba(76,175,80,0.2)',
+                                                color: 'white',
+                                                border: '1px solid rgba(76,175,80,0.3)',
+                                                padding: '8px 12px',
+                                                borderRadius: '20px',
+                                                fontSize: '12px',
+                                                cursor: 'pointer'
+                                            }}>
+                                                📞 Contact Driver
+                                            </button>
+                                            <button style={{
+                                                background: 'rgba(33,150,243,0.2)',
+                                                color: 'white',
+                                                border: '1px solid rgba(33,150,243,0.3)',
+                                                padding: '8px 12px',
+                                                borderRadius: '20px',
+                                                fontSize: '12px',
+                                                cursor: 'pointer'
+                                            }}>
+                                                📍 Track Live
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Past Deliveries */}
+                        {deliveryTab === 'past' && (
+                            <div>
+                                <h3 style={{marginBottom: '15px'}}>Past Deliveries ({pastDeliveries.length})</h3>
+                                {pastDeliveries.map(delivery => (
+                                    <div key={delivery.id} style={{
+                                        background: 'rgba(255,255,255,0.1)',
+                                        padding: '20px',
+                                        borderRadius: '15px',
+                                        marginBottom: '15px',
+                                        border: '1px solid rgba(255,255,255,0.1)'
+                                    }}>
+                                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px'}}>
+                                            <div>
+                                                <h4 style={{margin: '0 0 5px 0', fontSize: '18px'}}>{delivery.item}</h4>
+                                                <p style={{margin: '0 0 8px 0', opacity: 0.8}}>Buyer: {delivery.buyer}</p>
+                                                <div style={{display: 'flex', gap: '15px', fontSize: '14px'}}>
+                                                    <span style={{color: '#4CAF50'}}>✅ {delivery.status}</span>
+                                                    <span style={{opacity: 0.7}}>📅 {delivery.completedAt}</span>
+                                                    <span style={{opacity: 0.7}}>⭐ {delivery.rating}/5</span>
+                                                </div>
+                                            </div>
+                                            <span style={{color: '#4CAF50', fontWeight: 'bold'}}>{delivery.cost}</span>
+                                        </div>
+                                        
+                                        <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                                            <button style={{
+                                                background: 'rgba(255,255,255,0.1)',
+                                                color: 'white',
+                                                border: '1px solid rgba(255,255,255,0.2)',
+                                                padding: '8px 12px',
+                                                borderRadius: '20px',
+                                                fontSize: '12px',
+                                                cursor: 'pointer'
+                                            }}>
+                                                📄 View Receipt
+                                            </button>
+                                            <button style={{
+                                                background: 'rgba(255,255,255,0.1)',
+                                                color: 'white',
+                                                border: '1px solid rgba(255,255,255,0.2)',
+                                                padding: '8px 12px',
+                                                borderRadius: '20px',
+                                                fontSize: '12px',
+                                                cursor: 'pointer'
+                                            }}>
+                                                ⭐ Rate Delivery
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                );
+            };
+
+            const SettingsPage = () => {
+                return (
+                    <div style={{padding: '20px', paddingBottom: '120px'}}>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+                            <h2 style={{fontSize: '24px', margin: 0}}>Settings</h2>
+                        </div>
+
+                        <div style={{display: 'grid', gap: '15px'}}>
+                            {/* Account Settings */}
+                            <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
+                                <h3 style={{margin: '0 0 15px 0'}}>👤 Account Settings</h3>
+                                <div style={{display: 'grid', gap: '10px'}}>
+                                    <button style={{
+                                        background: 'rgba(255,255,255,0.1)',
+                                        color: 'white',
+                                        border: '1px solid rgba(255,255,255,0.2)',
+                                        padding: '12px 15px',
+                                        borderRadius: '10px',
+                                        fontSize: '14px',
+                                        cursor: 'pointer',
+                                        textAlign: 'left'
+                                    }}>
+                                        📝 Edit Profile Information
+                                    </button>
+                                    <button style={{
+                                        background: 'rgba(255,255,255,0.1)',
+                                        color: 'white',
+                                        border: '1px solid rgba(255,255,255,0.2)',
+                                        padding: '12px 15px',
+                                        borderRadius: '10px',
+                                        fontSize: '14px',
+                                        cursor: 'pointer',
+                                        textAlign: 'left'
+                                    }}>
+                                        🔒 Change Password
+                                    </button>
+                                    <button style={{
+                                        background: 'rgba(255,255,255,0.1)',
+                                        color: 'white',
+                                        border: '1px solid rgba(255,255,255,0.2)',
+                                        padding: '12px 15px',
+                                        borderRadius: '10px',
+                                        fontSize: '14px',
+                                        cursor: 'pointer',
+                                        textAlign: 'left'
+                                    }}>
+                                        📧 Email Preferences
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Notification Settings */}
+                            <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
+                                <h3 style={{margin: '0 0 15px 0'}}>🔔 Notification Settings</h3>
+                                <div style={{display: 'grid', gap: '10px'}}>
+                                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0'}}>
+                                        <span>New offers on my items</span>
+                                        <button style={{background: '#4CAF50', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '12px', fontSize: '12px'}}>ON</button>
+                                    </div>
+                                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0'}}>
+                                        <span>Delivery updates</span>
+                                        <button style={{background: '#4CAF50', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '12px', fontSize: '12px'}}>ON</button>
+                                    </div>
+                                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0'}}>
+                                        <span>Marketing emails</span>
+                                        <button style={{background: '#757575', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '12px', fontSize: '12px'}}>OFF</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Privacy & Security */}
+                            <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
+                                <h3 style={{margin: '0 0 15px 0'}}>🛡️ Privacy & Security</h3>
+                                <div style={{display: 'grid', gap: '10px'}}>
+                                    <button style={{
+                                        background: 'rgba(255,255,255,0.1)',
+                                        color: 'white',
+                                        border: '1px solid rgba(255,255,255,0.2)',
+                                        padding: '12px 15px',
+                                        borderRadius: '10px',
+                                        fontSize: '14px',
+                                        cursor: 'pointer',
+                                        textAlign: 'left'
+                                    }}>
+                                        🔐 Two-Factor Authentication
+                                    </button>
+                                    <button style={{
+                                        background: 'rgba(255,255,255,0.1)',
+                                        color: 'white',
+                                        border: '1px solid rgba(255,255,255,0.2)',
+                                        padding: '12px 15px',
+                                        borderRadius: '10px',
+                                        fontSize: '14px',
+                                        cursor: 'pointer',
+                                        textAlign: 'left'
+                                    }}>
+                                        👁️ Privacy Settings
+                                    </button>
+                                    <button style={{
+                                        background: 'rgba(255,255,255,0.1)',
+                                        color: 'white',
+                                        border: '1px solid rgba(255,255,255,0.2)',
+                                        padding: '12px 15px',
+                                        borderRadius: '10px',
+                                        fontSize: '14px',
+                                        cursor: 'pointer',
+                                        textAlign: 'left'
+                                    }}>
+                                        📊 Data Export
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Support */}
+                            <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
+                                <h3 style={{margin: '0 0 15px 0'}}>❓ Support & Help</h3>
+                                <div style={{display: 'grid', gap: '10px'}}>
+                                    <button style={{
+                                        background: 'rgba(255,255,255,0.1)',
+                                        color: 'white',
+                                        border: '1px solid rgba(255,255,255,0.2)',
+                                        padding: '12px 15px',
+                                        borderRadius: '10px',
+                                        fontSize: '14px',
+                                        cursor: 'pointer',
+                                        textAlign: 'left'
+                                    }}>
+                                        📚 Help Center
+                                    </button>
+                                    <button style={{
+                                        background: 'rgba(255,255,255,0.1)',
+                                        color: 'white',
+                                        border: '1px solid rgba(255,255,255,0.2)',
+                                        padding: '12px 15px',
+                                        borderRadius: '10px',
+                                        fontSize: '14px',
+                                        cursor: 'pointer',
+                                        textAlign: 'left'
+                                    }}>
+                                        💬 Contact Support
+                                    </button>
+                                    <button style={{
+                                        background: 'rgba(255,255,255,0.1)',
+                                        color: 'white',
+                                        border: '1px solid rgba(255,255,255,0.2)',
+                                        padding: '12px 15px',
+                                        borderRadius: '10px',
+                                        fontSize: '14px',
+                                        cursor: 'pointer',
+                                        textAlign: 'left'
+                                    }}>
+                                        📋 Terms of Service
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Account Actions */}
+                            <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
+                                <h3 style={{margin: '0 0 15px 0'}}>⚠️ Account Actions</h3>
+                                <div style={{display: 'grid', gap: '10px'}}>
+                                    <button style={{
+                                        background: 'rgba(255,152,0,0.2)',
+                                        color: 'white',
+                                        border: '1px solid rgba(255,152,0,0.3)',
+                                        padding: '12px 15px',
+                                        borderRadius: '10px',
+                                        fontSize: '14px',
+                                        cursor: 'pointer',
+                                        textAlign: 'left'
+                                    }}>
+                                        🚪 Sign Out
+                                    </button>
+                                    <button style={{
+                                        background: 'rgba(244,67,54,0.2)',
+                                        color: 'white',
+                                        border: '1px solid rgba(244,67,54,0.3)',
+                                        padding: '12px 15px',
+                                        borderRadius: '10px',
+                                        fontSize: '14px',
+                                        cursor: 'pointer',
+                                        textAlign: 'left'
+                                    }}>
+                                        🗑️ Delete Account
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const ProfilePage = () => {
+                return (
+                    <div style={{padding: '20px', paddingBottom: '120px'}}>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+                            <h2 style={{fontSize: '24px', margin: 0}}>My Profile</h2>
+                            <button
+                                onClick={() => setShowPostForm(true)}
+                                style={{
+                                    background: 'linear-gradient(135deg, #4CAF50, #45a049)',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '10px 20px',
+                                    borderRadius: '25px',
+                                    fontSize: '14px',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                + Create New Post
+                            </button>
+                        </div>
+
+                        {/* Profile Navigation */}
+                        <div style={{
+                            display: 'flex', 
+                            gap: '8px', 
+                            marginBottom: '25px', 
+                            flexWrap: 'wrap',
+                            padding: '10px',
+                            background: 'rgba(255,255,255,0.05)',
+                            borderRadius: '15px'
+                        }}>
+                            {[
+                                {key: 'items', icon: '📦', label: 'My Items'},
+                                {key: 'analytics', icon: '📊', label: 'Analytics'},
+                                {key: 'promotions', icon: '🚀', label: 'Promotions'},
+                                {key: 'integrations', icon: '🔗', label: 'Integrations'},
+                                {key: 'notifications', icon: '🔔', label: 'Notifications'}
+                            ].map(section => (
+                                <button
+                                    key={section.key}
+                                    onClick={() => setProfileSection(section.key)}
+                                    style={{
+                                        background: section.key === profileSection 
+                                            ? 'linear-gradient(135deg, #8B5CF6, #6D28D9)' 
+                                            : 'rgba(255,255,255,0.1)',
+                                        color: 'white',
+                                        border: 'none',
+                                        padding: '8px 12px',
+                                        borderRadius: '20px',
+                                        cursor: 'pointer',
+                                        fontSize: '12px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        minWidth: 'fit-content',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    <span>{section.icon}</span>
+                                    <span>{section.label}</span>
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Profile Content */}
+                        {profileSection === 'items' && (
+                            <div>
+                                <h3 style={{marginBottom: '15px'}}>My Items ({userItems.length})</h3>
+                                {userItems.map(item => (
+                                    <div key={item.id} style={{
+                                        background: 'rgba(255,255,255,0.1)',
+                                        padding: '20px',
+                                        borderRadius: '15px',
+                                        marginBottom: '20px',
+                                        border: '1px solid rgba(255,255,255,0.1)'
+                                    }}>
+                                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px'}}>
+                                            <div style={{flex: 1}}>
+                                                <h4 style={{margin: '0 0 8px 0', fontSize: '18px'}}>{item.title}</h4>
+                                                <p style={{margin: '0 0 10px 0', opacity: 0.8, lineHeight: 1.5}}>{item.description}</p>
+                                                <div style={{display: 'flex', gap: '15px', fontSize: '14px', marginBottom: '10px'}}>
+                                                    <span style={{color: '#4CAF50', fontWeight: 'bold'}}>{'$' + item.price}</span>
+                                                    <span style={{opacity: 0.7}}>👁️ {item.views} views</span>
+                                                    <span style={{opacity: 0.7}}>❤️ {item.likes} likes</span>
+                                                    <span style={{opacity: 0.7}}>📅 {item.createdAt}</span>
+                                                </div>
+                                            </div>
+                                            {item.promoted && (
+                                                <span style={{
+                                                    background: 'linear-gradient(135deg, #FF6B6B, #FF5722)',
+                                                    color: 'white',
+                                                    padding: '4px 8px',
+                                                    borderRadius: '12px',
+                                                    fontSize: '10px',
+                                                    fontWeight: 'bold'
+                                                }}>
+                                                    🚀 PROMOTED
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {/* Offers Section */}
+                                        {item.offers.length > 0 && (
+                                            <div style={{
+                                                background: 'rgba(0,0,0,0.2)',
+                                                padding: '15px',
+                                                borderRadius: '10px',
+                                                marginBottom: '15px'
+                                            }}>
+                                                <h5 style={{margin: '0 0 10px 0', fontSize: '14px'}}>Counter Offers ({item.offers.length})</h5>
+                                                {item.offers.map(offer => (
+                                                    <div key={offer.id} style={{
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between',
+                                                        alignItems: 'center',
+                                                        padding: '8px 0',
+                                                        borderBottom: '1px solid rgba(255,255,255,0.1)'
+                                                    }}>
+                                                        <div>
+                                                            <span style={{fontWeight: 'bold'}}>{'$' + offer.amount}</span>
+                                                            <span style={{marginLeft: '10px', opacity: 0.7}}>from {offer.buyer}</span>
+                                                        </div>
+                                                        <div style={{display: 'flex', gap: '8px'}}>
+                                                            {offer.status === 'pending' && (
+                                                                <>
+                                                                    <button style={{
+                                                                        background: '#4CAF50',
+                                                                        color: 'white',
+                                                                        border: 'none',
+                                                                        padding: '4px 8px',
+                                                                        borderRadius: '12px',
+                                                                        fontSize: '12px',
+                                                                        cursor: 'pointer'
+                                                                    }}>Accept</button>
+                                                                    <button style={{
+                                                                        background: '#FF5722',
+                                                                        color: 'white',
+                                                                        border: 'none',
+                                                                        padding: '4px 8px',
+                                                                        borderRadius: '12px',
+                                                                        fontSize: '12px',
+                                                                        cursor: 'pointer'
+                                                                    }}>Decline</button>
+                                                                </>
+                                                            )}
+                                                            {offer.status === 'declined' && (
+                                                                <span style={{color: '#FF5722', fontSize: '12px'}}>Declined</span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* Action Buttons */}
+                                        <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                                            <button style={{
+                                                background: 'rgba(255,255,255,0.1)',
+                                                color: 'white',
+                                                border: '1px solid rgba(255,255,255,0.2)',
+                                                padding: '8px 12px',
+                                                borderRadius: '20px',
+                                                fontSize: '12px',
+                                                cursor: 'pointer'
+                                            }}>
+                                                📝 Edit Post
+                                            </button>
+                                            <button style={{
+                                                background: item.promoted ? 'rgba(255,107,107,0.2)' : 'rgba(76,175,80,0.2)',
+                                                color: 'white',
+                                                border: '1px solid rgba(255,255,255,0.2)',
+                                                padding: '8px 12px',
+                                                borderRadius: '20px',
+                                                fontSize: '12px',
+                                                cursor: 'pointer'
+                                            }}>
+                                                {item.promoted ? '🚀 Boost More' : '🚀 Promote'}
+                                            </button>
+                                            <button style={{
+                                                background: 'rgba(255,255,255,0.1)',
+                                                color: 'white',
+                                                border: '1px solid rgba(255,255,255,0.2)',
+                                                padding: '8px 12px',
+                                                borderRadius: '20px',
+                                                fontSize: '12px',
+                                                cursor: 'pointer'
+                                            }}>
+                                                🚚 Delivery: {item.deliveryOption === 'marketpace' ? 'MarketPace' : 'Pickup'}
+                                            </button>
+                                            <button style={{
+                                                background: 'rgba(255,255,255,0.1)',
+                                                color: 'white',
+                                                border: '1px solid rgba(255,255,255,0.2)',
+                                                padding: '8px 12px',
+                                                borderRadius: '20px',
+                                                fontSize: '12px',
+                                                cursor: 'pointer'
+                                            }}>
+                                                📊 View Analytics
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {profileSection === 'analytics' && (
+                            <div>
+                                <h3 style={{marginBottom: '15px'}}>Profile Analytics</h3>
+                                <div style={{display: 'grid', gap: '15px', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', marginBottom: '20px'}}>
+                                    <div style={{background: 'rgba(76,175,80,0.2)', padding: '20px', borderRadius: '15px', border: '1px solid rgba(76,175,80,0.3)'}}>
+                                        <h4 style={{margin: '0 0 5px 0'}}>👁️ Total Views</h4>
+                                        <p style={{margin: 0, fontSize: '24px', fontWeight: 'bold'}}>{userAnalytics.totalViews}</p>
+                                    </div>
+                                    <div style={{background: 'rgba(255,107,107,0.2)', padding: '20px', borderRadius: '15px', border: '1px solid rgba(255,107,107,0.3)'}}>
+                                        <h4 style={{margin: '0 0 5px 0'}}>❤️ Total Likes</h4>
+                                        <p style={{margin: 0, fontSize: '24px', fontWeight: 'bold'}}>{userAnalytics.totalLikes}</p>
+                                    </div>
+                                    <div style={{background: 'rgba(139,92,246,0.2)', padding: '20px', borderRadius: '15px', border: '1px solid rgba(139,92,246,0.3)'}}>
+                                        <h4 style={{margin: '0 0 5px 0'}}>💰 Total Offers</h4>
+                                        <p style={{margin: 0, fontSize: '24px', fontWeight: 'bold'}}>{userAnalytics.totalOffers}</p>
+                                    </div>
+                                    <div style={{background: 'rgba(255,193,7,0.2)', padding: '20px', borderRadius: '15px', border: '1px solid rgba(255,193,7,0.3)'}}>
+                                        <h4 style={{margin: '0 0 5px 0'}}>📈 Conversion Rate</h4>
+                                        <p style={{margin: 0, fontSize: '24px', fontWeight: 'bold'}}>{userAnalytics.conversionRate}%</p>
+                                    </div>
+                                </div>
+                                
+                                <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px', marginBottom: '20px'}}>
+                                    <h4 style={{margin: '0 0 15px 0'}}>🏆 Top Performing Item</h4>
+                                    <p style={{margin: 0, fontSize: '18px', fontWeight: 'bold', color: '#4CAF50'}}>{userAnalytics.topPerformingItem}</p>
+                                </div>
+
+                                <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
+                                    <h4 style={{margin: '0 0 15px 0'}}>📅 Recent Activity</h4>
+                                    {userAnalytics.recentActivity.map((activity, index) => (
+                                        <div key={index} style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            padding: '10px 0',
+                                            borderBottom: index !== userAnalytics.recentActivity.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none'
+                                        }}>
+                                            <div>
+                                                <span style={{fontWeight: 'bold'}}>
+                                                    {activity.type === 'view' && '👁️'} 
+                                                    {activity.type === 'offer' && '💰'} 
+                                                    {activity.type === 'like' && '❤️'} 
+                                                </span>
+                                                <span style={{marginLeft: '8px'}}>
+                                                    {activity.type === 'view' && 'New view on ' + activity.item}
+                                                    {activity.type === 'offer' && 'New offer of $' + activity.amount + ' on ' + activity.item}
+                                                    {activity.type === 'like' && 'New like on ' + activity.item}
+                                                </span>
+                                            </div>
+                                            <span style={{opacity: 0.7, fontSize: '12px'}}>{activity.time}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {profileSection === 'promotions' && (
+                            <div>
+                                <h3 style={{marginBottom: '15px'}}>🚀 Promotion Center</h3>
+                                <div style={{display: 'grid', gap: '15px'}}>
+                                    <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
+                                        <h4 style={{margin: '0 0 10px 0'}}>Boost Your Posts</h4>
+                                        <p style={{margin: '0 0 15px 0', opacity: 0.8}}>Increase visibility and get more views on your items</p>
+                                        <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                                            <button style={{background: '#4CAF50', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '20px', cursor: 'pointer'}}>
+                                                $2 - 24 Hour Boost
+                                            </button>
+                                            <button style={{background: '#FF9800', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '20px', cursor: 'pointer'}}>
+                                                $5 - 3 Day Boost
+                                            </button>
+                                            <button style={{background: '#9C27B0', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '20px', cursor: 'pointer'}}>
+                                                $10 - 7 Day Boost
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
+                                        <h4 style={{margin: '0 0 10px 0'}}>Pin to Top</h4>
+                                        <p style={{margin: '0 0 15px 0', opacity: 0.8}}>Keep your post at the top of category feeds</p>
+                                        <button style={{background: '#FF5722', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '20px', cursor: 'pointer'}}>
+                                            $1/day - Pin to Top
+                                        </button>
+                                    </div>
+
+                                    <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
+                                        <h4 style={{margin: '0 0 10px 0'}}>Featured Listing</h4>
+                                        <p style={{margin: '0 0 15px 0', opacity: 0.8}}>Get featured on the community homepage</p>
+                                        <button style={{background: '#673AB7', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '20px', cursor: 'pointer'}}>
+                                            $15 - Featured for 7 days
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {profileSection === 'integrations' && (
+                            <div>
+                                <h3 style={{marginBottom: '15px'}}>🔗 Website Integrations</h3>
+                                <div style={{display: 'grid', gap: '15px'}}>
+                                    <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
+                                        <h4 style={{margin: '0 0 10px 0'}}>🛒 E-commerce Platforms</h4>
+                                        <p style={{margin: '0 0 15px 0', opacity: 0.8}}>Sync your existing online store with MarketPace</p>
+                                        <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                                            <button style={{background: 'rgba(76,175,80,0.2)', color: 'white', border: '1px solid rgba(76,175,80,0.3)', padding: '8px 15px', borderRadius: '20px', cursor: 'pointer'}}>
+                                                + Connect Shopify
+                                            </button>
+                                            <button style={{background: 'rgba(76,175,80,0.2)', color: 'white', border: '1px solid rgba(76,175,80,0.3)', padding: '8px 15px', borderRadius: '20px', cursor: 'pointer'}}>
+                                                + Connect WooCommerce
+                                            </button>
+                                            <button style={{background: 'rgba(76,175,80,0.2)', color: 'white', border: '1px solid rgba(76,175,80,0.3)', padding: '8px 15px', borderRadius: '20px', cursor: 'pointer'}}>
+                                                + Connect Etsy
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
+                                        <h4 style={{margin: '0 0 10px 0'}}>📱 Social Media</h4>
+                                        <p style={{margin: '0 0 15px 0', opacity: 0.8}}>Cross-post to your social media accounts</p>
+                                        <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                                            <button style={{background: 'rgba(59,89,152,0.2)', color: 'white', border: '1px solid rgba(59,89,152,0.3)', padding: '8px 15px', borderRadius: '20px', cursor: 'pointer'}}>
+                                                + Connect Facebook
+                                            </button>
+                                            <button style={{background: 'rgba(29,161,242,0.2)', color: 'white', border: '1px solid rgba(29,161,242,0.3)', padding: '8px 15px', borderRadius: '20px', cursor: 'pointer'}}>
+                                                + Connect Instagram
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
+                                        <h4 style={{margin: '0 0 10px 0'}}>📈 Traffic Sources</h4>
+                                        <p style={{margin: '0 0 15px 0', opacity: 0.8}}>Track where your visitors are coming from</p>
+                                        <div style={{fontSize: '14px'}}>
+                                            <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '8px'}}>
+                                                <span>Direct visits:</span><span>45%</span>
+                                            </div>
+                                            <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '8px'}}>
+                                                <span>Social media:</span><span>30%</span>
+                                            </div>
+                                            <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '8px'}}>
+                                                <span>Search engines:</span><span>25%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {profileSection === 'notifications' && (
+                            <div>
+                                <h3 style={{marginBottom: '15px'}}>🔔 Notifications ({notifications.filter(n => !n.read).length})</h3>
+                                <div style={{display: 'grid', gap: '10px'}}>
+                                    {notifications.map(notification => (
+                                        <div key={notification.id} style={{
+                                            background: notification.read ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.1)',
+                                            padding: '15px',
+                                            borderRadius: '10px',
+                                            border: notification.read ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(76,175,80,0.3)',
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center'
+                                        }}>
+                                            <div style={{flex: 1}}>
+                                                <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '5px'}}>
+                                                    <span>
+                                                        {notification.type === 'offer' && '💰'}
+                                                        {notification.type === 'like' && '❤️'}
+                                                        {notification.type === 'view' && '👁️'}
+                                                    </span>
+                                                    {!notification.read && (
+                                                        <span style={{
+                                                            width: '8px',
+                                                            height: '8px',
+                                                            background: '#4CAF50',
+                                                            borderRadius: '50%'
+                                                        }}></span>
+                                                    )}
+                                                </div>
+                                                <p style={{margin: '0 0 5px 0', fontWeight: notification.read ? 'normal' : 'bold'}}>
+                                                    {notification.message}
+                                                </p>
+                                                <p style={{margin: 0, fontSize: '12px', opacity: 0.7}}>{notification.time}</p>
+                                            </div>
+                                            {!notification.read && (
+                                                <button
+                                                    onClick={() => {
+                                                        setNotifications(notifications.map(n => 
+                                                            n.id === notification.id ? {...n, read: true} : n
+                                                        ));
+                                                    }}
+                                                    style={{
+                                                        background: 'rgba(76,175,80,0.2)',
+                                                        color: 'white',
+                                                        border: '1px solid rgba(76,175,80,0.3)',
+                                                        padding: '6px 12px',
+                                                        borderRadius: '15px',
+                                                        fontSize: '12px',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                >
+                                                    Mark Read
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
+            };
+
             const renderPageContent = () => {
                 const filteredPosts = currentFilter === 'all' 
                     ? posts 
@@ -590,7 +1461,10 @@ app.get('/', (req, res) => {
                         </div>
                         
                         {/* Page Content */}
-                        {renderPageContent()}
+                        {currentPage === 'marketplace' && renderPageContent()}
+                        {currentPage === 'profile' && <ProfilePage />}
+                        {currentPage === 'deliveries' && <DeliveriesPage />}
+                        {currentPage === 'settings' && <SettingsPage />}
                         
                         {/* Post Form Modal */}
                         {showPostForm && (
@@ -614,8 +1488,29 @@ app.get('/', (req, res) => {
                             border: '1px solid rgba(255,255,255,0.2)'
                         }}>
                             <button
+                                onClick={() => setCurrentPage('marketplace')}
                                 style={{
-                                    background: 'rgba(255,255,255,0.1)',
+                                    background: currentPage === 'marketplace' ? 'linear-gradient(135deg, #8B5CF6, #6D28D9)' : 'rgba(255,255,255,0.1)',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '8px 12px',
+                                    borderRadius: '20px',
+                                    cursor: 'pointer',
+                                    fontSize: '12px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    gap: '2px',
+                                    minWidth: '60px'
+                                }}
+                            >
+                                <span style={{fontSize: '16px'}}>🏘️</span>
+                                <span>Community</span>
+                            </button>
+                            <button
+                                onClick={() => setCurrentPage('profile')}
+                                style={{
+                                    background: currentPage === 'profile' ? 'linear-gradient(135deg, #8B5CF6, #6D28D9)' : 'rgba(255,255,255,0.1)',
                                     color: 'white',
                                     border: 'none',
                                     padding: '8px 12px',
@@ -633,8 +1528,9 @@ app.get('/', (req, res) => {
                                 <span>Profile</span>
                             </button>
                             <button
+                                onClick={() => setCurrentPage('deliveries')}
                                 style={{
-                                    background: 'rgba(255,255,255,0.1)',
+                                    background: currentPage === 'deliveries' ? 'linear-gradient(135deg, #8B5CF6, #6D28D9)' : 'rgba(255,255,255,0.1)',
                                     color: 'white',
                                     border: 'none',
                                     padding: '8px 12px',
@@ -652,8 +1548,9 @@ app.get('/', (req, res) => {
                                 <span>Deliveries</span>
                             </button>
                             <button
+                                onClick={() => setCurrentPage('settings')}
                                 style={{
-                                    background: 'rgba(255,255,255,0.1)',
+                                    background: currentPage === 'settings' ? 'linear-gradient(135deg, #8B5CF6, #6D28D9)' : 'rgba(255,255,255,0.1)',
                                     color: 'white',
                                     border: 'none',
                                     padding: '8px 12px',
