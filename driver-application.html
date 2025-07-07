@@ -301,7 +301,7 @@
       <h1>Driver Application</h1>
       <p>Join MarketPace as an Independent Contractor Driver</p>
       <div class="earnings-highlight">
-        Earn $4 per pickup + $2 per dropoff + $0.50/mile + 100% tips
+        Earn $4 per pickup + $2 per dropoff + $0.50/mile + 100% tips + $25 large items
       </div>
     </div>
 
@@ -329,6 +329,8 @@
             <li>Immediate payment via Stripe after each route</li>
             <li>Flexible scheduling with 4 daily time slots</li>
             <li>Professional driver support team</li>
+            <li>SMS notifications for route changes</li>
+            <li>Driver discretion for item removal if needed</li>
           </ul>
         </div>
       </div>
@@ -449,6 +451,65 @@
         <div class="form-group">
           <label for="licensePlate">License Plate Number *</label>
           <input type="text" id="licensePlate" name="licensePlate" required>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="hasTrailer" name="hasTrailer" style="margin-right: 10px;">
+            I have access to a trailer for large item deliveries
+          </label>
+          <small style="color: rgba(255,255,255,0.7); display: block; margin-top: 5px;">
+            Large items (furniture, appliances) require truck + trailer and earn $25+ per delivery
+          </small>
+        </div>
+
+        <h3 style="color: #00FFFF; margin: 30px 0 20px 0;">Item Size Preferences</h3>
+        <p style="margin-bottom: 20px; color: rgba(255,255,255,0.8);">
+          Select which item sizes you're willing to deliver. Large items require a truck/SUV with trailer access and have special route restrictions.
+        </p>
+
+        <div class="requirements-grid" style="margin-bottom: 30px;">
+          <div class="requirement-card">
+            <h3>Small Items</h3>
+            <p style="margin-bottom: 15px; color: rgba(255,255,255,0.7);">
+              Envelopes, small packages, documents, small electronics
+            </p>
+            <label style="display: flex; align-items: center;">
+              <input type="checkbox" id="deliverSmall" name="deliverSmall" checked style="margin-right: 10px;">
+              Willing to deliver small items
+            </label>
+          </div>
+          
+          <div class="requirement-card">
+            <h3>Medium Items</h3>
+            <p style="margin-bottom: 15px; color: rgba(255,255,255,0.7);">
+              Standard boxes, groceries, clothing, small furniture
+            </p>
+            <label style="display: flex; align-items: center;">
+              <input type="checkbox" id="deliverMedium" name="deliverMedium" checked style="margin-right: 10px;">
+              Willing to deliver medium items
+            </label>
+          </div>
+          
+          <div class="requirement-card" style="border: 2px solid #FF6B35;">
+            <h3 style="color: #FF6B35;">Large Items</h3>
+            <p style="margin-bottom: 15px; color: rgba(255,255,255,0.7);">
+              Furniture, appliances, large electronics (requires truck + trailer)
+            </p>
+            <div style="background: rgba(255, 107, 53, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+              <p style="font-weight: bold; color: #FF6B35; margin-bottom: 5px;">🚛 Large Item Benefits:</p>
+              <ul style="list-style: none; padding: 0; margin: 0;">
+                <li style="padding: 3px 0;">• Earn $25+ per large delivery</li>
+                <li style="padding: 3px 0;">• Only 1 large item per route (5 small/medium)</li>
+                <li style="padding: 3px 0;">• Driver discretion to remove items that don't fit</li>
+                <li style="padding: 3px 0;">• Members notified via SMS if item removed</li>
+              </ul>
+            </div>
+            <label style="display: flex; align-items: center;">
+              <input type="checkbox" id="deliverLarge" name="deliverLarge" style="margin-right: 10px;">
+              Willing to deliver large items (truck + trailer required)
+            </label>
+          </div>
         </div>
 
         <h3 style="color: #00FFFF; margin: 30px 0 20px 0;">Required Document Uploads</h3>
@@ -612,8 +673,8 @@
         inputs.forEach(input => {
           if (input.type !== 'file' && input.type !== 'checkbox') {
             formData.append(input.name, input.value);
-          } else if (input.type === 'checkbox' && input.checked) {
-            formData.append(input.name, 'true');
+          } else if (input.type === 'checkbox') {
+            formData.append(input.name, input.checked ? 'true' : 'false');
           }
         });
         
