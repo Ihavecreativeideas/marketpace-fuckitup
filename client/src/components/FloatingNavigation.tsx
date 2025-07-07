@@ -9,11 +9,11 @@ interface NavigationProps {
 
 export default function FloatingNavigation({ activeTab, onTabPress }: NavigationProps) {
   const tabs = [
-    { name: 'Home', icon: 'home' },
-    { name: 'Marketplace', icon: 'storefront' },
-    { name: 'Community', icon: 'people' },
-    { name: 'Deliveries', icon: 'car' },
-    { name: 'Menu', icon: 'menu' },
+    { name: 'Home', icon: 'home-outline' },
+    { name: 'Marketplace', icon: 'storefront-outline' },
+    { name: 'Community', icon: 'people-outline' },
+    { name: 'Deliveries', icon: 'car-outline' },
+    { name: 'Menu', icon: 'menu-outline' },
   ];
 
   return (
@@ -60,9 +60,9 @@ const styles = StyleSheet.create({
   navBar: {
     flexDirection: 'row',
     backgroundColor: 'white',
-    borderRadius: 25,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
+    borderRadius: 30,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -71,14 +71,16 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 8,
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   tab: {
     alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    minWidth: 60,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderRadius: 16,
+    flex: 1,
+    maxWidth: 70,
   },
   activeTab: {
     backgroundColor: '#E0E7FF',

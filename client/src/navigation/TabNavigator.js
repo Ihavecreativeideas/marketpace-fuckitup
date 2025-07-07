@@ -9,7 +9,7 @@ import HomeScreen from '../screens/marketplace/HomeScreen';
 import ShopsScreen from '../screens/marketplace/ShopsScreen';
 import ServicesScreen from '../screens/marketplace/ServicesScreen';
 import HubScreen from '../screens/marketplace/HubScreen';
-import CommunityScreen from '../screens/community/CommunityScreen';
+import Community from '../screens/Community';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import ListingDetailScreen from '../screens/marketplace/ListingDetailScreen';
 import CreateListingScreen from '../screens/marketplace/CreateListingScreen';
@@ -71,7 +71,7 @@ function HubStackNavigator() {
 function CommunityStackNavigator() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="CommunityMain" component={CommunityScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="CommunityMain" component={Community} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
