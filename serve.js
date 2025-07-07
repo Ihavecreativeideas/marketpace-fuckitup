@@ -147,6 +147,54 @@ app.get('/', (req, res) => {
                 }
             ]);
 
+            // Integration functions
+            const connectTicketPlatform = async (platform) => {
+                const apiKey = prompt('Enter your ' + platform.charAt(0).toUpperCase() + platform.slice(1) + ' API key:');
+                if (!apiKey) return;
+
+                let secretKey = null;
+                if (platform === 'stubhub') {
+                    secretKey = prompt('Enter your StubHub secret key (required for OAuth):');
+                    if (!secretKey) return;
+                }
+
+                try {
+                    const response = await fetch('/api/integrations/tickets/connect', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ platform, apiKey, secretKey })
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('Successfully connected ' + platform + '! Imported ' + result.eventsImported + ' events.');
+                    } else {
+                        alert('Failed to connect ' + platform + ': ' + result.error);
+                    }
+                } catch (error) {
+                    alert('Error connecting ' + platform + ': ' + error.message);
+                }
+            };
+
+            const connectTikTokShop = async () => {
+                try {
+                    // In real app, this would handle TikTok OAuth flow
+                    const response = await fetch('/api/integrations/tiktok/connect', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('Successfully connected TikTok Shop! Imported ' + result.productsImported + ' products.');
+                    } else {
+                        alert('Failed to connect TikTok Shop: ' + result.error);
+                    }
+                } catch (error) {
+                    alert('Error connecting TikTok Shop: ' + error.message);
+                }
+            };
+
             const PostForm = ({ onClose }) => {
                 const [formData, setFormData] = useState({
                     title: '',
@@ -1468,8 +1516,35 @@ app.get('/', (req, res) => {
 
                         {profileSection === 'integrations' && (
                             <div>
-                                <h3 style={{marginBottom: '15px'}}>🔗 Website Integrations</h3>
+                                <h3 style={{marginBottom: '15px'}}>🔗 Platform Integrations</h3>
                                 <div style={{display: 'grid', gap: '15px'}}>
+                                    <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
+                                        <h4 style={{margin: '0 0 10px 0'}}>🎫 Ticket Selling Platforms</h4>
+                                        <p style={{margin: '0 0 15px 0', opacity: 0.8}}>Import events and tickets from major platforms</p>
+                                        <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                                            <button 
+                                                onClick={() => connectTicketPlatform('ticketmaster')}
+                                                style={{background: 'rgba(0,93,170,0.2)', color: 'white', border: '1px solid rgba(0,93,170,0.3)', padding: '8px 15px', borderRadius: '20px', cursor: 'pointer'}}>
+                                                + Ticketmaster
+                                            </button>
+                                            <button 
+                                                onClick={() => connectTicketPlatform('eventbrite')}
+                                                style={{background: 'rgba(247,123,33,0.2)', color: 'white', border: '1px solid rgba(247,123,33,0.3)', padding: '8px 15px', borderRadius: '20px', cursor: 'pointer'}}>
+                                                + Eventbrite
+                                            </button>
+                                            <button 
+                                                onClick={() => connectTicketPlatform('stubhub')}
+                                                style={{background: 'rgba(0,129,138,0.2)', color: 'white', border: '1px solid rgba(0,129,138,0.3)', padding: '8px 15px', borderRadius: '20px', cursor: 'pointer'}}>
+                                                + StubHub
+                                            </button>
+                                            <button 
+                                                onClick={() => connectTicketPlatform('seatgeek')}
+                                                style={{background: 'rgba(44,210,139,0.2)', color: 'white', border: '1px solid rgba(44,210,139,0.3)', padding: '8px 15px', borderRadius: '20px', cursor: 'pointer'}}>
+                                                + SeatGeek
+                                            </button>
+                                        </div>
+                                    </div>
+
                                     <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
                                         <h4 style={{margin: '0 0 10px 0'}}>🛒 E-commerce Platforms</h4>
                                         <p style={{margin: '0 0 15px 0', opacity: 0.8}}>Sync your existing online store with MarketPace</p>
@@ -1487,14 +1562,19 @@ app.get('/', (req, res) => {
                                     </div>
                                     
                                     <div style={{background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px'}}>
-                                        <h4 style={{margin: '0 0 10px 0'}}>📱 Social Media</h4>
-                                        <p style={{margin: '0 0 15px 0', opacity: 0.8}}>Cross-post to your social media accounts</p>
+                                        <h4 style={{margin: '0 0 10px 0'}}>📱 Social Media Shops</h4>
+                                        <p style={{margin: '0 0 15px 0', opacity: 0.8}}>Import products from social commerce platforms</p>
                                         <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                                            <button 
+                                                onClick={() => connectTikTokShop()}
+                                                style={{background: 'rgba(255,0,80,0.2)', color: 'white', border: '1px solid rgba(255,0,80,0.3)', padding: '8px 15px', borderRadius: '20px', cursor: 'pointer'}}>
+                                                + TikTok Shop
+                                            </button>
                                             <button style={{background: 'rgba(59,89,152,0.2)', color: 'white', border: '1px solid rgba(59,89,152,0.3)', padding: '8px 15px', borderRadius: '20px', cursor: 'pointer'}}>
-                                                + Connect Facebook
+                                                + Facebook Shop
                                             </button>
                                             <button style={{background: 'rgba(29,161,242,0.2)', color: 'white', border: '1px solid rgba(29,161,242,0.3)', padding: '8px 15px', borderRadius: '20px', cursor: 'pointer'}}>
-                                                + Connect Instagram
+                                                + Instagram Shop
                                             </button>
                                         </div>
                                     </div>
