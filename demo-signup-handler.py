@@ -27,7 +27,8 @@ class DemoSignupManager:
             self.twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
         else:
             self.twilio_client = None
-            print("Warning: Twilio credentials not found. SMS notifications disabled.")
+            import sys
+            print("Warning: Twilio credentials not found. SMS notifications disabled.", file=sys.stderr)
     
     def init_database(self):
         """Initialize SQLite database for demo users"""
@@ -140,14 +141,18 @@ class DemoSignupManager:
                 elif TWILIO_PHONE_NUMBER:
                     message_params['from_'] = TWILIO_PHONE_NUMBER
                 else:
-                    print("No Twilio phone number or messaging service configured")
+                    import sys
+                    print("No Twilio phone number or messaging service configured", file=sys.stderr)
                     return
                 
                 message = self.twilio_client.messages.create(**message_params)
-                print(f"Welcome SMS sent to {formatted_phone} - SID: {message.sid}")
+                # Log SMS success to stderr so it doesn't interfere with JSON output
+                import sys
+                print(f"Welcome SMS sent to {formatted_phone} - SID: {message.sid}", file=sys.stderr)
                 
             except Exception as e:
-                print(f"Failed to send SMS to {user_data['phone']}: {e}")
+                import sys
+                print(f"Failed to send SMS to {user_data['phone']}: {e}", file=sys.stderr)
                 # Continue with account creation even if SMS fails
     
     def send_launch_notification(self, city, user_phone=None):
@@ -196,10 +201,12 @@ class DemoSignupManager:
                     WHERE phone = ?
                 ''', (phone,))
                 
-                print(f"Launch notification sent to {phone}")
+                import sys
+                print(f"Launch notification sent to {phone}", file=sys.stderr)
                 
             except Exception as e:
-                print(f"Failed to send launch SMS to {phone}: {e}")
+                import sys
+                print(f"Failed to send launch SMS to {phone}: {e}", file=sys.stderr)
         
         conn.commit()
         conn.close()
