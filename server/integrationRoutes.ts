@@ -13,6 +13,22 @@ export interface WebsiteIntegration {
   syncErrors?: string[];
 }
 
+// Ticket Platform Integration Types
+export interface TicketPlatformIntegration {
+  id: string;
+  userId: string;
+  platform: 'ticketmaster' | 'eventbrite' | 'stubhub' | 'universe' | 'seatgeek' | 'vividseats';
+  apiKey: string;
+  secretKey?: string;
+  organizationId?: string;
+  isConnected: boolean;
+  lastSync: Date;
+  eventCount: number;
+  ticketsSold: number;
+  totalRevenue: number;
+  syncErrors?: string[];
+}
+
 // Social Media Shop Integration Types
 export interface SocialMediaIntegration {
   id: string;
@@ -30,7 +46,7 @@ export interface SocialMediaIntegration {
 export interface ImportedProduct {
   id: string;
   externalId: string;
-  source: 'website' | 'facebook' | 'tiktok';
+  source: 'website' | 'facebook' | 'tiktok' | 'ticketmaster' | 'eventbrite' | 'stubhub' | 'universe' | 'seatgeek' | 'vividseats';
   name: string;
   description: string;
   price: number;
@@ -39,6 +55,12 @@ export interface ImportedProduct {
   inventory: number;
   isActive: boolean;
   lastUpdated: Date;
+  // Ticket-specific fields
+  eventDate?: Date;
+  venue?: string;
+  seatSection?: string;
+  ticketType?: 'single' | 'pair' | 'group' | 'season';
+  isResale?: boolean;
 }
 
 // Integration Management Classes
@@ -283,6 +305,202 @@ class SocialMediaIntegrationManager {
   }
 }
 
+class TicketPlatformIntegrationManager {
+  private static integrations: Map<string, TicketPlatformIntegration> = new Map();
+  private static events: Map<string, ImportedProduct[]> = new Map();
+
+  static async connectTicketPlatform(
+    userId: string, 
+    platform: 'ticketmaster' | 'eventbrite' | 'stubhub' | 'universe' | 'seatgeek' | 'vividseats',
+    apiKey: string,
+    secretKey?: string,
+    organizationId?: string
+  ): Promise<string> {
+    const integrationId = `${platform}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Test platform connection
+    const connectionResult = await this.testPlatformConnection(platform, apiKey, secretKey);
+    if (!connectionResult.success) {
+      throw new Error(connectionResult.error || 'Failed to connect to platform');
+    }
+    
+    const integration: TicketPlatformIntegration = {
+      id: integrationId,
+      userId,
+      platform,
+      apiKey,
+      secretKey,
+      organizationId,
+      isConnected: true,
+      lastSync: new Date(),
+      eventCount: 0,
+      ticketsSold: 0,
+      totalRevenue: 0,
+      syncErrors: []
+    };
+
+    this.integrations.set(integrationId, integration);
+    
+    // Import events/tickets from platform
+    await this.importTicketsFromPlatform(integrationId);
+    
+    return integrationId;
+  }
+
+  private static async testPlatformConnection(
+    platform: string, 
+    apiKey: string, 
+    secretKey?: string
+  ): Promise<{ success: boolean; error?: string; eventCount?: number }> {
+    // Simulate API connection testing based on platform
+    const platformHandlers = {
+      ticketmaster: () => this.testTicketmasterConnection(apiKey),
+      eventbrite: () => this.testEventbriteConnection(apiKey),
+      stubhub: () => this.testStubHubConnection(apiKey, secretKey),
+      universe: () => this.testUniverseConnection(apiKey),
+      seatgeek: () => this.testSeatGeekConnection(apiKey),
+      vividseats: () => this.testVividSeatsConnection(apiKey)
+    };
+
+    const handler = platformHandlers[platform as keyof typeof platformHandlers];
+    if (!handler) {
+      return { success: false, error: 'Unsupported ticket platform' };
+    }
+
+    return await handler();
+  }
+
+  private static async testTicketmasterConnection(apiKey: string) {
+    // Simulate Ticketmaster Discovery API connection
+    if (apiKey.length < 10) {
+      return { success: false, error: 'Invalid Ticketmaster API key format' };
+    }
+    return { success: true, eventCount: 1247 };
+  }
+
+  private static async testEventbriteConnection(apiKey: string) {
+    // Simulate Eventbrite API connection
+    if (apiKey.length < 15) {
+      return { success: false, error: 'Invalid Eventbrite OAuth token format' };
+    }
+    return { success: true, eventCount: 89 };
+  }
+
+  private static async testStubHubConnection(apiKey: string, secretKey?: string) {
+    // Simulate StubHub API connection (requires OAuth)
+    if (!secretKey) {
+      return { success: false, error: 'StubHub requires both API key and secret' };
+    }
+    return { success: true, eventCount: 3456 };
+  }
+
+  private static async testUniverseConnection(apiKey: string) {
+    // Simulate Universe API connection
+    return { success: true, eventCount: 234 };
+  }
+
+  private static async testSeatGeekConnection(apiKey: string) {
+    // Simulate SeatGeek API connection
+    return { success: true, eventCount: 567 };
+  }
+
+  private static async testVividSeatsConnection(apiKey: string) {
+    // Simulate Vivid Seats API connection
+    return { success: true, eventCount: 890 };
+  }
+
+  static async importTicketsFromPlatform(integrationId: string): Promise<ImportedProduct[]> {
+    const integration = this.integrations.get(integrationId);
+    if (!integration) throw new Error('Integration not found');
+
+    // Generate mock events/tickets based on platform
+    const mockEvents = this.generateMockEvents(integration.platform);
+    this.events.set(integrationId, mockEvents);
+    
+    // Update integration stats
+    integration.eventCount = mockEvents.length;
+    integration.ticketsSold = mockEvents.reduce((sum, event) => sum + (100 - event.inventory), 0);
+    integration.totalRevenue = mockEvents.reduce((sum, event) => sum + (event.price * (100 - event.inventory)), 0);
+    integration.lastSync = new Date();
+    
+    return mockEvents;
+  }
+
+  private static generateMockEvents(platform: string): ImportedProduct[] {
+    const events: ImportedProduct[] = [];
+    const eventTypes = {
+      ticketmaster: ['Concerts', 'Sports', 'Theater', 'Comedy'],
+      eventbrite: ['Workshops', 'Conferences', 'Festivals', 'Networking'],
+      stubhub: ['Concert Resale', 'Sports Resale', 'Theater Resale'],
+      universe: ['Music Festivals', 'Large Events', 'Expos'],
+      seatgeek: ['Sports', 'Concerts', 'Comedy Shows'],
+      vividseats: ['Premium Events', 'VIP Experiences', 'Season Tickets']
+    };
+
+    const venues = ['Madison Square Garden', 'Red Rocks', 'Hollywood Bowl', 'Fenway Park', 'Lincoln Center'];
+    const eventNames = [
+      'Summer Music Festival', 'Tech Conference 2025', 'Comedy Night Live',
+      'Baseball Championship', 'Broadway Musical', 'Jazz Concert Series'
+    ];
+
+    const count = Math.floor(Math.random() * 20) + 5; // 5-25 events
+
+    for (let i = 0; i < count; i++) {
+      const eventDate = new Date();
+      eventDate.setDate(eventDate.getDate() + Math.floor(Math.random() * 90)); // Next 90 days
+
+      const eventCategory = eventTypes[platform as keyof typeof eventTypes]?.[
+        Math.floor(Math.random() * eventTypes[platform as keyof typeof eventTypes].length)
+      ] || 'Event';
+
+      events.push({
+        id: `${platform}_event_${Date.now()}_${i}`,
+        externalId: `${platform}_${i}`,
+        source: platform as any,
+        name: `${eventNames[Math.floor(Math.random() * eventNames.length)]} ${i + 1}`,
+        description: `${eventCategory} event from ${platform.charAt(0).toUpperCase() + platform.slice(1)}`,
+        price: Math.floor(Math.random() * 200) + 25,
+        images: [`https://via.placeholder.com/300x200?text=${platform}+Event`],
+        category: eventCategory,
+        inventory: Math.floor(Math.random() * 100),
+        isActive: true,
+        lastUpdated: new Date(),
+        eventDate,
+        venue: venues[Math.floor(Math.random() * venues.length)],
+        seatSection: ['Floor', 'Balcony', 'Upper', 'VIP', 'General'][Math.floor(Math.random() * 5)],
+        ticketType: ['single', 'pair', 'group', 'season'][Math.floor(Math.random() * 4)] as any,
+        isResale: platform === 'stubhub' || platform === 'vividseats' || Math.random() > 0.7
+      });
+    }
+
+    return events;
+  }
+
+  static getTicketIntegration(integrationId: string): TicketPlatformIntegration | undefined {
+    return this.integrations.get(integrationId);
+  }
+
+  static getUserTicketIntegrations(userId: string): TicketPlatformIntegration[] {
+    return Array.from(this.integrations.values()).filter(integration => integration.userId === userId);
+  }
+
+  static getTicketEvents(integrationId: string): ImportedProduct[] {
+    return this.events.get(integrationId) || [];
+  }
+
+  static getAllUserTicketEvents(userId: string): ImportedProduct[] {
+    const userIntegrations = this.getUserTicketIntegrations(userId);
+    let allEvents: ImportedProduct[] = [];
+    
+    for (const integration of userIntegrations) {
+      const events = this.getTicketEvents(integration.id);
+      allEvents = allEvents.concat(events);
+    }
+    
+    return allEvents;
+  }
+}
+
 // API Routes
 export function registerIntegrationRoutes(app: Express): void {
   // Website Integration Routes
@@ -412,6 +630,73 @@ export function registerIntegrationRoutes(app: Express): void {
     }
   });
 
+  // Ticket Platform Integration Routes
+  app.post('/api/integrations/tickets/connect', async (req, res) => {
+    try {
+      const { platform, apiKey, secretKey, organizationId } = req.body;
+      const userId = req.user?.id || 'demo_user';
+      
+      if (!platform || !apiKey) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Platform and API key are required' 
+        });
+      }
+
+      const integrationId = await TicketPlatformIntegrationManager.connectTicketPlatform(
+        userId, platform, apiKey, secretKey, organizationId
+      );
+      const integration = TicketPlatformIntegrationManager.getTicketIntegration(integrationId);
+      const events = TicketPlatformIntegrationManager.getTicketEvents(integrationId);
+
+      res.json({
+        success: true,
+        integration,
+        eventsImported: events.length,
+        message: `Successfully connected ${platform} and imported ${events.length} events`
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        error: error.message || 'Failed to connect ticket platform' 
+      });
+    }
+  });
+
+  app.get('/api/integrations/tickets/:integrationId/events', async (req, res) => {
+    try {
+      const { integrationId } = req.params;
+      const events = TicketPlatformIntegrationManager.getTicketEvents(integrationId);
+      
+      res.json({ success: true, events });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to fetch ticket events' 
+      });
+    }
+  });
+
+  app.get('/api/integrations/tickets/user/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const integrations = TicketPlatformIntegrationManager.getUserTicketIntegrations(userId);
+      const allEvents = TicketPlatformIntegrationManager.getAllUserTicketEvents(userId);
+      
+      res.json({ 
+        success: true, 
+        integrations, 
+        totalEvents: allEvents.length,
+        events: allEvents 
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to fetch user ticket integrations' 
+      });
+    }
+  });
+
   // General Integration Routes
   app.get('/api/integrations/user/:userId', async (req, res) => {
     try {
@@ -419,12 +704,14 @@ export function registerIntegrationRoutes(app: Express): void {
       
       const websiteIntegrations = WebsiteIntegrationManager.getUserIntegrations(userId);
       const socialIntegrations = SocialMediaIntegrationManager.getUserSocialIntegrations(userId);
+      const ticketIntegrations = TicketPlatformIntegrationManager.getUserTicketIntegrations(userId);
       
       res.json({
         success: true,
         integrations: {
           website: websiteIntegrations,
-          social: socialIntegrations
+          social: socialIntegrations,
+          tickets: ticketIntegrations
         }
       });
     } catch (error) {
@@ -453,6 +740,15 @@ export function registerIntegrationRoutes(app: Express): void {
           success: true, 
           message: `Synced ${products.length} products from social media`,
           productCount: products.length 
+        });
+      } else if (integrationId.includes('ticketmaster') || integrationId.includes('eventbrite') || 
+                integrationId.includes('stubhub') || integrationId.includes('universe') || 
+                integrationId.includes('seatgeek') || integrationId.includes('vividseats')) {
+        const events = await TicketPlatformIntegrationManager.importTicketsFromPlatform(integrationId);
+        res.json({ 
+          success: true, 
+          message: `Synced ${events.length} events from ticket platform`,
+          eventCount: events.length 
         });
       } else {
         res.status(400).json({ 
