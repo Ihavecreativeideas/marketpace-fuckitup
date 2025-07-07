@@ -118,7 +118,7 @@ app.post('/api/integrations/test-stored', async (req, res) => {
 // Test with specific token from user
 app.post('/api/integrations/test-specific', async (req, res) => {
     try {
-        const specificToken = "cc68bfa81bc1e88a3327daf9ff777596";
+        const specificToken = "27a57cd1ebe4468fdd16545b236449b2-1751859749";
         
         // User's actual store URL with variations
         const storeUrls = [
@@ -185,7 +185,7 @@ app.post('/api/integrations/test-specific', async (req, res) => {
 // Comprehensive store finder
 app.post('/api/integrations/find-store', async (req, res) => {
     try {
-        const specificToken = "cc68bfa81bc1e88a3327daf9ff777596";
+        const specificToken = "27a57cd1ebe4468fdd16545b236449b2-1751859749";
         
         // Comprehensive search including common patterns based on "marketpace"
         const storeUrls = [
@@ -331,7 +331,15 @@ app.get('/', (req, res) => {
         <div class="integration-section">
             <h2>📊 Integration Status</h2>
             <div id="integration-list">
-                <p>No integrations connected yet.</p>
+                <div class="status info">
+                    <strong>MarketPace Integration System:</strong><br>
+                    ✅ Database with Row Level Security (RLS)<br>
+                    ✅ Real Shopify API integration endpoints<br>
+                    ✅ Member-specific integration workflows<br>
+                    ✅ Comprehensive error handling and diagnostics<br>
+                    ✅ Support for multiple e-commerce platforms<br><br>
+                    <em>Ready for live Shopify store connection when valid access token is provided.</em>
+                </div>
             </div>
         </div>
         
@@ -424,7 +432,7 @@ app.get('/', (req, res) => {
         }
 
         async function testSpecificToken() {
-            showStatus('shopify-status', 'Testing with your new token: cc68bfa81bc1e88a3327daf9ff777596...', 'info');
+            showStatus('shopify-status', 'Testing with your token: 27a57cd1ebe4468fdd16545b236449b2-1751859749...', 'info');
             
             try {
                 const response = await fetch('/api/integrations/test-specific', {
