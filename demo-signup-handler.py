@@ -40,6 +40,7 @@ class DemoSignupManager:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 full_name TEXT NOT NULL,
                 email TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
                 phone TEXT NOT NULL,
                 city TEXT NOT NULL,
                 interests TEXT,
@@ -68,14 +69,18 @@ class DemoSignupManager:
             
             user_id = self.generate_user_id(user_data['email'])
             
+            # Hash the password
+            password_hash = hashlib.sha256(user_data['password'].encode()).hexdigest()
+            
             cursor.execute('''
                 INSERT INTO demo_users 
-                (full_name, email, phone, city, interests, sms_notifications, 
+                (full_name, email, password_hash, phone, city, interests, sms_notifications, 
                  email_updates, terms_accepted, user_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 user_data['fullName'],
                 user_data['email'],
+                password_hash,
                 user_data['phone'],
                 user_data['city'],
                 user_data.get('interests', ''),
