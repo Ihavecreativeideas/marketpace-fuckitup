@@ -418,14 +418,35 @@
                         </div>
                     </div>
 
+                    <div class="form-group">
+                        <label for="phone">Phone Number *</label>
+                        <input type="tel" id="phone" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="country">Country *</label>
+                        <select id="country" class="form-input" required>
+                            <option value="">Select Country</option>
+                            <option value="United States">United States</option>
+                            <option value="Canada">Canada</option>
+                            <option value="United Kingdom">United Kingdom</option>
+                            <option value="Australia">Australia</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="phone">Phone Number *</label>
-                            <input type="tel" id="phone" class="form-input" required>
+                            <label for="state">State/Province *</label>
+                            <select id="state" class="form-input" required>
+                                <option value="">Select State</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="city">City *</label>
-                            <input type="text" id="city" class="form-input" required>
+                            <select id="city" class="form-input" required>
+                                <option value="">Select City</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -734,6 +755,8 @@
                 email: document.getElementById('email').value,
                 password: document.getElementById('password').value,
                 phone: document.getElementById('phone').value,
+                country: document.getElementById('country').value,
+                state: document.getElementById('state').value,
                 city: document.getElementById('city').value,
                 accountType: accountType,
                 bio: document.getElementById('bio').value,
@@ -779,6 +802,72 @@
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fas fa-rocket"></i> Join MarketPace';
+            }
+        });
+
+        // Location dropdown data and handlers
+        const locationData = {
+            "United States": {
+                "Alabama": ["Birmingham", "Montgomery", "Mobile", "Huntsville", "Tuscaloosa"],
+                "Alaska": ["Anchorage", "Fairbanks", "Juneau", "Sitka", "Ketchikan"],
+                "Arizona": ["Phoenix", "Tucson", "Mesa", "Chandler", "Glendale", "Scottsdale"],
+                "Arkansas": ["Little Rock", "Fort Smith", "Fayetteville", "Springdale", "Jonesboro"],
+                "California": ["Los Angeles", "San Diego", "San Jose", "San Francisco", "Fresno", "Sacramento", "Long Beach", "Oakland", "Bakersfield"],
+                "Colorado": ["Denver", "Colorado Springs", "Aurora", "Fort Collins", "Lakewood"],
+                "Florida": ["Jacksonville", "Miami", "Tampa", "Orlando", "St. Petersburg", "Hialeah", "Tallahassee"],
+                "Georgia": ["Atlanta", "Columbus", "Augusta", "Savannah", "Athens"],
+                "Illinois": ["Chicago", "Aurora", "Rockford", "Joliet", "Naperville", "Springfield"],
+                "New York": ["New York City", "Buffalo", "Rochester", "Yonkers", "Syracuse", "Albany"],
+                "Texas": ["Houston", "San Antonio", "Dallas", "Austin", "Fort Worth", "El Paso", "Arlington"],
+                "Washington": ["Seattle", "Spokane", "Tacoma", "Vancouver", "Bellevue", "Kent"],
+                "Pennsylvania": ["Philadelphia", "Pittsburgh", "Allentown", "Erie", "Reading"]
+            },
+            "Canada": {
+                "Ontario": ["Toronto", "Ottawa", "Mississauga", "Brampton", "Hamilton", "London"],
+                "Quebec": ["Montreal", "Quebec City", "Laval", "Gatineau", "Longueuil"],
+                "British Columbia": ["Vancouver", "Surrey", "Burnaby", "Richmond", "Abbotsford"],
+                "Alberta": ["Calgary", "Edmonton", "Red Deer", "Lethbridge", "St. Albert"]
+            }
+        };
+
+        // Handle country selection
+        document.getElementById('country').addEventListener('change', function() {
+            const country = this.value;
+            const stateSelect = document.getElementById('state');
+            const citySelect = document.getElementById('city');
+            
+            // Reset state and city dropdowns
+            stateSelect.innerHTML = '<option value="">Select State</option>';
+            citySelect.innerHTML = '<option value="">Select City</option>';
+            
+            if (country && locationData[country]) {
+                // Populate states for selected country
+                Object.keys(locationData[country]).forEach(state => {
+                    const option = document.createElement('option');
+                    option.value = state;
+                    option.textContent = state;
+                    stateSelect.appendChild(option);
+                });
+            }
+        });
+
+        // Handle state selection
+        document.getElementById('state').addEventListener('change', function() {
+            const country = document.getElementById('country').value;
+            const state = this.value;
+            const citySelect = document.getElementById('city');
+            
+            // Reset city dropdown
+            citySelect.innerHTML = '<option value="">Select City</option>';
+            
+            if (country && state && locationData[country] && locationData[country][state]) {
+                // Populate cities for selected state
+                locationData[country][state].forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    citySelect.appendChild(option);
+                });
             }
         });
 
