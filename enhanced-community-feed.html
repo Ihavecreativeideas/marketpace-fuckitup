@@ -564,6 +564,117 @@
             color: #ff6b35;
         }
 
+        /* New styles for enhanced features */
+        .radius-slider {
+            width: 100%;
+            margin: 0.5rem 0;
+            appearance: none;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .radius-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(45deg, #00ffff, #9d4edd);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .town-search-input {
+            width: calc(100% - 80px);
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 5px;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .search-town-btn {
+            width: 70px;
+            padding: 0.5rem;
+            background: linear-gradient(45deg, #00ffff, #9d4edd);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .poll-creator {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1rem;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .poll-question-input {
+            margin-bottom: 1rem;
+        }
+
+        .poll-option-input {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            gap: 0.5rem;
+        }
+
+        .poll-option-field {
+            flex: 1;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 5px;
+            color: white;
+        }
+
+        .poll-option-field::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .remove-option-btn {
+            width: 25px;
+            height: 25px;
+            background: #ff4444;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .add-poll-option-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(0, 255, 255, 0.2);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 5px;
+            color: #00ffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-poll-option-btn:hover {
+            background: rgba(0, 255, 255, 0.3);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            outline: none;
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
         /* Responsive design */
         @media (max-width: 768px) {
             .main-content {
@@ -656,8 +767,17 @@
                 <label class="filter-label">Location</label>
                 <div class="filter-options">
                     <button class="filter-btn active" data-filter="nearby">Nearby</button>
-                    <button class="filter-btn" data-filter="city">My City</button>
-                    <button class="filter-btn" data-filter="state">My State</button>
+                    <button class="filter-btn" data-filter="town-search">Search by Town</button>
+                </div>
+                <div class="location-controls" style="margin-top: 1rem;">
+                    <label class="filter-label">Radius (miles)</label>
+                    <input type="range" id="radiusSlider" min="1" max="50" value="10" class="radius-slider">
+                    <span id="radiusValue">10 miles</span>
+                    
+                    <div class="town-search-container" style="margin-top: 1rem; display: none;">
+                        <input type="text" id="townSearch" placeholder="Enter town name..." class="town-search-input">
+                        <button class="search-town-btn">Search</button>
+                    </div>
                 </div>
             </div>
         </aside>
@@ -676,9 +796,30 @@
                         <button class="post-type-btn" data-type="product">Product</button>
                         <button class="post-type-btn" data-type="iso">ISO</button>
                         <button class="post-type-btn" data-type="poll">Poll</button>
+                        <button class="post-type-btn" data-type="events">Events</button>
+                        <button class="post-type-btn" data-type="rentals">Rentals</button>
+                        <button class="post-type-btn" data-type="services">Services</button>
                         <button class="post-type-btn" data-type="shop">Shop</button>
                     </div>
                     <button class="post-btn" onclick="createPost()">Post</button>
+                </div>
+                
+                <!-- Poll creation section (hidden by default) -->
+                <div class="poll-creator" id="pollCreator" style="display: none; margin-top: 1rem;">
+                    <div class="poll-question-input">
+                        <input type="text" id="pollQuestion" placeholder="Ask a question..." class="form-input">
+                    </div>
+                    <div class="poll-options-container">
+                        <div class="poll-option-input">
+                            <input type="text" placeholder="Option 1" class="poll-option-field">
+                            <button class="remove-option-btn" onclick="removePollOption(this)" style="display: none;">✕</button>
+                        </div>
+                        <div class="poll-option-input">
+                            <input type="text" placeholder="Option 2" class="poll-option-field">
+                            <button class="remove-option-btn" onclick="removePollOption(this)" style="display: none;">✕</button>
+                        </div>
+                    </div>
+                    <button class="add-poll-option-btn" onclick="addPollOption()">+ Add Option</button>
                 </div>
             </div>
 
@@ -831,8 +972,8 @@
             },
             {
                 id: 6,
-                type: 'product',
-                category: 'hub',
+                type: 'events',
+                category: 'events',
                 author: 'Jazz Night Collective',
                 time: '1 day ago',
                 content: 'THIS SATURDAY: Live Jazz Night at the Community Center! Come support local musicians 🎷',
@@ -840,6 +981,29 @@
                 comments: 23,
                 shares: 34,
                 image: 'https://via.placeholder.com/500x300/1a0845/9d4edd?text=Jazz+Night'
+            },
+            {
+                id: 7,
+                type: 'rentals',
+                category: 'rentals',
+                author: 'Outdoor Adventures Co',
+                time: '3 hours ago',
+                content: 'Weekend camping package available for rent! Includes tent, sleeping bags, camping chairs, and portable grill. Perfect for families!',
+                likes: 31,
+                comments: 12,
+                shares: 8,
+                image: 'https://via.placeholder.com/500x300/0d0221/00ffff?text=Camping+Package'
+            },
+            {
+                id: 8,
+                type: 'services',
+                category: 'services',
+                author: 'HandyHelper Tom',
+                time: '5 hours ago',
+                content: 'Available for home repairs this weekend! Specializing in plumbing, electrical work, and general maintenance. Local references available.',
+                likes: 18,
+                comments: 7,
+                shares: 5
             }
         ];
 
@@ -861,11 +1025,34 @@
                     const filterType = this.getAttribute('data-filter');
                     if (filterType === 'all' || filterType === 'nearby') {
                         currentFilter = 'all';
+                        document.querySelector('.town-search-container').style.display = 'none';
+                    } else if (filterType === 'town-search') {
+                        currentFilter = 'all';
+                        document.querySelector('.town-search-container').style.display = 'block';
                     } else {
                         currentFilter = filterType;
+                        document.querySelector('.town-search-container').style.display = 'none';
                     }
                     renderPosts();
                 });
+            });
+
+            // Initialize radius slider
+            const radiusSlider = document.getElementById('radiusSlider');
+            const radiusValue = document.getElementById('radiusValue');
+            radiusSlider.addEventListener('input', function() {
+                radiusValue.textContent = this.value + ' miles';
+                // In a real app, this would filter posts by radius
+            });
+
+            // Initialize town search
+            document.querySelector('.search-town-btn').addEventListener('click', function() {
+                const townName = document.getElementById('townSearch').value;
+                if (townName.trim()) {
+                    // In a real app, this would filter posts by town
+                    console.log('Searching for posts in:', townName);
+                    alert(`Searching for posts in ${townName}...`);
+                }
             });
         }
 
@@ -875,6 +1062,14 @@
                 btn.addEventListener('click', function() {
                     document.querySelectorAll('.post-type-btn').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
+                    
+                    // Show/hide poll creator
+                    const pollCreator = document.getElementById('pollCreator');
+                    if (this.getAttribute('data-type') === 'poll') {
+                        pollCreator.style.display = 'block';
+                    } else {
+                        pollCreator.style.display = 'none';
+                    }
                 });
             });
         }
@@ -915,7 +1110,7 @@
         // Create post HTML
         function createPostHTML(post) {
             let postContent = `
-                <div class="feed-post" data-category="${post.category}">
+                <div class="feed-post" data-category="${post.category}" id="post-${post.id}">
                     <div class="post-header">
                         <div class="user-avatar">${post.author.charAt(0)}</div>
                         <div class="post-meta">
@@ -977,9 +1172,9 @@
                             <span>📤</span>
                             <span>${post.shares}</span>
                         </button>
-                        <button class="action-btn">
-                            <span>🔗</span>
-                            <span>Share</span>
+                        <button class="action-btn" onclick="shareToFacebook(${post.id}, \`${post.content.replace(/`/g, '\\`')}\`, '${post.author}')">
+                            <span>📘</span>
+                            <span>Share on Facebook</span>
                         </button>
                     </div>
                 </div>
@@ -998,11 +1193,11 @@
                 return;
             }
 
-            // In a real app, this would send to the server
+            // Create new post object
             const newPost = {
                 id: Date.now(),
                 type: activeType,
-                category: activeType === 'general' ? 'general' : 'buy-sell',
+                category: activeType === 'general' ? 'general' : activeType,
                 author: 'Demo User',
                 time: 'Just now',
                 content: postInput.value,
@@ -1011,9 +1206,93 @@
                 shares: 0
             };
 
+            // Handle poll creation
+            if (activeType === 'poll') {
+                const pollQuestion = document.getElementById('pollQuestion').value;
+                const pollOptions = Array.from(document.querySelectorAll('.poll-option-field'))
+                    .map(input => input.value.trim())
+                    .filter(value => value !== '');
+
+                if (!pollQuestion.trim() || pollOptions.length < 2) {
+                    alert('Please provide a poll question and at least 2 options!');
+                    return;
+                }
+
+                newPost.poll = {
+                    question: pollQuestion,
+                    options: pollOptions.map(option => ({
+                        text: option,
+                        votes: 0,
+                        percentage: 0
+                    }))
+                };
+
+                // Reset poll creator
+                document.getElementById('pollQuestion').value = '';
+                document.querySelectorAll('.poll-option-field').forEach(input => input.value = '');
+            }
+
             samplePosts.unshift(newPost);
             postInput.value = '';
+            document.getElementById('pollCreator').style.display = 'none';
+            document.querySelector('.post-type-btn[data-type="general"]').classList.add('active');
+            document.querySelectorAll('.post-type-btn:not([data-type="general"])').forEach(btn => btn.classList.remove('active'));
             renderPosts();
+        }
+
+        // Poll creation functions
+        function addPollOption() {
+            const container = document.querySelector('.poll-options-container');
+            const optionCount = container.children.length;
+            
+            if (optionCount >= 6) {
+                alert('Maximum 6 poll options allowed');
+                return;
+            }
+
+            const newOption = document.createElement('div');
+            newOption.className = 'poll-option-input';
+            newOption.innerHTML = `
+                <input type="text" placeholder="Option ${optionCount + 1}" class="poll-option-field">
+                <button class="remove-option-btn" onclick="removePollOption(this)">✕</button>
+            `;
+            container.appendChild(newOption);
+
+            // Show remove buttons if more than 2 options
+            if (optionCount >= 2) {
+                document.querySelectorAll('.remove-option-btn').forEach(btn => {
+                    btn.style.display = 'block';
+                });
+            }
+        }
+
+        function removePollOption(button) {
+            const container = document.querySelector('.poll-options-container');
+            const optionDiv = button.parentElement;
+            container.removeChild(optionDiv);
+
+            // Hide remove buttons if only 2 options left
+            if (container.children.length <= 2) {
+                document.querySelectorAll('.remove-option-btn').forEach(btn => {
+                    btn.style.display = 'none';
+                });
+            }
+
+            // Update placeholders
+            Array.from(container.children).forEach((child, index) => {
+                const input = child.querySelector('.poll-option-field');
+                input.placeholder = `Option ${index + 1}`;
+            });
+        }
+
+        // Facebook sharing function
+        function shareToFacebook(postId, content, author) {
+            // Clean content for sharing
+            const cleanContent = content.replace(/'/g, "\\'").substring(0, 200);
+            const shareUrl = encodeURIComponent(window.location.href + '#post-' + postId);
+            const shareText = encodeURIComponent(`Check out this post from ${author} on MarketPace: "${cleanContent}${cleanContent.length >= 200 ? '...' : ''}"`);
+            const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}&quote=${shareText}`;
+            window.open(facebookUrl, '_blank', 'width=600,height=400,scrollbars=yes,resizable=yes');
         }
 
         // Demo popup functionality
