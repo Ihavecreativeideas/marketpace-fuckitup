@@ -90,41 +90,37 @@
             transform: translateY(-100%);
         }
 
-        /* Community Calendar Styles */
-        .community-calendar-bar {
+        /* Community Calendar Styles - Now in Main Menu */
+        .menu-calendar-section {
             background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 100%);
-            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .menu-calendar-header {
             padding: 15px 20px;
             cursor: pointer;
             transition: all 0.3s ease;
-            position: fixed;
-            top: 140px;
-            left: 0;
-            right: 0;
-            width: 100%;
-            z-index: 99;
-        }
-
-        .community-calendar-bar:hover {
-            background: linear-gradient(135deg, #2d1b69 0%, #3730a3 100%);
-        }
-
-        .calendar-bar-content {
-            max-width: 1200px;
-            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 100%);
         }
 
-        .calendar-title {
-            font-size: 18px;
+        .menu-calendar-header:hover {
+            background: linear-gradient(135deg, #2d1b69 0%, #3730a3 100%);
+        }
+
+        .menu-calendar-title {
+            font-size: 16px;
             font-weight: bold;
             color: #00ffff;
             text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
         }
 
-        .calendar-toggle {
+        .menu-calendar-toggle {
             display: flex;
             align-items: center;
             gap: 10px;
@@ -132,16 +128,15 @@
             font-size: 14px;
         }
 
-        .calendar-expanded {
+        .menu-calendar-expanded {
             background: linear-gradient(135deg, #0d0221 0%, #1a0b3d 100%);
-            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
             padding: 0;
             max-height: 0;
             overflow: hidden;
             transition: all 0.3s ease;
         }
 
-        .calendar-expanded.active {
+        .menu-calendar-expanded.active {
             max-height: 500px;
             padding: 20px;
         }
@@ -322,7 +317,6 @@
         .main-content {
             max-width: 1200px;
             margin: 0 auto;
-            margin-top: 120px;
             padding: 2rem;
             display: grid;
             grid-template-columns: 1fr 3fr 1fr;
@@ -1245,7 +1239,6 @@
             .main-content {
                 grid-template-columns: 1fr;
                 padding: 1rem;
-                margin-top: 100px;
             }
             
             .filters-sidebar,
@@ -1638,44 +1631,7 @@
         </div>
     </header>
 
-    <!-- Community Calendar Bar -->
-    <div class="community-calendar-bar" onclick="toggleCalendar()">
-        <div class="calendar-bar-content">
-            <div class="calendar-title">📅 Community Calendar</div>
-            <div class="calendar-toggle">
-                <span>View Events</span>
-                <span id="calendarArrow">▼</span>
-            </div>
-        </div>
-    </div>
 
-    <!-- Expanded Calendar -->
-    <div class="calendar-expanded" id="calendarExpanded">
-        <div class="calendar-nav-header">
-            <button class="month-nav" onclick="previousMonth()">‹</button>
-            <div class="current-month" id="currentMonth">January 2025</div>
-            <button class="month-nav" onclick="nextMonth()">›</button>
-        </div>
-        
-        <div class="calendar-grid" id="calendarGrid">
-            <!-- Calendar days will be populated by JavaScript -->
-        </div>
-        
-        <div class="calendar-events" id="calendarEvents">
-            <div class="calendar-event">
-                <strong>Town Hall Meeting</strong> - Jan 15, 7:00 PM
-                <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Discuss new community initiatives</div>
-            </div>
-            <div class="calendar-event">
-                <strong>Local Market Day</strong> - Jan 20, 9:00 AM
-                <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Support local vendors and shops</div>
-            </div>
-            <div class="calendar-event">
-                <strong>Community Cleanup</strong> - Jan 25, 10:00 AM
-                <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Help beautify our neighborhood</div>
-            </div>
-        </div>
-    </div>
 
     <!-- Main content -->
     <main class="main-content">
@@ -2738,6 +2694,20 @@
             }
         }
 
+        // Menu Calendar Functions
+        function toggleMenuCalendar() {
+            const expanded = document.getElementById('menuCalendarExpanded');
+            const arrow = document.getElementById('menuCalendarArrow');
+            
+            if (expanded.classList.contains('active')) {
+                expanded.classList.remove('active');
+                arrow.textContent = '▼';
+            } else {
+                expanded.classList.add('active');
+                arrow.textContent = '▲';
+            }
+        }
+
         function navigateToFavorites() {
             alert('Navigating to Favorites page...');
             toggleMainMenu();
@@ -2813,24 +2783,8 @@
             generateCalendar();
         }
 
-        // Community calendar functions
+        // Community calendar functions - Now in Main Menu
         let isCalendarExpanded = false;
-
-        function toggleCalendar() {
-            const calendarExpanded = document.getElementById('calendarExpanded');
-            const calendarArrow = document.getElementById('calendarArrow');
-            
-            isCalendarExpanded = !isCalendarExpanded;
-            
-            if (isCalendarExpanded) {
-                calendarExpanded.classList.add('active');
-                calendarArrow.textContent = '▲';
-                generateCalendar();
-            } else {
-                calendarExpanded.classList.remove('active');
-                calendarArrow.textContent = '▼';
-            }
-        }
 
         function generateCalendar() {
             const calendarGrid = document.getElementById('calendarGrid');
@@ -3084,6 +3038,45 @@
                 <h3>Main Menu</h3>
                 <button class="close-menu-btn" onclick="toggleMainMenu()">✕</button>
             </div>
+            
+            <!-- Calendar Section in Main Menu -->
+            <div class="menu-calendar-section">
+                <div class="menu-calendar-header" onclick="toggleMenuCalendar()">
+                    <div class="menu-calendar-title">📅 Community Calendar</div>
+                    <div class="menu-calendar-toggle">
+                        <span>View Events</span>
+                        <span id="menuCalendarArrow">▼</span>
+                    </div>
+                </div>
+                
+                <div class="menu-calendar-expanded" id="menuCalendarExpanded">
+                    <div class="calendar-nav-header">
+                        <button class="month-nav" onclick="previousMonth()">‹</button>
+                        <div class="current-month" id="currentMonth">January 2025</div>
+                        <button class="month-nav" onclick="nextMonth()">›</button>
+                    </div>
+                    
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- Calendar days will be populated by JavaScript -->
+                    </div>
+                    
+                    <div class="calendar-events" id="calendarEvents">
+                        <div class="calendar-event">
+                            <strong>Town Hall Meeting</strong> - Jan 15, 7:00 PM
+                            <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Discuss new community initiatives</div>
+                        </div>
+                        <div class="calendar-event">
+                            <strong>Local Market Day</strong> - Jan 20, 9:00 AM
+                            <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Support local vendors and shops</div>
+                        </div>
+                        <div class="calendar-event">
+                            <strong>Community Cleanup</strong> - Jan 25, 10:00 AM
+                            <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Help beautify our neighborhood</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="menu-items">
                 <button class="menu-item" onclick="navigateToFavorites()">
                     <span>⭐</span> Favorites
