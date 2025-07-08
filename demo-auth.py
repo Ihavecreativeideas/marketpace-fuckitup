@@ -38,22 +38,22 @@ class DemoAuthHandler(BaseHTTPRequestHandler):
             print(f"Database setup error: {e}")
             return False
     
-    def verify_demo_user(self, email, phone):
+    def verify_demo_user(self, email, password):
         """Verify demo user credentials"""
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
             
-            # Format phone number for comparison
-            formatted_phone = self.format_phone_number(phone)
+            # Hash the provided password
+            password_hash = hashlib.sha256(password.encode()).hexdigest()
             
             cursor.execute("""
-                SELECT user_id, email, phone, first_name, last_name, 
-                       city, interests, early_supporter, signup_date
+                SELECT user_id, email, phone, full_name, 
+                       city, interests, created_at
                 FROM demo_users 
                 WHERE LOWER(email) = LOWER(?) 
-                AND (phone = ? OR phone = ?)
-            """, (email, phone, formatted_phone))
+                AND password_hash = ?
+            """, (email, password_hash))
             
             user = cursor.fetchone()
             conn.close()
@@ -63,12 +63,11 @@ class DemoAuthHandler(BaseHTTPRequestHandler):
                     'user_id': user[0],
                     'email': user[1],
                     'phone': user[2],
-                    'first_name': user[3],
-                    'last_name': user[4],
-                    'city': user[5],
-                    'interests': user[6],
-                    'early_supporter': bool(user[7]),
-                    'signup_date': user[8]
+                    'full_name': user[3],
+                    'city': user[4],
+                    'interests': user[5],
+                    'early_supporter': True,  # All demo users are early supporters
+                    'signup_date': user[6]
                 }
             
             return None
