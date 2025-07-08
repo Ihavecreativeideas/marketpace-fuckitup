@@ -43,6 +43,38 @@
             0%, 100% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(-20px) rotate(180deg); }
         }
+        
+        .header-logo-flow-particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 6;
+            box-shadow: 0 0 6px currentColor;
+            animation: headerLogoFlow linear infinite;
+        }
+        
+        @keyframes headerLogoFlow {
+            0% {
+                transform: translate(var(--start-x), var(--start-y)) scale(0);
+                opacity: 0;
+            }
+            15% {
+                opacity: 1;
+                transform: translate(var(--start-x), var(--start-y)) scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(calc((var(--start-x) + var(--end-x)) / 2), calc((var(--start-y) + var(--end-y)) / 2)) scale(1.1);
+            }
+            85% {
+                opacity: 0.7;
+                transform: translate(var(--end-x), var(--end-y)) scale(0.8);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--end-x), var(--end-y)) scale(0);
+            }
+        }
 
         /* Header */
         .header {
@@ -1524,16 +1556,31 @@
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <img src="/marketpace-hero-logo.jpeg" alt="MarketPace" style="
-                  height: 60px; 
-                  width: auto; 
-                  border-radius: 12px; 
-                  object-fit: cover;
-                  filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.6));
-                  mask: radial-gradient(ellipse at center, rgba(0,0,0,1) 75%, rgba(0,0,0,0.6) 90%, rgba(0,0,0,0) 100%);
-                  -webkit-mask: radial-gradient(ellipse at center, rgba(0,0,0,1) 75%, rgba(0,0,0,0.6) 90%, rgba(0,0,0,0) 100%);
-                ">
+            <div style="display: flex; align-items: center; gap: 15px; position: relative;">
+                <div id="headerLogoContainer" style="position: relative; overflow: visible;">
+                    <!-- Header logo flow particles -->
+                    <div id="headerLogoFlowParticles" style="
+                      position: absolute;
+                      top: -30px;
+                      left: -30px;
+                      right: -30px;
+                      bottom: -30px;
+                      z-index: 4;
+                      pointer-events: none;
+                    "></div>
+                    
+                    <img src="/marketpace-hero-logo.jpeg" alt="MarketPace" style="
+                      height: 60px; 
+                      width: auto; 
+                      border-radius: 12px; 
+                      object-fit: cover;
+                      filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.6));
+                      mask: radial-gradient(ellipse at center, rgba(0,0,0,1) 75%, rgba(0,0,0,0.6) 90%, rgba(0,0,0,0) 100%);
+                      -webkit-mask: radial-gradient(ellipse at center, rgba(0,0,0,1) 75%, rgba(0,0,0,0.6) 90%, rgba(0,0,0,0) 100%);
+                      position: relative;
+                      z-index: 5;
+                    ">
+                </div>
             </div>
             <div class="search-bar">
                 <input type="text" class="search-input" placeholder="Search posts, products, services, or people..." id="searchInput">
@@ -2805,9 +2852,70 @@
             }
         }
 
+        // Create header logo flow particles
+        function createHeaderLogoFlowParticles() {
+            const logoContainer = document.getElementById('headerLogoFlowParticles');
+            if (!logoContainer) return;
+
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'header-logo-flow-particle';
+                    
+                    // Random starting position around smaller logo perimeter
+                    const angle = Math.random() * 2 * Math.PI;
+                    const radius = 40 + Math.random() * 20;
+                    const centerX = 60; // Header logo center X
+                    const centerY = 60; // Header logo center Y
+                    const startX = Math.cos(angle) * radius + centerX;
+                    const startY = Math.sin(angle) * radius + centerY;
+                    
+                    // Create flowing end position
+                    const flowAngle = angle + (Math.random() - 0.5) * Math.PI * 0.5;
+                    const flowRadius = radius + Math.random() * 40 + 30;
+                    const endX = Math.cos(flowAngle) * flowRadius + centerX;
+                    const endY = Math.sin(flowAngle) * flowRadius + centerY;
+                    
+                    particle.style.left = '0px';
+                    particle.style.top = '0px';
+                    
+                    // Random color with higher opacity
+                    const colors = ['rgba(0, 255, 255, 0.8)', 'rgba(138, 43, 226, 0.8)', 'rgba(255, 255, 255, 0.7)'];
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    // Smaller size for header
+                    const size = Math.random() * 2 + 1.5;
+                    particle.style.width = size + 'px';
+                    particle.style.height = size + 'px';
+                    
+                    // Set custom properties for animation
+                    particle.style.setProperty('--start-x', startX + 'px');
+                    particle.style.setProperty('--start-y', startY + 'px');
+                    particle.style.setProperty('--end-x', endX + 'px');
+                    particle.style.setProperty('--end-y', endY + 'px');
+                    
+                    // Random animation duration
+                    particle.style.animationDuration = (Math.random() * 4 + 3) + 's';
+                    
+                    logoContainer.appendChild(particle);
+                    
+                    // Remove particle after animation
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, 7000);
+                }, i * 200);
+            }
+            
+            // Restart header logo particles every 3 seconds
+            setTimeout(createHeaderLogoFlowParticles, 3000);
+        }
+
         // Initialize everything
         document.addEventListener('DOMContentLoaded', function() {
             createParticles();
+            createHeaderLogoFlowParticles(); // Start header logo particle flow
             initializeFilters();
             initializePostTypes();
             initializeSearch();
