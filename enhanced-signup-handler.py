@@ -45,7 +45,9 @@ class EnhancedSignupManager:
             ('business_description', 'TEXT'),
             ('business_categories', 'TEXT'),
             ('early_supporter', 'BOOLEAN DEFAULT 1'),
-            ('signup_date', 'TEXT')
+            ('signup_date', 'TEXT'),
+            ('country', 'TEXT'),
+            ('state', 'TEXT')
         ]
         
         for column_name, column_def in columns_to_add:
@@ -83,13 +85,13 @@ class EnhancedSignupManager:
                 
                 cursor.execute('''
                     UPDATE demo_users SET 
-                    password_hash = ?, phone = ?, full_name = ?, city = ?, 
+                    password_hash = ?, phone = ?, full_name = ?, country = ?, state = ?, city = ?, 
                     interests = ?, business_name = ?, business_website = ?, 
                     business_address = ?, business_phone = ?, business_description = ?, 
                     bio = ?, business_categories = ?, account_type = ?
                     WHERE email = ?
                 ''', (
-                    password_hash, phone, full_name, user_data['city'], 
+                    password_hash, phone, full_name, user_data.get('country'), user_data.get('state'), user_data['city'], 
                     interests, user_data.get('businessName'), user_data.get('businessWebsite'), 
                     user_data.get('businessAddress'), user_data.get('workPhone'),
                     user_data.get('businessDescription'), user_data.get('bio'), 
@@ -130,18 +132,20 @@ class EnhancedSignupManager:
             # Insert user with all enhanced fields
             cursor.execute("""
                 INSERT INTO demo_users 
-                (user_id, full_name, email, password_hash, phone, city, interests, 
+                (user_id, full_name, email, password_hash, phone, country, state, city, interests, 
                  account_type, bio, business_name, business_website, business_address, 
                  business_phone, business_description, business_categories, 
                  early_supporter, signup_date, sms_notifications, email_updates, 
                  terms_accepted, demo_access_granted)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 user_id,
                 full_name,
                 user_data['email'],
                 password_hash,
                 phone,
+                user_data.get('country'),
+                user_data.get('state'),
                 user_data['city'],
                 interests,
                 user_data.get('accountType', 'personal'),
