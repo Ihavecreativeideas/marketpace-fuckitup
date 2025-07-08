@@ -67,10 +67,51 @@ class EnhancedSignupManager:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
             
-            # Check if email already exists
-            cursor.execute("SELECT email FROM demo_users WHERE email = ?", (user_data['email'],))
-            if cursor.fetchone():
-                return {"success": False, "error": "Email already registered"}
+            # Check if email already exists and handle updates
+            cursor.execute("SELECT user_id, full_name FROM demo_users WHERE email = ?", (user_data['email'],))
+            existing_user = cursor.fetchone()
+            
+            if existing_user:
+                # Update existing user account
+                password_hash = hashlib.sha256(user_data['password'].encode()).hexdigest()
+                phone = self.format_phone_number(user_data['phone'])
+                full_name = f"{user_data['firstName']} {user_data['lastName']}"
+                interests = ','.join(user_data.get('interests', []))
+                business_categories = ','.join(user_data.get('businessCategories', []))
+                
+                cursor.execute('''
+                    UPDATE demo_users SET 
+                    password_hash = ?, phone = ?, full_name = ?, city = ?, 
+                    account_type = ?, business_name = ?, business_website = ?, 
+                    business_address = ?, business_phone = ?, business_description = ?, 
+                    bio = ?, interests = ?, business_categories = ?, 
+                    sms_notifications = ?, email_updates = ?
+                    WHERE email = ?
+                ''', (
+                    password_hash, phone, full_name, user_data['city'], user_data['account_type'],
+                    user_data.get('businessName'), user_data.get('businessWebsite'), 
+                    user_data.get('businessAddress'), user_data.get('workPhone'),
+                    user_data.get('businessDescription'), user_data.get('bio'), 
+                    interests, business_categories, user_data.get('notifications', True), 
+                    user_data.get('notifications', True), user_data['email']
+                ))
+                self.conn.commit()
+                
+                # Prepare data for SMS notification
+                notification_data = {
+                    'full_name': full_name,
+                    'phone': phone,
+                    'account_type': user_data['account_type'],
+                    'business_name': user_data.get('businessName'),
+                    'city': user_data['city']
+                }
+                self.send_welcome_notifications(notification_data)
+                
+                return {
+                    "success": True,
+                    "user_id": existing_user[0], 
+                    "message": f"Account updated successfully! Welcome back, {full_name}."
+                }
             
             # Generate unique user ID
             user_id = self.generate_user_id(user_data['email'])
