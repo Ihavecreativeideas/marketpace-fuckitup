@@ -817,6 +817,66 @@
             width: 20px;
         }
 
+        /* Item Actions */
+        .item-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .item-action-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .item-action-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: rgba(0, 255, 255, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .item-action-btn.counter-offer {
+            border-color: rgba(255, 107, 53, 0.5);
+            color: #ff6b35;
+        }
+
+        .item-action-btn.counter-offer:hover {
+            background: rgba(255, 107, 53, 0.2);
+        }
+
+        .item-action-btn.add-to-cart {
+            border-color: rgba(157, 78, 221, 0.5);
+            color: #9d4edd;
+        }
+
+        .item-action-btn.add-to-cart:hover {
+            background: rgba(157, 78, 221, 0.2);
+        }
+
+        .item-action-btn.deliver-now {
+            border-color: rgba(0, 255, 255, 0.5);
+            color: #00ffff;
+        }
+
+        .item-action-btn.deliver-now:hover {
+            background: rgba(0, 255, 255, 0.2);
+        }
+
+        .post-price {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #ff6b35;
+            margin-bottom: 0.5rem;
+        }
+
         /* Responsive design */
         @media (max-width: 768px) {
             .main-content {
@@ -1102,6 +1162,7 @@
                 likes: 18,
                 comments: 6,
                 shares: 4,
+                price: 25.00,
                 image: 'https://via.placeholder.com/500x300/0d0221/00ffff?text=Camping+Gear'
             },
             {
@@ -1137,6 +1198,7 @@
                 likes: 31,
                 comments: 12,
                 shares: 8,
+                price: 85.00,
                 image: 'https://via.placeholder.com/500x300/0d0221/00ffff?text=Camping+Package'
             },
             {
@@ -1281,8 +1343,37 @@
                                 <div class="shop-item-image">${item.emoji}</div>
                                 <div class="shop-item-name">${item.name}</div>
                                 <div class="shop-item-price">${item.price}</div>
+                                <div class="item-actions">
+                                    <button class="item-action-btn counter-offer" onclick="makeCounterOffer('${item.name}', '${item.price}')">
+                                        💰 Counter Offer
+                                    </button>
+                                    <button class="item-action-btn add-to-cart" onclick="addToCart('${item.name}')">
+                                        🛒 Add to Cart
+                                    </button>
+                                    <button class="item-action-btn deliver-now" onclick="deliverNow('${item.name}')">
+                                        🚚 Deliver Now
+                                    </button>
+                                </div>
                             </div>
                         `).join('')}
+                    </div>
+                `;
+            }
+
+            // Add individual post price and actions if it's a direct product post
+            if (post.price) {
+                postContent += `
+                    <div class="post-price">$${post.price.toFixed(2)}</div>
+                    <div class="item-actions">
+                        <button class="item-action-btn counter-offer" onclick="makeCounterOffer(${post.id}, ${post.price})">
+                            💰 Counter Offer
+                        </button>
+                        <button class="item-action-btn add-to-cart" onclick="addToCart(${post.id})">
+                            🛒 Add to Cart
+                        </button>
+                        <button class="item-action-btn deliver-now" onclick="deliverNow(${post.id})">
+                            🚚 Deliver Now
+                        </button>
                     </div>
                 `;
             }
@@ -1319,7 +1410,6 @@
                         </button>
                         <button class="action-btn" onclick="shareToFacebook(${post.id}, \`${post.content.replace(/`/g, '\\`')}\`, '${post.author}')">
                             <span>📘</span>
-                            <span>Share on Facebook</span>
                         </button>
                     </div>
                 </div>
@@ -1488,6 +1578,22 @@
         // Profile Functions
         function openProfile() {
             window.location.href = '/profile';
+        }
+
+        // Item Action Functions
+        function makeCounterOffer(itemId, currentPrice) {
+            const counterOffer = prompt(`Current price: $${currentPrice}\n\nEnter your counter offer:`);
+            if (counterOffer && !isNaN(counterOffer) && parseFloat(counterOffer) > 0) {
+                alert(`Counter offer of $${parseFloat(counterOffer).toFixed(2)} has been sent to the seller!\n\nYou'll receive a notification when they respond.`);
+            }
+        }
+
+        function addToCart(itemId) {
+            alert(`Item added to cart!\n\n• Item will be held for 24 hours\n• Proceed to checkout when ready\n• MarketPace delivery available\n• Free delivery on orders over $50`);
+        }
+
+        function deliverNow(itemId) {
+            alert(`Deliver Now selected!\n\n• Estimated delivery: 2-4 hours\n• Delivery fee: $3.50\n• Driver will contact you for pickup\n• Track your delivery in real-time`);
         }
 
         // Demo popup functionality
