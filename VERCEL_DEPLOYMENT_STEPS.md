@@ -72,16 +72,23 @@ PGDATABASE = your_pg_database
      - Admin login: `/admin-login.html`
      - Sponsorship: `/sponsorship`
 
-## Step 5: Add Custom Domain (Optional)
+## Step 5: Add Custom Domain (www.MarketPace.shop)
 
 1. **In Vercel dashboard:**
    - Go to Settings → Domains
-   - Add your domain: `marketpace.shop`
-   - Follow DNS instructions
+   - Add domain: `marketpace.shop`
+   - Add domain: `www.marketpace.shop`
+   - Follow DNS verification instructions
 
 2. **Update DNS at your domain registrar:**
-   - Add CNAME record: `www` → `cname.vercel-dns.com`
    - Add A record: `@` → `76.76.19.19`
+   - Add CNAME record: `www` → `cname.vercel-dns.com`
+   - TTL: 300 seconds (5 minutes)
+
+3. **DNS propagation:**
+   - Wait 1-24 hours for DNS changes
+   - SSL certificate issued automatically
+   - Test at: `https://www.marketpace.shop`
 
 ## Step 6: Enable Auto-Deployment
 
@@ -92,9 +99,11 @@ PGDATABASE = your_pg_database
 ## Step 7: Access Your Live App
 
 **Your live URLs:**
-- Main site: `https://your-vercel-url.vercel.app`
-- Demo app: `https://your-vercel-url.vercel.app/enhanced-community-feed.html`
-- Admin dashboard: `https://your-vercel-url.vercel.app/admin-login.html`
+- Main site: `https://www.marketpace.shop`
+- Demo app: `https://www.marketpace.shop/enhanced-community-feed.html`
+- Admin dashboard: `https://www.marketpace.shop/admin-login.html`
+- Driver application: `https://www.marketpace.shop/driver-application.html`
+- Sponsorship: `https://www.marketpace.shop/sponsorship`
 
 **Admin credentials:**
 - Username: `admin`
