@@ -1096,7 +1096,16 @@
             <div class="search-bar">
                 <input type="text" class="search-input" placeholder="Search posts, products, services, or people..." id="searchInput">
             </div>
-            <div class="user-menu">
+            <div class="user-menu" style="display: flex; align-items: center; gap: 15px;">
+                <!-- Mini Calendar -->
+                <div class="mini-calendar" onclick="toggleEventCalendar()" style="cursor: pointer;">
+                    <div style="background: linear-gradient(135deg, #6a1b9a, #0d0221); padding: 8px; border-radius: 10px; border: 2px solid #00ffff; box-shadow: 0 0 10px rgba(0, 255, 255, 0.3); min-width: 60px; text-align: center;">
+                        <div style="color: #00ffff; font-size: 10px; font-weight: bold;" id="miniCalendarMonth">FEB</div>
+                        <div style="color: white; font-size: 18px; font-weight: bold; margin: 1px 0;" id="miniCalendarDay">8</div>
+                        <div style="color: rgba(255,255,255,0.7); font-size: 8px;">2025</div>
+                        <div style="color: #ff6b35; font-size: 8px; margin-top: 2px; font-weight: bold;">3 Events</div>
+                    </div>
+                </div>
                 <div class="demo-badge" onclick="showDemoPopup()">
                     Demo Mode - Sign Up Free!
                 </div>
@@ -2190,6 +2199,26 @@
             alert(`Selected date: ${currentDate.getMonth() + 1}/${day}/${currentDate.getFullYear()}`);
         }
 
+        // Mini calendar and event calendar functions
+        function updateMiniCalendar() {
+            const today = new Date();
+            const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+            
+            document.getElementById('miniCalendarMonth').textContent = monthNames[today.getMonth()];
+            document.getElementById('miniCalendarDay').textContent = today.getDate();
+        }
+
+        function toggleEventCalendar() {
+            const modal = document.getElementById('eventCalendarModal');
+            modal.classList.remove('hidden');
+            renderCalendar();
+        }
+
+        function hideEventCalendar() {
+            const modal = document.getElementById('eventCalendarModal');
+            modal.classList.add('hidden');
+        }
+
         // Hub entertainment interaction handlers
         function buyMusic(title) {
             alert(`Demo Mode: Would purchase "${title}" for $0.99. Feature available when MarketPace launches in your area!`);
@@ -2254,6 +2283,7 @@
             initializePostTypes();
             initializeSearch();
             initializeCalendar();
+            updateMiniCalendar();
             renderPosts();
             
             // Show demo popup after 3 seconds
@@ -2298,5 +2328,65 @@
             </div>
         </div>
     </div>
+
+    <!-- Event Calendar Modal -->
+    <div id="eventCalendarModal" class="modal hidden">
+        <div class="modal-content calendar-modal-content">
+            <div class="calendar-header">
+                <button onclick="previousMonth()" class="calendar-nav-btn">‹</button>
+                <h2 id="calendarMonth">February 2025</h2>
+                <button onclick="nextMonth()" class="calendar-nav-btn">›</button>
+            </div>
+            <div id="calendarGrid" class="calendar-grid">
+                <!-- Calendar will be generated here -->
+            </div>
+            
+            <!-- Upcoming Events List -->
+            <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px;">
+                <h3 style="color: #00ffff; margin-bottom: 15px;">📅 Upcoming Events</h3>
+                <div id="upcomingEventsList">
+                    <div class="event-item" style="margin-bottom: 10px; padding: 10px; background: rgba(0,255,255,0.1); border-radius: 8px; border-left: 4px solid #9d4edd;">
+                        <div style="font-weight: bold; color: #9d4edd;">🎵 Live Jazz Night</div>
+                        <div style="color: #00ffff; font-size: 14px;">Feb 15 • 8:00 PM • Downtown Venue</div>
+                        <div style="color: rgba(255,255,255,0.8); font-size: 12px;">Entertainment • $15 cover</div>
+                    </div>
+                    <div class="event-item" style="margin-bottom: 10px; padding: 10px; background: rgba(255,107,53,0.1); border-radius: 8px; border-left: 4px solid #ff6b35;">
+                        <div style="font-weight: bold; color: #ff6b35;">🛍️ Vintage Clothing Sale</div>
+                        <div style="color: #00ffff; font-size: 14px;">Feb 18 • 10:00 AM • Retro Threads Shop</div>
+                        <div style="color: rgba(255,255,255,0.8); font-size: 12px;">Shop Sale • 30% off everything</div>
+                    </div>
+                    <div class="event-item" style="margin-bottom: 10px; padding: 10px; background: rgba(0,255,255,0.1); border-radius: 8px; border-left: 4px solid #00ffff;">
+                        <div style="font-weight: bold; color: #00ffff;">🎸 Guitar Workshop</div>
+                        <div style="color: #00ffff; font-size: 14px;">Feb 22 • 2:00 PM • Music Academy</div>
+                        <div style="color: rgba(255,255,255,0.8); font-size: 12px;">Education • Beginner friendly</div>
+                    </div>
+                    <div class="event-item" style="margin-bottom: 10px; padding: 10px; background: rgba(255,107,53,0.1); border-radius: 8px; border-left: 4px solid #ff6b35;">
+                        <div style="font-weight: bold; color: #ff6b35;">💻 Tech Equipment Flash Sale</div>
+                        <div style="color: #00ffff; font-size: 14px;">Feb 25 • 9:00 AM • TechWorld Shop</div>
+                        <div style="color: rgba(255,255,255,0.8); font-size: 12px;">Shop Sale • Laptops, phones, accessories</div>
+                    </div>
+                    <div class="event-item" style="margin-bottom: 10px; padding: 10px; background: rgba(157,78,221,0.1); border-radius: 8px; border-left: 4px solid #9d4edd;">
+                        <div style="font-weight: bold; color: #9d4edd;">🍕 Food Truck Rally</div>
+                        <div style="color: #00ffff; font-size: 14px;">Feb 28 • 12:00 PM • City Park</div>
+                        <div style="color: rgba(255,255,255,0.8); font-size: 12px;">Community Event • Free entry</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2);">
+                    <div style="font-size: 14px; color: rgba(255,255,255,0.7);">
+                        📍 All events within 25 miles of Seattle, WA<br>
+                        🏪 Shops can post sale events to boost visibility<br>
+                        🎭 Entertainment venues can promote upcoming shows
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="hideEventCalendar()" class="close-btn" style="margin-top: 20px;">Close Calendar</button>
+        </div>
+    </div>
+
+    <!-- Floating particles container -->
+    <div id="particles-container"></div>
+
 </body>
 </html>
