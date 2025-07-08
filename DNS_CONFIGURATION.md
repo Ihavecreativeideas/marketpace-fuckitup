@@ -1,11 +1,11 @@
-# DNS Configuration for marketplace.shop
+# DNS Configuration for MarketPace.shop
 
 ## Current Issue:
 Vercel is showing "invalid configuration" because the DNS records don't match what's required for domain verification.
 
 ## Required DNS Records for Vercel:
 
-### For Root Domain (marketplace.shop):
+### For Root Domain (MarketPace.shop):
 ```
 Type: A
 Name: @
@@ -13,7 +13,7 @@ Value: 76.76.21.21
 TTL: 300 (or Auto)
 ```
 
-### For WWW Subdomain (www.marketplace.shop):
+### For WWW Subdomain (www.MarketPace.shop):
 ```
 Type: CNAME
 Name: www
@@ -37,7 +37,7 @@ TTL: 300 (or Auto)
 ## Steps to Fix DNS:
 
 ### Step 1: Access Your Domain Provider
-- Go to your domain registrar (GoDaddy, Namecheap, Cloudflare, etc.)
+- Go to your domain registrar for MarketPace.shop (GoDaddy, Namecheap, Cloudflare, etc.)
 - Navigate to DNS management section
 
 ### Step 2: Clear Existing Records
