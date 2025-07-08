@@ -146,8 +146,10 @@
         }
 
         .menu-calendar-expanded.active {
-            max-height: 500px;
-            padding: 20px;
+            max-height: 400px;
+            padding: 15px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .calendar-nav-header {
@@ -1465,6 +1467,37 @@
             .action-btn {
                 font-size: 12px;
                 padding: 0.4rem 0.8rem;
+            }
+            
+            /* Mobile Calendar Fixes */
+            .menu-calendar-section {
+                margin: 0 0.25rem 0.75rem 0.25rem;
+            }
+            
+            .menu-calendar-expanded.active {
+                max-height: 300px;
+                padding: 10px;
+            }
+            
+            .calendar-grid {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 2px;
+                font-size: 12px;
+            }
+            
+            .calendar-day {
+                min-height: 30px;
+                padding: 5px;
+                font-size: 11px;
+            }
+            
+            .month-nav {
+                padding: 5px 10px;
+                font-size: 14px;
+            }
+            
+            .current-month {
+                font-size: 14px;
             }
 
             .post-header {
@@ -2805,6 +2838,15 @@
             const menu = document.getElementById('mainMenu');
             if (menu.style.display === 'none' || menu.style.display === '') {
                 menu.style.display = 'flex';
+                // Reset menu scroll position when opening
+                menu.scrollTop = 0;
+                // Also close calendar if it's open
+                const expanded = document.getElementById('menuCalendarExpanded');
+                const arrow = document.getElementById('menuCalendarArrow');
+                if (expanded && expanded.classList.contains('active')) {
+                    expanded.classList.remove('active');
+                    arrow.textContent = '▼';
+                }
             } else {
                 menu.style.display = 'none';
             }
@@ -2814,13 +2856,31 @@
         function toggleMenuCalendar() {
             const expanded = document.getElementById('menuCalendarExpanded');
             const arrow = document.getElementById('menuCalendarArrow');
+            const mainMenu = document.getElementById('mainMenu');
             
             if (expanded.classList.contains('active')) {
                 expanded.classList.remove('active');
                 arrow.textContent = '▼';
+                // Allow main menu to scroll normally
+                if (mainMenu) {
+                    mainMenu.style.overflowY = 'auto';
+                }
             } else {
                 expanded.classList.add('active');
                 arrow.textContent = '▲';
+                // Generate calendar when opened
+                setTimeout(() => {
+                    generateCalendar();
+                }, 100);
+                // Scroll to calendar section
+                setTimeout(() => {
+                    if (mainMenu) {
+                        const calendarSection = document.querySelector('.menu-calendar-section');
+                        if (calendarSection) {
+                            calendarSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }
+                }, 200);
             }
         }
 
@@ -3170,6 +3230,9 @@
                         <button class="month-nav" onclick="previousMonth()">‹</button>
                         <div class="current-month" id="currentMonth">January 2025</div>
                         <button class="month-nav" onclick="nextMonth()">›</button>
+                    </div>
+                    <div style="text-align: right; margin-bottom: 10px;">
+                        <button onclick="toggleMenuCalendar()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(0,255,255,0.3); color: #00ffff; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Close Calendar</button>
                     </div>
                     
                     <div class="calendar-grid" id="calendarGrid">
