@@ -67,35 +67,35 @@ class EnhancedSignupManager:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
             
+            # Prepare common data
+            password_hash = hashlib.sha256(user_data['password'].encode()).hexdigest()
+            phone = self.format_phone_number(user_data['phone'])
+            full_name = f"{user_data['firstName']} {user_data['lastName']}"
+            interests = ','.join(user_data.get('interests', []))
+            business_categories = ','.join(user_data.get('businessCategories', []))
+            
             # Check if email already exists and handle updates
             cursor.execute("SELECT user_id, full_name FROM demo_users WHERE email = ?", (user_data['email'],))
             existing_user = cursor.fetchone()
             
             if existing_user:
                 # Update existing user account
-                password_hash = hashlib.sha256(user_data['password'].encode()).hexdigest()
-                phone = self.format_phone_number(user_data['phone'])
-                full_name = f"{user_data['firstName']} {user_data['lastName']}"
-                interests = ','.join(user_data.get('interests', []))
-                business_categories = ','.join(user_data.get('businessCategories', []))
                 
                 cursor.execute('''
                     UPDATE demo_users SET 
                     password_hash = ?, phone = ?, full_name = ?, city = ?, 
-                    account_type = ?, business_name = ?, business_website = ?, 
+                    interests = ?, business_name = ?, business_website = ?, 
                     business_address = ?, business_phone = ?, business_description = ?, 
-                    bio = ?, interests = ?, business_categories = ?, 
-                    sms_notifications = ?, email_updates = ?
+                    bio = ?, business_categories = ?, account_type = ?
                     WHERE email = ?
                 ''', (
-                    password_hash, phone, full_name, user_data['city'], user_data['account_type'],
-                    user_data.get('businessName'), user_data.get('businessWebsite'), 
+                    password_hash, phone, full_name, user_data['city'], 
+                    interests, user_data.get('businessName'), user_data.get('businessWebsite'), 
                     user_data.get('businessAddress'), user_data.get('workPhone'),
                     user_data.get('businessDescription'), user_data.get('bio'), 
-                    interests, business_categories, user_data.get('notifications', True), 
-                    user_data.get('notifications', True), user_data['email']
+                    business_categories, user_data['accountType'], user_data['email']
                 ))
-                self.conn.commit()
+                conn.commit()
                 
                 # Prepare data for SMS notification
                 notification_data = {
