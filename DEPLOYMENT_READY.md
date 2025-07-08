@@ -3,8 +3,8 @@
 ## Project Status: READY FOR DEPLOYMENT ✅
 
 ### Domain Configuration
-- **Target Domain**: marketplace.shop
-- **Alternate Domain**: www.marketplace.shop
+- **Target Domain**: MarketPace.shop
+- **Alternate Domain**: www.MarketPace.shop
 - **Vercel Project Name**: Can be any name (existing "marketplace web app" is fine)
 
 ### Files Ready for Deployment
@@ -47,7 +47,7 @@ PGDATABASE=... (your database name)
 ### Option 2: New Vercel Project
 1. Create new Vercel project from this Replit
 2. Set project name to whatever you prefer
-3. Add domain `marketplace.shop` in settings
+3. Add domain `MarketPace.shop` in settings
 4. Set all environment variables
 5. Deploy
 
