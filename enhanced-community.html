@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPace Community - Full Demo Experience</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(circle at 20% 50%, #0d0221 0%, rgba(13, 2, 33, 0.8) 100%), 
+                        radial-gradient(circle at 80% 50%, #1a0845 0%, rgba(26, 8, 69, 0.8) 100%);
+            min-height: 100vh;
+            color: white;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #00ffff 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 8s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            background: rgba(13, 2, 33, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+            padding: 15px 20px;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            color: #00ffff;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(13, 2, 33, 0.8);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+        }
+
+        .welcome-section h1 {
+            color: #00ffff;
+            font-size: 36px;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            margin-bottom: 15px;
+        }
+
+        .welcome-section p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .demo-notice {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .category-card {
+            background: rgba(26, 8, 69, 0.6);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .category-card:hover {
+            border-color: #00ffff;
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .category-icon {
+            font-size: 32px;
+            color: #00ffff;
+            margin-right: 15px;
+            width: 50px;
+            text-align: center;
+        }
+
+        .category-title {
+            color: #00ffff;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .category-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .demo-items {
+            display: grid;
+            gap: 12px;
+        }
+
+        .demo-item {
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .demo-item:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .item-title {
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .item-price {
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .item-details {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .business-section {
+            background: rgba(13, 2, 33, 0.8);
+            border: 2px solid rgba(255, 165, 0, 0.4);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .business-section h2 {
+            color: #ffa500;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 28px;
+            text-shadow: 0 0 15px rgba(255, 165, 0, 0.5);
+        }
+
+        .business-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .business-card {
+            background: rgba(255, 165, 0, 0.1);
+            border: 1px solid rgba(255, 165, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .business-card h3 {
+            color: #ffa500;
+            margin-bottom: 10px;
+        }
+
+        .business-card p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .business-features {
+            list-style: none;
+            text-align: left;
+        }
+
+        .business-features li {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            margin-bottom: 5px;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .business-features li:before {
+            content: "✓";
+            color: #00ff88;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .footer-actions {
+            text-align: center;
+            margin-top: 40px;
+            padding: 30px;
+            background: rgba(13, 2, 33, 0.8);
+            border-radius: 15px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #00ffff 0%, #0080ff 100%);
+            color: #0d0221;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 255, 255, 0.4);
+        }
+
+        .action-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .categories-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .welcome-section h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <div class="header">
+        <div class="logo">
+            <i class="fas fa-store"></i> MarketPace
+        </div>
+        <div class="nav-buttons">
+            <a href="/demo-login" class="nav-btn">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+            <a href="/" class="nav-btn">
+                <i class="fas fa-home"></i> Home
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="welcome-section">
+            <h1>Welcome to MarketPace Community</h1>
+            <p>Experience the full power of community-first marketplace features</p>
+            <div class="demo-notice">
+                <i class="fas fa-star"></i> Demo Mode Active - All features are fully functional for testing
+            </div>
+        </div>
+
+        <div class="categories-grid">
+            <!-- For Sale -->
+            <div class="category-card" onclick="filterCategory('sale')">
+                <div class="category-header">
+                    <div class="category-icon"><i class="fas fa-tag"></i></div>
+                    <div>
+                        <div class="category-title">For Sale</div>
+                        <div class="category-subtitle">Buy & sell local items</div>
+                    </div>
+                </div>
+                <div class="demo-items">
+                    <div class="demo-item">
+                        <div class="item-header">
+                            <span class="item-title">MacBook Pro 2021</span>
+                            <span class="item-price">$1,200</span>
+                        </div>
+                        <div class="item-details">
+                            <span>Electronics • Downtown</span>
+                            <span>2 days ago</span>
+                        </div>
+                    </div>
+                    <div class="demo-item">
+                        <div class="item-header">
+                            <span class="item-title">Vintage Dining Set</span>
+                            <span class="item-price">$450</span>
+                        </div>
+                        <div class="item-details">
+                            <span>Furniture • West Side</span>
+                            <span>1 week ago</span>
+                        </div>
+                    </div>
+                    <div class="demo-item">
+                        <div class="item-header">
+                            <span class="item-title">Road Bike</span>
+                            <span class="item-price">$320</span>
+                        </div>
+                        <div class="item-details">
+                            <span>Sports • East End</span>
+                            <span>3 days ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- For Rent -->
+            <div class="category-card" onclick="filterCategory('rent')">
+                <div class="category-header">
+                    <div class="category-icon"><i class="fas fa-calendar-alt"></i></div>
+                    <div>
+                        <div class="category-title">For Rent</div>
+                        <div class="category-subtitle">Rent anything locally</div>
+                    </div>
+                </div>
+                <div class="demo-items">
+                    <div class="demo-item">
+                        <div class="item-header">
+                            <span class="item-title">Power Tools Set</span>
+                            <span class="item-price">$25/day</span>
+                        </div>
+                        <div class="item-details">
+                            <span>Tools • North Side</span>
+                            <span>Available now</span>
+                        </div>
+                    </div>
+                    <div class="demo-item">
+                        <div class="item-header">
+                            <span class="item-title">Photography Equipment</span>
+                            <span class="item-price">$80/day</span>
+                        </div>
+                        <div class="item-details">
+                            <span>Camera Gear • Downtown</span>
+                            <span>Weekend available</span>
+                        </div>
+                    </div>
+                    <div class="demo-item">
+                        <div class="item-header">
+                            <span class="item-title">Camping Gear</span>
+                            <span class="item-price">$40/weekend</span>
+                        </div>
+                        <div class="item-details">
+                            <span>Outdoor • South Park</span>
+                            <span>Summer booking</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Services -->
+            <div class="category-card" onclick="filterCategory('services')">
+                <div class="category-header">
+                    <div class="category-icon"><i class="fas fa-wrench"></i></div>
+                    <div>
+                        <div class="category-title">Services</div>
+                        <div class="category-subtitle">Local services & odd jobs</div>
+                    </div>
+                </div>
+                <div class="demo-items">
+                    <div class="demo-item">
+                        <div class="item-header">
+                            <span class="item-title">House Cleaning</span>
+                            <span class="item-price">$120</span>
+                        </div>
+                        <div class="item-details">
+                            <span>Cleaning • City-wide</span>
+                            <span>Weekly available</span>
+                        </div>
+                    </div>
+                    <div class="demo-item">
+                        <div class="item-header">
+                            <span class="item-title">Guitar Lessons</span>
+                            <span class="item-price">$50/hr</span>
+                        </div>
+                        <div class="item-details">
+                            <span>Music • Downtown</span>
+                            <span>Beginner friendly</span>
+                        </div>
+                    </div>
+                    <div class="demo-item">
+                        <div class="item-header">
+                            <span class="item-title">Dog Walking</span>
+                            <span class="item-price">$20/walk</span>
+                        </div>
+                        <div class="item-details">
+                            <span>Pet Care • All areas</span>
+                            <span>Daily service</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shops -->
+            <div class="category-card" onclick="filterCategory('shops')">
+                <div class="category-header">
+                    <div class="category-icon"><i class="fas fa-store"></i></div>
+                    <div>
+                        <div class="category-title">Local Shops</div>
+                        <div class="category-subtitle">Community businesses</div>
+                    </div>
+                </div>
+                <div class="demo-items">
+                    <div class="demo-item">
+                        <div class="item-header">
+                            <span class="item-title">Community Coffee Co.</span>
+                            <span class="item-price">Open</span>
+                        </div>
+                        <div class="item-details">
+                            <span>Café • Main Street</span>
+                            <span>⭐ 4.8 rating</span>
+                        </div>
+                    </div>
+                    <div class="demo-item">
+                        <div class="item-header">
+                            <span class="item-title">Local Art Studio</span>
+                            <span class="item-price">View</span>
+                        </div>
+                        <div class="item-details">
+                            <span>Art • Arts District</span>
+                            <span>Custom commissions</span>
+                        </div>
+                    </div>
+                    <div class="demo-item">
+                        <div class="item-header">
+                            <span class="item-title">Green Thumb Nursery</span>
+                            <span class="item-price">Browse</span>
+                        </div>
+                        <div class="item-details">
+                            <span>Plants • Garden Center</span>
+                            <span>Local grown</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="business-section">
+            <h2><i class="fas fa-briefcase"></i> Business Profile Features</h2>
+            <div class="business-grid">
+                <div class="business-card">
+                    <h3>Professional Profiles</h3>
+                    <p>Dual personal + business accounts with dedicated business pages</p>
+                    <ul class="business-features">
+                        <li>Custom business website links</li>
+                        <li>Business address & work phone</li>
+                        <li>Category-based filtering</li>
+                        <li>Professional branding</li>
+                    </ul>
+                </div>
+                <div class="business-card">
+                    <h3>Shop Integration</h3>
+                    <p>Connect existing online stores and local businesses seamlessly</p>
+                    <ul class="business-features">
+                        <li>Multi-platform integration</li>
+                        <li>Inventory synchronization</li>
+                        <li>Local delivery options</li>
+                        <li>Community engagement</li>
+                    </ul>
+                </div>
+                <div class="business-card">
+                    <h3>Service Providers</h3>
+                    <p>Professional service listings with booking and scheduling</p>
+                    <ul class="business-features">
+                        <li>Service booking system</li>
+                        <li>Reviews & ratings</li>
+                        <li>Portfolio showcase</li>
+                        <li>Client communication</li>
+                    </ul>
+                </div>
+                <div class="business-card">
+                    <h3>Entertainment Hub</h3>
+                    <p>Platform for local artists, musicians, and entertainment venues</p>
+                    <ul class="business-features">
+                        <li>Event booking system</li>
+                        <li>Artist profiles</li>
+                        <li>Live streaming</li>
+                        <li>Community events</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-actions">
+            <h3 style="color: #00ffff; margin-bottom: 20px;">Ready to Join MarketPace?</h3>
+            <div class="action-buttons">
+                <a href="/enhanced-signup" class="action-btn">
+                    <i class="fas fa-rocket"></i> Create Account
+                </a>
+                <a href="/demo-login" class="action-btn secondary">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+                <a href="/driver-dash-demo" class="action-btn secondary">
+                    <i class="fas fa-truck"></i> Driver Demo
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 5) + 's';
+                
+                if (Math.random() > 0.5) {
+                    particle.style.background = 'radial-gradient(circle, #a855f7 0%, transparent 70%)';
+                }
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Category filtering (for demo purposes)
+        function filterCategory(category) {
+            // Add visual feedback
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.style.opacity = '0.6';
+            });
+            
+            event.currentTarget.style.opacity = '1';
+            event.currentTarget.style.transform = 'scale(1.05)';
+            
+            setTimeout(() => {
+                document.querySelectorAll('.category-card').forEach(card => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'scale(1)';
+                });
+            }, 2000);
+            
+            // Show demo notification
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #00ffff 0%, #0080ff 100%);
+                color: #0d0221;
+                padding: 15px 20px;
+                border-radius: 10px;
+                font-weight: bold;
+                z-index: 1000;
+                box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+            `;
+            notification.innerHTML = `<i class="fas fa-filter"></i> Filtered by ${category.charAt(0).toUpperCase() + category.slice(1)}`;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Initialize
+        createParticles();
+    </script>
+</body>
+</html>
