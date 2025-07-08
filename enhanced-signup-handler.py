@@ -145,12 +145,22 @@ class EnhancedSignupManager:
     
     def format_phone_number(self, phone):
         """Format phone number for consistency"""
+        # Remove all non-digit characters
         phone = ''.join(filter(str.isdigit, phone))
+        
+        # Handle different phone number formats
         if len(phone) == 10:
-            phone = '1' + phone
-        if len(phone) == 11 and phone.startswith('1'):
+            # US number without country code
+            return f"+1{phone}"
+        elif len(phone) == 11 and phone.startswith('1'):
+            # US number with country code
             return f"+{phone}"
-        return phone
+        elif len(phone) > 11:
+            # International number
+            return f"+{phone}"
+        else:
+            # Invalid number, return as is for error handling
+            return phone
     
     def send_welcome_notifications(self, user_data):
         """Send welcome SMS and email notifications"""
@@ -171,17 +181,24 @@ Ready to get started? Visit your community page now!
 
 - The MarketPace Team"""
             
-            # Send SMS if Twilio is available
+            # Send SMS if Twilio is available and phone number is valid
             if self.twilio_client and user_data.get('phone'):
                 try:
-                    message = self.twilio_client.messages.create(
-                        body=sms_message,
-                        from_=self.twilio_phone,
-                        to=user_data['phone']
-                    )
-                    print(f"Welcome SMS sent to {user_data['phone']}")
+                    # Skip SMS for demo numbers (555-xxx-xxxx) to avoid Twilio errors
+                    phone_digits = ''.join(filter(str.isdigit, user_data['phone']))
+                    if phone_digits.startswith('555') or phone_digits.startswith('1555'):
+                        print(f"SMS skipped for demo number: {user_data['phone']}")
+                        print(f"Welcome message would be: {sms_message}")
+                    else:
+                        message = self.twilio_client.messages.create(
+                            body=sms_message,
+                            from_=self.twilio_phone,
+                            to=user_data['phone']
+                        )
+                        print(f"Welcome SMS sent to {user_data['phone']} - SID: {message.sid}")
                 except Exception as e:
                     print(f"SMS sending failed: {e}")
+                    print(f"Welcome message would be: {sms_message}")
             
         except Exception as e:
             print(f"Error sending welcome notifications: {e}")
