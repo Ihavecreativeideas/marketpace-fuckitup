@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dual Profile System - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0845 50%, #2d1810 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 40px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #00FFFF, #8A2BE2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .profile-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .profile-option {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid rgba(0, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .profile-option:hover {
+            border-color: rgba(0, 255, 255, 0.5);
+            transform: translateY(-5px);
+        }
+
+        .profile-option.active {
+            border-color: #00FFFF;
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .profile-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .profile-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #00FFFF;
+        }
+
+        .profile-description {
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+
+        .dual-profile-form {
+            display: none;
+        }
+
+        .dual-profile-form.active {
+            display: block;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-left: 4px solid #00FFFF;
+        }
+
+        .form-section h3 {
+            margin-bottom: 15px;
+            color: #00FFFF;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-size: 16px;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .business-type-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .business-type-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(0, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .business-type-option:hover {
+            border-color: rgba(0, 255, 255, 0.5);
+        }
+
+        .business-type-option.selected {
+            border-color: #00FFFF;
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #1e40af, #3730a3);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            background: linear-gradient(45deg, #2563eb, #4338ca);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .profile-preview {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .preview-section {
+            margin-bottom: 20px;
+        }
+
+        .preview-section h4 {
+            color: #00FFFF;
+            margin-bottom: 10px;
+        }
+
+        .switch-profile-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(45deg, #8A2BE2, #00FFFF);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            .profile-selector {
+                grid-template-columns: 1fr;
+            }
+            
+            .business-type-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="switch-profile-btn" onclick="switchProfile()">
+        Switch to <span id="switchText">Business</span>
+    </button>
+
+    <div class="container">
+        <h1>🔄 Create Your Dual Profile</h1>
+        <p style="text-align: center; margin-bottom: 30px; opacity: 0.9;">
+            Like Facebook, you can have both a personal profile and a business profile. Switch between them anytime.
+        </p>
+
+        <!-- Profile Type Selector -->
+        <div class="profile-selector">
+            <div class="profile-option active" data-type="personal" onclick="selectProfileType('personal')">
+                <div class="profile-icon">👤</div>
+                <div class="profile-title">Personal Profile</div>
+                <div class="profile-description">
+                    For buying, selling personal items, and connecting with neighbors in your community.
+                </div>
+            </div>
+            
+            <div class="profile-option" data-type="business" onclick="selectProfileType('business')">
+                <div class="profile-icon">🏢</div>
+                <div class="profile-title">Business Profile</div>
+                <div class="profile-description">
+                    For shops, services, entertainment, restaurants - reach customers and grow your business.
+                </div>
+            </div>
+        </div>
+
+        <!-- Personal Profile Form -->
+        <div id="personalForm" class="dual-profile-form active">
+            <div class="form-section">
+                <h3>👤 Personal Information</h3>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="personalName" placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label>Bio</label>
+                    <textarea id="personalBio" placeholder="Tell your neighbors about yourself..." rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="personalLocation" placeholder="City, State">
+                </div>
+                <div class="form-group">
+                    <label>Interests</label>
+                    <input type="text" id="personalInterests" placeholder="What are you interested in? (hobbies, activities, etc.)">
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Profile Form -->
+        <div id="businessForm" class="dual-profile-form">
+            <div class="form-section">
+                <h3>🏢 Business Information</h3>
+                <div class="form-group">
+                    <label>Business Name</label>
+                    <input type="text" id="businessName" placeholder="Enter your business name">
+                </div>
+                <div class="form-group">
+                    <label>Business Description</label>
+                    <textarea id="businessDescription" placeholder="Describe your business and services..." rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Business Type</label>
+                    <div class="business-type-grid">
+                        <div class="business-type-option" data-type="shop" onclick="selectBusinessType('shop')">
+                            🛍️ Shop
+                        </div>
+                        <div class="business-type-option" data-type="service" onclick="selectBusinessType('service')">
+                            🛠️ Service
+                        </div>
+                        <div class="business-type-option" data-type="entertainment" onclick="selectBusinessType('entertainment')">
+                            🎭 Entertainment
+                        </div>
+                        <div class="business-type-option" data-type="restaurant" onclick="selectBusinessType('restaurant')">
+                            🍕 Restaurant/Bar
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Business Address</label>
+                    <input type="text" id="businessAddress" placeholder="123 Main St, City, State">
+                </div>
+                <div class="form-group">
+                    <label>Business Phone</label>
+                    <input type="tel" id="businessPhone" placeholder="(555) 123-4567">
+                </div>
+                <div class="form-group">
+                    <label>Website (Optional)</label>
+                    <input type="url" id="businessWebsite" placeholder="https://yourbusiness.com">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>🔗 Platform Integrations</h3>
+                <p style="margin-bottom: 15px; opacity: 0.8;">Connect your existing online stores and platforms:</p>
+                <div class="form-group">
+                    <label>Shopify Store URL</label>
+                    <input type="url" id="shopifyUrl" placeholder="https://yourstore.myshopify.com">
+                </div>
+                <div class="form-group">
+                    <label>Facebook Page</label>
+                    <input type="url" id="facebookPage" placeholder="https://facebook.com/yourpage">
+                </div>
+                <div class="form-group">
+                    <label>Instagram Business</label>
+                    <input type="text" id="instagramBusiness" placeholder="@yourbusiness">
+                </div>
+                <div class="form-group">
+                    <label>TikTok Shop</label>
+                    <input type="text" id="tiktokShop" placeholder="@yourshop">
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Preview -->
+        <div class="profile-preview">
+            <h3 style="color: #00FFFF; margin-bottom: 15px;">Profile Preview</h3>
+            <div id="profilePreview">
+                <!-- Preview content will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="btn btn-secondary" onclick="saveDraft()">Save Draft</button>
+            <button class="btn" onclick="createProfiles()">Create Dual Profile</button>
+        </div>
+    </div>
+
+    <script>
+        let currentProfileType = 'personal';
+        let selectedBusinessType = '';
+        let profileData = {
+            personal: {},
+            business: {}
+        };
+
+        function selectProfileType(type) {
+            currentProfileType = type;
+            
+            // Update UI
+            document.querySelectorAll('.profile-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            document.querySelector(`[data-type="${type}"]`).classList.add('active');
+            
+            // Show/hide forms
+            document.querySelectorAll('.dual-profile-form').forEach(form => {
+                form.classList.remove('active');
+            });
+            document.getElementById(`${type}Form`).classList.add('active');
+            
+            updatePreview();
+        }
+
+        function selectBusinessType(type) {
+            selectedBusinessType = type;
+            
+            // Update UI
+            document.querySelectorAll('.business-type-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelector(`[data-type="${type}"]`).classList.add('selected');
+            
+            updatePreview();
+        }
+
+        function updatePreview() {
+            const preview = document.getElementById('profilePreview');
+            
+            if (currentProfileType === 'personal') {
+                const name = document.getElementById('personalName').value || 'Your Name';
+                const bio = document.getElementById('personalBio').value || 'Your bio will appear here...';
+                const location = document.getElementById('personalLocation').value || 'Your Location';
+                const interests = document.getElementById('personalInterests').value || 'Your interests...';
+                
+                preview.innerHTML = `
+                    <div class="preview-section">
+                        <h4>👤 ${name}</h4>
+                        <p><strong>📍</strong> ${location}</p>
+                        <p><strong>💭</strong> ${bio}</p>
+                        <p><strong>❤️</strong> Interested in: ${interests}</p>
+                    </div>
+                `;
+            } else {
+                const businessName = document.getElementById('businessName').value || 'Your Business Name';
+                const description = document.getElementById('businessDescription').value || 'Business description...';
+                const address = document.getElementById('businessAddress').value || 'Business Address';
+                const phone = document.getElementById('businessPhone').value || 'Business Phone';
+                const type = selectedBusinessType || 'business';
+                
+                const typeEmojis = {
+                    shop: '🛍️',
+                    service: '🛠️',
+                    entertainment: '🎭',
+                    restaurant: '🍕'
+                };
+                
+                preview.innerHTML = `
+                    <div class="preview-section">
+                        <h4>${typeEmojis[type] || '🏢'} ${businessName}</h4>
+                        <p><strong>📍</strong> ${address}</p>
+                        <p><strong>📞</strong> ${phone}</p>
+                        <p><strong>💼</strong> ${description}</p>
+                        <p><strong>🏷️</strong> ${type.charAt(0).toUpperCase() + type.slice(1)} Business</p>
+                    </div>
+                `;
+            }
+        }
+
+        function switchProfile() {
+            const newType = currentProfileType === 'personal' ? 'business' : 'personal';
+            selectProfileType(newType);
+            document.getElementById('switchText').textContent = newType === 'personal' ? 'Business' : 'Personal';
+        }
+
+        function saveDraft() {
+            // Save current form data
+            if (currentProfileType === 'personal') {
+                profileData.personal = {
+                    name: document.getElementById('personalName').value,
+                    bio: document.getElementById('personalBio').value,
+                    location: document.getElementById('personalLocation').value,
+                    interests: document.getElementById('personalInterests').value
+                };
+            } else {
+                profileData.business = {
+                    name: document.getElementById('businessName').value,
+                    description: document.getElementById('businessDescription').value,
+                    type: selectedBusinessType,
+                    address: document.getElementById('businessAddress').value,
+                    phone: document.getElementById('businessPhone').value,
+                    website: document.getElementById('businessWebsite').value,
+                    shopifyUrl: document.getElementById('shopifyUrl').value,
+                    facebookPage: document.getElementById('facebookPage').value,
+                    instagramBusiness: document.getElementById('instagramBusiness').value,
+                    tiktokShop: document.getElementById('tiktokShop').value
+                };
+            }
+            
+            localStorage.setItem('dualProfileData', JSON.stringify(profileData));
+            alert('Draft saved! You can continue editing later.');
+        }
+
+        function createProfiles() {
+            // Save all data
+            saveDraft();
+            
+            // In a real implementation, this would send data to the server
+            const confirmData = JSON.parse(localStorage.getItem('dualProfileData') || '{}');
+            
+            if (!confirmData.personal.name && !confirmData.business.name) {
+                alert('Please fill out at least one profile before creating your account.');
+                return;
+            }
+            
+            // Simulate account creation
+            localStorage.setItem('hasDualProfile', 'true');
+            localStorage.setItem('currentProfileType', 'personal');
+            
+            alert('Dual profile created successfully! You can now switch between your personal and business profiles anytime.');
+            
+            // Redirect to community feed
+            window.location.href = '/enhanced-community-feed';
+        }
+
+        // Auto-update preview when typing
+        document.addEventListener('input', updatePreview);
+        
+        // Load saved draft if exists
+        window.addEventListener('load', () => {
+            const savedData = localStorage.getItem('dualProfileData');
+            if (savedData) {
+                profileData = JSON.parse(savedData);
+                
+                // Populate personal form
+                if (profileData.personal) {
+                    document.getElementById('personalName').value = profileData.personal.name || '';
+                    document.getElementById('personalBio').value = profileData.personal.bio || '';
+                    document.getElementById('personalLocation').value = profileData.personal.location || '';
+                    document.getElementById('personalInterests').value = profileData.personal.interests || '';
+                }
+                
+                // Populate business form
+                if (profileData.business) {
+                    document.getElementById('businessName').value = profileData.business.name || '';
+                    document.getElementById('businessDescription').value = profileData.business.description || '';
+                    document.getElementById('businessAddress').value = profileData.business.address || '';
+                    document.getElementById('businessPhone').value = profileData.business.phone || '';
+                    document.getElementById('businessWebsite').value = profileData.business.website || '';
+                    document.getElementById('shopifyUrl').value = profileData.business.shopifyUrl || '';
+                    document.getElementById('facebookPage').value = profileData.business.facebookPage || '';
+                    document.getElementById('instagramBusiness').value = profileData.business.instagramBusiness || '';
+                    document.getElementById('tiktokShop').value = profileData.business.tiktokShop || '';
+                    
+                    if (profileData.business.type) {
+                        selectBusinessType(profileData.business.type);
+                    }
+                }
+            }
+            
+            updatePreview();
+        });
+    </script>
+</body>
+</html>
