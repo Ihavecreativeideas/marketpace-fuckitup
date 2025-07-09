@@ -724,25 +724,112 @@
 
         // Profile functions
         function editProfile() {
-            const userInfo = currentUser ? `
-Current Profile Information:
-• Name: ${currentUser.fullName}
-• Email: ${currentUser.email}
-• Phone: ${currentUser.phone || 'Not provided'}
-• Location: ${currentUser.city}, ${currentUser.state}, ${currentUser.country}
-• Account Type: ${currentUser.accountType === 'dual' ? 'Personal + Business' : 'Personal'}
-• Bio: ${currentUser.bio || 'No bio set'}
-${currentUser.businessName ? `• Business: ${currentUser.businessName}` : ''}
-
-Features Available:
-• Change profile picture
-• Update bio and contact information
-• Modify interests and preferences
-• Business profile management (if applicable)
-• Privacy settings
-            ` : 'Profile editing features coming soon!';
+            if (!currentUser) {
+                alert('Please sign in to edit your profile.');
+                return;
+            }
             
-            alert(userInfo);
+            // Create a comprehensive edit form as an HTML modal
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.8); z-index: 10000; display: flex; 
+                align-items: center; justify-content: center; padding: 20px;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: linear-gradient(135deg, #0d0221 0%, #1a0845 100%); 
+                           border-radius: 20px; padding: 30px; max-width: 500px; width: 100%; 
+                           border: 1px solid rgba(0, 255, 255, 0.3); max-height: 80vh; overflow-y: auto;">
+                    <h2 style="color: #00ffff; margin-bottom: 20px; text-align: center;">Edit Profile</h2>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: #00ffff; display: block; margin-bottom: 5px;">Full Name</label>
+                        <input type="text" id="editFullName" value="${currentUser.fullName}" 
+                               style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); 
+                                      border: 1px solid rgba(0,255,255,0.3); border-radius: 8px; 
+                                      color: white; outline: none;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: #00ffff; display: block; margin-bottom: 5px;">Bio</label>
+                        <textarea id="editBio" placeholder="Tell us about yourself..." 
+                                  style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); 
+                                         border: 1px solid rgba(0,255,255,0.3); border-radius: 8px; 
+                                         color: white; outline: none; height: 80px; resize: vertical;">${currentUser.bio || ''}</textarea>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: #00ffff; display: block; margin-bottom: 5px;">Phone Number</label>
+                        <input type="tel" id="editPhone" value="${currentUser.phone || ''}" 
+                               style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); 
+                                      border: 1px solid rgba(0,255,255,0.3); border-radius: 8px; 
+                                      color: white; outline: none;">
+                    </div>
+                    
+                    ${currentUser.accountType === 'dual' && currentUser.businessName ? `
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: #00ffff; display: block; margin-bottom: 5px;">Business Name</label>
+                        <input type="text" id="editBusinessName" value="${currentUser.businessName}" 
+                               style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); 
+                                      border: 1px solid rgba(0,255,255,0.3); border-radius: 8px; 
+                                      color: white; outline: none;">
+                    </div>` : ''}
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button onclick="saveProfileChanges()" 
+                                style="flex: 1; padding: 12px; background: linear-gradient(45deg, #00ffff, #9d4edd); 
+                                       border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">
+                            Save Changes
+                        </button>
+                        <button onclick="closeEditModal()" 
+                                style="flex: 1; padding: 12px; background: rgba(255,255,255,0.1); 
+                                       border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; 
+                                       color: white; cursor: pointer;">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            window.currentEditModal = modal;
+        }
+        
+        function saveProfileChanges() {
+            const fullName = document.getElementById('editFullName').value.trim();
+            const bio = document.getElementById('editBio').value.trim();
+            const phone = document.getElementById('editPhone').value.trim();
+            const businessName = document.getElementById('editBusinessName')?.value.trim();
+            
+            if (!fullName) {
+                alert('Please enter your full name.');
+                return;
+            }
+            
+            // Update current user data
+            currentUser.fullName = fullName;
+            currentUser.bio = bio;
+            currentUser.phone = phone;
+            if (businessName) currentUser.businessName = businessName;
+            
+            // Save to localStorage
+            localStorage.setItem('currentUserData', JSON.stringify(currentUser));
+            
+            // Update profile interface
+            updateProfileInterface();
+            
+            // Close modal
+            closeEditModal();
+            
+            alert('Profile updated successfully!');
+        }
+        
+        function closeEditModal() {
+            if (window.currentEditModal) {
+                document.body.removeChild(window.currentEditModal);
+                window.currentEditModal = null;
+            }
         }
 
         function shareProfile() {
@@ -753,20 +840,111 @@ Features Available:
         }
 
         function viewAnalytics() {
-            const userStats = currentUser ? `
-Profile Analytics for ${currentUser.fullName}:
-
-• Profile views: 234
-• Post engagement: 78%
-• Community interactions: 89
-• Shop visits: ${currentUser.businessName ? '156' : '23'}
-• Items sold: ${currentUser.businessName ? '12' : '3'}
-• Average rating: 4.8/5
-• Member since: ${currentUser.earlySupporter ? 'Early Supporter' : 'Recent Member'}
-${currentUser.businessName ? `• Business: ${currentUser.businessName} - Active` : ''}
-            ` : 'Analytics coming soon!';
+            if (!currentUser) {
+                alert('Please sign in to view your analytics.');
+                return;
+            }
             
-            alert(userStats);
+            // Create analytics modal
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.9); z-index: 10000; display: flex; 
+                align-items: center; justify-content: center; padding: 20px;
+            `;
+            
+            const isBusinessUser = currentUser.accountType === 'dual';
+            
+            modal.innerHTML = `
+                <div style="background: linear-gradient(135deg, #0d0221 0%, #1a0845 100%); 
+                           border-radius: 20px; padding: 30px; max-width: 700px; width: 100%; 
+                           border: 1px solid rgba(0, 255, 255, 0.3); max-height: 85vh; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 style="color: #00ffff; margin: 0;">📊 Analytics Dashboard</h2>
+                        <button onclick="closeAnalyticsModal()" 
+                                style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); 
+                                       border-radius: 50%; width: 30px; height: 30px; color: white; cursor: pointer;">✕</button>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                        <div style="background: rgba(0,255,255,0.1); padding: 15px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 24px; font-weight: bold; color: #00ffff;">234</div>
+                            <div style="color: rgba(255,255,255,0.8); font-size: 12px;">Profile Views</div>
+                        </div>
+                        <div style="background: rgba(138,43,226,0.1); padding: 15px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 24px; font-weight: bold; color: #9d4edd;">89</div>
+                            <div style="color: rgba(255,255,255,0.8); font-size: 12px;">Interactions</div>
+                        </div>
+                        <div style="background: rgba(16,185,129,0.1); padding: 15px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 24px; font-weight: bold; color: #10b981;">${isBusinessUser ? '12' : '3'}</div>
+                            <div style="color: rgba(255,255,255,0.8); font-size: 12px;">Items Sold</div>
+                        </div>
+                        <div style="background: rgba(245,158,11,0.1); padding: 15px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 24px; font-weight: bold; color: #f59e0b;">78%</div>
+                            <div style="color: rgba(255,255,255,0.8); font-size: 12px;">Engagement</div>
+                        </div>
+                    </div>
+                    
+                    ${isBusinessUser ? `
+                    <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+                        <h3 style="color: #00ffff; margin-bottom: 15px;">🏢 Business Performance</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <div style="color: rgba(255,255,255,0.7); font-size: 14px;">Shop Visits</div>
+                                <div style="color: #00ffff; font-size: 20px; font-weight: bold;">156 this month</div>
+                            </div>
+                            <div>
+                                <div style="color: rgba(255,255,255,0.7); font-size: 14px;">Business Name</div>
+                                <div style="color: #10b981; font-size: 16px; font-weight: bold;">${currentUser.businessName}</div>
+                            </div>
+                            <div>
+                                <div style="color: rgba(255,255,255,0.7); font-size: 14px;">Business Status</div>
+                                <div style="color: #10b981; font-size: 18px; font-weight: bold;">Active ✓</div>
+                            </div>
+                            <div>
+                                <div style="color: rgba(255,255,255,0.7); font-size: 14px;">Average Rating</div>
+                                <div style="color: #f59e0b; font-size: 20px; font-weight: bold;">4.8/5 ⭐</div>
+                            </div>
+                        </div>
+                    </div>` : ''}
+                    
+                    <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+                        <h3 style="color: #00ffff; margin-bottom: 15px;">🌟 Member Status</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <div style="color: rgba(255,255,255,0.7); font-size: 14px;">Member Type</div>
+                                <div style="color: ${currentUser.earlySupporter ? '#f59e0b' : '#10b981'}; font-size: 18px; font-weight: bold;">
+                                    ${currentUser.earlySupporter ? 'Early Supporter 🌟' : 'Member'}
+                                </div>
+                            </div>
+                            <div>
+                                <div style="color: rgba(255,255,255,0.7); font-size: 14px;">Community Rating</div>
+                                <div style="color: #f59e0b; font-size: 18px; font-weight: bold;">4.8/5 ⭐</div>
+                            </div>
+                            <div>
+                                <div style="color: rgba(255,255,255,0.7); font-size: 14px;">Account Type</div>
+                                <div style="color: #9d4edd; font-size: 16px; font-weight: bold;">
+                                    ${currentUser.accountType === 'dual' ? 'Personal + Business' : 'Personal'}
+                                </div>
+                            </div>
+                            <div>
+                                <div style="color: rgba(255,255,255,0.7); font-size: 14px;">Location</div>
+                                <div style="color: #00ffff; font-size: 16px; font-weight: bold;">${currentUser.city}, ${currentUser.state}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            window.currentAnalyticsModal = modal;
+        }
+        
+        function closeAnalyticsModal() {
+            if (window.currentAnalyticsModal) {
+                document.body.removeChild(window.currentAnalyticsModal);
+                window.currentAnalyticsModal = null;
+            }
         }
 
         // Posts functions
