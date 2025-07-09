@@ -222,6 +222,8 @@ MarketPace is a React Native mobile application that prioritizes community empow
 ✓ Enhanced driver recruitment section with earnings highlight cards and orange gradient call-to-action button
 ✓ Changed color of "Standard Route Demo" text from purple to teal for better visibility
 ✓ Replaced founder's pledge with detailed "Founder's Story" about Brooke Brown's journey from music artist (15,000 followers, JMA winner) to MarketPace founder due to Facebook bot issues and account hacking
+✓ Enlarged founder's picture from 120px to 200px with centered layout and enhanced styling
+✓ Added name and title display directly under the picture with professional formatting
 
 ✓ **RESTAURANT/BAR BUSINESS INTEGRATION WITH DELIVERY PLATFORMS** (July 09, 2025)
 ✓ Added comprehensive restaurant and bar business category with 5% commission model
