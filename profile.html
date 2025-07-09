@@ -423,10 +423,7 @@
     <!-- Back button -->
     <button class="back-btn" onclick="goBack()">← Back to Feed</button>
     
-    <!-- Favorites Heart Icon -->
-    <div style="position: fixed; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 105, 180, 0.5); border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; z-index: 1001;" onclick="toggleFavorite()" id="favoritesHeart">
-        <span style="font-size: 24px; color: #ff69b4; transition: all 0.3s ease;" id="heartIcon">♡</span>
-    </div>
+
 
     <div class="container">
         <!-- Profile Header -->
@@ -467,6 +464,7 @@
             <button class="nav-btn" onclick="showSection('shop')">My Shop</button>
             <button class="nav-btn" onclick="showSection('create-shop')">Create Shop</button>
             <button class="nav-btn" onclick="showSection('activity')">Activity</button>
+            <button class="nav-btn" onclick="showSection('upgrade-dual')">Upgrade to Dual</button>
         </div>
 
         <!-- Posts Section -->
@@ -553,29 +551,64 @@
 
         <!-- Activity Section -->
         <div class="profile-content" id="activity-content">
-            <h3 style="color: #00ffff; text-align: center; margin-bottom: 2rem;">Recent Activity</h3>
-            <div class="posts-grid">
-                <div class="post-card">
-                    <div class="post-header">
-                        <span>Liked a post</span>
-                        <span class="post-date">2 hours ago</span>
-                    </div>
-                    <div class="post-content">You liked Sarah's post about vintage furniture.</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h3 style="color: #00ffff; margin: 0;">Recent Activity</h3>
+                <button class="action-btn" onclick="clearRecentActivity()" style="background: rgba(255, 107, 53, 0.2); border: 1px solid #ff6b35; color: #ff6b35;">Clear Activity</button>
+            </div>
+            <div class="activity-items" id="activityItems">
+                <!-- Activity items will be populated by JavaScript - empty for new users -->
+                <div style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.6);">
+                    <p>No recent activity to display.</p>
+                    <p style="font-size: 14px;">Start exploring the community to see your activity here!</p>
                 </div>
-                <div class="post-card">
-                    <div class="post-header">
-                        <span>Shop item sold</span>
-                        <span class="post-date">1 day ago</span>
+            </div>
+        </div>
+
+        <!-- Upgrade to Dual Section -->
+        <div class="profile-content" id="upgrade-dual-content">
+            <div style="text-align: center; padding: 2rem;">
+                <h3 style="color: #00ffff; margin-bottom: 1rem;">Upgrade to Dual Profile</h3>
+                <p style="color: rgba(255,255,255,0.8); margin-bottom: 2rem;">
+                    Add business features to your personal profile and unlock shop, service, or entertainment capabilities.
+                </p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 2rem;">
+                    <div class="dual-option" onclick="upgradeToDual('shop')" style="background: rgba(0, 255, 255, 0.1); border: 2px solid rgba(0, 255, 255, 0.3); border-radius: 15px; padding: 20px; cursor: pointer; transition: all 0.3s ease;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">🛍️</div>
+                        <h4 style="color: #00ffff; margin-bottom: 10px;">Shop Owner</h4>
+                        <p style="color: rgba(255,255,255,0.7); font-size: 14px;">Sell products, manage inventory, connect existing stores</p>
+                        <div style="margin-top: 15px;">
+                            <div style="color: #00ff88; font-weight: bold;">✓ Website Integration</div>
+                            <div style="color: #00ff88; font-weight: bold;">✓ Inventory Management</div>
+                            <div style="color: #00ff88; font-weight: bold;">✓ Delivery Methods</div>
+                        </div>
                     </div>
-                    <div class="post-content">Your vintage lamp was purchased by Mike for $45.</div>
-                </div>
-                <div class="post-card">
-                    <div class="post-header">
-                        <span>New comment</span>
-                        <span class="post-date">2 days ago</span>
+                    
+                    <div class="dual-option" onclick="upgradeToDual('service')" style="background: rgba(138, 43, 226, 0.1); border: 2px solid rgba(138, 43, 226, 0.3); border-radius: 15px; padding: 20px; cursor: pointer; transition: all 0.3s ease;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">🔧</div>
+                        <h4 style="color: #8A2BE2; margin-bottom: 10px;">Service Provider</h4>
+                        <p style="color: rgba(255,255,255,0.7); font-size: 14px;">Offer services, book appointments, set rates</p>
+                        <div style="margin-top: 15px;">
+                            <div style="color: #00ff88; font-weight: bold;">✓ Booking System</div>
+                            <div style="color: #00ff88; font-weight: bold;">✓ Pricing Controls</div>
+                            <div style="color: #00ff88; font-weight: bold;">✓ Sales Management</div>
+                        </div>
                     </div>
-                    <div class="post-content">Lisa commented on your ISO post about gardening tools.</div>
+                    
+                    <div class="dual-option" onclick="upgradeToDual('entertainer')" style="background: rgba(255, 107, 53, 0.1); border: 2px solid rgba(255, 107, 53, 0.3); border-radius: 15px; padding: 20px; cursor: pointer; transition: all 0.3s ease;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">🎭</div>
+                        <h4 style="color: #ff6b35; margin-bottom: 10px;">Entertainer</h4>
+                        <p style="color: rgba(255,255,255,0.7); font-size: 14px;">Book shows, sell tickets, connect social media</p>
+                        <div style="margin-top: 15px;">
+                            <div style="color: #00ff88; font-weight: bold;">✓ Ticket Selling</div>
+                            <div style="color: #00ff88; font-weight: bold;">✓ Social Media Hooks</div>
+                            <div style="color: #00ff88; font-weight: bold;">✓ Show Booking</div>
+                        </div>
+                    </div>
                 </div>
+                
+                <p style="color: #00ff88; font-weight: bold; margin-bottom: 1rem;">FREE during launch campaign!</p>
+                <p style="color: rgba(255,255,255,0.6); font-size: 14px;">All business features are currently free. Subscription pricing will apply after the launch campaign ends.</p>
             </div>
         </div>
     </div>
@@ -824,6 +857,297 @@
             if (window.currentEditModal) {
                 document.body.removeChild(window.currentEditModal);
                 window.currentEditModal = null;
+            }
+        }
+
+        // Clear recent activity function
+        function clearRecentActivity() {
+            const activityItems = document.getElementById('activityItems');
+            activityItems.innerHTML = `
+                <div style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.6);">
+                    <p>Activity cleared successfully!</p>
+                    <p style="font-size: 14px;">Start exploring the community to see your activity here!</p>
+                </div>
+            `;
+            localStorage.removeItem('userActivity');
+        }
+
+        // Upgrade to dual profile function
+        function upgradeToDual(businessType) {
+            if (!currentUser) {
+                alert('Please sign in to upgrade your profile.');
+                return;
+            }
+            
+            // Create upgrade modal
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.9); z-index: 10000; display: flex; 
+                align-items: center; justify-content: center; padding: 20px;
+            `;
+            
+            const businessTypeNames = {
+                'shop': 'Shop Owner',
+                'service': 'Service Provider', 
+                'entertainer': 'Entertainer'
+            };
+            
+            modal.innerHTML = `
+                <div style="background: linear-gradient(135deg, #0d0221 0%, #1a0845 100%); 
+                           border-radius: 20px; padding: 30px; max-width: 600px; width: 100%; 
+                           border: 1px solid rgba(0, 255, 255, 0.3); max-height: 80vh; overflow-y: auto;">
+                    <h2 style="color: #00ffff; margin-bottom: 20px; text-align: center;">Create ${businessTypeNames[businessType]} Account</h2>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: #00ffff; display: block; margin-bottom: 5px;">Business Name</label>
+                        <input type="text" id="businessName" placeholder="Enter your business name" 
+                               style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); 
+                                      border: 1px solid rgba(0,255,255,0.3); border-radius: 8px; 
+                                      color: white; outline: none;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: #00ffff; display: block; margin-bottom: 5px;">Business Description</label>
+                        <textarea id="businessDescription" placeholder="Describe your business..." 
+                                  style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); 
+                                         border: 1px solid rgba(0,255,255,0.3); border-radius: 8px; 
+                                         color: white; outline: none; height: 80px; resize: vertical;"></textarea>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: #00ffff; display: block; margin-bottom: 5px;">Website URL (Optional)</label>
+                        <input type="url" id="businessWebsite" placeholder="https://your-website.com" 
+                               style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); 
+                                      border: 1px solid rgba(0,255,255,0.3); border-radius: 8px; 
+                                      color: white; outline: none;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: #00ffff; display: block; margin-bottom: 5px;">Business Address</label>
+                        <input type="text" id="businessAddress" placeholder="123 Main St, City, State" 
+                               style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); 
+                                      border: 1px solid rgba(0,255,255,0.3); border-radius: 8px; 
+                                      color: white; outline: none;">
+                    </div>
+                    
+                    <div style="background: rgba(0, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); 
+                               border-radius: 10px; padding: 15px; margin: 20px 0;">
+                        <h4 style="color: #00ff88; margin-bottom: 10px;">✓ Free Features During Launch:</h4>
+                        <ul style="color: rgba(255,255,255,0.8); margin: 0; padding-left: 20px;">
+                            ${businessType === 'shop' ? `
+                                <li>Website integration with inventory sync</li>
+                                <li>Product transfer and management</li>
+                                <li>Multiple delivery methods</li>
+                                <li>Pricing and shipping controls</li>
+                            ` : businessType === 'service' ? `
+                                <li>Booking system with calendar</li>
+                                <li>Service pricing controls</li>
+                                <li>Sales and appointment management</li>
+                                <li>Website connection</li>
+                            ` : `
+                                <li>Ticket selling website integration</li>
+                                <li>Social media connection</li>
+                                <li>Merchandise and music sales</li>
+                                <li>Show booking system</li>
+                            `}
+                        </ul>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button onclick="createBusinessAccount('${businessType}')" 
+                                style="flex: 1; padding: 12px; background: linear-gradient(45deg, #00ffff, #9d4edd); 
+                                       border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">
+                            Create Business Account
+                        </button>
+                        <button onclick="closeUpgradeModal()" 
+                                style="flex: 1; padding: 12px; background: rgba(255,255,255,0.1); 
+                                       border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; 
+                                       color: white; cursor: pointer;">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            window.currentUpgradeModal = modal;
+        }
+
+        function createBusinessAccount(businessType) {
+            const businessName = document.getElementById('businessName').value.trim();
+            const businessDescription = document.getElementById('businessDescription').value.trim();
+            const businessWebsite = document.getElementById('businessWebsite').value.trim();
+            const businessAddress = document.getElementById('businessAddress').value.trim();
+            
+            if (!businessName) {
+                alert('Please enter your business name.');
+                return;
+            }
+            
+            if (!businessDescription) {
+                alert('Please provide a business description.');
+                return;
+            }
+            
+            // Update user to dual account
+            currentUser.accountType = 'dual';
+            currentUser.businessType = businessType;
+            currentUser.businessName = businessName;
+            currentUser.businessDescription = businessDescription;
+            currentUser.businessWebsite = businessWebsite;
+            currentUser.businessAddress = businessAddress;
+            currentUser.businessCreatedAt = new Date().toISOString();
+            
+            // Save to localStorage
+            localStorage.setItem('currentUserData', JSON.stringify(currentUser));
+            
+            // Close modal
+            closeUpgradeModal();
+            
+            // Show success message and redirect to website integration
+            alert(`Congratulations! Your ${businessType} business account has been created successfully. You can now access website integration and all business features.`);
+            
+            // Trigger website integration setup
+            setTimeout(() => {
+                setupWebsiteIntegration(businessType);
+            }, 1000);
+        }
+
+        function closeUpgradeModal() {
+            if (window.currentUpgradeModal) {
+                document.body.removeChild(window.currentUpgradeModal);
+                window.currentUpgradeModal = null;
+            }
+        }
+
+        function setupWebsiteIntegration(businessType) {
+            // Create website integration modal
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.9); z-index: 10000; display: flex; 
+                align-items: center; justify-content: center; padding: 20px;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: linear-gradient(135deg, #0d0221 0%, #1a0845 100%); 
+                           border-radius: 20px; padding: 30px; max-width: 700px; width: 100%; 
+                           border: 1px solid rgba(0, 255, 255, 0.3); max-height: 80vh; overflow-y: auto;">
+                    <h2 style="color: #00ffff; margin-bottom: 20px; text-align: center;">Website Integration Setup</h2>
+                    
+                    ${businessType === 'shop' ? `
+                        <div style="margin-bottom: 20px;">
+                            <h3 style="color: #00ffff; margin-bottom: 15px;">Shop Integration Options</h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px;">
+                                    <h4 style="color: #00ff88; margin-bottom: 10px;">🔗 Shopify Integration</h4>
+                                    <input type="text" placeholder="your-store.myshopify.com" 
+                                           style="width: 100%; padding: 8px; margin-bottom: 10px; background: rgba(255,255,255,0.1); 
+                                                  border: 1px solid rgba(0,255,255,0.3); border-radius: 5px; color: white;">
+                                    <button style="padding: 8px 15px; background: #7c3aed; border: none; border-radius: 5px; color: white; cursor: pointer;">Connect Shopify</button>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px;">
+                                    <h4 style="color: #00ff88; margin-bottom: 10px;">📱 TikTok Shop Integration</h4>
+                                    <input type="text" placeholder="TikTok Shop URL" 
+                                           style="width: 100%; padding: 8px; margin-bottom: 10px; background: rgba(255,255,255,0.1); 
+                                                  border: 1px solid rgba(0,255,255,0.3); border-radius: 5px; color: white;">
+                                    <button style="padding: 8px 15px; background: #fe2c55; border: none; border-radius: 5px; color: white; cursor: pointer;">Connect TikTok</button>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px;">
+                                    <h4 style="color: #00ff88; margin-bottom: 10px;">📘 Facebook Shop Integration</h4>
+                                    <button style="padding: 8px 15px; background: #1877f2; border: none; border-radius: 5px; color: white; cursor: pointer;">Connect Facebook Shop</button>
+                                </div>
+                            </div>
+                        </div>
+                    ` : businessType === 'service' ? `
+                        <div style="margin-bottom: 20px;">
+                            <h3 style="color: #00ffff; margin-bottom: 15px;">Service Integration Options</h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px;">
+                                    <h4 style="color: #00ff88; margin-bottom: 10px;">🗓️ Booking System</h4>
+                                    <p style="color: rgba(255,255,255,0.8); margin-bottom: 10px;">Connect your existing booking system or use our built-in calendar</p>
+                                    <button style="padding: 8px 15px; background: #8a2be2; border: none; border-radius: 5px; color: white; cursor: pointer;">Setup Booking</button>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px;">
+                                    <h4 style="color: #00ff88; margin-bottom: 10px;">💰 Pricing Controls</h4>
+                                    <p style="color: rgba(255,255,255,0.8); margin-bottom: 10px;">Set your service rates and manage pricing</p>
+                                    <button style="padding: 8px 15px; background: #10b981; border: none; border-radius: 5px; color: white; cursor: pointer;">Configure Pricing</button>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px;">
+                                    <h4 style="color: #00ff88; margin-bottom: 10px;">🌐 Website Connection</h4>
+                                    <input type="url" placeholder="https://your-service-website.com" 
+                                           style="width: 100%; padding: 8px; margin-bottom: 10px; background: rgba(255,255,255,0.1); 
+                                                  border: 1px solid rgba(0,255,255,0.3); border-radius: 5px; color: white;">
+                                    <button style="padding: 8px 15px; background: #0ea5e9; border: none; border-radius: 5px; color: white; cursor: pointer;">Connect Website</button>
+                                </div>
+                            </div>
+                        </div>
+                    ` : `
+                        <div style="margin-bottom: 20px;">
+                            <h3 style="color: #00ffff; margin-bottom: 15px;">Entertainment Integration Options</h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px;">
+                                    <h4 style="color: #00ff88; margin-bottom: 10px;">🎫 Ticket Selling Integration</h4>
+                                    <select style="width: 100%; padding: 8px; margin-bottom: 10px; background: rgba(255,255,255,0.1); 
+                                                   border: 1px solid rgba(0,255,255,0.3); border-radius: 5px; color: white;">
+                                        <option>Select Platform</option>
+                                        <option>Ticketmaster</option>
+                                        <option>Eventbrite</option>
+                                        <option>StubHub</option>
+                                        <option>Custom Platform</option>
+                                    </select>
+                                    <button style="padding: 8px 15px; background: #f59e0b; border: none; border-radius: 5px; color: white; cursor: pointer;">Connect Ticketing</button>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px;">
+                                    <h4 style="color: #00ff88; margin-bottom: 10px;">📱 Social Media Integration</h4>
+                                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                        <button style="padding: 8px 15px; background: #1877f2; border: none; border-radius: 5px; color: white; cursor: pointer;">Facebook</button>
+                                        <button style="padding: 8px 15px; background: #1da1f2; border: none; border-radius: 5px; color: white; cursor: pointer;">Twitter</button>
+                                        <button style="padding: 8px 15px; background: #e1306c; border: none; border-radius: 5px; color: white; cursor: pointer;">Instagram</button>
+                                        <button style="padding: 8px 15px; background: #fe2c55; border: none; border-radius: 5px; color: white; cursor: pointer;">TikTok</button>
+                                    </div>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px;">
+                                    <h4 style="color: #00ff88; margin-bottom: 10px;">🛍️ Merchandise & Music Sales</h4>
+                                    <input type="url" placeholder="https://your-merchandise-store.com" 
+                                           style="width: 100%; padding: 8px; margin-bottom: 10px; background: rgba(255,255,255,0.1); 
+                                                  border: 1px solid rgba(0,255,255,0.3); border-radius: 5px; color: white;">
+                                    <button style="padding: 8px 15px; background: #7c3aed; border: none; border-radius: 5px; color: white; cursor: pointer;">Connect Store</button>
+                                </div>
+                            </div>
+                        </div>
+                    `}
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button onclick="completeIntegrationSetup()" 
+                                style="flex: 1; padding: 12px; background: linear-gradient(45deg, #00ffff, #9d4edd); 
+                                       border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">
+                            Complete Setup
+                        </button>
+                        <button onclick="closeIntegrationModal()" 
+                                style="flex: 1; padding: 12px; background: rgba(255,255,255,0.1); 
+                                       border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; 
+                                       color: white; cursor: pointer;">
+                            Skip for Now
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            window.currentIntegrationModal = modal;
+        }
+
+        function completeIntegrationSetup() {
+            closeIntegrationModal();
+            alert('Website integration setup completed! You can configure more integrations anytime from your business profile.');
+        }
+
+        function closeIntegrationModal() {
+            if (window.currentIntegrationModal) {
+                document.body.removeChild(window.currentIntegrationModal);
+                window.currentIntegrationModal = null;
             }
         }
 
