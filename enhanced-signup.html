@@ -789,6 +789,30 @@
                 if (response.ok && result.success) {
                     showMessage('success', 'Account created successfully! Welcome to MarketPace!');
                     
+                    // Store user data in localStorage for community feed access
+                    localStorage.setItem('currentUserEmail', result.user.email);
+                    localStorage.setItem('currentUserData', JSON.stringify({
+                        userId: result.user.userId,
+                        email: result.user.email,
+                        fullName: result.user.fullName,
+                        phone: formData.phone,
+                        city: formData.city,
+                        state: formData.state,
+                        country: formData.country,
+                        accountType: formData.accountType,
+                        bio: formData.bio,
+                        interests: formData.interests,
+                        businessName: formData.businessName,
+                        businessWebsite: formData.businessWebsite,
+                        businessAddress: formData.businessAddress,
+                        businessPhone: formData.businessPhone,
+                        businessDescription: formData.businessDescription,
+                        businessCategories: formData.businessCategories,
+                        earlySupporter: result.user.earlySupporter,
+                        // No profile picture means demo mode
+                        profilePicture: null
+                    }));
+                    
                     // Immediate redirect to community feed (seamless experience)
                     setTimeout(() => {
                         window.location.href = '/enhanced-community-feed';

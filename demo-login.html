@@ -357,7 +357,29 @@
                 
                 if (response.ok && result.success) {
                     // Store demo user session
-                    localStorage.setItem('demoUser', JSON.stringify(result.user));
+                    // Store user data in localStorage for community feed access
+                    localStorage.setItem('currentUserEmail', result.user.email);
+                    localStorage.setItem('currentUserData', JSON.stringify({
+                        userId: result.user.userId,
+                        email: result.user.email,
+                        fullName: result.user.fullName,
+                        phone: result.user.phone,
+                        city: result.user.city,
+                        state: result.user.state,
+                        country: result.user.country,
+                        accountType: result.user.accountType,
+                        bio: result.user.bio,
+                        interests: result.user.interests ? result.user.interests.split(',') : [],
+                        businessName: result.user.businessName,
+                        businessWebsite: result.user.businessWebsite,
+                        businessAddress: result.user.businessAddress,
+                        businessPhone: result.user.businessPhone,
+                        businessDescription: result.user.businessDescription,
+                        businessCategories: result.user.businessCategories ? result.user.businessCategories.split(',') : [],
+                        earlySupporter: result.user.earlySupporter,
+                        // No profile picture means demo mode
+                        profilePicture: null
+                    }));
                     
                     successMessage.textContent = `Welcome back! Redirecting to community...`;
                     successMessage.style.display = 'block';
