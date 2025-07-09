@@ -2202,6 +2202,21 @@ function MainMenuStack() {
         component={DeliveryDemoScreen} 
         options={{ headerShown: false }} 
       />
+      <Stack.Screen 
+        name="FacebookIntegration" 
+        component={FacebookIntegrationScreen} 
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen 
+        name="WebsiteIntegration" 
+        component={WebsiteIntegrationScreen} 
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen 
+        name="FoodDeliveryIntegration" 
+        component={FoodDeliveryIntegrationScreen} 
+        options={{ headerShown: false }} 
+      />
     </Stack.Navigator>
   );
 }
@@ -2598,6 +2613,74 @@ const MainMenuScreen = ({ navigation }: any) => {
                   </Text>
                 </View>
               )}
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Business Integration Section */}
+        <View style={{ marginBottom: 20 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 12 }}>
+            Business Integrations
+          </Text>
+          
+          {[
+            { 
+              name: 'FacebookIntegration', 
+              icon: 'logo-facebook', 
+              label: 'Facebook Integration', 
+              description: 'Auto-post to Facebook Marketplace',
+              color: '#1877F2',
+              bgColor: 'rgba(24, 119, 242, 0.1)',
+              borderColor: 'rgba(24, 119, 242, 0.3)'
+            },
+            { 
+              name: 'WebsiteIntegration', 
+              icon: 'globe', 
+              label: 'Website Integration', 
+              description: 'Connect Shopify, Etsy, or custom site',
+              color: '#00B894',
+              bgColor: 'rgba(0, 184, 148, 0.1)',
+              borderColor: 'rgba(0, 184, 148, 0.3)'
+            },
+            { 
+              name: 'FoodDeliveryIntegration', 
+              icon: 'restaurant', 
+              label: 'Food Delivery Integration', 
+              description: 'Connect DoorDash, Uber Eats, etc.',
+              color: '#FF6B6B',
+              bgColor: 'rgba(255, 107, 107, 0.1)',
+              borderColor: 'rgba(255, 107, 107, 0.3)'
+            },
+          ].map((item, index) => (
+            <TouchableOpacity 
+              key={index}
+              style={{ 
+                backgroundColor: item.bgColor, 
+                borderRadius: 12, 
+                padding: 16, 
+                marginBottom: 12,
+                borderWidth: 1,
+                borderColor: item.borderColor,
+                flexDirection: 'row',
+                alignItems: 'center'
+              }}
+              onPress={() => navigation.navigate(item.name)}
+            >
+              <Ionicons 
+                name={item.icon as any} 
+                size={24} 
+                color={item.color} 
+                style={{ marginRight: 12 }} 
+              />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#fff', marginBottom: 2 }}>
+                  {item.label}
+                </Text>
+                <Text style={{ fontSize: 12, color: '#B8B8B8' }}>
+                  {item.description}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#B8B8B8" />
             </TouchableOpacity>
           ))}
         </View>
@@ -4040,6 +4123,319 @@ const SecurityPoliciesScreen = ({ navigation }: any) => {
       {/* Bottom padding for floating navigation */}
       <View style={{ height: 100 }} />
     </ScrollView>
+  );
+};
+
+// Facebook Integration Screen
+const FacebookIntegrationScreen = ({ navigation }: any) => {
+  const [isConnected, setIsConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+
+  const handleConnect = async () => {
+    setIsConnecting(true);
+    // Simulate connection process
+    setTimeout(() => {
+      setIsConnected(true);
+      setIsConnecting(false);
+    }, 2000);
+  };
+
+  return (
+    <View style={{ flex: 1, backgroundColor: '#0F0B1F' }}>
+      <LinearGradient
+        colors={['#1877F2', '#4267B2']}
+        style={{ paddingTop: 60, paddingBottom: 20, paddingHorizontal: 20 }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff', marginLeft: 16 }}>
+            Facebook Integration
+          </Text>
+        </View>
+      </LinearGradient>
+
+      <ScrollView style={{ padding: 20 }}>
+        <View style={{ marginBottom: 30 }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#fff', marginBottom: 12 }}>
+            Connect Facebook Marketplace
+          </Text>
+          <Text style={{ fontSize: 16, color: '#B8B8B8', lineHeight: 22 }}>
+            Automatically post your MarketPace listings to Facebook Marketplace and respond to inquiries with MarketPace delivery options.
+          </Text>
+        </View>
+
+        <View style={{ marginBottom: 30 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 16 }}>
+            Features
+          </Text>
+          {[
+            'Auto-post listings to Facebook Marketplace',
+            'Respond to "Is this still available?" messages',
+            'Cross-platform analytics and insights',
+            'Unified inventory management',
+            'MarketPace delivery integration'
+          ].map((feature, index) => (
+            <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+              <Ionicons name="checkmark-circle" size={20} color="#1877F2" style={{ marginRight: 12 }} />
+              <Text style={{ fontSize: 16, color: '#fff' }}>{feature}</Text>
+            </View>
+          ))}
+        </View>
+
+        <TouchableOpacity
+          style={{
+            backgroundColor: isConnected ? '#22C55E' : '#1877F2',
+            borderRadius: 12,
+            padding: 16,
+            alignItems: 'center',
+            marginBottom: 20
+          }}
+          onPress={handleConnect}
+          disabled={isConnecting || isConnected}
+        >
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff' }}>
+            {isConnecting ? 'Connecting...' : isConnected ? 'Connected ✓' : 'Connect Facebook Account'}
+          </Text>
+        </TouchableOpacity>
+
+        {isConnected && (
+          <View style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', padding: 16, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(34, 197, 94, 0.3)' }}>
+            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#22C55E', marginBottom: 8 }}>
+              Integration Active
+            </Text>
+            <Text style={{ fontSize: 14, color: '#B8B8B8' }}>
+              Your listings will now automatically appear on Facebook Marketplace with MarketPace delivery options.
+            </Text>
+          </View>
+        )}
+      </ScrollView>
+    </View>
+  );
+};
+
+// Website Integration Screen
+const WebsiteIntegrationScreen = ({ navigation }: any) => {
+  const [selectedPlatform, setSelectedPlatform] = useState('');
+  const [isConnected, setIsConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+
+  const platforms = [
+    { id: 'shopify', name: 'Shopify', color: '#96BF48', icon: 'storefront' },
+    { id: 'etsy', name: 'Etsy', color: '#F56500', icon: 'diamond' },
+    { id: 'woocommerce', name: 'WooCommerce', color: '#96588A', icon: 'basket' },
+    { id: 'squarespace', name: 'Squarespace', color: '#000000', icon: 'square' },
+  ];
+
+  const handleConnect = async () => {
+    if (!selectedPlatform) return;
+    setIsConnecting(true);
+    setTimeout(() => {
+      setIsConnected(true);
+      setIsConnecting(false);
+    }, 2000);
+  };
+
+  return (
+    <View style={{ flex: 1, backgroundColor: '#0F0B1F' }}>
+      <LinearGradient
+        colors={['#00B894', '#00A085']}
+        style={{ paddingTop: 60, paddingBottom: 20, paddingHorizontal: 20 }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff', marginLeft: 16 }}>
+            Website Integration
+          </Text>
+        </View>
+      </LinearGradient>
+
+      <ScrollView style={{ padding: 20 }}>
+        <View style={{ marginBottom: 30 }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#fff', marginBottom: 12 }}>
+            Connect Your Online Store
+          </Text>
+          <Text style={{ fontSize: 16, color: '#B8B8B8', lineHeight: 22 }}>
+            Sync your existing website inventory with MarketPace and offer local delivery to your community.
+          </Text>
+        </View>
+
+        <View style={{ marginBottom: 30 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 16 }}>
+            Choose Your Platform
+          </Text>
+          {platforms.map((platform) => (
+            <TouchableOpacity
+              key={platform.id}
+              style={{
+                backgroundColor: selectedPlatform === platform.id ? `${platform.color}20` : 'rgba(255, 255, 255, 0.05)',
+                borderRadius: 12,
+                padding: 16,
+                marginBottom: 12,
+                borderWidth: 2,
+                borderColor: selectedPlatform === platform.id ? platform.color : 'rgba(255, 255, 255, 0.1)',
+                flexDirection: 'row',
+                alignItems: 'center'
+              }}
+              onPress={() => setSelectedPlatform(platform.id)}
+            >
+              <Ionicons name={platform.icon as any} size={24} color={platform.color} style={{ marginRight: 12 }} />
+              <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#fff' }}>{platform.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <TouchableOpacity
+          style={{
+            backgroundColor: isConnected ? '#22C55E' : '#00B894',
+            borderRadius: 12,
+            padding: 16,
+            alignItems: 'center',
+            marginBottom: 20,
+            opacity: !selectedPlatform ? 0.5 : 1
+          }}
+          onPress={handleConnect}
+          disabled={isConnecting || isConnected || !selectedPlatform}
+        >
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff' }}>
+            {isConnecting ? 'Connecting...' : isConnected ? 'Connected ✓' : 'Connect Website'}
+          </Text>
+        </TouchableOpacity>
+
+        {isConnected && (
+          <View style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', padding: 16, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(34, 197, 94, 0.3)' }}>
+            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#22C55E', marginBottom: 8 }}>
+              {platforms.find(p => p.id === selectedPlatform)?.name} Connected
+            </Text>
+            <Text style={{ fontSize: 14, color: '#B8B8B8' }}>
+              Your inventory is now synced with MarketPace. Local customers can order with same-day delivery.
+            </Text>
+          </View>
+        )}
+      </ScrollView>
+    </View>
+  );
+};
+
+// Food Delivery Integration Screen
+const FoodDeliveryIntegrationScreen = ({ navigation }: any) => {
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+
+  const platforms = [
+    { id: 'doordash', name: 'DoorDash', color: '#FF3008', icon: 'car' },
+    { id: 'ubereats', name: 'Uber Eats', color: '#00B956', icon: 'bicycle' },
+    { id: 'grubhub', name: 'Grubhub', color: '#FF8000', icon: 'restaurant' },
+    { id: 'postmates', name: 'Postmates', color: '#000000', icon: 'bag' },
+  ];
+
+  const togglePlatform = (platformId: string) => {
+    setSelectedPlatforms(prev => 
+      prev.includes(platformId) 
+        ? prev.filter(id => id !== platformId)
+        : [...prev, platformId]
+    );
+  };
+
+  const handleConnect = async () => {
+    if (selectedPlatforms.length === 0) return;
+    setIsConnecting(true);
+    setTimeout(() => {
+      setIsConnected(true);
+      setIsConnecting(false);
+    }, 2000);
+  };
+
+  return (
+    <View style={{ flex: 1, backgroundColor: '#0F0B1F' }}>
+      <LinearGradient
+        colors={['#FF6B6B', '#EE5A52']}
+        style={{ paddingTop: 60, paddingBottom: 20, paddingHorizontal: 20 }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff', marginLeft: 16 }}>
+            Food Delivery Integration
+          </Text>
+        </View>
+      </LinearGradient>
+
+      <ScrollView style={{ padding: 20 }}>
+        <View style={{ marginBottom: 30 }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#fff', marginBottom: 12 }}>
+            Connect Food Delivery Platforms
+          </Text>
+          <Text style={{ fontSize: 16, color: '#B8B8B8', lineHeight: 22 }}>
+            Manage all your food delivery orders from one dashboard. MarketPace takes only 5% commission vs 15-30% from other platforms.
+          </Text>
+        </View>
+
+        <View style={{ marginBottom: 30 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 16 }}>
+            Select Platforms
+          </Text>
+          {platforms.map((platform) => (
+            <TouchableOpacity
+              key={platform.id}
+              style={{
+                backgroundColor: selectedPlatforms.includes(platform.id) ? `${platform.color}20` : 'rgba(255, 255, 255, 0.05)',
+                borderRadius: 12,
+                padding: 16,
+                marginBottom: 12,
+                borderWidth: 2,
+                borderColor: selectedPlatforms.includes(platform.id) ? platform.color : 'rgba(255, 255, 255, 0.1)',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}
+              onPress={() => togglePlatform(platform.id)}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Ionicons name={platform.icon as any} size={24} color={platform.color} style={{ marginRight: 12 }} />
+                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#fff' }}>{platform.name}</Text>
+              </View>
+              {selectedPlatforms.includes(platform.id) && (
+                <Ionicons name="checkmark-circle" size={24} color={platform.color} />
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <TouchableOpacity
+          style={{
+            backgroundColor: isConnected ? '#22C55E' : '#FF6B6B',
+            borderRadius: 12,
+            padding: 16,
+            alignItems: 'center',
+            marginBottom: 20,
+            opacity: selectedPlatforms.length === 0 ? 0.5 : 1
+          }}
+          onPress={handleConnect}
+          disabled={isConnecting || isConnected || selectedPlatforms.length === 0}
+        >
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff' }}>
+            {isConnecting ? 'Connecting...' : isConnected ? 'Connected ✓' : 'Connect Platforms'}
+          </Text>
+        </TouchableOpacity>
+
+        {isConnected && (
+          <View style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', padding: 16, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(34, 197, 94, 0.3)' }}>
+            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#22C55E', marginBottom: 8 }}>
+              {selectedPlatforms.length} Platform{selectedPlatforms.length > 1 ? 's' : ''} Connected
+            </Text>
+            <Text style={{ fontSize: 14, color: '#B8B8B8' }}>
+              Your restaurant is now connected to {selectedPlatforms.join(', ')}. Manage all orders through MarketPace with lower fees.
+            </Text>
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 };
 
