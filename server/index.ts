@@ -31,6 +31,11 @@ app.use(express.json());
 app.use(express.static("client/dist"));
 app.use(express.static(path.join(__dirname, '../')));
 
+// Main landing page route
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../index.html'));
+});
+
 // Facebook integration demo route
 app.get('/facebook-demo', (req, res) => {
   res.sendFile(path.join(__dirname, '../facebook-integration-demo.html'));
@@ -47,6 +52,16 @@ app.get('/terms-of-service', (req, res) => {
 
 app.get('/data-deletion', (req, res) => {
   res.sendFile(path.join(__dirname, '../data-deletion.html'));
+});
+
+// Admin login page
+app.get('/admin-login', (req, res) => {
+  res.sendFile(path.join(__dirname, '../admin-login.html'));
+});
+
+// Admin dashboard (existing)
+app.get('/admin-dashboard.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../admin-dashboard.html'));
 });
 
 const port = process.env.PORT || 5000;
