@@ -10,6 +10,12 @@ interface FacebookProfile {
 }
 
 export function setupFacebookAuth(app: Express) {
+  // Only set up Facebook authentication if credentials are provided
+  if (!process.env.FACEBOOK_APP_ID || !process.env.FACEBOOK_APP_SECRET) {
+    console.log('Facebook credentials not found - Facebook authentication disabled');
+    return;
+  }
+
   // Facebook Strategy Configuration
   passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID!,

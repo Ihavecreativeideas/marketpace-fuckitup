@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import path from "path";
 import { registerRoutes } from "./routes";
 
 const app = express();
@@ -28,6 +29,12 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.static("client/dist"));
+app.use(express.static(path.join(__dirname, '../')));
+
+// Facebook integration demo route
+app.get('/facebook-demo', (req, res) => {
+  res.sendFile(path.join(__dirname, '../facebook-integration-demo.html'));
+});
 
 const port = process.env.PORT || 5000;
 

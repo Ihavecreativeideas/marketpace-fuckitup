@@ -23,7 +23,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
   
-  // Facebook Auth setup
+  // Facebook Auth setup (optional - requires credentials)
   setupFacebookAuth(app);
 
   // RLS Context middleware - sets user context for database security policies
