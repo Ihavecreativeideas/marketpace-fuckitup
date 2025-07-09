@@ -49,16 +49,28 @@ export function setupFacebookAuth(app: Express) {
     done(null, user);
   });
 
-  // Facebook authentication routes
-  app.get('/auth/facebook', passport.authenticate('facebook', { 
-    scope: ['email', 'public_profile', 'pages_manage_metadata', 'pages_read_engagement'] 
-  }));
+  // Privacy-compliant Facebook OAuth (redirect-based, not embedded)
+  app.get('/auth/facebook', (req, res) => {
+    // Store return URL for post-authentication redirect
+    const returnUrl = req.query.returnUrl || '/';
+    req.session.returnUrl = returnUrl;
+    
+    // Use redirect-based OAuth instead of embedded iframe
+    passport.authenticate('facebook', { 
+      scope: ['email', 'public_profile', 'pages_manage_metadata', 'pages_read_engagement'],
+      // Force redirect to facebook.com then back to MarketPace
+      display: 'popup',
+      auth_type: 'rerequest'
+    })(req, res);
+  });
 
   app.get('/auth/facebook/callback', 
     passport.authenticate('facebook', { failureRedirect: '/login' }),
     (req, res) => {
-      // Successful authentication
-      res.redirect('/');
+      // Successful authentication - redirect to stored return URL
+      const returnUrl = req.session.returnUrl || '/';
+      delete req.session.returnUrl;
+      res.redirect(returnUrl);
     }
   );
 

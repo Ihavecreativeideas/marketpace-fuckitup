@@ -40,7 +40,13 @@ export function getSession() {
       httpOnly: true,
       secure: true,
       maxAge: sessionTtl,
+      sameSite: 'none', // Privacy compliant cross-site cookie setting
+      partitioned: true, // Chrome's privacy sandbox partitioned cookies
     },
+    // Server-to-server communication settings
+    name: 'marketpace.sid',
+    rolling: true,
+    proxy: true,
   });
 }
 
