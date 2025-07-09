@@ -80,6 +80,7 @@ export const DRIVER_PAYMENTS = {
   PICKUP_FEE: 4.00,
   DROPOFF_FEE: 2.00,
   MILEAGE_RATE: 0.50,
+  LARGE_DELIVERY_BONUS: 25.00,
   TIP_PERCENTAGE: 1.00 // 100% of tips go to drivers
 };
 
@@ -149,8 +150,8 @@ export function calculateRentalOrServiceFee(
 }
 
 export function calculateDriverPayout(
-  pickups: number, 
-  dropoffs: number, 
+  pickups: number,
+  dropoffs: number,
   miles: number, 
   tips: number
 ): number {
@@ -414,11 +415,11 @@ export function calculateEnhancedDeliveryFee(
   // Base delivery calculation
   const baseFee = DRIVER_PAYMENTS.PICKUP_FEE + DRIVER_PAYMENTS.DROPOFF_FEE + (DRIVER_PAYMENTS.MILEAGE_RATE * distance);
   
-  // Large item fee (only for large items requiring truck/trailer)
-  const largeItemFee = (itemSize === 'large' && (driverVehicleType === 'truck' || driverVehicleType === 'van')) ? FEE_STRUCTURE.LARGE_ITEM_FEE : 0;
+  // Large delivery bonus (only for large items requiring truck/van)
+  const largeDeliveryBonus = (itemSize === 'large' && (driverVehicleType === 'truck' || driverVehicleType === 'van')) ? DRIVER_PAYMENTS.LARGE_DELIVERY_BONUS : 0;
   
   // Total delivery fee before tips
-  const totalDeliveryFee = baseFee + largeItemFee;
+  const totalDeliveryFee = baseFee + largeDeliveryBonus;
   
   // Platform commission (5% of delivery fee, excluding tips)
   const platformCommission = totalDeliveryFee * FEE_STRUCTURE.DELIVERY_PLATFORM_PERCENT;
@@ -439,7 +440,7 @@ Vehicle: ${driverVehicleType.charAt(0).toUpperCase() + driverVehicleType.slice(1
 Compatible: ${canHandle ? 'Yes' : 'No'}
 
 Base Delivery: $${baseFee.toFixed(2)} ($${DRIVER_PAYMENTS.PICKUP_FEE} pickup + $${DRIVER_PAYMENTS.DROPOFF_FEE} dropoff + $${(DRIVER_PAYMENTS.MILEAGE_RATE * distance).toFixed(2)} mileage)
-Large Item Fee: $${largeItemFee.toFixed(2)}
+Large Delivery Bonus: $${largeDeliveryBonus.toFixed(2)}
 Total Delivery Fee: $${totalDeliveryFee.toFixed(2)}
 
 Fee Split:
@@ -451,7 +452,7 @@ Fee Split:
   
   return {
     baseFee,
-    largeItemFee,
+    largeItemFee: largeDeliveryBonus,
     platformCommission,
     driverPayout,
     buyerShare,
@@ -492,6 +493,7 @@ export interface DeliveryRoute {
   id: string;
   driverId: string;
   items: DeliveryItem[];
+  pickups: number;
   totalDistance: number;
   hasLargeItem: boolean;
   maxCapacityReached: boolean;
@@ -500,12 +502,13 @@ export interface DeliveryRoute {
 export class DeliveryRouteManager {
   private static routes: Map<string, DeliveryRoute> = new Map();
   
-  static createRoute(driverId: string): string {
+  static createRoute(driverId: string, pickups: number = 1): string {
     const routeId = `ROUTE_${Date.now()}`;
     const route: DeliveryRoute = {
       id: routeId,
       driverId,
       items: [],
+      pickups: pickups, // For shop deliveries, usually 1 pickup with multiple dropoffs
       totalDistance: 0,
       hasLargeItem: false,
       maxCapacityReached: false
@@ -560,10 +563,10 @@ export class DeliveryRouteManager {
   static calculateRouteEarnings(routeId: string, tip: number = 0): {
     totalEarnings: number;
     breakdown: {
-      pickups: number;
-      dropoffs: number;
+      pickupPay: number;
+      dropoffPay: number;
       mileage: number;
-      largeItemFees: number;
+      largeDeliveryBonus: number;
       tips: number;
     };
     details: string;
@@ -573,29 +576,30 @@ export class DeliveryRouteManager {
       throw new Error('Route not found');
     }
     
-    const pickupFees = route.items.length * DRIVER_PAYMENTS.PICKUP_FEE;
-    const dropoffFees = route.items.length * DRIVER_PAYMENTS.DROPOFF_FEE;
+    // For shop deliveries: 1 pickup can have multiple dropoffs
+    const pickupPay = route.pickups * DRIVER_PAYMENTS.PICKUP_FEE;
+    const dropoffPay = route.items.length * DRIVER_PAYMENTS.DROPOFF_FEE; // Each item is one dropoff
     const mileageFees = route.totalDistance * DRIVER_PAYMENTS.MILEAGE_RATE;
-    const largeItemFees = route.hasLargeItem ? FEE_STRUCTURE.LARGE_ITEM_FEE : 0;
+    const largeDeliveryBonus = route.hasLargeItem ? DRIVER_PAYMENTS.LARGE_DELIVERY_BONUS : 0;
     
-    const totalBeforeTip = pickupFees + dropoffFees + mileageFees + largeItemFees;
-    const platformCommission = (totalBeforeTip - largeItemFees) * FEE_STRUCTURE.DELIVERY_PLATFORM_PERCENT;
+    const totalBeforeTip = pickupPay + dropoffPay + mileageFees + largeDeliveryBonus;
+    const platformCommission = (totalBeforeTip - largeDeliveryBonus) * FEE_STRUCTURE.DELIVERY_PLATFORM_PERCENT;
     const driverEarnings = totalBeforeTip - platformCommission + tip;
     
     const breakdown = {
-      pickups: pickupFees,
-      dropoffs: dropoffFees,
+      pickupPay: pickupPay,
+      dropoffPay: dropoffPay,
       mileage: mileageFees,
-      largeItemFees: largeItemFees,
+      largeDeliveryBonus: largeDeliveryBonus,
       tips: tip
     };
     
     const details = `
 Route ${routeId} Earnings:
-- ${route.items.length} pickups: $${pickupFees.toFixed(2)}
-- ${route.items.length} dropoffs: $${dropoffFees.toFixed(2)}
-- ${route.totalDistance} miles: $${mileageFees.toFixed(2)}
-- Large item fees: $${largeItemFees.toFixed(2)}
+- ${route.pickups} pickups × $4: $${pickupPay.toFixed(2)}
+- ${route.items.length} dropoffs × $2: $${dropoffPay.toFixed(2)}
+- ${route.totalDistance} miles × $0.50: $${mileageFees.toFixed(2)}
+- Large delivery bonus: $${largeDeliveryBonus.toFixed(2)}
 - Tips: $${tip.toFixed(2)}
 - Platform commission: -$${platformCommission.toFixed(2)}
 Total Driver Earnings: $${driverEarnings.toFixed(2)}
