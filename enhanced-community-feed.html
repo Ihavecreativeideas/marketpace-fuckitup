@@ -1856,44 +1856,45 @@
 
     <!-- Header -->
     <header class="header">
-        <div class="header-content">
-            <!-- Left Section: Back Button + Logo -->
+        <div class="header-content" style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 20px;">
+            <!-- Left Corner: Back Button -->
             <div class="header-left">
-                <button onclick="window.location.href='/'" style="background: transparent; color: #87ceeb; border: none; padding: 4px 8px; font-size: 14px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 6px;" onmouseover="this.style.color='#00ffff'; this.style.transform='translateX(-2px)'" onmouseout="this.style.color='#87ceeb'; this.style.transform='translateX(0)'">
+                <button onclick="window.history.back()" style="background: linear-gradient(135deg, #1e40af, #3730a3); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 500; cursor: pointer; box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3); transition: all 0.2s ease; display: flex; align-items: center; gap: 6px;" onmouseover="this.style.transform='translateX(-2px) scale(1.05)'" onmouseout="this.style.transform='translateX(0) scale(1)'">
                     <span style="font-size: 16px; font-weight: 300;">←</span> Back
                 </button>
-                
-                <div id="headerLogoContainer" style="position: relative; overflow: visible;">
+            </div>
+            
+            <!-- Center: Logo and Main Menu -->
+            <div class="header-center" style="text-align: center;">
+                <div id="headerLogoContainer" style="position: relative; overflow: visible; margin-bottom: 10px;">
                     <!-- Header logo flow particles -->
                     <div id="headerLogoFlowParticles" style="
                       position: absolute;
-                      top: -30px;
-                      left: -30px;
-                      right: -30px;
-                      bottom: -30px;
+                      top: -40px;
+                      left: -40px;
+                      right: -40px;
+                      bottom: -40px;
                       z-index: 4;
                       pointer-events: none;
                     "></div>
                     
                     <img src="/marketpace-hero-logo.jpeg" alt="MarketPace" style="
-                      height: 70px; 
+                      height: 100px; 
                       width: auto; 
-                      border-radius: 12px; 
+                      border-radius: 16px; 
                       object-fit: cover;
-                      filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.6)) drop-shadow(0 0 30px rgba(138, 43, 226, 0.3));
+                      filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.7)) drop-shadow(0 0 40px rgba(138, 43, 226, 0.4));
                       mask: radial-gradient(ellipse at center, rgba(0,0,0,1) 75%, rgba(0,0,0,0.6) 90%, rgba(0,0,0,0) 100%);
                       -webkit-mask: radial-gradient(ellipse at center, rgba(0,0,0,1) 75%, rgba(0,0,0,0.6) 90%, rgba(0,0,0,0) 100%);
                       position: relative;
                       z-index: 5;
                     ">
                 </div>
-            </div>
-            
-            <!-- Center Section: Search Bar -->
-            <div class="header-center">
-                <div style="text-align: center; margin-bottom: 8px;">
-                    <span onclick="toggleMainMenu()" style="color: #00ffff; font-size: 14px; cursor: pointer; text-decoration: underline; text-shadow: 0 0 10px rgba(0, 255, 255, 0.5); transition: all 0.2s ease;" onmouseover="this.style.color='#87ceeb'" onmouseout="this.style.color='#00ffff'">Main Menu</span>
+                
+                <div style="margin-bottom: 10px;">
+                    <button onclick="toggleMainMenu()" style="background: rgba(255, 255, 255, 0.9); color: #333; border: none; padding: 8px 20px; border-radius: 25px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15); transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 1)'; this.style.transform='scale(1.05)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.9)'; this.style.transform='scale(1)'">Main Menu</button>
                 </div>
+                
                 <div class="search-bar">
                     <input type="text" class="search-input" placeholder="Search posts, products, services, or people..." id="searchInput">
                 </div>
@@ -3666,6 +3667,14 @@
         function upgradeToDual() {
             alert('Upgrade to Dual Profile: Add business features to your personal account. Available when MarketPace launches in your area!');
         }
+
+        function showSecurityPolicies() {
+            window.location.href = '/security-policies.html';
+        }
+
+        function showDeliveryDemo() {
+            alert('Delivery Demo: Interactive demonstration showing how our 6-stop delivery routes work and how drivers earn $4 pickup + $2 dropoff + $0.50/mile + 100% tips!');
+        }
     </script>
 
     <!-- Floating Profile Icon -->
@@ -3674,75 +3683,148 @@
     </div>
 
     <!-- Main Menu Overlay -->
-    <div class="main-menu" id="mainMenu" style="display: none;">
-        <div class="menu-content">
-            <div class="menu-header">
-                <h3>Main Menu</h3>
-                <button class="close-menu-btn" onclick="toggleMainMenu()">✕</button>
+    <div class="main-menu" id="mainMenu" style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        display: none;
+        backdrop-filter: blur(10px);
+    ">
+        <div class="menu-content" style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(13, 2, 33, 0.95);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        ">
+            <div class="menu-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(0, 255, 255, 0.2); padding-bottom: 15px;">
+                <h3 style="color: #00ffff; margin: 0; font-size: 24px; text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);">Main Menu</h3>
+                <button class="close-menu-btn" onclick="toggleMainMenu()" style="background: transparent; border: none; color: #ff6b35; font-size: 24px; cursor: pointer; padding: 5px;">✕</button>
             </div>
             
-            <!-- Calendar Section in Main Menu -->
-            <div class="menu-calendar-section">
-                <div class="menu-calendar-header" onclick="toggleMenuCalendar()">
-                    <div class="menu-calendar-title">📅 Community Calendar</div>
-                    <div class="menu-calendar-toggle">
-                        <span>View Events</span>
-                        <span id="menuCalendarArrow">▼</span>
-                    </div>
-                </div>
+            <div class="menu-items" style="display: grid; gap: 15px;">
+                <button class="menu-item" onclick="window.location.href='/profile.html'" style="
+                    background: rgba(0, 255, 255, 0.1);
+                    border: 1px solid rgba(0, 255, 255, 0.3);
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 12px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    font-size: 16px;
+                    transition: all 0.2s ease;
+                " onmouseover="this.style.background='rgba(0, 255, 255, 0.2)'" onmouseout="this.style.background='rgba(0, 255, 255, 0.1)'">
+                    <span style="font-size: 20px;">👤</span> View Profile
+                </button>
                 
-                <div class="menu-calendar-expanded" id="menuCalendarExpanded">
-                    <div class="calendar-nav-header">
-                        <button class="month-nav" onclick="previousMonth()">‹</button>
-                        <div class="current-month" id="currentMonth">January 2025</div>
-                        <button class="month-nav" onclick="nextMonth()">›</button>
-                    </div>
-                    <div style="text-align: right; margin-bottom: 10px;">
-                        <button onclick="toggleMenuCalendar()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(0,255,255,0.3); color: #00ffff; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Close Calendar</button>
-                    </div>
-                    
-                    <div class="calendar-grid" id="calendarGrid">
-                        <!-- Calendar days will be populated by JavaScript -->
-                    </div>
-                    
-                    <div class="calendar-events" id="calendarEvents">
-                        <div class="calendar-event">
-                            <strong>Town Hall Meeting</strong> - Jan 15, 7:00 PM
-                            <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Discuss new community initiatives</div>
-                        </div>
-                        <div class="calendar-event">
-                            <strong>Local Market Day</strong> - Jan 20, 9:00 AM
-                            <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Support local vendors and shops</div>
-                        </div>
-                        <div class="calendar-event">
-                            <strong>Community Cleanup</strong> - Jan 25, 10:00 AM
-                            <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Help beautify our neighborhood</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="menu-items">
-                <button class="menu-item" onclick="navigateToFavorites()">
-                    <span>⭐</span> Favorites
+                <button class="menu-item" onclick="navigateToFavorites()" style="
+                    background: rgba(255, 105, 180, 0.1);
+                    border: 1px solid rgba(255, 105, 180, 0.3);
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 12px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    font-size: 16px;
+                    transition: all 0.2s ease;
+                " onmouseover="this.style.background='rgba(255, 105, 180, 0.2)'" onmouseout="this.style.background='rgba(255, 105, 180, 0.1)'">
+                    <span style="font-size: 20px;">⭐</span> Favorites
                 </button>
-                <button class="menu-item" onclick="navigateToForYou()">
-                    <span>🎯</span> For You Page
+                
+                <button class="menu-item" onclick="showSecurityPolicies()" style="
+                    background: rgba(34, 197, 94, 0.1);
+                    border: 1px solid rgba(34, 197, 94, 0.3);
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 12px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    font-size: 16px;
+                    transition: all 0.2s ease;
+                " onmouseover="this.style.background='rgba(34, 197, 94, 0.2)'" onmouseout="this.style.background='rgba(34, 197, 94, 0.1)'">
+                    <span style="font-size: 20px;">🛡️</span> Security Policies
                 </button>
-                <button class="menu-item" onclick="showPrivacyPolicies()">
-                    <span>🔒</span> Privacy Policies
+                
+                <button class="menu-item" onclick="showDeliveryDemo()" style="
+                    background: rgba(157, 78, 221, 0.1);
+                    border: 1px solid rgba(157, 78, 221, 0.3);
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 12px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    font-size: 16px;
+                    transition: all 0.2s ease;
+                " onmouseover="this.style.background='rgba(157, 78, 221, 0.2)'" onmouseout="this.style.background='rgba(157, 78, 221, 0.1)'">
+                    <span style="font-size: 20px;">🚚</span> Delivery Demo
                 </button>
-                <button class="menu-item" onclick="showAccountSettings()">
-                    <span>⚙️</span> Account Settings
+                
+                <button class="menu-item" onclick="showIntegrations()" style="
+                    background: rgba(255, 107, 53, 0.1);
+                    border: 1px solid rgba(255, 107, 53, 0.3);
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 12px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    font-size: 16px;
+                    transition: all 0.2s ease;
+                " onmouseover="this.style.background='rgba(255, 107, 53, 0.2)'" onmouseout="this.style.background='rgba(255, 107, 53, 0.1)'">
+                    <span style="font-size: 20px;">🔗</span> Website Integrations
                 </button>
-                <button class="menu-item" onclick="showIntegrations()">
-                    <span>🔗</span> Website Integrations
+                
+                <button class="menu-item" onclick="showAnalytics()" style="
+                    background: rgba(59, 130, 246, 0.1);
+                    border: 1px solid rgba(59, 130, 246, 0.3);
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 12px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    font-size: 16px;
+                    transition: all 0.2s ease;
+                " onmouseover="this.style.background='rgba(59, 130, 246, 0.2)'" onmouseout="this.style.background='rgba(59, 130, 246, 0.1)'">
+                    <span style="font-size: 20px;">📊</span> Profile Analytics
                 </button>
-                <button class="menu-item" onclick="showAnalytics()">
-                    <span>📊</span> Profile Analytics
-                </button>
-                <button class="menu-item" onclick="upgradeToDual()">
-                    <span>🏢</span> Upgrade to Dual Profile
+                
+                <button class="menu-item" onclick="showAccountSettings()" style="
+                    background: rgba(107, 114, 128, 0.1);
+                    border: 1px solid rgba(107, 114, 128, 0.3);
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 12px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    font-size: 16px;
+                    transition: all 0.2s ease;
+                " onmouseover="this.style.background='rgba(107, 114, 128, 0.2)'" onmouseout="this.style.background='rgba(107, 114, 128, 0.1)'">
+                    <span style="font-size: 20px;">⚙️</span> Account Settings
                 </button>
             </div>
         </div>
