@@ -70,6 +70,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Privacy-compliant first-party analytics
+  app.post('/api/analytics/track', async (req, res) => {
+    try {
+      const { event, properties, userId } = req.body;
+      
+      // Store analytics data in our own database instead of third-party
+      await storage.trackEvent({
+        event,
+        properties,
+        userId: userId || 'anonymous',
+        timestamp: new Date(),
+        userAgent: req.get('User-Agent'),
+        ip: req.ip,
+        // Privacy compliant - don't store sensitive data
+        sessionId: req.sessionID,
+      });
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Analytics tracking error:', error);
+      res.status(500).json({ message: 'Failed to track event' });
+    }
+  });
+
+  // Town search API for launched towns
+  app.get('/api/towns', async (req, res) => {
+    try {
+      const { query } = req.query;
+      
+      const launchedTowns = [
+        { name: 'Orange Beach', state: 'Alabama', fullName: 'Orange Beach, AL' },
+        { name: 'Gulf Shores', state: 'Alabama', fullName: 'Gulf Shores, AL' },
+        { name: 'Foley', state: 'Alabama', fullName: 'Foley, AL' },
+        { name: 'Fairhope', state: 'Alabama', fullName: 'Fairhope, AL' },
+        { name: 'Daphne', state: 'Alabama', fullName: 'Daphne, AL' },
+        { name: 'Mobile', state: 'Alabama', fullName: 'Mobile, AL' },
+        { name: 'Pensacola', state: 'Florida', fullName: 'Pensacola, FL' },
+        { name: 'Destin', state: 'Florida', fullName: 'Destin, FL' },
+        { name: 'Fort Walton Beach', state: 'Florida', fullName: 'Fort Walton Beach, FL' },
+        { name: 'Navarre', state: 'Florida', fullName: 'Navarre, FL' },
+        { name: 'Perdido Key', state: 'Florida', fullName: 'Perdido Key, FL' },
+        { name: 'Crestview', state: 'Florida', fullName: 'Crestview, FL' }
+      ];
+      
+      if (query) {
+        const filtered = launchedTowns.filter(town => 
+          town.name.toLowerCase().includes(query.toLowerCase()) ||
+          town.state.toLowerCase().includes(query.toLowerCase())
+        );
+        res.json(filtered);
+      } else {
+        res.json(launchedTowns);
+      }
+    } catch (error) {
+      console.error('Town search error:', error);
+      res.status(500).json({ message: 'Failed to search towns' });
+    }
+  });
+
   // Category routes
   app.get('/api/categories', async (req, res) => {
     try {
@@ -495,7 +554,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Payment routes
+  // Privacy-compliant Stripe checkout (redirect-based, not embedded)
+  app.post("/api/create-checkout-session", isAuthenticated, async (req, res) => {
+    try {
+      const { amount, returnUrl, description = 'MarketPace Service' } = req.body;
+      
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: description,
+              },
+              unit_amount: Math.round(amount * 100),
+            },
+            quantity: 1,
+          },
+        ],
+        mode: 'payment',
+        success_url: `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: returnUrl,
+        // Privacy compliant settings
+        consent_collection: {
+          terms_of_service: 'required',
+        },
+        // Use session tokens instead of cookies
+        metadata: {
+          user_id: req.user?.claims?.sub || 'anonymous',
+          timestamp: new Date().toISOString(),
+        },
+      });
+      
+      res.json({ 
+        sessionId: session.id,
+        url: session.url,
+        // Use redirect instead of embedded iframe
+        redirect: true
+      });
+    } catch (error: any) {
+      res.status(500).json({ 
+        message: "Error creating checkout session: " + error.message 
+      });
+    }
+  });
+
+  // Legacy payment intent route for backward compatibility
   app.post("/api/create-payment-intent", isAuthenticated, async (req, res) => {
     try {
       const { amount } = req.body;

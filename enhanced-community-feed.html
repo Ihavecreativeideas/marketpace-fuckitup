@@ -266,6 +266,50 @@
             color: white;
             font-size: 12px;
             width: 150px;
+            position: relative;
+        }
+
+        .town-search:focus {
+            outline: none;
+            border-color: rgba(0, 255, 255, 0.6);
+        }
+
+        .town-search::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .town-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(13, 2, 33, 0.95);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 200;
+            display: none;
+        }
+
+        .town-dropdown.active {
+            display: block;
+        }
+
+        .town-option {
+            padding: 8px 12px;
+            color: white;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.2s ease;
+        }
+
+        .town-option:hover {
+            background: rgba(0, 255, 255, 0.2);
+        }
+
+        .town-option:last-child {
+            border-bottom: none;
         }
 
         /* Post Composer */
@@ -760,7 +804,12 @@
                 <span style="color: #00ffff; font-size: 14px;">Radius:</span>
                 <input type="range" class="radius-slider" min="1" max="50" value="10" id="radiusSlider" onchange="updateRadius()">
                 <span id="radiusValue" style="color: white; font-size: 14px;">10 miles</span>
-                <input type="text" class="town-search" placeholder="Search specific town..." id="townSearch">
+                <div style="position: relative;">
+                    <input type="text" class="town-search" placeholder="Search specific town..." id="townSearch">
+                    <div class="town-dropdown" id="townDropdown">
+                        <!-- Town options will be populated here -->
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -869,6 +918,22 @@
         let currentMonth = 0; // 0 = January
         let currentYear = 2025;
         let selectedPostType = 'general';
+
+        // MarketPace launched towns with states
+        const launchedTowns = [
+            { name: 'Orange Beach', state: 'Alabama', fullName: 'Orange Beach, AL' },
+            { name: 'Gulf Shores', state: 'Alabama', fullName: 'Gulf Shores, AL' },
+            { name: 'Foley', state: 'Alabama', fullName: 'Foley, AL' },
+            { name: 'Fairhope', state: 'Alabama', fullName: 'Fairhope, AL' },
+            { name: 'Daphne', state: 'Alabama', fullName: 'Daphne, AL' },
+            { name: 'Mobile', state: 'Alabama', fullName: 'Mobile, AL' },
+            { name: 'Pensacola', state: 'Florida', fullName: 'Pensacola, FL' },
+            { name: 'Destin', state: 'Florida', fullName: 'Destin, FL' },
+            { name: 'Fort Walton Beach', state: 'Florida', fullName: 'Fort Walton Beach, FL' },
+            { name: 'Navarre', state: 'Florida', fullName: 'Navarre, FL' },
+            { name: 'Perdido Key', state: 'Florida', fullName: 'Perdido Key, FL' },
+            { name: 'Crestview', state: 'Florida', fullName: 'Crestview, FL' }
+        ];
 
         // Sample data
         let posts = [
@@ -1003,7 +1068,10 @@
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+            const activeBtn = document.querySelector(`[data-filter="${filter}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
             
             renderPosts();
         }
@@ -1037,15 +1105,71 @@
         function initializeSearch() {
             const searchInput = document.getElementById('searchInput');
             const townSearch = document.getElementById('townSearch');
+            const townDropdown = document.getElementById('townDropdown');
             
             searchInput.addEventListener('input', function() {
                 renderPosts();
             });
             
             townSearch.addEventListener('input', function() {
-                currentTown = this.value;
-                renderPosts();
+                const query = this.value.toLowerCase();
+                
+                if (query.length > 0) {
+                    const filteredTowns = launchedTowns.filter(town => 
+                        town.name.toLowerCase().includes(query) || 
+                        town.state.toLowerCase().includes(query)
+                    );
+                    
+                    showTownDropdown(filteredTowns);
+                } else {
+                    hideTownDropdown();
+                }
             });
+            
+            townSearch.addEventListener('focus', function() {
+                if (this.value.length > 0) {
+                    const query = this.value.toLowerCase();
+                    const filteredTowns = launchedTowns.filter(town => 
+                        town.name.toLowerCase().includes(query) || 
+                        town.state.toLowerCase().includes(query)
+                    );
+                    showTownDropdown(filteredTowns);
+                }
+            });
+            
+            // Hide dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!townSearch.contains(event.target) && !townDropdown.contains(event.target)) {
+                    hideTownDropdown();
+                }
+            });
+        }
+
+        function showTownDropdown(towns) {
+            const dropdown = document.getElementById('townDropdown');
+            
+            if (towns.length === 0) {
+                dropdown.innerHTML = '<div class="town-option" style="color: rgba(255,255,255,0.6); cursor: default;">No launched towns found</div>';
+            } else {
+                dropdown.innerHTML = towns.map(town => 
+                    `<div class="town-option" onclick="selectTown('${town.fullName}')">${town.fullName}</div>`
+                ).join('');
+            }
+            
+            dropdown.classList.add('active');
+        }
+
+        function hideTownDropdown() {
+            const dropdown = document.getElementById('townDropdown');
+            dropdown.classList.remove('active');
+        }
+
+        function selectTown(townName) {
+            const townSearch = document.getElementById('townSearch');
+            townSearch.value = townName;
+            currentTown = townName;
+            hideTownDropdown();
+            renderPosts();
         }
 
         // Post creation
@@ -1405,6 +1529,78 @@
                 closeCalendar();
             }
         });
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserProfile();
+            renderPosts();
+            initializeSearch();
+            initializeCalendar();
+            initializePostTypes();
+            createParticles();
+            initializeButtons();
+        });
+
+        // Initialize button functionality
+        function initializeButtons() {
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const filter = this.getAttribute('data-filter');
+                    if (filter) {
+                        setFilter(filter);
+                    }
+                });
+            });
+
+            // Advanced filter buttons
+            document.querySelectorAll('.advanced-filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const filter = this.getAttribute('data-filter');
+                    if (filter) {
+                        toggleAdvancedFilter(filter);
+                    }
+                });
+            });
+
+            // Main menu buttons
+            const createPostBtn = document.querySelector('.create-post-btn');
+            if (createPostBtn) {
+                createPostBtn.addEventListener('click', function() {
+                    document.getElementById('postModal').style.display = 'block';
+                });
+            }
+
+            const eventsBtn = document.querySelector('.menu-btn[onclick="showEvents()"]');
+            if (eventsBtn) {
+                eventsBtn.addEventListener('click', function() {
+                    showEvents();
+                });
+            }
+
+            // Close modal functionality
+            document.querySelectorAll('.close').forEach(closeBtn => {
+                closeBtn.addEventListener('click', function() {
+                    this.closest('.modal').style.display = 'none';
+                });
+            });
+
+            // Close modals when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
+                }
+            });
+
+            // Form submission
+            const postForm = document.getElementById('postForm');
+            if (postForm) {
+                postForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    submitPost();
+                });
+            }
+        }
     </script>
 </body>
 </html>

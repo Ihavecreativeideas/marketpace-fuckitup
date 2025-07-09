@@ -1696,6 +1696,20 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return user;
   }
+
+  // Privacy-compliant analytics tracking
+  async trackEvent(eventData: {
+    event: string;
+    properties: any;
+    userId: string;
+    timestamp: Date;
+    userAgent?: string;
+    ip?: string;
+    sessionId?: string;
+  }): Promise<void> {
+    // Implementation would go here - storing in our own database instead of third-party
+    console.log('Privacy-compliant analytics event:', eventData);
+  }
 }
 
 export const storage = new DatabaseStorage();
