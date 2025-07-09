@@ -181,7 +181,7 @@
                 <input type="password" id="password" name="password" required>
             </div>
 
-            <button type="submit" class="login-btn">Access Admin Panel</button>
+            <button type="submit" class="login-btn" onclick="handleLogin()">Access Admin Panel</button>
         </form>
 
         <!-- Test button for debugging -->
@@ -195,39 +195,69 @@
     </div>
 
     <script>
-        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        // Ensure DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, setting up login form');
             
+            const form = document.getElementById('adminLoginForm');
+            if (!form) {
+                console.error('Form not found!');
+                return;
+            }
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                console.log('Form submitted');
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const errorDiv = document.getElementById('errorMessage');
+                
+                console.log('Login attempt:', { username, password: password.substring(0, 3) + '...' });
+                
+                // Admin credentials
+                if (username === 'marketpace_admin' && password === 'MP2025_Secure!') {
+                    console.log('Credentials match, redirecting...');
+                    // Successful login
+                    localStorage.setItem('adminLoggedIn', 'true');
+                    localStorage.setItem('adminLoginTime', Date.now());
+                    
+                    // Direct navigation
+                    console.log('Navigating to admin dashboard...');
+                    window.location.href = 'admin-dashboard.html';
+                } else {
+                    console.log('Invalid credentials');
+                    // Failed login
+                    errorDiv.style.display = 'block';
+                    setTimeout(() => {
+                        errorDiv.style.display = 'none';
+                    }, 3000);
+                }
+            });
+        });
+
+        // Direct login handler for button click
+        function handleLogin() {
+            console.log('Button click login handler called');
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const errorDiv = document.getElementById('errorMessage');
             
-            console.log('Login attempt:', { username, password: password.substring(0, 3) + '...' });
+            console.log('Button login attempt:', { username, password: password.substring(0, 3) + '...' });
             
-            // Admin credentials
             if (username === 'marketpace_admin' && password === 'MP2025_Secure!') {
-                console.log('Login successful, redirecting...');
-                // Successful login
+                console.log('Button login successful, redirecting...');
                 localStorage.setItem('adminLoggedIn', 'true');
                 localStorage.setItem('adminLoginTime', Date.now());
-                
-                // Try different navigation methods
-                try {
-                    window.location.href = './admin-dashboard.html';
-                } catch (err) {
-                    console.error('Navigation error:', err);
-                    // Fallback method
-                    window.location.replace('./admin-dashboard.html');
-                }
+                window.location.href = 'admin-dashboard.html';
             } else {
-                console.log('Login failed');
-                // Failed login
+                console.log('Button login failed');
                 errorDiv.style.display = 'block';
                 setTimeout(() => {
                     errorDiv.style.display = 'none';
                 }, 3000);
             }
-        });
+        }
 
         // Test function for debugging
         function testDashboard() {
