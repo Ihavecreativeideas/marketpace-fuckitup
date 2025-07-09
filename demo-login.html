@@ -345,7 +345,7 @@
             loginBtn.textContent = 'Signing In...';
             
             try {
-                const response = await fetch('/api/demo-login', {
+                const response = await fetch('/api/seamless-login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -355,19 +355,19 @@
                 
                 const result = await response.json();
                 
-                if (response.ok) {
+                if (response.ok && result.success) {
                     // Store demo user session
                     localStorage.setItem('demoUser', JSON.stringify(result.user));
                     
-                    successMessage.textContent = `Welcome back, ${result.user.first_name}! Redirecting to community...`;
+                    successMessage.textContent = `Welcome back! Redirecting to community...`;
                     successMessage.style.display = 'block';
                     
-                    // Redirect to community after short delay
+                    // Immediate redirect to community feed
                     setTimeout(() => {
-                        window.location.href = '/community';
-                    }, 2000);
+                        window.location.href = '/enhanced-community-feed';
+                    }, 1000);
                 } else {
-                    throw new Error(result.message || 'Login failed');
+                    throw new Error(result.error || 'Login failed');
                 }
             } catch (error) {
                 errorMessage.textContent = error.message || 'Login failed. Please check your credentials.';
