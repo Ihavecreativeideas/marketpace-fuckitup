@@ -208,6 +208,17 @@ MarketPace is a React Native mobile application that prioritizes community empow
 
 ## Recent Changes
 
+✓ **ENHANCED LOGO & NAVIGATION WITH SPONSOR/SUPPORT BUTTON** (July 09, 2025)
+✓ Enlarged main logo from 160px to 220px for better prominence on landing page
+✓ Enhanced logo glow effects with larger box shadows (0 0 50px) and drop shadows (0 0 30px)
+✓ Added Sponsor/Support button to main pitch page navigation with matching blue gradient styling
+✓ Fixed community feed Sponsor/Support navigation to point to /sponsorship.html correctly
+✓ Created comprehensive sponsorship.html page with dark futuristic theme matching platform design
+✓ Added floating particle system to sponsorship page for consistent visual experience
+✓ Built 4-tier sponsorship system: Community Supporter ($25), Local Champion ($100), Business Partner ($500), Community Ambassador ($1,000)
+✓ Integrated sponsorship routing in pitch-page.js server for proper navigation functionality
+✓ Enhanced overall platform branding with larger, more prominent logo display
+
 ✓ **RESTAURANT/BAR BUSINESS INTEGRATION WITH DELIVERY PLATFORMS** (July 09, 2025)
 ✓ Added comprehensive restaurant and bar business category with 5% commission model
 ✓ Integrated DoorDash, Uber Eats, and Shipt delivery platform connections
