@@ -36,6 +36,19 @@ app.get('/facebook-demo', (req, res) => {
   res.sendFile(path.join(__dirname, '../facebook-integration-demo.html'));
 });
 
+// Policy and legal pages
+app.get('/privacy-policy', (req, res) => {
+  res.sendFile(path.join(__dirname, '../privacy-policy.html'));
+});
+
+app.get('/terms-of-service', (req, res) => {
+  res.sendFile(path.join(__dirname, '../terms-of-service.html'));
+});
+
+app.get('/data-deletion', (req, res) => {
+  res.sendFile(path.join(__dirname, '../data-deletion.html'));
+});
+
 const port = process.env.PORT || 5000;
 
 registerRoutes(app).then((server) => {
