@@ -1814,6 +1814,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Facebook Webhook Verification (GET request)
+  app.get('/api/facebook/webhook', (req, res) => {
+    const mode = req.query['hub.mode'];
+    const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
+    
+    // Verify the webhook with your verify token
+    const VERIFY_TOKEN = process.env.FACEBOOK_VERIFY_TOKEN || 'marketpace_webhook_token';
+    
+    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+      console.log('Facebook webhook verified successfully');
+      res.status(200).send(challenge);
+    } else {
+      console.log('Failed to verify Facebook webhook');
+      res.status(403).send('Forbidden');
+    }
+  });
+
+  // Facebook Webhook Handler (POST request)
   app.post('/api/facebook/webhook', async (req, res) => {
     try {
       const body = req.body;
