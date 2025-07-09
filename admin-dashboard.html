@@ -732,16 +732,49 @@
         }
 
         // Campaign functions
-        function exportCampaignData() {
-            alert('📊 Campaign data exported to CSV format successfully!');
+        async function exportCampaignData() {
+            try {
+                const response = await fetch('/api/admin/campaigns/export?token=admin_token_2025');
+                const data = await response.json();
+                if (data.success) {
+                    alert(`📊 ${data.message}`);
+                } else {
+                    alert('❌ Export failed');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
         }
 
-        function sendCityNotifications() {
-            alert('📱 Launch notifications sent to all drivers in ready cities!');
+        async function sendCityNotifications() {
+            try {
+                const response = await fetch('/api/admin/campaigns/notify?token=admin_token_2025', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert(`📱 ${data.message}`);
+                } else {
+                    alert('❌ Failed to send notifications');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
         }
 
-        function generateCampaignReport() {
-            alert('📄 Campaign report generated and saved successfully!');
+        async function generateCampaignReport() {
+            try {
+                const response = await fetch('/api/admin/campaigns/report?token=admin_token_2025');
+                const data = await response.json();
+                if (data.success) {
+                    alert(`📄 ${data.message}`);
+                } else {
+                    alert('❌ Report generation failed');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
         }
 
         // Analytics functions
@@ -759,96 +792,349 @@
         }
 
         // Driver functions
-        function approveAllDrivers() {
+        async function approveAllDrivers() {
             if (confirm('Approve all pending driver applications?')) {
-                alert('✅ All pending drivers approved and notifications sent!');
+                try {
+                    const response = await fetch('/api/admin/drivers/approve-all?token=admin_token_2025', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        alert(`✅ ${data.message}`);
+                        await loadAdminStats(); // Refresh stats
+                    } else {
+                        alert('❌ Failed to approve drivers');
+                    }
+                } catch (error) {
+                    alert('❌ Error: ' + error.message);
+                }
             }
         }
 
-        function sendDriverNotifications() {
-            alert('📱 Launch notifications sent to all drivers!');
+        async function sendDriverNotifications() {
+            try {
+                const response = await fetch('/api/admin/drivers/notify?token=admin_token_2025', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert(`📱 ${data.message}`);
+                } else {
+                    alert('❌ Failed to send notifications');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
         }
 
-        function exportDriverData() {
-            alert('📊 Driver data exported with privacy compliance!');
+        async function exportDriverData() {
+            try {
+                const response = await fetch('/api/admin/drivers/export?token=admin_token_2025');
+                const data = await response.json();
+                if (data.success) {
+                    alert(`📊 ${data.message}`);
+                } else {
+                    alert('❌ Export failed');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
         }
 
         // Promotion functions
-        function createPromotion() {
-            alert('➕ Promotion creation wizard launched!');
+        async function createPromotion() {
+            try {
+                const response = await fetch('/api/admin/promotions/create?token=admin_token_2025', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert(`➕ ${data.message}`);
+                } else {
+                    alert('❌ Failed to create promotion');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
         }
 
-        function sendPromoEmails() {
-            alert('📧 Promotional emails sent to all users!');
+        async function sendPromoEmails() {
+            try {
+                const response = await fetch('/api/admin/promotions/email?token=admin_token_2025', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert(`📧 ${data.message}`);
+                } else {
+                    alert('❌ Failed to send emails');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
         }
 
-        function generatePromoCodes() {
-            alert('🎟️ New promo codes generated successfully!');
+        async function generatePromoCodes() {
+            try {
+                const response = await fetch('/api/admin/promotions/codes?token=admin_token_2025', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert(`🎟️ ${data.message}\nCodes: ${data.codes.join(', ')}`);
+                } else {
+                    alert('❌ Failed to generate codes');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
         }
 
-        function launchSocialCampaign() {
-            alert('📱 Social media campaign launched across all platforms!');
+        async function launchSocialCampaign() {
+            try {
+                const response = await fetch('/api/admin/promotions/social?token=admin_token_2025', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert(`📱 ${data.message}\nPlatforms: ${data.platforms.join(', ')}`);
+                } else {
+                    alert('❌ Failed to launch campaign');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
         }
 
         // Route functions
-        function optimizeAllRoutes() {
-            alert('⚡ All active routes optimized! Average efficiency increased by 12%!');
+        async function optimizeAllRoutes() {
+            try {
+                const response = await fetch('/api/admin/routes/optimize-all?token=admin_token_2025', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert(`⚡ ${data.message}\nDetails: ${data.optimization.routesOptimized} routes optimized, ${data.optimization.timeSaved} saved, ${data.optimization.efficiencyGain} efficiency gain!`);
+                } else {
+                    alert('❌ Route optimization failed');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
         }
 
-        function createShopRoute() {
-            alert('🏪 New shop delivery route created for bulk orders!');
+        async function createShopRoute() {
+            try {
+                const response = await fetch('/api/admin/routes/shop?token=admin_token_2025', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert(`🏪 ${data.message}`);
+                } else {
+                    alert('❌ Failed to create route');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
         }
 
-        function viewRouteAnalytics() {
-            alert('📊 Detailed route analytics dashboard opened!');
+        async function viewRouteAnalytics() {
+            try {
+                const response = await fetch('/api/admin/routes/analytics?token=admin_token_2025');
+                const data = await response.json();
+                if (data.success) {
+                    alert(`📊 Route Analytics:\nTotal Routes: ${data.analytics.totalRoutes}\nAvg Efficiency: ${data.analytics.avgEfficiency}\nCompletion Rate: ${data.analytics.completionRate}\nDriver Rating: ${data.analytics.driverRating}/5`);
+                } else {
+                    alert('❌ Failed to load analytics');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
         }
 
-        function exportRouteData() {
-            alert('📄 Route performance data exported successfully!');
+        async function exportRouteData() {
+            try {
+                const response = await fetch('/api/admin/routes/export?token=admin_token_2025');
+                const data = await response.json();
+                if (data.success) {
+                    alert(`📄 ${data.message}`);
+                } else {
+                    alert('❌ Export failed');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
         }
 
         // Content functions
-        function editPage(pageType) {
-            alert(`📝 Opening ${pageType} page editor with AI assistance!`);
+        async function editPage(pageType) {
+            try {
+                const response = await fetch('/api/admin/content/edit?token=admin_token_2025', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ page: pageType })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert(`📝 ${data.message}`);
+                } else {
+                    alert('❌ Failed to open editor');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
         }
 
-        function saveContentChanges() {
-            alert('💾 All content changes saved successfully!');
+        async function saveContentChanges() {
+            try {
+                const response = await fetch('/api/admin/content/save?token=admin_token_2025', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ changes: 5 })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert(`💾 ${data.message}`);
+                } else {
+                    alert('❌ Failed to save changes');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
         }
 
-        function previewChanges() {
-            alert('👀 Preview mode activated. Opening staging environment!');
-            window.open('/', '_blank');
+        async function previewChanges() {
+            try {
+                const response = await fetch('/api/admin/content/preview?token=admin_token_2025', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert(`👀 ${data.message}`);
+                    window.open('/', '_blank');
+                } else {
+                    alert('❌ Preview failed');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
         }
 
-        function revertChanges() {
+        async function revertChanges() {
             if (confirm('↶ Are you sure you want to revert all unsaved changes?')) {
-                alert('Changes reverted to last saved version!');
+                try {
+                    const response = await fetch('/api/admin/content/revert?token=admin_token_2025', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        alert(`↶ ${data.message}`);
+                    } else {
+                        alert('❌ Revert failed');
+                    }
+                } catch (error) {
+                    alert('❌ Error: ' + error.message);
+                }
             }
         }
 
         // Integration functions
-        function testAllIntegrations() {
-            alert('🔍 Testing all integrations... Results: 6 healthy, 1 warning (Ticketmaster), 1 inactive (StubHub)!');
-        }
-
-        function refreshAPIKeys() {
-            if (confirm('🔑 Refresh all API keys? This may temporarily disrupt services.')) {
-                alert('API keys refreshed successfully. All services reconnected!');
+        async function testAllIntegrations() {
+            try {
+                const response = await fetch('/api/admin/integrations/test-all?token=admin_token_2025', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    const results = data.results;
+                    const summary = Object.entries(results).map(([key, status]) => `${key}: ${status}`).join(', ');
+                    alert(`🔍 ${data.message}\nResults: ${summary}`);
+                } else {
+                    alert('❌ Integration test failed');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
             }
         }
 
-        function addNewIntegration() {
-            alert('➕ Integration marketplace opened. Choose from 50+ available platforms!');
+        async function refreshAPIKeys() {
+            if (confirm('🔑 Refresh all API keys? This may temporarily disrupt services.')) {
+                try {
+                    const response = await fetch('/api/admin/integrations/refresh-keys?token=admin_token_2025', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        alert(`🔑 ${data.message}`);
+                    } else {
+                        alert('❌ Failed to refresh keys');
+                    }
+                } catch (error) {
+                    alert('❌ Error: ' + error.message);
+                }
+            }
         }
 
-        function exportIntegrationReport() {
-            alert('📊 Integration health report exported successfully!');
+        async function addNewIntegration() {
+            try {
+                const response = await fetch('/api/admin/integrations/add?token=admin_token_2025', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert(`➕ ${data.message}`);
+                } else {
+                    alert('❌ Failed to open integration marketplace');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
         }
 
-        function emergencyDisconnect() {
+        async function exportIntegrationReport() {
+            try {
+                const response = await fetch('/api/admin/integrations/export?token=admin_token_2025');
+                const data = await response.json();
+                if (data.success) {
+                    alert(`📊 ${data.message}`);
+                } else {
+                    alert('❌ Export failed');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        async function emergencyDisconnect() {
             if (confirm('🚨 EMERGENCY: Disconnect all external integrations?')) {
-                alert('Emergency disconnect activated. All integrations paused!');
+                try {
+                    const response = await fetch('/api/admin/integrations/emergency?token=admin_token_2025', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        alert(`🚨 ${data.message}`);
+                    } else {
+                        alert('❌ Emergency disconnect failed');
+                    }
+                } catch (error) {
+                    alert('❌ Error: ' + error.message);
+                }
             }
         }
 
