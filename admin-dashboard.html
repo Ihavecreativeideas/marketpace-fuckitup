@@ -365,27 +365,27 @@
             
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-number" id="totalUsers">2,847</div>
+                    <div class="stat-number" id="totalUsers">0</div>
                     <div class="stat-label">Total Users</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="driverApplications">342</div>
+                    <div class="stat-number" id="driverApplications">0</div>
                     <div class="stat-label">Driver Applications</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="demoSignups">1,523</div>
+                    <div class="stat-number" id="demoSignups">0</div>
                     <div class="stat-label">Demo Signups</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="sponsorships">12</div>
+                    <div class="stat-number" id="sponsorships">0</div>
                     <div class="stat-label">Active Sponsorships</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="revenue">$4,250</div>
+                    <div class="stat-number" id="revenue">$0</div>
                     <div class="stat-label">Total Revenue</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="cities">8</div>
+                    <div class="stat-number" id="cities">0</div>
                     <div class="stat-label">Launch Cities</div>
                 </div>
             </div>
@@ -394,19 +394,19 @@
                 <h3 style="color: #00FFFF; margin-bottom: 15px;">Real-time Platform Activity</h3>
                 <div class="metric-row">
                     <span>Active Sessions</span>
-                    <span style="color: #00FFFF; font-weight: bold;" id="activeSessions">247</span>
+                    <span style="color: #00FFFF; font-weight: bold;" id="activeSessions">0</span>
                 </div>
                 <div class="metric-row">
                     <span>Page Views (Today)</span>
-                    <span style="color: #00FFFF; font-weight: bold;" id="pageViews">5,689</span>
+                    <span style="color: #00FFFF; font-weight: bold;" id="pageViews">0</span>
                 </div>
                 <div class="metric-row">
                     <span>Demo Completions</span>
-                    <span style="color: #00FFFF; font-weight: bold;" id="demoCompletions">89</span>
+                    <span style="color: #00FFFF; font-weight: bold;" id="demoCompletions">0</span>
                 </div>
                 <div class="metric-row">
                     <span>Facebook Shares</span>
-                    <span style="color: #00FFFF; font-weight: bold;" id="facebookShares">156</span>
+                    <span style="color: #00FFFF; font-weight: bold;" id="facebookShares">0</span>
                 </div>
             </div>
         </div>
@@ -417,19 +417,19 @@
             
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-number">8</div>
+                    <div class="stat-number">0</div>
                     <div class="stat-label">Cities Launched</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">1,523</div>
+                    <div class="stat-number">0</div>
                     <div class="stat-label">Early Supporters</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">342</div>
+                    <div class="stat-number">0</div>
                     <div class="stat-label">Drivers Hired</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">89</div>
+                    <div class="stat-number">0</div>
                     <div class="stat-label">Local Shops</div>
                 </div>
             </div>
@@ -1085,16 +1085,76 @@
             }
         }
 
-        function exportCampaignData() {
-            alert('📊 Campaign data exported successfully! Check downloads folder.');
+        // Campaign Tracker Functions
+        async function exportCampaignData() {
+            try {
+                const response = await fetch('/api/admin/campaigns?token=admin_token_2025');
+                const data = await response.json();
+                
+                const csvContent = "data:text/csv;charset=utf-8," + 
+                    "City,Demo Signups,Drivers,Shops,Status\n" +
+                    data.cities.map(city => `${city.name},${city.signups},${city.drivers},${city.shops},${city.status}`).join("\n");
+                
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "campaign_data.csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                alert('📊 Campaign data exported successfully! Check downloads folder.');
+            } catch (error) {
+                alert('Error exporting campaign data: ' + error.message);
+            }
         }
 
-        function sendCityNotifications() {
-            alert('📱 Launch notifications sent to all drivers in ready cities!');
+        async function sendCityNotifications() {
+            try {
+                const response = await fetch('/api/admin/campaigns', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'admin_token_2025' },
+                    body: JSON.stringify({ action: 'notify_all' })
+                });
+                
+                if (response.ok) {
+                    alert('📱 Launch notifications sent to all drivers in ready cities!');
+                } else {
+                    alert('Failed to send notifications');
+                }
+            } catch (error) {
+                alert('Error sending notifications: ' + error.message);
+            }
         }
 
-        function generateCampaignReport() {
-            alert('📄 Campaign report generated and saved to admin reports.');
+        async function generateCampaignReport() {
+            try {
+                const response = await fetch('/api/admin/campaigns?token=admin_token_2025');
+                const data = await response.json();
+                
+                const reportContent = `
+Campaign Report - ${new Date().toLocaleDateString()}
+==============================================
+
+Cities Overview:
+${data.cities.map(city => `${city.name}: ${city.signups} signups, ${city.drivers} drivers, ${city.shops} shops - ${city.status}`).join('\n')}
+
+Total Campaigns: ${data.campaigns.length}
+Next Actions: Continue driver recruitment and shop onboarding
+                `;
+                
+                const blob = new Blob([reportContent], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'campaign_report.txt';
+                a.click();
+                window.URL.revokeObjectURL(url);
+                
+                alert('📄 Campaign report generated and saved to admin reports.');
+            } catch (error) {
+                alert('Error generating report: ' + error.message);
+            }
         }
 
         function refreshAnalytics() {
@@ -1156,18 +1216,108 @@
             alert('📄 Route performance data exported successfully.');
         }
 
-        // Content Editor Functions
-        function editPage(pageType) {
-            alert(`✏️ Opening page editor for ${pageType} page. Changes will be saved automatically.`);
+        // Content Editor Functions with AI Assistance
+        async function editPage(pageType) {
+            try {
+                const response = await fetch(`/api/admin/content?token=admin_token_2025`);
+                const data = await response.json();
+                
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                    background: rgba(0,0,0,0.8); z-index: 1000; display: flex; 
+                    align-items: center; justify-content: center;
+                `;
+                
+                modal.innerHTML = `
+                    <div style="background: #0d0221; padding: 30px; border-radius: 20px; width: 80%; max-width: 800px; max-height: 80%; overflow-y: auto;">
+                        <h3 style="color: #00FFFF; margin-bottom: 20px;">✏️ Editing ${pageType} Page</h3>
+                        <textarea id="contentEditor" style="width: 100%; height: 300px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #00FFFF; border-radius: 10px; padding: 15px; font-family: monospace;">${data.drafts[pageType]?.content || 'Enter your content here...'}</textarea>
+                        <div style="margin: 20px 0;">
+                            <button onclick="getAIAssistance()" style="background: linear-gradient(135deg, #8A2BE2, #4B0082); color: white; padding: 10px 20px; border: none; border-radius: 10px; margin-right: 10px;">🤖 AI Assistance</button>
+                            <button onclick="saveContent('${pageType}')" style="background: linear-gradient(135deg, #00FFFF, #0088CC); color: #0d0221; padding: 10px 20px; border: none; border-radius: 10px; margin-right: 10px;">💾 Save</button>
+                            <button onclick="closeModal()" style="background: linear-gradient(135deg, #FF6B35, #FF4500); color: white; padding: 10px 20px; border: none; border-radius: 10px;">❌ Close</button>
+                        </div>
+                        <div id="aiResponse" style="background: rgba(0,255,255,0.1); padding: 15px; border-radius: 10px; margin-top: 10px; display: none;"></div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                window.currentModal = modal;
+                
+            } catch (error) {
+                alert('Error opening page editor: ' + error.message);
+            }
         }
 
-        function saveContentChanges() {
+        async function getAIAssistance() {
+            const content = document.getElementById('contentEditor').value;
+            const aiResponse = document.getElementById('aiResponse');
+            
+            try {
+                aiResponse.style.display = 'block';
+                aiResponse.innerHTML = '<div style="color: #00FFFF;">🤖 AI is analyzing your content...</div>';
+                
+                const response = await fetch('/api/admin/content/ai-assist', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'admin_token_2025' },
+                    body: JSON.stringify({ 
+                        prompt: content, 
+                        context: 'web page content' 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    aiResponse.innerHTML = `
+                        <div style="color: #00FFFF; margin-bottom: 10px;">🤖 AI Assistant Recommendations:</div>
+                        <div style="color: white; white-space: pre-wrap;">${data.aiResponse}</div>
+                    `;
+                } else {
+                    aiResponse.innerHTML = '<div style="color: #FF6B35;">AI assistance temporarily unavailable</div>';
+                }
+                
+            } catch (error) {
+                aiResponse.innerHTML = '<div style="color: #FF6B35;">Error getting AI assistance: ' + error.message + '</div>';
+            }
+        }
+
+        async function saveContent(pageType) {
+            const content = document.getElementById('contentEditor').value;
+            
+            try {
+                const response = await fetch('/api/admin/content/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'admin_token_2025' },
+                    body: JSON.stringify({ page: pageType, content })
+                });
+                
+                if (response.ok) {
+                    alert('💾 Content saved successfully!');
+                    closeModal();
+                } else {
+                    alert('Error saving content');
+                }
+            } catch (error) {
+                alert('Error saving content: ' + error.message);
+            }
+        }
+
+        function closeModal() {
+            if (window.currentModal) {
+                document.body.removeChild(window.currentModal);
+                window.currentModal = null;
+            }
+        }
+
+        async function saveContentChanges() {
             alert('💾 All content changes saved successfully! Pages will update within 5 minutes.');
         }
 
         function previewChanges() {
             alert('👀 Preview mode activated. Opening staging environment in new tab.');
-            window.open('/preview', '_blank');
+            window.open('/', '_blank');
         }
 
         function revertChanges() {
@@ -1176,19 +1326,68 @@
             }
         }
 
-        function publishDrafts() {
-            if (confirm('🚀 Publish all 12 draft updates to live site?')) {
-                alert('All drafts published successfully! Live site updated.');
+        async function publishDrafts() {
+            if (confirm('🚀 Publish all draft updates to live site?')) {
+                try {
+                    const response = await fetch('/api/admin/content', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'admin_token_2025' },
+                        body: JSON.stringify({ action: 'publish_all' })
+                    });
+                    
+                    if (response.ok) {
+                        alert('All drafts published successfully! Live site updated.');
+                    } else {
+                        alert('Error publishing drafts');
+                    }
+                } catch (error) {
+                    alert('Error publishing: ' + error.message);
+                }
             }
         }
 
-        function backupContent() {
-            alert('📦 Full content backup created and stored securely.');
+        async function backupContent() {
+            try {
+                const response = await fetch('/api/admin/content?token=admin_token_2025');
+                const data = await response.json();
+                
+                const backup = {
+                    timestamp: new Date().toISOString(),
+                    pages: data.pages,
+                    drafts: data.drafts
+                };
+                
+                const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `content_backup_${new Date().toISOString().slice(0,10)}.json`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                
+                alert('📦 Full content backup created and downloaded!');
+            } catch (error) {
+                alert('Error creating backup: ' + error.message);
+            }
         }
 
-        function resetToDefaults() {
+        async function resetToDefaults() {
             if (confirm('🔄 WARNING: This will reset ALL content to default templates. This cannot be undone!')) {
-                alert('Content reset to defaults. Please review all pages.');
+                try {
+                    const response = await fetch('/api/admin/reset', {
+                        method: 'POST',
+                        headers: { 'Authorization': 'admin_token_2025' }
+                    });
+                    
+                    if (response.ok) {
+                        alert('Content reset to defaults. Please review all pages.');
+                        location.reload();
+                    } else {
+                        alert('Error resetting content');
+                    }
+                } catch (error) {
+                    alert('Error resetting: ' + error.message);
+                }
             }
         }
 
@@ -1265,6 +1464,70 @@
             }
         }
 
+        // Real-time data loading and refresh functions
+        async function loadAdminStats() {
+            try {
+                const response = await fetch('/api/admin/stats?token=admin_token_2025');
+                const stats = await response.json();
+                
+                // Update overview stats
+                document.getElementById('totalUsers').textContent = stats.totalUsers;
+                document.getElementById('driverApplications').textContent = stats.driverApplications;
+                document.getElementById('demoSignups').textContent = stats.demoSignups;
+                document.getElementById('sponsorships').textContent = stats.sponsorships;
+                document.getElementById('revenue').textContent = '$' + stats.revenue;
+                document.getElementById('cities').textContent = stats.cities;
+                
+                // Update real-time activity
+                document.getElementById('activeSessions').textContent = stats.activeSessions;
+                document.getElementById('pageViews').textContent = stats.pageViews;
+                document.getElementById('demoCompletions').textContent = stats.demoCompletions;
+                document.getElementById('facebookShares').textContent = stats.facebookShares;
+                
+            } catch (error) {
+                console.error('Error loading admin stats:', error);
+            }
+        }
+
+        async function testAllIntegrations() {
+            const integrations = ['stripe', 'facebook', 'shopify', 'twilio'];
+            let results = [];
+            
+            for (const integration of integrations) {
+                try {
+                    const response = await fetch('/api/admin/integrations/test', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'admin_token_2025' },
+                        body: JSON.stringify({ integration })
+                    });
+                    
+                    const result = await response.json();
+                    results.push(`${integration}: ${result.success ? '✅ Working' : '❌ ' + result.message}`);
+                } catch (error) {
+                    results.push(`${integration}: ❌ Connection failed`);
+                }
+            }
+            
+            alert('🔍 Integration Test Results:\n\n' + results.join('\n'));
+        }
+
+        async function refreshAnalytics() {
+            try {
+                const response = await fetch('/api/admin/analytics?token=admin_token_2025');
+                const analytics = await response.json();
+                
+                // Update analytics displays
+                await loadAdminStats();
+                
+                alert('🔄 Analytics data refreshed successfully!');
+            } catch (error) {
+                alert('Error refreshing analytics: ' + error.message);
+            }
+        }
+
+        // Auto-refresh admin stats every 30 seconds
+        setInterval(loadAdminStats, 30000);
+
         // Check admin authentication on page load
         window.addEventListener('load', function() {
             const isLoggedIn = localStorage.getItem('adminLoggedIn');
@@ -1290,6 +1553,12 @@
             }
             
             console.log('Admin authenticated successfully');
+            
+            // Load initial data
+            loadAdminStats();
+            
+            // Set last login time
+            document.getElementById('lastLogin').textContent = new Date(parseInt(loginTime)).toLocaleString();
         });
     </script>
 </body>

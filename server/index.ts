@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import path from "path";
 import { registerRoutes } from "./routes";
+import { registerAdminRoutes } from "./adminRoutes";
 
 const app = express();
 
@@ -78,6 +79,9 @@ app.get('/admin-dashboard.html', (req, res) => {
 });
 
 const port = process.env.PORT || 5000;
+
+// Register admin routes
+registerAdminRoutes(app);
 
 registerRoutes(app).then((server) => {
   server.listen(port, "0.0.0.0", () => {
