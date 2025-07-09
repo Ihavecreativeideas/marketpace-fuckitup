@@ -413,6 +413,29 @@
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
         }
+        
+        .filter-dropdown {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-dropdown:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(0, 255, 255, 0.5);
+        }
+        
+        .filter-dropdown option {
+            background: #0d0221;
+            color: white;
+            padding: 0.5rem;
+        }
 
         /* Feed content */
         .feed-content {
@@ -1721,20 +1744,7 @@
     <!-- Floating particles -->
     <div class="particles" id="particles"></div>
 
-    <!-- Demo mode popup -->
-    <div class="demo-popup" id="demoPopup">
-        <div class="popup-content">
-            <h2 class="popup-title">🎉 Early Supporter Benefits!</h2>
-            <p class="popup-text">
-                Join MarketPace now and help us launch in your area! Get a <strong>FREE lifetime Pro account</strong>! 
-                Start uploading items and building your profile - everything goes LIVE when we launch with 50+ members & 5+ drivers.
-            </p>
-            <div class="popup-buttons">
-                <button class="popup-btn primary" onclick="signUpNow()">Sign Up Now - FREE Pro!</button>
-                <button class="popup-btn secondary" onclick="continueBrowsing()">Continue Browsing</button>
-            </div>
-        </div>
-    </div>
+
 
 
 
@@ -1818,32 +1828,33 @@
             
             <div class="filter-group">
                 <label class="filter-label">Category</label>
-                <div class="filter-options">
-                    <button class="filter-btn active" data-filter="all">All</button>
-                    <button class="filter-btn" data-filter="buy-sell">Buy/Sell</button>
-                    <button class="filter-btn" data-filter="rent">Rent</button>
-                    <button class="filter-btn" data-filter="services">Services</button>
-                    <button class="filter-btn" data-filter="hub">The Hub</button>
-                    <button class="filter-btn" data-filter="shops">Shops</button>
-                </div>
+                <select class="filter-dropdown" id="categoryFilter" onchange="handleFilterChange('category', this.value)">
+                    <option value="all">All Categories</option>
+                    <option value="buy-sell">Buy/Sell</option>
+                    <option value="rent">Rent</option>
+                    <option value="services">Services</option>
+                    <option value="hub">The Hub</option>
+                    <option value="shops">Shops</option>
+                </select>
             </div>
 
             <div class="filter-group">
                 <label class="filter-label">Post Type</label>
-                <div class="filter-options">
-                    <button class="filter-btn" data-filter="product">Products</button>
-                    <button class="filter-btn" data-filter="iso">ISO Posts</button>
-                    <button class="filter-btn" data-filter="poll">Polls</button>
-                    <button class="filter-btn" data-filter="general">General</button>
-                </div>
+                <select class="filter-dropdown" id="postTypeFilter" onchange="handleFilterChange('postType', this.value)">
+                    <option value="all">All Types</option>
+                    <option value="product">Products</option>
+                    <option value="iso">ISO Posts</option>
+                    <option value="poll">Polls</option>
+                    <option value="general">General</option>
+                </select>
             </div>
 
             <div class="filter-group">
                 <label class="filter-label">Location</label>
-                <div class="filter-options">
-                    <button class="filter-btn active" data-filter="nearby">Nearby</button>
-                    <button class="filter-btn" data-filter="town-search">Search by Town</button>
-                </div>
+                <select class="filter-dropdown" id="locationFilter" onchange="handleFilterChange('location', this.value)">
+                    <option value="nearby">Nearby</option>
+                    <option value="town-search">Search by Town</option>
+                </select>
                 <div class="location-controls" style="margin-top: 1rem;">
                     <label class="filter-label">Radius (miles)</label>
                     <input type="range" id="radiusSlider" min="1" max="50" value="10" class="radius-slider">
@@ -2470,7 +2481,23 @@
         let currentFilter = 'all';
         let currentSearchTerm = '';
 
+        // Handle dropdown filter changes
+        function handleFilterChange(filterType, value) {
+            if (filterType === 'category') {
+                currentFilter = value;
+            } else if (filterType === 'location') {
+                const townSearchContainer = document.querySelector('.town-search-container');
+                if (value === 'town-search') {
+                    townSearchContainer.style.display = 'block';
+                } else {
+                    townSearchContainer.style.display = 'none';
+                }
+            }
+            renderPosts();
+        }
+        
         function initializeFilters() {
+            // Keep existing filter button functionality for any remaining buttons
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     // Remove active class from all buttons in the same group
@@ -3341,13 +3368,7 @@
             // updateMiniCalendar removed
             renderPosts();
             
-            // Show demo popup after 3 seconds only if user is not already a member
-            setTimeout(() => {
-                const userEmail = localStorage.getItem('currentUserEmail');
-                if (!userEmail) {
-                    showDemoPopup();
-                }
-            }, 3000);
+
         });
     </script>
 
