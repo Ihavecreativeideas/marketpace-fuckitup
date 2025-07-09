@@ -9,6 +9,8 @@ import { registerPasswordRecoveryRoutes } from "./passwordRecovery";
 import { registerIntegrationRoutes } from "./integrationRoutes";
 import { registerScammerProtectionRoutes } from "./antiScammerProtection";
 import { registerFacebookRoutes } from "./facebookIntegration";
+import { setupFacebookAuth } from "./facebookAuth";
+import { facebookAPI } from "./facebookGraphAPI";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -20,6 +22,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
+  
+  // Facebook Auth setup
+  setupFacebookAuth(app);
 
   // RLS Context middleware - sets user context for database security policies
   app.use(async (req: any, res, next) => {
@@ -1693,6 +1698,156 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Scammer protection and security routes
   registerScammerProtectionRoutes(app);
+
+  // Facebook API integration routes
+  app.post('/api/facebook/connect', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { accessToken } = req.body;
+      
+      if (!accessToken) {
+        return res.status(400).json({ error: 'Access token is required' });
+      }
+      
+      // Get user's Facebook pages
+      const pagesResponse = await facebookAPI.getUserPages(accessToken);
+      
+      if (pagesResponse.error) {
+        return res.status(400).json({ error: pagesResponse.error.message });
+      }
+      
+      // Save Facebook connection to user profile
+      await storage.updateUserProfile(userId, {
+        facebookConnected: true,
+        facebookAccessToken: accessToken,
+        facebookPages: pagesResponse.data?.data || []
+      });
+      
+      res.json({ 
+        success: true, 
+        pages: pagesResponse.data?.data || [],
+        message: 'Facebook account connected successfully' 
+      });
+    } catch (error) {
+      console.error('Facebook connect error:', error);
+      res.status(500).json({ error: 'Failed to connect Facebook account' });
+    }
+  });
+
+  app.post('/api/facebook/post', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { pageId, message, link } = req.body;
+      
+      const user = await storage.getUser(userId);
+      if (!user?.facebookAccessToken) {
+        return res.status(401).json({ error: 'Facebook not connected' });
+      }
+      
+      const postResponse = await facebookAPI.postToPage(
+        pageId, 
+        user.facebookAccessToken, 
+        message, 
+        link
+      );
+      
+      if (postResponse.error) {
+        return res.status(400).json({ error: postResponse.error.message });
+      }
+      
+      res.json({ 
+        success: true, 
+        postId: postResponse.data?.id,
+        message: 'Post created successfully' 
+      });
+    } catch (error) {
+      console.error('Facebook post error:', error);
+      res.status(500).json({ error: 'Failed to create Facebook post' });
+    }
+  });
+
+  app.get('/api/facebook/pages', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.facebookAccessToken) {
+        return res.status(401).json({ error: 'Facebook not connected' });
+      }
+      
+      const pagesResponse = await facebookAPI.getUserPages(user.facebookAccessToken);
+      
+      if (pagesResponse.error) {
+        return res.status(400).json({ error: pagesResponse.error.message });
+      }
+      
+      res.json({ pages: pagesResponse.data?.data || [] });
+    } catch (error) {
+      console.error('Facebook pages error:', error);
+      res.status(500).json({ error: 'Failed to fetch Facebook pages' });
+    }
+  });
+
+  app.get('/api/facebook/conversations/:pageId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { pageId } = req.params;
+      
+      const user = await storage.getUser(userId);
+      if (!user?.facebookAccessToken) {
+        return res.status(401).json({ error: 'Facebook not connected' });
+      }
+      
+      const conversationsResponse = await facebookAPI.getPageConversations(
+        pageId, 
+        user.facebookAccessToken
+      );
+      
+      if (conversationsResponse.error) {
+        return res.status(400).json({ error: conversationsResponse.error.message });
+      }
+      
+      res.json({ conversations: conversationsResponse.data?.data || [] });
+    } catch (error) {
+      console.error('Facebook conversations error:', error);
+      res.status(500).json({ error: 'Failed to fetch conversations' });
+    }
+  });
+
+  app.post('/api/facebook/webhook', async (req, res) => {
+    try {
+      const body = req.body;
+      
+      // Verify webhook signature
+      const signature = req.headers['x-hub-signature-256'];
+      
+      if (body.object === 'page') {
+        body.entry.forEach(async (entry: any) => {
+          const webhookEvent = entry.messaging?.[0];
+          
+          if (webhookEvent && webhookEvent.message) {
+            // Handle incoming Facebook message
+            const senderId = webhookEvent.sender.id;
+            const messageText = webhookEvent.message.text;
+            
+            // Check if message contains "Is this still available?"
+            if (messageText?.toLowerCase().includes('still available')) {
+              const pageId = entry.id;
+              const autoReply = "Thanks for your interest! This item is still available. You can get it delivered through MarketPace at https://marketpace.shop - just search for the item and we'll deliver it right to you!";
+              
+              // Send auto-reply
+              await facebookAPI.sendMessage(pageId, process.env.FACEBOOK_PAGE_ACCESS_TOKEN!, senderId, autoReply);
+            }
+          }
+        });
+      }
+      
+      res.status(200).send('EVENT_RECEIVED');
+    } catch (error) {
+      console.error('Facebook webhook error:', error);
+      res.status(500).send('Webhook error');
+    }
+  });
 
   // Register Facebook marketing integration routes  
   registerFacebookRoutes(app);
