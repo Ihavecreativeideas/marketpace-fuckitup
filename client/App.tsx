@@ -3610,26 +3610,26 @@ const DeliveryDemoScreen = ({ navigation }: any) => {
     {
       title: "Driver Accepts Route",
       description: "Sarah accepts a 6-item route for the 12pm-3pm time slot",
-      earnings: "$19.25",
-      details: "1 route × $15 + 8.5 miles × $0.50 = $19.25"
+      earnings: "$40.25",
+      details: "6 pickups × $4 + 6 dropoffs × $2 + 8.5 miles × $0.50 = $40.25"
     },
     {
       title: "Optimized Route Planning", 
       description: "AI creates the most efficient path through all 12 stops",
-      earnings: "$19.25",
+      earnings: "$40.25",
       details: "Route covers: Electronics store → Marketplace pickup → 3 homes → Coffee shop"
     },
     {
       title: "Real-Time Tracking",
       description: "Buyers and sellers see live updates as items move through the route",
-      earnings: "$19.25 + tips",
+      earnings: "$40.25 + tips",
       details: "Color-coded tracking: Dark Blue → Light Blue, Dark Red → Light Red"
     },
     {
       title: "Route Complete",
       description: "All deliveries finished, payment released instantly to driver",
-      earnings: "$24.00 total",
-      details: "$19.25 base + $4.75 in tips (100% goes to driver)"
+      earnings: "$45.00 total",
+      details: "$40.25 base + $4.75 in tips (100% goes to driver)"
     }
   ];
 
@@ -3771,7 +3771,8 @@ const DeliveryDemoScreen = ({ navigation }: any) => {
           </Text>
           
           {[
-            { label: 'Base Pay', amount: '$15.00', detail: 'Per route completed' },
+            { label: 'Pickup Fee', amount: '$4.00', detail: 'Per item collected' },
+            { label: 'Dropoff Fee', amount: '$2.00', detail: 'Per item delivered' },
             { label: 'Mileage', amount: '$0.50', detail: 'Per mile driven' },
             { label: 'Tips', amount: '100%', detail: 'Go directly to driver' },
             { label: 'Large Items', amount: '+$25', detail: 'Truck/van required' }
