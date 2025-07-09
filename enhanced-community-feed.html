@@ -1758,10 +1758,7 @@
         <span style="color: #00ffff; font-size: 0.9rem;">Demo items deleted at launch</span>
     </div>
 
-    <!-- Favorites Heart Icon -->
-    <div style="position: fixed; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 105, 180, 0.5); border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; z-index: 1001;" onclick="toggleFavorite()" id="favoritesHeart">
-        <span style="font-size: 24px; color: #ff69b4; transition: all 0.3s ease;" id="heartIcon">♡</span>
-    </div>
+
 
     <!-- Header -->
     <header class="header">
@@ -2808,7 +2805,7 @@
                 `;
             }
 
-            // Add post actions
+            // Add post actions with heart favorite
             postContent += `
                     <div class="post-actions">
                         <button class="action-btn">
@@ -2825,6 +2822,9 @@
                         </button>
                         <button class="action-btn" onclick="shareToFacebook(${post.id}, \`${post.content.replace(/`/g, '\\`')}\`, '${post.author}')">
                             <span>📘</span>
+                        </button>
+                        <button class="action-btn favorite-btn" onclick="togglePostFavorite(${post.id})" id="favorite-${post.id}">
+                            <span>♡</span>
                         </button>
                     </div>
                 </div>
@@ -2889,6 +2889,7 @@
             document.querySelector('.post-type-btn[data-type="general"]').classList.add('active');
             document.querySelectorAll('.post-type-btn:not([data-type="general"])').forEach(btn => btn.classList.remove('active'));
             renderPosts();
+            setTimeout(checkPostFavorites, 100);
         }
 
         // Poll creation functions
@@ -3394,10 +3395,46 @@
             if (favorites.includes(currentPage)) {
                 const heartIcon = document.getElementById('heartIcon');
                 const favoritesHeart = document.getElementById('favoritesHeart');
-                heartIcon.textContent = '♥';
-                favoritesHeart.style.background = 'rgba(255, 105, 180, 0.3)';
-                favoritesHeart.style.borderColor = 'rgba(255, 105, 180, 0.8)';
+                if (heartIcon && favoritesHeart) {
+                    heartIcon.textContent = '♥';
+                    favoritesHeart.style.background = 'rgba(255, 105, 180, 0.3)';
+                    favoritesHeart.style.borderColor = 'rgba(255, 105, 180, 0.8)';
+                }
             }
+        }
+
+        // Toggle individual post favorite
+        function togglePostFavorite(postId) {
+            let favoritesPosts = JSON.parse(localStorage.getItem('marketPaceFavoritePosts') || '[]');
+            const favoriteBtn = document.getElementById(`favorite-${postId}`);
+            const heartSpan = favoriteBtn.querySelector('span');
+            
+            if (favoritesPosts.includes(postId)) {
+                // Remove from favorites
+                favoritesPosts = favoritesPosts.filter(id => id !== postId);
+                heartSpan.textContent = '♡';
+                favoriteBtn.style.color = 'rgba(255, 255, 255, 0.7)';
+            } else {
+                // Add to favorites
+                favoritesPosts.push(postId);
+                heartSpan.textContent = '♥';
+                favoriteBtn.style.color = '#ff69b4';
+            }
+            
+            localStorage.setItem('marketPaceFavoritePosts', JSON.stringify(favoritesPosts));
+        }
+
+        // Check post favorite status after rendering
+        function checkPostFavorites() {
+            const favoritesPosts = JSON.parse(localStorage.getItem('marketPaceFavoritePosts') || '[]');
+            favoritesPosts.forEach(postId => {
+                const favoriteBtn = document.getElementById(`favorite-${postId}`);
+                if (favoriteBtn) {
+                    const heartSpan = favoriteBtn.querySelector('span');
+                    heartSpan.textContent = '♥';
+                    favoriteBtn.style.color = '#ff69b4';
+                }
+            });
         }
 
         // Sample events data for calendar
