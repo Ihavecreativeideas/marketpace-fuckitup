@@ -1,129 +1,219 @@
-# Facebook Marketing Automation Testing Guide
+# Facebook Integration Testing Guide
 
-## Quick Demo Testing (No Facebook Setup Required)
+## Prerequisites
 
-### 1. Test Integration Interface
-1. Open MarketPace app → Profile → Integrations
-2. You'll see the Facebook Marketing Automation section with:
-   - "Connect Facebook Page" button
-   - "Share Product Demo" button
-   - Feature checklist showing auto-posting and messaging capabilities
+Before you can fully integrate Facebook with MarketPace, you need to:
 
-### 2. Test Demo Functions
-- Click "Connect Facebook Page" - prompts for access token (demo mode)
-- Click "Share Product Demo" - simulates posting a vintage chair listing
-- Both buttons show success/error messages demonstrating the workflow
+1. **Create a Facebook Developer Account**
+   - Go to https://developers.facebook.com/
+   - Create a developer account if you don't have one
 
-## Full Facebook Testing (Requires Facebook Developer Account)
+2. **Create a Facebook App**
+   - Click "Create App" → Select "Business" type
+   - Name it "MarketPace" or similar
+   - Add your business information
 
-### Step 1: Set Up Facebook App
-1. Go to https://developers.facebook.com/
-2. Create a new app → Business → Continue
-3. Add Facebook Login and Webhooks products
-4. Configure these permissions:
-   - `pages_manage_posts` (post to pages)
-   - `pages_messaging` (respond to messages)
-   - `pages_read_engagement` (read comments/messages)
+3. **Get Required Credentials**
+   - App ID (public - can be in client code)
+   - App Secret (private - server only)
+   - Page Access Token (for your business page)
 
-### Step 2: Get Access Tokens
-1. In Facebook App → Tools → Graph API Explorer
-2. Select your page and generate User Access Token
-3. Exchange for long-lived Page Access Token using:
-   ```
-   https://graph.facebook.com/v18.0/oauth/access_token?grant_type=fb_exchange_token&client_id=YOUR_APP_ID&client_secret=YOUR_APP_SECRET&fb_exchange_token=SHORT_LIVED_TOKEN
-   ```
+## Environment Variables Setup
 
-### Step 3: Configure Environment Variables
-Add to your `.env` file:
-```
+Add these to your `.env` file:
+
+```env
+FACEBOOK_APP_ID=your_app_id_here
+FACEBOOK_APP_SECRET=your_app_secret_here
 FACEBOOK_PAGE_ACCESS_TOKEN=your_page_access_token_here
 FACEBOOK_VERIFY_TOKEN=your_custom_verify_token_here
+FACEBOOK_WEBHOOK_SECRET=your_webhook_secret_here
 ```
 
-### Step 4: Set Up Webhook
-1. In Facebook App → Webhooks → New Subscription
-2. Callback URL: `https://your-replit-domain.replit.app/api/facebook/webhook`
-3. Verify Token: Use the same token from your .env file
-4. Subscribe to: `messages`, `messaging_postbacks`
+## Testing the Integration
 
-### Step 5: Test Live Integration
-1. Connect your Facebook page using the real access token
-2. Post a product - it will appear on your Facebook page with delivery link
-3. Comment "Is this still available?" on the Facebook post
-4. The webhook will trigger and auto-reply through Messenger
+### 1. Authentication Test
 
-## API Endpoints for Direct Testing
-
-### Connect Facebook Account
 ```bash
+# Test Facebook login (replace with your actual credentials)
+curl -X POST http://localhost:5000/auth/facebook \
+  -H "Content-Type: application/json"
+```
+
+### 2. Page Connection Test
+
+```bash
+# Test getting user pages
 curl -X POST http://localhost:5000/api/facebook/connect \
   -H "Content-Type: application/json" \
-  -d '{"accessToken": "YOUR_ACCESS_TOKEN"}'
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -d '{"accessToken": "YOUR_FACEBOOK_ACCESS_TOKEN"}'
 ```
 
-### Post Product to Facebook
+### 3. Post Creation Test
+
 ```bash
+# Test posting to Facebook page
 curl -X POST http://localhost:5000/api/facebook/post \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
   -d '{
-    "productData": {
-      "id": "test123",
-      "title": "Test Product",
-      "description": "This is a test product for MarketPace",
-      "price": 50
-    }
+    "pageId": "YOUR_PAGE_ID",
+    "message": "Check out this amazing product on MarketPace!",
+    "link": "https://marketpace.shop"
   }'
 ```
 
-### Check Facebook Analytics
-```bash
-curl http://localhost:5000/api/facebook/analytics
-```
+### 4. Webhook Test
 
-### View Recent Messages
 ```bash
-curl http://localhost:5000/api/facebook/messages
-```
-
-## Testing Webhook Responses
-
-### Simulate Facebook Message Webhook
-```bash
+# Test webhook endpoint
 curl -X POST http://localhost:5000/api/facebook/webhook \
   -H "Content-Type: application/json" \
   -d '{
-    "entry": [{
-      "messaging": [{
-        "sender": {"id": "test_user_123"},
-        "message": {"text": "Is this still available?"}
-      }]
-    }]
+    "object": "page",
+    "entry": [
+      {
+        "id": "PAGE_ID",
+        "messaging": [
+          {
+            "sender": {"id": "USER_ID"},
+            "message": {"text": "Is this still available?"}
+          }
+        ]
+      }
+    ]
   }'
 ```
 
-## Expected Behaviors
+## Frontend Integration
 
-### Successful Facebook Post
-- Returns post ID from Facebook
-- Creates "Deliver Now" link: `https://marketpace.app/product/{id}?deliver_now=true`
-- Tracks post in analytics system
+### 1. Add Facebook Login Component
 
-### Auto-Reply Triggers
-Messages containing these phrases trigger auto-replies:
-- "is this still available"
-- "still available"
-- "available?"
+```jsx
+import { FacebookLogin } from './components/FacebookLogin';
 
-### Auto-Reply Message
-"Yes it is! Purchase now and have it delivered to you at the next available delivery route from MarketPace. Click the link in the original post to order!"
+function LoginPage() {
+  const handleFacebookSuccess = (response) => {
+    console.log('Facebook login successful:', response);
+    // Save user data and redirect
+  };
 
-## Troubleshooting
+  const handleFacebookError = (error) => {
+    console.error('Facebook login error:', error);
+  };
 
-### Common Issues
-1. **Invalid Access Token**: Ensure token has proper permissions and hasn't expired
-2. **Webhook Verification Failed**: Check verify token matches .env file
-3. **Auto-Reply Not Working**: Verify webhook is subscribed to 'messages' event
-4. **Posts Not Appearing**: Check page permissions and app review status
+  return (
+    <div>
+      <FacebookLogin 
+        onSuccess={handleFacebookSuccess}
+        onError={handleFacebookError}
+        buttonText="Continue with Facebook"
+      />
+    </div>
+  );
+}
+```
 
-### Debug Mode
-Check server logs for detailed Facebook API responses and error messages.
+### 2. Add Facebook Share Component
+
+```jsx
+import { FacebookShare } from './components/FacebookShare';
+
+function ProductPage({ product }) {
+  return (
+    <div>
+      <h1>{product.name}</h1>
+      <p>{product.description}</p>
+      
+      <FacebookShare 
+        url={`https://marketpace.shop/products/${product.id}`}
+        title={product.name}
+        description={product.description}
+        image={product.image}
+      />
+    </div>
+  );
+}
+```
+
+## Required Facebook App Configuration
+
+### 1. App Settings
+- **App Domain**: `marketpace.shop`
+- **Privacy Policy URL**: `https://marketpace.shop/privacy`
+- **Terms of Service URL**: `https://marketpace.shop/terms`
+
+### 2. Facebook Login Settings
+- **Valid OAuth Redirect URIs**: 
+  - `https://marketpace.shop/auth/facebook/callback`
+  - `http://localhost:5000/auth/facebook/callback` (for testing)
+
+### 3. Webhooks Configuration
+- **Callback URL**: `https://marketpace.shop/api/facebook/webhook`
+- **Verify Token**: (use your custom token from .env)
+- **Subscription Fields**: `messages`, `messaging_postbacks`, `feed`
+
+### 4. Permissions Required
+- `email` - User's email address
+- `public_profile` - Basic profile information
+- `pages_manage_metadata` - Manage page information
+- `pages_read_engagement` - Read page interactions
+- `pages_messaging` - Send messages to page
+- `pages_manage_posts` - Create and manage posts
+
+## Common Issues and Solutions
+
+### 1. "App Not Set Up" Error
+- Ensure your Facebook App is configured correctly
+- Check that all required permissions are added
+- Verify your app domain is set correctly
+
+### 2. "Invalid Access Token" Error
+- Check that your access token hasn't expired
+- Ensure you're using the correct token type (user vs page)
+- Verify the token has the required permissions
+
+### 3. "Webhook Verification Failed"
+- Ensure your verify token matches exactly
+- Check that your webhook URL is accessible
+- Verify SSL certificate is valid
+
+### 4. "Permission Denied" Error
+- Request additional permissions in your Facebook app
+- Ensure user has granted the required permissions
+- Check that your app is approved for the permission
+
+## Production Deployment
+
+### 1. App Review Process
+- Submit your app for review with Facebook
+- Provide detailed use case descriptions
+- Include screenshots and demo videos
+- Complete business verification if required
+
+### 2. Go Live Checklist
+- [ ] All environment variables are set
+- [ ] Webhook URL is accessible and secure
+- [ ] SSL certificate is installed
+- [ ] Privacy policy is published
+- [ ] Terms of service are published
+- [ ] App is switched to "Live" mode
+- [ ] All required permissions are approved
+
+## Support Resources
+
+- **Facebook Developer Docs**: https://developers.facebook.com/docs/
+- **Graph API Explorer**: https://developers.facebook.com/tools/explorer/
+- **Webhook Tester**: https://developers.facebook.com/tools/webhooks/
+- **Facebook Developer Community**: https://developers.facebook.com/community/
+
+## Success Metrics
+
+Once integrated, you should be able to:
+- [ ] Users can log in with Facebook
+- [ ] Business owners can connect their Facebook pages
+- [ ] Products can be automatically posted to Facebook
+- [ ] Auto-replies work for marketplace inquiries
+- [ ] Webhooks receive and process messages correctly
+- [ ] Facebook sharing works from your website
