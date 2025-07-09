@@ -535,6 +535,31 @@
             font-weight: bold;
             color: #00ffff;
             margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .member-badge {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .demo-badge {
+            background: linear-gradient(135deg, #1e40af, #3730a3);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .post-time {
@@ -1837,7 +1862,7 @@
             <!-- Post composer -->
             <div class="post-composer">
                 <div class="composer-header">
-                    <div class="user-avatar">D</div>
+                    <div class="user-avatar" id="composerAvatar">D</div>
                     <textarea class="composer-input" placeholder="What's happening in your community?" id="postInput"></textarea>
                 </div>
                 <div class="composer-actions">
@@ -1970,6 +1995,45 @@
             }
         }
 
+        // Current user profile
+        let currentUser = null;
+        
+        // Load user profile on page load
+        function loadUserProfile() {
+            // Get user profile from localStorage or API
+            const userEmail = localStorage.getItem('currentUserEmail');
+            if (userEmail) {
+                // In a real implementation, fetch from API
+                // For now, get from localStorage
+                const userData = localStorage.getItem('currentUserData');
+                if (userData) {
+                    currentUser = JSON.parse(userData);
+                    updateUserInterface();
+                }
+            }
+        }
+        
+        // Update UI with current user information
+        function updateUserInterface() {
+            if (currentUser) {
+                const composerAvatar = document.getElementById('composerAvatar');
+                if (composerAvatar) {
+                    composerAvatar.textContent = currentUser.fullName.charAt(0);
+                }
+                
+                // Update profile avatar
+                const profileAvatar = document.querySelector('.profile-avatar');
+                if (profileAvatar) {
+                    profileAvatar.textContent = currentUser.fullName.charAt(0);
+                }
+            }
+        }
+        
+        // Check if user is in demo mode (no profile picture = demo mode)
+        function isDemo(user) {
+            return !user.profilePicture;
+        }
+        
         // Sample posts data
         const samplePosts = [
             {
@@ -1986,7 +2050,8 @@
                 image: 'https://via.placeholder.com/500x300/0d0221/00ffff?text=MacBook+Pro+2023',
                 hasCounterOffer: true,
                 hasAddToCart: true,
-                hasDeliverNow: true
+                hasDeliverNow: true,
+                isDemo: true
             },
             {
                 id: 2,
@@ -2001,7 +2066,8 @@
                 price: 50.00,
                 image: 'https://via.placeholder.com/500x300/9d4edd/ffffff?text=Guitar+Lessons',
                 hasBookNow: true,
-                serviceType: 'lessons'
+                serviceType: 'lessons',
+                isDemo: true
             },
             {
                 id: 3,
@@ -2517,12 +2583,16 @@
 
         // Create post HTML
         function createPostHTML(post) {
+            // Determine if post is from demo user or member
+            const isDemoPost = post.isDemo || post.author === 'Demo User';
+            const badge = isDemoPost ? '<span class="demo-badge">Demo</span>' : '<span class="member-badge">Member</span>';
+            
             let postContent = `
                 <div class="feed-post" data-category="${post.category}" id="post-${post.id}">
                     <div class="post-header">
                         <div class="user-avatar">${post.author.charAt(0)}</div>
                         <div class="post-meta">
-                            <div class="post-author">${post.author}</div>
+                            <div class="post-author">${post.author} ${badge}</div>
                             <div class="post-time">${post.time}</div>
                         </div>
                         <div class="post-category">${post.category.replace('-', '/')}</div>
@@ -2736,12 +2806,13 @@
                 id: Date.now(),
                 type: activeType,
                 category: activeType === 'general' ? 'general' : activeType,
-                author: 'Demo User',
+                author: currentUser ? currentUser.fullName : 'Demo User',
                 time: 'Just now',
                 content: postInput.value,
                 likes: 0,
                 comments: 0,
-                shares: 0
+                shares: 0,
+                isDemo: !currentUser || isDemo(currentUser)
             };
 
             // Handle poll creation
@@ -3035,22 +3106,39 @@
 
         // E-commerce and service button functions
         function makeCounterOffer(postId, price) {
+            if (!currentUser || isDemo(currentUser)) {
+                alert('Demo Mode: Counter offers will be available when MarketPace launches in your area! Your profile is set up and ready to go.');
+                return;
+            }
             alert(`Making counter offer for post ${postId}. Original price: $${price}`);
         }
 
         function addToCart(postId) {
+            if (!currentUser || isDemo(currentUser)) {
+                alert('Demo Mode: Shopping cart will be available when MarketPace launches in your area! Your profile is set up and ready to go.');
+                return;
+            }
             alert(`Added item from post ${postId} to cart!`);
         }
 
         function deliverNow(postId) {
+            if (!currentUser || isDemo(currentUser)) {
+                alert('Demo Mode: Delivery services will be available when MarketPace launches in your area! Your profile is set up and ready to go.');
+                return;
+            }
             alert(`Requesting immediate delivery for post ${postId}`);
         }
 
         function bookService(postId, serviceType) {
+            if (!currentUser || isDemo(currentUser)) {
+                alert('Demo Mode: Service booking will be available when MarketPace launches in your area! Your profile is set up and ready to go.');
+                return;
+            }
             alert(`Booking ${serviceType} service from post ${postId}`);
         }
 
         function contactService(postId) {
+            // Allow contacting - this is not purchasing/booking
             alert(`Contacting service provider from post ${postId}`);
         }
 
@@ -3188,6 +3276,7 @@
 
         // Initialize everything
         document.addEventListener('DOMContentLoaded', function() {
+            loadUserProfile(); // Load user profile first
             createParticles();
             createHeaderLogoFlowParticles(); // Start header logo particle flow
             initializeFilters();
