@@ -1038,12 +1038,12 @@ const DriverJobDescriptionScreen = ({ navigation }: any) => {
             💰 Earnings Breakdown
           </Text>
           <View style={{ marginBottom: 8 }}>
-            <Text style={{ fontSize: 16, color: '#fff', fontWeight: '600' }}>$4 per pickup</Text>
+            <Text style={{ fontSize: 16, color: '#fff', fontWeight: '600' }}>$15 per route</Text>
             <Text style={{ fontSize: 14, color: '#ccc' }}>Collect items from sellers</Text>
           </View>
           <View style={{ marginBottom: 8 }}>
-            <Text style={{ fontSize: 16, color: '#fff', fontWeight: '600' }}>$2 per dropoff</Text>
-            <Text style={{ fontSize: 14, color: '#ccc' }}>Deliver items to buyers</Text>
+            <Text style={{ fontSize: 16, color: '#fff', fontWeight: '600' }}>$0.50 per mile</Text>
+            <Text style={{ fontSize: 14, color: '#ccc' }}>Distance traveled</Text>
           </View>
           <View style={{ marginBottom: 8 }}>
             <Text style={{ fontSize: 16, color: '#fff', fontWeight: '600' }}>$0.50 per mile</Text>
@@ -1570,7 +1570,7 @@ const CampaignLandingScreen = ({ navigation }: any) => (
             Apply to Drive
           </Text>
           <Text style={{ fontSize: 14, color: 'rgba(255, 255, 255, 0.9)' }}>
-            Earn $4 pickup + $2 dropoff + $0.50/mile + $25 large delivery bonus + 100% tips
+            Earn $15 per route + $0.50/mile + $25 large delivery bonus + 100% tips
           </Text>
         </LinearGradient>
       </TouchableOpacity>
@@ -3610,26 +3610,26 @@ const DeliveryDemoScreen = ({ navigation }: any) => {
     {
       title: "Driver Accepts Route",
       description: "Sarah accepts a 6-item route for the 12pm-3pm time slot",
-      earnings: "$32.50",
-      details: "6 pickups × $4 + 6 dropoffs × $2 + 8.5 miles × $0.50 = $32.50"
+      earnings: "$19.25",
+      details: "1 route × $15 + 8.5 miles × $0.50 = $19.25"
     },
     {
       title: "Optimized Route Planning", 
       description: "AI creates the most efficient path through all 12 stops",
-      earnings: "$32.50",
+      earnings: "$19.25",
       details: "Route covers: Electronics store → Marketplace pickup → 3 homes → Coffee shop"
     },
     {
       title: "Real-Time Tracking",
       description: "Buyers and sellers see live updates as items move through the route",
-      earnings: "$32.50 + tips",
+      earnings: "$19.25 + tips",
       details: "Color-coded tracking: Dark Blue → Light Blue, Dark Red → Light Red"
     },
     {
       title: "Route Complete",
       description: "All deliveries finished, payment released instantly to driver",
-      earnings: "$37.25 total",
-      details: "$32.50 base + $4.75 in tips (100% goes to driver)"
+      earnings: "$24.00 total",
+      details: "$19.25 base + $4.75 in tips (100% goes to driver)"
     }
   ];
 
@@ -3771,8 +3771,7 @@ const DeliveryDemoScreen = ({ navigation }: any) => {
           </Text>
           
           {[
-            { label: 'Pickup Fee', amount: '$4.00', detail: 'Per item collected' },
-            { label: 'Dropoff Fee', amount: '$2.00', detail: 'Per item delivered' },
+            { label: 'Base Pay', amount: '$15.00', detail: 'Per route completed' },
             { label: 'Mileage', amount: '$0.50', detail: 'Per mile driven' },
             { label: 'Tips', amount: '100%', detail: 'Go directly to driver' },
             { label: 'Large Items', amount: '+$25', detail: 'Truck/van required' }
