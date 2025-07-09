@@ -67,6 +67,11 @@ let adminData = {
 
 export function registerAdminRoutes(app: Express) {
   
+  // Test endpoint to verify admin API connection
+  app.get('/api/admin/test', isAdminAuthenticated, (req, res) => {
+    res.json({ success: true, message: 'Admin API connected successfully', timestamp: new Date() });
+  });
+  
   // Platform Overview API
   app.get('/api/admin/stats', isAdminAuthenticated, async (req, res) => {
     try {
