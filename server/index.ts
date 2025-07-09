@@ -33,7 +33,7 @@ app.use(express.static(path.join(__dirname, '../')));
 
 // Main landing page route
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../index.html'));
+  res.sendFile(path.join(__dirname, '../pitch-page.html'));
 });
 
 // Facebook integration demo route
