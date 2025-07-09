@@ -78,6 +78,31 @@ app.get('/admin-dashboard.html', (req, res) => {
   res.sendFile(path.join(__dirname, '../admin-dashboard.html'));
 });
 
+// Dedicated admin pages
+app.get('/admin-drivers.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../admin-drivers.html'));
+});
+
+app.get('/admin-campaigns.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../admin-campaigns.html'));
+});
+
+app.get('/admin-promotions.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../admin-promotions.html'));
+});
+
+app.get('/admin-routes.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../admin-routes.html'));
+});
+
+app.get('/admin-content.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../admin-content.html'));
+});
+
+app.get('/admin-integrations.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../admin-integrations.html'));
+});
+
 const port = process.env.PORT || 5000;
 
 // Register admin routes
