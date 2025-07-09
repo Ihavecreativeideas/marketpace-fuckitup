@@ -77,7 +77,8 @@ export const FEE_STRUCTURE = {
 
 // Driver Payment Structure
 export const DRIVER_PAYMENTS = {
-  BASE_PAY: 15.00, // Base payment per route
+  PICKUP_FEE: 4.00, // Per pickup
+  DROPOFF_FEE: 2.00, // Per dropoff
   MILEAGE_RATE: 0.50,
   LARGE_DELIVERY_BONUS: 25.00,
   TIP_PERCENTAGE: 1.00 // 100% of tips go to drivers
@@ -149,17 +150,19 @@ export function calculateRentalOrServiceFee(
 }
 
 export function calculateDriverPayout(
-  routes: number,
+  pickups: number,
+  dropoffs: number,
   miles: number, 
   tips: number,
   hasLargeItems: boolean = false
 ): number {
-  const basePay = routes * DRIVER_PAYMENTS.BASE_PAY;
+  const pickupPay = pickups * DRIVER_PAYMENTS.PICKUP_FEE;
+  const dropoffPay = dropoffs * DRIVER_PAYMENTS.DROPOFF_FEE;
   const mileagePay = miles * DRIVER_PAYMENTS.MILEAGE_RATE;
   const tipPay = tips * DRIVER_PAYMENTS.TIP_PERCENTAGE;
   const largeBonusPay = hasLargeItems ? DRIVER_PAYMENTS.LARGE_DELIVERY_BONUS : 0;
   
-  return basePay + mileagePay + tipPay + largeBonusPay;
+  return pickupPay + dropoffPay + mileagePay + tipPay + largeBonusPay;
 }
 
 export function calculateDeliveryPlatformFee(orderTotal: number): number {
