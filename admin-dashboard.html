@@ -1079,8 +1079,9 @@
         function logout() {
             if (confirm('Are you sure you want to logout?')) {
                 // Clear admin session and redirect
-                sessionStorage.removeItem('adminLoggedIn');
-                window.location.href = '/admin-login';
+                localStorage.removeItem('adminLoggedIn');
+                localStorage.removeItem('adminLoginTime');
+                window.location.href = '/admin-login.html';
             }
         }
 
@@ -1266,9 +1267,29 @@
 
         // Check admin authentication on page load
         window.addEventListener('load', function() {
-            if (!sessionStorage.getItem('adminLoggedIn')) {
-                window.location.href = '/admin-login';
+            const isLoggedIn = localStorage.getItem('adminLoggedIn');
+            const loginTime = localStorage.getItem('adminLoginTime');
+            
+            if (!isLoggedIn || isLoggedIn !== 'true') {
+                window.location.href = '/admin-login.html';
+                return;
             }
+            
+            // Check if login is still valid (24 hours)
+            if (loginTime) {
+                const now = Date.now();
+                const timeDiff = now - parseInt(loginTime);
+                const twentyFourHours = 24 * 60 * 60 * 1000;
+                
+                if (timeDiff >= twentyFourHours) {
+                    localStorage.removeItem('adminLoggedIn');
+                    localStorage.removeItem('adminLoginTime');
+                    window.location.href = '/admin-login.html';
+                    return;
+                }
+            }
+            
+            console.log('Admin authenticated successfully');
         });
     </script>
 </body>
