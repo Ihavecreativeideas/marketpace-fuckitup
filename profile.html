@@ -422,13 +422,18 @@
 
     <!-- Back button -->
     <button class="back-btn" onclick="goBack()">← Back to Feed</button>
+    
+    <!-- Favorites Heart Icon -->
+    <div style="position: fixed; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 105, 180, 0.5); border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; z-index: 1001;" onclick="toggleFavorite()" id="favoritesHeart">
+        <span style="font-size: 24px; color: #ff69b4; transition: all 0.3s ease;" id="heartIcon">♡</span>
+    </div>
 
     <div class="container">
         <!-- Profile Header -->
         <div class="profile-header">
             <div class="profile-avatar-large" id="profileAvatarLarge">D</div>
             <h1 class="profile-name">Demo User</h1>
-            <p class="profile-bio">Community member since joining MarketPace. Love connecting with neighbors and sharing great finds!</p>
+            <p class="profile-bio" id="profileBio">Orange Beach, Alabama member</p>
             
             <div class="profile-stats">
                 <div class="stat-item">
@@ -611,10 +616,8 @@
                 
                 // Update bio
                 const profileBio = document.querySelector('.profile-bio');
-                if (profileBio && currentUser.bio) {
-                    profileBio.textContent = currentUser.bio;
-                } else if (profileBio) {
-                    profileBio.textContent = `Community member from ${currentUser.city}, ${currentUser.state}. ${currentUser.accountType === 'dual' ? 'Business owner and community member' : 'Community member'} since joining MarketPace.`;
+                if (profileBio) {
+                    profileBio.textContent = 'Orange Beach, Alabama member';
                 }
             }
         }
@@ -634,61 +637,52 @@
             }
         }
 
-        // Sample posts data
-        const userPosts = [
-            {
-                id: 1,
-                content: "Looking for a good handyman in the area. Need some electrical work done. Any recommendations?",
-                date: "2 days ago",
-                likes: 12,
-                comments: 5,
-                type: "ISO"
-            },
-            {
-                id: 2,
-                content: "Vintage lamp for sale! Great condition, perfect for any room. Check out my shop for more details.",
-                date: "3 days ago",
-                likes: 18,
-                comments: 7,
-                type: "Product"
-            },
-            {
-                id: 3,
-                content: "Had an amazing experience with MarketPace delivery today. Driver was super friendly and on time!",
-                date: "1 week ago",
-                likes: 34,
-                comments: 12,
-                type: "General"
-            }
-        ];
+        // Sample posts data - Empty for new users
+        const userPosts = [];
 
-        // Sample shop items
-        const shopItems = [
-            {
-                id: 1,
-                name: "Vintage Table Lamp",
-                price: 45.00,
-                category: "home",
-                image: "https://via.placeholder.com/250x150/1a0845/00ffff?text=Vintage+Lamp",
-                counterOffers: true
-            },
-            {
-                id: 2,
-                name: "Gaming Headset",
-                price: 75.00,
-                category: "electronics",
-                image: "https://via.placeholder.com/250x150/0d0221/9d4edd?text=Gaming+Headset",
-                counterOffers: true
-            },
-            {
-                id: 3,
-                name: "Garden Tools Set",
-                price: 30.00,
-                category: "home",
-                image: "https://via.placeholder.com/250x150/1a0845/ff6b35?text=Garden+Tools",
-                counterOffers: false
+        // Sample shop items - Empty for new users
+        const shopItems = [];
+
+        // Favorites functionality
+        function toggleFavorite() {
+            const heartIcon = document.getElementById('heartIcon');
+            const favoritesHeart = document.getElementById('favoritesHeart');
+            const currentPage = window.location.pathname;
+            
+            let favorites = JSON.parse(localStorage.getItem('marketPaceFavorites') || '[]');
+            
+            if (favorites.includes(currentPage)) {
+                // Remove from favorites
+                favorites = favorites.filter(page => page !== currentPage);
+                heartIcon.textContent = '♡';
+                favoritesHeart.style.background = 'rgba(255, 255, 255, 0.1)';
+                favoritesHeart.style.borderColor = 'rgba(255, 105, 180, 0.5)';
+            } else {
+                // Add to favorites
+                favorites.push(currentPage);
+                heartIcon.textContent = '♥';
+                favoritesHeart.style.background = 'rgba(255, 105, 180, 0.3)';
+                favoritesHeart.style.borderColor = 'rgba(255, 105, 180, 0.8)';
             }
-        ];
+            
+            localStorage.setItem('marketPaceFavorites', JSON.stringify(favorites));
+        }
+        
+        // Check if current page is favorited
+        function checkFavoriteStatus() {
+            const currentPage = window.location.pathname;
+            const favorites = JSON.parse(localStorage.getItem('marketPaceFavorites') || '[]');
+            
+            if (favorites.includes(currentPage)) {
+                const heartIcon = document.getElementById('heartIcon');
+                const favoritesHeart = document.getElementById('favoritesHeart');
+                if (heartIcon && favoritesHeart) {
+                    heartIcon.textContent = '♥';
+                    favoritesHeart.style.background = 'rgba(255, 105, 180, 0.3)';
+                    favoritesHeart.style.borderColor = 'rgba(255, 105, 180, 0.8)';
+                }
+            }
+        }
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
@@ -697,6 +691,7 @@
             renderPosts();
             renderShopItems();
             setupShopForm();
+            checkFavoriteStatus();
         });
 
         // Navigation functions
@@ -876,11 +871,11 @@
                             <div style="color: rgba(255,255,255,0.8); font-size: 12px;">Interactions</div>
                         </div>
                         <div style="background: rgba(16,185,129,0.1); padding: 15px; border-radius: 12px; text-align: center;">
-                            <div style="font-size: 24px; font-weight: bold; color: #10b981;">${isBusinessUser ? '12' : '3'}</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #10b981;">0</div>
                             <div style="color: rgba(255,255,255,0.8); font-size: 12px;">Items Sold</div>
                         </div>
                         <div style="background: rgba(245,158,11,0.1); padding: 15px; border-radius: 12px; text-align: center;">
-                            <div style="font-size: 24px; font-weight: bold; color: #f59e0b;">78%</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #f59e0b;">0%</div>
                             <div style="color: rgba(255,255,255,0.8); font-size: 12px;">Engagement</div>
                         </div>
                     </div>
@@ -891,7 +886,7 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div>
                                 <div style="color: rgba(255,255,255,0.7); font-size: 14px;">Shop Visits</div>
-                                <div style="color: #00ffff; font-size: 20px; font-weight: bold;">156 this month</div>
+                                <div style="color: #00ffff; font-size: 20px; font-weight: bold;">0 this month</div>
                             </div>
                             <div>
                                 <div style="color: rgba(255,255,255,0.7); font-size: 14px;">Business Name</div>

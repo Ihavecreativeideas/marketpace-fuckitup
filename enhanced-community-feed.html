@@ -1758,6 +1758,11 @@
         <span style="color: #00ffff; font-size: 0.9rem;">Demo items deleted at launch</span>
     </div>
 
+    <!-- Favorites Heart Icon -->
+    <div style="position: fixed; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 105, 180, 0.5); border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; z-index: 1001;" onclick="toggleFavorite()" id="favoritesHeart">
+        <span style="font-size: 24px; color: #ff69b4; transition: all 0.3s ease;" id="heartIcon">♡</span>
+    </div>
+
     <!-- Header -->
     <header class="header">
         <div class="header-content">
@@ -3356,6 +3361,88 @@
             setTimeout(createHeaderLogoFlowParticles, 3000);
         }
 
+        // Favorites functionality
+        function toggleFavorite() {
+            const heartIcon = document.getElementById('heartIcon');
+            const favoritesHeart = document.getElementById('favoritesHeart');
+            const currentPage = window.location.pathname;
+            
+            let favorites = JSON.parse(localStorage.getItem('marketPaceFavorites') || '[]');
+            
+            if (favorites.includes(currentPage)) {
+                // Remove from favorites
+                favorites = favorites.filter(page => page !== currentPage);
+                heartIcon.textContent = '♡';
+                favoritesHeart.style.background = 'rgba(255, 255, 255, 0.1)';
+                favoritesHeart.style.borderColor = 'rgba(255, 105, 180, 0.5)';
+            } else {
+                // Add to favorites
+                favorites.push(currentPage);
+                heartIcon.textContent = '♥';
+                favoritesHeart.style.background = 'rgba(255, 105, 180, 0.3)';
+                favoritesHeart.style.borderColor = 'rgba(255, 105, 180, 0.8)';
+            }
+            
+            localStorage.setItem('marketPaceFavorites', JSON.stringify(favorites));
+        }
+        
+        // Check if current page is favorited
+        function checkFavoriteStatus() {
+            const currentPage = window.location.pathname;
+            const favorites = JSON.parse(localStorage.getItem('marketPaceFavorites') || '[]');
+            
+            if (favorites.includes(currentPage)) {
+                const heartIcon = document.getElementById('heartIcon');
+                const favoritesHeart = document.getElementById('favoritesHeart');
+                heartIcon.textContent = '♥';
+                favoritesHeart.style.background = 'rgba(255, 105, 180, 0.3)';
+                favoritesHeart.style.borderColor = 'rgba(255, 105, 180, 0.8)';
+            }
+        }
+
+        // Sample events data for calendar
+        const calendarEvents = {
+            15: [
+                { title: "Community BBQ", time: "6:00 PM", type: "community" },
+                { title: "Local Art Show", time: "7:30 PM", type: "entertainment" }
+            ],
+            22: [
+                { title: "Farmers Market", time: "9:00 AM", type: "market" },
+                { title: "Guitar Lessons", time: "2:00 PM", type: "service" }
+            ],
+            28: [
+                { title: "Book Club Meeting", time: "7:00 PM", type: "community" }
+            ]
+        };
+        
+        function setupCalendarEvents() {
+            setTimeout(() => {
+                const calendarDays = document.querySelectorAll('.calendar-day');
+                calendarDays.forEach(dayEl => {
+                    const day = parseInt(dayEl.textContent);
+                    if (calendarEvents[day]) {
+                        dayEl.classList.add('has-event');
+                        dayEl.style.cursor = 'pointer';
+                        dayEl.style.background = 'rgba(0, 255, 255, 0.2)';
+                        dayEl.onclick = () => showEventDetails(day);
+                        dayEl.title = calendarEvents[day].map(e => e.title).join(', ');
+                    }
+                });
+            }, 1000);
+        }
+        
+        function showEventDetails(day) {
+            const events = calendarEvents[day];
+            if (!events) return;
+            
+            let eventDetails = `Events for September ${day}:\n\n`;
+            events.forEach(event => {
+                eventDetails += `• ${event.title}\n  Time: ${event.time}\n  Type: ${event.type}\n\n`;
+            });
+            
+            alert(eventDetails);
+        }
+
         // Initialize everything
         document.addEventListener('DOMContentLoaded', function() {
             loadUserProfile(); // Load user profile first
@@ -3365,6 +3452,8 @@
             initializePostTypes();
             initializeSearch();
             initializeCalendar();
+            checkFavoriteStatus();
+            setupCalendarEvents();
             // updateMiniCalendar removed
             renderPosts();
             
