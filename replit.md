@@ -208,6 +208,29 @@ MarketPace is a React Native mobile application that prioritizes community empow
 
 ## Recent Changes
 
+✓ **RESTAURANT/BAR BUSINESS INTEGRATION WITH DELIVERY PLATFORMS** (July 09, 2025)
+✓ Added comprehensive restaurant and bar business category with 5% commission model
+✓ Integrated DoorDash, Uber Eats, and Shipt delivery platform connections
+✓ Built menu management system with PDF and image upload capabilities
+✓ Created analytics dashboard for order tracking and commission reporting
+✓ Added customer review management across all delivery platforms
+✓ Implemented business type selection (Restaurant, Bar, Cafe, Food Truck, etc.)
+✓ Enhanced dual profile system to include restaurant/bar owners alongside shops, services, and entertainers
+✓ All restaurant features free during launch campaign with subscription model post-launch
+
+✓ **ENHANCED ENTERTAINER BUSINESS FEATURES WITH COMPREHENSIVE CAPABILITIES** (July 09, 2025)
+✓ Added booking and scheduling system with service type selection and custom pricing
+✓ Implemented equipment rental management with daily rates and security deposits
+✓ Built merchandise and media sales with custom pricing and image/video uploads
+✓ Enhanced social media integration including YouTube and Spotify connections
+✓ Created custom pricing and portfolio system with rate setting and travel fees
+✓ Added comprehensive business management for entertainers with complete workflow
+
+✓ **ETSY INTEGRATION FOR SHOP OWNERS** (July 09, 2025)
+✓ Added Etsy shop integration to existing e-commerce platform connections
+✓ Branded with Etsy's signature orange styling for consistent platform recognition
+✓ Enhanced shop owner capabilities alongside Shopify, TikTok Shop, and Facebook Shop
+
 ✓ **COMPREHENSIVE PROFILE & FAVORITES SYSTEM COMPLETION** (July 09, 2025)
 ✓ Implemented heart favorites functionality across all pages with localStorage persistence
 ✓ Fixed profile location display from "undefined" to "Orange Beach, Alabama member"
