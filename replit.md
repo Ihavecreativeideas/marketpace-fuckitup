@@ -220,17 +220,16 @@ MarketPace is a React Native mobile application that prioritizes community empow
 ✓ Created connection simulation with loading states and success confirmation messages
 ✓ Maintained consistency with existing dark purple futuristic theme throughout integration screens
 
-✓ **DRIVER PAYMENT STRUCTURE CLARIFICATION** (January 09, 2025)
-✓ Confirmed and restored proper pickup/dropoff payment model as specified by user requirements
-✓ Driver payment structure: $4 per pickup + $2 per dropoff + $0.50 per mile + $25 large delivery bonus + 100% tips
-✓ Shop delivery routes: 1 pickup can have multiple dropoffs, allowing drivers to earn more per route
-✓ Updated server/revenue.ts to use PICKUP_FEE and DROPOFF_FEE constants instead of BASE_PAY
-✓ Modified calculateDriverPayout function to accept pickups, dropoffs, miles, and tips parameters
-✓ Enhanced calculateRouteEarnings function to support pickup/dropoff breakdown with shop delivery capability
-✓ Updated DeliveryRoute interface to include pickups count for accurate earnings calculation
-✓ Restored all platform files to display "$4 pickup + $2 dropoff + $0.50/mile + $25 large delivery bonus + 100% tips"
-✓ Comprehensive update across: pitch-page.html, driver-application.html, admin-dashboard.html, client/App.tsx, facebook-launch-flyer.svg, server/storage.ts
-✓ Payment structure now correctly supports shop delivery model where drivers can maximize earnings with multiple dropoffs per pickup
+✓ **DRIVER PAYMENT STRUCTURE REVERTED TO ORIGINAL** (January 09, 2025)
+✓ Reverted driver payment structure from pickup/dropoff model back to original BASE_PAY system
+✓ Driver payment structure now: $15 per route + $0.50 per mile + $25 large delivery bonus + 100% tips
+✓ Updated server/revenue.ts to use BASE_PAY: 15.00 constant instead of PICKUP_FEE and DROPOFF_FEE
+✓ Modified calculateDriverPayout function to accept routes, miles, tips, and hasLargeItems parameters
+✓ Updated all platform files to display "$15 per route + $0.50/mile + $25 large delivery bonus + 100% tips"
+✓ Comprehensive update across: pitch-page.html, driver-application.html, client/App.tsx, facebook-launch-flyer.svg
+✓ Fixed driver demo earnings calculations to reflect new payment structure ($19.25 base instead of $32.50)
+✓ Updated mobile app delivery demo with corrected earnings breakdown and payment structure
+✓ Restored original payment model as per user request to maintain consistency with established system
 
 ✓ **ENHANCED LOGO & NAVIGATION WITH SPONSOR/SUPPORT BUTTON** (July 09, 2025)
 ✓ Enlarged main logo from 160px to 220px for better prominence on landing page
