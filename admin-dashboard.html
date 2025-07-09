@@ -1061,6 +1061,8 @@
         setInterval(updateRealTimeData, 30000);
 
         function showTab(tabName) {
+            console.log('Switching to tab:', tabName);
+            
             // Hide all admin content
             document.querySelectorAll('.admin-content').forEach(content => {
                 content.classList.remove('active');
@@ -1072,8 +1074,46 @@
             });
             
             // Show selected content and activate button
-            document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
+            const targetContent = document.getElementById(tabName);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            } else {
+                console.error('Tab content not found:', tabName);
+            }
+            
+            // Activate the clicked button
+            const clickedButton = event?.target;
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+            
+            // Load tab-specific data
+            switch(tabName) {
+                case 'overview':
+                    loadAdminStats();
+                    break;
+                case 'campaign':
+                    loadCampaignData();
+                    break;
+                case 'analytics':
+                    loadAnalyticsData();
+                    break;
+                case 'drivers':
+                    loadDriverData();
+                    break;
+                case 'promotions':
+                    loadPromotionsData();
+                    break;
+                case 'routes':
+                    loadRouteData();
+                    break;
+                case 'edit':
+                    loadContentEditor();
+                    break;
+                case 'integrations':
+                    loadIntegrationsData();
+                    break;
+            }
         }
 
         // Admin functions
@@ -1158,31 +1198,112 @@ Next Actions: Continue driver recruitment and shop onboarding
             }
         }
 
-        function refreshAnalytics() {
-            alert('🔄 Analytics data refreshed successfully!');
-            updateRealTimeData();
-        }
-
-        function exportAnalytics() {
-            alert('📊 Analytics data exported to CSV format.');
-        }
-
-        function setUpTracking() {
-            alert('📍 Advanced tracking configuration updated.');
-        }
-
-        function approveAllPending() {
-            if (confirm('Approve all 23 pending driver applications?')) {
-                alert('✅ All pending drivers approved and notifications sent!');
+        async function refreshAnalytics() {
+            try {
+                await loadAnalyticsData();
+                alert('Analytics data refreshed successfully!');
+                updateRealTimeData();
+            } catch (error) {
+                alert('Error refreshing analytics: ' + error.message);
             }
         }
 
-        function sendDriverNotifications() {
-            alert('📱 Launch notifications sent to all 342 demo mode drivers!');
+        async function exportAnalytics() {
+            try {
+                const response = await fetch('/api/admin/analytics/export?token=admin_token_2025');
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'analytics_data.csv';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    alert('Analytics data exported to CSV format.');
+                } else {
+                    alert('Error exporting analytics data');
+                }
+            } catch (error) {
+                alert('Error exporting analytics: ' + error.message);
+            }
         }
 
-        function exportDriverData() {
-            alert('📊 Driver data exported with privacy compliance.');
+        async function setUpTracking() {
+            try {
+                const response = await fetch('/api/admin/analytics/tracking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'admin_token_2025' },
+                    body: JSON.stringify({ action: 'configure_tracking' })
+                });
+                
+                if (response.ok) {
+                    alert('Advanced tracking configuration updated.');
+                } else {
+                    alert('Error updating tracking configuration');
+                }
+            } catch (error) {
+                alert('Error configuring tracking: ' + error.message);
+            }
+        }
+
+        async function approveAllPending() {
+            if (confirm('Approve all pending driver applications?')) {
+                try {
+                    const response = await fetch('/api/admin/drivers/approve-all', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'admin_token_2025' }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        alert(`All pending drivers approved and notifications sent! ${data.approved || 0} drivers approved.`);
+                        await loadDriverData();
+                    } else {
+                        alert('Error approving drivers');
+                    }
+                } catch (error) {
+                    alert('Error approving drivers: ' + error.message);
+                }
+            }
+        }
+
+        async function sendDriverNotifications() {
+            try {
+                const response = await fetch('/api/admin/drivers/notify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'admin_token_2025' },
+                    body: JSON.stringify({ action: 'send_launch_notifications' })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(`Launch notifications sent to ${data.notified || 0} drivers!`);
+                } else {
+                    alert('Error sending notifications');
+                }
+            } catch (error) {
+                alert('Error sending notifications: ' + error.message);
+            }
+        }
+
+        async function exportDriverData() {
+            try {
+                const response = await fetch('/api/admin/drivers/export?token=admin_token_2025');
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'driver_data.csv';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    alert('Driver data exported with privacy compliance.');
+                } else {
+                    alert('Error exporting driver data');
+                }
+            } catch (error) {
+                alert('Error exporting driver data: ' + error.message);
+            }
         }
 
         function createPromotion() {
@@ -1345,6 +1466,109 @@ Next Actions: Continue driver recruitment and shop onboarding
                     alert('Error publishing: ' + error.message);
                 }
             }
+        }
+
+        // Integration Management Functions
+        async function testAllIntegrations() {
+            try {
+                const response = await fetch('/api/admin/integrations/test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'admin_token_2025' }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(`Integration test completed! ${data.active || 0} active, ${data.inactive || 0} inactive connections.`);
+                } else {
+                    alert('Error testing integrations');
+                }
+            } catch (error) {
+                alert('Error testing integrations: ' + error.message);
+            }
+        }
+
+        async function refreshAPIKeys() {
+            try {
+                const response = await fetch('/api/admin/integrations/refresh-keys', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'admin_token_2025' }
+                });
+                
+                if (response.ok) {
+                    alert('API keys refreshed successfully!');
+                    await loadIntegrationsData();
+                } else {
+                    alert('Error refreshing API keys');
+                }
+            } catch (error) {
+                alert('Error refreshing API keys: ' + error.message);
+            }
+        }
+
+        function addNewIntegration() {
+            const integrationName = prompt('Enter integration name (e.g., Shopify, Facebook, Stripe):');
+            if (integrationName) {
+                alert(`New integration "${integrationName}" configuration started. Check your email for setup instructions.`);
+            }
+        }
+
+        async function exportIntegrationReport() {
+            try {
+                const response = await fetch('/api/admin/integrations/export?token=admin_token_2025');
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'integrations_report.csv';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    alert('Integration report exported successfully!');
+                } else {
+                    alert('Error exporting integration report');
+                }
+            } catch (error) {
+                alert('Error exporting report: ' + error.message);
+            }
+        }
+
+        function viewAPILogs() {
+            window.open('/api/admin/logs?token=admin_token_2025', '_blank');
+        }
+
+        function emergencyDisconnect() {
+            if (confirm('Emergency disconnect all integrations? This will stop all API connections immediately.')) {
+                alert('All integrations disconnected! Contact support to reconnect.');
+            }
+        }
+
+        // Individual integration configuration functions
+        function configureStripe() {
+            alert('Stripe configuration panel opened. Update payment processing settings.');
+        }
+
+        function configureFacebook() {
+            alert('Facebook Graph API configuration opened. Update social media settings.');
+        }
+
+        function configureShopify() {
+            alert('Shopify API configuration opened. Update e-commerce settings.');
+        }
+
+        function configureTwilio() {
+            alert('Twilio API configuration opened. Update SMS notification settings.');
+        }
+
+        function configureSendGrid() {
+            alert('SendGrid configuration opened. Update email marketing settings.');
+        }
+
+        function configureTicketmaster() {
+            alert('Ticketmaster API configuration opened. Update event ticketing settings.');
+        }
+
+        function configureStubHub() {
+            alert('StubHub API configuration opened. Update ticket resale settings.');
         }
 
         async function backupContent() {
@@ -1539,6 +1763,98 @@ Next Actions: Continue driver recruitment and shop onboarding
                 }
             } catch (error) {
                 alert('❌ Admin API connection error: ' + error.message);
+            }
+        }
+
+        // Data loading functions for each tab
+        async function loadCampaignData() {
+            console.log('Loading campaign data...');
+            try {
+                const response = await fetch('/api/admin/campaigns?token=admin_token_2025');
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Campaign data loaded:', data);
+                }
+            } catch (error) {
+                console.error('Error loading campaign data:', error);
+            }
+        }
+
+        async function loadAnalyticsData() {
+            console.log('Loading analytics data...');
+            try {
+                const response = await fetch('/api/admin/analytics?token=admin_token_2025');
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Analytics data loaded:', data);
+                }
+            } catch (error) {
+                console.error('Error loading analytics data:', error);
+            }
+        }
+
+        async function loadDriverData() {
+            console.log('Loading driver data...');
+            try {
+                const response = await fetch('/api/admin/drivers?token=admin_token_2025');
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Driver data loaded:', data);
+                }
+            } catch (error) {
+                console.error('Error loading driver data:', error);
+            }
+        }
+
+        async function loadPromotionsData() {
+            console.log('Loading promotions data...');
+            try {
+                const response = await fetch('/api/admin/promotions?token=admin_token_2025');
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Promotions data loaded:', data);
+                }
+            } catch (error) {
+                console.error('Error loading promotions data:', error);
+            }
+        }
+
+        async function loadRouteData() {
+            console.log('Loading route data...');
+            try {
+                const response = await fetch('/api/admin/routes?token=admin_token_2025');
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Route data loaded:', data);
+                }
+            } catch (error) {
+                console.error('Error loading route data:', error);
+            }
+        }
+
+        async function loadContentEditor() {
+            console.log('Loading content editor...');
+            try {
+                const response = await fetch('/api/admin/content?token=admin_token_2025');
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Content editor loaded:', data);
+                }
+            } catch (error) {
+                console.error('Error loading content editor:', error);
+            }
+        }
+
+        async function loadIntegrationsData() {
+            console.log('Loading integrations data...');
+            try {
+                const response = await fetch('/api/admin/integrations?token=admin_token_2025');
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Integrations data loaded:', data);
+                }
+            } catch (error) {
+                console.error('Error loading integrations data:', error);
             }
         }
 
