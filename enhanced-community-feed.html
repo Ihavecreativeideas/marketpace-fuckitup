@@ -1792,7 +1792,7 @@
             
             <!-- Right Section: Action Buttons -->
             <div class="header-right">
-                <button class="demo-badge" onclick="showDemoPopup()" style="background: linear-gradient(135deg, #1e40af, #3730a3); color: white; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer; box-shadow: 0 2px 6px rgba(30, 64, 175, 0.3); transition: transform 0.2s ease; white-space: nowrap;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">
+                <button class="demo-badge" onclick="showDemoPopup()" id="demoBadgeBtn" style="background: linear-gradient(135deg, #1e40af, #3730a3); color: white; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer; box-shadow: 0 2px 6px rgba(30, 64, 175, 0.3); transition: transform 0.2s ease; white-space: nowrap;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">
                     Demo Mode
                 </button>
                 <button onclick="window.location.href='/driver-application.html'" style="background: linear-gradient(135deg, #1e40af, #3730a3); color: white; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer; box-shadow: 0 2px 6px rgba(30, 64, 175, 0.3); transition: transform 0.2s ease; white-space: nowrap;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">
@@ -2009,6 +2009,14 @@
                 if (userData) {
                     currentUser = JSON.parse(userData);
                     updateUserInterface();
+                    
+                    // Update demo badge for logged-in users
+                    const demoBadgeBtn = document.getElementById('demoBadgeBtn');
+                    if (demoBadgeBtn) {
+                        demoBadgeBtn.textContent = `Welcome, ${currentUser.fullName.split(' ')[0]}!`;
+                        demoBadgeBtn.style.background = 'linear-gradient(135deg, #10B981, #059669)';
+                        demoBadgeBtn.onclick = () => window.location.href = '/profile';
+                    }
                 }
             }
         }
@@ -2583,9 +2591,11 @@
 
         // Create post HTML
         function createPostHTML(post) {
-            // Determine if post is from demo user or member
-            const isDemoPost = post.isDemo || post.author === 'Demo User';
-            const badge = isDemoPost ? '<span class="demo-badge">Demo</span>' : '<span class="member-badge">Member</span>';
+            // Demo posts (created during development) get no badge
+            // Member posts (created by real signed-up users) get member badge
+            // All current posts are demo posts since we created them
+            const isUserCreatedPost = post.createdByUser === true; // Only real user-created posts get badges
+            const badge = isUserCreatedPost ? '<span class="member-badge">Member</span>' : '';
             
             let postContent = `
                 <div class="feed-post" data-category="${post.category}" id="post-${post.id}">
@@ -3174,10 +3184,15 @@
             alert(`Demo Mode: Would send serious inquiry about ${instrument}. Feature available when MarketPace launches in your area!`);
         }
 
-        // Override the existing createPost function to handle events
+        // Override the existing createPost function to handle events and real member posts
         function createPost() {
             const postInput = document.getElementById('postInput');
             const activeType = document.querySelector('.post-type-btn.active').getAttribute('data-type');
+            
+            if (!currentUser) {
+                alert('Please sign up to create posts! Your posts will be visible to the community and help grow local engagement.');
+                return;
+            }
             
             if (activeType === 'events') {
                 const eventDate = document.getElementById('eventDate').value;
@@ -3195,7 +3210,29 @@
                     return;
                 }
                 
-                alert(`Demo Mode: Event created!\n\nEvent: ${postInput.value}\nDate: ${eventDate}\nTime: ${eventTime}\nLocation: ${eventLocation}\nType: ${eventType}\n\nEvents will be added to the community calendar when MarketPace launches!`);
+                // Create real user event post
+                const newPost = {
+                    id: Date.now(),
+                    author: currentUser.fullName,
+                    time: 'Just now',
+                    content: postInput.value,
+                    category: 'hub',
+                    type: 'events',
+                    createdByUser: true, // This marks it as a real member post
+                    eventDate: eventDate,
+                    eventTime: eventTime,
+                    eventLocation: eventLocation,
+                    eventType: eventType,
+                    likes: 0,
+                    comments: 0,
+                    shares: 0
+                };
+                
+                // Add to posts array and re-render
+                samplePosts.unshift(newPost);
+                renderPosts();
+                
+                alert(`Event created successfully! Your event "${postInput.value}" is now live in the community feed.`);
                 
                 // Clear form
                 postInput.value = '';
@@ -3209,7 +3246,25 @@
                     return;
                 }
                 
-                alert(`Demo Mode: ${activeType} post created! Posts will appear in the community feed when MarketPace launches in your area.`);
+                // Create real user post
+                const newPost = {
+                    id: Date.now(),
+                    author: currentUser.fullName,
+                    time: 'Just now',
+                    content: postInput.value,
+                    category: activeType === 'general' ? 'buy-sell' : activeType,
+                    type: activeType,
+                    createdByUser: true, // This marks it as a real member post
+                    likes: 0,
+                    comments: 0,
+                    shares: 0
+                };
+                
+                // Add to posts array and re-render
+                samplePosts.unshift(newPost);
+                renderPosts();
+                
+                alert(`Post created successfully! Your ${activeType} post is now live in the community feed.`);
                 postInput.value = '';
             }
         }
@@ -3286,8 +3341,13 @@
             // updateMiniCalendar removed
             renderPosts();
             
-            // Show demo popup after 3 seconds
-            setTimeout(showDemoPopup, 3000);
+            // Show demo popup after 3 seconds only if user is not already a member
+            setTimeout(() => {
+                const userEmail = localStorage.getItem('currentUserEmail');
+                if (!userEmail) {
+                    showDemoPopup();
+                }
+            }, 3000);
         });
     </script>
 
