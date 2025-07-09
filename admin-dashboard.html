@@ -1035,24 +1035,29 @@
     </div>
 
     <script>
+        // Global variables
+        let currentTab = 'overview';
+        
         // Update last login time
-        document.getElementById('lastLogin').textContent = new Date().toLocaleString();
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('lastLogin').textContent = new Date().toLocaleString();
+            loadAdminStats();
+        });
 
         // Real-time data updates
         function updateRealTimeData() {
-            // Simulate real-time updates
             const activeSessions = document.getElementById('activeSessions');
             const pageViews = document.getElementById('pageViews');
             const demoCompletions = document.getElementById('demoCompletions');
             const facebookShares = document.getElementById('facebookShares');
 
             if (activeSessions) {
-                const current = parseInt(activeSessions.textContent);
-                activeSessions.textContent = current + Math.floor(Math.random() * 10) - 5;
+                const current = parseInt(activeSessions.textContent) || 0;
+                activeSessions.textContent = Math.max(0, current + Math.floor(Math.random() * 10) - 5);
             }
 
             if (pageViews) {
-                const current = parseInt(pageViews.textContent.replace(',', ''));
+                const current = parseInt(pageViews.textContent.replace(',', '')) || 0;
                 pageViews.textContent = (current + Math.floor(Math.random() * 50)).toLocaleString();
             }
         }
@@ -1062,6 +1067,7 @@
 
         function showTab(tabName) {
             console.log('Switching to tab:', tabName);
+            currentTab = tabName;
             
             // Hide all admin content
             document.querySelectorAll('.admin-content').forEach(content => {
@@ -1073,19 +1079,23 @@
                 button.classList.remove('active');
             });
             
-            // Show selected content and activate button
+            // Show selected content
             const targetContent = document.getElementById(tabName);
             if (targetContent) {
                 targetContent.classList.add('active');
+                console.log('Tab content found and activated:', tabName);
             } else {
                 console.error('Tab content not found:', tabName);
+                return;
             }
             
             // Activate the clicked button
-            const clickedButton = event?.target;
-            if (clickedButton) {
-                clickedButton.classList.add('active');
-            }
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(button => {
+                if (button.textContent.toLowerCase().includes(tabName) || button.onclick.toString().includes(tabName)) {
+                    button.classList.add('active');
+                }
+            });
             
             // Load tab-specific data
             switch(tabName) {
@@ -1691,23 +1701,38 @@ Next Actions: Continue driver recruitment and shop onboarding
 
         // Real-time data loading and refresh functions
         async function loadAdminStats() {
+            console.log('Loading admin stats...');
             try {
                 const response = await fetch('/api/admin/stats?token=admin_token_2025');
+                console.log('Stats response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const stats = await response.json();
+                console.log('Admin stats loaded:', stats);
                 
-                // Update overview stats
-                document.getElementById('totalUsers').textContent = stats.totalUsers;
-                document.getElementById('driverApplications').textContent = stats.driverApplications;
-                document.getElementById('demoSignups').textContent = stats.demoSignups;
-                document.getElementById('sponsorships').textContent = stats.sponsorships;
-                document.getElementById('revenue').textContent = '$' + stats.revenue;
-                document.getElementById('cities').textContent = stats.cities;
+                // Update overview stats if elements exist
+                const updateElement = (id, value) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = value;
+                    } else {
+                        console.warn(`Element ${id} not found`);
+                    }
+                };
                 
-                // Update real-time activity
-                document.getElementById('activeSessions').textContent = stats.activeSessions;
-                document.getElementById('pageViews').textContent = stats.pageViews;
-                document.getElementById('demoCompletions').textContent = stats.demoCompletions;
-                document.getElementById('facebookShares').textContent = stats.facebookShares;
+                updateElement('totalUsers', stats.totalUsers || 0);
+                updateElement('driverApplications', stats.driverApplications || 0);
+                updateElement('demoSignups', stats.demoSignups || 0);
+                updateElement('sponsorships', stats.sponsorships || 0);
+                updateElement('revenue', '$' + (stats.revenue || 0));
+                updateElement('cities', stats.cities || 0);
+                updateElement('activeSessions', stats.activeSessions || 0);
+                updateElement('pageViews', stats.pageViews || 0);
+                updateElement('demoCompletions', stats.demoCompletions || 0);
+                updateElement('facebookShares', stats.facebookShares || 0);
                 
             } catch (error) {
                 console.error('Error loading admin stats:', error);
@@ -1752,16 +1777,25 @@ Next Actions: Continue driver recruitment and shop onboarding
 
         // Test admin API connection
         async function testAdminAPI() {
+            console.log('Testing admin API connection...');
             try {
                 const response = await fetch('/api/admin/test?token=admin_token_2025');
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const data = await response.json();
+                console.log('API response:', data);
                 
                 if (data.success) {
                     alert('✅ Admin API connection successful!\n\nMessage: ' + data.message + '\nTimestamp: ' + new Date(data.timestamp).toLocaleString());
                 } else {
-                    alert('❌ Admin API connection failed');
+                    alert('❌ Admin API connection failed: ' + (data.message || 'Unknown error'));
                 }
             } catch (error) {
+                console.error('API test error:', error);
                 alert('❌ Admin API connection error: ' + error.message);
             }
         }
