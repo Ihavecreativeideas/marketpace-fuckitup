@@ -184,6 +184,11 @@
             <button type="submit" class="login-btn">Access Admin Panel</button>
         </form>
 
+        <!-- Test button for debugging -->
+        <button onclick="testDashboard()" style="width: 100%; padding: 0.5rem; margin-top: 1rem; background: rgba(255,165,0,0.2); border: 1px solid orange; border-radius: 5px; color: orange; cursor: pointer;">
+            Test Dashboard Access (Debug)
+        </button>
+
         <div class="back-link">
             <a href="/">← Back to MarketPace</a>
         </div>
@@ -197,13 +202,25 @@
             const password = document.getElementById('password').value;
             const errorDiv = document.getElementById('errorMessage');
             
+            console.log('Login attempt:', { username, password: password.substring(0, 3) + '...' });
+            
             // Admin credentials
             if (username === 'marketpace_admin' && password === 'MP2025_Secure!') {
+                console.log('Login successful, redirecting...');
                 // Successful login
                 localStorage.setItem('adminLoggedIn', 'true');
                 localStorage.setItem('adminLoginTime', Date.now());
-                window.location.href = '/admin-dashboard.html';
+                
+                // Try different navigation methods
+                try {
+                    window.location.href = './admin-dashboard.html';
+                } catch (err) {
+                    console.error('Navigation error:', err);
+                    // Fallback method
+                    window.location.replace('./admin-dashboard.html');
+                }
             } else {
+                console.log('Login failed');
                 // Failed login
                 errorDiv.style.display = 'block';
                 setTimeout(() => {
@@ -211,6 +228,22 @@
                 }, 3000);
             }
         });
+
+        // Test function for debugging
+        function testDashboard() {
+            console.log('Testing dashboard access...');
+            localStorage.setItem('adminLoggedIn', 'true');
+            localStorage.setItem('adminLoginTime', Date.now());
+            
+            // Multiple navigation attempts
+            try {
+                console.log('Attempting navigation to admin-dashboard.html');
+                window.location.href = 'admin-dashboard.html';
+            } catch (error) {
+                console.error('Navigation failed:', error);
+                alert('Navigation failed. Check console for details.');
+            }
+        }
 
         // Check if already logged in
         const isLoggedIn = localStorage.getItem('adminLoggedIn');
