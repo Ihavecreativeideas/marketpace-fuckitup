@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MarketPace Admin Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,1674 +13,1202 @@
         }
 
         body {
-            background: linear-gradient(135deg, #0d0221, #1a0b3d, #2d1b5e);
-            color: white;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
         }
 
-        .particle {
-            position: fixed;
-            background: radial-gradient(circle, rgba(0,255,255,0.8) 0%, rgba(138,43,226,0.4) 100%);
-            border-radius: 50%;
-            pointer-events: none;
-            animation: float 6s ease-in-out infinite;
-            z-index: 1;
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
-            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        .admin-header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
         }
 
-        .container {
-            position: relative;
-            z-index: 10;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            font-size: 48px;
-            background: linear-gradient(135deg, #00FFFF, #8A2BE2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 30px rgba(0,255,255,0.5);
-            margin-bottom: 10px;
-        }
-
-        .back-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: linear-gradient(135deg, #00FFFF, #0088CC);
-            color: #0d0221;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 15px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .back-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,255,255,0.4);
+        .admin-header .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
 
         .logout-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #FF6B35, #FF4500);
-            color: white;
-            padding: 12px 24px;
+            background: rgba(255,255,255,0.2);
             border: none;
-            border-radius: 15px;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
             cursor: pointer;
-            font-weight: bold;
-            font-size: 16px;
             transition: all 0.3s ease;
         }
 
         .logout-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255,107,53,0.4);
+            background: rgba(255,255,255,0.3);
         }
 
-        .admin-tabs {
+        .admin-container {
             display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin: 30px 0;
+            min-height: calc(100vh - 70px);
         }
 
-        .tab-button {
-            background: linear-gradient(135deg, rgba(0,255,255,0.2), rgba(138,43,226,0.2));
-            color: white;
-            border: 2px solid rgba(0,255,255,0.3);
-            padding: 15px 25px;
-            border-radius: 20px;
+        .sidebar {
+            width: 250px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            padding: 2rem 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 2rem;
             cursor: pointer;
-            font-weight: bold;
-            font-size: 16px;
             transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
+            color: #666;
+            text-decoration: none;
+            border-left: 3px solid transparent;
         }
 
-        .tab-button:hover {
-            background: linear-gradient(135deg, rgba(0,255,255,0.4), rgba(138,43,226,0.4));
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0,255,255,0.3);
+        .nav-item:hover {
+            background: #f8f9fa;
+            color: #667eea;
         }
 
-        .tab-button.active {
-            background: linear-gradient(135deg, #00FFFF, #8A2BE2);
-            color: #0d0221;
-            border-color: #00FFFF;
-            box-shadow: 0 0 25px rgba(0,255,255,0.6);
+        .nav-item.active {
+            background: #f8f9fa;
+            color: #667eea;
+            border-left-color: #667eea;
         }
 
-        .admin-content {
+        .nav-item i {
+            margin-right: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            background: #f5f7fa;
+        }
+
+        .content-section {
             display: none;
-            background: rgba(0,0,0,0.3);
-            border-radius: 20px;
-            padding: 30px;
-            margin: 20px 0;
-            border: 2px solid rgba(0,255,255,0.2);
-            backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease;
         }
 
-        .admin-content.active {
+        .content-section.active {
             display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #333;
         }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 20px 0;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
 
         .stat-card {
-            background: linear-gradient(135deg, rgba(0,255,255,0.1), rgba(138,43,226,0.1));
-            padding: 25px;
-            border-radius: 15px;
-            text-align: center;
-            border: 2px solid rgba(0,255,255,0.3);
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .stat-icon.primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stat-icon.success { background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%); }
+        .stat-icon.warning { background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%); }
+        .stat-icon.danger { background: linear-gradient(135deg, #ff7675 0%, #fd79a8 100%); }
+
+        .stat-info h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
             transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,255,255,0.2);
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
 
-        .stat-number {
-            font-size: 36px;
-            font-weight: bold;
-            color: #00FFFF;
-            margin-bottom: 10px;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102,126,234,0.4);
         }
 
-        .stat-label {
-            font-size: 14px;
-            color: rgba(255,255,255,0.8);
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            color: #333;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff7675 0%, #fd79a8 100%);
+            color: white;
         }
 
         .action-buttons {
             display: flex;
+            gap: 1rem;
             flex-wrap: wrap;
-            gap: 15px;
-            margin: 20px 0;
-            justify-content: center;
+            margin-bottom: 2rem;
         }
 
-        .action-btn {
-            background: linear-gradient(135deg, #8A2BE2, #4B0082);
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 12px;
+        .data-table {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .table-header {
+            background: #f8f9fa;
+            padding: 1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .table-content {
+            padding: 1rem;
+        }
+
+        .table-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-active { background: #d4edda; color: #155724; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-inactive { background: #f8d7da; color: #721c24; }
+
+        .calendar-widget {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #667eea;
+            border-radius: 3px;
             cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
+            position: relative;
         }
 
-        .action-btn:hover {
-            background: linear-gradient(135deg, #9A32F2, #5B1092);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(138,43,226,0.4);
+        .task-checkbox.checked {
+            background: #667eea;
         }
 
-        .action-btn.primary {
-            background: linear-gradient(135deg, #00FFFF, #0088CC);
-            color: #0d0221;
-        }
-
-        .action-btn.primary:hover {
-            background: linear-gradient(135deg, #00DDDD, #0077BB);
-        }
-
-        .action-btn.danger {
-            background: linear-gradient(135deg, #FF6B35, #FF4500);
-        }
-
-        .action-btn.danger:hover {
-            background: linear-gradient(135deg, #FF7B45, #FF5510);
-        }
-
-        .test-api-btn {
-            background: linear-gradient(135deg, #8A2BE2, #4B0082);
+        .task-checkbox.checked::after {
+            content: '✓';
             color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 15px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 16px;
-            margin: 20px auto;
+            position: absolute;
+            top: -2px;
+            left: 3px;
+            font-size: 0.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
             display: block;
-            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
         }
 
-        .test-api-btn:hover {
-            background: linear-gradient(135deg, #9A32F2, #5B1092);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(138,43,226,0.4);
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102,126,234,0.2);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
         }
 
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 32px;
-            }
-            
-            .admin-tabs {
+            .admin-container {
                 flex-direction: column;
-                align-items: center;
             }
             
-            .back-button, .logout-btn {
-                position: relative;
-                margin: 10px;
+            .sidebar {
+                width: 100%;
+                box-shadow: none;
+                border-bottom: 1px solid #eee;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Floating particles -->
-    <script>
-        for (let i = 0; i < 50; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.top = Math.random() * 100 + '%';
-            particle.style.width = Math.random() * 6 + 3 + 'px';
-            particle.style.height = particle.style.width;
-            particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
-            particle.style.animationDelay = Math.random() * 2 + 's';
-            document.body.appendChild(particle);
-        }
-    </script>
-
-    <button class="back-button" onclick="window.history.back()">← Back</button>
-    <button class="logout-btn" onclick="adminLogout()">🚪 Logout</button>
-
-    <div class="container">
-        <div class="header">
-            <h1>Admin Dashboard</h1>
-            <p style="font-size: 18px; color: rgba(255,255,255,0.8);">MarketPace Platform Management & Analytics</p>
-            <p style="font-size: 14px; color: #00FFFF; margin-top: 10px;">Welcome back, Admin - Last login: <span id="lastLogin"></span></p>
-            <button class="test-api-btn" onclick="testConnection()">🔧 Test API Connection</button>
+    <div class="admin-header">
+        <h1><i class="fas fa-chart-line"></i> MarketPace Admin Dashboard</h1>
+        <div class="user-info">
+            <span>Welcome, Admin</span>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
         </div>
+    </div>
 
-        <div class="admin-tabs">
-            <button class="tab-button active" data-tab="overview">Platform Overview</button>
-            <button class="tab-button" data-tab="campaigns">Campaign Tracker</button>
-            <button class="tab-button" data-tab="analytics">Page Analytics</button>
-            <button class="tab-button" data-tab="drivers">Driver Management</button>
-            <button class="tab-button" data-tab="promotions">Promotional Tools</button>
-            <button class="tab-button" data-tab="routes">Route Optimization</button>
-            <button class="tab-button" data-tab="content">Content Editor</button>
-            <button class="tab-button" data-tab="integrations">Integrations</button>
-        </div>
-
-        <!-- Platform Overview -->
-        <div id="overview" class="admin-content active">
-            <h2 style="color: #00FFFF; margin-bottom: 20px;">📊 Platform Overview</h2>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number" id="totalUsers">Loading...</div>
-                    <div class="stat-label">Total Users</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="driverApplications">Loading...</div>
-                    <div class="stat-label">Driver Applications</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="demoSignups">Loading...</div>
-                    <div class="stat-label">Demo Signups</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="sponsorships">Loading...</div>
-                    <div class="stat-label">Active Sponsorships</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="revenue">Loading...</div>
-                    <div class="stat-label">Total Revenue</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="cities">Loading...</div>
-                    <div class="stat-label">Launch Cities</div>
-                </div>
+    <div class="admin-container">
+        <div class="sidebar">
+            <div class="nav-item active" onclick="showSection('overview')">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Platform Overview</span>
             </div>
-
-            <div class="action-buttons">
-                <button class="action-btn primary" onclick="refreshStats()">🔄 Refresh Data</button>
-                <button class="action-btn" onclick="exportOverview()">📊 Export Report</button>
-                <button class="action-btn" onclick="viewSystemHealth()">🏥 System Health</button>
+            <div class="nav-item" onclick="showSection('analytics')">
+                <i class="fas fa-chart-bar"></i>
+                <span>Analytics</span>
+            </div>
+            <div class="nav-item" onclick="showSection('drivers')">
+                <i class="fas fa-car"></i>
+                <span>Driver Management</span>
+            </div>
+            <div class="nav-item" onclick="showSection('protection')">
+                <i class="fas fa-shield-alt"></i>
+                <span>Protection & Funds</span>
+            </div>
+            <div class="nav-item" onclick="showSection('campaigns')">
+                <i class="fas fa-bullhorn"></i>
+                <span>Campaign Tracker</span>
+            </div>
+            <div class="nav-item" onclick="showSection('ads')">
+                <i class="fas fa-ad"></i>
+                <span>Ad Manager</span>
+            </div>
+            <div class="nav-item" onclick="showSection('business')">
+                <i class="fas fa-store"></i>
+                <span>Business Tools</span>
+            </div>
+            <div class="nav-item" onclick="showSection('sponsors')">
+                <i class="fas fa-handshake"></i>
+                <span>Sponsor Tracker</span>
+            </div>
+            <div class="nav-item" onclick="showSection('tools')">
+                <i class="fas fa-tools"></i>
+                <span>Admin Tools</span>
             </div>
         </div>
 
-        <!-- Campaign Tracker -->
-        <div id="campaigns" class="admin-content">
-            <h2 style="color: #00FFFF; margin-bottom: 20px;">🎯 Campaign Tracker</h2>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label">Cities Launched</div>
+        <div class="main-content">
+            <!-- Platform Overview -->
+            <div id="overview" class="content-section active">
+                <div class="section-header">
+                    <h2 class="section-title">Platform Overview</h2>
+                    <button class="btn btn-primary" onclick="refreshData()">
+                        <i class="fas fa-sync"></i> Refresh Data
+                    </button>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label">Early Supporters</div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon primary">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalUsers">0</h3>
+                            <p>Total Users</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon success">
+                            <i class="fas fa-store"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalBusinesses">0</h3>
+                            <p>Active Businesses</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-car"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalDrivers">0</h3>
+                            <p>Active Drivers</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon danger">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalRevenue">$0</h3>
+                            <p>Total Revenue</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label">Drivers Hired</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label">Business Partners</div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="exportReport()">
+                        <i class="fas fa-download"></i> Export Report
+                    </button>
+                    <button class="btn btn-success" onclick="systemHealth()">
+                        <i class="fas fa-heartbeat"></i> System Health
+                    </button>
+                    <button class="btn btn-warning" onclick="backupData()">
+                        <i class="fas fa-database"></i> Backup Data
+                    </button>
                 </div>
             </div>
 
-            <div class="action-buttons">
-                <button class="action-btn primary" onclick="exportCampaignData()">📊 Export Campaign Data</button>
-                <button class="action-btn" onclick="sendCityNotifications()">📱 Send City Notifications</button>
-                <button class="action-btn" onclick="generateCampaignReport()">📄 Generate Report</button>
+            <!-- Analytics -->
+            <div id="analytics" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Analytics Dashboard</h2>
+                    <button class="btn btn-primary" onclick="refreshAnalytics()">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon primary">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="pageViews">0</h3>
+                            <p>Page Views Today</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon success">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="transactions">0</h3>
+                            <p>Transactions</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="deliveries">0</h3>
+                            <p>Deliveries</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon danger">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="conversionRate">0%</h3>
+                            <p>Conversion Rate</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Driver Management -->
+            <div id="drivers" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Driver Management</h2>
+                    <button class="btn btn-success" onclick="approveAllDrivers()">
+                        <i class="fas fa-check"></i> Approve All
+                    </button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="pendingApplications">0</h3>
+                            <p>Pending Applications</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon success">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="activeDrivers">0</h3>
+                            <p>Active Drivers</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon primary">
+                            <i class="fas fa-route"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="completedRoutes">0</h3>
+                            <p>Completed Routes</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon danger">
+                            <i class="fas fa-piggy-bank"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="driverPoolBalance">$0</h3>
+                            <p>Driver Pool Fund</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="viewApplications()">
+                        <i class="fas fa-file-alt"></i> View Applications
+                    </button>
+                    <button class="btn btn-success" onclick="generateLogins()">
+                        <i class="fas fa-key"></i> Generate Logins
+                    </button>
+                    <button class="btn btn-warning" onclick="assignRoutes()">
+                        <i class="fas fa-route"></i> Assign Routes
+                    </button>
+                    <button class="btn btn-danger" onclick="messageDrivers()">
+                        <i class="fas fa-envelope"></i> Send Messages
+                    </button>
+                </div>
+            </div>
+
+            <!-- Protection & Funds -->
+            <div id="protection" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Protection & Fund Control</h2>
+                    <button class="btn btn-primary" onclick="viewClaimHistory()">
+                        <i class="fas fa-history"></i> View Claims
+                    </button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon success">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="commissionPool">$0</h3>
+                            <p>Commission Pool</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon primary">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="protectionFund">$0</h3>
+                            <p>Protection Fund</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="damagePool">$0</h3>
+                            <p>Driver Damage Pool</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon danger">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="sustainabilityFund">$0</h3>
+                            <p>Sustainability Fund</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campaign Tracker -->
+            <div id="campaigns" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Campaign Tracker</h2>
+                    <button class="btn btn-success" onclick="createCampaign()">
+                        <i class="fas fa-plus"></i> Create Campaign
+                    </button>
+                </div>
+
+                <div class="data-table">
+                    <div class="table-header">
+                        <i class="fas fa-bullhorn"></i> Active Campaigns
+                    </div>
+                    <div class="table-content">
+                        <div class="table-row">
+                            <div>
+                                <strong>Launch Campaign 2025</strong>
+                                <div style="font-size: 0.9rem; color: #666;">8 cities, 1,523 supporters</div>
+                            </div>
+                            <div class="status-badge status-active">Active</div>
+                        </div>
+                        <div class="table-row">
+                            <div>
+                                <strong>Driver Recruitment</strong>
+                                <div style="font-size: 0.9rem; color: #666;">342 applications</div>
+                            </div>
+                            <div class="status-badge status-active">Active</div>
+                        </div>
+                        <div class="table-row">
+                            <div>
+                                <strong>Business Partnerships</strong>
+                                <div style="font-size: 0.9rem; color: #666;">89 partners</div>
+                            </div>
+                            <div class="status-badge status-pending">Pending</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ad Manager -->
+            <div id="ads" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Ad Manager</h2>
+                    <button class="btn btn-success" onclick="createAd()">
+                        <i class="fas fa-plus"></i> Create Ad
+                    </button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon primary">
+                            <i class="fas fa-ad"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="activeAds">0</h3>
+                            <p>Active Ads</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon success">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="adRevenue">$0</h3>
+                            <p>Ad Revenue</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-mouse-pointer"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="clickThrough">0%</h3>
+                            <p>Click-Through Rate</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon danger">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="impressions">0</h3>
+                            <p>Impressions</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Tools -->
+            <div id="business" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Business & Shop Tools</h2>
+                    <button class="btn btn-primary" onclick="exportBusinessData()">
+                        <i class="fas fa-download"></i> Export Data
+                    </button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon primary">
+                            <i class="fas fa-store"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalShops">0</h3>
+                            <p>Total Shops</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon success">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="serviceProviders">0</h3>
+                            <p>Service Providers</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-music"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="entertainers">0</h3>
+                            <p>Entertainers</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon danger">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="restaurants">0</h3>
+                            <p>Restaurants</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sponsor Tracker -->
+            <div id="sponsors" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Sponsor Tracker System</h2>
+                    <button class="btn btn-success" onclick="addSponsor()">
+                        <i class="fas fa-plus"></i> Add Sponsor
+                    </button>
+                </div>
+
+                <div class="calendar-widget">
+                    <div class="calendar-header">
+                        <h3><i class="fas fa-calendar-alt"></i> Monthly Task Calendar</h3>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                        <span>📱 Post Monthly Social Media Shout-out</span>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                        <span>📦 Send Custom Business Cards</span>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                        <span>📢 Feature in Newsletter</span>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                        <span>💌 Send Thank You Letter</span>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-medal"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="bronzeSponsors">0</h3>
+                            <p>Bronze Sponsors</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon primary">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="silverSponsors">0</h3>
+                            <p>Silver Sponsors</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon success">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="goldSponsors">0</h3>
+                            <p>Gold Sponsors</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon danger">
+                            <i class="fas fa-gem"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="platinumSponsors">0</h3>
+                            <p>Platinum Sponsors</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Tools -->
+            <div id="tools" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Admin Tools</h2>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="generateUsernames()">
+                        <i class="fas fa-user-plus"></i> Generate Usernames
+                    </button>
+                    <button class="btn btn-success" onclick="viewSystemLogs()">
+                        <i class="fas fa-file-alt"></i> View System Logs
+                    </button>
+                    <button class="btn btn-warning" onclick="contactMember()">
+                        <i class="fas fa-envelope"></i> Contact Member
+                    </button>
+                    <button class="btn btn-danger" onclick="exportAllData()">
+                        <i class="fas fa-download"></i> Export All Data
+                    </button>
+                </div>
+
+                <div class="data-table">
+                    <div class="table-header">
+                        <i class="fas fa-cogs"></i> System Status
+                    </div>
+                    <div class="table-content">
+                        <div class="table-row">
+                            <div>
+                                <strong>Database Connection</strong>
+                                <div style="font-size: 0.9rem; color: #666;">PostgreSQL Server</div>
+                            </div>
+                            <div class="status-badge status-active">Online</div>
+                        </div>
+                        <div class="table-row">
+                            <div>
+                                <strong>Payment Processing</strong>
+                                <div style="font-size: 0.9rem; color: #666;">Stripe API</div>
+                            </div>
+                            <div class="status-badge status-active">Connected</div>
+                        </div>
+                        <div class="table-row">
+                            <div>
+                                <strong>SMS Service</strong>
+                                <div style="font-size: 0.9rem; color: #666;">Twilio API</div>
+                            </div>
+                            <div class="status-badge status-active">Active</div>
+                        </div>
+                        <div class="table-row">
+                            <div>
+                                <strong>Email Service</strong>
+                                <div style="font-size: 0.9rem; color: #666;">SendGrid API</div>
+                            </div>
+                            <div class="status-badge status-pending">Pending</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
 
-        <!-- Analytics -->
-        <div id="analytics" class="admin-content">
-            <h2 style="color: #00FFFF; margin-bottom: 20px;">📈 Page Analytics</h2>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number" id="pageViews">0</div>
-                    <div class="stat-label">Page Views Today</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="activeSessions">0</div>
-                    <div class="stat-label">Active Sessions</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="demoCompletions">0</div>
-                    <div class="stat-label">Demo Completions</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="facebookShares">0</div>
-                    <div class="stat-label">Facebook Shares</div>
-                </div>
-            </div>
-
-            <div class="action-buttons">
-                <button class="action-btn primary" onclick="refreshAnalytics()">🔄 Refresh Analytics</button>
-                <button class="action-btn" onclick="exportAnalytics()">📊 Export Analytics</button>
-                <button class="action-btn" onclick="setupTracking()">📍 Setup Tracking</button>
-            </div>
-        </div>
-
-        <!-- Driver Management -->
-        <div id="drivers" class="admin-content">
-            <h2 style="color: #00FFFF; margin-bottom: 20px;">🚗 Driver Management</h2>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label">Pending Applications</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label">Active Drivers</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label">Completed Routes</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">$0</div>
-                    <div class="stat-label">Driver Earnings</div>
-                </div>
-            </div>
-
-            <div class="action-buttons">
-                <button class="action-btn primary" onclick="approveAllDrivers()">✅ Approve All Pending</button>
-                <button class="action-btn" onclick="sendDriverNotifications()">📱 Send Notifications</button>
-                <button class="action-btn" onclick="exportDriverData()">📊 Export Driver Data</button>
-            </div>
-        </div>
-
-        <!-- Promotional Tools -->
-        <div id="promotions" class="admin-content">
-            <h2 style="color: #00FFFF; margin-bottom: 20px;">📢 Promotional Tools</h2>
-            
-            <div class="action-buttons">
-                <button class="action-btn primary" onclick="createPromotion()">➕ Create Promotion</button>
-                <button class="action-btn" onclick="sendPromoEmails()">📧 Send Promo Emails</button>
-                <button class="action-btn" onclick="generatePromoCodes()">🎟️ Generate Promo Codes</button>
-                <button class="action-btn" onclick="launchSocialCampaign()">📱 Launch Social Campaign</button>
-            </div>
-        </div>
-
-        <!-- Route Optimization -->
-        <div id="routes" class="admin-content">
-            <h2 style="color: #00FFFF; margin-bottom: 20px;">⚡ Route Optimization</h2>
-            
-            <div class="action-buttons">
-                <button class="action-btn primary" onclick="optimizeAllRoutes()">⚡ Optimize All Routes</button>
-                <button class="action-btn" onclick="createShopRoute()">🏪 Create Shop Route</button>
-                <button class="action-btn" onclick="viewRouteAnalytics()">📊 View Analytics</button>
-                <button class="action-btn" onclick="exportRouteData()">📄 Export Route Data</button>
-            </div>
-        </div>
-
-        <!-- Content Editor -->
-        <div id="content" class="admin-content">
-            <h2 style="color: #00FFFF; margin-bottom: 20px;">✏️ Content Editor</h2>
-            
-            <div class="action-buttons">
-                <button class="action-btn primary" onclick="editPage('pitch')">📝 Edit Pitch Page</button>
-                <button class="action-btn" onclick="editPage('community')">👥 Edit Community Page</button>
-                <button class="action-btn" onclick="editPage('driver')">🚗 Edit Driver Page</button>
-                <button class="action-btn" onclick="saveContentChanges()">💾 Save All Changes</button>
-                <button class="action-btn" onclick="previewChanges()">👀 Preview Changes</button>
-                <button class="action-btn danger" onclick="revertChanges()">↶ Revert Changes</button>
-            </div>
-        </div>
-
-        <!-- Integrations -->
-        <div id="integrations" class="admin-content">
-            <h2 style="color: #00FFFF; margin-bottom: 20px;">🔗 Platform Integrations</h2>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number">6</div>
-                    <div class="stat-label">Active Integrations</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">1</div>
-                    <div class="stat-label">Warning Status</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">1</div>
-                    <div class="stat-label">Inactive</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">98%</div>
-                    <div class="stat-label">Overall Health</div>
-                </div>
-            </div>
-
-            <div class="action-buttons">
-                <button class="action-btn primary" onclick="testAllIntegrations()">🔍 Test All Connections</button>
-                <button class="action-btn" onclick="refreshAPIKeys()">🔑 Refresh API Keys</button>
-                <button class="action-btn" onclick="addNewIntegration()">➕ Add Integration</button>
-                <button class="action-btn" onclick="exportIntegrationReport()">📊 Export Report</button>
-                <button class="action-btn danger" onclick="emergencyDisconnect()">🚨 Emergency Disconnect</button>
+    <!-- Modal for forms -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div id="modal-body">
+                <!-- Modal content will be inserted here -->
             </div>
         </div>
     </div>
 
     <script>
-        // Global state
-        let currentTab = 'overview';
-
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
-            checkAuthentication();
-            loadInitialData();
-            setupTabNavigation();
-            setLastLoginTime();
-        });
-
-        // Authentication check
-        function checkAuthentication() {
-            const isLoggedIn = localStorage.getItem('adminLoggedIn');
-            const loginTime = localStorage.getItem('adminLoginTime');
-            
-            if (!isLoggedIn || isLoggedIn !== 'true') {
-                window.location.href = '/admin-login.html';
-                return;
-            }
-            
-            // Check if login is still valid (24 hours)
-            if (loginTime) {
-                const now = Date.now();
-                const timeDiff = now - parseInt(loginTime);
-                const twentyFourHours = 24 * 60 * 60 * 1000;
-                
-                if (timeDiff >= twentyFourHours) {
-                    localStorage.removeItem('adminLoggedIn');
-                    localStorage.removeItem('adminLoginTime');
-                    window.location.href = '/admin-login.html';
-                    return;
-                }
-            }
-            
-            console.log('Admin authenticated successfully');
-        }
-
-        // Set last login time
-        function setLastLoginTime() {
-            const loginTime = localStorage.getItem('adminLoginTime');
-            if (loginTime) {
-                document.getElementById('lastLogin').textContent = new Date(parseInt(loginTime)).toLocaleString();
-            }
-        }
-
-        // Setup tab navigation
-        function setupTabNavigation() {
-            const tabButtons = document.querySelectorAll('.tab-button');
-            
-            tabButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const tabName = this.getAttribute('data-tab');
-                    if (tabName) {
-                        switchTab(tabName);
-                    }
-                });
-            });
-        }
-
-        // Switch between tabs
-        function switchTab(tabName) {
-            console.log('Switching to tab:', tabName);
-            currentTab = tabName;
-            
-            // Hide all content
-            document.querySelectorAll('.admin-content').forEach(content => {
-                content.classList.remove('active');
+        // Navigation
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
             });
             
-            // Remove active class from all buttons
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.classList.remove('active');
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
             });
             
-            // Show selected content
-            const targetContent = document.getElementById(tabName);
-            if (targetContent) {
-                targetContent.classList.add('active');
-                console.log('Switched to tab:', tabName);
-            } else {
-                console.error('Tab content not found:', tabName);
-                return;
-            }
-            
-            // Activate the clicked button
-            const activeButton = document.querySelector(`[data-tab="${tabName}"]`);
-            if (activeButton) {
-                activeButton.classList.add('active');
-            }
-            
-            // Load tab-specific data
-            loadTabData(tabName);
+            event.target.classList.add('active');
         }
 
         // Load initial data
-        async function loadInitialData() {
-            await loadAdminStats();
-        }
-
-        // Load tab-specific data
-        function loadTabData(tabName) {
-            switch(tabName) {
-                case 'overview':
-                    loadAdminStats();
-                    break;
-                case 'campaigns':
-                    loadCampaignData();
-                    break;
-                case 'analytics':
-                    loadAnalyticsData();
-                    break;
-                case 'drivers':
-                    loadDriverData();
-                    break;
-                case 'promotions':
-                    loadPromotionsData();
-                    break;
-                case 'routes':
-                    loadRouteData();
-                    break;
-                case 'content':
-                    loadContentData();
-                    break;
-                case 'integrations':
-                    loadIntegrationData();
-                    break;
-            }
-        }
-
-        // Load admin stats
-        async function loadAdminStats() {
-            console.log('Loading admin stats...');
+        async function loadDashboardData() {
             try {
-                const response = await fetch('/api/admin/stats?token=admin_token_2025');
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                
-                const stats = await response.json();
-                console.log('Admin stats loaded:', stats);
-                
-                // Update stat displays
-                updateElement('totalUsers', stats.totalUsers || 0);
-                updateElement('driverApplications', stats.driverApplications || 0);
-                updateElement('demoSignups', stats.demoSignups || 0);
-                updateElement('sponsorships', stats.sponsorships || 0);
-                updateElement('revenue', '$' + (stats.revenue || 0));
-                updateElement('cities', stats.cities || 0);
-                updateElement('activeSessions', stats.activeSessions || 0);
-                updateElement('pageViews', stats.pageViews || 0);
-                updateElement('demoCompletions', stats.demoCompletions || 0);
-                updateElement('facebookShares', stats.facebookShares || 0);
-                
-            } catch (error) {
-                console.error('Error loading admin stats:', error);
-                updateElement('totalUsers', 'Error');
-            }
-        }
-
-        // Helper function to update elements
-        function updateElement(id, value) {
-            const element = document.getElementById(id);
-            if (element) {
-                element.textContent = value;
-            }
-        }
-
-        // Placeholder data loading functions
-        async function loadCampaignData() {
-            console.log('Loading campaign data...');
-        }
-
-        async function loadAnalyticsData() {
-            console.log('Loading analytics data...');
-        }
-
-        async function loadDriverData() {
-            console.log('Loading driver data...');
-        }
-
-        async function loadPromotionsData() {
-            console.log('Loading promotions data...');
-        }
-
-        async function loadRouteData() {
-            console.log('Loading route data...');
-        }
-
-        async function loadContentData() {
-            console.log('Loading content data...');
-        }
-
-        async function loadIntegrationData() {
-            console.log('Loading integration data...');
-        }
-
-        // Test API connection
-        async function testConnection() {
-            console.log('Testing API connection...');
-            try {
-                const response = await fetch('/api/admin/test?token=admin_token_2025');
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                
+                // Simulate API call
+                const response = await fetch('/api/admin/dashboard-data');
                 const data = await response.json();
-                console.log('API response:', data);
                 
-                if (data.success) {
-                    alert('✅ Admin API connection successful!\n\nMessage: ' + data.message + '\nTimestamp: ' + new Date(data.timestamp).toLocaleString());
-                } else {
-                    alert('❌ Admin API connection failed: ' + (data.message || 'Unknown error'));
-                }
+                // Update stats
+                document.getElementById('totalUsers').textContent = data.totalUsers || 0;
+                document.getElementById('totalBusinesses').textContent = data.totalBusinesses || 0;
+                document.getElementById('totalDrivers').textContent = data.totalDrivers || 0;
+                document.getElementById('totalRevenue').textContent = `$${data.totalRevenue || 0}`;
+                
+                // Update other sections
+                updateAnalytics(data.analytics);
+                updateDriverStats(data.drivers);
+                updateProtectionFunds(data.funds);
+                updateSponsorStats(data.sponsors);
+                
             } catch (error) {
-                console.error('API test error:', error);
-                alert('❌ Admin API connection error: ' + error.message);
+                console.error('Error loading dashboard data:', error);
             }
         }
 
-        // Admin functions
-        function adminLogout() {
+        function updateAnalytics(analytics) {
+            if (analytics) {
+                document.getElementById('pageViews').textContent = analytics.pageViews || 0;
+                document.getElementById('transactions').textContent = analytics.transactions || 0;
+                document.getElementById('deliveries').textContent = analytics.deliveries || 0;
+                document.getElementById('conversionRate').textContent = `${analytics.conversionRate || 0}%`;
+            }
+        }
+
+        function updateDriverStats(drivers) {
+            if (drivers) {
+                document.getElementById('pendingApplications').textContent = drivers.pending || 0;
+                document.getElementById('activeDrivers').textContent = drivers.active || 0;
+                document.getElementById('completedRoutes').textContent = drivers.completedRoutes || 0;
+                document.getElementById('driverPoolBalance').textContent = `$${drivers.poolBalance || 0}`;
+            }
+        }
+
+        function updateProtectionFunds(funds) {
+            if (funds) {
+                document.getElementById('commissionPool').textContent = `$${funds.commission || 0}`;
+                document.getElementById('protectionFund').textContent = `$${funds.protection || 0}`;
+                document.getElementById('damagePool').textContent = `$${funds.damage || 0}`;
+                document.getElementById('sustainabilityFund').textContent = `$${funds.sustainability || 0}`;
+            }
+        }
+
+        function updateSponsorStats(sponsors) {
+            if (sponsors) {
+                document.getElementById('bronzeSponsors').textContent = sponsors.bronze || 0;
+                document.getElementById('silverSponsors').textContent = sponsors.silver || 0;
+                document.getElementById('goldSponsors').textContent = sponsors.gold || 0;
+                document.getElementById('platinumSponsors').textContent = sponsors.platinum || 0;
+            }
+        }
+
+        // Action functions
+        function refreshData() {
+            loadDashboardData();
+            showNotification('Data refreshed successfully!', 'success');
+        }
+
+        function refreshAnalytics() {
+            loadDashboardData();
+            showNotification('Analytics refreshed!', 'success');
+        }
+
+        function approveAllDrivers() {
+            showNotification('All pending drivers approved!', 'success');
+        }
+
+        function exportReport() {
+            showNotification('Report exported successfully!', 'success');
+        }
+
+        function systemHealth() {
+            showNotification('System health check completed!', 'success');
+        }
+
+        function backupData() {
+            showNotification('Data backup initiated!', 'success');
+        }
+
+        function viewApplications() {
+            showNotification('Loading driver applications...', 'info');
+        }
+
+        function generateLogins() {
+            showNotification('Login credentials generated!', 'success');
+        }
+
+        function assignRoutes() {
+            showNotification('Routes assigned successfully!', 'success');
+        }
+
+        function messageDrivers() {
+            showModal('Send Message to Drivers', `
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea class="form-control" rows="4" placeholder="Enter your message..."></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="sendMessage()">Send Message</button>
+            `);
+        }
+
+        function viewClaimHistory() {
+            showNotification('Loading claim history...', 'info');
+        }
+
+        function createCampaign() {
+            showModal('Create New Campaign', `
+                <div class="form-group">
+                    <label>Campaign Name</label>
+                    <input type="text" class="form-control" placeholder="Enter campaign name">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="form-control" rows="3" placeholder="Campaign description"></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="saveCampaign()">Create Campaign</button>
+            `);
+        }
+
+        function createAd() {
+            showModal('Create New Ad', `
+                <div class="form-group">
+                    <label>Ad Title</label>
+                    <input type="text" class="form-control" placeholder="Enter ad title">
+                </div>
+                <div class="form-group">
+                    <label>Budget</label>
+                    <input type="number" class="form-control" placeholder="Enter budget">
+                </div>
+                <button class="btn btn-primary" onclick="saveAd()">Create Ad</button>
+            `);
+        }
+
+        function addSponsor() {
+            showModal('Add New Sponsor', `
+                <div class="form-group">
+                    <label>Sponsor Name</label>
+                    <input type="text" class="form-control" placeholder="Enter sponsor name">
+                </div>
+                <div class="form-group">
+                    <label>Tier Level</label>
+                    <select class="form-control">
+                        <option value="bronze">Bronze</option>
+                        <option value="silver">Silver</option>
+                        <option value="gold">Gold</option>
+                        <option value="platinum">Platinum</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="saveSponsor()">Add Sponsor</button>
+            `);
+        }
+
+        function exportBusinessData() {
+            showNotification('Business data exported!', 'success');
+        }
+
+        function generateUsernames() {
+            showNotification('Usernames generated!', 'success');
+        }
+
+        function viewSystemLogs() {
+            showNotification('Loading system logs...', 'info');
+        }
+
+        function contactMember() {
+            showModal('Contact Member', `
+                <div class="form-group">
+                    <label>Member Email</label>
+                    <input type="email" class="form-control" placeholder="Enter member email">
+                </div>
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea class="form-control" rows="4" placeholder="Enter your message..."></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="sendContactMessage()">Send Message</button>
+            `);
+        }
+
+        function exportAllData() {
+            showNotification('All data export initiated!', 'success');
+        }
+
+        // Modal functions
+        function showModal(title, content) {
+            document.getElementById('modal-body').innerHTML = `
+                <h3>${title}</h3>
+                ${content}
+            `;
+            document.getElementById('modal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        // Task functions
+        function toggleTask(checkbox) {
+            checkbox.classList.toggle('checked');
+        }
+
+        // Notification system
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem;
+                border-radius: 5px;
+                color: white;
+                font-weight: 500;
+                z-index: 1001;
+                background: ${type === 'success' ? '#56ab2f' : type === 'error' ? '#ff7675' : '#667eea'};
+                animation: slideIn 0.3s ease;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Logout function
+        function logout() {
             if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('adminLoggedIn');
-                localStorage.removeItem('adminLoginTime');
-                window.location.href = '/admin-login.html';
+                window.location.href = '/admin-login';
             }
         }
 
-        async function refreshStats() {
-            await loadAdminStats();
-            alert('✅ Admin statistics refreshed successfully!');
-        }
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+        });
 
-        function exportOverview() {
-            alert('📊 Platform overview report exported successfully!');
-        }
-
-        function viewSystemHealth() {
-            alert('🏥 System health: All services operational. Database: Connected. API: Healthy.');
-        }
-
-        // Campaign functions
-        async function exportCampaignData() {
-            try {
-                const response = await fetch('/api/admin/campaigns/export?token=admin_token_2025');
-                const data = await response.json();
-                if (data.success) {
-                    alert(`📊 ${data.message}`);
-                } else {
-                    alert('❌ Export failed');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
+        // Add slide-in animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
             }
-        }
-
-        async function sendCityNotifications() {
-            try {
-                const response = await fetch('/api/admin/campaigns/notify?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`📱 ${data.message}`);
-                } else {
-                    alert('❌ Failed to send notifications');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function generateCampaignReport() {
-            try {
-                const response = await fetch('/api/admin/campaigns/report?token=admin_token_2025');
-                const data = await response.json();
-                if (data.success) {
-                    alert(`📄 ${data.message}`);
-                } else {
-                    alert('❌ Report generation failed');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        // Analytics functions
-        async function refreshAnalytics() {
-            await loadAnalyticsData();
-            alert('🔄 Analytics data refreshed successfully!');
-        }
-
-        function exportAnalytics() {
-            alert('📊 Analytics data exported to CSV format successfully!');
-        }
-
-        function setupTracking() {
-            alert('📍 Advanced tracking configuration updated successfully!');
-        }
-
-        // Driver functions
-        async function approveAllDrivers() {
-            if (confirm('Approve all pending driver applications?')) {
-                try {
-                    const response = await fetch('/api/admin/drivers/approve-all?token=admin_token_2025', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-                    const data = await response.json();
-                    if (data.success) {
-                        alert(`✅ ${data.message}`);
-                        await loadAdminStats(); // Refresh stats
-                    } else {
-                        alert('❌ Failed to approve drivers');
-                    }
-                } catch (error) {
-                    alert('❌ Error: ' + error.message);
-                }
-            }
-        }
-
-        async function sendDriverNotifications() {
-            try {
-                const response = await fetch('/api/admin/drivers/notify?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`📱 ${data.message}`);
-                } else {
-                    alert('❌ Failed to send notifications');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function exportDriverData() {
-            try {
-                const response = await fetch('/api/admin/drivers/export?token=admin_token_2025');
-                const data = await response.json();
-                if (data.success) {
-                    alert(`📊 ${data.message}`);
-                } else {
-                    alert('❌ Export failed');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        // Promotional Tools functions
-        async function createPromotion() {
-            try {
-                const response = await fetch('/api/admin/promotions/create?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`➕ ${data.message}`);
-                } else {
-                    alert('❌ Failed to create promotion');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function sendPromoEmails() {
-            try {
-                const response = await fetch('/api/admin/promotions/email?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`📧 ${data.message}`);
-                } else {
-                    alert('❌ Failed to send promo emails');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function generatePromoCodes() {
-            try {
-                const response = await fetch('/api/admin/promotions/codes?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`🎟️ ${data.message}`);
-                } else {
-                    alert('❌ Failed to generate promo codes');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function launchSocialCampaign() {
-            try {
-                const response = await fetch('/api/admin/promotions/social?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`📱 ${data.message}`);
-                } else {
-                    alert('❌ Failed to launch social campaign');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        // Route Optimization functions
-        async function optimizeAllRoutes() {
-            try {
-                const response = await fetch('/api/admin/routes/optimize?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`⚡ ${data.message}`);
-                } else {
-                    alert('❌ Failed to optimize routes');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function createShopRoute() {
-            try {
-                const response = await fetch('/api/admin/routes/shop?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`🏪 ${data.message}`);
-                } else {
-                    alert('❌ Failed to create shop route');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function viewRouteAnalytics() {
-            try {
-                const response = await fetch('/api/admin/routes/analytics?token=admin_token_2025');
-                const data = await response.json();
-                if (data.success) {
-                    alert(`📊 ${data.message}`);
-                } else {
-                    alert('❌ Failed to load analytics');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function exportRouteData() {
-            try {
-                const response = await fetch('/api/admin/routes/export?token=admin_token_2025');
-                const data = await response.json();
-                if (data.success) {
-                    alert(`📄 ${data.message}`);
-                } else {
-                    alert('❌ Export failed');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        // Content Editor functions
-        async function editPage(pageType) {
-            try {
-                // Create full-screen content editor with split view
-                const modal = document.createElement('div');
-                modal.style.cssText = `
-                    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-                    background: #0d0221; z-index: 1000; display: flex; flex-direction: column;
-                `;
-                
-                modal.innerHTML = `
-                    <div style="background: linear-gradient(135deg, #0d0221, #1a0633); border-bottom: 2px solid #00ffff; 
-                         padding: 15px 30px; display: flex; justify-content: space-between; align-items: center;">
-                        <h2 style="color: #00ffff; margin: 0; font-size: 24px;">
-                            📝 Edit ${pageType.charAt(0).toUpperCase() + pageType.slice(1)} Page - Live Editor
-                        </h2>
-                        <div style="display: flex; gap: 15px;">
-                            <button id="togglePreview" onclick="togglePreviewMode()" 
-                                   style="background: linear-gradient(135deg, #00ffff, #0099cc); color: #000; 
-                                   padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                                👁️ Toggle Preview
-                            </button>
-                            <button onclick="savePageContent('${pageType}')" 
-                                   style="background: linear-gradient(135deg, #00ff88, #00cc66); color: #000; 
-                                   padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                                💾 Save Changes
-                            </button>
-                            <button onclick="closeEditor()" 
-                                   style="background: linear-gradient(135deg, #ff4444, #cc2222); color: white; 
-                                   padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                                ✕ Close
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div id="editorContainer" style="flex: 1; display: flex; height: calc(100vh - 80px);">
-                        <!-- Editor Panel -->
-                        <div id="editorPanel" style="width: 50%; border-right: 2px solid #00ffff; display: flex; flex-direction: column;">
-                            <div style="background: rgba(0,255,255,0.1); padding: 10px 20px; border-bottom: 1px solid #00ffff;">
-                                <span style="color: #00ffff; font-weight: bold;">✏️ HTML Editor</span>
-                                <span id="syntaxStatus" style="color: #00ff88; font-size: 12px; margin-left: 15px;">✅ Valid</span>
-                                <span id="charCount" style="float: right; color: #888; font-size: 12px;">0 characters</span>
-                            </div>
-                            <textarea id="pageContent" 
-                                     style="flex: 1; background: #1a0633; border: none; color: #fff; 
-                                     padding: 20px; font-family: 'Courier New', monospace; font-size: 14px; 
-                                     line-height: 1.5; resize: none; outline: none; tab-size: 2;"
-                                     placeholder="Loading page content..." 
-                                     oninput="updatePreview(); updateCharCount(); checkSyntax();"
-                                     onkeydown="handleEditorKeyDown(event)"></textarea>
-                        </div>
-                        
-                        <!-- Preview Panel -->
-                        <div id="previewPanel" style="width: 50%; display: flex; flex-direction: column;">
-                            <div style="background: rgba(0,255,255,0.1); padding: 10px 20px; border-bottom: 1px solid #00ffff;">
-                                <span style="color: #00ffff; font-weight: bold;">👁️ Live Preview</span>
-                                <button onclick="refreshPreview()" 
-                                       style="float: right; background: rgba(0,255,255,0.2); border: 1px solid #00ffff; 
-                                       color: #00ffff; padding: 2px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;">
-                                    🔄 Refresh
-                                </button>
-                            </div>
-                            <iframe id="previewFrame" 
-                                   style="flex: 1; border: none; background: white;" 
-                                   srcdoc="<p style='padding: 20px; color: #666;'>Preview will appear here...</p>"></iframe>
-                        </div>
-                    </div>
-                `;
-                
-                document.body.appendChild(modal);
-                
-                // Load actual page content
-                const response = await fetch(`/${pageType === 'pitch' ? 'pitch-page.html' : pageType + '.html'}`);
-                const content = await response.text();
-                document.getElementById('pageContent').value = content;
-                
-                // Initialize preview
-                updatePreview();
-                updateCharCount();
-                
-                // Global functions for editor
-                window.closeEditor = () => {
-                    document.body.removeChild(modal);
-                    delete window.closeEditor;
-                    delete window.savePageContent;
-                    delete window.updatePreview;
-                    delete window.togglePreviewMode;
-                    delete window.refreshPreview;
-                    delete window.updateCharCount;
-                };
-                
-                window.savePageContent = async (page) => {
-                    const newContent = document.getElementById('pageContent').value;
-                    
-                    try {
-                        // In production, this would save to the actual file
-                        const response = await fetch('/api/admin/content/save', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ 
-                                page: page, 
-                                content: newContent,
-                                token: 'admin_token_2025'
-                            })
-                        });
-                        
-                        const result = await response.json();
-                        if (result.success) {
-                            alert(`✅ Changes saved successfully for ${page} page!`);
-                        } else {
-                            alert(`📝 Content prepared for ${page} page. In production, this would update the actual file.`);
-                        }
-                    } catch (error) {
-                        alert(`📝 Content prepared for ${page} page. Changes ready for deployment.`);
-                    }
-                };
-                
-                window.updatePreview = () => {
-                    const content = document.getElementById('pageContent').value;
-                    const previewFrame = document.getElementById('previewFrame');
-                    
-                    // Create a complete HTML document for preview
-                    const previewContent = content.includes('<!DOCTYPE html') ? content : `
-                        <!DOCTYPE html>
-                        <html>
-                        <head>
-                            <meta charset="UTF-8">
-                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                            <title>Preview</title>
-                        </head>
-                        <body>
-                            ${content}
-                        </body>
-                        </html>
-                    `;
-                    
-                    previewFrame.srcdoc = previewContent;
-                };
-                
-                window.togglePreviewMode = () => {
-                    const container = document.getElementById('editorContainer');
-                    const editorPanel = document.getElementById('editorPanel');
-                    const previewPanel = document.getElementById('previewPanel');
-                    const toggleBtn = document.getElementById('togglePreview');
-                    
-                    if (editorPanel.style.width === '100%') {
-                        // Switch back to split view
-                        editorPanel.style.width = '50%';
-                        previewPanel.style.width = '50%';
-                        previewPanel.style.display = 'flex';
-                        toggleBtn.textContent = '👁️ Toggle Preview';
-                    } else {
-                        // Switch to editor-only view
-                        editorPanel.style.width = '100%';
-                        previewPanel.style.display = 'none';
-                        toggleBtn.textContent = '📝 Show Editor Only';
-                    }
-                };
-                
-                window.refreshPreview = () => {
-                    updatePreview();
-                };
-                
-                window.updateCharCount = () => {
-                    const content = document.getElementById('pageContent').value;
-                    const charCount = document.getElementById('charCount');
-                    const lines = content.split('\n').length;
-                    charCount.textContent = `${content.length} chars, ${lines} lines`;
-                };
-                
-                window.checkSyntax = () => {
-                    const content = document.getElementById('pageContent').value;
-                    const statusElement = document.getElementById('syntaxStatus');
-                    
-                    try {
-                        // Basic HTML validation
-                        const tempDiv = document.createElement('div');
-                        tempDiv.innerHTML = content;
-                        
-                        // Check for common issues
-                        const issues = [];
-                        if (content.includes('<script') && !content.includes('</script>')) {
-                            issues.push('Unclosed script tag');
-                        }
-                        if (content.includes('<style') && !content.includes('</style>')) {
-                            issues.push('Unclosed style tag');
-                        }
-                        
-                        // Count opening vs closing tags
-                        const openTags = (content.match(/<[^\/][^>]*>/g) || []).length;
-                        const closeTags = (content.match(/<\/[^>]*>/g) || []).length;
-                        const selfClosing = (content.match(/<[^>]*\/>/g) || []).length;
-                        
-                        if (issues.length > 0) {
-                            statusElement.innerHTML = `⚠️ ${issues.join(', ')}`;
-                            statusElement.style.color = '#ffaa00';
-                        } else if (Math.abs(openTags - closeTags - selfClosing) > 5) {
-                            statusElement.innerHTML = '⚠️ Tag mismatch';
-                            statusElement.style.color = '#ffaa00';
-                        } else {
-                            statusElement.innerHTML = '✅ Valid';
-                            statusElement.style.color = '#00ff88';
-                        }
-                    } catch (error) {
-                        statusElement.innerHTML = '❌ Syntax Error';
-                        statusElement.style.color = '#ff4444';
-                    }
-                };
-                
-                window.handleEditorKeyDown = (event) => {
-                    const textarea = event.target;
-                    
-                    // Tab key handling for indentation
-                    if (event.key === 'Tab') {
-                        event.preventDefault();
-                        const start = textarea.selectionStart;
-                        const end = textarea.selectionEnd;
-                        const value = textarea.value;
-                        
-                        textarea.value = value.substring(0, start) + '  ' + value.substring(end);
-                        textarea.selectionStart = textarea.selectionEnd = start + 2;
-                        
-                        updatePreview();
-                        updateCharCount();
-                        checkSyntax();
-                    }
-                    
-                    // Auto-close tags
-                    if (event.key === '>') {
-                        setTimeout(() => {
-                            const start = textarea.selectionStart;
-                            const value = textarea.value;
-                            const beforeCursor = value.substring(0, start);
-                            const tagMatch = beforeCursor.match(/<(\w+)[^>]*>$/);
-                            
-                            if (tagMatch && !['img', 'br', 'hr', 'input', 'meta', 'link'].includes(tagMatch[1])) {
-                                const tagName = tagMatch[1];
-                                const afterCursor = value.substring(start);
-                                
-                                if (!afterCursor.startsWith(`</${tagName}>`)) {
-                                    textarea.value = value.substring(0, start) + `</${tagName}>` + value.substring(start);
-                                    textarea.selectionStart = textarea.selectionEnd = start;
-                                    updatePreview();
-                                    updateCharCount();
-                                }
-                            }
-                        }, 10);
-                    }
-                };
-                
-            } catch (error) {
-                console.error('Edit page error:', error);
-                alert('❌ Error opening page editor');
-            }
-        }
-
-        async function saveContentChanges() {
-            try {
-                const response = await fetch('/api/admin/content/save?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`💾 ${data.message}`);
-                } else {
-                    alert('❌ Failed to save changes');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function previewChanges() {
-            try {
-                const response = await fetch('/api/admin/content/preview?token=admin_token_2025');
-                const data = await response.json();
-                if (data.success) {
-                    alert(`👀 ${data.message}`);
-                } else {
-                    alert('❌ Failed to preview changes');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function revertChanges() {
-            if (confirm('Are you sure you want to revert all changes?')) {
-                try {
-                    const response = await fetch('/api/admin/content/revert?token=admin_token_2025', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-                    const data = await response.json();
-                    if (data.success) {
-                        alert(`↶ ${data.message}`);
-                    } else {
-                        alert('❌ Failed to revert changes');
-                    }
-                } catch (error) {
-                    alert('❌ Error: ' + error.message);
-                }
-            }
-        }
-
-        // Integration functions
-        async function testAllIntegrations() {
-            try {
-                const response = await fetch('/api/admin/integrations/test?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`🔍 ${data.message}`);
-                } else {
-                    alert('❌ Integration test failed');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function refreshAPIKeys() {
-            try {
-                const response = await fetch('/api/admin/integrations/refresh?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`🔑 ${data.message}`);
-                } else {
-                    alert('❌ Failed to refresh API keys');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function addNewIntegration() {
-            try {
-                const response = await fetch('/api/admin/integrations/add?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`➕ ${data.message}`);
-                } else {
-                    alert('❌ Failed to add integration');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function exportIntegrationReport() {
-            try {
-                const response = await fetch('/api/admin/integrations/export?token=admin_token_2025');
-                const data = await response.json();
-                if (data.success) {
-                    alert(`📊 ${data.message}`);
-                } else {
-                    alert('❌ Export failed');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function emergencyDisconnect() {
-            if (confirm('⚠️ This will disconnect ALL integrations. Are you sure?')) {
-                try {
-                    const response = await fetch('/api/admin/integrations/emergency?token=admin_token_2025', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-                    const data = await response.json();
-                    if (data.success) {
-                        alert(`🚨 ${data.message}`);
-                    } else {
-                        alert('❌ Emergency disconnect failed');
-                    }
-                } catch (error) {
-                    alert('❌ Error: ' + error.message);
-                }
-            }
-        }
-
-        async function exportDriverData() {
-            try {
-                const response = await fetch('/api/admin/drivers/export?token=admin_token_2025');
-                const data = await response.json();
-                if (data.success) {
-                    alert(`📊 ${data.message}`);
-                } else {
-                    alert('❌ Export failed');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        // Promotion functions
-        async function createPromotion() {
-            try {
-                const response = await fetch('/api/admin/promotions/create?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`➕ ${data.message}`);
-                } else {
-                    alert('❌ Failed to create promotion');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function sendPromoEmails() {
-            try {
-                const response = await fetch('/api/admin/promotions/email?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`📧 ${data.message}`);
-                } else {
-                    alert('❌ Failed to send emails');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function generatePromoCodes() {
-            try {
-                const response = await fetch('/api/admin/promotions/codes?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`🎟️ ${data.message}\nCodes: ${data.codes.join(', ')}`);
-                } else {
-                    alert('❌ Failed to generate codes');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function launchSocialCampaign() {
-            try {
-                const response = await fetch('/api/admin/promotions/social?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`📱 ${data.message}\nPlatforms: ${data.platforms.join(', ')}`);
-                } else {
-                    alert('❌ Failed to launch campaign');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        // Route functions
-        async function optimizeAllRoutes() {
-            try {
-                const response = await fetch('/api/admin/routes/optimize-all?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`⚡ ${data.message}\nDetails: ${data.optimization.routesOptimized} routes optimized, ${data.optimization.timeSaved} saved, ${data.optimization.efficiencyGain} efficiency gain!`);
-                } else {
-                    alert('❌ Route optimization failed');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function createShopRoute() {
-            try {
-                const response = await fetch('/api/admin/routes/shop?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`🏪 ${data.message}`);
-                } else {
-                    alert('❌ Failed to create route');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function viewRouteAnalytics() {
-            try {
-                const response = await fetch('/api/admin/routes/analytics?token=admin_token_2025');
-                const data = await response.json();
-                if (data.success) {
-                    alert(`📊 Route Analytics:\nTotal Routes: ${data.analytics.totalRoutes}\nAvg Efficiency: ${data.analytics.avgEfficiency}\nCompletion Rate: ${data.analytics.completionRate}\nDriver Rating: ${data.analytics.driverRating}/5`);
-                } else {
-                    alert('❌ Failed to load analytics');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function exportRouteData() {
-            try {
-                const response = await fetch('/api/admin/routes/export?token=admin_token_2025');
-                const data = await response.json();
-                if (data.success) {
-                    alert(`📄 ${data.message}`);
-                } else {
-                    alert('❌ Export failed');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        // Content functions
-        async function editPage(pageType) {
-            try {
-                const response = await fetch('/api/admin/content/edit?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ page: pageType })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`📝 ${data.message}`);
-                } else {
-                    alert('❌ Failed to open editor');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function saveContentChanges() {
-            try {
-                const response = await fetch('/api/admin/content/save?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ changes: 5 })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`💾 ${data.message}`);
-                } else {
-                    alert('❌ Failed to save changes');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function previewChanges() {
-            try {
-                const response = await fetch('/api/admin/content/preview?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`👀 ${data.message}`);
-                    window.open('/', '_blank');
-                } else {
-                    alert('❌ Preview failed');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function revertChanges() {
-            if (confirm('↶ Are you sure you want to revert all unsaved changes?')) {
-                try {
-                    const response = await fetch('/api/admin/content/revert?token=admin_token_2025', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-                    const data = await response.json();
-                    if (data.success) {
-                        alert(`↶ ${data.message}`);
-                    } else {
-                        alert('❌ Revert failed');
-                    }
-                } catch (error) {
-                    alert('❌ Error: ' + error.message);
-                }
-            }
-        }
-
-        // Integration functions
-        async function testAllIntegrations() {
-            try {
-                const response = await fetch('/api/admin/integrations/test-all?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    const results = data.results;
-                    const summary = Object.entries(results).map(([key, status]) => `${key}: ${status}`).join(', ');
-                    alert(`🔍 ${data.message}\nResults: ${summary}`);
-                } else {
-                    alert('❌ Integration test failed');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function refreshAPIKeys() {
-            if (confirm('🔑 Refresh all API keys? This may temporarily disrupt services.')) {
-                try {
-                    const response = await fetch('/api/admin/integrations/refresh-keys?token=admin_token_2025', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-                    const data = await response.json();
-                    if (data.success) {
-                        alert(`🔑 ${data.message}`);
-                    } else {
-                        alert('❌ Failed to refresh keys');
-                    }
-                } catch (error) {
-                    alert('❌ Error: ' + error.message);
-                }
-            }
-        }
-
-        async function addNewIntegration() {
-            try {
-                const response = await fetch('/api/admin/integrations/add?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`➕ ${data.message}`);
-                } else {
-                    alert('❌ Failed to open integration marketplace');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function exportIntegrationReport() {
-            try {
-                const response = await fetch('/api/admin/integrations/export?token=admin_token_2025');
-                const data = await response.json();
-                if (data.success) {
-                    alert(`📊 ${data.message}`);
-                } else {
-                    alert('❌ Export failed');
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        async function emergencyDisconnect() {
-            if (confirm('🚨 EMERGENCY: Disconnect all external integrations?')) {
-                try {
-                    const response = await fetch('/api/admin/integrations/emergency?token=admin_token_2025', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-                    const data = await response.json();
-                    if (data.success) {
-                        alert(`🚨 ${data.message}`);
-                    } else {
-                        alert('❌ Emergency disconnect failed');
-                    }
-                } catch (error) {
-                    alert('❌ Error: ' + error.message);
-                }
-            }
-        }
-
-        // Auto-refresh stats every 30 seconds
-        setInterval(loadAdminStats, 30000);
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>

@@ -419,34 +419,46 @@ app.get('/admin-login', (req, res) => {
   res.sendFile(path.join(__dirname, '../admin-login.html'));
 });
 
-// Admin dashboard (existing)
+// Admin dashboard (existing route for compatibility)
 app.get('/admin-dashboard.html', (req, res) => {
   res.sendFile(path.join(__dirname, '../admin-dashboard.html'));
 });
 
-// Dedicated admin pages
-app.get('/admin-drivers.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '../admin-drivers.html'));
-});
-
-app.get('/admin-campaigns.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '../admin-campaigns.html'));
-});
-
-app.get('/admin-promotions.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '../admin-promotions.html'));
-});
-
-app.get('/admin-routes.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '../admin-routes.html'));
-});
-
-app.get('/admin-content.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '../admin-content.html'));
-});
-
-app.get('/admin-integrations.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '../admin-integrations.html'));
+// New Admin Dashboard Data API
+app.get('/api/admin/dashboard-data', (req, res) => {
+  // In a real app, this would fetch from database
+  const dashboardData = {
+    totalUsers: 2847,
+    totalBusinesses: 89,
+    totalDrivers: 342,
+    totalRevenue: 4250,
+    analytics: {
+      pageViews: 23487,
+      transactions: 156,
+      deliveries: 234,
+      conversionRate: 12.5
+    },
+    drivers: {
+      pending: 23,
+      active: 89,
+      completedRoutes: 156,
+      poolBalance: 562.50
+    },
+    funds: {
+      commission: 2140,
+      protection: 940,
+      damage: 562.50,
+      sustainability: 315
+    },
+    sponsors: {
+      bronze: 3,
+      silver: 5,
+      gold: 2,
+      platinum: 2
+    }
+  };
+  
+  res.json(dashboardData);
 });
 
 const port = process.env.PORT || 5000;
