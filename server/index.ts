@@ -169,6 +169,16 @@ app.get('/debug-buttons', (req, res) => {
   res.sendFile(path.join(__dirname, '../debug-buttons.html'));
 });
 
+// Cart route
+app.get('/cart', (req, res) => {
+  res.sendFile(path.join(__dirname, '../cart.html'));
+});
+
+// Checkout route
+app.get('/checkout', (req, res) => {
+  res.sendFile(path.join(__dirname, '../checkout.html'));
+});
+
 // Seamless signup API endpoint
 app.post('/api/seamless-signup', async (req, res) => {
   const { email, password, phone } = req.body;

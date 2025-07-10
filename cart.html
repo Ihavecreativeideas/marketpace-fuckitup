@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0845 50%, #2d1b69 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        /* Floating Particles */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .particle:nth-child(odd) {
+            background: rgba(0, 255, 255, 0.3);
+            animation: float 6s infinite linear;
+        }
+
+        .particle:nth-child(even) {
+            background: rgba(157, 78, 221, 0.3);
+            animation: float 8s infinite reverse;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-100vh) scale(1); opacity: 0; }
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00ffff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            min-height: calc(100vh - 100px);
+        }
+
+        /* Cart Items Section */
+        .cart-section {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        .section-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .cart-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .item-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .item-seller {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .item-price {
+            font-size: 20px;
+            font-weight: 700;
+            color: #00ffff;
+        }
+
+        .item-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .item-size-selector {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .availability-status {
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .available {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .limited {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+
+        .unavailable {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .remove-btn {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        /* Checkout Section */
+        .checkout-section {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+
+        .checkout-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .delivery-window {
+            margin-bottom: 25px;
+        }
+
+        .delivery-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #00ffff;
+        }
+
+        .window-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .window-option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .window-option:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .window-option.selected {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .urgent-delivery {
+            background: rgba(255, 107, 107, 0.1);
+            border: 2px solid rgba(255, 107, 107, 0.3);
+            margin-bottom: 25px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .urgent-title {
+            font-weight: 600;
+            color: #ff6b6b;
+            margin-bottom: 5px;
+        }
+
+        .urgent-fee {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .urgent-checkbox {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .cost-breakdown {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 20px;
+            margin-bottom: 25px;
+        }
+
+        .cost-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .cost-label {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .cost-value {
+            font-weight: 600;
+        }
+
+        .total-row {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 15px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #00ffff;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
+            border: none;
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .checkout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 255, 0.4);
+        }
+
+        .checkout-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .empty-cart-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .empty-cart-text {
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .continue-shopping {
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .continue-shopping:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 255, 0.4);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+
+            .cart-section,
+            .checkout-section {
+                padding: 20px;
+            }
+
+            .cart-item {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .item-actions {
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .window-options {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Particles -->
+    <script>
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.animationDelay = Math.random() * 10 + 's';
+            particle.style.width = particle.style.height = Math.random() * 4 + 2 + 'px';
+            document.body.appendChild(particle);
+        }
+    </script>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">MarketPace</div>
+            <a href="/community" class="back-btn">
+                ← Back to Community
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Cart Items Section -->
+        <div class="cart-section">
+            <h1 class="section-title">🛒 Shopping Cart</h1>
+            
+            <div id="cartItems">
+                <!-- Cart items will be loaded here -->
+            </div>
+            
+            <div id="emptyCart" class="empty-cart" style="display: none;">
+                <div class="empty-cart-icon">🛒</div>
+                <div class="empty-cart-text">Your cart is empty</div>
+                <a href="/community" class="continue-shopping">Continue Shopping</a>
+            </div>
+        </div>
+
+        <!-- Checkout Section -->
+        <div class="checkout-section">
+            <h2 class="checkout-title">Checkout</h2>
+            
+            <!-- Delivery Window Selection -->
+            <div class="delivery-window">
+                <h3 class="delivery-title">🕐 Select Delivery Window</h3>
+                <div class="window-options">
+                    <div class="window-option" data-window="9-12" onclick="selectWindow(this)">
+                        9:00 AM - 12:00 PM
+                    </div>
+                    <div class="window-option" data-window="12-3" onclick="selectWindow(this)">
+                        12:00 PM - 3:00 PM
+                    </div>
+                    <div class="window-option" data-window="3-6" onclick="selectWindow(this)">
+                        3:00 PM - 6:00 PM
+                    </div>
+                    <div class="window-option" data-window="6-9" onclick="selectWindow(this)">
+                        6:00 PM - 9:00 PM
+                    </div>
+                </div>
+            </div>
+
+            <!-- Urgent Delivery Option -->
+            <div class="urgent-delivery">
+                <div class="urgent-title">⚡ Urgent Delivery</div>
+                <div class="urgent-fee">Additional $10 fee for priority delivery</div>
+                <div class="urgent-checkbox">
+                    <input type="checkbox" id="urgentDelivery" onchange="updateCosts()">
+                    <label for="urgentDelivery">Rush my order</label>
+                </div>
+            </div>
+
+            <!-- Cost Breakdown -->
+            <div class="cost-breakdown">
+                <div class="cost-row">
+                    <span class="cost-label">Subtotal:</span>
+                    <span class="cost-value" id="subtotal">$0.00</span>
+                </div>
+                <div class="cost-row">
+                    <span class="cost-label">Delivery Fee:</span>
+                    <span class="cost-value" id="deliveryFee">$0.00</span>
+                </div>
+                <div class="cost-row">
+                    <span class="cost-label">Large Item Fee:</span>
+                    <span class="cost-value" id="largeItemFee">$0.00</span>
+                </div>
+                <div class="cost-row">
+                    <span class="cost-label">Mileage Fee:</span>
+                    <span class="cost-value" id="mileageFee">$0.00</span>
+                </div>
+                <div class="cost-row" id="urgentFeeRow" style="display: none;">
+                    <span class="cost-label">Urgent Fee:</span>
+                    <span class="cost-value" id="urgentFeeValue">$10.00</span>
+                </div>
+                <div class="cost-row total-row">
+                    <span class="cost-label">Total:</span>
+                    <span class="cost-value" id="totalCost">$0.00</span>
+                </div>
+            </div>
+
+            <!-- Checkout Button -->
+            <button class="checkout-btn" id="checkoutBtn" onclick="proceedToCheckout()">
+                Proceed to Payment
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Load shopping cart data from localStorage
+        let cartData = JSON.parse(localStorage.getItem('marketplaceCart')) || {
+            items: [],
+            selectedWindow: null,
+            urgentDelivery: false,
+            deliveryDistance: 8.5
+        };
+
+        // Initialize cart
+        function initializeCart() {
+            displayCartItems();
+            updateCosts();
+            updateCartBadge();
+        }
+
+        // Display cart items
+        function displayCartItems() {
+            const cartContainer = document.getElementById('cartItems');
+            const emptyCart = document.getElementById('emptyCart');
+            
+            if (cartData.items.length === 0) {
+                cartContainer.style.display = 'none';
+                emptyCart.style.display = 'block';
+                return;
+            }
+
+            cartContainer.style.display = 'block';
+            emptyCart.style.display = 'none';
+            
+            cartContainer.innerHTML = cartData.items.map(item => `
+                <div class="cart-item" data-item-id="${item.id}">
+                    <img src="${item.image}" alt="${item.name}" class="item-image">
+                    <div class="item-details">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-seller">Sold by ${item.seller}</div>
+                        <div class="item-price">$${item.price.toFixed(2)}</div>
+                    </div>
+                    <div class="item-actions">
+                        <select class="item-size-selector" onchange="updateItemSize(${item.id}, this.value)">
+                            <option value="small" ${item.size === 'small' ? 'selected' : ''}>Small</option>
+                            <option value="medium" ${item.size === 'medium' ? 'selected' : ''}>Medium</option>
+                            <option value="large" ${item.size === 'large' ? 'selected' : ''}>Large (+$25)</option>
+                        </select>
+                        <div class="availability-status ${item.availabilityStatus}">
+                            ${getAvailabilityText(item.availabilityStatus)}
+                        </div>
+                        <button class="remove-btn" onclick="removeItem(${item.id})">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Get availability text
+        function getAvailabilityText(status) {
+            switch(status) {
+                case 'available': return '✓ Available';
+                case 'limited': return '⚠ Limited Stock';
+                case 'unavailable': return '✗ Out of Stock';
+                default: return 'Unknown';
+            }
+        }
+
+        // Update item size
+        function updateItemSize(itemId, newSize) {
+            const item = cartData.items.find(i => i.id === itemId);
+            if (item) {
+                item.size = newSize;
+                localStorage.setItem('marketplaceCart', JSON.stringify(cartData));
+                updateCosts();
+                
+                // Show notification for large items
+                if (newSize === 'large') {
+                    showNotification('Large item fee (+$25) will be added to delivery cost', 'warning');
+                }
+            }
+        }
+
+        // Remove item from cart
+        function removeItem(itemId) {
+            cartData.items = cartData.items.filter(item => item.id !== itemId);
+            localStorage.setItem('marketplaceCart', JSON.stringify(cartData));
+            displayCartItems();
+            updateCosts();
+            updateCartBadge();
+            showNotification('Item removed from cart', 'info');
+        }
+
+        // Select delivery window
+        function selectWindow(element) {
+            // Remove selection from all windows
+            document.querySelectorAll('.window-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Select clicked window
+            element.classList.add('selected');
+            cartData.selectedWindow = element.dataset.window;
+            
+            // Enable checkout if items exist
+            updateCheckoutButton();
+        }
+
+        // Update costs
+        function updateCosts() {
+            const subtotal = cartData.items.reduce((sum, item) => sum + item.price, 0);
+            const deliveryFee = calculateDeliveryFee();
+            const largeItemFee = calculateLargeItemFee();
+            const mileageFee = calculateMileageFee();
+            const urgentFee = cartData.urgentDelivery ? 10.00 : 0;
+            
+            const total = subtotal + deliveryFee + largeItemFee + mileageFee + urgentFee;
+
+            document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('deliveryFee').textContent = `$${deliveryFee.toFixed(2)}`;
+            document.getElementById('largeItemFee').textContent = `$${largeItemFee.toFixed(2)}`;
+            document.getElementById('mileageFee').textContent = `$${mileageFee.toFixed(2)}`;
+            document.getElementById('totalCost').textContent = `$${total.toFixed(2)}`;
+            
+            // Show/hide urgent fee
+            const urgentFeeRow = document.getElementById('urgentFeeRow');
+            if (cartData.urgentDelivery) {
+                urgentFeeRow.style.display = 'flex';
+            } else {
+                urgentFeeRow.style.display = 'none';
+            }
+        }
+
+        // Calculate delivery fee (base rate)
+        function calculateDeliveryFee() {
+            return cartData.items.length > 0 ? 5.00 : 0;
+        }
+
+        // Calculate large item fee
+        function calculateLargeItemFee() {
+            const largeItems = cartData.items.filter(item => item.size === 'large');
+            return largeItems.length * 25.00;
+        }
+
+        // Calculate mileage fee (over 15 miles)
+        function calculateMileageFee() {
+            const extraMiles = Math.max(0, cartData.deliveryDistance - 15);
+            return extraMiles * 0.50;
+        }
+
+        // Update urgent delivery
+        function updateUrgentDelivery() {
+            cartData.urgentDelivery = document.getElementById('urgentDelivery').checked;
+            updateCosts();
+        }
+
+        // Update checkout button state
+        function updateCheckoutButton() {
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            const hasItems = cartData.items.length > 0;
+            const hasWindow = cartData.selectedWindow !== null;
+            const allAvailable = cartData.items.every(item => item.availabilityStatus !== 'unavailable');
+            
+            if (hasItems && hasWindow && allAvailable) {
+                checkoutBtn.disabled = false;
+                checkoutBtn.textContent = 'Proceed to Payment';
+            } else if (!hasItems) {
+                checkoutBtn.disabled = true;
+                checkoutBtn.textContent = 'Cart is Empty';
+            } else if (!hasWindow) {
+                checkoutBtn.disabled = true;
+                checkoutBtn.textContent = 'Select Delivery Window';
+            } else if (!allAvailable) {
+                checkoutBtn.disabled = true;
+                checkoutBtn.textContent = 'Some Items Unavailable';
+            }
+        }
+
+        // Update cart badge in community page
+        function updateCartBadge() {
+            const badge = parent.document.getElementById('cartBadge');
+            if (badge) {
+                badge.textContent = cartData.items.length;
+            }
+        }
+
+        // Proceed to checkout
+        function proceedToCheckout() {
+            if (cartData.items.length === 0) {
+                showNotification('Your cart is empty', 'error');
+                return;
+            }
+            
+            if (!cartData.selectedWindow) {
+                showNotification('Please select a delivery window', 'error');
+                return;
+            }
+            
+            // Check item availability
+            const unavailableItems = cartData.items.filter(item => item.availabilityStatus === 'unavailable');
+            if (unavailableItems.length > 0) {
+                showNotification('Some items in your cart are no longer available', 'error');
+                return;
+            }
+            
+            // Prepare checkout data
+            const checkoutData = {
+                items: cartData.items,
+                deliveryWindow: cartData.selectedWindow,
+                urgentDelivery: cartData.urgentDelivery,
+                costs: {
+                    subtotal: cartData.items.reduce((sum, item) => sum + item.price, 0),
+                    deliveryFee: calculateDeliveryFee(),
+                    largeItemFee: calculateLargeItemFee(),
+                    mileageFee: calculateMileageFee(),
+                    urgentFee: cartData.urgentDelivery ? 10.00 : 0
+                }
+            };
+            
+            // Store checkout data and redirect to payment
+            localStorage.setItem('marketplaceCheckout', JSON.stringify(checkoutData));
+            window.location.href = '/checkout';
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 10px;
+                color: white;
+                font-weight: 600;
+                z-index: 10000;
+                max-width: 300px;
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            `;
+            
+            switch(type) {
+                case 'success':
+                    notification.style.background = 'rgba(34, 197, 94, 0.9)';
+                    break;
+                case 'error':
+                    notification.style.background = 'rgba(239, 68, 68, 0.9)';
+                    break;
+                case 'warning':
+                    notification.style.background = 'rgba(251, 191, 36, 0.9)';
+                    break;
+                default:
+                    notification.style.background = 'rgba(59, 130, 246, 0.9)';
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 3000);
+        }
+
+        // Initialize cart when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCart();
+            
+            // Update urgent delivery checkbox
+            document.getElementById('urgentDelivery').addEventListener('change', function() {
+                cartData.urgentDelivery = this.checked;
+                updateCosts();
+            });
+        });
+    </script>
+</body>
+</html>
