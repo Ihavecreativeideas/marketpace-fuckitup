@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up / Login - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0233 50%, #2d1b69 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-group input:focus {
+            border-color: #00ffff;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .social-buttons {
+            margin-bottom: 20px;
+        }
+
+        .social-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .facebook-btn {
+            background: #1877f2;
+            color: white;
+        }
+
+        .facebook-btn:hover {
+            background: #166fe5;
+        }
+
+        .google-btn {
+            background: white;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .google-btn:hover {
+            background: #f8f9fa;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .divider span {
+            padding: 0 15px;
+            font-size: 14px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .back-link {
+            color: #00ffff;
+            text-decoration: none;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #9d4edd;
+        }
+
+        .info-text {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 15px;
+            line-height: 1.4;
+        }
+
+        #loginForm {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">MarketPace</div>
+        <div class="subtitle">Join your local community marketplace</div>
+
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="showSignup()">Sign Up</button>
+            <button class="tab-btn" onclick="showLogin()">Login</button>
+        </div>
+
+        <!-- Sign Up Form -->
+        <div id="signupForm">
+            <div class="social-buttons">
+                <button class="social-btn facebook-btn" onclick="signupWithFacebook()">
+                    📘 Continue with Facebook
+                </button>
+                <button class="social-btn google-btn" onclick="signupWithGoogle()">
+                    📧 Continue with Google
+                </button>
+            </div>
+
+            <div class="divider">
+                <span>or</span>
+            </div>
+
+            <form onsubmit="handleSignup(event)">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Create a password" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" placeholder="Your phone number" required>
+                </div>
+                <button type="submit" class="submit-btn">Create Account</button>
+            </form>
+
+            <div class="info-text">
+                You'll receive a text verification code to confirm you're a real person. All account setup (business profiles, preferences) can be completed later in Account Settings.
+            </div>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm">
+            <div class="social-buttons">
+                <button class="social-btn facebook-btn" onclick="loginWithFacebook()">
+                    📘 Continue with Facebook
+                </button>
+                <button class="social-btn google-btn" onclick="loginWithGoogle()">
+                    📧 Continue with Google
+                </button>
+            </div>
+
+            <div class="divider">
+                <span>or</span>
+            </div>
+
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" name="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="submit-btn">Sign In</button>
+            </form>
+        </div>
+
+        <a href="/" class="back-link">← Back to MarketPace</a>
+    </div>
+
+    <script>
+        function showSignup() {
+            document.getElementById('signupForm').style.display = 'block';
+            document.getElementById('loginForm').style.display = 'none';
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            document.querySelectorAll('.tab-btn')[1].classList.remove('active');
+        }
+
+        function showLogin() {
+            document.getElementById('signupForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            document.querySelectorAll('.tab-btn')[0].classList.remove('active');
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        }
+
+        function signupWithFacebook() {
+            alert('Facebook signup coming soon! Use email signup for now.');
+        }
+
+        function signupWithGoogle() {
+            alert('Google signup coming soon! Use email signup for now.');
+        }
+
+        function loginWithFacebook() {
+            alert('Facebook login coming soon! Use email login for now.');
+        }
+
+        function loginWithGoogle() {
+            alert('Google login coming soon! Use email login for now.');
+        }
+
+        function handleSignup(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const email = formData.get('email');
+            const phone = formData.get('phone');
+            
+            // Store user data in localStorage (simplified for now)
+            const userData = {
+                email: email,
+                phone: phone,
+                loggedIn: true,
+                loginTime: Date.now()
+            };
+            
+            localStorage.setItem('marketpaceUser', JSON.stringify(userData));
+            
+            // Simulate SMS verification
+            alert(`Welcome to MarketPace! A verification code has been sent to ${phone}. You're now logged in and will stay logged in for future visits.`);
+            
+            // Redirect to community feed
+            window.location.href = '/community';
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const email = formData.get('email');
+            
+            // Store login state
+            const userData = {
+                email: email,
+                loggedIn: true,
+                loginTime: Date.now()
+            };
+            
+            localStorage.setItem('marketpaceUser', JSON.stringify(userData));
+            
+            alert('Welcome back! You\'re now logged in.');
+            
+            // Redirect to community feed
+            window.location.href = '/community';
+        }
+
+        // Check if user is already logged in
+        function checkLoginStatus() {
+            const userData = localStorage.getItem('marketpaceUser');
+            if (userData) {
+                const user = JSON.parse(userData);
+                if (user.loggedIn) {
+                    // User is already logged in, redirect to community
+                    window.location.href = '/community';
+                }
+            }
+        }
+
+        // Check login status when page loads
+        checkLoginStatus();
+    </script>
+</body>
+</html>
