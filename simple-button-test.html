@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Button Test</title>
+    <style>
+        body { background: #0d0221; color: white; padding: 20px; font-family: Arial; }
+        .test-btn { padding: 15px 30px; background: #1e0b3d; color: white; border: 1px solid #00ffff; border-radius: 5px; cursor: pointer; margin: 10px; }
+        .test-btn:hover { background: #2d1b4e; }
+        .result { background: #001122; padding: 10px; margin: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>SIMPLE BUTTON TEST</h1>
+    
+    <button class="test-btn" onclick="testAlert()">Test Alert Button</button>
+    <button class="test-btn" onclick="testAPICall()">Test API Call Button</button>
+    
+    <div id="result" class="result">Click buttons to test...</div>
+    
+    <script>
+        function testAlert() {
+            alert('BUTTON CLICKED! This proves JavaScript is working.');
+            document.getElementById('result').innerHTML = '✅ Alert button works!';
+        }
+        
+        async function testAPICall() {
+            document.getElementById('result').innerHTML = 'Testing API call...';
+            
+            try {
+                const response = await fetch('/api/admin/drivers/approve-all?token=admin_token_2025', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('result').innerHTML = '✅ API CALL WORKS: ' + data.message;
+                } else {
+                    document.getElementById('result').innerHTML = '❌ API call failed: ' + data.message;
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = '❌ ERROR: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
