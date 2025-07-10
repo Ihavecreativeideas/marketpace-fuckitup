@@ -296,6 +296,13 @@ MarketPace is a React Native mobile application that prioritizes community empow
 ✓ Implemented MarketPace Pro integration allowing service providers to create enhanced business profiles
 ✓ Added floating particles theme and mobile-responsive design matching platform aesthetic
 
+✓ **MILEAGE CALCULATION UPDATE - PICKUP FEE INCLUDES INITIAL TRAVEL** (January 10, 2025)
+✓ Updated mileage calculation logic so $4 pickup fee covers driver's initial travel to pickup location
+✓ Mileage charges now start from pickup location rather than uncertain driver position for predictable pricing
+✓ Enhanced visual displays to clearly explain that pickup fee includes initial travel costs
+✓ Simplified cost structure makes it easier for buyers to understand delivery charges
+✓ Both standard mixed routes and shop delivery day routes updated with new mileage methodology
+
 ✓ **COMPREHENSIVE DELIVERY DASHBOARD WITH REAL-TIME TRACKING** (January 10, 2025)
 ✓ Created member delivery dashboard at /delivery with current and past delivery tabs
 ✓ Built real-time delivery tracking showing driver progress through 6-stop routes
