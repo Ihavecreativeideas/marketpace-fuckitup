@@ -18,6 +18,7 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      scriptSrcAttr: ["'unsafe-inline'"], // CRITICAL FIX: Allow onclick handlers
       styleSrc: ["'self'", "'unsafe-inline'", "https:"],
       imgSrc: ["'self'", "data:", "https:", "https://images.unsplash.com"],
       connectSrc: ["'self'", "https:", "https://api.stripe.com", "https://checkout.stripe.com"],
