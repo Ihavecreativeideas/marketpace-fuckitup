@@ -392,8 +392,8 @@ router.put('/profile', authMiddleware, async (req, res) => {
 
     // Filter allowed updates
     const filteredUpdates = {};
-    Object.keys(updates).forEach(key => {
-      if (allowedUpdates.includes(key)) {
+    allowedUpdates.forEach(key => {
+      if (updates.hasOwnProperty(key)) {
         filteredUpdates[key] = updates[key];
       }
     });
