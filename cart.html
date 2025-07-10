@@ -505,6 +505,17 @@
                     <span class="cost-value" id="subtotal">$0.00</span>
                 </div>
                 <div class="cost-row">
+                    <span class="cost-label">Platform Fee (5%):</span>
+                    <span class="cost-value" id="platformFee">$0.00</span>
+                </div>
+                <div class="cost-row">
+                    <span class="cost-label">Membership Protection ($0.50):</span>
+                    <span class="cost-value" id="protectionFee">$0.50</span>
+                </div>
+                <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-left: 20px; margin-top: -5px; margin-bottom: 10px;">
+                    🛡️ Damage protection up to $100 per item
+                </div>
+                <div class="cost-row">
                     <span class="cost-label">Delivery Fee:</span>
                     <span class="cost-value" id="deliveryFee">$0.00</span>
                 </div>
@@ -537,6 +548,12 @@
                 </button>
                 <button onclick="loadShopDeliveryItems()" style="padding: 8px 15px; margin: 5px; background: rgba(255,150,0,0.8); color: white; border: none; border-radius: 5px; cursor: pointer;">
                     Shop Delivery Day Route
+                </button>
+                <button onclick="showDriverInsuranceDemo()" style="padding: 8px 15px; margin: 5px; background: rgba(34,197,94,0.8); color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    Driver Insurance Demo
+                </button>
+                <button onclick="showFeeBreakdownDemo()" style="padding: 8px 15px; margin: 5px; background: rgba(139,92,246,0.8); color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    Fee Breakdown Demo
                 </button>
                 <button onclick="clearCart()" style="padding: 8px 15px; margin: 5px; background: rgba(255,50,50,0.8); color: white; border: none; border-radius: 5px; cursor: pointer;">
                     Clear Cart
@@ -676,14 +693,18 @@
         // Update costs
         function updateCosts() {
             const subtotal = cartData.items.reduce((sum, item) => sum + item.price, 0);
+            const platformFee = calculatePlatformFee(subtotal);
+            const protectionFee = 0.50; // Fixed membership protection fee
             const deliveryFee = calculateDeliveryFee();
             const largeItemFee = calculateLargeItemFee();
             const mileageFee = calculateMileageFee();
             const urgentFee = cartData.urgentDelivery ? 10.00 : 0;
             
-            const total = subtotal + deliveryFee + largeItemFee + mileageFee + urgentFee;
+            const total = subtotal + platformFee + protectionFee + deliveryFee + largeItemFee + mileageFee + urgentFee;
 
             document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('platformFee').textContent = `$${platformFee.toFixed(2)}`;
+            document.getElementById('protectionFee').textContent = `$${protectionFee.toFixed(2)}`;
             document.getElementById('deliveryFee').textContent = `$${deliveryFee.toFixed(2)}`;
             document.getElementById('largeItemFee').textContent = `$${largeItemFee.toFixed(2)}`;
             document.getElementById('mileageFee').textContent = `$${mileageFee.toFixed(2)}`;
@@ -699,6 +720,11 @@
             } else {
                 urgentFeeRow.style.display = 'none';
             }
+        }
+
+        // Calculate platform fee (5% of subtotal)
+        function calculatePlatformFee(subtotal) {
+            return subtotal * 0.05;
         }
 
         // Update mileage breakdown display
@@ -802,12 +828,19 @@
                 let pricingInfo = '';
                 if (isShopDelivery) {
                     if (step.type === 'pickup') {
-                        pricingInfo = `<br><span style="color: #00ff00; font-size: 10px;">💰 Shop Pickup Fee: $4.00</span>`;
+                        pricingInfo = `<br><span style="color: #00ff00; font-size: 10px;">💰 Driver Payment: $4.00 pickup fee</span>`;
                     } else {
-                        pricingInfo = `<br><span style="color: #00ff00; font-size: 10px;">💰 Shop Dropoff Fee: $4.00 per delivery</span>`;
+                        pricingInfo = `<br><span style="color: #00ff00; font-size: 10px;">💰 Driver Payment: $4.00 dropoff fee per delivery</span>`;
                     }
                 } else {
-                    // Standard route - show individual buyer mileage charges
+                    // Standard route - show driver payments and mileage charges
+                    let driverPayment = '';
+                    if (step.type === 'pickup') {
+                        driverPayment = `<br><span style="color: #00ff00; font-size: 10px;">💰 Driver Payment: $4.00 pickup fee</span>`;
+                    } else if (step.type === 'dropoff') {
+                        driverPayment = `<br><span style="color: #00ff00; font-size: 10px;">💰 Driver Payment: $2.00 dropoff fee</span>`;
+                    }
+                    
                     let chargingInfo = '';
                     if (cartData.individualMileageFees) {
                         const chargedBuyers = [];
@@ -834,7 +867,7 @@
                             chargingInfo = `<br><span style="color: #00ffff; font-size: 10px;">💰 Mileage charged to: ${chargedBuyers.join(', ')}</span>`;
                         }
                     }
-                    pricingInfo = chargingInfo;
+                    pricingInfo = driverPayment + chargingInfo;
                 }
                 
                 stepsHTML += `
@@ -857,9 +890,20 @@
                 </div>`;
             } else {
                 stepsHTML += `<div style="margin-top: 4px; font-size: 10px; color: rgba(255, 255, 255, 0.7);">
-                    💡 Each buyer pays only for their portion: from pickup location to their delivery address ($4 pickup fee covers initial travel)
+                    💡 Driver earnings: $4 pickup + $2 dropoff + $0.50/mile + 100% tips + appreciation bonuses
                 </div>`;
             }
+            
+            // Add driver insurance and protection information
+            stepsHTML += `<div style="margin-top: 6px; padding: 6px; background: rgba(0,255,255,0.1); border: 1px solid rgba(0,255,255,0.3); border-radius: 5px;">
+                <div style="color: #00ffff; font-weight: bold; font-size: 11px;">🛡️ Driver Protection System</div>
+                <div style="font-size: 10px; color: rgba(255,255,255,0.8); line-height: 1.3;">
+                    • Drivers pay $4/month insurance (deducted from first route)<br>
+                    • Required to take before/after photos of all items<br>
+                    • Good drivers get appreciation bonuses for avoiding damages<br>
+                    • Membership protection covers buyer damages up to $100/item
+                </div>
+            </div>`;
             
             stepsHTML += '</div>';
             
@@ -1306,12 +1350,15 @@
             }
             
             // Prepare checkout data
+            const subtotal = cartData.items.reduce((sum, item) => sum + item.price, 0);
             const checkoutData = {
                 items: cartData.items,
                 deliveryWindow: cartData.selectedWindow,
                 urgentDelivery: cartData.urgentDelivery,
                 costs: {
-                    subtotal: cartData.items.reduce((sum, item) => sum + item.price, 0),
+                    subtotal: subtotal,
+                    platformFee: calculatePlatformFee(subtotal),
+                    protectionFee: 0.50,
                     deliveryFee: calculateDeliveryFee(),
                     largeItemFee: calculateLargeItemFee(),
                     mileageFee: calculateMileageFee(),
@@ -1466,6 +1513,116 @@
             document.getElementById('urgentDelivery').checked = false;
             
             showNotification('Cart cleared', 'info');
+        }
+
+        // Show driver insurance demo modal
+        function showDriverInsuranceDemo() {
+            const modalHTML = `
+                <div id="driverInsuranceModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; justify-content: center; align-items: center;">
+                    <div style="background: linear-gradient(135deg, #0d0221 0%, #1a0845 50%); padding: 30px; border-radius: 15px; max-width: 600px; width: 90%; border: 2px solid rgba(0,255,255,0.3); box-shadow: 0 0 30px rgba(0,255,255,0.5);">
+                        <h3 style="color: #00ffff; margin-bottom: 20px; text-align: center;">🛡️ Driver Protection & Insurance System</h3>
+                        
+                        <div style="margin-bottom: 20px; padding: 15px; background: rgba(0,255,255,0.1); border-radius: 10px;">
+                            <h4 style="color: #22c55e; margin-bottom: 10px;">Monthly Insurance: $4.00</h4>
+                            <ul style="color: rgba(255,255,255,0.9); line-height: 1.6;">
+                                <li>• Automatically deducted from first delivery route of each month</li>
+                                <li>• Covers driver liability and damage protection</li>
+                                <li>• Ensures all drivers are properly insured</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px; padding: 15px; background: rgba(139,92,246,0.1); border-radius: 10px;">
+                            <h4 style="color: #8b5cf6; margin-bottom: 10px;">Photo Requirements</h4>
+                            <ul style="color: rgba(255,255,255,0.9); line-height: 1.6;">
+                                <li>• Before pickup: Photo of item condition</li>
+                                <li>• After delivery: Photo confirming safe delivery</li>
+                                <li>• Protects both drivers and customers</li>
+                                <li>• Creates accountability trail for all deliveries</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px; padding: 15px; background: rgba(34,197,94,0.1); border-radius: 10px;">
+                            <h4 style="color: #22c55e; margin-bottom: 10px;">Appreciation Bonuses</h4>
+                            <ul style="color: rgba(255,255,255,0.9); line-height: 1.6;">
+                                <li>• Good drivers get bonus pay for damage-free deliveries</li>
+                                <li>• Bonus increases with consistently good ratings</li>
+                                <li>• Encourages careful handling and professional service</li>
+                            </ul>
+                        </div>
+                        
+                        <button onclick="closeModal('driverInsuranceModal')" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #00ffff, #9d4edd); border: none; color: white; border-radius: 8px; font-size: 16px; cursor: pointer;">
+                            Got It!
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
+        // Show fee breakdown demo modal
+        function showFeeBreakdownDemo() {
+            const subtotal = 47.97; // Example order total
+            const platformFee = subtotal * 0.05;
+            const protectionFee = 0.50;
+            const deliveryFee = 5.00;
+            const total = subtotal + platformFee + protectionFee + deliveryFee;
+            
+            const modalHTML = `
+                <div id="feeBreakdownModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; justify-content: center; align-items: center;">
+                    <div style="background: linear-gradient(135deg, #0d0221 0%, #1a0845 50%); padding: 30px; border-radius: 15px; max-width: 600px; width: 90%; border: 2px solid rgba(0,255,255,0.3); box-shadow: 0 0 30px rgba(0,255,255,0.5);">
+                        <h3 style="color: #00ffff; margin-bottom: 20px; text-align: center;">💰 Complete Fee Structure Breakdown</h3>
+                        
+                        <div style="margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span>Subtotal (Your purchases):</span>
+                                <span style="color: #00ffff;">$${subtotal.toFixed(2)}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span>Platform Fee (5%):</span>
+                                <span style="color: #ff6b35;">$${platformFee.toFixed(2)}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span>Membership Protection:</span>
+                                <span style="color: #22c55e;">$${protectionFee.toFixed(2)}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span>Delivery Service:</span>
+                                <span style="color: #8b5cf6;">$${deliveryFee.toFixed(2)}</span>
+                            </div>
+                            <hr style="border: 1px solid rgba(255,255,255,0.2); margin: 10px 0;">
+                            <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px;">
+                                <span>Total:</span>
+                                <span style="color: #00ffff;">$${total.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px; padding: 15px; background: rgba(0,255,255,0.1); border-radius: 10px;">
+                            <h4 style="color: #00ffff; margin-bottom: 10px;">Where Your Money Goes:</h4>
+                            <ul style="color: rgba(255,255,255,0.9); line-height: 1.6; font-size: 14px;">
+                                <li>• Platform Fee: Supports app development and community features</li>
+                                <li>• Protection Fee: Insurance fund for damaged items (up to $100 coverage)</li>
+                                <li>• Delivery Service: Driver payment ($4 pickup + $2 dropoff + mileage + tips)</li>
+                                <li>• Driver Insurance: $4/month deducted from first route for liability coverage</li>
+                            </ul>
+                        </div>
+                        
+                        <button onclick="closeModal('feeBreakdownModal')" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #00ffff, #9d4edd); border: none; color: white; border-radius: 8px; font-size: 16px; cursor: pointer;">
+                            Got It!
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
+        // Close modal function
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.remove();
+            }
         }
 
         // Initialize cart when page loads
