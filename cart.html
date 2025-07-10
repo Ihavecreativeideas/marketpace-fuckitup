@@ -687,22 +687,38 @@
 
         // Update mileage breakdown display
         function updateMileageBreakdown() {
-            const totalMiles = cartData.deliveryDistance || 0;
-            const baseMileageFee = totalMiles * 0.50;
-            const extraMiles = Math.max(0, totalMiles - 15);
-            const premiumFee = extraMiles * 1.00;
+            const individualFees = cartData.individualMileageFees || [];
             
-            let breakdownText = `${totalMiles} miles (optimized route) × $0.50 = $${baseMileageFee.toFixed(2)}`;
+            let breakdownText = '';
             
-            if (extraMiles > 0) {
-                breakdownText += `<br>+ ${extraMiles} miles beyond 15 miles × $1.00 = $${premiumFee.toFixed(2)}`;
+            if (individualFees.length > 0) {
+                breakdownText = '<div style="font-size: 11px; line-height: 1.3;">';
+                breakdownText += '<strong>Individual Delivery Mileage:</strong><br>';
+                
+                individualFees.forEach((fee, index) => {
+                    breakdownText += `<div style="margin: 2px 0; padding: 2px; background: rgba(255,255,255,0.05); border-radius: 3px;">`;
+                    breakdownText += `${fee.itemName}: ${fee.miles} miles × $0.50 = $${fee.baseFee.toFixed(2)}`;
+                    
+                    if (fee.premiumFee > 0) {
+                        const extraMiles = Math.max(0, fee.miles - 15);
+                        breakdownText += `<br>&nbsp;&nbsp;&nbsp;+ ${extraMiles} miles beyond 15 × $1.00 = $${fee.premiumFee.toFixed(2)}`;
+                    }
+                    
+                    breakdownText += `<br>&nbsp;&nbsp;&nbsp;<strong>Subtotal: $${fee.totalFee.toFixed(2)}</strong>`;
+                    breakdownText += `</div>`;
+                });
+                
+                const totalFee = individualFees.reduce((sum, fee) => sum + fee.totalFee, 0);
+                breakdownText += `<div style="margin-top: 4px; font-weight: bold; color: #00ffff;">Total Mileage Fee: $${totalFee.toFixed(2)}</div>`;
+                breakdownText += '</div>';
+            } else {
+                breakdownText = 'No items in cart';
             }
             
             document.getElementById('mileageBreakdown').innerHTML = breakdownText;
             
             // Show route display if items exist
             const routeDisplay = document.getElementById('routeDisplay');
-            const routeSteps = document.getElementById('routeSteps');
             
             if (cartData.items.length > 0 && cartData.deliveryRoute) {
                 routeDisplay.style.display = 'block';
@@ -712,7 +728,7 @@
             }
         }
 
-        // Display route optimization steps
+        // Display route optimization steps with buyer-specific charging
         function displayRouteSteps() {
             const routeSteps = document.getElementById('routeSteps');
             if (!cartData.deliveryRoute || !cartData.deliveryRoute.route) return;
@@ -720,16 +736,55 @@
             let stepsHTML = '<div style="font-size: 12px; color: rgba(255, 255, 255, 0.8);">';
             stepsHTML += `<div style="margin-bottom: 8px;"><strong>🚗 Driver starts at:</strong> ${sampleAddresses.driverStart.name}</div>`;
             
+            // Map items to their pickup/dropoff locations for charging visualization
+            const itemLocationMap = {};
+            cartData.items.forEach((item, index) => {
+                const sellerIndex = index % sampleAddresses.sellers.length;
+                const buyerIndex = index % sampleAddresses.buyers.length;
+                itemLocationMap[item.id] = {
+                    pickup: sampleAddresses.sellers[sellerIndex].name,
+                    dropoff: sampleAddresses.buyers[buyerIndex].name
+                };
+            });
+            
             cartData.deliveryRoute.route.forEach((step, index) => {
                 const icon = step.type === 'pickup' ? '📦' : '🏠';
                 const action = step.type === 'pickup' ? 'Pick up from' : 'Deliver to';
                 const items = step.items.map(item => item.itemName || 'Item').join(', ');
                 
+                // Check which buyers are being charged for this route segment
+                let chargingInfo = '';
+                if (cartData.individualMileageFees) {
+                    const chargedBuyers = [];
+                    
+                    cartData.individualMileageFees.forEach(fee => {
+                        const itemLocation = itemLocationMap[fee.itemId];
+                        if (itemLocation) {
+                            // Find pickup and dropoff step indices for this item
+                            const pickupStepIndex = cartData.deliveryRoute.route.findIndex(s => 
+                                s.type === 'pickup' && s.location.name === itemLocation.pickup
+                            );
+                            const dropoffStepIndex = cartData.deliveryRoute.route.findIndex(s => 
+                                s.type === 'dropoff' && s.location.name === itemLocation.dropoff
+                            );
+                            
+                            // Check if this step is within the charging range for this buyer
+                            if (index >= pickupStepIndex && index <= dropoffStepIndex) {
+                                chargedBuyers.push(fee.itemName);
+                            }
+                        }
+                    });
+                    
+                    if (chargedBuyers.length > 0) {
+                        chargingInfo = `<br><span style="color: #00ffff; font-size: 10px;">💰 Charged to: ${chargedBuyers.join(', ')}</span>`;
+                    }
+                }
+                
                 stepsHTML += `
                     <div style="margin-bottom: 6px; padding: 4px; background: rgba(255, 255, 255, 0.05); border-radius: 4px;">
                         <div><strong>${icon} Step ${index + 1}:</strong> ${action} ${step.location.name}</div>
                         <div style="font-size: 11px; color: rgba(255, 255, 255, 0.6);">
-                            ${step.distance.toFixed(1)} miles • Items: ${items}
+                            ${step.distance.toFixed(1)} miles • Items: ${items}${chargingInfo}
                         </div>
                     </div>
                 `;
@@ -737,6 +792,9 @@
             
             stepsHTML += `<div style="margin-top: 8px; font-weight: bold; color: #00ffff;">
                 Total Route Distance: ${cartData.deliveryRoute.totalMiles} miles
+            </div>`;
+            stepsHTML += `<div style="margin-top: 4px; font-size: 10px; color: rgba(255, 255, 255, 0.7);">
+                💡 Each buyer pays only for their portion: from driver's last stop before pickup to their delivery address
             </div>`;
             stepsHTML += '</div>';
             
@@ -874,22 +932,88 @@
             return { totalMiles: Math.round(totalMiles * 100) / 100, route };
         }
 
-        // Calculate mileage fee based on optimized route
-        function calculateMileageFee() {
+        // Calculate individual buyer mileage fees based on their specific delivery portion
+        function calculateIndividualMileageFees() {
+            if (cartData.items.length === 0) return [];
+
             const routeData = optimizeDeliveryRoute();
-            const totalMiles = routeData.totalMiles;
-            
-            // Store route data for display
             cartData.deliveryRoute = routeData;
-            cartData.deliveryDistance = totalMiles;
             
-            const baseMileageFee = totalMiles * 0.50; // All miles at $0.50
+            const buyerMileageFees = [];
             
-            // Additional $1.00 per mile beyond 15 miles (driver out-of-range compensation)
-            const extraMiles = Math.max(0, totalMiles - 15);
-            const premiumFee = extraMiles * 1.00;
+            // For each item in cart, calculate the mileage from driver's last stop before pickup to buyer dropoff
+            cartData.items.forEach((item, index) => {
+                const sellerIndex = index % sampleAddresses.sellers.length;
+                const buyerIndex = index % sampleAddresses.buyers.length;
+                
+                const sellerLocation = sampleAddresses.sellers[sellerIndex];
+                const buyerLocation = sampleAddresses.buyers[buyerIndex];
+                
+                // Find the route step where this seller pickup occurs
+                const pickupStepIndex = routeData.route.findIndex(step => 
+                    step.type === 'pickup' && step.location.name === sellerLocation.name
+                );
+                
+                // Find the route step where this buyer dropoff occurs
+                const dropoffStepIndex = routeData.route.findIndex(step => 
+                    step.type === 'dropoff' && step.location.name === buyerLocation.name
+                );
+                
+                if (pickupStepIndex === -1 || dropoffStepIndex === -1) return;
+                
+                // Calculate mileage from last stop before pickup to buyer dropoff
+                let totalMilesForBuyer = 0;
+                let driverPosition;
+                
+                // Start from driver's position before pickup
+                if (pickupStepIndex === 0) {
+                    driverPosition = sampleAddresses.driverStart;
+                } else {
+                    driverPosition = routeData.route[pickupStepIndex - 1].location;
+                }
+                
+                // Add distance from last stop to seller pickup
+                totalMilesForBuyer += calculateDistance(
+                    driverPosition.lat, driverPosition.lng,
+                    sellerLocation.lat, sellerLocation.lng
+                );
+                
+                // Add all route segments from pickup to buyer dropoff
+                for (let i = pickupStepIndex; i < dropoffStepIndex; i++) {
+                    totalMilesForBuyer += routeData.route[i + 1].distance;
+                }
+                
+                // Calculate fees for this buyer
+                const baseMileageFee = totalMilesForBuyer * 0.50;
+                const extraMiles = Math.max(0, totalMilesForBuyer - 15);
+                const premiumFee = extraMiles * 1.00;
+                const totalFee = baseMileageFee + premiumFee;
+                
+                buyerMileageFees.push({
+                    itemId: item.id,
+                    itemName: item.name,
+                    miles: Math.round(totalMilesForBuyer * 100) / 100,
+                    baseFee: baseMileageFee,
+                    premiumFee: premiumFee,
+                    totalFee: totalFee,
+                    sellerLocation: sellerLocation.name,
+                    buyerLocation: buyerLocation.name
+                });
+            });
             
-            return baseMileageFee + premiumFee;
+            return buyerMileageFees;
+        }
+
+        // Calculate total mileage fee (sum of all individual buyer fees)
+        function calculateMileageFee() {
+            const individualFees = calculateIndividualMileageFees();
+            const totalFee = individualFees.reduce((sum, fee) => sum + fee.totalFee, 0);
+            
+            // Store individual fees for detailed display
+            cartData.individualMileageFees = individualFees;
+            cartData.deliveryDistance = individualFees.reduce((sum, fee) => sum + fee.miles, 0);
+            
+            return totalFee;
         }
 
         // Update delivery distance
