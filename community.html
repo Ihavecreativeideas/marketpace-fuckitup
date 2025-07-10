@@ -146,6 +146,19 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
+        .cart-badge {
+            background: linear-gradient(135deg, #ff4757, #ff3742);
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 8px;
+            min-width: 16px;
+            text-align: center;
+            display: inline-block;
+        }
+
         /* Main Content */
         .main-content {
             max-width: 600px;
@@ -423,6 +436,7 @@
                 <span>DU</span>
                 <div class="menu-dropdown" id="menuDropdown">
                     <div class="menu-option" onclick="goToProfile()">👤 Profile</div>
+                    <div class="menu-option" onclick="goToCart()">🛒 Cart <span id="cartBadge" class="cart-badge">0</span></div>
                     <div class="menu-option" onclick="goToSettings()">⚙️ Settings</div>
                     <div class="menu-option" onclick="goToDeliveries()">🚚 Deliveries</div>
                     <div class="menu-option" onclick="goToSponsor()">💝 Sponsor/Support</div>
@@ -482,7 +496,7 @@
                     <div class="commerce-info">
                         <div class="price-tag">$85.00</div>
                         <div class="commerce-actions">
-                            <button class="commerce-btn primary" onclick="addToCart('leather jacket')">Add to Cart</button>
+                            <button class="commerce-btn primary" onclick="addToCart('Vintage Leather Jacket', 85.00, 'Sarah\'s Boutique', 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400')">Add to Cart</button>
                             <button class="commerce-btn" onclick="makeOffer('leather jacket')">Make Offer</button>
                             <button class="commerce-btn" onclick="deliverNow('leather jacket')">Deliver Now</button>
                         </div>
@@ -572,7 +586,8 @@
                     <div class="commerce-info">
                         <div class="price-tag">$25.00/day</div>
                         <div class="commerce-actions">
-                            <button class="commerce-btn primary" onclick="rentNow('beach chairs')">Rent Now</button>
+                            <button class="commerce-btn primary" onclick="addToCart('Beach Umbrella Set', 25.00, 'Jessica Martinez', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400')">Add to Cart</button>
+                            <button class="commerce-btn" onclick="rentNow('beach chairs')">Rent Now</button>
                             <button class="commerce-btn" onclick="makeOffer('beach chairs')">Counter Offer</button>
                         </div>
                     </div>
@@ -674,6 +689,11 @@
             document.getElementById('menuDropdown').classList.remove('show');
         }
 
+        function goToCart() {
+            window.location.href = '/cart';
+            document.getElementById('menuDropdown').classList.remove('show');
+        }
+
         function logout() {
             alert('Logging out...');
             window.location.href = '/';
@@ -716,8 +736,84 @@
         }
 
         // Commerce functions
-        function addToCart(item) {
-            alert(`Added "${item}" to cart!`);
+        function addToCart(itemName, price = null, seller = null, image = null) {
+            // Get or create cart data
+            let cartData = JSON.parse(localStorage.getItem('marketplaceCart')) || { items: [] };
+            
+            // Generate item data
+            const newItem = {
+                id: Date.now(),
+                name: itemName,
+                seller: seller || "Local Seller",
+                price: price || 25.00,
+                image: image || "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400",
+                size: "small",
+                available: true,
+                availabilityStatus: Math.random() > 0.7 ? "limited" : "available"
+            };
+            
+            // Add to cart
+            cartData.items.push(newItem);
+            
+            // Save to localStorage
+            localStorage.setItem('marketplaceCart', JSON.stringify(cartData));
+            
+            // Update cart badge
+            updateCartBadge();
+            
+            // Show notification
+            showNotification(`"${itemName}" added to cart!`, 'success');
+        }
+        
+        // Update cart badge
+        function updateCartBadge() {
+            const cartData = JSON.parse(localStorage.getItem('marketplaceCart')) || { items: [] };
+            const badge = document.getElementById('cartBadge');
+            if (badge) {
+                badge.textContent = cartData.items.length;
+                badge.style.display = cartData.items.length > 0 ? 'inline-block' : 'none';
+            }
+        }
+        
+        // Show notification function
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 10px;
+                color: white;
+                font-weight: 600;
+                z-index: 10000;
+                max-width: 300px;
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            `;
+            
+            switch(type) {
+                case 'success':
+                    notification.style.background = 'rgba(34, 197, 94, 0.9)';
+                    break;
+                case 'error':
+                    notification.style.background = 'rgba(239, 68, 68, 0.9)';
+                    break;
+                case 'warning':
+                    notification.style.background = 'rgba(251, 191, 36, 0.9)';
+                    break;
+                default:
+                    notification.style.background = 'rgba(59, 130, 246, 0.9)';
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 3000);
         }
 
         function makeOffer(item) {
@@ -888,6 +984,9 @@
         
         // Check login status when page loads
         checkLoginStatus();
+        
+        // Initialize cart badge on page load
+        updateCartBadge();
     </script>
 </body>
 </html>
