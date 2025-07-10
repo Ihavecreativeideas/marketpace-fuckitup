@@ -2,8 +2,12 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import path from "path";
+import { config } from "dotenv";
 import { registerRoutes } from "./routes";
 import { registerAdminRoutes } from "./adminRoutes";
+
+// Load environment variables
+config();
 
 const app = express();
 
