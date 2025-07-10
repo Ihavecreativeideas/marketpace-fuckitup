@@ -208,6 +208,21 @@ MarketPace is a React Native mobile application that prioritizes community empow
 
 ## Recent Changes
 
+✓ **SHOPS - DUAL-PROFILE BUSINESS SYSTEM WITH WEBSITE INTEGRATION** (January 10, 2025)
+✓ Created comprehensive local shops platform at /shops for business discovery and integration
+✓ Built "Add Business Profile" questionnaire system for dual-profile account creation
+✓ Implemented business category selection, location, work phone, and description collection
+✓ Added flexible website integration allowing shops to redirect customers to their existing sites
+✓ Created delivery options: Website Integration, Shop Pickup, MarketPace Delivery, Bulk Delivery Days
+✓ Built product showcase system displaying items with pricing and delivery method indicators
+✓ Integrated search and filter functionality by category and distance
+✓ Added sample shops demonstrating website redirects, pickup options, and bulk delivery scheduling
+✓ Created professional business profile modal with comprehensive form validation
+✓ Built shop action buttons: Visit Website, Call Shop, Directions, Schedule Pickup, Bulk Delivery
+✓ Implemented delivery method badges showing available options for each shop
+✓ Enhanced navigation system to include Shops as primary marketplace destination
+✓ Added floating particles theme and mobile-responsive design matching platform aesthetic
+
 ✓ **THE HUB - COMPREHENSIVE ENTERTAINMENT NETWORK LAUNCH** (January 10, 2025)
 ✓ Created complete entertainment platform at /the-hub for all live entertainment professionals
 ✓ Built 6-tab navigation: Feed, Gear, Tickets, Media, Events, Profiles for comprehensive coverage
