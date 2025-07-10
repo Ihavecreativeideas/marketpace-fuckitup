@@ -362,6 +362,142 @@
             color: #666;
         }
 
+        /* AI Chat Styles */
+        .ai-message {
+            display: flex;
+            margin-bottom: 1rem;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .user-message {
+            display: flex;
+            margin-bottom: 1rem;
+            flex-direction: row-reverse;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .user-message .message-avatar {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            margin-right: 0;
+            margin-left: 10px;
+        }
+
+        .message-content {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 80%;
+            border: 1px solid #e0e0e0;
+        }
+
+        .user-message .message-content {
+            background: #f0f2f5;
+            border: 1px solid #d0d0d0;
+        }
+
+        .message-content p {
+            margin: 0 0 8px 0;
+            line-height: 1.4;
+        }
+
+        .message-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .message-content ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .message-content li {
+            margin-bottom: 4px;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 8px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+        }
+
+        .file-preview {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 8px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .thinking-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            font-style: italic;
+            padding: 8px 0;
+        }
+
+        .thinking-dots {
+            display: inline-flex;
+            gap: 4px;
+        }
+
+        .thinking-dots span {
+            width: 6px;
+            height: 6px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: thinking 1.4s infinite ease-in-out both;
+        }
+
+        .thinking-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .thinking-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes thinking {
+            0%, 80%, 100% { 
+                transform: scale(0);
+                opacity: 0.5;
+            }
+            40% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         @media (max-width: 768px) {
             .admin-container {
                 flex-direction: column;
@@ -379,6 +515,16 @@
             
             .action-buttons {
                 flex-direction: column;
+            }
+
+            #ai-editor > div:first-child {
+                grid-template-columns: 1fr !important;
+                height: auto !important;
+            }
+
+            #ai-editor .ai-chat-panel,
+            #ai-editor .code-panel {
+                height: 50vh;
             }
         }
     </style>
@@ -427,6 +573,10 @@
             <div class="nav-item" onclick="showSection('sponsors')">
                 <i class="fas fa-handshake"></i>
                 <span>Sponsor Tracker</span>
+            </div>
+            <div class="nav-item" onclick="showSection('ai-editor')">
+                <i class="fas fa-robot"></i>
+                <span>AI Platform Editor</span>
             </div>
             <div class="nav-item" onclick="showSection('tools')">
                 <i class="fas fa-tools"></i>
@@ -878,6 +1028,147 @@
                     <div id="monthlyTasks">
                         <div style="text-align: center; padding: 1rem; color: #666;">
                             <i class="fas fa-spinner fa-spin"></i> Loading monthly tasks...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Platform Editor -->
+            <div id="ai-editor" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">AI Platform Editor</h2>
+                    <button class="btn btn-primary" onclick="resetAIChat()">
+                        <i class="fas fa-refresh"></i> New Chat
+                    </button>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; height: 70vh;">
+                    <!-- Chat Interface -->
+                    <div style="background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; flex-direction: column;">
+                        <div style="padding: 1rem; border-bottom: 1px solid #eee; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px 10px 0 0;">
+                            <h3 style="margin: 0; display: flex; align-items: center;">
+                                <i class="fas fa-robot" style="margin-right: 10px;"></i>
+                                AI Platform Assistant
+                            </h3>
+                            <p style="margin: 5px 0 0 0; font-size: 0.9rem; opacity: 0.9;">
+                                Ask me to read, analyze, or modify any part of your MarketPace platform
+                            </p>
+                        </div>
+                        
+                        <div id="aiChatMessages" style="flex: 1; padding: 1rem; overflow-y: auto; background: #f8f9fa;">
+                            <div class="ai-message">
+                                <div class="message-avatar">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div class="message-content">
+                                    <p>Hello! I'm your AI Platform Editor Assistant. I can:</p>
+                                    <ul>
+                                        <li>🔍 Read and analyze your entire MarketPace codebase</li>
+                                        <li>✏️ Make code edits across all files</li>
+                                        <li>🧠 Understand the full context of your platform architecture</li>
+                                        <li>💡 Suggest improvements and implement changes</li>
+                                        <li>🔧 Debug issues and optimize performance</li>
+                                        <li>📊 Analyze data flow and database relationships</li>
+                                    </ul>
+                                    <p>What would you like me to help you with today?</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="padding: 1rem; border-top: 1px solid #eee; background: white;">
+                            <div style="display: flex; gap: 10px;">
+                                <textarea 
+                                    id="aiChatInput" 
+                                    placeholder="Ask me to read files, make edits, or analyze your platform..."
+                                    style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; resize: none; min-height: 60px; font-family: inherit;"
+                                    rows="2"
+                                    onkeypress="handleChatKeyPress(event)"
+                                ></textarea>
+                                <button 
+                                    id="sendAIMessage" 
+                                    class="btn btn-primary" 
+                                    onclick="sendAIMessage()"
+                                    style="min-height: 60px; padding: 0 20px;"
+                                >
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <span style="font-size: 0.8rem; color: #666;">
+                                    <i class="fas fa-lightbulb"></i> 
+                                    Try: "Show me the sponsor database schema" or "Add a new feature to the community feed"
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Platform Overview & File Explorer -->
+                    <div style="background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; flex-direction: column;">
+                        <div style="padding: 1rem; border-bottom: 1px solid #eee; background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%); color: white; border-radius: 10px 10px 0 0;">
+                            <h3 style="margin: 0; display: flex; align-items: center;">
+                                <i class="fas fa-code" style="margin-right: 10px;"></i>
+                                Platform Code Analysis
+                            </h3>
+                        </div>
+                        
+                        <div style="padding: 1rem;">
+                            <div class="stats-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                                <div class="stat-card" style="padding: 1rem;">
+                                    <div class="stat-icon primary">
+                                        <i class="fas fa-file-code"></i>
+                                    </div>
+                                    <div class="stat-info">
+                                        <h3 id="totalFiles">0</h3>
+                                        <p>Code Files</p>
+                                    </div>
+                                </div>
+                                <div class="stat-card" style="padding: 1rem;">
+                                    <div class="stat-icon success">
+                                        <i class="fas fa-database"></i>
+                                    </div>
+                                    <div class="stat-info">
+                                        <h3 id="totalTables">0</h3>
+                                        <p>Database Tables</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-bottom: 1rem;">
+                                <label style="font-weight: 600; margin-bottom: 5px; display: block;">
+                                    <i class="fas fa-search"></i> Quick File Access
+                                </label>
+                                <select id="fileSelector" class="form-control" onchange="loadFileContent(this.value)">
+                                    <option value="">Select a file to view...</option>
+                                    <optgroup label="Frontend">
+                                        <option value="admin-dashboard.html">admin-dashboard.html</option>
+                                        <option value="community.html">community.html</option>
+                                        <option value="pitch-page.html">pitch-page.html</option>
+                                        <option value="sponsorship.html">sponsorship.html</option>
+                                    </optgroup>
+                                    <optgroup label="Backend">
+                                        <option value="server/index.ts">server/index.ts</option>
+                                        <option value="server/adminRoutes.ts">server/adminRoutes.ts</option>
+                                        <option value="server/sponsorshipRoutes.ts">server/sponsorshipRoutes.ts</option>
+                                    </optgroup>
+                                    <optgroup label="Database">
+                                        <option value="shared/sponsorSchema.ts">shared/sponsorSchema.ts</option>
+                                        <option value="shared/schema.ts">shared/schema.ts</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            
+                            <div style="margin-bottom: 1rem;">
+                                <button class="btn btn-primary" onclick="scanPlatformFiles()" style="width: 100%;">
+                                    <i class="fas fa-search"></i> Scan Platform Files
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="fileContentPreview" style="flex: 1; margin: 0 1rem 1rem 1rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #ddd; padding: 1rem; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.4;">
+                            <div style="text-align: center; color: #666; padding: 2rem;">
+                                <i class="fas fa-folder-open" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                                Select a file above to view its contents
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1500,6 +1791,308 @@
 
         function exportAllData() {
             showNotification('All data export initiated!', 'success');
+        }
+
+        // AI Platform Editor Functions
+        let aiChatHistory = [];
+        let isAIThinking = false;
+
+        async function sendAIMessage() {
+            const input = document.getElementById('aiChatInput');
+            const message = input.value.trim();
+            
+            if (!message || isAIThinking) return;
+            
+            // Add user message to chat
+            addUserMessage(message);
+            input.value = '';
+            
+            // Show thinking indicator
+            showAIThinking();
+            
+            try {
+                const response = await fetch('/api/admin/ai-assistant', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'admin_token_2025'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        chatHistory: aiChatHistory,
+                        platformContext: {
+                            currentSection: getCurrentSection(),
+                            userRole: 'admin'
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Remove thinking indicator
+                hideAIThinking();
+                
+                if (data.success) {
+                    // Add AI response to chat
+                    addAIMessage(data.response, data.fileContent, data.codeChanges);
+                    
+                    // Update file stats if provided
+                    if (data.platformStats) {
+                        updatePlatformStats(data.platformStats);
+                    }
+                } else {
+                    addAIMessage('Sorry, I encountered an error. Please try again.', null, null);
+                }
+                
+            } catch (error) {
+                console.error('AI Assistant Error:', error);
+                hideAIThinking();
+                addAIMessage('Sorry, I\'m having trouble connecting right now. Please try again.', null, null);
+            }
+        }
+
+        function addUserMessage(message) {
+            const chatContainer = document.getElementById('aiChatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'user-message';
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="message-content">
+                    <p>${escapeHtml(message)}</p>
+                </div>
+            `;
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // Add to chat history
+            aiChatHistory.push({
+                role: 'user',
+                content: message,
+                timestamp: new Date()
+            });
+        }
+
+        function addAIMessage(message, fileContent = null, codeChanges = null) {
+            const chatContainer = document.getElementById('aiChatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'ai-message';
+            
+            let contentHtml = `<p>${escapeHtml(message).replace(/\n/g, '<br>')}</p>`;
+            
+            // Add file content if provided
+            if (fileContent) {
+                contentHtml += `
+                    <div class="file-preview">
+                        <strong>📄 ${fileContent.filename}</strong>
+                        <pre>${escapeHtml(fileContent.content)}</pre>
+                    </div>
+                `;
+            }
+            
+            // Add code changes if provided
+            if (codeChanges && codeChanges.length > 0) {
+                contentHtml += '<div style="margin-top: 12px;"><strong>📝 Code Changes Made:</strong><ul>';
+                codeChanges.forEach(change => {
+                    contentHtml += `<li>${escapeHtml(change)}</li>`;
+                });
+                contentHtml += '</ul></div>';
+            }
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                    ${contentHtml}
+                </div>
+            `;
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // Add to chat history
+            aiChatHistory.push({
+                role: 'assistant',
+                content: message,
+                fileContent,
+                codeChanges,
+                timestamp: new Date()
+            });
+        }
+
+        function showAIThinking() {
+            isAIThinking = true;
+            const chatContainer = document.getElementById('aiChatMessages');
+            const thinkingDiv = document.createElement('div');
+            thinkingDiv.className = 'ai-message';
+            thinkingDiv.id = 'thinking-indicator';
+            
+            thinkingDiv.innerHTML = `
+                <div class="message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                    <div class="thinking-indicator">
+                        <span>AI is thinking</span>
+                        <div class="thinking-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            chatContainer.appendChild(thinkingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // Disable send button
+            document.getElementById('sendAIMessage').disabled = true;
+        }
+
+        function hideAIThinking() {
+            isAIThinking = false;
+            const thinkingElement = document.getElementById('thinking-indicator');
+            if (thinkingElement) {
+                thinkingElement.remove();
+            }
+            
+            // Re-enable send button
+            document.getElementById('sendAIMessage').disabled = false;
+        }
+
+        function resetAIChat() {
+            aiChatHistory = [];
+            const chatContainer = document.getElementById('aiChatMessages');
+            chatContainer.innerHTML = `
+                <div class="ai-message">
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <p>Hello! I'm your AI Platform Editor Assistant. I can:</p>
+                        <ul>
+                            <li>🔍 Read and analyze your entire MarketPace codebase</li>
+                            <li>✏️ Make code edits across all files</li>
+                            <li>🧠 Understand the full context of your platform architecture</li>
+                            <li>💡 Suggest improvements and implement changes</li>
+                            <li>🔧 Debug issues and optimize performance</li>
+                            <li>📊 Analyze data flow and database relationships</li>
+                        </ul>
+                        <p>What would you like me to help you with today?</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendAIMessage();
+            }
+        }
+
+        async function loadFileContent(filePath) {
+            if (!filePath) {
+                document.getElementById('fileContentPreview').innerHTML = `
+                    <div style="text-align: center; color: #666; padding: 2rem;">
+                        <i class="fas fa-folder-open" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                        Select a file above to view its contents
+                    </div>
+                `;
+                return;
+            }
+            
+            document.getElementById('fileContentPreview').innerHTML = `
+                <div style="text-align: center; color: #666; padding: 2rem;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                    Loading ${filePath}...
+                </div>
+            `;
+            
+            try {
+                const response = await fetch('/api/admin/file-content', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'admin_token_2025'
+                    },
+                    body: JSON.stringify({ filePath })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('fileContentPreview').innerHTML = `
+                        <div style="border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 12px; font-weight: bold;">
+                            📄 ${filePath}
+                        </div>
+                        <pre style="margin: 0; white-space: pre-wrap; word-wrap: break-word;">${escapeHtml(data.content)}</pre>
+                    `;
+                } else {
+                    document.getElementById('fileContentPreview').innerHTML = `
+                        <div style="text-align: center; color: #e74c3c; padding: 2rem;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                            Error loading file: ${data.error}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading file:', error);
+                document.getElementById('fileContentPreview').innerHTML = `
+                    <div style="text-align: center; color: #e74c3c; padding: 2rem;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                        Error loading file
+                    </div>
+                `;
+            }
+        }
+
+        async function scanPlatformFiles() {
+            try {
+                const response = await fetch('/api/admin/platform-scan', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'admin_token_2025'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    updatePlatformStats(data.stats);
+                    showNotification('Platform scan completed!', 'success');
+                } else {
+                    showNotification('Error scanning platform', 'error');
+                }
+            } catch (error) {
+                console.error('Error scanning platform:', error);
+                showNotification('Error scanning platform', 'error');
+            }
+        }
+
+        function updatePlatformStats(stats) {
+            if (stats.totalFiles) {
+                document.getElementById('totalFiles').textContent = stats.totalFiles;
+            }
+            if (stats.totalTables) {
+                document.getElementById('totalTables').textContent = stats.totalTables;
+            }
+        }
+
+        function getCurrentSection() {
+            const activeSection = document.querySelector('.content-section.active');
+            return activeSection ? activeSection.id : 'overview';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         // Modal functions
