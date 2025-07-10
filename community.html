@@ -753,11 +753,28 @@
         }
 
         function commentPost() {
-            alert('Comment feature coming soon!');
+            const comment = prompt('Write your comment:');
+            if (comment) {
+                alert(`Comment posted: "${comment}"`);
+            }
         }
 
         function sharePost() {
-            alert('Post shared!');
+            if (navigator.share) {
+                navigator.share({
+                    title: 'MarketPace Community Post',
+                    text: 'Check out this post on MarketPace!',
+                    url: window.location.href
+                });
+            } else {
+                // Fallback for browsers without native sharing
+                const url = window.location.href;
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Post link copied to clipboard!');
+                }).catch(() => {
+                    alert('Share feature - link: ' + url);
+                });
+            }
         }
 
         // Check if user is logged in
