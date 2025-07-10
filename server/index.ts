@@ -118,6 +118,11 @@ app.get('/the-hub', (req, res) => {
   res.sendFile(path.join(__dirname, '../the-hub.html'));
 });
 
+// Shops route
+app.get('/shops', (req, res) => {
+  res.sendFile(path.join(__dirname, '../shops.html'));
+});
+
 // Button test page route
 app.get('/button-test', (req, res) => {
   res.sendFile(path.join(__dirname, '../button-test.html'));
