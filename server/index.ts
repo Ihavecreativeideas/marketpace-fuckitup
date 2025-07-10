@@ -133,6 +133,11 @@ app.get('/services', (req, res) => {
   res.sendFile(path.join(__dirname, '../services.html'));
 });
 
+// Profile route
+app.get('/profile', (req, res) => {
+  res.sendFile(path.join(__dirname, '../profile.html'));
+});
+
 // Button test page route
 app.get('/button-test', (req, res) => {
   res.sendFile(path.join(__dirname, '../button-test.html'));
