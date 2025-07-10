@@ -1,0 +1,89 @@
+// AdminDashboard.jsx
+import React from 'react';
+import { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Calendar } from "@/components/ui/calendar";
+
+export default function AdminDashboard() {
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  return (
+    <div className="p-6">
+      <h1 className="text-3xl font-bold mb-6">📊 MarketPace Admin Dashboard</h1>
+
+      <Tabs defaultValue="analytics" className="space-y-4">
+        <TabsList className="grid grid-cols-4 w-full">
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="drivers">Drivers</TabsTrigger>
+          <TabsTrigger value="protection">Protection & Funds</TabsTrigger>
+          <TabsTrigger value="sponsors">Sponsors</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="analytics">
+          <Card>
+            <CardHeader className="font-semibold text-xl">Platform Analytics</CardHeader>
+            <CardContent>
+              <ul className="list-disc pl-6 space-y-1">
+                <li>Total Users: 1,500</li>
+                <li>Monthly Revenue: $8,320</li>
+                <li>Commission Pool: $2,140</li>
+                <li>Protection Fund: $940</li>
+                <li>Active Deliveries: 178</li>
+              </ul>
+              <Button className="mt-4">Export Report</Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="drivers">
+          <Card>
+            <CardHeader className="font-semibold text-xl">Driver Management</CardHeader>
+            <CardContent>
+              <Button className="mb-2">View Applications</Button>
+              <Button className="mb-2 ml-2">Generate Login</Button>
+              <Button className="mb-2 ml-2">Assign Route</Button>
+              <Button className="mb-2 ml-2">Send Message</Button>
+              <p className="mt-4 text-sm">Driver Pool Fund Balance: $562.50</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="protection">
+          <Card>
+            <CardHeader className="font-semibold text-xl">Fund Management</CardHeader>
+            <CardContent>
+              <p>Commission Pool: $2,140</p>
+              <p>Protection Fund: $940</p>
+              <p>Driver Damage Pool: $562.50</p>
+              <Button className="mt-4">View Claim History</Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="sponsors">
+          <Card>
+            <CardHeader className="font-semibold text-xl">Sponsor Tracker</CardHeader>
+            <CardContent>
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                className="rounded-md border shadow"
+              />
+              <p className="mt-4">Selected Date: {selectedDate.toDateString()}</p>
+              <ul className="mt-4 space-y-1">
+                <li>🔁 Post Monthly Shout-Out</li>
+                <li>📦 Send Business Cards</li>
+                <li>📢 Feature in Newsletter</li>
+                <li>💌 Send Thank You Letter</li>
+              </ul>
+              <Button className="mt-4">Mark All as Completed</Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
