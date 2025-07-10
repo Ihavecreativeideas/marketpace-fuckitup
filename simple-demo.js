@@ -118,7 +118,14 @@ app.post('/api/integrations/test-stored', async (req, res) => {
 // Test with specific token from user
 app.post('/api/integrations/test-specific', async (req, res) => {
     try {
-        const specificToken = "27a57cd1ebe4468fdd16545b236449b2-1751859749";
+        const specificToken = process.env.SHOPIFY_TEST_TOKEN || req.body.token;
+        
+        if (!specificToken) {
+            return res.json({ 
+                success: false, 
+                error: 'No test token provided. Please provide a token in the request body or set SHOPIFY_TEST_TOKEN environment variable.' 
+            });
+        }
         
         // User's actual store URL with variations
         const storeUrls = [
