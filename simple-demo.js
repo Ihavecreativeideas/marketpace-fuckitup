@@ -466,7 +466,7 @@ app.get('/', (req, res) => {
         }
 
         async function testSpecificToken() {
-            showStatus('shopify-status', 'Testing with your token: 27a57cd1ebe4468fdd16545b236449b2-1751859749...', 'info');
+            showStatus('shopify-status', 'Testing with your stored access token...', 'info');
             
             try {
                 const response = await fetch('/api/integrations/test-specific', {
