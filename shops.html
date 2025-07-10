@@ -447,7 +447,7 @@
     <div class="header">
         <div class="header-content">
             <div class="logo">🛍️ Local Shops</div>
-            <button class="add-business-btn" onclick="openBusinessModal()">+ Add Business Profile</button>
+            <button class="add-business-btn" onclick="openBusinessModal()">+ MarketPace Pro</button>
         </div>
     </div>
 
@@ -612,10 +612,25 @@
     <div id="businessModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Add Business Profile</h2>
+                <h2 class="modal-title">MarketPace Pro - Business Profile</h2>
                 <button class="close-btn" onclick="closeBusinessModal()">&times;</button>
             </div>
+            
+            <!-- Launch Campaign Banner -->
+            <div style="background: linear-gradient(135deg, #ff6b6b, #ffd93d); color: #000; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold;">
+                🎉 LAUNCH CAMPAIGN: FREE MarketPace Pro + No Delivery Upcharges + Lifetime Benefits!
+            </div>
             <form id="businessForm">
+                <div class="form-group">
+                    <label class="form-label">MarketPace Pro Profile Type *</label>
+                    <select class="form-select" name="profileType" id="profileType" required onchange="updateCategoryOptions()">
+                        <option value="">Select your business type</option>
+                        <option value="shop">🛍️ Shop (Retail, Products, E-commerce)</option>
+                        <option value="service">🔧 Service (Professional Services, Labor)</option>
+                        <option value="entertainment">🎭 Entertainment (Music, Comedy, Theater, Live Acts)</option>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label class="form-label">Business Name *</label>
                     <input type="text" class="form-input" name="businessName" placeholder="Enter your business name" required>
@@ -623,18 +638,8 @@
 
                 <div class="form-group">
                     <label class="form-label">Business Category *</label>
-                    <select class="form-select" name="category" required>
-                        <option value="">Select category</option>
-                        <option value="clothing">Clothing & Fashion</option>
-                        <option value="electronics">Electronics</option>
-                        <option value="home">Home & Garden</option>
-                        <option value="health">Health & Beauty</option>
-                        <option value="food">Food & Beverage</option>
-                        <option value="books">Books & Media</option>
-                        <option value="sports">Sports & Outdoors</option>
-                        <option value="auto">Automotive</option>
-                        <option value="services">Professional Services</option>
-                        <option value="other">Other</option>
+                    <select class="form-select" name="category" id="categorySelect" required>
+                        <option value="">First select your profile type above</option>
                     </select>
                 </div>
 
@@ -659,18 +664,25 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Delivery Options *</label>
-                    <select class="form-select" name="deliveryMethod" required>
-                        <option value="">Select delivery method</option>
-                        <option value="website-integration">Website Integration (redirect customers to my site)</option>
-                        <option value="shop-pickup">Shop Pickup Only</option>
-                        <option value="marketpace-delivery">MarketPace Local Delivery</option>
-                        <option value="bulk-delivery">Bulk Delivery Days (weekly scheduled deliveries)</option>
-                        <option value="multiple">Multiple Options (pickup + delivery)</option>
+                    <label class="form-label">Delivery/Service Options *</label>
+                    <select class="form-select" name="deliveryMethod" id="deliveryMethod" required>
+                        <option value="">Select how customers access your business</option>
                     </select>
                 </div>
 
-                <button type="submit" class="submit-btn">Create Business Profile</button>
+                <!-- Launch Campaign Benefits -->
+                <div style="background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 8px; padding: 16px; margin: 16px 0;">
+                    <h4 style="color: #00ff88; margin: 0 0 8px 0;">Launch Campaign Benefits:</h4>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 14px;">
+                        <li>✅ FREE MarketPace Pro (normally $15/month)</li>
+                        <li>✅ NO delivery upcharges - pay only driver + 5% commission</li>
+                        <li>✅ Tickets & artist merch: 0% commission</li>
+                        <li>✅ Lifetime benefits for early supporters</li>
+                        <li>✅ Priority placement in local search</li>
+                    </ul>
+                </div>
+
+                <button type="submit" class="submit-btn">Create MarketPace Pro Profile - FREE</button>
             </form>
         </div>
     </div>
@@ -804,12 +816,100 @@
             alert(`Joining bulk delivery day for ${shopId}. Orders placed today will be delivered together this Friday.`);
         }
 
+        // Category options for different profile types
+        const categoryOptions = {
+            shop: [
+                {value: 'clothing', text: 'Clothing & Fashion'},
+                {value: 'electronics', text: 'Electronics & Tech'},
+                {value: 'home', text: 'Home & Garden'},
+                {value: 'health', text: 'Health & Beauty'},
+                {value: 'food', text: 'Food & Beverage'},
+                {value: 'books', text: 'Books & Media'},
+                {value: 'sports', text: 'Sports & Outdoors'},
+                {value: 'auto', text: 'Automotive'},
+                {value: 'other', text: 'Other Products'}
+            ],
+            service: [
+                {value: 'home-services', text: 'Home Services (Plumbing, Electric, etc.)'},
+                {value: 'professional', text: 'Professional Services (Legal, Finance, etc.)'},
+                {value: 'personal', text: 'Personal Services (Hair, Fitness, etc.)'},
+                {value: 'tech', text: 'Tech Services (Repair, IT, Web Design)'},
+                {value: 'automotive', text: 'Automotive Services'},
+                {value: 'health', text: 'Health & Wellness Services'},
+                {value: 'education', text: 'Education & Tutoring'},
+                {value: 'other', text: 'Other Services'}
+            ],
+            entertainment: [
+                {value: 'musician', text: 'Musician / Band'},
+                {value: 'dj', text: 'DJ / Music Producer'},
+                {value: 'comedian', text: 'Comedian / Comedy'},
+                {value: 'theater', text: 'Theater / Acting'},
+                {value: 'sound-engineer', text: 'Sound Engineer / Audio Tech'},
+                {value: 'live-performer', text: 'Live Performer / Artist'},
+                {value: 'event-entertainment', text: 'Event Entertainment'},
+                {value: 'other', text: 'Other Entertainment'}
+            ]
+        };
+
+        // Delivery options for different profile types
+        const deliveryOptions = {
+            shop: [
+                {value: 'website-integration', text: 'Website Integration (redirect to my online store)'},
+                {value: 'shop-pickup', text: 'Shop Pickup Only'},
+                {value: 'marketpace-delivery', text: 'MarketPace Local Delivery'},
+                {value: 'bulk-delivery', text: 'Bulk Delivery Days (weekly scheduled)'},
+                {value: 'multiple', text: 'Multiple Options (pickup + delivery)'}
+            ],
+            service: [
+                {value: 'on-location', text: 'On-Location Service (I travel to customers)'},
+                {value: 'shop-location', text: 'My Business Location'},
+                {value: 'remote', text: 'Remote Service (online/virtual)'},
+                {value: 'multiple-locations', text: 'Multiple Options (location + remote)'}
+            ],
+            entertainment: [
+                {value: 'venue-performance', text: 'Venue Performances (I travel to events)'},
+                {value: 'home-studio', text: 'Home/Studio Sessions'},
+                {value: 'online-services', text: 'Online Services (streaming, virtual shows)'},
+                {value: 'equipment-rental', text: 'Equipment Rental + Services'},
+                {value: 'multiple-services', text: 'Multiple Service Options'}
+            ]
+        };
+
+        function updateCategoryOptions() {
+            const profileType = document.getElementById('profileType').value;
+            const categorySelect = document.getElementById('categorySelect');
+            const deliverySelect = document.getElementById('deliveryMethod');
+            
+            // Clear existing options
+            categorySelect.innerHTML = '<option value="">Select category</option>';
+            deliverySelect.innerHTML = '<option value="">Select service delivery method</option>';
+            
+            if (profileType && categoryOptions[profileType]) {
+                categoryOptions[profileType].forEach(option => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = option.value;
+                    optionElement.textContent = option.text;
+                    categorySelect.appendChild(optionElement);
+                });
+            }
+            
+            if (profileType && deliveryOptions[profileType]) {
+                deliveryOptions[profileType].forEach(option => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = option.value;
+                    optionElement.textContent = option.text;
+                    deliverySelect.appendChild(optionElement);
+                });
+            }
+        }
+
         // Business form submission
         document.getElementById('businessForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const formData = new FormData(e.target);
             const businessData = {
+                profileType: formData.get('profileType'),
                 name: formData.get('businessName'),
                 category: formData.get('category'),
                 address: formData.get('address'),
@@ -819,8 +919,14 @@
                 deliveryMethod: formData.get('deliveryMethod')
             };
 
-            // Simulate API call
-            alert(`Business profile created for ${businessData.name}!\n\nYour shop will appear in local listings within 24 hours. You can now start adding products and managing your delivery options.`);
+            // Simulate API call with launch campaign benefits
+            const profileTypeLabels = {
+                'shop': 'Shop',
+                'service': 'Service',
+                'entertainment': 'Entertainment'
+            };
+            
+            alert(`🎉 MarketPace Pro ${profileTypeLabels[businessData.profileType]} Profile Created!\n\n✅ ${businessData.name} is now live with launch campaign benefits:\n\n• FREE MarketPace Pro (lifetime access)\n• NO delivery upcharges during launch\n• Only 5% commission (0% on tickets/merch)\n• Priority placement in local search\n• Early supporter lifetime benefits\n\nYour profile will appear in local listings within 24 hours!`);
             
             closeBusinessModal();
             e.target.reset();
