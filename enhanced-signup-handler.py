@@ -50,9 +50,28 @@ class EnhancedSignupManager:
             ('state', 'TEXT')
         ]
         
+        # Whitelist of allowed column names and definitions for security
+        allowed_columns = {
+            'account_type': 'TEXT DEFAULT "personal"',
+            'bio': 'TEXT',
+            'business_name': 'TEXT',
+            'business_website': 'TEXT',
+            'business_address': 'TEXT',
+            'business_phone': 'TEXT',
+            'business_description': 'TEXT',
+            'business_categories': 'TEXT',
+            'early_supporter': 'BOOLEAN DEFAULT 1',
+            'signup_date': 'TEXT',
+            'country': 'TEXT',
+            'state': 'TEXT'
+        }
+        
         for column_name, column_def in columns_to_add:
             try:
-                cursor.execute(f'ALTER TABLE demo_users ADD COLUMN {column_name} {column_def}')
+                # Only proceed if column is in our whitelist with exact definition
+                if column_name in allowed_columns and column_def == allowed_columns[column_name]:
+                    # Safe to execute since values are from controlled whitelist
+                    cursor.execute(f'ALTER TABLE demo_users ADD COLUMN {column_name} {column_def}')
             except sqlite3.OperationalError:
                 pass  # Column already exists
         
