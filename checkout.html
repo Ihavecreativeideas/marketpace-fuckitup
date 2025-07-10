@@ -400,6 +400,17 @@
                     <span class="cost-value" id="subtotalAmount">$0.00</span>
                 </div>
                 <div class="cost-row">
+                    <span class="cost-label">Platform Fee (5%):</span>
+                    <span class="cost-value" id="platformFeeAmount">$0.00</span>
+                </div>
+                <div class="cost-row">
+                    <span class="cost-label">Membership Protection:</span>
+                    <span class="cost-value" id="protectionFeeAmount">$0.50</span>
+                </div>
+                <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-left: 20px; margin-top: -5px; margin-bottom: 10px;">
+                    🛡️ Damage protection up to $100 per item
+                </div>
+                <div class="cost-row">
                     <span class="cost-label">Delivery Fee:</span>
                     <span class="cost-value" id="deliveryFeeAmount">$0.00</span>
                 </div>
@@ -512,6 +523,8 @@
 
             // Display costs
             document.getElementById('subtotalAmount').textContent = `$${checkoutData.costs.subtotal.toFixed(2)}`;
+            document.getElementById('platformFeeAmount').textContent = `$${(checkoutData.costs.platformFee || 0).toFixed(2)}`;
+            document.getElementById('protectionFeeAmount').textContent = `$${(checkoutData.costs.protectionFee || 0.50).toFixed(2)}`;
             document.getElementById('deliveryFeeAmount').textContent = `$${checkoutData.costs.deliveryFee.toFixed(2)}`;
             document.getElementById('largeItemFeeAmount').textContent = `$${checkoutData.costs.largeItemFee.toFixed(2)}`;
             document.getElementById('mileageFeeAmount').textContent = `$${checkoutData.costs.mileageFee.toFixed(2)}`;
@@ -521,8 +534,12 @@
                 document.getElementById('urgentFeeAmount').textContent = `$${checkoutData.costs.urgentFee.toFixed(2)}`;
             }
 
-            const total = checkoutData.costs.subtotal + checkoutData.costs.deliveryFee + 
-                         checkoutData.costs.largeItemFee + checkoutData.costs.mileageFee + 
+            const total = checkoutData.costs.subtotal + 
+                         (checkoutData.costs.platformFee || 0) +
+                         (checkoutData.costs.protectionFee || 0.50) +
+                         checkoutData.costs.deliveryFee + 
+                         checkoutData.costs.largeItemFee + 
+                         checkoutData.costs.mileageFee + 
                          checkoutData.costs.urgentFee;
 
             document.getElementById('totalAmount').textContent = `$${total.toFixed(2)}`;
@@ -610,8 +627,12 @@
         // Helper functions
         function getTotalAmount() {
             if (!checkoutData) return 0;
-            return checkoutData.costs.subtotal + checkoutData.costs.deliveryFee + 
-                   checkoutData.costs.largeItemFee + checkoutData.costs.mileageFee + 
+            return checkoutData.costs.subtotal + 
+                   (checkoutData.costs.platformFee || 0) +
+                   (checkoutData.costs.protectionFee || 0.50) +
+                   checkoutData.costs.deliveryFee + 
+                   checkoutData.costs.largeItemFee + 
+                   checkoutData.costs.mileageFee + 
                    checkoutData.costs.urgentFee;
         }
 
