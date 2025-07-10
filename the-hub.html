@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Hub - MarketPace Entertainment</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0233 50%, #2d1b69 100%);
+            color: white;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(0, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 6s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 12px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hub-title {
+            font-size: 28px;
+            text-align: center;
+            margin: 20px 0;
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d, #ff6b6b);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .commission-free-banner {
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            color: #000;
+            text-align: center;
+            padding: 12px;
+            margin: 20px;
+            border-radius: 12px;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 16px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin: 20px 0;
+            padding: 4px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 12px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            color: #000;
+            font-weight: bold;
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* Post Creation */
+        .create-post {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .create-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            color: #000;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .create-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Posts/Items Grid */
+        .posts-grid {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .post-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+            margin-right: 12px;
+        }
+
+        .post-info h4 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .post-info span {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .post-content {
+            margin: 12px 0;
+        }
+
+        .post-media {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin: 8px 0;
+        }
+
+        .gear-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            margin: 8px 0;
+        }
+
+        .gear-info h5 {
+            margin: 0;
+            color: #ffd93d;
+        }
+
+        .gear-price {
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .action-btn {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .ticket-link {
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            color: #000;
+            padding: 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .nav-item {
+            flex: 1;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            padding: 8px 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .nav-item.active {
+            color: #ffd93d;
+        }
+
+        .nav-icon {
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+        }
+
+        /* Release Calendar */
+        .release-calendar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+
+        .calendar-header {
+            text-align: center;
+            margin-bottom: 16px;
+            color: #ffd93d;
+            font-weight: bold;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            text-align: center;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-day.today {
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            color: #000;
+            font-weight: bold;
+        }
+
+        .calendar-day.has-release {
+            background: rgba(0, 255, 136, 0.3);
+            border: 1px solid #00ff88;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">🎭 The Hub</div>
+            <button class="action-btn" onclick="goToProfile()">Profile</button>
+        </div>
+    </div>
+
+    <!-- Commission-Free Banner -->
+    <div class="commission-free-banner">
+        🎵 100% COMMISSION-FREE for Artists! 🎵<br>
+        Keep all your ticket sales & merch profits!
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1 class="hub-title">The Hub - Local Entertainment Network</h1>
+        <p style="text-align: center; margin: 0 20px 20px; opacity: 0.9;">
+            For Musicians • DJs • Comedians • Theater • Sound Engineers • Live Acts
+        </p>
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+            <button class="tab-btn active" onclick="switchTab('feed')">Feed</button>
+            <button class="tab-btn" onclick="switchTab('gear')">Gear</button>
+            <button class="tab-btn" onclick="switchTab('tickets')">Tickets</button>
+            <button class="tab-btn" onclick="switchTab('releases')">Media</button>
+            <button class="tab-btn" onclick="switchTab('events')">Events</button>
+            <button class="tab-btn" onclick="switchTab('profiles')">Profiles</button>
+        </div>
+
+        <!-- Feed Section -->
+        <div id="feed" class="content-section active">
+            <div class="create-post">
+                <button class="create-btn" onclick="createHubPost('media')">
+                    📸 Share Photo/Video
+                </button>
+            </div>
+
+            <div class="posts-grid">
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="profile-pic">JD</div>
+                        <div class="post-info">
+                            <h4>Jazz District Band</h4>
+                            <span>2 hours ago • Musician</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <p>Check out our latest music video! Filmed right here in downtown. 🎵</p>
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzMzMzMzMyIvPjx0ZXh0IHg9IjE1MCIgeT0iMTAwIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk11c2ljIFZpZGVvPC90ZXh0Pjwvc3ZnPg==" alt="Music Video" class="post-media">
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="likePost(this)">🤍 Like</button>
+                        <button class="action-btn" onclick="commentPost()">💬 Comment</button>
+                        <button class="action-btn" onclick="sharePost()">📤 Share</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gear Section -->
+        <div id="gear" class="content-section">
+            <div class="create-post">
+                <button class="create-btn" onclick="createHubPost('gear')">
+                    🎸 List Gear for Sale/Rent
+                </button>
+            </div>
+
+            <div class="posts-grid">
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="profile-pic">MK</div>
+                        <div class="post-info">
+                            <h4>Mike's Music Studio</h4>
+                            <span>1 day ago • Sound Engineer</span>
+                        </div>
+                    </div>
+                    <div class="gear-item">
+                        <div class="gear-info">
+                            <h5>Fender Stratocaster Electric Guitar</h5>
+                            <p>Excellent condition, perfect for live shows</p>
+                        </div>
+                        <div class="gear-price">$850</div>
+                    </div>
+                    <div class="gear-item">
+                        <div class="gear-info">
+                            <h5>Marshall Amp Stack (Rental)</h5>
+                            <p>Per day rental, perfect for gigs</p>
+                        </div>
+                        <div class="gear-price">$75/day</div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="contactSeller()">💬 Message</button>
+                        <button class="action-btn" onclick="makeOffer()">💰 Make Offer</button>
+                        <button class="action-btn" onclick="rentGear()">📅 Rent</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tickets Section -->
+        <div id="tickets" class="content-section">
+            <div class="create-post">
+                <button class="create-btn" onclick="createHubPost('tickets')">
+                    🎫 Share Event Tickets
+                </button>
+            </div>
+
+            <div class="posts-grid">
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="profile-pic">RC</div>
+                        <div class="post-info">
+                            <h4>Rock City Venue</h4>
+                            <span>3 hours ago • Venue</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <h4>Live Jazz Night - This Saturday</h4>
+                        <p>Featuring local jazz artists and special guest performers!</p>
+                        <a href="#" class="ticket-link" onclick="openTicketLink('eventbrite')">
+                            🎫 Get Tickets on Eventbrite - $25
+                        </a>
+                        <a href="#" class="ticket-link" onclick="openTicketLink('ticketmaster')">
+                            🎫 Get Tickets on Ticketmaster - $25
+                        </a>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="shareEvent()">📤 Share Event</button>
+                        <button class="action-btn" onclick="saveEvent()">⭐ Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Releases Section -->
+        <div id="releases" class="content-section">
+            <div class="create-post">
+                <button class="create-btn" onclick="createHubPost('release')">
+                    📱 Share Media/Content
+                </button>
+            </div>
+
+            <div class="release-calendar">
+                <div class="calendar-header">January 2025 - Content Calendar</div>
+                <div class="calendar-grid">
+                    <div class="calendar-day">S</div>
+                    <div class="calendar-day">M</div>
+                    <div class="calendar-day">T</div>
+                    <div class="calendar-day">W</div>
+                    <div class="calendar-day">T</div>
+                    <div class="calendar-day">F</div>
+                    <div class="calendar-day">S</div>
+                    <div class="calendar-day"></div>
+                    <div class="calendar-day"></div>
+                    <div class="calendar-day"></div>
+                    <div class="calendar-day">1</div>
+                    <div class="calendar-day">2</div>
+                    <div class="calendar-day">3</div>
+                    <div class="calendar-day">4</div>
+                    <div class="calendar-day">5</div>
+                    <div class="calendar-day">6</div>
+                    <div class="calendar-day">7</div>
+                    <div class="calendar-day">8</div>
+                    <div class="calendar-day">9</div>
+                    <div class="calendar-day today">10</div>
+                    <div class="calendar-day">11</div>
+                    <div class="calendar-day">12</div>
+                    <div class="calendar-day">13</div>
+                    <div class="calendar-day">14</div>
+                    <div class="calendar-day has-release" onclick="viewRelease('15')">15</div>
+                    <div class="calendar-day">16</div>
+                    <div class="calendar-day">17</div>
+                    <div class="calendar-day">18</div>
+                    <div class="calendar-day">19</div>
+                    <div class="calendar-day">20</div>
+                    <div class="calendar-day">21</div>
+                    <div class="calendar-day has-release" onclick="viewRelease('22')">22</div>
+                    <div class="calendar-day">23</div>
+                    <div class="calendar-day">24</div>
+                    <div class="calendar-day">25</div>
+                    <div class="calendar-day">26</div>
+                    <div class="calendar-day">27</div>
+                    <div class="calendar-day has-release" onclick="viewRelease('28')">28</div>
+                    <div class="calendar-day">29</div>
+                    <div class="calendar-day">30</div>
+                    <div class="calendar-day">31</div>
+                </div>
+            </div>
+
+            <div class="posts-grid">
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="profile-pic">CB</div>
+                        <div class="post-info">
+                            <h4>Comedy Basement</h4>
+                            <span>Content Day - Jan 15 • Comedy Club</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <h4>🎭 NEW COMEDY SPECIAL: "Downtown Laughs" 🎭</h4>
+                        <p>Our latest comedy special is now streaming! Check it out on all platforms.</p>
+                        <a href="#" class="ticket-link" onclick="openMusicLink('youtube')">
+                            📺 Watch on YouTube
+                        </a>
+                        <a href="#" class="ticket-link" onclick="openMusicLink('website')">
+                            🌐 Visit Our Website
+                        </a>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="likePost(this)">🤍 Like</button>
+                        <button class="action-btn" onclick="shareMusic()">📤 Share</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Events Section -->
+        <div id="events" class="content-section">
+            <div class="create-post">
+                <button class="create-btn" onclick="createHubPost('event')">
+                    📅 Create Local Event
+                </button>
+            </div>
+
+            <div class="posts-grid">
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="profile-pic">LD</div>
+                        <div class="post-info">
+                            <h4>Luna Davis</h4>
+                            <span>Tomorrow 8PM • Singer-Songwriter</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <h4>🎤 Acoustic Night at Café Melody</h4>
+                        <p><strong>When:</strong> Saturday, January 11, 8:00 PM</p>
+                        <p><strong>Where:</strong> Café Melody, Downtown</p>
+                        <p><strong>What:</strong> Intimate acoustic performance featuring original songs and covers</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="attendEvent()">✅ Attend</button>
+                        <button class="action-btn" onclick="shareEvent()">📤 Share</button>
+                        <button class="action-btn" onclick="getDirections()">📍 Directions</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profiles Section -->
+        <div id="profiles" class="content-section">
+            <div class="create-post">
+                <button class="create-btn" onclick="createHubPost('profile')">
+                    🌐 Update Your Professional Profile
+                </button>
+            </div>
+
+            <div class="posts-grid">
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="profile-pic">MJ</div>
+                        <div class="post-info">
+                            <h4>Mike Johnson</h4>
+                            <span>Sound Engineer • 5 years experience</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <h4>🎚️ Professional Sound Engineering Services</h4>
+                        <p><strong>Specialties:</strong> Live mixing, studio recording, equipment setup</p>
+                        <p><strong>Equipment:</strong> Full PA systems, wireless mics, mixing boards</p>
+                        
+                        <div style="margin: 12px 0;">
+                            <h5 style="color: #ffd93d; margin-bottom: 8px;">Connect with me:</h5>
+                            <a href="#" class="action-btn" onclick="openWebsite('personal')" style="margin: 2px; display: inline-block;">
+                                🌐 Portfolio Website
+                            </a>
+                            <a href="#" class="action-btn" onclick="openSocial('instagram')" style="margin: 2px; display: inline-block;">
+                                📷 Instagram
+                            </a>
+                            <a href="#" class="action-btn" onclick="openSocial('linkedin')" style="margin: 2px; display: inline-block;">
+                                💼 LinkedIn
+                            </a>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="bookServices()">📅 Book Services</button>
+                        <button class="action-btn" onclick="contactProfessional()">💬 Message</button>
+                        <button class="action-btn" onclick="viewPortfolio()">👁️ View Work</button>
+                    </div>
+                </div>
+
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="profile-pic">TC</div>
+                        <div class="post-info">
+                            <h4>Theater Collective</h4>
+                            <span>Community Theater • Established 2018</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <h4>🎭 Local Theater Productions & Workshops</h4>
+                        <p><strong>Current Shows:</strong> Romeo & Juliet, Comedy Nights</p>
+                        <p><strong>Services:</strong> Acting classes, script writing, venue rental</p>
+                        
+                        <div style="margin: 12px 0;">
+                            <h5 style="color: #ffd93d; margin-bottom: 8px;">Follow our work:</h5>
+                            <a href="#" class="action-btn" onclick="openWebsite('theater')" style="margin: 2px; display: inline-block;">
+                                🌐 Official Website
+                            </a>
+                            <a href="#" class="action-btn" onclick="openSocial('facebook')" style="margin: 2px; display: inline-block;">
+                                👥 Facebook Page
+                            </a>
+                            <a href="#" class="action-btn" onclick="openSocial('tiktok')" style="margin: 2px; display: inline-block;">
+                                🎵 TikTok
+                            </a>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="joinTheater()">🎭 Join Us</button>
+                        <button class="action-btn" onclick="viewShows()">🎪 View Shows</button>
+                        <button class="action-btn" onclick="bookVenue()">🏢 Rent Venue</button>
+                    </div>
+                </div>
+
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="profile-pic">DJ</div>
+                        <div class="post-info">
+                            <h4>DJ Electric</h4>
+                            <span>Electronic Music Producer • DJ</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <h4>🎧 Electronic Music & DJ Services</h4>
+                        <p><strong>Genres:</strong> House, Techno, EDM, Progressive</p>
+                        <p><strong>Services:</strong> Event DJing, music production, mixing lessons</p>
+                        
+                        <div style="margin: 12px 0;">
+                            <h5 style="color: #ffd93d; margin-bottom: 8px;">Listen & Connect:</h5>
+                            <a href="#" class="action-btn" onclick="openMusicLink('soundcloud')" style="margin: 2px; display: inline-block;">
+                                🎵 SoundCloud
+                            </a>
+                            <a href="#" class="action-btn" onclick="openMusicLink('spotify')" style="margin: 2px; display: inline-block;">
+                                🎵 Spotify
+                            </a>
+                            <a href="#" class="action-btn" onclick="openSocial('instagram')" style="margin: 2px; display: inline-block;">
+                                📷 Instagram
+                            </a>
+                            <a href="#" class="action-btn" onclick="openWebsite('dj')" style="margin: 2px; display: inline-block;">
+                                🌐 DJ Website
+                            </a>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="bookDJ()">🎵 Book DJ</button>
+                        <button class="action-btn" onclick="requestMix()">🎧 Request Mix</button>
+                        <button class="action-btn" onclick="learnDJing()">📚 Learn DJing</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-container">
+            <button class="nav-item" onclick="goToPage('home')">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">Home</div>
+            </button>
+            <button class="nav-item" onclick="goToPage('shop')">
+                <div class="nav-icon">🛍️</div>
+                <div class="nav-label">Shop</div>
+            </button>
+            <button class="nav-item" onclick="goToPage('services')">
+                <div class="nav-icon">🔧</div>
+                <div class="nav-label">Services</div>
+            </button>
+            <button class="nav-item active" onclick="goToPage('hub')">
+                <div class="nav-icon">🎭</div>
+                <div class="nav-label">The Hub</div>
+            </button>
+            <button class="nav-item" onclick="goToPage('delivery')">
+                <div class="nav-icon">🚚</div>
+                <div class="nav-label">Delivery</div>
+            </button>
+            <button class="nav-item" onclick="goToPage('menu')">
+                <div class="nav-icon">☰</div>
+                <div class="nav-label">Menu</div>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize floating particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                
+                // Random colors
+                const colors = ['rgba(0, 255, 255, 0.6)', 'rgba(255, 107, 107, 0.6)', 'rgba(255, 217, 61, 0.6)'];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                container.appendChild(particle);
+            }
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Remove active class from all tabs and sections
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+            
+            // Add active class to selected tab and section
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // Navigation functions
+        function goToPage(page) {
+            // Update active nav item
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.nav-item').classList.add('active');
+
+            // Navigate to different pages
+            switch(page) {
+                case 'home':
+                    window.location.href = '/community';
+                    break;
+                case 'shop':
+                    window.location.href = '/shop';
+                    break;
+                case 'services':
+                    window.location.href = '/services';
+                    break;
+                case 'hub':
+                    // Already on The Hub
+                    break;
+                case 'delivery':
+                    window.location.href = '/delivery';
+                    break;
+                case 'menu':
+                    window.location.href = '/menu';
+                    break;
+            }
+        }
+
+        function goToProfile() {
+            window.location.href = '/profile';
+        }
+
+        // Hub-specific functions
+        function createHubPost(type) {
+            switch(type) {
+                case 'media':
+                    alert('Photo/Video sharing feature coming soon!');
+                    break;
+                case 'gear':
+                    alert('Gear listing feature coming soon!');
+                    break;
+                case 'tickets':
+                    alert('Ticket sharing feature coming soon!');
+                    break;
+                case 'release':
+                    const today = new Date();
+                    const releaseDate = prompt('Schedule content release date (YYYY-MM-DD):');
+                    if (releaseDate) {
+                        alert(`Content release scheduled for ${releaseDate}!`);
+                    }
+                    break;
+                case 'event':
+                    alert('Event creation feature coming soon!');
+                    break;
+                case 'profile':
+                    alert('Professional profile editor coming soon!');
+                    break;
+            }
+        }
+
+        // Professional profile functions
+        function openWebsite(type) {
+            alert(`Opening ${type} website...`);
+        }
+
+        function openSocial(platform) {
+            const platforms = {
+                'instagram': 'Instagram profile',
+                'facebook': 'Facebook page',
+                'linkedin': 'LinkedIn profile',
+                'tiktok': 'TikTok profile',
+                'twitter': 'Twitter profile'
+            };
+            alert(`Opening ${platforms[platform]}...`);
+        }
+
+        function bookServices() {
+            alert('Booking sound engineering services...');
+        }
+
+        function contactProfessional() {
+            alert('Opening message to professional...');
+        }
+
+        function viewPortfolio() {
+            alert('Viewing professional portfolio...');
+        }
+
+        function joinTheater() {
+            alert('Theater membership application...');
+        }
+
+        function viewShows() {
+            alert('Viewing current theater shows...');
+        }
+
+        function bookVenue() {
+            alert('Theater venue rental inquiry...');
+        }
+
+        function bookDJ() {
+            alert('DJ booking request...');
+        }
+
+        function requestMix() {
+            alert('Custom mix request...');
+        }
+
+        function learnDJing() {
+            alert('DJ lessons inquiry...');
+        }
+
+        // Ticket platform functions
+        function openTicketLink(platform) {
+            const platforms = {
+                'eventbrite': 'https://eventbrite.com',
+                'ticketmaster': 'https://ticketmaster.com',
+                'stubhub': 'https://stubhub.com',
+                'seatgeek': 'https://seatgeek.com'
+            };
+            
+            alert(`Opening ${platform} tickets (commission-free for artists!)`);
+            // window.open(platforms[platform], '_blank');
+        }
+
+        // Music platform functions
+        function openMusicLink(platform) {
+            const platforms = {
+                'spotify': 'Spotify',
+                'apple': 'Apple Music',
+                'youtube': 'YouTube',
+                'soundcloud': 'SoundCloud',
+                'website': 'Artist Website'
+            };
+            
+            alert(`Opening ${platforms[platform]}...`);
+            // window.open(platforms[platform], '_blank');
+        }
+
+        // Social interaction functions
+        function likePost(button) {
+            if (button.innerHTML.includes('🤍')) {
+                button.innerHTML = '❤️ Like';
+                button.style.color = '#ff6b6b';
+            } else {
+                button.innerHTML = '🤍 Like';
+                button.style.color = 'rgba(255, 255, 255, 0.8)';
+            }
+        }
+
+        function commentPost() {
+            const comment = prompt('Write your comment:');
+            if (comment) {
+                alert(`Comment posted: "${comment}"`);
+            }
+        }
+
+        function sharePost() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'The Hub - MarketPace Entertainment',
+                    text: 'Check out this post on The Hub!',
+                    url: window.location.href
+                });
+            } else {
+                alert('Post shared!');
+            }
+        }
+
+        // Event functions
+        function attendEvent() {
+            alert('Added to your calendar! You\'ll receive a reminder.');
+        }
+
+        function shareEvent() {
+            alert('Event shared with your community!');
+        }
+
+        function getDirections() {
+            alert('Opening directions to venue...');
+        }
+
+        function saveEvent() {
+            alert('Event saved to your favorites!');
+        }
+
+        // Gear functions
+        function contactSeller() {
+            alert('Message sent to seller!');
+        }
+
+        function makeOffer() {
+            const offer = prompt('Enter your offer amount:');
+            if (offer) {
+                alert(`Offer of $${offer} sent!`);
+            }
+        }
+
+        function rentGear() {
+            alert('Rental request sent!');
+        }
+
+        // Music functions
+        function shareMusic() {
+            alert('Music shared to your social networks!');
+        }
+
+        // Calendar functions
+        function viewRelease(day) {
+            alert(`Viewing releases for January ${day}th`);
+        }
+
+        // Initialize particles when page loads
+        createParticles();
+    </script>
+</body>
+</html>

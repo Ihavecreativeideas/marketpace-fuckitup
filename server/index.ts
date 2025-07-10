@@ -113,6 +113,11 @@ app.get('/signup-login', (req, res) => {
   res.sendFile(path.join(__dirname, '../signup-login.html'));
 });
 
+// The Hub route
+app.get('/the-hub', (req, res) => {
+  res.sendFile(path.join(__dirname, '../the-hub.html'));
+});
+
 // Button test page route
 app.get('/button-test', (req, res) => {
   res.sendFile(path.join(__dirname, '../button-test.html'));
