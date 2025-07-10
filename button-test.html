@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Test - MarketPace</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #0d0221; 
+            color: white; 
+        }
+        .test-section { 
+            margin: 20px 0; 
+            padding: 20px; 
+            border: 1px solid #333; 
+            border-radius: 8px; 
+        }
+        .btn { 
+            padding: 10px 20px; 
+            margin: 5px; 
+            background: #1e0b3d; 
+            color: white; 
+            border: 1px solid #00ffff; 
+            border-radius: 5px; 
+            cursor: pointer; 
+        }
+        .btn:hover { 
+            background: #2d1b4e; 
+        }
+        .result { 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+            background: #001122; 
+        }
+        .success { 
+            background: #001100; 
+            color: #00ff00; 
+        }
+        .error { 
+            background: #220000; 
+            color: #ff0000; 
+        }
+    </style>
+</head>
+<body>
+    <h1>MarketPace Button Functionality Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Signup/Login API Test</h2>
+        <button class="btn" onclick="testSignup()">Test Signup API</button>
+        <button class="btn" onclick="testLogin()">Test Login API</button>
+        <div id="authResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Admin Dashboard API Test</h2>
+        <button class="btn" onclick="testAdminApproval()">Test Driver Approval</button>
+        <button class="btn" onclick="testAdminPromotion()">Test Promotion Creation</button>
+        <button class="btn" onclick="testAdminRoutes()">Test Route Optimization</button>
+        <div id="adminResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Navigation Test</h2>
+        <button class="btn" onclick="testNavigation()">Test Page Navigation</button>
+        <div id="navResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Form Submission Test</h2>
+        <form onsubmit="testFormSubmission(event)">
+            <input type="email" placeholder="Test Email" required>
+            <input type="password" placeholder="Test Password" required>
+            <input type="tel" placeholder="Test Phone" required>
+            <button type="submit" class="btn">Submit Test Form</button>
+        </form>
+        <div id="formResult" class="result"></div>
+    </div>
+
+    <script>
+        async function testSignup() {
+            const result = document.getElementById('authResult');
+            result.innerHTML = 'Testing signup...';
+            
+            try {
+                const response = await fetch('/api/seamless-signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'test@buttontest.com',
+                        password: 'testpass123',
+                        phone: '555-0123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.innerHTML = '✅ Signup API Working: ' + data.message;
+                    result.className = 'result success';
+                } else {
+                    result.innerHTML = '❌ Signup Failed: ' + data.message;
+                    result.className = 'result error';
+                }
+            } catch (error) {
+                result.innerHTML = '❌ Signup Error: ' + error.message;
+                result.className = 'result error';
+            }
+        }
+        
+        async function testLogin() {
+            const result = document.getElementById('authResult');
+            result.innerHTML = 'Testing login...';
+            
+            try {
+                const response = await fetch('/api/seamless-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'test@buttontest.com',
+                        password: 'testpass123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.innerHTML = '✅ Login API Working: ' + data.message;
+                    result.className = 'result success';
+                } else {
+                    result.innerHTML = '❌ Login Failed: ' + data.message;
+                    result.className = 'result error';
+                }
+            } catch (error) {
+                result.innerHTML = '❌ Login Error: ' + error.message;
+                result.className = 'result error';
+            }
+        }
+        
+        async function testAdminApproval() {
+            const result = document.getElementById('adminResult');
+            result.innerHTML = 'Testing admin approval...';
+            
+            try {
+                const response = await fetch('/api/admin/drivers/approve-all?token=admin_token_2025', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.innerHTML = '✅ Admin Approval Working: ' + data.message;
+                    result.className = 'result success';
+                } else {
+                    result.innerHTML = '❌ Admin Approval Failed: ' + data.message;
+                    result.className = 'result error';
+                }
+            } catch (error) {
+                result.innerHTML = '❌ Admin Approval Error: ' + error.message;
+                result.className = 'result error';
+            }
+        }
+        
+        async function testAdminPromotion() {
+            const result = document.getElementById('adminResult');
+            result.innerHTML = 'Testing promotion creation...';
+            
+            try {
+                const response = await fetch('/api/admin/promotions/create?token=admin_token_2025', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.innerHTML = '✅ Promotion Creation Working: ' + data.message;
+                    result.className = 'result success';
+                } else {
+                    result.innerHTML = '❌ Promotion Creation Failed: ' + data.message;
+                    result.className = 'result error';
+                }
+            } catch (error) {
+                result.innerHTML = '❌ Promotion Creation Error: ' + error.message;
+                result.className = 'result error';
+            }
+        }
+        
+        async function testAdminRoutes() {
+            const result = document.getElementById('adminResult');
+            result.innerHTML = 'Testing route optimization...';
+            
+            try {
+                const response = await fetch('/api/admin/routes/optimize?token=admin_token_2025', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.innerHTML = '✅ Route Optimization Working: Efficiency improved by ' + data.improvements.efficiency;
+                    result.className = 'result success';
+                } else {
+                    result.innerHTML = '❌ Route Optimization Failed';
+                    result.className = 'result error';
+                }
+            } catch (error) {
+                result.innerHTML = '❌ Route Optimization Error: ' + error.message;
+                result.className = 'result error';
+            }
+        }
+        
+        function testNavigation() {
+            const result = document.getElementById('navResult');
+            result.innerHTML = 'Testing navigation...';
+            
+            // Test if key pages are accessible
+            const pages = [
+                '/signup-login',
+                '/admin-dashboard',
+                '/community',
+                '/driver-application.html'
+            ];
+            
+            let navTests = [];
+            
+            pages.forEach(page => {
+                fetch(page)
+                    .then(response => {
+                        if (response.ok) {
+                            navTests.push(`✅ ${page} - Accessible`);
+                        } else {
+                            navTests.push(`❌ ${page} - Status: ${response.status}`);
+                        }
+                        
+                        if (navTests.length === pages.length) {
+                            result.innerHTML = navTests.join('<br>');
+                            result.className = 'result success';
+                        }
+                    })
+                    .catch(error => {
+                        navTests.push(`❌ ${page} - Error: ${error.message}`);
+                        if (navTests.length === pages.length) {
+                            result.innerHTML = navTests.join('<br>');
+                            result.className = 'result error';
+                        }
+                    });
+            });
+        }
+        
+        function testFormSubmission(event) {
+            event.preventDefault();
+            const result = document.getElementById('formResult');
+            const formData = new FormData(event.target);
+            
+            result.innerHTML = '✅ Form Submission Working: preventDefault called, form data captured';
+            result.className = 'result success';
+            
+            // Show form data
+            let formFields = [];
+            for (let [key, value] of formData.entries()) {
+                formFields.push(`${key}: ${value}`);
+            }
+            result.innerHTML += '<br>Form Data: ' + formFields.join(', ');
+        }
+        
+        // Auto-run all tests on page load
+        window.onload = function() {
+            setTimeout(() => {
+                testSignup();
+                setTimeout(() => {
+                    testAdminApproval();
+                    setTimeout(() => {
+                        testNavigation();
+                    }, 1000);
+                }, 1000);
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
