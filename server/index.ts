@@ -112,6 +112,26 @@ app.get('/signup-login', (req, res) => {
   res.sendFile(path.join(__dirname, '../signup-login.html'));
 });
 
+// Button test page route
+app.get('/button-test', (req, res) => {
+  res.sendFile(path.join(__dirname, '../button-test.html'));
+});
+
+// Admin dashboard route
+app.get('/admin-dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '../admin-dashboard.html'));
+});
+
+// Admin login route
+app.get('/admin-login', (req, res) => {
+  res.sendFile(path.join(__dirname, '../admin-login.html'));
+});
+
+// Driver application route
+app.get('/driver-application', (req, res) => {
+  res.sendFile(path.join(__dirname, '../driver-application.html'));
+});
+
 // Seamless signup API endpoint
 app.post('/api/seamless-signup', async (req, res) => {
   const { email, password, phone } = req.body;
