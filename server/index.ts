@@ -130,6 +130,111 @@ app.post('/api/forgot-password', (req, res) => {
   });
 });
 
+// Facebook OAuth routes
+app.get('/api/auth/facebook', (req, res) => {
+  const facebookAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${process.env.FACEBOOK_APP_ID}&redirect_uri=${encodeURIComponent(process.env.FACEBOOK_REDIRECT_URI || 'http://localhost:5000/api/auth/facebook/callback')}&scope=email,public_profile&response_type=code`;
+  res.redirect(facebookAuthUrl);
+});
+
+app.get('/api/auth/facebook/callback', async (req, res) => {
+  const { code } = req.query;
+  
+  if (!code) {
+    return res.redirect('/signup-login?error=facebook_auth_failed');
+  }
+  
+  try {
+    // Exchange code for access token
+    const tokenResponse = await fetch(`https://graph.facebook.com/v18.0/oauth/access_token?client_id=${process.env.FACEBOOK_APP_ID}&client_secret=${process.env.FACEBOOK_APP_SECRET}&redirect_uri=${encodeURIComponent(process.env.FACEBOOK_REDIRECT_URI || 'http://localhost:5000/api/auth/facebook/callback')}&code=${code}`);
+    const tokenData = await tokenResponse.json();
+    
+    if (!tokenData.access_token) {
+      return res.redirect('/signup-login?error=facebook_token_failed');
+    }
+    
+    // Get user info
+    const userResponse = await fetch(`https://graph.facebook.com/me?fields=id,name,email&access_token=${tokenData.access_token}`);
+    const userData = await userResponse.json();
+    
+    // Store user session
+    const user = {
+      id: userData.id,
+      email: userData.email,
+      name: userData.name,
+      provider: 'facebook',
+      loggedIn: true,
+      loginTime: Date.now()
+    };
+    
+    // In a real app, you would store this in a secure session
+    // For demo purposes, we'll redirect with user data
+    res.redirect(`/community?user=${encodeURIComponent(JSON.stringify(user))}`);
+    
+  } catch (error) {
+    console.error('Facebook auth error:', error);
+    res.redirect('/signup-login?error=facebook_auth_error');
+  }
+});
+
+// Google OAuth routes
+app.get('/api/auth/google', (req, res) => {
+  const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5000/api/auth/google/callback')}&scope=openid email profile&response_type=code`;
+  res.redirect(googleAuthUrl);
+});
+
+app.get('/api/auth/google/callback', async (req, res) => {
+  const { code } = req.query;
+  
+  if (!code) {
+    return res.redirect('/signup-login?error=google_auth_failed');
+  }
+  
+  try {
+    // Exchange code for access token
+    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        client_id: process.env.GOOGLE_CLIENT_ID,
+        client_secret: process.env.GOOGLE_CLIENT_SECRET,
+        code: code,
+        grant_type: 'authorization_code',
+        redirect_uri: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5000/api/auth/google/callback'
+      })
+    });
+    
+    const tokenData = await tokenResponse.json();
+    
+    if (!tokenData.access_token) {
+      return res.redirect('/signup-login?error=google_token_failed');
+    }
+    
+    // Get user info
+    const userResponse = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${tokenData.access_token}`);
+    const userData = await userResponse.json();
+    
+    // Store user session
+    const user = {
+      id: userData.id,
+      email: userData.email,
+      name: userData.name,
+      provider: 'google',
+      loggedIn: true,
+      loginTime: Date.now()
+    };
+    
+    // In a real app, you would store this in a secure session
+    // For demo purposes, we'll redirect with user data
+    res.redirect(`/community?user=${encodeURIComponent(JSON.stringify(user))}`);
+    
+  } catch (error) {
+    console.error('Google auth error:', error);
+    res.redirect('/signup-login?error=google_auth_error');
+  }
+});
+
 // Admin login page
 app.get('/admin-login', (req, res) => {
   res.sendFile(path.join(__dirname, '../admin-login.html'));
