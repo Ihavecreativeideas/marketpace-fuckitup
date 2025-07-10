@@ -428,13 +428,68 @@
             }
         }
 
-        // Sponsor function
-        function sponsorNow(tier) {
-            // For demo purposes, show alert
-            alert(`Thank you for your interest in becoming a ${tier}! This would redirect to payment processing in the live version.`);
+        // Sponsor function with real Stripe integration
+        async function sponsorNow(tier) {
+            const tierDetails = {
+                supporter: { name: 'Community Supporter', amount: 25 },
+                partner: { name: 'Local Partner', amount: 100 },
+                champion: { name: 'Community Champion', amount: 500 },
+                ambassador: { name: 'Brand Ambassador', amount: 1000 },
+                legacy: { name: 'Legacy Founder', amount: 2500 }
+            };
             
-            // In production, this would redirect to Stripe checkout
-            // window.location.href = '/sponsor-checkout?tier=' + tier;
+            const selectedTier = tierDetails[tier];
+            if (!selectedTier) {
+                alert('Invalid sponsorship tier selected');
+                return;
+            }
+            
+            try {
+                // Show loading state
+                event.target.disabled = true;
+                event.target.textContent = 'Processing...';
+                
+                // Create Stripe checkout session
+                const response = await fetch('/api/create-sponsor-checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        tier: tier,
+                        tierName: selectedTier.name,
+                        amount: selectedTier.amount
+                    })
+                });
+                
+                const { sessionUrl } = await response.json();
+                
+                if (sessionUrl) {
+                    // Redirect to Stripe checkout
+                    window.location.href = sessionUrl;
+                } else {
+                    throw new Error('Failed to create checkout session');
+                }
+                
+            } catch (error) {
+                console.error('Error creating checkout session:', error);
+                alert('Payment system temporarily unavailable. Please try again later.');
+                
+                // Reset button state
+                event.target.disabled = false;
+                event.target.textContent = getOriginalButtonText(tier);
+            }
+        }
+        
+        function getOriginalButtonText(tier) {
+            const buttonTexts = {
+                supporter: 'Support Now',
+                partner: 'Become a Partner',
+                champion: 'Become a Champion',
+                ambassador: 'Become an Ambassador',
+                legacy: 'LEAVE YOUR LEGACY'
+            };
+            return buttonTexts[tier] || 'Sponsor Now';
         }
 
         // Initialize particles when page loads

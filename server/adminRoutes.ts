@@ -1,7 +1,8 @@
 import type { Express } from "express";
 import { db } from "./db";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, and, gte, lte, asc } from "drizzle-orm";
 import { users } from "../shared/schema";
+import { sponsors, sponsorBenefits, aiAssistantTasks } from "../shared/sponsorSchema";
 
 // Admin authentication middleware
 function isAdminAuthenticated(req: any, res: any, next: any) {
@@ -542,5 +543,145 @@ Here's a suggested improvement for your ${context || 'content'}:
     };
     
     res.json({ success: true, message: 'All admin data reset to zero' });
+  });
+
+  // ===== SPONSOR TRACKING API ENDPOINTS =====
+  
+  // Get all sponsors with their benefits tracking
+  app.get('/api/admin/sponsors', async (req, res) => {
+    try {
+      // Get sponsors from database
+      const sponsorList = await db.select().from(sponsors).orderBy(desc(sponsors.joinedAt));
+      
+      // Get current month's tasks
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth() + 1;
+      const currentYear = currentDate.getFullYear();
+      
+      const monthlyTasks = await db.select()
+        .from(aiAssistantTasks)
+        .where(
+          and(
+            gte(aiAssistantTasks.dueDate, new Date(currentYear, currentMonth - 1, 1)),
+            lte(aiAssistantTasks.dueDate, new Date(currentYear, currentMonth, 0))
+          )
+        )
+        .orderBy(asc(aiAssistantTasks.priority));
+      
+      res.json({
+        sponsors: sponsorList,
+        monthlyTasks: monthlyTasks
+      });
+    } catch (error) {
+      console.error('Error fetching sponsors:', error);
+      res.status(500).json({ error: 'Failed to fetch sponsor data' });
+    }
+  });
+
+  // Get specific sponsor's benefits
+  app.get('/api/admin/sponsors/:sponsorId/benefits', async (req, res) => {
+    try {
+      const sponsorId = parseInt(req.params.sponsorId);
+      const benefits = await db.select()
+        .from(sponsorBenefits)
+        .where(eq(sponsorBenefits.sponsorId, sponsorId))
+        .orderBy(asc(sponsorBenefits.dueDate));
+      
+      res.json(benefits);
+    } catch (error) {
+      console.error('Error fetching sponsor benefits:', error);
+      res.status(500).json({ error: 'Failed to fetch sponsor benefits' });
+    }
+  });
+
+  // Update benefit completion status
+  app.put('/api/admin/sponsors/benefits/:benefitId', async (req, res) => {
+    try {
+      const benefitId = parseInt(req.params.benefitId);
+      const { completed, completedBy, completedAt } = req.body;
+      
+      await db.update(sponsorBenefits)
+        .set({
+          completedAt: completed ? new Date(completedAt) : null,
+          completedBy: completed ? completedBy : null,
+          notes: completed ? 'Completed via Admin Dashboard' : null
+        })
+        .where(eq(sponsorBenefits.id, benefitId));
+      
+      res.json({ success: true, message: 'Benefit updated successfully' });
+    } catch (error) {
+      console.error('Error updating benefit:', error);
+      res.status(500).json({ error: 'Failed to update benefit' });
+    }
+  });
+
+  // Update task completion status
+  app.put('/api/admin/sponsors/tasks/:taskId', async (req, res) => {
+    try {
+      const taskId = parseInt(req.params.taskId);
+      const { completed, completedAt } = req.body;
+      
+      await db.update(aiAssistantTasks)
+        .set({
+          isCompleted: completed,
+          completedAt: completed ? new Date(completedAt) : null
+        })
+        .where(eq(aiAssistantTasks.id, taskId));
+      
+      res.json({ success: true, message: 'Task updated successfully' });
+    } catch (error) {
+      console.error('Error updating task:', error);
+      res.status(500).json({ error: 'Failed to update task' });
+    }
+  });
+
+  // Mark all current month tasks as complete
+  app.post('/api/admin/sponsors/tasks/complete-all', async (req, res) => {
+    try {
+      const { completedBy } = req.body;
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth() + 1;
+      const currentYear = currentDate.getFullYear();
+      
+      await db.update(aiAssistantTasks)
+        .set({
+          isCompleted: true,
+          completedAt: new Date()
+        })
+        .where(
+          and(
+            eq(aiAssistantTasks.isCompleted, false),
+            gte(aiAssistantTasks.dueDate, new Date(currentYear, currentMonth - 1, 1)),
+            lte(aiAssistantTasks.dueDate, new Date(currentYear, currentMonth, 0))
+          )
+        );
+      
+      res.json({ success: true, message: 'All current month tasks marked complete' });
+    } catch (error) {
+      console.error('Error completing all tasks:', error);
+      res.status(500).json({ error: 'Failed to complete tasks' });
+    }
+  });
+
+  // Export sponsor data as CSV
+  app.get('/api/admin/sponsors/export', async (req, res) => {
+    try {
+      const sponsorList = await db.select().from(sponsors).orderBy(desc(sponsors.joinedAt));
+      
+      // Generate CSV content
+      const csvHeader = 'Business Name,Contact Name,Email,Tier,Amount,Joined Date,Status\n';
+      const csvRows = sponsorList.map(sponsor => 
+        `"${sponsor.businessName}","${sponsor.contactName}","${sponsor.email}","${sponsor.tier}","$${sponsor.amount}","${new Date(sponsor.joinedAt).toLocaleDateString()}","${sponsor.status}"`
+      ).join('\n');
+      
+      const csvContent = csvHeader + csvRows;
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename=sponsors_data.csv');
+      res.send(csvContent);
+    } catch (error) {
+      console.error('Error exporting sponsor data:', error);
+      res.status(500).json({ error: 'Failed to export sponsor data' });
+    }
   });
 }

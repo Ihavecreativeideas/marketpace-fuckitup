@@ -5,6 +5,7 @@ import path from "path";
 import { config } from "dotenv";
 import { registerRoutes } from "./routes";
 import { registerAdminRoutes } from "./adminRoutes";
+import { registerSponsorshipRoutes } from "./sponsorshipRoutes";
 
 // Load environment variables
 config();
@@ -465,6 +466,9 @@ const port = process.env.PORT || 5000;
 
 // Register admin routes
 registerAdminRoutes(app);
+
+// Register sponsorship routes
+registerSponsorshipRoutes(app);
 
 registerRoutes(app).then((server) => {
   server.listen(port, "0.0.0.0", () => {
