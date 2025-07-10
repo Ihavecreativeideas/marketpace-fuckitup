@@ -251,13 +251,13 @@ app.get('/api/delivery/pricing-rules', (req, res) => {
   res.json({
     success: true,
     rules: {
-      small: { fee: 0, description: "Fits in garbage bag - FREE delivery" },
-      medium: { fee: 25, description: "Larger than garbage bag - $25 large item fee" },
-      large: { fee: 25, description: "Furniture, appliances - $25 large item fee" },
-      bulk: { fee: 25, description: "Large bulk delivery - $25 fee" }
+      small: { fee: 0, description: "Fits in garbage bag - No extra fee" },
+      medium: { fee: 25, description: "Larger than garbage bag - +$25 oversized fee" },
+      large: { fee: 25, description: "Furniture, appliances - +$25 oversized fee" },
+      bulk: { fee: 25, description: "Large bulk delivery - +$25 oversized fee" }
     },
     splitPolicy: "50/50 between buyer and seller",
-    commission: "5% platform fee on delivery charges (excluding tips)"
+    commission: "5% platform fee on oversized charges (excluding tips)"
   });
 });
 

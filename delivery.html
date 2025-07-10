@@ -848,21 +848,21 @@
             <div style="margin-bottom: 16px;">
                 <label style="display: block; margin-bottom: 8px; color: #00ff88;">Item Size:</label>
                 <select id="itemSize" class="form-input" onchange="updatePricing()">
-                    <option value="small">Small (Fits in garbage bag) - FREE</option>
-                    <option value="medium">Medium (Larger than garbage bag)</option>
-                    <option value="large">Large (Furniture, appliances)</option>
-                    <option value="bulk">Large Bulk Delivery - $25</option>
+                    <option value="small">Small (Fits in garbage bag) - No extra fee</option>
+                    <option value="medium">Medium (Larger than garbage bag) - +$25 oversized fee</option>
+                    <option value="large">Large (Furniture, appliances) - +$25 oversized fee</option>
+                    <option value="bulk">Large Bulk Delivery - +$25 oversized fee</option>
                 </select>
             </div>
             
             <div style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 6px; padding: 12px; margin: 16px 0; font-size: 12px;">
-                <strong>Honor System:</strong> Multiple small items that fit in one garbage bag = FREE. Mix of medium/large items or choosing "Large Bulk Delivery" = $25 charge.
+                <strong>Honor System:</strong> Multiple small items that fit in one garbage bag = No extra fee. Mix of medium/large items or choosing "Large Bulk Delivery" = +$25 oversized fee.
             </div>
             
             <div id="sizePricing" style="margin: 16px 0; padding: 12px; background: rgba(0, 0, 0, 0.3); border-radius: 6px;">
                 <div style="display: flex; justify-content: space-between;">
-                    <span>Delivery Fee:</span>
-                    <span id="deliveryFee">FREE</span>
+                    <span>Oversized Fee:</span>
+                    <span id="deliveryFee">No extra fee</span>
                 </div>
                 <div style="display: flex; justify-content: space-between;">
                     <span>Your Share (50%):</span>
@@ -1133,11 +1133,11 @@
             const size = document.getElementById('itemSize').value;
             const quantity = parseInt(document.getElementById('itemQuantity').value) || 1;
             let fee = 0;
-            let feeText = 'FREE';
+            let feeText = 'No extra fee';
             
             if (size === 'medium' || size === 'large' || size === 'bulk') {
                 fee = 25;
-                feeText = '$25.00';
+                feeText = '+$25.00';
             }
             
             const yourShare = fee / 2;
@@ -1163,7 +1163,8 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    alert(`Delivery size confirmed!\n\nItems: ${quantity}\nSize: ${size}\nDelivery Fee: $${data.deliveryFee}\nYour Share: $${data.yourShare.toFixed(2)}\n\nYour delivery has been updated. The driver will be notified of any changes.`);
+                    const feeText = data.deliveryFee === 0 ? 'No extra fee' : `+$${data.deliveryFee} oversized fee`;
+                    alert(`Delivery size confirmed!\n\nItems: ${quantity}\nSize: ${size}\nOversized Fee: ${feeText}\nYour Share: $${data.yourShare.toFixed(2)}\n\nYour delivery has been updated. The driver will be notified of any changes.`);
                 } else {
                     alert('Error updating delivery size: ' + data.message);
                 }
