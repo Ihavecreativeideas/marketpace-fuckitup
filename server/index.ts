@@ -112,6 +112,59 @@ app.get('/signup-login', (req, res) => {
   res.sendFile(path.join(__dirname, '../signup-login.html'));
 });
 
+// Seamless signup API endpoint
+app.post('/api/seamless-signup', async (req, res) => {
+  const { email, password, phone } = req.body;
+  
+  if (!email || !password || !phone) {
+    return res.status(400).json({ success: false, message: 'Email, password, and phone are required' });
+  }
+  
+  try {
+    // In a real app, you would:
+    // 1. Hash the password
+    // 2. Store user in database
+    // 3. Send verification SMS
+    
+    console.log(`New user signup: ${email}, ${phone}`);
+    
+    res.json({ 
+      success: true, 
+      message: 'Account created successfully',
+      user: { email, phone, loggedIn: true }
+    });
+  } catch (error) {
+    console.error('Signup error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Seamless login API endpoint
+app.post('/api/seamless-login', async (req, res) => {
+  const { email, password } = req.body;
+  
+  if (!email || !password) {
+    return res.status(400).json({ success: false, message: 'Email and password are required' });
+  }
+  
+  try {
+    // In a real app, you would:
+    // 1. Verify password hash
+    // 2. Check user exists in database
+    
+    console.log(`User login: ${email}`);
+    
+    res.json({ 
+      success: true, 
+      message: 'Login successful',
+      user: { email, loggedIn: true }
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 // Forgot password API endpoint
 app.post('/api/forgot-password', (req, res) => {
   const { email } = req.body;
