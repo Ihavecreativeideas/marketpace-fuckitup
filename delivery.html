@@ -361,6 +361,81 @@
             font-size: 10px;
         }
 
+        /* Honor System Features */
+        .delivery-size-info {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            font-size: 12px;
+        }
+
+        .size-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .size-small { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
+        .size-medium { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+        .size-large { background: rgba(255, 107, 107, 0.2); color: #ff6b6b; }
+        .size-bulk { background: rgba(138, 43, 226, 0.2); color: #8a2be2; }
+
+        .honor-system-notice {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 12px 0;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .delivery-fee-breakdown {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            font-size: 12px;
+        }
+
+        .fee-line {
+            display: flex;
+            justify-content: space-between;
+            margin: 4px 0;
+        }
+
+        .fee-line.total {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 8px;
+            margin-top: 8px;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .honesty-rating {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+        .rating-stars {
+            margin-left: 8px;
+        }
+
+        .star {
+            color: #ffd93d;
+            margin-right: 2px;
+        }
+
         /* Rating Modal */
         .modal {
             display: none;
@@ -497,6 +572,10 @@
 
         <!-- Current Deliveries -->
         <div id="current" class="content-section">
+            <div class="honor-system-notice">
+                ⚖️ Honor System Delivery Pricing: Choose item size honestly when placing orders. Drivers can rate buyer/seller honesty to maintain community trust.
+            </div>
+            
             <div class="notification-banner">
                 📦 You have 2 active deliveries in progress
             </div>
@@ -512,6 +591,16 @@
                     <div class="item-info">
                         <div class="item-name">Vintage Leather Jacket</div>
                         <div class="item-details">From: Sarah's Boutique • Order #MP1234</div>
+                        <div class="delivery-size-info">
+                            <span class="size-badge size-small">Small Item</span>
+                            <span style="opacity: 0.8;">Fits in garbage bag - No extra charge</span>
+                        </div>
+                        <div class="honesty-rating">
+                            <span>Buyer Honesty Rating:</span>
+                            <div class="rating-stars">
+                                <span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="driver-info">
@@ -537,14 +626,29 @@
                         </div>
                     </div>
 
-                    <div class="cost-breakdown">
-                        <span>Delivery Fee (split): $3.50</span>
-                        <span>Your Total: $88.50</span>
+                    <div class="delivery-fee-breakdown">
+                        <div class="fee-line">
+                            <span>Item Total:</span>
+                            <span>$85.00</span>
+                        </div>
+                        <div class="fee-line">
+                            <span>Small Item Delivery:</span>
+                            <span>FREE</span>
+                        </div>
+                        <div class="fee-line">
+                            <span>Your Share (50%):</span>
+                            <span>$0.00</span>
+                        </div>
+                        <div class="fee-line total">
+                            <span>Your Total:</span>
+                            <span>$85.00</span>
+                        </div>
                     </div>
 
                     <div class="delivery-actions">
                         <button class="action-btn primary" onclick="trackLive('MP1234')">📍 Track Live</button>
                         <button class="action-btn" onclick="contactDriver('mike-johnson')">💬 Message Driver</button>
+                        <button class="action-btn" onclick="openSizeModal()">📦 Update Size</button>
                         <button class="action-btn danger" onclick="declineDelivery('MP1234')">❌ Decline</button>
                     </div>
                 </div>
@@ -557,8 +661,18 @@
                     </div>
 
                     <div class="item-info">
-                        <div class="item-name">Garden Tool Set</div>
+                        <div class="item-name">Garden Tool Set (3 items)</div>
                         <div class="item-details">To: Tom Wilson • Order #MP5678</div>
+                        <div class="delivery-size-info">
+                            <span class="size-badge size-medium">Medium Items</span>
+                            <span style="opacity: 0.8;">Mixed sizes - Large item delivery charge applied</span>
+                        </div>
+                        <div class="honesty-rating">
+                            <span>Seller Honesty Rating:</span>
+                            <div class="rating-stars">
+                                <span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="driver-info">
@@ -582,9 +696,27 @@
                         </div>
                     </div>
 
-                    <div class="cost-breakdown">
-                        <span>Delivery Fee (split): $4.25</span>
-                        <span>Your Earnings: $41.75</span>
+                    <div class="delivery-fee-breakdown">
+                        <div class="fee-line">
+                            <span>Item Total:</span>
+                            <span>$150.00</span>
+                        </div>
+                        <div class="fee-line">
+                            <span>Large Item Delivery:</span>
+                            <span>$25.00</span>
+                        </div>
+                        <div class="fee-line">
+                            <span>Your Share (50%):</span>
+                            <span>-$12.50</span>
+                        </div>
+                        <div class="fee-line">
+                            <span>MarketPace Fee (5%):</span>
+                            <span>-$7.50</span>
+                        </div>
+                        <div class="fee-line total">
+                            <span>You Receive:</span>
+                            <span>$130.00</span>
+                        </div>
                     </div>
 
                     <div class="delivery-actions">
@@ -625,6 +757,7 @@
 
                     <div class="delivery-actions">
                         <button class="action-btn primary" onclick="rateDriver('david-johnson', 'MP9999')">⭐ Rate & Review</button>
+                        <button class="action-btn" onclick="rateHonesty('david-johnson', 'MP9999')">⚖️ Rate Honesty</button>
                         <button class="action-btn" onclick="tipDriver('david-johnson')">💰 Add Tip</button>
                         <button class="action-btn" onclick="viewReceipt('MP9999')">📄 Receipt</button>
                     </div>
@@ -692,6 +825,78 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Delivery Size Selection Modal -->
+    <div id="sizeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Select Delivery Size</h2>
+                <button class="close-btn" onclick="closeSizeModal()">&times;</button>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <p>Please honestly select your item size(s) and quantity:</p>
+            </div>
+            
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; margin-bottom: 8px; color: #00ff88;">Number of Items:</label>
+                <input type="number" id="itemQuantity" class="form-input" value="1" min="1" placeholder="How many items?">
+            </div>
+            
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; margin-bottom: 8px; color: #00ff88;">Item Size:</label>
+                <select id="itemSize" class="form-input" onchange="updatePricing()">
+                    <option value="small">Small (Fits in garbage bag) - FREE</option>
+                    <option value="medium">Medium (Larger than garbage bag)</option>
+                    <option value="large">Large (Furniture, appliances)</option>
+                    <option value="bulk">Large Bulk Delivery - $25</option>
+                </select>
+            </div>
+            
+            <div style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 6px; padding: 12px; margin: 16px 0; font-size: 12px;">
+                <strong>Honor System:</strong> Multiple small items that fit in one garbage bag = FREE. Mix of medium/large items or choosing "Large Bulk Delivery" = $25 charge.
+            </div>
+            
+            <div id="sizePricing" style="margin: 16px 0; padding: 12px; background: rgba(0, 0, 0, 0.3); border-radius: 6px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Delivery Fee:</span>
+                    <span id="deliveryFee">FREE</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Your Share (50%):</span>
+                    <span id="yourShare">$0.00</span>
+                </div>
+            </div>
+            
+            <button class="submit-btn" onclick="confirmDeliverySize()">Confirm Delivery</button>
+        </div>
+    </div>
+
+    <!-- Honesty Rating Modal -->
+    <div id="honestyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Rate Item Size Honesty</h2>
+                <button class="close-btn" onclick="closeHonestyModal()">&times;</button>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <p>Was the item size accurately reported by the buyer/seller?</p>
+            </div>
+            
+            <div class="rating-stars" id="honestyStars">
+                <span class="star" onclick="setHonestyRating(1)">⭐</span>
+                <span class="star" onclick="setHonestyRating(2)">⭐</span>
+                <span class="star" onclick="setHonestyRating(3)">⭐</span>
+                <span class="star" onclick="setHonestyRating(4)">⭐</span>
+                <span class="star" onclick="setHonestyRating(5)">⭐</span>
+            </div>
+            
+            <textarea class="form-textarea" id="honestyComment" placeholder="Optional: Explain any size discrepancies..."></textarea>
+            
+            <button class="submit-btn" onclick="submitHonestyRating()">Submit Rating</button>
         </div>
     </div>
 
@@ -912,11 +1117,136 @@
             alert(`Adding ${itemId.replace('-', ' ')} to your cart...\n\nWould you like to order from the same seller or browse other options?`);
         }
 
+        // Honor System Functions
+        let currentHonestyRating = 0;
+        
+        function openSizeModal() {
+            document.getElementById('sizeModal').style.display = 'block';
+            updatePricing();
+        }
+        
+        function closeSizeModal() {
+            document.getElementById('sizeModal').style.display = 'none';
+        }
+        
+        function updatePricing() {
+            const size = document.getElementById('itemSize').value;
+            const quantity = parseInt(document.getElementById('itemQuantity').value) || 1;
+            let fee = 0;
+            let feeText = 'FREE';
+            
+            if (size === 'medium' || size === 'large' || size === 'bulk') {
+                fee = 25;
+                feeText = '$25.00';
+            }
+            
+            const yourShare = fee / 2;
+            
+            document.getElementById('deliveryFee').textContent = feeText;
+            document.getElementById('yourShare').textContent = '$' + yourShare.toFixed(2);
+        }
+        
+        async function confirmDeliverySize() {
+            const size = document.getElementById('itemSize').value;
+            const quantity = document.getElementById('itemQuantity').value;
+            const orderId = 'MP1234'; // In real app, get from context
+            
+            try {
+                const response = await fetch('/api/delivery/size', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ orderId, size, quantity })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`Delivery size confirmed!\n\nItems: ${quantity}\nSize: ${size}\nDelivery Fee: $${data.deliveryFee}\nYour Share: $${data.yourShare.toFixed(2)}\n\nYour delivery has been updated. The driver will be notified of any changes.`);
+                } else {
+                    alert('Error updating delivery size: ' + data.message);
+                }
+            } catch (error) {
+                alert('Network error updating delivery size. Please try again.');
+                console.error('Error:', error);
+            }
+            
+            closeSizeModal();
+        }
+        
+        function rateHonesty(userId, orderId) {
+            document.getElementById('honestyModal').style.display = 'block';
+        }
+        
+        function closeHonestyModal() {
+            document.getElementById('honestyModal').style.display = 'none';
+            currentHonestyRating = 0;
+            document.querySelectorAll('#honestyStars .star').forEach(star => star.classList.remove('active'));
+            document.getElementById('honestyComment').value = '';
+        }
+        
+        function setHonestyRating(rating) {
+            currentHonestyRating = rating;
+            document.querySelectorAll('#honestyStars .star').forEach((star, index) => {
+                star.classList.toggle('active', index < rating);
+            });
+        }
+        
+        async function submitHonestyRating() {
+            if (currentHonestyRating === 0) {
+                alert('Please select a honesty rating before submitting.');
+                return;
+            }
+            
+            const comment = document.getElementById('honestyComment').value;
+            const raterId = 'current-user'; // In real app, get from auth context
+            const ratedUserId = 'other-user'; // In real app, get from delivery context  
+            const orderId = 'MP9999'; // In real app, get from context
+            
+            try {
+                const response = await fetch('/api/delivery/honesty-rating', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        raterId, 
+                        ratedUserId, 
+                        orderId, 
+                        honestyScore: currentHonestyRating, 
+                        comment 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const ratingText = currentHonestyRating >= 4 ? 'Accurate size reporting' : 'Size was not accurately reported';
+                    alert(`Honesty rating submitted!\n\n⚖️ Rating: ${currentHonestyRating} stars\n📝 ${ratingText}\n${comment ? '💬 Comment: ' + comment : ''}\n\nThank you for helping maintain community trust!`);
+                } else {
+                    alert('Error submitting honesty rating: ' + data.message);
+                }
+            } catch (error) {
+                alert('Network error submitting rating. Please try again.');
+                console.error('Error:', error);
+            }
+            
+            closeHonestyModal();
+        }
+
         // Close modal when clicking outside
         window.addEventListener('click', function(e) {
-            const modal = document.getElementById('ratingModal');
-            if (e.target === modal) {
+            const ratingModal = document.getElementById('ratingModal');
+            const sizeModal = document.getElementById('sizeModal');
+            const honestyModal = document.getElementById('honestyModal');
+            
+            if (e.target === ratingModal) {
                 closeRatingModal();
+            } else if (e.target === sizeModal) {
+                closeSizeModal();
+            } else if (e.target === honestyModal) {
+                closeHonestyModal();
             }
         });
 
