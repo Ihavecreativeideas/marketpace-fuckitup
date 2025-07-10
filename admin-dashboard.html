@@ -799,68 +799,85 @@
             <div id="sponsors" class="content-section">
                 <div class="section-header">
                     <h2 class="section-title">Sponsor Tracker System</h2>
-                    <button class="btn btn-success" onclick="addSponsor()">
-                        <i class="fas fa-plus"></i> Add Sponsor
+                    <button class="btn btn-success" onclick="refreshSponsors()">
+                        <i class="fas fa-sync"></i> Refresh Sponsors
                     </button>
-                </div>
-
-                <div class="calendar-widget">
-                    <div class="calendar-header">
-                        <h3><i class="fas fa-calendar-alt"></i> Monthly Task Calendar</h3>
-                    </div>
-                    <div class="task-item">
-                        <div class="task-checkbox" onclick="toggleTask(this)"></div>
-                        <span>📱 Post Monthly Social Media Shout-out</span>
-                    </div>
-                    <div class="task-item">
-                        <div class="task-checkbox" onclick="toggleTask(this)"></div>
-                        <span>📦 Send Custom Business Cards</span>
-                    </div>
-                    <div class="task-item">
-                        <div class="task-checkbox" onclick="toggleTask(this)"></div>
-                        <span>📢 Feature in Newsletter</span>
-                    </div>
-                    <div class="task-item">
-                        <div class="task-checkbox" onclick="toggleTask(this)"></div>
-                        <span>💌 Send Thank You Letter</span>
-                    </div>
                 </div>
 
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-icon warning">
-                            <i class="fas fa-medal"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="bronzeSponsors">0</h3>
-                            <p>Bronze Sponsors</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
                         <div class="stat-icon primary">
-                            <i class="fas fa-star"></i>
+                            <i class="fas fa-heart"></i>
                         </div>
                         <div class="stat-info">
-                            <h3 id="silverSponsors">0</h3>
-                            <p>Silver Sponsors</p>
+                            <h3 id="communitySupporter">0</h3>
+                            <p>Community Supporter ($25)</p>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon success">
-                            <i class="fas fa-crown"></i>
+                            <i class="fas fa-handshake"></i>
                         </div>
                         <div class="stat-info">
-                            <h3 id="goldSponsors">0</h3>
-                            <p>Gold Sponsors</p>
+                            <h3 id="localPartner">0</h3>
+                            <p>Local Partner ($100)</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="communityChampion">0</h3>
+                            <p>Community Champion ($500)</p>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon danger">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="brandAmbassador">0</h3>
+                            <p>Brand Ambassador ($1,000)</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon primary">
                             <i class="fas fa-gem"></i>
                         </div>
                         <div class="stat-info">
-                            <h3 id="platinumSponsors">0</h3>
-                            <p>Platinum Sponsors</p>
+                            <h3 id="legacyFounder">0</h3>
+                            <p>Legacy Founder ($2,500)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sponsor List with Monthly Perks -->
+                <div class="data-table" style="margin-top: 2rem;">
+                    <div class="table-header">
+                        <i class="fas fa-users"></i> Active Sponsors & Monthly Perks
+                        <button class="btn btn-primary" style="float: right; margin-top: -5px;" onclick="exportSponsorData()">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                    <div class="table-content" id="sponsorsList">
+                        <div style="text-align: center; padding: 2rem; color: #666;">
+                            <i class="fas fa-spinner fa-spin"></i> Loading sponsors...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monthly Task Calendar -->
+                <div class="calendar-widget" style="margin-top: 2rem;">
+                    <div class="calendar-header">
+                        <h3><i class="fas fa-calendar-check"></i> This Month's Tasks</h3>
+                        <button class="btn btn-warning" onclick="markAllTasksComplete()">
+                            <i class="fas fa-check-double"></i> Mark All Complete
+                        </button>
+                    </div>
+                    <div id="monthlyTasks">
+                        <div style="text-align: center; padding: 1rem; color: #666;">
+                            <i class="fas fa-spinner fa-spin"></i> Loading monthly tasks...
                         </div>
                     </div>
                 </div>
@@ -953,12 +970,23 @@
             });
             
             event.target.classList.add('active');
+            
+            // Load section-specific data
+            if (sectionId === 'sponsors') {
+                // Load sponsor data when sponsors section is first shown
+                if (window.sponsorData) {
+                    loadSponsorsList(window.sponsorData.sponsors);
+                    loadMonthlyTasks(window.sponsorData.monthlyTasks);
+                } else {
+                    refreshSponsors();
+                }
+            }
         }
 
         // Load initial data
         async function loadDashboardData() {
             try {
-                // Simulate API call
+                // Load platform stats
                 const response = await fetch('/api/admin/dashboard-data');
                 const data = await response.json();
                 
@@ -972,10 +1000,34 @@
                 updateAnalytics(data.analytics);
                 updateDriverStats(data.drivers);
                 updateProtectionFunds(data.funds);
-                updateSponsorStats(data.sponsors);
+                
+                // Load sponsor data separately
+                await loadSponsorData();
                 
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        async function loadSponsorData() {
+            try {
+                const response = await fetch('/api/admin/sponsors');
+                const data = await response.json();
+                
+                // Update sponsor counts
+                updateSponsorCounts(data.sponsors);
+                
+                // Store data for sponsor section
+                window.sponsorData = data;
+                
+            } catch (error) {
+                console.error('Error loading sponsor data:', error);
+                // Set default empty sponsor counts
+                document.getElementById('communitySupporter').textContent = '0';
+                document.getElementById('localPartner').textContent = '0';
+                document.getElementById('communityChampion').textContent = '0';
+                document.getElementById('brandAmbassador').textContent = '0';
+                document.getElementById('legacyFounder').textContent = '0';
             }
         }
 
@@ -1008,10 +1060,315 @@
 
         function updateSponsorStats(sponsors) {
             if (sponsors) {
-                document.getElementById('bronzeSponsors').textContent = sponsors.bronze || 0;
-                document.getElementById('silverSponsors').textContent = sponsors.silver || 0;
-                document.getElementById('goldSponsors').textContent = sponsors.gold || 0;
-                document.getElementById('platinumSponsors').textContent = sponsors.platinum || 0;
+                document.getElementById('communitySupporter').textContent = sponsors.supporter || 0;
+                document.getElementById('localPartner').textContent = sponsors.starter || 0;
+                document.getElementById('communityChampion').textContent = sponsors.community || 0;
+                document.getElementById('brandAmbassador').textContent = sponsors.ambassador || 0;
+                document.getElementById('legacyFounder').textContent = sponsors.legacy || 0;
+            }
+        }
+
+        // Sponsor-specific functions
+        async function refreshSponsors() {
+            try {
+                const response = await fetch('/api/admin/sponsors');
+                const data = await response.json();
+                
+                // Update sponsor counts
+                updateSponsorCounts(data.sponsors);
+                
+                // Load sponsor list with monthly perks
+                loadSponsorsList(data.sponsors);
+                
+                // Load monthly tasks
+                loadMonthlyTasks(data.monthlyTasks);
+                
+                showNotification('Sponsors refreshed successfully!', 'success');
+            } catch (error) {
+                console.error('Error refreshing sponsors:', error);
+                showNotification('Error loading sponsor data', 'error');
+            }
+        }
+
+        function updateSponsorCounts(sponsors) {
+            const counts = sponsors.reduce((acc, sponsor) => {
+                acc[sponsor.tier] = (acc[sponsor.tier] || 0) + 1;
+                return acc;
+            }, {});
+            
+            document.getElementById('communitySupporter').textContent = counts.supporter || 0;
+            document.getElementById('localPartner').textContent = counts.starter || 0;
+            document.getElementById('communityChampion').textContent = counts.community || 0;
+            document.getElementById('brandAmbassador').textContent = counts.ambassador || 0;
+            document.getElementById('legacyFounder').textContent = counts.legacy || 0;
+        }
+
+        function loadSponsorsList(sponsors) {
+            const sponsorsList = document.getElementById('sponsorsList');
+            
+            if (sponsors.length === 0) {
+                sponsorsList.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #666;">
+                        <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <h3>No Sponsors Yet</h3>
+                        <p>Sponsors from the sponsorship page will appear here with their monthly perks tracking.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            sponsors.forEach(sponsor => {
+                const tierColors = {
+                    supporter: '#4169E1',
+                    starter: '#32CD32', 
+                    community: '#FFD700',
+                    ambassador: '#FF4500',
+                    legacy: '#8A2BE2'
+                };
+                
+                const tierNames = {
+                    supporter: 'Community Supporter',
+                    starter: 'Local Partner',
+                    community: 'Community Champion',
+                    ambassador: 'Brand Ambassador',
+                    legacy: 'Legacy Founder'
+                };
+                
+                const monthsRemaining = calculateMonthsRemaining(sponsor.joinedAt);
+                
+                html += `
+                    <div class="sponsor-card" style="border: 2px solid ${tierColors[sponsor.tier]}; margin-bottom: 1rem; padding: 1rem; border-radius: 8px; background: rgba(255,255,255,0.05);">
+                        <div style="display: flex; justify-content: between; align-items: center;">
+                            <div style="flex: 1;">
+                                <h4 style="color: ${tierColors[sponsor.tier]}; margin: 0;">${sponsor.businessName}</h4>
+                                <p style="margin: 0.25rem 0; color: #666;">${tierNames[sponsor.tier]} - $${sponsor.amount}</p>
+                                <p style="margin: 0.25rem 0; font-size: 0.9rem; color: #888;">${sponsor.contactName} • ${sponsor.email}</p>
+                                <p style="margin: 0.25rem 0; font-size: 0.9rem; color: #888;">Joined: ${new Date(sponsor.joinedAt).toLocaleDateString()}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="background: ${tierColors[sponsor.tier]}; color: white; padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem; margin-bottom: 0.5rem;">
+                                    ${monthsRemaining} months left
+                                </div>
+                                <button class="btn btn-sm btn-primary" onclick="viewSponsorDetails(${sponsor.id})" style="font-size: 0.8rem;">
+                                    <i class="fas fa-tasks"></i> View Perks
+                                </button>
+                            </div>
+                        </div>
+                        <div id="sponsor-${sponsor.id}-perks" style="margin-top: 1rem; display: none;">
+                            <!-- Monthly perks will be loaded here -->
+                        </div>
+                    </div>
+                `;
+            });
+            
+            sponsorsList.innerHTML = html;
+        }
+
+        function calculateMonthsRemaining(joinedAt) {
+            const joined = new Date(joinedAt);
+            const now = new Date();
+            const oneYear = new Date(joined);
+            oneYear.setFullYear(oneYear.getFullYear() + 1);
+            
+            const monthsRemaining = Math.ceil((oneYear - now) / (1000 * 60 * 60 * 24 * 30));
+            return Math.max(0, monthsRemaining);
+        }
+
+        async function viewSponsorDetails(sponsorId) {
+            try {
+                const response = await fetch(`/api/admin/sponsors/${sponsorId}/benefits`);
+                const benefits = await response.json();
+                
+                const perksDiv = document.getElementById(`sponsor-${sponsorId}-perks`);
+                if (perksDiv.style.display === 'none') {
+                    perksDiv.style.display = 'block';
+                    perksDiv.innerHTML = generatePerksHTML(benefits);
+                } else {
+                    perksDiv.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error loading sponsor details:', error);
+                showNotification('Error loading sponsor details', 'error');
+            }
+        }
+
+        function generatePerksHTML(benefits) {
+            let html = '<h5 style="margin: 0.5rem 0; color: #87ceeb;">Monthly Perks Checklist:</h5>';
+            
+            benefits.forEach(benefit => {
+                const isCompleted = benefit.completedAt !== null;
+                const dueDate = benefit.dueDate ? new Date(benefit.dueDate).toLocaleDateString() : 'No deadline';
+                
+                html += `
+                    <div class="perk-item" style="padding: 0.5rem; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="flex: 1;">
+                            <label style="display: flex; align-items: center; cursor: pointer;">
+                                <input type="checkbox" ${isCompleted ? 'checked' : ''} 
+                                       onchange="toggleBenefit(${benefit.id}, this.checked)"
+                                       style="margin-right: 0.5rem;">
+                                <span style="color: ${isCompleted ? '#4CAF50' : '#fff'};">
+                                    ${benefit.benefitName}
+                                </span>
+                            </label>
+                            <div style="font-size: 0.8rem; color: #666; margin-left: 1.5rem;">
+                                Due: ${dueDate}
+                                ${benefit.description ? `<br>${benefit.description}` : ''}
+                            </div>
+                        </div>
+                        <div style="text-align: right; font-size: 0.8rem;">
+                            ${isCompleted ? 
+                                `<span style="color: #4CAF50;">✓ Completed</span>` : 
+                                `<span style="color: #ff9800;">Pending</span>`}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            return html;
+        }
+
+        async function toggleBenefit(benefitId, isCompleted) {
+            try {
+                const response = await fetch(`/api/admin/sponsors/benefits/${benefitId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        completed: isCompleted,
+                        completedBy: 'Admin Dashboard',
+                        completedAt: isCompleted ? new Date().toISOString() : null
+                    })
+                });
+                
+                if (response.ok) {
+                    showNotification(`Benefit ${isCompleted ? 'completed' : 'marked pending'}!`, 'success');
+                } else {
+                    showNotification('Error updating benefit', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating benefit:', error);
+                showNotification('Error updating benefit', 'error');
+            }
+        }
+
+        function loadMonthlyTasks(tasks) {
+            const tasksDiv = document.getElementById('monthlyTasks');
+            
+            if (!tasks || tasks.length === 0) {
+                tasksDiv.innerHTML = `
+                    <div style="text-align: center; padding: 1rem; color: #666;">
+                        <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                        <p>No pending tasks this month!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            tasks.forEach(task => {
+                const isCompleted = task.isCompleted;
+                const dueDate = task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '';
+                
+                html += `
+                    <div class="task-item" style="padding: 0.75rem; border-bottom: 1px solid #333; display: flex; align-items: center;">
+                        <div class="task-checkbox ${isCompleted ? 'completed' : ''}" 
+                             onclick="toggleTask(${task.id}, this)" 
+                             style="width: 20px; height: 20px; border: 2px solid #87ceeb; border-radius: 4px; margin-right: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; ${isCompleted ? 'background: #87ceeb;' : ''}">
+                            ${isCompleted ? '<i class="fas fa-check" style="color: white; font-size: 12px;"></i>' : ''}
+                        </div>
+                        <div style="flex: 1;">
+                            <span style="color: ${isCompleted ? '#4CAF50' : '#fff'}; ${isCompleted ? 'text-decoration: line-through;' : ''}">${task.title}</span>
+                            ${task.description ? `<div style="font-size: 0.8rem; color: #666; margin-top: 0.25rem;">${task.description}</div>` : ''}
+                            ${dueDate ? `<div style="font-size: 0.8rem; color: #ff9800;">Due: ${dueDate}</div>` : ''}
+                        </div>
+                        <div style="font-size: 0.8rem; color: ${task.priority === 1 ? '#ff4444' : task.priority === 2 ? '#ff9800' : '#4CAF50'};">
+                            ${task.priority === 1 ? 'High' : task.priority === 2 ? 'Medium' : 'Low'} Priority
+                        </div>
+                    </div>
+                `;
+            });
+            
+            tasksDiv.innerHTML = html;
+        }
+
+        async function toggleTask(taskId, element) {
+            const isCompleted = element.classList.contains('completed');
+            
+            try {
+                const response = await fetch(`/api/admin/sponsors/tasks/${taskId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        completed: !isCompleted,
+                        completedAt: !isCompleted ? new Date().toISOString() : null
+                    })
+                });
+                
+                if (response.ok) {
+                    if (!isCompleted) {
+                        element.classList.add('completed');
+                        element.style.background = '#87ceeb';
+                        element.innerHTML = '<i class="fas fa-check" style="color: white; font-size: 12px;"></i>';
+                    } else {
+                        element.classList.remove('completed');
+                        element.style.background = 'transparent';
+                        element.innerHTML = '';
+                    }
+                    showNotification(`Task ${!isCompleted ? 'completed' : 'marked pending'}!`, 'success');
+                } else {
+                    showNotification('Error updating task', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating task:', error);
+                showNotification('Error updating task', 'error');
+            }
+        }
+
+        async function markAllTasksComplete() {
+            try {
+                const response = await fetch('/api/admin/sponsors/tasks/complete-all', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        completedBy: 'Admin Dashboard'
+                    })
+                });
+                
+                if (response.ok) {
+                    refreshSponsors();
+                    showNotification('All tasks marked complete!', 'success');
+                } else {
+                    showNotification('Error completing tasks', 'error');
+                }
+            } catch (error) {
+                console.error('Error completing tasks:', error);
+                showNotification('Error completing tasks', 'error');
+            }
+        }
+
+        async function exportSponsorData() {
+            try {
+                const response = await fetch('/api/admin/sponsors/export');
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `sponsors_data_${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                showNotification('Sponsor data exported successfully!', 'success');
+            } catch (error) {
+                console.error('Error exporting sponsor data:', error);
+                showNotification('Error exporting data', 'error');
             }
         }
 

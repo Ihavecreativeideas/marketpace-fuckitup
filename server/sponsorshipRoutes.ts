@@ -1,364 +1,263 @@
 import type { Express } from "express";
-import Stripe from "stripe";
+import express from "express";
+import Stripe from 'stripe';
 import { db } from "./db";
-import { sponsors, sponsorBenefits, routeSponsorships, spotlightCalendar, aiAssistantTasks } from "../shared/sponsorSchema";
-import { eq, and, desc, asc } from "drizzle-orm";
+import { sponsors, sponsorBenefits, aiAssistantTasks } from "../shared/sponsorSchema";
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
-}
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-10-16",
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+  apiVersion: '2024-06-20',
 });
 
-// Sponsorship tier configurations
-const SPONSORSHIP_TIERS = {
-  supporter: {
-    name: "Supporter",
-    price: 25,
-    currency: "usd",
-    interval: "one_time",
-    benefits: [
-      "Thank-you email",
-      "Public Thank You on MarketPace Community Feed",
-      "Recognition as a MarketPace Backer"
-    ]
-  },
-  starter: {
-    name: "Starter Sponsor",
-    price: 100,
-    currency: "usd", 
-    interval: "one_time",
-    benefits: [
-      "Lifetime MarketPace Pro membership",
-      "Sponsor badge in web & app profile",
-      "Shout-out on social media",
-      "Listed in Supporter Wall"
-    ]
-  },
-  community: {
-    name: "Community Sponsor",
-    price: 500,
-    currency: "usd",
-    interval: "one_time",
-    benefits: [
-      "No added delivery fees (1 year)",
-      "100 QR-coded business cards",
-      "Vinyl MarketPace Partner window sticker",
-      "Co-branded tote bags",
-      "Featured on landing page & sponsor page",
-      "Live Mention at Local Events",
-      "Gift bag insert for select drop-offs",
-      "Pace Partner of the Month promotion",
-      "Blog feature + backlink to website",
-      "Beta access to upcoming tools & features"
-    ]
-  },
-  ambassador: {
-    name: "Ambassador Sponsor",
-    price: 1000,
-    currency: "usd",
-    interval: "one_time",
-    benefits: [
-      "Personalized video shout-out from founder",
-      "Featured business banner in app + web homepage",
-      "Special Ambassador badge in app",
-      "Custom social promo for business",
-      "Route Sponsorship (1x/month)",
-      "Monthly social promotion"
-    ]
-  },
-  legacy: {
-    name: "Legacy Sponsor",
-    price: 2500,
-    currency: "usd",
-    interval: "one_time",
-    benefits: [
-      "Founding Partner status (permanent)",
-      "Monthly social promotion (12 months)",
-      "VIP founder updates & roadmap access",
-      "Press mention & rollout announcements",
-      "Invite to future MarketPace Partner events",
-      "Priority feature request queue",
-      "2 Route Sponsorships per month"
-    ]
-  }
-};
-
-// Create sponsor benefits when sponsor signs up
-async function createSponsorBenefits(sponsorId: number, tier: string) {
-  const tierConfig = SPONSORSHIP_TIERS[tier as keyof typeof SPONSORSHIP_TIERS];
-  if (!tierConfig) return;
-
-  const benefits = tierConfig.benefits.map(benefit => ({
-    sponsorId,
-    benefitType: benefit.toLowerCase().replace(/\s+/g, '_'),
-    benefitName: benefit,
-    description: `${benefit} for ${tierConfig.name}`,
-    dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-    priority: tier === 'legacy' ? 1 : tier === 'ambassador' ? 1 : 2
-  }));
-
-  await db.insert(sponsorBenefits).values(benefits);
-
-  // Create AI assistant tasks for high-priority sponsors
-  if (tier === 'ambassador' || tier === 'legacy') {
-    await db.insert(aiAssistantTasks).values([
-      {
-        taskType: 'reminder',
-        title: `Welcome ${tierConfig.name} - Schedule video call`,
-        description: `New ${tierConfig.name} signed up. Schedule welcome call and video shout-out within 48 hours.`,
-        sponsorId,
-        dueDate: new Date(Date.now() + 48 * 60 * 60 * 1000),
-        priority: 1
-      }
-    ]);
-  }
-
-  // Create monthly spotlight calendar entries for eligible tiers
-  if (tier === 'community' || tier === 'ambassador' || tier === 'legacy') {
-    const currentDate = new Date();
-    const months = tier === 'legacy' ? 12 : 1;
-    
-    for (let i = 0; i < months; i++) {
-      const targetDate = new Date(currentDate);
-      targetDate.setMonth(currentDate.getMonth() + i + 1);
-      
-      await db.insert(spotlightCalendar).values({
-        sponsorId,
-        month: targetDate.getMonth() + 1,
-        year: targetDate.getFullYear(),
-        spotlightType: 'pace_partner_month'
-      });
-    }
-  }
-}
-
-export function registerSponsorshipRoutes(app: Express): void {
+export function registerSponsorshipRoutes(app: Express) {
   
-  // Get sponsorship tiers for checkout page
-  app.get('/api/sponsorship/tiers', (req, res) => {
-    res.json(SPONSORSHIP_TIERS);
-  });
-
   // Create Stripe checkout session for sponsorship
-  app.post('/api/sponsorship/create-checkout', async (req, res) => {
+  app.post('/api/create-sponsor-checkout', async (req, res) => {
     try {
-      const { tier, businessInfo } = req.body;
-      const tierConfig = SPONSORSHIP_TIERS[tier as keyof typeof SPONSORSHIP_TIERS];
+      const { tier, tierName, amount } = req.body;
       
-      if (!tierConfig) {
-        return res.status(400).json({ error: 'Invalid sponsorship tier' });
+      if (!tier || !tierName || !amount) {
+        return res.status(400).json({ error: 'Missing required fields' });
       }
 
+      // Create Stripe checkout session
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: [
           {
             price_data: {
-              currency: tierConfig.currency,
+              currency: 'usd',
               product_data: {
-                name: `MarketPace ${tierConfig.name}`,
-                description: `Support local community marketplace - ${tierConfig.benefits.length} benefits included`,
-                images: [] // Add logo URL here if available
+                name: `MarketPace ${tierName}`,
+                description: `One-time sponsorship to support community commerce`,
+                images: ['https://your-domain.com/logo.png'], // Add your logo URL
               },
-              unit_amount: tierConfig.price * 100, // Convert to cents
+              unit_amount: amount * 100, // Stripe uses cents
             },
             quantity: 1,
           },
         ],
         mode: 'payment',
-        success_url: `${req.headers.origin}/sponsorship/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${req.headers.origin}/sponsorship`,
+        success_url: `${req.headers.origin || 'http://localhost:5000'}/sponsor-success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${req.headers.origin || 'http://localhost:5000'}/sponsorship.html`,
         metadata: {
-          tier,
-          businessName: businessInfo.businessName,
-          contactName: businessInfo.contactName,
-          email: businessInfo.email
-        },
-        customer_email: businessInfo.email
+          tier: tier,
+          tierName: tierName,
+          amount: amount.toString()
+        }
       });
 
-      res.json({ sessionId: session.id, url: session.url });
-    } catch (error: any) {
-      console.error('Stripe checkout error:', error);
-      res.status(500).json({ error: error.message });
+      res.json({ sessionUrl: session.url });
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      res.status(500).json({ error: 'Failed to create checkout session' });
     }
   });
 
-  // Handle successful payment and create sponsor record
-  app.post('/api/sponsorship/payment-success', async (req, res) => {
+  // Handle successful sponsorship payment
+  app.get('/sponsor-success', async (req, res) => {
     try {
-      const { sessionId } = req.body;
-      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      const { session_id } = req.query;
+      
+      if (!session_id) {
+        return res.redirect('/sponsorship.html?error=no_session');
+      }
+
+      // Retrieve the checkout session from Stripe
+      const session = await stripe.checkout.sessions.retrieve(session_id as string);
       
       if (session.payment_status === 'paid') {
-        const { tier, businessName, contactName, email } = session.metadata!;
-        const tierConfig = SPONSORSHIP_TIERS[tier as keyof typeof SPONSORSHIP_TIERS];
+        // Create sponsor record in database
+        await createSponsorRecord(session);
         
-        // Create sponsor record
-        const [sponsor] = await db.insert(sponsors).values({
-          businessName,
-          contactName,
-          email,
-          tier,
-          amount: tierConfig.price.toString(),
-          stripeCustomerId: session.customer as string,
-          status: 'active',
-          totalPaid: tierConfig.price.toString(),
-          joinedAt: new Date()
-        }).returning();
-
-        // Create benefits and tasks
-        await createSponsorBenefits(sponsor.id, tier);
-
-        res.json({ success: true, sponsor });
+        // Redirect to success page
+        res.send(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Sponsorship Success - MarketPace</title>
+              <style>
+                  body { font-family: Arial, sans-serif; background: #0d0221; color: white; text-align: center; padding: 50px; }
+                  .success-container { max-width: 600px; margin: 0 auto; }
+                  .success-icon { font-size: 4rem; color: #4CAF50; margin-bottom: 20px; }
+                  h1 { color: #87ceeb; margin-bottom: 20px; }
+                  .tier-name { color: #FFD700; font-size: 1.5rem; margin: 20px 0; }
+                  .benefits { text-align: left; margin: 30px auto; max-width: 400px; }
+                  .benefits li { margin: 10px 0; }
+                  .cta-button { 
+                      background: linear-gradient(45deg, #4169E1, #87ceeb); 
+                      color: white; padding: 15px 30px; border: none; border-radius: 25px; 
+                      font-size: 1.1rem; cursor: pointer; margin-top: 30px; text-decoration: none; display: inline-block;
+                  }
+              </style>
+          </head>
+          <body>
+              <div class="success-container">
+                  <div class="success-icon">🎉</div>
+                  <h1>Thank You for Your Sponsorship!</h1>
+                  <div class="tier-name">${session.metadata?.tierName}</div>
+                  <p>Your payment of $${session.metadata?.amount} has been processed successfully.</p>
+                  <p>You are now a valued MarketPace sponsor and will receive all tier benefits over the next 12 months.</p>
+                  
+                  <div class="benefits">
+                      <h3>What happens next:</h3>
+                      <ul>
+                          <li>Welcome email with benefit schedule</li>
+                          <li>Admin team will begin fulfilling your perks</li>
+                          <li>Monthly check-ins and updates</li>
+                          <li>Direct access to founder for feedback</li>
+                      </ul>
+                  </div>
+                  
+                  <a href="/community.html" class="cta-button">Explore Community Feed</a>
+                  <a href="/pitch-page.html" class="cta-button">Back to Home</a>
+              </div>
+          </body>
+          </html>
+        `);
       } else {
-        res.status(400).json({ error: 'Payment not completed' });
+        res.redirect('/sponsorship.html?error=payment_failed');
       }
-    } catch (error: any) {
-      console.error('Payment success handling error:', error);
-      res.status(500).json({ error: error.message });
+    } catch (error) {
+      console.error('Error processing sponsorship success:', error);
+      res.redirect('/sponsorship.html?error=processing_failed');
     }
   });
 
-  // Get all sponsors for admin dashboard
-  app.get('/api/admin/sponsors', async (req, res) => {
-    try {
-      const allSponsors = await db.select().from(sponsors).orderBy(desc(sponsors.joinedAt));
-      res.json(allSponsors);
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  });
+  // Stripe webhook for sponsorship confirmations
+  app.post('/api/sponsor-webhook', express.raw({type: 'application/json'}), async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-  // Get sponsor details with benefits
-  app.get('/api/admin/sponsors/:id', async (req, res) => {
+    if (!webhookSecret) {
+      return res.status(400).send('Webhook secret not configured');
+    }
+
+    let event;
+
     try {
-      const sponsorId = parseInt(req.params.id);
-      
-      const [sponsor] = await db.select().from(sponsors).where(eq(sponsors.id, sponsorId));
-      if (!sponsor) {
-        return res.status(404).json({ error: 'Sponsor not found' });
+      event = stripe.webhooks.constructEvent(req.body, sig!, webhookSecret);
+    } catch (err: any) {
+      console.log(`Webhook signature verification failed.`, err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    // Handle the event
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object as Stripe.Checkout.Session;
+      await createSponsorRecord(session);
+    }
+
+    res.json({received: true});
+  });
+}
+
+// Helper function to create sponsor record and benefits
+async function createSponsorRecord(session: Stripe.Checkout.Session) {
+  try {
+    const { tier, tierName, amount } = session.metadata!;
+    
+    // Get customer details from Stripe
+    const customer = await stripe.customers.retrieve(session.customer as string);
+    const customerEmail = (customer as Stripe.Customer).email || session.customer_details?.email;
+    const customerName = (customer as Stripe.Customer).name || session.customer_details?.name;
+    
+    // Create sponsor record
+    const [newSponsor] = await db.insert(sponsors).values({
+      businessName: customerName || 'Business Name',
+      contactName: customerName || 'Contact Name',
+      email: customerEmail!,
+      tier: tier,
+      amount: amount,
+      stripeCustomerId: session.customer as string,
+      status: 'active',
+      joinedAt: new Date(),
+      totalPaid: parseFloat(amount)
+    }).returning();
+
+    // Create monthly benefits for 12 months
+    await createSponsorBenefits(newSponsor.id!, tier);
+    
+    console.log(`Sponsor created: ${customerName} - ${tierName} - $${amount}`);
+    
+  } catch (error) {
+    console.error('Error creating sponsor record:', error);
+  }
+}
+
+// Create tier-specific benefits for 12 months
+async function createSponsorBenefits(sponsorId: number, tier: string) {
+  const benefitTemplates = {
+    supporter: [
+      { name: 'Personal Thank-You Letter', type: 'communication', recurring: false },
+      { name: 'Community Recognition', type: 'social_media', recurring: true },
+      { name: 'MarketPace Backer Badge', type: 'digital_badge', recurring: false }
+    ],
+    partner: [
+      { name: 'Zero Delivery Upcharge', type: 'platform_benefit', recurring: true },
+      { name: 'Monthly Check-in', type: 'communication', recurring: true }
+    ],
+    champion: [
+      { name: 'Website Logo Feature', type: 'marketing', recurring: true },
+      { name: 'Social Media Shout-out', type: 'social_media', recurring: true },
+      { name: 'Custom Business Cards', type: 'physical_marketing', recurring: false },
+      { name: 'Monthly Spotlight', type: 'promotion', recurring: true }
+    ],
+    ambassador: [
+      { name: 'Personal Video from Founder', type: 'communication', recurring: false },
+      { name: 'Featured Banner Placement', type: 'marketing', recurring: true },
+      { name: 'Route Sponsorship', type: 'route_sponsor', recurring: true }
+    ],
+    legacy: [
+      { name: 'Permanent Founding Partner Status', type: 'platform_recognition', recurring: false },
+      { name: 'VIP Updates & Roadmap', type: 'communication', recurring: true },
+      { name: 'Bi-monthly Route Sponsorship', type: 'route_sponsor', recurring: true },
+      { name: 'Press Mentions', type: 'marketing', recurring: true }
+    ]
+  };
+
+  const benefits = benefitTemplates[tier as keyof typeof benefitTemplates] || [];
+  
+  for (const benefit of benefits) {
+    // Create initial benefit
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 7); // Due in 1 week
+
+    await db.insert(sponsorBenefits).values({
+      sponsorId: sponsorId,
+      benefitType: benefit.type,
+      benefitName: benefit.name,
+      dueDate: dueDate,
+      isRecurring: benefit.recurring,
+      recurringInterval: benefit.recurring ? 'monthly' : undefined,
+      priority: 1
+    });
+
+    // If recurring, create 11 more monthly benefits
+    if (benefit.recurring) {
+      for (let month = 1; month < 12; month++) {
+        const nextDueDate = new Date();
+        nextDueDate.setMonth(nextDueDate.getMonth() + month);
+        
+        await db.insert(sponsorBenefits).values({
+          sponsorId: sponsorId,
+          benefitType: benefit.type,
+          benefitName: `${benefit.name} - Month ${month + 1}`,
+          dueDate: nextDueDate,
+          isRecurring: true,
+          recurringInterval: 'monthly',
+          priority: 2
+        });
       }
-
-      const benefits = await db.select().from(sponsorBenefits)
-        .where(eq(sponsorBenefits.sponsorId, sponsorId))
-        .orderBy(asc(sponsorBenefits.dueDate));
-
-      const spotlights = await db.select().from(spotlightCalendar)
-        .where(eq(spotlightCalendar.sponsorId, sponsorId))
-        .orderBy(asc(spotlightCalendar.year), asc(spotlightCalendar.month));
-
-      const routes = await db.select().from(routeSponsorships)
-        .where(eq(routeSponsorships.sponsorId, sponsorId))
-        .orderBy(desc(routeSponsorships.routeDate));
-
-      res.json({ sponsor, benefits, spotlights, routes });
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
     }
-  });
+  }
 
-  // Mark benefit as completed
-  app.post('/api/admin/benefits/:id/complete', async (req, res) => {
-    try {
-      const benefitId = parseInt(req.params.id);
-      const { notes, completedBy } = req.body;
-      
-      await db.update(sponsorBenefits)
-        .set({ 
-          completedAt: new Date(),
-          notes,
-          completedBy: completedBy || 'Admin'
-        })
-        .where(eq(sponsorBenefits.id, benefitId));
-
-      res.json({ success: true });
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  });
-
-  // Get AI assistant dashboard
-  app.get('/api/admin/ai-assistant', async (req, res) => {
-    try {
-      const tasks = await db.select().from(aiAssistantTasks)
-        .where(eq(aiAssistantTasks.isCompleted, false))
-        .orderBy(asc(aiAssistantTasks.priority), asc(aiAssistantTasks.dueDate));
-
-      const upcomingSpotlights = await db.select({
-        id: spotlightCalendar.id,
-        sponsorId: spotlightCalendar.sponsorId,
-        month: spotlightCalendar.month,
-        year: spotlightCalendar.year,
-        spotlightType: spotlightCalendar.spotlightType,
-        businessName: sponsors.businessName,
-        tier: sponsors.tier
-      })
-      .from(spotlightCalendar)
-      .leftJoin(sponsors, eq(spotlightCalendar.sponsorId, sponsors.id))
-      .where(eq(spotlightCalendar.isCompleted, false))
-      .orderBy(asc(spotlightCalendar.year), asc(spotlightCalendar.month));
-
-      res.json({ tasks, upcomingSpotlights });
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  });
-
-  // Create new AI task
-  app.post('/api/admin/ai-assistant/tasks', async (req, res) => {
-    try {
-      const { title, description, sponsorId, dueDate, priority } = req.body;
-      
-      const [task] = await db.insert(aiAssistantTasks).values({
-        taskType: 'manual',
-        title,
-        description,
-        sponsorId: sponsorId || null,
-        dueDate: dueDate ? new Date(dueDate) : null,
-        priority: priority || 2
-      }).returning();
-
-      res.json(task);
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  });
-
-  // Complete AI task
-  app.post('/api/admin/ai-assistant/tasks/:id/complete', async (req, res) => {
-    try {
-      const taskId = parseInt(req.params.id);
-      
-      await db.update(aiAssistantTasks)
-        .set({ 
-          isCompleted: true,
-          completedAt: new Date()
-        })
-        .where(eq(aiAssistantTasks.id, taskId));
-
-      res.json({ success: true });
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  });
-
-  // Update sponsor information
-  app.put('/api/admin/sponsors/:id', async (req, res) => {
-    try {
-      const sponsorId = parseInt(req.params.id);
-      const updates = req.body;
-      
-      await db.update(sponsors)
-        .set({ ...updates, updatedAt: new Date() })
-        .where(eq(sponsors.id, sponsorId));
-
-      res.json({ success: true });
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
+  // Create AI assistant tasks for high-priority follow-ups
+  await db.insert(aiAssistantTasks).values({
+    taskType: 'follow_up',
+    title: `Welcome new ${tier} sponsor`,
+    description: `Send welcome email and begin benefit fulfillment for new sponsor`,
+    sponsorId: sponsorId,
+    dueDate: new Date(),
+    priority: 1
   });
 }
