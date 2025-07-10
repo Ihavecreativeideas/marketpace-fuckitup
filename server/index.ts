@@ -98,6 +98,16 @@ app.get('/data-deletion', (req, res) => {
   res.sendFile(path.join(__dirname, '../data-deletion.html'));
 });
 
+// Community feed route
+app.get('/community', (req, res) => {
+  res.sendFile(path.join(__dirname, '../community.html'));
+});
+
+// Sign up/login route  
+app.get('/signup-login', (req, res) => {
+  res.sendFile(path.join(__dirname, '../signup-login.html'));
+});
+
 // Admin login page
 app.get('/admin-login', (req, res) => {
   res.sendFile(path.join(__dirname, '../admin-login.html'));
