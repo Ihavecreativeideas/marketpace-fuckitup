@@ -762,6 +762,24 @@
 
         // Check if user is logged in
         function checkLoginStatus() {
+            // Check for OAuth user data in URL params
+            const urlParams = new URLSearchParams(window.location.search);
+            const userParam = urlParams.get('user');
+            
+            if (userParam) {
+                // Store OAuth user data in localStorage
+                const userData = JSON.parse(decodeURIComponent(userParam));
+                localStorage.setItem('marketpaceUser', JSON.stringify(userData));
+                
+                // Clean up URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                // Update profile display
+                updateProfileDisplay(userData);
+                return;
+            }
+            
+            // Check localStorage for existing user
             const userData = localStorage.getItem('marketpaceUser');
             if (!userData) {
                 // Not logged in, redirect to signup/login
@@ -775,8 +793,17 @@
                 return;
             }
             
+            updateProfileDisplay(user);
+        }
+        
+        function updateProfileDisplay(user) {
             // Update profile display with user info
-            if (user.email) {
+            if (user.name) {
+                const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                document.querySelectorAll('.profile-pic span').forEach(span => {
+                    span.textContent = initials;
+                });
+            } else if (user.email) {
                 const initials = user.email.substring(0, 2).toUpperCase();
                 document.querySelectorAll('.profile-pic span').forEach(span => {
                     span.textContent = initials;
