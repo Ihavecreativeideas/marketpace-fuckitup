@@ -461,6 +461,19 @@
         <div class="checkout-section">
             <h2 class="checkout-title">Checkout</h2>
             
+            <!-- Delivery Distance Demo -->
+            <div class="delivery-window">
+                <h3 class="delivery-title">📍 Demo Distance Settings</h3>
+                <div style="margin-bottom: 15px;">
+                    <select id="distanceSelector" onchange="updateDeliveryDistance()" style="width: 100%; padding: 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: white;">
+                        <option value="8.5">8.5 miles (Standard delivery)</option>
+                        <option value="12">12 miles (Within normal range)</option>
+                        <option value="18">18 miles (Premium: 3 miles beyond limit)</option>
+                        <option value="25">25 miles (Premium: 10 miles beyond limit)</option>
+                    </select>
+                </div>
+            </div>
+
             <!-- Delivery Window Selection -->
             <div class="delivery-window">
                 <h3 class="delivery-title">🕐 Select Delivery Window</h3>
@@ -507,6 +520,9 @@
                 <div class="cost-row">
                     <span class="cost-label">Mileage Fee:</span>
                     <span class="cost-value" id="mileageFee">$0.00</span>
+                </div>
+                <div id="mileageBreakdown" style="font-size: 12px; color: rgba(255, 255, 255, 0.6); margin-left: 20px; margin-top: -5px; margin-bottom: 10px;">
+                    8.5 miles × $0.50 = $4.25
                 </div>
                 <div class="cost-row" id="urgentFeeRow" style="display: none;">
                     <span class="cost-label">Urgent Fee:</span>
@@ -644,6 +660,9 @@
             document.getElementById('mileageFee').textContent = `$${mileageFee.toFixed(2)}`;
             document.getElementById('totalCost').textContent = `$${total.toFixed(2)}`;
             
+            // Update mileage breakdown display
+            updateMileageBreakdown();
+            
             // Show/hide urgent fee
             const urgentFeeRow = document.getElementById('urgentFeeRow');
             if (cartData.urgentDelivery) {
@@ -651,6 +670,22 @@
             } else {
                 urgentFeeRow.style.display = 'none';
             }
+        }
+
+        // Update mileage breakdown display
+        function updateMileageBreakdown() {
+            const totalMiles = cartData.deliveryDistance || 8.5;
+            const baseMileageFee = totalMiles * 0.50;
+            const extraMiles = Math.max(0, totalMiles - 15);
+            const premiumFee = extraMiles * 1.00;
+            
+            let breakdownText = `${totalMiles} miles × $0.50 = $${baseMileageFee.toFixed(2)}`;
+            
+            if (extraMiles > 0) {
+                breakdownText += `<br>+ ${extraMiles} miles beyond 15 miles × $1.00 = $${premiumFee.toFixed(2)}`;
+            }
+            
+            document.getElementById('mileageBreakdown').innerHTML = breakdownText;
         }
 
         // Calculate delivery fee (base rate)
@@ -664,10 +699,31 @@
             return largeItems.length * 25.00;
         }
 
-        // Calculate mileage fee (over 15 miles)
+        // Calculate mileage fee (all miles + premium for over 15 miles)
         function calculateMileageFee() {
-            const extraMiles = Math.max(0, cartData.deliveryDistance - 15);
-            return extraMiles * 0.50;
+            const totalMiles = cartData.deliveryDistance || 8.5; // Default demo distance
+            const baseMileageFee = totalMiles * 0.50; // All miles at $0.50
+            
+            // Additional $1.00 per mile beyond 15 miles (driver out-of-range compensation)
+            const extraMiles = Math.max(0, totalMiles - 15);
+            const premiumFee = extraMiles * 1.00;
+            
+            return baseMileageFee + premiumFee;
+        }
+
+        // Update delivery distance
+        function updateDeliveryDistance() {
+            const selectedDistance = parseFloat(document.getElementById('distanceSelector').value);
+            cartData.deliveryDistance = selectedDistance;
+            localStorage.setItem('marketplaceCart', JSON.stringify(cartData));
+            updateCosts();
+            
+            // Show notification about distance change
+            if (selectedDistance > 15) {
+                showNotification(`Distance updated to ${selectedDistance} miles - premium fees apply beyond 15 miles`, 'info');
+            } else {
+                showNotification(`Distance updated to ${selectedDistance} miles - standard pricing`, 'success');
+            }
         }
 
         // Update urgent delivery
