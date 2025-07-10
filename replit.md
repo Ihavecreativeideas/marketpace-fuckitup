@@ -208,6 +208,15 @@ MarketPace is a React Native mobile application that prioritizes community empow
 
 ## Recent Changes
 
+✓ **PROFILE CUSTOMIZATION: BLUE THEME & BULK UPLOAD SYSTEM** (January 10, 2025)
+✓ Changed profile color scheme from green to blue for more professional appearance
+✓ Updated all UI elements: logo, avatars, accent colors, gradients, and navigation states
+✓ Removed "closet items" terminology - users now create custom item descriptions
+✓ Added bulk upload functionality with collection labels: "Closet Clean Out", "Garage Sale", "Moving Sale", etc.
+✓ Enhanced item addition modal with single/bulk upload options and custom label input
+✓ Updated privacy settings and tab labels to use generic "items" instead of "closet items"
+✓ Added helpful tips for bulk photo uploads and flexible pricing options (ranges, "Various prices")
+
 ✓ **HONOR-BASED DELIVERY PRICING SYSTEM WITH BUYER/SELLER RATING** (January 10, 2025)
 ✓ Implemented comprehensive honor system for delivery size selection with multi-item purchase support
 ✓ Added size-based pricing: Small items (fits in garbage bag) = No extra fee; Mixed medium/large = +$25 oversized charge
