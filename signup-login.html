@@ -367,27 +367,46 @@
             }
         }
 
-        function handleSignup(event) {
+        async function handleSignup(event) {
             event.preventDefault();
             const formData = new FormData(event.target);
             const email = formData.get('email');
+            const password = formData.get('password');
             const phone = formData.get('phone');
             
-            // Store user data in localStorage (simplified for now)
-            const userData = {
-                email: email,
-                phone: phone,
-                loggedIn: true,
-                loginTime: Date.now()
-            };
-            
-            localStorage.setItem('marketpaceUser', JSON.stringify(userData));
-            
-            // Simulate SMS verification
-            alert(`Welcome to MarketPace! A verification code has been sent to ${phone}. You're now logged in and will stay logged in for future visits.`);
-            
-            // Redirect to community feed
-            window.location.href = '/community';
+            try {
+                const response = await fetch('/api/seamless-signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password, phone }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Store user data in localStorage
+                    const userData = {
+                        email: email,
+                        phone: phone,
+                        loggedIn: true,
+                        loginTime: Date.now()
+                    };
+                    
+                    localStorage.setItem('marketpaceUser', JSON.stringify(userData));
+                    
+                    alert(`Welcome to MarketPace! A verification code has been sent to ${phone}. You're now logged in and will stay logged in for future visits.`);
+                    
+                    // Redirect to community feed
+                    window.location.href = '/community';
+                } else {
+                    alert('Signup failed: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                alert('Signup failed. Please try again.');
+            }
         }
 
         function forgotPassword() {
@@ -415,24 +434,44 @@
             }
         }
 
-        function handleLogin(event) {
+        async function handleLogin(event) {
             event.preventDefault();
             const formData = new FormData(event.target);
             const email = formData.get('email');
+            const password = formData.get('password');
             
-            // Store login state
-            const userData = {
-                email: email,
-                loggedIn: true,
-                loginTime: Date.now()
-            };
-            
-            localStorage.setItem('marketpaceUser', JSON.stringify(userData));
-            
-            alert('Welcome back! You\'re now logged in.');
-            
-            // Redirect to community feed
-            window.location.href = '/community';
+            try {
+                const response = await fetch('/api/seamless-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Store login state
+                    const userData = {
+                        email: email,
+                        loggedIn: true,
+                        loginTime: Date.now()
+                    };
+                    
+                    localStorage.setItem('marketpaceUser', JSON.stringify(userData));
+                    
+                    alert('Welcome back! You\'re now logged in.');
+                    
+                    // Redirect to community feed
+                    window.location.href = '/community';
+                } else {
+                    alert('Login failed: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login failed. Please try again.');
+            }
         }
 
         // Check if user is already logged in
