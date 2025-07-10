@@ -529,6 +529,20 @@
                 </div>
             </div>
 
+            <!-- Demo Route Type Buttons -->
+            <div style="margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #00ffff;">Demo Different Route Types:</div>
+                <button onclick="loadStandardItems()" style="padding: 8px 15px; margin: 5px; background: rgba(0,150,255,0.8); color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    Standard Mixed Route
+                </button>
+                <button onclick="loadShopDeliveryItems()" style="padding: 8px 15px; margin: 5px; background: rgba(255,150,0,0.8); color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    Shop Delivery Day Route
+                </button>
+                <button onclick="clearCart()" style="padding: 8px 15px; margin: 5px; background: rgba(255,50,50,0.8); color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    Clear Cart
+                </button>
+            </div>
+
             <!-- Checkout Button -->
             <button class="checkout-btn" id="checkoutBtn" onclick="proceedToCheckout()">
                 Proceed to Payment
@@ -549,10 +563,12 @@
         // Sample addresses for route optimization demo
         const sampleAddresses = {
             sellers: [
-                { name: "Electronics Store", address: "123 Main St, Orange Beach, AL", lat: 30.2810, lng: -87.6134 },
-                { name: "Vintage Boutique", address: "456 Gulf Shores Pkwy, Gulf Shores, AL", lat: 30.2468, lng: -87.6725 },
-                { name: "Outdoor Gear Co", address: "789 Beach Blvd, Orange Beach, AL", lat: 30.2751, lng: -87.6089 },
-                { name: "Art Gallery", address: "321 Cotton Bayou Dr, Orange Beach, AL", lat: 30.2699, lng: -87.6156 }
+                { name: "Electronics Store", address: "123 Main St, Orange Beach, AL", lat: 30.2810, lng: -87.6134, type: "individual" },
+                { name: "Vintage Boutique", address: "456 Gulf Shores Pkwy, Gulf Shores, AL", lat: 30.2468, lng: -87.6725, type: "individual" },
+                { name: "Outdoor Gear Co", address: "789 Beach Blvd, Orange Beach, AL", lat: 30.2751, lng: -87.6089, type: "individual" },
+                { name: "Art Gallery", address: "321 Cotton Bayou Dr, Orange Beach, AL", lat: 30.2699, lng: -87.6156, type: "individual" },
+                { name: "Beach Shop Pro", address: "111 Coastal Hwy, Orange Beach, AL", lat: 30.2801, lng: -87.6201, type: "shop", deliveryDay: true },
+                { name: "Local Market Plus", address: "222 Marina Rd, Orange Beach, AL", lat: 30.2745, lng: -87.6167, type: "shop", deliveryDay: true }
             ],
             buyers: [
                 { name: "Customer A", address: "555 Phoenix Dr, Orange Beach, AL", lat: 30.2834, lng: -87.6221 },
@@ -692,25 +708,43 @@
             let breakdownText = '';
             
             if (individualFees.length > 0) {
-                breakdownText = '<div style="font-size: 11px; line-height: 1.3;">';
-                breakdownText += '<strong>Individual Delivery Mileage:</strong><br>';
+                const isShopDelivery = individualFees[0]?.isShopDeliveryDay;
                 
-                individualFees.forEach((fee, index) => {
-                    breakdownText += `<div style="margin: 2px 0; padding: 2px; background: rgba(255,255,255,0.05); border-radius: 3px;">`;
-                    breakdownText += `${fee.itemName}: ${fee.miles} miles × $0.50 = $${fee.baseFee.toFixed(2)}`;
+                if (isShopDelivery) {
+                    // Shop delivery day - no mileage fees
+                    breakdownText = '<div style="font-size: 11px; line-height: 1.3;">';
+                    breakdownText += `<strong>🏪 Shop Delivery Day Route</strong><br>`;
+                    breakdownText += `<div style="margin: 4px 0; padding: 6px; background: rgba(0,255,255,0.1); border: 1px solid rgba(0,255,255,0.3); border-radius: 5px;">`;
+                    breakdownText += `<div style="color: #00ffff; font-weight: bold;">Exclusive Shop Route - ${individualFees[0].shopName}</div>`;
+                    breakdownText += `<div style="font-size: 10px; color: rgba(255,255,255,0.8); margin-top: 2px;">`;
+                    breakdownText += `• No other deliveries on this route<br>`;
+                    breakdownText += `• Higher pickup/dropoff fees to compensate for lack of multiple tips<br>`;
+                    breakdownText += `• No mileage charges - pricing is flat rate per delivery`;
+                    breakdownText += `</div></div>`;
+                    breakdownText += `<div style="margin-top: 4px; font-weight: bold; color: #00ffff;">Mileage Fee: $0.00 (Shop Delivery Day)</div>`;
+                    breakdownText += '</div>';
+                } else {
+                    // Standard mixed route with individual mileage calculations
+                    breakdownText = '<div style="font-size: 11px; line-height: 1.3;">';
+                    breakdownText += '<strong>📍 Individual Delivery Mileage:</strong><br>';
                     
-                    if (fee.premiumFee > 0) {
-                        const extraMiles = Math.max(0, fee.miles - 15);
-                        breakdownText += `<br>&nbsp;&nbsp;&nbsp;+ ${extraMiles} miles beyond 15 × $1.00 = $${fee.premiumFee.toFixed(2)}`;
-                    }
+                    individualFees.forEach((fee, index) => {
+                        breakdownText += `<div style="margin: 2px 0; padding: 2px; background: rgba(255,255,255,0.05); border-radius: 3px;">`;
+                        breakdownText += `${fee.itemName}: ${fee.miles} miles × $0.50 = $${fee.baseFee.toFixed(2)}`;
+                        
+                        if (fee.premiumFee > 0) {
+                            const extraMiles = Math.max(0, fee.miles - 15);
+                            breakdownText += `<br>&nbsp;&nbsp;&nbsp;+ ${extraMiles} miles beyond 15 × $1.00 = $${fee.premiumFee.toFixed(2)}`;
+                        }
+                        
+                        breakdownText += `<br>&nbsp;&nbsp;&nbsp;<strong>Subtotal: $${fee.totalFee.toFixed(2)}</strong>`;
+                        breakdownText += `</div>`;
+                    });
                     
-                    breakdownText += `<br>&nbsp;&nbsp;&nbsp;<strong>Subtotal: $${fee.totalFee.toFixed(2)}</strong>`;
-                    breakdownText += `</div>`;
-                });
-                
-                const totalFee = individualFees.reduce((sum, fee) => sum + fee.totalFee, 0);
-                breakdownText += `<div style="margin-top: 4px; font-weight: bold; color: #00ffff;">Total Mileage Fee: $${totalFee.toFixed(2)}</div>`;
-                breakdownText += '</div>';
+                    const totalFee = individualFees.reduce((sum, fee) => sum + fee.totalFee, 0);
+                    breakdownText += `<div style="margin-top: 4px; font-weight: bold; color: #00ffff;">Total Mileage Fee: $${totalFee.toFixed(2)}</div>`;
+                    breakdownText += '</div>';
+                }
             } else {
                 breakdownText = 'No items in cart';
             }
@@ -733,8 +767,17 @@
             const routeSteps = document.getElementById('routeSteps');
             if (!cartData.deliveryRoute || !cartData.deliveryRoute.route) return;
 
+            const isShopDelivery = cartData.deliveryRoute.isShopDeliveryDay;
+            
             let stepsHTML = '<div style="font-size: 12px; color: rgba(255, 255, 255, 0.8);">';
             stepsHTML += `<div style="margin-bottom: 8px;"><strong>🚗 Driver starts at:</strong> ${sampleAddresses.driverStart.name}</div>`;
+            
+            if (isShopDelivery) {
+                stepsHTML += `<div style="margin-bottom: 8px; padding: 6px; background: rgba(0,255,255,0.1); border: 1px solid rgba(0,255,255,0.3); border-radius: 5px;">`;
+                stepsHTML += `<div style="color: #00ffff; font-weight: bold;">🏪 Exclusive Shop Delivery Day Route</div>`;
+                stepsHTML += `<div style="font-size: 10px; color: rgba(255,255,255,0.8);">No other deliveries • $4 pickup + $4 per dropoff</div>`;
+                stepsHTML += `</div>`;
+            }
             
             // Map items to their pickup/dropoff locations for charging visualization
             const itemLocationMap = {};
@@ -752,39 +795,50 @@
                 const action = step.type === 'pickup' ? 'Pick up from' : 'Deliver to';
                 const items = step.items.map(item => item.itemName || 'Item').join(', ');
                 
-                // Check which buyers are being charged for this route segment
-                let chargingInfo = '';
-                if (cartData.individualMileageFees) {
-                    const chargedBuyers = [];
-                    
-                    cartData.individualMileageFees.forEach(fee => {
-                        const itemLocation = itemLocationMap[fee.itemId];
-                        if (itemLocation) {
-                            // Find pickup and dropoff step indices for this item
-                            const pickupStepIndex = cartData.deliveryRoute.route.findIndex(s => 
-                                s.type === 'pickup' && s.location.name === itemLocation.pickup
-                            );
-                            const dropoffStepIndex = cartData.deliveryRoute.route.findIndex(s => 
-                                s.type === 'dropoff' && s.location.name === itemLocation.dropoff
-                            );
-                            
-                            // Check if this step is within the charging range for this buyer
-                            if (index >= pickupStepIndex && index <= dropoffStepIndex) {
-                                chargedBuyers.push(fee.itemName);
-                            }
-                        }
-                    });
-                    
-                    if (chargedBuyers.length > 0) {
-                        chargingInfo = `<br><span style="color: #00ffff; font-size: 10px;">💰 Charged to: ${chargedBuyers.join(', ')}</span>`;
+                // Pricing information based on route type
+                let pricingInfo = '';
+                if (isShopDelivery) {
+                    if (step.type === 'pickup') {
+                        pricingInfo = `<br><span style="color: #00ff00; font-size: 10px;">💰 Shop Pickup Fee: $4.00</span>`;
+                    } else {
+                        pricingInfo = `<br><span style="color: #00ff00; font-size: 10px;">💰 Shop Dropoff Fee: $4.00 per delivery</span>`;
                     }
+                } else {
+                    // Standard route - show individual buyer mileage charges
+                    let chargingInfo = '';
+                    if (cartData.individualMileageFees) {
+                        const chargedBuyers = [];
+                        
+                        cartData.individualMileageFees.forEach(fee => {
+                            const itemLocation = itemLocationMap[fee.itemId];
+                            if (itemLocation) {
+                                // Find pickup and dropoff step indices for this item
+                                const pickupStepIndex = cartData.deliveryRoute.route.findIndex(s => 
+                                    s.type === 'pickup' && s.location.name === itemLocation.pickup
+                                );
+                                const dropoffStepIndex = cartData.deliveryRoute.route.findIndex(s => 
+                                    s.type === 'dropoff' && s.location.name === itemLocation.dropoff
+                                );
+                                
+                                // Check if this step is within the charging range for this buyer
+                                if (index >= pickupStepIndex && index <= dropoffStepIndex) {
+                                    chargedBuyers.push(fee.itemName);
+                                }
+                            }
+                        });
+                        
+                        if (chargedBuyers.length > 0) {
+                            chargingInfo = `<br><span style="color: #00ffff; font-size: 10px;">💰 Mileage charged to: ${chargedBuyers.join(', ')}</span>`;
+                        }
+                    }
+                    pricingInfo = chargingInfo;
                 }
                 
                 stepsHTML += `
                     <div style="margin-bottom: 6px; padding: 4px; background: rgba(255, 255, 255, 0.05); border-radius: 4px;">
                         <div><strong>${icon} Step ${index + 1}:</strong> ${action} ${step.location.name}</div>
                         <div style="font-size: 11px; color: rgba(255, 255, 255, 0.6);">
-                            ${step.distance.toFixed(1)} miles • Items: ${items}${chargingInfo}
+                            ${step.distance.toFixed(1)} miles • Items: ${items}${pricingInfo}
                         </div>
                     </div>
                 `;
@@ -793,17 +847,40 @@
             stepsHTML += `<div style="margin-top: 8px; font-weight: bold; color: #00ffff;">
                 Total Route Distance: ${cartData.deliveryRoute.totalMiles} miles
             </div>`;
-            stepsHTML += `<div style="margin-top: 4px; font-size: 10px; color: rgba(255, 255, 255, 0.7);">
-                💡 Each buyer pays only for their portion: from driver's last stop before pickup to their delivery address
-            </div>`;
+            
+            if (isShopDelivery) {
+                stepsHTML += `<div style="margin-top: 4px; font-size: 10px; color: rgba(255, 255, 255, 0.7);">
+                    🏪 Shop delivery day: higher pickup/dropoff fees compensate for lack of multiple tips between buyers/sellers
+                </div>`;
+            } else {
+                stepsHTML += `<div style="margin-top: 4px; font-size: 10px; color: rgba(255, 255, 255, 0.7);">
+                    💡 Each buyer pays only for their portion: from driver's last stop before pickup to their delivery address
+                </div>`;
+            }
+            
             stepsHTML += '</div>';
             
             routeSteps.innerHTML = stepsHTML;
         }
 
-        // Calculate delivery fee (base rate)
+        // Calculate delivery fee based on route type
         function calculateDeliveryFee() {
-            return cartData.items.length > 0 ? 5.00 : 0;
+            if (cartData.items.length === 0) return 0;
+            
+            const routeData = cartData.deliveryRoute;
+            if (!routeData) return 5.00; // Default base fee
+            
+            if (routeData.isShopDeliveryDay) {
+                // Shop delivery day pricing: $4 pickup + $4 per dropoff
+                const pickupFee = 4.00; // Single pickup from shop
+                const dropoffCount = cartData.items.length; // One dropoff per item
+                const dropoffFees = dropoffCount * 4.00;
+                
+                return pickupFee + dropoffFees;
+            } else {
+                // Standard mixed route pricing
+                return 5.00; // Base delivery fee
+            }
         }
 
         // Calculate large item fee
@@ -824,11 +901,140 @@
             return R * c;
         }
 
+        // Determine route type and pricing structure
+        function determineRouteType() {
+            // Check if all items are from shops with delivery days
+            const deliveryStops = cartData.items.map((item, index) => {
+                const sellerIndex = index % sampleAddresses.sellers.length;
+                return {
+                    itemId: item.id,
+                    itemName: item.name,
+                    seller: sampleAddresses.sellers[sellerIndex]
+                };
+            });
+
+            const shopDeliveryItems = deliveryStops.filter(stop => 
+                stop.seller.type === 'shop' && stop.seller.deliveryDay
+            );
+
+            // If all items are from the same shop with delivery day, use shop delivery route
+            if (shopDeliveryItems.length === cartData.items.length) {
+                const uniqueShops = [...new Set(shopDeliveryItems.map(item => item.seller.name))];
+                if (uniqueShops.length === 1) {
+                    return {
+                        type: 'shop_delivery_day',
+                        shop: shopDeliveryItems[0].seller,
+                        pricing: { pickup: 4.00, dropoff: 4.00 }
+                    };
+                }
+            }
+
+            // Default to standard mixed route
+            return {
+                type: 'standard_mixed',
+                pricing: { pickup: 4.00, dropoff: 2.00, mileage: 0.50, premium: 1.00 }
+            };
+        }
+
         // Optimize delivery route using nearest neighbor algorithm
         function optimizeDeliveryRoute() {
-            if (cartData.items.length === 0) return { totalMiles: 0, route: [] };
+            if (cartData.items.length === 0) return { totalMiles: 0, route: [], routeType: null };
 
-            // Assign sample addresses to cart items
+            const routeType = determineRouteType();
+            
+            if (routeType.type === 'shop_delivery_day') {
+                return optimizeShopDeliveryRoute(routeType);
+            } else {
+                return optimizeStandardRoute(routeType);
+            }
+        }
+
+        // Optimize shop delivery day route (exclusive shop route)
+        function optimizeShopDeliveryRoute(routeType) {
+            const route = [];
+            let currentPosition = sampleAddresses.driverStart;
+            let totalMiles = 0;
+
+            // Single pickup from the shop
+            const shopLocation = routeType.shop;
+            const distanceToShop = calculateDistance(
+                currentPosition.lat, currentPosition.lng,
+                shopLocation.lat, shopLocation.lng
+            );
+
+            totalMiles += distanceToShop;
+            route.push({
+                type: 'pickup',
+                location: shopLocation,
+                distance: distanceToShop,
+                items: cartData.items.map(item => ({ itemId: item.id, itemName: item.name })),
+                pricing: 'shop_delivery_day'
+            });
+
+            currentPosition = shopLocation;
+
+            // Multiple dropoffs to buyers (optimized order)
+            const dropoffLocations = cartData.items.map((item, index) => {
+                const buyerIndex = index % sampleAddresses.buyers.length;
+                return {
+                    location: sampleAddresses.buyers[buyerIndex],
+                    item: item
+                };
+            });
+
+            // Use nearest neighbor for dropoffs
+            const uniqueDropoffs = [...new Set(dropoffLocations.map(d => d.location.name))]
+                .map(name => dropoffLocations.find(d => d.location.name === name).location);
+
+            let remainingDropoffs = [...uniqueDropoffs];
+
+            while (remainingDropoffs.length > 0) {
+                let nearestIndex = 0;
+                let shortestDistance = calculateDistance(
+                    currentPosition.lat, currentPosition.lng,
+                    remainingDropoffs[0].lat, remainingDropoffs[0].lng
+                );
+
+                for (let i = 1; i < remainingDropoffs.length; i++) {
+                    const distance = calculateDistance(
+                        currentPosition.lat, currentPosition.lng,
+                        remainingDropoffs[i].lat, remainingDropoffs[i].lng
+                    );
+                    if (distance < shortestDistance) {
+                        shortestDistance = distance;
+                        nearestIndex = i;
+                    }
+                }
+
+                const nextDropoff = remainingDropoffs[nearestIndex];
+                totalMiles += shortestDistance;
+                
+                const dropoffItems = dropoffLocations
+                    .filter(d => d.location.name === nextDropoff.name)
+                    .map(d => ({ itemId: d.item.id, itemName: d.item.name }));
+
+                route.push({
+                    type: 'dropoff',
+                    location: nextDropoff,
+                    distance: shortestDistance,
+                    items: dropoffItems,
+                    pricing: 'shop_delivery_day'
+                });
+
+                currentPosition = nextDropoff;
+                remainingDropoffs.splice(nearestIndex, 1);
+            }
+
+            return { 
+                totalMiles: Math.round(totalMiles * 100) / 100, 
+                route, 
+                routeType: routeType,
+                isShopDeliveryDay: true
+            };
+        }
+
+        // Optimize standard mixed route (original algorithm)
+        function optimizeStandardRoute(routeType) {
             const route = [];
             let currentPosition = sampleAddresses.driverStart;
             let totalMiles = 0;
@@ -862,7 +1068,6 @@
                     remainingPickups[0].lat, remainingPickups[0].lng
                 );
 
-                // Find nearest pickup location
                 for (let i = 1; i < remainingPickups.length; i++) {
                     const distance = calculateDistance(
                         currentPosition.lat, currentPosition.lng,
@@ -880,10 +1085,10 @@
                     type: 'pickup',
                     location: nextPickup,
                     distance: shortestDistance,
-                    items: deliveryStops.filter(stop => stop.pickup.name === nextPickup.name)
+                    items: deliveryStops.filter(stop => stop.pickup.name === nextPickup.name),
+                    pricing: 'standard'
                 });
 
-                // Add corresponding dropoffs to remaining list
                 const pickupDropoffs = deliveryStops
                     .filter(stop => stop.pickup.name === nextPickup.name)
                     .map(stop => stop.dropoff);
@@ -904,7 +1109,6 @@
                     uniqueDropoffs[0].lat, uniqueDropoffs[0].lng
                 );
 
-                // Find nearest dropoff location
                 for (let i = 1; i < uniqueDropoffs.length; i++) {
                     const distance = calculateDistance(
                         currentPosition.lat, currentPosition.lng,
@@ -922,14 +1126,20 @@
                     type: 'dropoff',
                     location: nextDropoff,
                     distance: shortestDistance,
-                    items: deliveryStops.filter(stop => stop.dropoff.name === nextDropoff.name)
+                    items: deliveryStops.filter(stop => stop.dropoff.name === nextDropoff.name),
+                    pricing: 'standard'
                 });
 
                 currentPosition = nextDropoff;
                 uniqueDropoffs.splice(nearestIndex, 1);
             }
 
-            return { totalMiles: Math.round(totalMiles * 100) / 100, route };
+            return { 
+                totalMiles: Math.round(totalMiles * 100) / 100, 
+                route, 
+                routeType: routeType,
+                isShopDeliveryDay: false
+            };
         }
 
         // Calculate individual buyer mileage fees based on their specific delivery portion
@@ -941,65 +1151,82 @@
             
             const buyerMileageFees = [];
             
-            // For each item in cart, calculate the mileage from driver's last stop before pickup to buyer dropoff
-            cartData.items.forEach((item, index) => {
-                const sellerIndex = index % sampleAddresses.sellers.length;
-                const buyerIndex = index % sampleAddresses.buyers.length;
-                
-                const sellerLocation = sampleAddresses.sellers[sellerIndex];
-                const buyerLocation = sampleAddresses.buyers[buyerIndex];
-                
-                // Find the route step where this seller pickup occurs
-                const pickupStepIndex = routeData.route.findIndex(step => 
-                    step.type === 'pickup' && step.location.name === sellerLocation.name
-                );
-                
-                // Find the route step where this buyer dropoff occurs
-                const dropoffStepIndex = routeData.route.findIndex(step => 
-                    step.type === 'dropoff' && step.location.name === buyerLocation.name
-                );
-                
-                if (pickupStepIndex === -1 || dropoffStepIndex === -1) return;
-                
-                // Calculate mileage from last stop before pickup to buyer dropoff
-                let totalMilesForBuyer = 0;
-                let driverPosition;
-                
-                // Start from driver's position before pickup
-                if (pickupStepIndex === 0) {
-                    driverPosition = sampleAddresses.driverStart;
-                } else {
-                    driverPosition = routeData.route[pickupStepIndex - 1].location;
-                }
-                
-                // Add distance from last stop to seller pickup
-                totalMilesForBuyer += calculateDistance(
-                    driverPosition.lat, driverPosition.lng,
-                    sellerLocation.lat, sellerLocation.lng
-                );
-                
-                // Add all route segments from pickup to buyer dropoff
-                for (let i = pickupStepIndex; i < dropoffStepIndex; i++) {
-                    totalMilesForBuyer += routeData.route[i + 1].distance;
-                }
-                
-                // Calculate fees for this buyer
-                const baseMileageFee = totalMilesForBuyer * 0.50;
-                const extraMiles = Math.max(0, totalMilesForBuyer - 15);
-                const premiumFee = extraMiles * 1.00;
-                const totalFee = baseMileageFee + premiumFee;
-                
-                buyerMileageFees.push({
-                    itemId: item.id,
-                    itemName: item.name,
-                    miles: Math.round(totalMilesForBuyer * 100) / 100,
-                    baseFee: baseMileageFee,
-                    premiumFee: premiumFee,
-                    totalFee: totalFee,
-                    sellerLocation: sellerLocation.name,
-                    buyerLocation: buyerLocation.name
+            if (routeData.isShopDeliveryDay) {
+                // Shop delivery day: No mileage fees - pricing is purely pickup/dropoff based
+                cartData.items.forEach((item, index) => {
+                    buyerMileageFees.push({
+                        itemId: item.id,
+                        itemName: item.name,
+                        miles: 0,
+                        baseFee: 0,
+                        premiumFee: 0,
+                        totalFee: 0,
+                        isShopDeliveryDay: true,
+                        shopName: routeData.routeType.shop.name
+                    });
                 });
-            });
+            } else {
+                // Standard mixed route: Calculate individual mileage portions
+                cartData.items.forEach((item, index) => {
+                    const sellerIndex = index % sampleAddresses.sellers.length;
+                    const buyerIndex = index % sampleAddresses.buyers.length;
+                    
+                    const sellerLocation = sampleAddresses.sellers[sellerIndex];
+                    const buyerLocation = sampleAddresses.buyers[buyerIndex];
+                    
+                    // Find the route step where this seller pickup occurs
+                    const pickupStepIndex = routeData.route.findIndex(step => 
+                        step.type === 'pickup' && step.location.name === sellerLocation.name
+                    );
+                    
+                    // Find the route step where this buyer dropoff occurs
+                    const dropoffStepIndex = routeData.route.findIndex(step => 
+                        step.type === 'dropoff' && step.location.name === buyerLocation.name
+                    );
+                    
+                    if (pickupStepIndex === -1 || dropoffStepIndex === -1) return;
+                    
+                    // Calculate mileage from last stop before pickup to buyer dropoff
+                    let totalMilesForBuyer = 0;
+                    let driverPosition;
+                    
+                    // Start from driver's position before pickup
+                    if (pickupStepIndex === 0) {
+                        driverPosition = sampleAddresses.driverStart;
+                    } else {
+                        driverPosition = routeData.route[pickupStepIndex - 1].location;
+                    }
+                    
+                    // Add distance from last stop to seller pickup
+                    totalMilesForBuyer += calculateDistance(
+                        driverPosition.lat, driverPosition.lng,
+                        sellerLocation.lat, sellerLocation.lng
+                    );
+                    
+                    // Add all route segments from pickup to buyer dropoff
+                    for (let i = pickupStepIndex; i < dropoffStepIndex; i++) {
+                        totalMilesForBuyer += routeData.route[i + 1].distance;
+                    }
+                    
+                    // Calculate fees for this buyer
+                    const baseMileageFee = totalMilesForBuyer * 0.50;
+                    const extraMiles = Math.max(0, totalMilesForBuyer - 15);
+                    const premiumFee = extraMiles * 1.00;
+                    const totalFee = baseMileageFee + premiumFee;
+                    
+                    buyerMileageFees.push({
+                        itemId: item.id,
+                        itemName: item.name,
+                        miles: Math.round(totalMilesForBuyer * 100) / 100,
+                        baseFee: baseMileageFee,
+                        premiumFee: premiumFee,
+                        totalFee: totalFee,
+                        sellerLocation: sellerLocation.name,
+                        buyerLocation: buyerLocation.name,
+                        isShopDeliveryDay: false
+                    });
+                });
+            }
             
             return buyerMileageFees;
         }
@@ -1144,6 +1371,109 @@
                     notification.parentNode.removeChild(notification);
                 }
             }, 3000);
+        }
+
+        // Sample items for testing different route types
+        const sampleItems = {
+            standard: [
+                {
+                    id: 1,
+                    name: "Wireless Headphones",
+                    price: 89.99,
+                    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=200&fit=crop",
+                    seller: "Electronics Store",
+                    size: "medium",
+                    availabilityStatus: "available"
+                },
+                {
+                    id: 2,
+                    name: "Coffee Table",
+                    price: 150.00,
+                    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=300&h=200&fit=crop",
+                    seller: "Vintage Boutique",
+                    size: "large",
+                    availabilityStatus: "limited"
+                },
+                {
+                    id: 3,
+                    name: "Garden Tools Set",
+                    price: 45.50,
+                    image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=300&h=200&fit=crop",
+                    seller: "Outdoor Gear Co",
+                    size: "medium",
+                    availabilityStatus: "available"
+                }
+            ],
+            shopDelivery: [
+                {
+                    id: 4,
+                    name: "Beach Towel Set",
+                    price: 25.99,
+                    image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=300&h=200&fit=crop",
+                    seller: "Beach Shop Pro",
+                    size: "small",
+                    availabilityStatus: "available"
+                },
+                {
+                    id: 5,
+                    name: "Sunscreen & Beach Gear",
+                    price: 35.00,
+                    image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=300&h=200&fit=crop",
+                    seller: "Beach Shop Pro",
+                    size: "medium",
+                    availabilityStatus: "available"
+                },
+                {
+                    id: 6,
+                    name: "Beach Umbrella",
+                    price: 55.00,
+                    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=300&h=200&fit=crop",
+                    seller: "Beach Shop Pro",
+                    size: "large",
+                    availabilityStatus: "available"
+                }
+            ]
+        };
+
+        // Load standard mixed route items
+        function loadStandardItems() {
+            cartData.items = [...sampleItems.standard];
+            localStorage.setItem('marketplaceCart', JSON.stringify(cartData));
+            displayCartItems();
+            updateCosts();
+            updateCartBadge();
+            showNotification('Loaded standard mixed route items - from different sellers', 'success');
+        }
+
+        // Load shop delivery day items
+        function loadShopDeliveryItems() {
+            cartData.items = [...sampleItems.shopDelivery];
+            localStorage.setItem('marketplaceCart', JSON.stringify(cartData));
+            displayCartItems();
+            updateCosts();
+            updateCartBadge();
+            showNotification('Loaded shop delivery day items - all from Beach Shop Pro', 'success');
+        }
+
+        // Clear cart
+        function clearCart() {
+            cartData.items = [];
+            cartData.selectedWindow = null;
+            cartData.urgentDelivery = false;
+            cartData.deliveryRoute = null;
+            cartData.individualMileageFees = [];
+            localStorage.setItem('marketplaceCart', JSON.stringify(cartData));
+            displayCartItems();
+            updateCosts();
+            updateCartBadge();
+            
+            // Reset delivery window selection
+            document.querySelectorAll('.window-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.getElementById('urgentDelivery').checked = false;
+            
+            showNotification('Cart cleared', 'info');
         }
 
         // Initialize cart when page loads
