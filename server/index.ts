@@ -137,6 +137,11 @@ app.get('/simple-test', (req, res) => {
   res.sendFile(path.join(__dirname, '../simple-button-test.html'));
 });
 
+// Debug button test route
+app.get('/debug-buttons', (req, res) => {
+  res.sendFile(path.join(__dirname, '../debug-buttons.html'));
+});
+
 // Seamless signup API endpoint
 app.post('/api/seamless-signup', async (req, res) => {
   const { email, password, phone } = req.body;

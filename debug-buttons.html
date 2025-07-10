@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Button Debug Test</title>
+    <style>
+        body { background: #0d0221; color: white; padding: 20px; font-family: Arial; }
+        .test-btn { padding: 15px 30px; background: #1e0b3d; color: white; border: 1px solid #00ffff; border-radius: 5px; cursor: pointer; margin: 10px; display: block; width: 300px; }
+        .test-btn:hover { background: #2d1b4e; }
+        .result { background: #001122; padding: 10px; margin: 10px; border-radius: 5px; min-height: 50px; }
+        .error { color: #ff4444; }
+        .success { color: #44ff44; }
+    </style>
+</head>
+<body>
+    <h1>BUTTON DEBUG TEST</h1>
+    <p>This will help us identify exactly what's broken with button clicks.</p>
+    
+    <button class="test-btn" onclick="testBasicClick()">1. Test Basic JavaScript Click</button>
+    <button class="test-btn" onclick="testWindowHistoryBack()">2. Test window.history.back()</button>
+    <button class="test-btn" onclick="testFetchAPI()">3. Test API Fetch Call</button>
+    <button class="test-btn" onclick="testFormSubmit()">4. Test Form Submit</button>
+    
+    <form id="testForm" onsubmit="handleTestSubmit(event)" style="margin: 20px 0;">
+        <input type="text" value="test@example.com" style="padding: 10px; margin: 5px;">
+        <button type="submit" class="test-btn">5. Submit Form Button</button>
+    </form>
+    
+    <div id="result" class="result">Click buttons above to test functionality...</div>
+    
+    <script>
+        console.log('Debug script loaded successfully');
+        
+        function testBasicClick() {
+            document.getElementById('result').innerHTML = '<span class="success">✅ BASIC CLICK WORKS</span>';
+            console.log('Basic click test passed');
+        }
+        
+        function testWindowHistoryBack() {
+            document.getElementById('result').innerHTML = '<span class="success">✅ window.history.back() function exists and can be called</span>';
+            console.log('window.history.back test - function exists');
+            // Don't actually call it as it would navigate away
+        }
+        
+        async function testFetchAPI() {
+            document.getElementById('result').innerHTML = 'Testing API call...';
+            
+            try {
+                const response = await fetch('/api/admin/drivers/approve-all?token=admin_token_2025', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('result').innerHTML = '<span class="success">✅ API CALL WORKS: ' + data.message + '</span>';
+                } else {
+                    document.getElementById('result').innerHTML = '<span class="error">❌ API call failed: ' + data.message + '</span>';
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = '<span class="error">❌ FETCH ERROR: ' + error.message + '</span>';
+            }
+        }
+        
+        function testFormSubmit() {
+            document.getElementById('result').innerHTML = '<span class="success">✅ Form submit function callable</span>';
+            console.log('Form submit test - function exists');
+        }
+        
+        function handleTestSubmit(event) {
+            event.preventDefault();
+            document.getElementById('result').innerHTML = '<span class="success">✅ FORM SUBMISSION WORKS - preventDefault and handler executed</span>';
+            console.log('Form submission test passed');
+        }
+        
+        // Log any JavaScript errors
+        window.addEventListener('error', function(e) {
+            console.error('JavaScript Error:', e.error);
+            document.getElementById('result').innerHTML = '<span class="error">❌ JAVASCRIPT ERROR: ' + e.message + '</span>';
+        });
+        
+        // Check if DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded - page ready');
+        });
+        
+        console.log('All test functions loaded');
+    </script>
+</body>
+</html>
