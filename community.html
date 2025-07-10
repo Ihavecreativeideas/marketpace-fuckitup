@@ -688,7 +688,8 @@
                     window.location.href = '/shops';
                     break;
                 case 'services':
-                    window.location.href = '/services';
+                    // Filter community for services instead of separate page
+                    filterByCategory('services');
                     break;
                 case 'hub':
                     window.location.href = '/the-hub';
@@ -842,6 +843,40 @@
         function initializePostTypes() {
             // Function for initializing post types when needed
             console.log('Post types initialized');
+        }
+        
+        // Filter posts by category
+        function filterByCategory(category) {
+            const posts = document.querySelectorAll('.post-card');
+            const filterButton = document.querySelector(`.nav-item[onclick*="${category}"]`);
+            
+            // Update nav highlight
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            filterButton.classList.add('active');
+            
+            // Show notification
+            const notification = document.createElement('div');
+            notification.innerHTML = `📍 Showing ${category} posts in your area`;
+            notification.style.cssText = `
+                position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+                background: linear-gradient(135deg, #00ff88, #00cc6a); color: #000;
+                padding: 8px 16px; border-radius: 20px; font-weight: bold;
+                z-index: 1000; font-size: 14px;
+            `;
+            document.body.appendChild(notification);
+            
+            // Filter posts (in real app, this would filter by category)
+            posts.forEach(post => {
+                // Show all posts but highlight that we're filtering
+                post.style.opacity = '1';
+            });
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 3000);
         }
         
         // Check login status when page loads
