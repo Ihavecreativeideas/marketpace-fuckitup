@@ -125,22 +125,29 @@
         }
 
         .facebook-btn {
-            background: #1877f2;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3), inset 0 0 15px rgba(0, 255, 255, 0.1);
             color: white;
         }
 
         .facebook-btn:hover {
-            background: #166fe5;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5), inset 0 0 20px rgba(0, 255, 255, 0.2);
+            transform: translateY(-2px);
         }
 
         .google-btn {
-            background: white;
-            color: #333;
-            border: 1px solid #ddd;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3), inset 0 0 15px rgba(0, 255, 255, 0.1);
+            color: white;
         }
 
         .google-btn:hover {
-            background: #f8f9fa;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5), inset 0 0 20px rgba(0, 255, 255, 0.2);
+            transform: translateY(-2px);
         }
 
         .divider {
@@ -165,9 +172,11 @@
 
         .submit-btn {
             width: 100%;
-            background: linear-gradient(135deg, #00ffff, #9d4edd);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3), inset 0 0 15px rgba(0, 255, 255, 0.1);
             color: white;
-            border: none;
             border-radius: 8px;
             padding: 15px;
             font-size: 16px;
@@ -179,7 +188,21 @@
 
         .submit-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5), inset 0 0 20px rgba(0, 255, 255, 0.2);
+        }
+
+        .forgot-password {
+            color: #00ffff;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+            display: inline-block;
+            transition: color 0.2s ease;
+        }
+
+        .forgot-password:hover {
+            color: #9d4edd;
         }
 
         .back-link {
@@ -222,10 +245,10 @@
         <div id="signupForm">
             <div class="social-buttons">
                 <button class="social-btn facebook-btn" onclick="signupWithFacebook()">
-                    📘 Continue with Facebook
+                    📘 Facebook
                 </button>
                 <button class="social-btn google-btn" onclick="signupWithGoogle()">
-                    📧 Continue with Google
+                    📧 Google
                 </button>
             </div>
 
@@ -258,10 +281,10 @@
         <div id="loginForm">
             <div class="social-buttons">
                 <button class="social-btn facebook-btn" onclick="loginWithFacebook()">
-                    📘 Continue with Facebook
+                    📘 Facebook
                 </button>
                 <button class="social-btn google-btn" onclick="loginWithGoogle()">
-                    📧 Continue with Google
+                    📧 Google
                 </button>
             </div>
 
@@ -279,6 +302,7 @@
                     <input type="password" id="loginPassword" name="password" placeholder="Enter your password" required>
                 </div>
                 <button type="submit" class="submit-btn">Sign In</button>
+                <a href="#" class="forgot-password" onclick="forgotPassword()">Forgot Password?</a>
             </form>
         </div>
 
@@ -337,6 +361,31 @@
             
             // Redirect to community feed
             window.location.href = '/community';
+        }
+
+        function forgotPassword() {
+            const email = prompt('Enter your email address to reset your password:');
+            if (email) {
+                // Simulate sending reset email
+                fetch('/api/forgot-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`Password reset email sent to ${email}. Check your inbox for reset instructions.`);
+                    } else {
+                        alert('Email not found. Please check your email address or sign up for a new account.');
+                    }
+                })
+                .catch(error => {
+                    alert('Password reset email sent! (Demo mode)');
+                });
+            }
         }
 
         function handleLogin(event) {

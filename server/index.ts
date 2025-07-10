@@ -108,6 +108,28 @@ app.get('/signup-login', (req, res) => {
   res.sendFile(path.join(__dirname, '../signup-login.html'));
 });
 
+// Forgot password API endpoint
+app.post('/api/forgot-password', (req, res) => {
+  const { email } = req.body;
+  
+  if (!email) {
+    return res.status(400).json({ success: false, message: 'Email is required' });
+  }
+  
+  // In a real app, you would:
+  // 1. Check if email exists in database
+  // 2. Generate a secure reset token
+  // 3. Send email with reset link
+  
+  // For demo purposes, we'll just respond with success
+  console.log(`Password reset requested for: ${email}`);
+  
+  res.json({ 
+    success: true, 
+    message: 'Password reset email sent if account exists' 
+  });
+});
+
 // Admin login page
 app.get('/admin-login', (req, res) => {
   res.sendFile(path.join(__dirname, '../admin-login.html'));
