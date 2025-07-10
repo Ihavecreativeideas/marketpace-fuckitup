@@ -265,7 +265,7 @@ Here's a suggested improvement for your ${context || 'content'}:
 
   // Save content changes
   app.post('/api/admin/content/save', isAdminAuthenticated, (req, res) => {
-    const { page, content } = req.body;
+    const { page, content } = req.body || {};
     
     adminData.contentDrafts[page] = {
       content,
