@@ -461,16 +461,11 @@
         <div class="checkout-section">
             <h2 class="checkout-title">Checkout</h2>
             
-            <!-- Delivery Distance Demo -->
-            <div class="delivery-window">
-                <h3 class="delivery-title">📍 Demo Distance Settings</h3>
-                <div style="margin-bottom: 15px;">
-                    <select id="distanceSelector" onchange="updateDeliveryDistance()" style="width: 100%; padding: 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: white;">
-                        <option value="8.5">8.5 miles (Standard delivery)</option>
-                        <option value="12">12 miles (Within normal range)</option>
-                        <option value="18">18 miles (Premium: 3 miles beyond limit)</option>
-                        <option value="25">25 miles (Premium: 10 miles beyond limit)</option>
-                    </select>
+            <!-- Optimized Route Display -->
+            <div class="delivery-window" id="routeDisplay" style="display: none;">
+                <h3 class="delivery-title">🗺️ Optimized Delivery Route</h3>
+                <div id="routeSteps" style="max-height: 200px; overflow-y: auto; background: rgba(0, 0, 0, 0.2); border-radius: 8px; padding: 10px;">
+                    <!-- Route steps will be displayed here -->
                 </div>
             </div>
 
@@ -547,7 +542,25 @@
             items: [],
             selectedWindow: null,
             urgentDelivery: false,
-            deliveryDistance: 8.5
+            deliveryDistance: 8.5,
+            deliveryRoute: null
+        };
+
+        // Sample addresses for route optimization demo
+        const sampleAddresses = {
+            sellers: [
+                { name: "Electronics Store", address: "123 Main St, Orange Beach, AL", lat: 30.2810, lng: -87.6134 },
+                { name: "Vintage Boutique", address: "456 Gulf Shores Pkwy, Gulf Shores, AL", lat: 30.2468, lng: -87.6725 },
+                { name: "Outdoor Gear Co", address: "789 Beach Blvd, Orange Beach, AL", lat: 30.2751, lng: -87.6089 },
+                { name: "Art Gallery", address: "321 Cotton Bayou Dr, Orange Beach, AL", lat: 30.2699, lng: -87.6156 }
+            ],
+            buyers: [
+                { name: "Customer A", address: "555 Phoenix Dr, Orange Beach, AL", lat: 30.2834, lng: -87.6221 },
+                { name: "Customer B", address: "777 Canal Rd, Orange Beach, AL", lat: 30.2756, lng: -87.6044 },
+                { name: "Customer C", address: "888 Wolf Bay Dr, Orange Beach, AL", lat: 30.2912, lng: -87.6378 },
+                { name: "Customer D", address: "999 Perdido Beach Blvd, Orange Beach, AL", lat: 30.2723, lng: -87.6089 }
+            ],
+            driverStart: { name: "Driver Hub", address: "200 Canal Rd, Orange Beach, AL", lat: 30.2789, lng: -87.6123 }
         };
 
         // Initialize cart
@@ -674,18 +687,60 @@
 
         // Update mileage breakdown display
         function updateMileageBreakdown() {
-            const totalMiles = cartData.deliveryDistance || 8.5;
+            const totalMiles = cartData.deliveryDistance || 0;
             const baseMileageFee = totalMiles * 0.50;
             const extraMiles = Math.max(0, totalMiles - 15);
             const premiumFee = extraMiles * 1.00;
             
-            let breakdownText = `${totalMiles} miles × $0.50 = $${baseMileageFee.toFixed(2)}`;
+            let breakdownText = `${totalMiles} miles (optimized route) × $0.50 = $${baseMileageFee.toFixed(2)}`;
             
             if (extraMiles > 0) {
                 breakdownText += `<br>+ ${extraMiles} miles beyond 15 miles × $1.00 = $${premiumFee.toFixed(2)}`;
             }
             
             document.getElementById('mileageBreakdown').innerHTML = breakdownText;
+            
+            // Show route display if items exist
+            const routeDisplay = document.getElementById('routeDisplay');
+            const routeSteps = document.getElementById('routeSteps');
+            
+            if (cartData.items.length > 0 && cartData.deliveryRoute) {
+                routeDisplay.style.display = 'block';
+                displayRouteSteps();
+            } else {
+                routeDisplay.style.display = 'none';
+            }
+        }
+
+        // Display route optimization steps
+        function displayRouteSteps() {
+            const routeSteps = document.getElementById('routeSteps');
+            if (!cartData.deliveryRoute || !cartData.deliveryRoute.route) return;
+
+            let stepsHTML = '<div style="font-size: 12px; color: rgba(255, 255, 255, 0.8);">';
+            stepsHTML += `<div style="margin-bottom: 8px;"><strong>🚗 Driver starts at:</strong> ${sampleAddresses.driverStart.name}</div>`;
+            
+            cartData.deliveryRoute.route.forEach((step, index) => {
+                const icon = step.type === 'pickup' ? '📦' : '🏠';
+                const action = step.type === 'pickup' ? 'Pick up from' : 'Deliver to';
+                const items = step.items.map(item => item.itemName || 'Item').join(', ');
+                
+                stepsHTML += `
+                    <div style="margin-bottom: 6px; padding: 4px; background: rgba(255, 255, 255, 0.05); border-radius: 4px;">
+                        <div><strong>${icon} Step ${index + 1}:</strong> ${action} ${step.location.name}</div>
+                        <div style="font-size: 11px; color: rgba(255, 255, 255, 0.6);">
+                            ${step.distance.toFixed(1)} miles • Items: ${items}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            stepsHTML += `<div style="margin-top: 8px; font-weight: bold; color: #00ffff;">
+                Total Route Distance: ${cartData.deliveryRoute.totalMiles} miles
+            </div>`;
+            stepsHTML += '</div>';
+            
+            routeSteps.innerHTML = stepsHTML;
         }
 
         // Calculate delivery fee (base rate)
@@ -699,9 +754,135 @@
             return largeItems.length * 25.00;
         }
 
-        // Calculate mileage fee (all miles + premium for over 15 miles)
+        // Calculate distance between two coordinates (Haversine formula)
+        function calculateDistance(lat1, lng1, lat2, lng2) {
+            const R = 3959; // Earth's radius in miles
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                     Math.sin(dLng/2) * Math.sin(dLng/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // Optimize delivery route using nearest neighbor algorithm
+        function optimizeDeliveryRoute() {
+            if (cartData.items.length === 0) return { totalMiles: 0, route: [] };
+
+            // Assign sample addresses to cart items
+            const route = [];
+            let currentPosition = sampleAddresses.driverStart;
+            let totalMiles = 0;
+
+            // Create pickup/dropoff pairs for each item
+            const deliveryStops = cartData.items.map((item, index) => {
+                const sellerIndex = index % sampleAddresses.sellers.length;
+                const buyerIndex = index % sampleAddresses.buyers.length;
+                
+                return {
+                    itemId: item.id,
+                    itemName: item.name,
+                    pickup: sampleAddresses.sellers[sellerIndex],
+                    dropoff: sampleAddresses.buyers[buyerIndex]
+                };
+            });
+
+            // Collect all unique pickup locations
+            const pickupLocations = [...new Set(deliveryStops.map(stop => stop.pickup.name))]
+                .map(name => deliveryStops.find(stop => stop.pickup.name === name).pickup);
+
+            // Route optimization: Visit all pickups first, then all dropoffs
+            let remainingPickups = [...pickupLocations];
+            let remainingDropoffs = [];
+
+            // Phase 1: Collect all items (pickups)
+            while (remainingPickups.length > 0) {
+                let nearestIndex = 0;
+                let shortestDistance = calculateDistance(
+                    currentPosition.lat, currentPosition.lng,
+                    remainingPickups[0].lat, remainingPickups[0].lng
+                );
+
+                // Find nearest pickup location
+                for (let i = 1; i < remainingPickups.length; i++) {
+                    const distance = calculateDistance(
+                        currentPosition.lat, currentPosition.lng,
+                        remainingPickups[i].lat, remainingPickups[i].lng
+                    );
+                    if (distance < shortestDistance) {
+                        shortestDistance = distance;
+                        nearestIndex = i;
+                    }
+                }
+
+                const nextPickup = remainingPickups[nearestIndex];
+                totalMiles += shortestDistance;
+                route.push({
+                    type: 'pickup',
+                    location: nextPickup,
+                    distance: shortestDistance,
+                    items: deliveryStops.filter(stop => stop.pickup.name === nextPickup.name)
+                });
+
+                // Add corresponding dropoffs to remaining list
+                const pickupDropoffs = deliveryStops
+                    .filter(stop => stop.pickup.name === nextPickup.name)
+                    .map(stop => stop.dropoff);
+                remainingDropoffs.push(...pickupDropoffs);
+
+                currentPosition = nextPickup;
+                remainingPickups.splice(nearestIndex, 1);
+            }
+
+            // Phase 2: Deliver all items (dropoffs)
+            const uniqueDropoffs = [...new Set(remainingDropoffs.map(d => d.name))]
+                .map(name => remainingDropoffs.find(d => d.name === name));
+
+            while (uniqueDropoffs.length > 0) {
+                let nearestIndex = 0;
+                let shortestDistance = calculateDistance(
+                    currentPosition.lat, currentPosition.lng,
+                    uniqueDropoffs[0].lat, uniqueDropoffs[0].lng
+                );
+
+                // Find nearest dropoff location
+                for (let i = 1; i < uniqueDropoffs.length; i++) {
+                    const distance = calculateDistance(
+                        currentPosition.lat, currentPosition.lng,
+                        uniqueDropoffs[i].lat, uniqueDropoffs[i].lng
+                    );
+                    if (distance < shortestDistance) {
+                        shortestDistance = distance;
+                        nearestIndex = i;
+                    }
+                }
+
+                const nextDropoff = uniqueDropoffs[nearestIndex];
+                totalMiles += shortestDistance;
+                route.push({
+                    type: 'dropoff',
+                    location: nextDropoff,
+                    distance: shortestDistance,
+                    items: deliveryStops.filter(stop => stop.dropoff.name === nextDropoff.name)
+                });
+
+                currentPosition = nextDropoff;
+                uniqueDropoffs.splice(nearestIndex, 1);
+            }
+
+            return { totalMiles: Math.round(totalMiles * 100) / 100, route };
+        }
+
+        // Calculate mileage fee based on optimized route
         function calculateMileageFee() {
-            const totalMiles = cartData.deliveryDistance || 8.5; // Default demo distance
+            const routeData = optimizeDeliveryRoute();
+            const totalMiles = routeData.totalMiles;
+            
+            // Store route data for display
+            cartData.deliveryRoute = routeData;
+            cartData.deliveryDistance = totalMiles;
+            
             const baseMileageFee = totalMiles * 0.50; // All miles at $0.50
             
             // Additional $1.00 per mile beyond 15 miles (driver out-of-range compensation)
