@@ -95,6 +95,31 @@ export const cartItems = pgTable("cart_items", {
   addedAt: timestamp("added_at").defaultNow(),
 });
 
+// Delivery size tracking and honesty ratings
+export const deliverySizes = pgTable("delivery_sizes", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  orderId: integer("order_id").notNull(),
+  reportedSize: varchar("reported_size").notNull(), // small, medium, large, bulk
+  reportedQuantity: integer("reported_quantity").default(1),
+  actualSize: varchar("actual_size"), // Driver's assessment if different
+  sizeDiscrepancy: boolean("size_discrepancy").default(false),
+  deliveryFee: decimal("delivery_fee", { precision: 10, scale: 2 }).default('0'),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const honestyRatings = pgTable("honesty_ratings", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  raterId: varchar("rater_id").notNull(), // User who is rating
+  ratedUserId: varchar("rated_user_id").notNull(), // User being rated
+  orderId: integer("order_id").notNull(),
+  deliverySizeId: integer("delivery_size_id").notNull(),
+  honestyScore: integer("honesty_score").notNull(), // 1-5 stars
+  comment: text("comment"),
+  raterType: varchar("rater_type").notNull(), // driver, buyer, seller
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Orders
 export const orders = pgTable("orders", {
   id: integer("id").primaryKey().generatedByDefaultAsIdentity(),

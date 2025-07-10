@@ -195,6 +195,72 @@ app.post('/api/seamless-signup', async (req, res) => {
   }
 });
 
+// Honor System Delivery Endpoints
+app.post('/api/delivery/size', async (req, res) => {
+  const { orderId, size, quantity } = req.body;
+  
+  if (!orderId || !size || !quantity) {
+    return res.status(400).json({ success: false, message: 'Order ID, size, and quantity are required' });
+  }
+  
+  try {
+    // Calculate delivery fee based on honor system rules
+    let deliveryFee = 0;
+    if (size === 'medium' || size === 'large' || size === 'bulk') {
+      deliveryFee = 25;
+    }
+    
+    // In a real app, save to database
+    console.log(`Delivery size update: Order ${orderId}, Size: ${size}, Quantity: ${quantity}, Fee: $${deliveryFee}`);
+    
+    res.json({ 
+      success: true, 
+      message: 'Delivery size updated successfully',
+      deliveryFee,
+      yourShare: deliveryFee / 2
+    });
+  } catch (error) {
+    console.error('Delivery size update error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+app.post('/api/delivery/honesty-rating', async (req, res) => {
+  const { raterId, ratedUserId, orderId, honestyScore, comment } = req.body;
+  
+  if (!raterId || !ratedUserId || !orderId || !honestyScore) {
+    return res.status(400).json({ success: false, message: 'Rater ID, rated user ID, order ID, and honesty score are required' });
+  }
+  
+  try {
+    // In a real app, save honesty rating to database
+    console.log(`Honesty rating: ${raterId} rated ${ratedUserId} ${honestyScore} stars for order ${orderId}`);
+    
+    res.json({ 
+      success: true, 
+      message: 'Honesty rating submitted successfully',
+      rating: { honestyScore, comment }
+    });
+  } catch (error) {
+    console.error('Honesty rating error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+app.get('/api/delivery/pricing-rules', (req, res) => {
+  res.json({
+    success: true,
+    rules: {
+      small: { fee: 0, description: "Fits in garbage bag - FREE delivery" },
+      medium: { fee: 25, description: "Larger than garbage bag - $25 large item fee" },
+      large: { fee: 25, description: "Furniture, appliances - $25 large item fee" },
+      bulk: { fee: 25, description: "Large bulk delivery - $25 fee" }
+    },
+    splitPolicy: "50/50 between buyer and seller",
+    commission: "5% platform fee on delivery charges (excluding tips)"
+  });
+});
+
 // Seamless login API endpoint
 app.post('/api/seamless-login', async (req, res) => {
   const { email, password } = req.body;

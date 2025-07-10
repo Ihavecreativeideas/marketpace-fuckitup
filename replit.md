@@ -208,6 +208,19 @@ MarketPace is a React Native mobile application that prioritizes community empow
 
 ## Recent Changes
 
+✓ **HONOR-BASED DELIVERY PRICING SYSTEM WITH BUYER/SELLER RATING** (January 10, 2025)
+✓ Implemented comprehensive honor system for delivery size selection with multi-item purchase support
+✓ Added size-based pricing: Small items (fits in garbage bag) = FREE; Mixed medium/large = $25 Large delivery charge
+✓ Created "Large Bulk Delivery" option for $25 fee when buyers honestly select larger combined orders
+✓ Built honor system rating where drivers can rate buyers/sellers on size reporting honesty (1-5 stars)
+✓ Enhanced delivery dashboard with size badges, delivery fee breakdowns, and honesty rating displays
+✓ Added interactive modals for size selection and honesty rating with real-time pricing calculation
+✓ Created comprehensive API endpoints: /api/delivery/size, /api/delivery/honesty-rating, /api/delivery/pricing-rules
+✓ Updated database schema with deliverySizes and honestyRatings tables for tracking size accuracy
+✓ Implemented 50/50 buyer/seller delivery fee split with transparent cost breakdown display
+✓ Added "Update Size" and "Rate Honesty" buttons to delivery tracking for ongoing order management
+✓ Built community trust system encouraging honest size reporting through visible honesty ratings
+
 ✓ **FACEBOOK-STYLE MEMBER PROFILE SYSTEM WITH "CLOSET CLEAN OUT"** (January 10, 2025)
 ✓ Created comprehensive Facebook-style profile system at /profile with MarketPace's sophisticated futuristic theme
 ✓ Built direct posting to profile with content types: general posts, for sale items, services, photo sharing
