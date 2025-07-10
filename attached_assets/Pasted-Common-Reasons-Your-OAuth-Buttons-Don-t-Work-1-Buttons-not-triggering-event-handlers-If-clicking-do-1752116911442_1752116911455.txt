@@ -1,0 +1,76 @@
+Common Reasons Your OAuth Buttons Don’t Work
+1. Buttons not triggering event handlers
+If clicking does nothing, your onClick or event binding may not be working due to:
+
+Incorrect component mounting
+
+JS errors halting execution
+
+Replit hot reload issues (common)
+
+✅ Fix: Check your button code
+
+jsx
+Copy
+Edit
+<button onClick={handleFacebookLogin}>Sign in with Facebook</button>
+Make sure handleFacebookLogin is defined and not crashing or undefined.
+
+2. CORS or popup blocker is interfering
+Check browser console: If popups are blocked or redirected URLs are CORS-blocked, nothing happens.
+
+OAuth often opens a new window → browsers like Chrome block it if not triggered by a user gesture.
+
+✅ Fix: Wrap your auth call inside a direct click, not a useEffect or delayed trigger.
+
+🔍 Diagnosing Step-by-Step
+Here’s how to track and fix it:
+
+✅ Step 1: Check your browser console
+Look for:
+
+Uncaught TypeError: handleFacebookLogin is not a function
+
+Blocked a frame with origin from accessing a cross-origin frame
+
+Any CORS or popup-related errors
+
+✅ Step 2: Confirm button JSX and function
+jsx
+Copy
+Edit
+const handleFacebookLogin = () => {
+  window.location.href = 'https://your-backend.com/auth/facebook';
+};
+
+const handleGoogleLogin = () => {
+  window.location.href = 'https://your-backend.com/auth/google';
+};
+If you use Next.js or React Router:
+
+jsx
+Copy
+Edit
+import { useNavigate } from 'react-router-dom';
+
+const LoginPage = () => {
+  const navigate = useNavigate();
+
+  const handleFacebookLogin = async () => {
+    try {
+      window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/facebook`;
+    } catch (err) {
+      console.error('Facebook login failed:', err);
+    }
+  };
+
+  return (
+    <button onClick={handleFacebookLogin}>Login with Facebook</button>
+  );
+};
+🧰 Troubleshooting Fixes (Quick Wins)
+Issue	Fix
+Buttons do nothing	Make sure onClick is attached and the function exists.
+No network call on click	Ensure window.location.href = "/auth/facebook" is being triggered
+Popup blocked	Call OAuth redirect directly in the onClick handler, not via indirect flow
+Still stuck in Replit	Replit sometimes fails to hot-reload. Use the “Restart” button at the top of Replit, or reload hard: CTRL+SHIFT+R
