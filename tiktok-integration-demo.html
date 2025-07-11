@@ -323,6 +323,7 @@
             </div>
 
             <button class="btn" onclick="testConnection()">Test Connection</button>
+            <button class="btn" onclick="getActiveShops()">Get Active Shops</button>
             <button class="btn" onclick="connectTikTokShop()">Connect TikTok Shop</button>
             <button class="btn btn-secondary" onclick="generateTestCredentials()">Use Demo Credentials</button>
 
@@ -435,6 +436,68 @@
                 }
             } catch (error) {
                 showStatus('❌ Connection test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function getActiveShops() {
+            const appKey = document.getElementById('appKey').value;
+            const appSecret = document.getElementById('appSecret').value;
+            const accessToken = document.getElementById('accessToken').value;
+
+            if (!appKey || !appSecret || !accessToken) {
+                showStatus('Please fill in App Key, App Secret, and Access Token to retrieve active shops', 'error');
+                return;
+            }
+
+            showStatus('Retrieving active shops from TikTok Shop API...', 'info');
+
+            try {
+                const response = await fetch('/api/integrations/tiktok/active-shops', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        appKey,
+                        appSecret,
+                        accessToken
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus(`✅ Found ${result.active_shops} active shops out of ${result.total_shops} total shops`, 'success');
+                    
+                    let shopsHtml = '<h4>Active Shops Retrieved:</h4>';
+                    if (result.shops && result.shops.length > 0) {
+                        shopsHtml += '<div style="display: grid; gap: 15px; margin-top: 15px;">';
+                        result.shops.forEach(shop => {
+                            shopsHtml += `
+                                <div style="background: rgba(0,255,0,0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(0,255,0,0.3);">
+                                    <h5 style="color: #00ff00; margin: 0 0 10px 0;">${shop.shop_name}</h5>
+                                    <p><strong>Shop ID:</strong> ${shop.shop_id}</p>
+                                    <p><strong>Status:</strong> <span style="color: #00ff00;">${shop.status}</span></p>
+                                    <p><strong>Region:</strong> ${shop.shop_region}</p>
+                                    <p><strong>Type:</strong> ${shop.shop_type} (${shop.seller_type})</p>
+                                    <p><strong>Verification:</strong> ${shop.verification_status}</p>
+                                    <p><strong>Products:</strong> ${shop.product_count} | <strong>Orders:</strong> ${shop.total_orders}</p>
+                                    ${shop.shop_rating > 0 ? `<p><strong>Rating:</strong> ${shop.shop_rating}/5.0 ⭐</p>` : ''}
+                                    <p><strong>Activated:</strong> ${new Date(shop.activated_at).toLocaleDateString()}</p>
+                                </div>
+                            `;
+                        });
+                        shopsHtml += '</div>';
+                    } else {
+                        shopsHtml += '<p style="color: #ffaa00;">No active shops found. You may need to activate your TikTok Shop first.</p>';
+                    }
+                    
+                    showResults(shopsHtml);
+                } else {
+                    showStatus('❌ Failed to retrieve active shops: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showStatus('❌ Failed to retrieve active shops: ' + error.message, 'error');
             }
         }
 
