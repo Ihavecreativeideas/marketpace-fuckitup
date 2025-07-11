@@ -6,6 +6,7 @@ import { config } from "dotenv";
 import { registerRoutes } from "./routes";
 import { registerAdminRoutes } from "./adminRoutes";
 import { registerSponsorshipRoutes } from "./sponsorshipRoutes";
+import integrationRoutes from "./integrations";
 
 // Load environment variables
 config();
@@ -137,6 +138,11 @@ app.get('/services', (req, res) => {
 // Profile route
 app.get('/profile', (req, res) => {
   res.sendFile(path.join(__dirname, '../profile.html'));
+});
+
+// Platform integrations route
+app.get('/platform-integrations', (req, res) => {
+  res.sendFile(path.join(__dirname, '../platform-integrations.html'));
 });
 
 // Button test page route
@@ -479,6 +485,9 @@ registerAdminRoutes(app);
 
 // Register sponsorship routes
 registerSponsorshipRoutes(app);
+
+// Register integration routes
+app.use('/api/integrations', integrationRoutes);
 
 registerRoutes(app).then((server) => {
   server.listen(port, "0.0.0.0", () => {

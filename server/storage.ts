@@ -1,5 +1,6 @@
 import {
   users,
+  userIntegrations,
   categories,
   listings,
   cartItems,
@@ -275,6 +276,11 @@ export interface IStorage {
   getAppSetting(key: string): Promise<AppSetting | undefined>;
   updateAppSetting(key: string, value: string, updatedBy: string): Promise<AppSetting>;
   createAppSetting(setting: InsertAppSetting): Promise<AppSetting>;
+  
+  // Integration operations
+  updateUserIntegration(userId: string, integration: any): Promise<any>;
+  getUserIntegrations(userId: string): Promise<any[]>;
+  removeUserIntegration(userId: string, platform: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1709,6 +1715,72 @@ export class DatabaseStorage implements IStorage {
   }): Promise<void> {
     // Implementation would go here - storing in our own database instead of third-party
     console.log('Privacy-compliant analytics event:', eventData);
+  }
+
+  // Integration operations
+  async updateUserIntegration(userId: string, integration: any): Promise<any> {
+    const [userIntegration] = await db
+      .insert(userIntegrations)
+      .values({
+        userId,
+        platform: integration.platform,
+        accessToken: integration.accessToken,
+        refreshToken: integration.refreshToken,
+        externalId: integration.externalId,
+        externalEmail: integration.email,
+        externalName: integration.name,
+        shopName: integration.shopName,
+        shopUrl: integration.shopUrl,
+        venueName: integration.venueName,
+        venueUrl: integration.venueUrl,
+        clientId: integration.clientId,
+        status: integration.status || 'active',
+        capabilities: integration.capabilities,
+        metadata: integration.metadata,
+        lastSyncAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [userIntegrations.userId, userIntegrations.platform],
+        set: {
+          accessToken: integration.accessToken,
+          refreshToken: integration.refreshToken,
+          externalId: integration.externalId,
+          externalEmail: integration.email,
+          externalName: integration.name,
+          shopName: integration.shopName,
+          shopUrl: integration.shopUrl,
+          venueName: integration.venueName,
+          venueUrl: integration.venueUrl,
+          clientId: integration.clientId,
+          status: integration.status || 'active',
+          capabilities: integration.capabilities,
+          metadata: integration.metadata,
+          lastSyncAt: new Date(),
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    
+    return userIntegration;
+  }
+
+  async getUserIntegrations(userId: string): Promise<any[]> {
+    return await db
+      .select()
+      .from(userIntegrations)
+      .where(eq(userIntegrations.userId, userId))
+      .orderBy(desc(userIntegrations.createdAt));
+  }
+
+  async removeUserIntegration(userId: string, platform: string): Promise<void> {
+    await db
+      .delete(userIntegrations)
+      .where(
+        and(
+          eq(userIntegrations.userId, userId),
+          eq(userIntegrations.platform, platform)
+        )
+      );
   }
 }
 
