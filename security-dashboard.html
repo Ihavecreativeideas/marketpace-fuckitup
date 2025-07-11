@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Dashboard - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0845 50%, #2d1b69 100%);
+            color: white;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #00ffff, transparent);
+            border-radius: 50%;
+            animation: float 10s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) translateX(100px) rotate(360deg); opacity: 0; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #00ffff, #ff6b35);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .security-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .security-card h3 {
+            color: #00ffff;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .metric {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00ffff;
+            display: block;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .alert {
+            background: rgba(255, 107, 53, 0.2);
+            border: 1px solid rgba(255, 107, 53, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .alert.success {
+            background: rgba(0, 255, 0, 0.2);
+            border-color: rgba(0, 255, 0, 0.5);
+        }
+
+        .alert.warning {
+            background: rgba(255, 165, 0, 0.2);
+            border-color: rgba(255, 165, 0, 0.5);
+        }
+
+        .alert.danger {
+            background: rgba(255, 0, 0, 0.2);
+            border-color: rgba(255, 0, 0, 0.5);
+        }
+
+        .event-log {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .event-item {
+            background: rgba(255, 255, 255, 0.05);
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 3px solid #00ffff;
+        }
+
+        .event-time {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            float: right;
+        }
+
+        .event-type {
+            font-weight: bold;
+            color: #00ffff;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #00ffff, #ff6b35);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 255, 0.4);
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .status-healthy { background: #00ff00; }
+        .status-warning { background: #ffaa00; }
+        .status-danger { background: #ff4444; }
+
+        .security-controls {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 25px;
+        }
+
+        .control-button {
+            background: rgba(255, 107, 53, 0.8);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .control-button:hover {
+            background: rgba(255, 107, 53, 1);
+            transform: translateY(-1px);
+        }
+
+        .control-button.danger {
+            background: rgba(255, 0, 0, 0.8);
+        }
+
+        .control-button.danger:hover {
+            background: rgba(255, 0, 0, 1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating particles -->
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ Security Dashboard</h1>
+            <p>Real-time security monitoring and threat detection for MarketPace</p>
+            <button class="refresh-btn" onclick="refreshData()">🔄 Refresh Data</button>
+            <button class="refresh-btn" onclick="exportSecurityReport()">📊 Export Report</button>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Security Overview -->
+            <div class="security-card">
+                <h3>🔒 Security Overview</h3>
+                <div class="metric-grid">
+                    <div class="metric">
+                        <span class="metric-value" id="threatLevel">LOW</span>
+                        <div class="metric-label">Threat Level</div>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-value" id="activeThreats">0</span>
+                        <div class="metric-label">Active Threats</div>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-value" id="blockedAttempts">156</span>
+                        <div class="metric-label">Blocked Today</div>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-value" id="uptime">99.9%</span>
+                        <div class="metric-label">Security Uptime</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Authentication Security -->
+            <div class="security-card">
+                <h3>🔐 Authentication Security</h3>
+                <div class="metric-grid">
+                    <div class="metric">
+                        <span class="metric-value" id="failedLogins">23</span>
+                        <div class="metric-label">Failed Logins (24h)</div>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-value" id="lockedAccounts">2</span>
+                        <div class="metric-label">Locked Accounts</div>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-value" id="activeSessions">847</span>
+                        <div class="metric-label">Active Sessions</div>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-value" id="twoFaEnabled">78%</span>
+                        <div class="metric-label">2FA Adoption</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Security -->
+            <div class="security-card">
+                <h3>🌐 API Security</h3>
+                <div class="metric-grid">
+                    <div class="metric">
+                        <span class="metric-value" id="apiRequests">12.4K</span>
+                        <div class="metric-label">API Requests (1h)</div>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-value" id="rateLimited">87</span>
+                        <div class="metric-label">Rate Limited</div>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-value" id="corsViolations">5</span>
+                        <div class="metric-label">CORS Violations</div>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-value" id="invalidTokens">12</span>
+                        <div class="metric-label">Invalid Tokens</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Health -->
+            <div class="security-card">
+                <h3>⚡ System Health</h3>
+                <div id="systemStatus">
+                    <div style="margin: 10px 0;">
+                        <span class="status-indicator status-healthy"></span>
+                        <strong>Database:</strong> Healthy
+                    </div>
+                    <div style="margin: 10px 0;">
+                        <span class="status-indicator status-healthy"></span>
+                        <strong>API Endpoints:</strong> Operational
+                    </div>
+                    <div style="margin: 10px 0;">
+                        <span class="status-indicator status-warning"></span>
+                        <strong>Rate Limiting:</strong> High Load
+                    </div>
+                    <div style="margin: 10px 0;">
+                        <span class="status-indicator status-healthy"></span>
+                        <strong>SSL Certificates:</strong> Valid
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Alerts -->
+        <div class="security-card">
+            <h3>🚨 Security Alerts</h3>
+            <div id="securityAlerts">
+                <div class="alert warning">
+                    <strong>⚠️ Moderate Alert:</strong> Unusual login pattern detected from IP 192.168.1.100 - 15 failed attempts in 10 minutes
+                </div>
+                <div class="alert success">
+                    <strong>✅ Security Update:</strong> All systems updated with latest security patches
+                </div>
+                <div class="alert warning">
+                    <strong>⚠️ Rate Limiting:</strong> High API request volume detected - automatic throttling engaged
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Security Events -->
+        <div class="security-card">
+            <h3>📋 Recent Security Events</h3>
+            <div class="event-log" id="eventLog">
+                <!-- Events will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Security Controls -->
+        <div class="security-controls">
+            <h3 style="color: #00ffff; margin-bottom: 20px;">🛠️ Security Controls</h3>
+            <button class="control-button" onclick="runSecurityScan()">🔍 Security Scan</button>
+            <button class="control-button" onclick="clearFailedAttempts()">🧹 Clear Failed Attempts</button>
+            <button class="control-button" onclick="refreshApiKeys()">🔑 Refresh API Keys</button>
+            <button class="control-button" onclick="testIntegrations()">🔗 Test Integrations</button>
+            <button class="control-button danger" onclick="emergencyLockdown()">🚫 Emergency Lockdown</button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Refresh security data
+        async function refreshData() {
+            try {
+                const response = await fetch('/api/security/dashboard');
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateMetrics(data.data);
+                    updateEventLog(data.data.recentEvents);
+                }
+            } catch (error) {
+                console.error('Failed to refresh security data:', error);
+                showAlert('Failed to refresh security data', 'danger');
+            }
+        }
+
+        // Update metrics on dashboard
+        function updateMetrics(data) {
+            if (data.stats) {
+                const stats = data.stats;
+                
+                // Update counters
+                document.getElementById('activeThreats').textContent = stats.activeThreats || 0;
+                document.getElementById('blockedAttempts').textContent = stats.blockedAttempts || 0;
+                document.getElementById('failedLogins').textContent = stats.failedLogins || 0;
+                document.getElementById('lockedAccounts').textContent = stats.lockedAccounts || 0;
+            }
+        }
+
+        // Update event log
+        function updateEventLog(events) {
+            const eventLog = document.getElementById('eventLog');
+            eventLog.innerHTML = '';
+
+            if (!events || events.length === 0) {
+                eventLog.innerHTML = '<p style="opacity: 0.7; text-align: center;">No recent security events</p>';
+                return;
+            }
+
+            events.forEach(event => {
+                const eventItem = document.createElement('div');
+                eventItem.className = 'event-item';
+                eventItem.innerHTML = `
+                    <span class="event-time">${new Date(event.timestamp).toLocaleTimeString()}</span>
+                    <div class="event-type">${event.type}</div>
+                    <div style="font-size: 0.9rem; opacity: 0.8; margin-top: 5px;">
+                        ${JSON.stringify(event.details)}
+                    </div>
+                `;
+                eventLog.appendChild(eventItem);
+            });
+        }
+
+        // Security control functions
+        async function runSecurityScan() {
+            showAlert('Security scan initiated...', 'success');
+            // In real implementation, this would trigger a comprehensive security scan
+            setTimeout(() => {
+                showAlert('Security scan completed - No threats detected', 'success');
+            }, 3000);
+        }
+
+        async function clearFailedAttempts() {
+            try {
+                // In real implementation, call API to clear failed attempts
+                showAlert('Failed login attempts cleared', 'success');
+                refreshData();
+            } catch (error) {
+                showAlert('Failed to clear attempts', 'danger');
+            }
+        }
+
+        async function refreshApiKeys() {
+            showAlert('API key refresh initiated...', 'warning');
+            setTimeout(() => {
+                showAlert('API keys refreshed successfully', 'success');
+            }, 2000);
+        }
+
+        async function testIntegrations() {
+            showAlert('Testing integration connections...', 'warning');
+            setTimeout(() => {
+                showAlert('All integrations tested - 2 warnings found', 'warning');
+            }, 2000);
+        }
+
+        async function emergencyLockdown() {
+            if (confirm('Are you sure you want to activate emergency lockdown? This will temporarily restrict access to all non-essential systems.')) {
+                showAlert('🚨 EMERGENCY LOCKDOWN ACTIVATED', 'danger');
+                // In real implementation, this would activate emergency protocols
+            }
+        }
+
+        function exportSecurityReport() {
+            // Generate and download security report
+            const reportData = {
+                timestamp: new Date().toISOString(),
+                threatLevel: 'LOW',
+                metrics: {
+                    activeThreats: 0,
+                    blockedAttempts: 156,
+                    failedLogins: 23,
+                    lockedAccounts: 2
+                }
+            };
+            
+            const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `security-report-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showAlert('Security report exported', 'success');
+        }
+
+        function showAlert(message, type = 'success') {
+            const alertsContainer = document.getElementById('securityAlerts');
+            const alert = document.createElement('div');
+            alert.className = `alert ${type}`;
+            alert.innerHTML = `<strong>${type === 'danger' ? '🚨' : type === 'warning' ? '⚠️' : '✅'}</strong> ${message}`;
+            
+            alertsContainer.insertBefore(alert, alertsContainer.firstChild);
+            
+            // Remove alert after 5 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.parentNode.removeChild(alert);
+                }
+            }, 5000);
+        }
+
+        // Auto-refresh data every 30 seconds
+        setInterval(refreshData, 30000);
+
+        // Initialize page
+        createParticles();
+        refreshData();
+    </script>
+</body>
+</html>

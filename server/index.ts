@@ -7,80 +7,148 @@ import { registerRoutes } from "./routes";
 import { registerAdminRoutes } from "./adminRoutes";
 import { registerSponsorshipRoutes } from "./sponsorshipRoutes";
 import integrationRoutes from "./integrations";
+import securityRoutes from "./routes/security";
+import { 
+  securityHeaders, 
+  rateLimit, 
+  validateAndSanitize,
+  csrfProtection 
+} from "./security/validation";
+import { 
+  validateEnvironment, 
+  SecurityMonitor,
+  SECURITY_CONFIG 
+} from "./security/environment";
 
 // Load environment variables
 config();
 
+// Validate environment on startup
+const envValidation = validateEnvironment();
+if (!envValidation.valid) {
+  console.error('Missing required environment variables:', envValidation.missing);
+  console.warn('Application starting with reduced functionality');
+}
+
 const app = express();
 
-// Privacy compliant security headers
+// Security monitoring middleware
+app.use((req, res, next) => {
+  SecurityMonitor.logSecurityEvent('request', {
+    method: req.method,
+    url: req.url,
+    ip: req.ip,
+    userAgent: req.get('User-Agent')
+  });
+  next();
+});
+
+// Enhanced security headers with nonce support
+app.use(securityHeaders);
+
+// Helmet with stricter CSP
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-      scriptSrcAttr: ["'unsafe-inline'"], // CRITICAL FIX: Allow onclick handlers
-      styleSrc: ["'self'", "'unsafe-inline'", "https:"],
-      imgSrc: ["'self'", "data:", "https:", "https://images.unsplash.com"],
-      connectSrc: ["'self'", "https:", "https://api.stripe.com", "https://checkout.stripe.com"],
-      fontSrc: ["'self'", "https:", "data:"],
-      objectSrc: ["'none'"],
-      mediaSrc: ["'self'"],
-      frameSrc: ["'self'", "https://checkout.stripe.com", "https://js.stripe.com"],
-      formAction: ["'self'", "https://checkout.stripe.com"],
-    },
-  },
-  // Add privacy sandbox headers
+  contentSecurityPolicy: false, // Handled by securityHeaders middleware
   crossOriginEmbedderPolicy: false,
-  // Enable privacy sandbox features
   hsts: {
     maxAge: 31536000,
     includeSubDomains: true,
     preload: true
-  }
+  },
+  noSniff: true,
+  frameguard: { action: 'deny' },
+  xssFilter: true
 }));
 
+// Enhanced CORS with security validation
 app.use(cors({
-  origin: [
-    'http://localhost:8083',
-    'https://localhost:8083',
-    'exp://localhost:8083',
-    'exp://172.31.128.31:8083',
-    /^https:\/\/.*\.replit\.dev$/,
-    /^https:\/\/.*\.replit\.app$/,
-    /^exp:\/\/.*$/,
-    /^https:\/\/.*\.spock\.replit\.dev$/
-  ],
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      'http://localhost:8083',
+      'https://localhost:8083',
+      'exp://localhost:8083',
+      'exp://172.31.128.31:8083'
+    ];
+    
+    const allowedPatterns = [
+      /^https:\/\/.*\.replit\.dev$/,
+      /^https:\/\/.*\.replit\.app$/,
+      /^exp:\/\/.*$/,
+      /^https:\/\/.*\.spock\.replit\.dev$/
+    ];
+    
+    // Allow requests with no origin (mobile apps, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Check against allowed origins
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    // Check against patterns
+    if (allowedPatterns.some(pattern => pattern.test(origin))) {
+      return callback(null, true);
+    }
+    
+    // Log potential CORS attack
+    SecurityMonitor.logSecurityEvent('cors_violation', { origin });
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Privacy-Sandbox']
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'X-Requested-With', 
+    'X-Privacy-Sandbox',
+    'X-CSRF-Token'
+  ],
+  maxAge: 86400 // 24 hours
 }));
 
-// Privacy compliance middleware
-app.use((req, res, next) => {
-  // Set proper security headers for privacy compliance
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
-  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  
-  // Privacy sandbox headers
-  res.setHeader('Interest-Cohort', '()');
-  res.setHeader('Sec-CH-UA', '()');
-  
-  // For cross-site cookies (when needed)
-  if (req.headers.cookie) {
-    res.setHeader('Set-Cookie', req.headers.cookie + '; SameSite=None; Secure');
+// Enhanced request parsing with security limits
+app.use(express.json({ 
+  limit: '10mb',
+  verify: (req, res, buf) => {
+    // Log large payloads for monitoring
+    if (buf.length > 1024 * 1024) { // 1MB threshold
+      SecurityMonitor.logSecurityEvent('large_payload', {
+        size: buf.length,
+        endpoint: req.url,
+        ip: req.ip
+      });
+    }
   }
-  
-  next();
-});
+}));
 
-app.use(express.json());
-app.use(express.static("client/dist"));
-app.use(express.static(path.join(__dirname, '../')));
+app.use(express.urlencoded({ 
+  extended: true, 
+  limit: '10mb',
+  parameterLimit: 1000
+}));
+
+// Rate limiting for all requests
+app.use(rateLimit(SECURITY_CONFIG.RATE_LIMIT_WINDOW, SECURITY_CONFIG.RATE_LIMIT_MAX_REQUESTS));
+
+// Static file serving with security headers
+app.use(express.static("client/dist", {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    }
+    if (path.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    }
+  }
+}));
+
+app.use(express.static(path.join(__dirname, '../'), {
+  setHeaders: (res, path) => {
+    // Add security headers to static files
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+  }
+}));
 
 // Main landing page route
 app.get('/', (req, res) => {
@@ -235,6 +303,11 @@ app.get('/button-test', (req, res) => {
 // Admin dashboard route
 app.get('/admin-dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, '../admin-dashboard.html'));
+});
+
+// Security dashboard route
+app.get('/security-dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '../security-dashboard.html'));
 });
 
 // Admin login route
@@ -570,6 +643,9 @@ registerSponsorshipRoutes(app);
 
 // Register integration routes
 app.use('/api/integrations', integrationRoutes);
+
+// Register security routes
+app.use('/api/security', securityRoutes);
 
 registerRoutes(app).then((server) => {
   server.listen(port, "0.0.0.0", () => {
