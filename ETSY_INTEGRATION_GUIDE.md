@@ -14,8 +14,8 @@ Just one thing: Your **Etsy API Key** (called "Keystring" in Etsy's developer po
 - Fill out the simple form:
   - **App Name**: "MarketPace Integration" 
   - **App Description**: "Marketplace platform connecting local businesses"
-  - **Website URL**: Your MarketPace domain
-  - **Callback URL**: `https://your-domain.com/api/integrations/etsy/callback`
+  - **Website URL**: `https://www.marketpace.com`
+  - **Callback URL**: `https://www.marketpace.com/api/integrations/etsy/callback`
 
 ### 3. Get Your API Key
 - Once approved (usually instant), you'll see your **"Keystring"**
