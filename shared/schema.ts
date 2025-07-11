@@ -58,6 +58,29 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// User integrations table for external platform connections
+export const userIntegrations = pgTable("user_integrations", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  userId: varchar("user_id").notNull(),
+  platform: varchar("platform").notNull(), // facebook, google, etsy, doordash, uber_eats, ticketmaster
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  externalId: varchar("external_id"), // Platform-specific user/shop/venue ID
+  externalEmail: varchar("external_email"),
+  externalName: varchar("external_name"),
+  shopName: varchar("shop_name"), // For Etsy shops
+  shopUrl: varchar("shop_url"),
+  venueName: varchar("venue_name"), // For Ticketmaster venues
+  venueUrl: varchar("venue_url"),
+  clientId: varchar("client_id"), // For apps requiring client ID
+  status: varchar("status").default("active"), // active, sandbox, inactive
+  capabilities: jsonb("capabilities"), // Array of platform-specific features
+  metadata: jsonb("metadata"), // Additional platform-specific data
+  lastSyncAt: timestamp("last_sync_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Categories for marketplace items
 export const categories = pgTable("categories", {
   id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
