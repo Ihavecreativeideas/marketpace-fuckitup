@@ -145,6 +145,11 @@ app.get('/platform-integrations', (req, res) => {
   res.sendFile(path.join(__dirname, '../platform-integrations.html'));
 });
 
+// TikTok integration demo route
+app.get('/tiktok-integration-demo', (req, res) => {
+  res.sendFile(path.join(__dirname, '../tiktok-integration-demo.html'));
+});
+
 // Food ordering page
 app.get('/food-ordering', (req, res) => {
   res.sendFile(path.join(__dirname, '../food-ordering.html'));
