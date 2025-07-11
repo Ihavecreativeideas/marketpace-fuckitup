@@ -222,47 +222,97 @@ router.post('/doordash/connect', async (req, res) => {
   }
 });
 
-// Uber Eats Integration
+// Uber Eats Marketplace Integration (API Suite: Eats Marketplace)
 router.post('/uber-eats/connect', async (req, res) => {
   try {
-    const { storeId, clientId, clientSecret } = req.body;
+    const { storeId, clientId, clientSecret, accessToken } = req.body;
     
-    if (!process.env.UBER_EATS_API_KEY) {
+    if (!storeId || !clientId) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Store ID and Client ID are required' 
+      });
+    }
+
+    // Use provided credentials or environment variable
+    const uberApiKey = process.env.UBER_EATS_API_KEY;
+    
+    if (!uberApiKey && !accessToken) {
       return res.status(500).json({ 
         success: false, 
-        message: 'Uber Eats API key not configured' 
+        message: 'Uber Eats API credentials not configured' 
       });
     }
 
-    // Uber Eats OAuth flow simulation
-    const authResponse = {
-      success: true,
-      store_id: storeId,
-      status: 'connected',
-      capabilities: ['menu_management', 'order_tracking', 'analytics']
+    // Uber Eats Marketplace API structure
+    const headers: any = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
     };
 
-    // Store Uber Eats connection
-    if (req.isAuthenticated()) {
-      await storage.updateUserIntegration(req.user.claims.sub, {
-        platform: 'uber_eats',
-        accessToken: `ue_${Date.now()}`,
-        externalId: storeId,
-        clientId,
-        capabilities: authResponse.capabilities
-      });
+    if (accessToken) {
+      headers['Authorization'] = `Bearer ${accessToken}`;
     }
 
-    res.json({ 
-      success: true, 
-      message: 'Uber Eats connected successfully',
-      data: authResponse 
-    });
+    // Test connection to Uber Eats Marketplace API
+    try {
+      const response = await fetch(`https://api.uber.com/v1/eats/stores/${storeId}`, {
+        method: 'GET',
+        headers
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return res.status(400).json({ 
+          success: false, 
+          message: `Failed to verify Uber Eats store: ${response.status} - ${errorText}` 
+        });
+      }
+
+      const storeData = await response.json();
+
+      res.json({ 
+        success: true, 
+        message: 'Uber Eats Marketplace connected successfully',
+        store: storeData,
+        apiSuite: 'Eats Marketplace',
+        capabilities: [
+          'menu_management',
+          'order_tracking', 
+          'delivery_coordination',
+          'marketplace_integration',
+          'analytics'
+        ]
+      });
+    } catch (fetchError) {
+      // Provide setup information for Eats Marketplace API
+      res.json({ 
+        success: false, 
+        message: 'Uber Eats connection pending - complete API setup',
+        setupInfo: {
+          apiSuite: 'Eats Marketplace',
+          selectedFromOptions: [
+            'lending',
+            'Spender Arrears', 
+            'Uber Third Party Support',
+            'Uber Pay',
+            '✓ Eats Marketplace (SELECTED)',
+            'Financial Services',
+            'Uber Insurance Carrier',
+            'Others'
+          ],
+          endpoint: 'https://api.uber.com/v1/eats/stores',
+          documentation: 'https://developer.uber.com/docs/eats',
+          requiredCredentials: ['Store ID', 'Client ID', 'OAuth Access Token'],
+          nextSteps: 'Complete Uber Developer registration with Eats Marketplace API suite'
+        }
+      });
+    }
   } catch (error) {
     console.error('Uber Eats connection error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Failed to connect Uber Eats account' 
+      message: 'Failed to connect Uber Eats: ' + error.message 
     });
   }
 });
