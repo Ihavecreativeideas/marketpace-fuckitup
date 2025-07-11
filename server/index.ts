@@ -160,6 +160,11 @@ app.get('/ticket-integration-demo', (req, res) => {
   res.sendFile(path.join(__dirname, '../ticket-integration-demo.html'));
 });
 
+// Bandzoogle integration route
+app.get('/bandzoogle-integration', (req, res) => {
+  res.sendFile(path.join(__dirname, '../bandzoogle-integration.html'));
+});
+
 // Event booking routes for direct links
 app.get('/book-event/:eventId', (req, res) => {
   const { eventId } = req.params;
