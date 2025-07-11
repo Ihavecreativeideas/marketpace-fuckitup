@@ -150,6 +150,11 @@ app.get('/food-ordering', (req, res) => {
   res.sendFile(path.join(__dirname, '../food-ordering.html'));
 });
 
+// Uber Eats OAuth Demo page
+app.get('/uber-eats-oauth-demo', (req, res) => {
+  res.sendFile(path.join(__dirname, '../uber-eats-oauth-demo.html'));
+});
+
 // Button test page route
 app.get('/button-test', (req, res) => {
   res.sendFile(path.join(__dirname, '../button-test.html'));
