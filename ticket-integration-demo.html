@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Selling Platform Integration - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0845 50%, #2d1b69 100%);
+            color: white;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #00ffff, transparent);
+            border-radius: 50%;
+            animation: float 10s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) translateX(100px) rotate(360deg); opacity: 0; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #00ffff, #ff6b35);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+
+        .integration-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .platform-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .platform-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 255, 255, 0.2);
+        }
+
+        .platform-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .platform-logo {
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+            border-radius: 8px;
+        }
+
+        .platform-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .connect-btn {
+            background: linear-gradient(135deg, #ff6b35, #00ffff);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .connect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+
+        .status-connected { background: #00ff00; }
+        .status-disconnected { background: #ff4444; }
+
+        .direct-link-section {
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .link-generator {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00ffff;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .generated-link {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            background: rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+            border: 1px solid rgba(0, 255, 0, 0.5);
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .status-success {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid rgba(0, 255, 0, 0.5);
+            color: #00ff00;
+        }
+
+        .status-error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.5);
+            color: #ff4444;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating particles -->
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🎟️ Ticket Platform Integration</h1>
+            <p>Connect your ticket selling platforms and create direct booking links for MarketPace members</p>
+        </div>
+
+        <!-- Platform Integration Grid -->
+        <div class="integration-grid">
+            <div class="platform-card">
+                <div class="platform-header">
+                    <div style="width: 40px; height: 40px; background: #026cdf; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                        🎫
+                    </div>
+                    <div>
+                        <div class="platform-name">Ticketmaster</div>
+                        <span class="status-indicator status-disconnected"></span>
+                        <span style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">Not Connected</span>
+                    </div>
+                </div>
+                <p style="color: rgba(255,255,255,0.8); margin-bottom: 15px;">
+                    Connect your Ticketmaster events for seamless booking integration
+                </p>
+                <button class="connect-btn" onclick="connectPlatform('ticketmaster')">
+                    Connect Ticketmaster
+                </button>
+            </div>
+
+            <div class="platform-card">
+                <div class="platform-header">
+                    <div style="width: 40px; height: 40px; background: #f77921; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                        📅
+                    </div>
+                    <div>
+                        <div class="platform-name">Eventbrite</div>
+                        <span class="status-indicator status-disconnected"></span>
+                        <span style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">Not Connected</span>
+                    </div>
+                </div>
+                <p style="color: rgba(255,255,255,0.8); margin-bottom: 15px;">
+                    Import and manage your Eventbrite events with direct booking links
+                </p>
+                <button class="connect-btn" onclick="connectPlatform('eventbrite')">
+                    Connect Eventbrite
+                </button>
+            </div>
+
+            <div class="platform-card">
+                <div class="platform-header">
+                    <div style="width: 40px; height: 40px; background: #00818a; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                        🎪
+                    </div>
+                    <div>
+                        <div class="platform-name">StubHub</div>
+                        <span class="status-indicator status-disconnected"></span>
+                        <span style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">Not Connected</span>
+                    </div>
+                </div>
+                <p style="color: rgba(255,255,255,0.8); margin-bottom: 15px;">
+                    Connect StubHub for resale ticket management and direct purchasing
+                </p>
+                <button class="connect-btn" onclick="connectPlatform('stubhub')">
+                    Connect StubHub
+                </button>
+            </div>
+
+            <div class="platform-card">
+                <div class="platform-header">
+                    <div style="width: 40px; height: 40px; background: #2cd28b; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                        🏟️
+                    </div>
+                    <div>
+                        <div class="platform-name">SeatGeek</div>
+                        <span class="status-indicator status-disconnected"></span>
+                        <span style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">Not Connected</span>
+                    </div>
+                </div>
+                <p style="color: rgba(255,255,255,0.8); margin-bottom: 15px;">
+                    Integrate SeatGeek for comprehensive event and ticket management
+                </p>
+                <button class="connect-btn" onclick="connectPlatform('seatgeek')">
+                    Connect SeatGeek
+                </button>
+            </div>
+        </div>
+
+        <!-- Direct Link Generator -->
+        <div class="direct-link-section">
+            <h2 style="color: #00ffff; margin-bottom: 20px;">📎 Direct Ticket Link Generator</h2>
+            <p style="color: rgba(255,255,255,0.8); margin-bottom: 25px;">
+                Create direct booking links for your events that members can share instantly
+            </p>
+
+            <div class="link-generator">
+                <div class="form-group">
+                    <label for="eventName">Event Name</label>
+                    <input type="text" id="eventName" placeholder="Enter your event name (e.g., 'Comedy Night at Downtown Theater')">
+                </div>
+
+                <div class="form-group">
+                    <label for="eventDate">Event Date & Time</label>
+                    <input type="datetime-local" id="eventDate">
+                </div>
+
+                <div class="form-group">
+                    <label for="venue">Venue</label>
+                    <input type="text" id="venue" placeholder="Event venue or location">
+                </div>
+
+                <div class="form-group">
+                    <label for="ticketPrice">Ticket Price</label>
+                    <input type="number" id="ticketPrice" placeholder="Price per ticket" step="0.01" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="ticketPlatform">Ticket Platform</label>
+                    <select id="ticketPlatform">
+                        <option value="">Select Platform</option>
+                        <option value="ticketmaster">Ticketmaster</option>
+                        <option value="eventbrite">Eventbrite</option>
+                        <option value="stubhub">StubHub</option>
+                        <option value="seatgeek">SeatGeek</option>
+                        <option value="direct">Direct MarketPace Booking</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="externalUrl">External Ticket URL (Optional)</label>
+                    <input type="url" id="externalUrl" placeholder="https://www.ticketmaster.com/your-event-link">
+                </div>
+
+                <button class="connect-btn" onclick="generateDirectLink()" style="margin-top: 20px;">
+                    🔗 Generate Direct Link
+                </button>
+
+                <div id="linkResult" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Integration Status -->
+        <div id="statusMessage"></div>
+    </div>
+
+    <script>
+        // Initialize floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.innerHTML = `<div class="status-message status-${type}">${message}</div>`;
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        async function connectPlatform(platform) {
+            const apiKey = prompt(`Enter your ${platform.charAt(0).toUpperCase() + platform.slice(1)} API key:`);
+            if (!apiKey) return;
+
+            let secretKey = null;
+            if (platform === 'stubhub') {
+                secretKey = prompt('Enter your StubHub secret key (required for OAuth):');
+                if (!secretKey) return;
+            }
+
+            try {
+                showStatus(`Connecting to ${platform}...`, 'success');
+                
+                const response = await fetch('/api/integrations/tickets/connect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ platform, apiKey, secretKey })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    showStatus(`✅ Successfully connected ${platform}! Imported ${result.eventsImported} events.`, 'success');
+                    // Update UI to show connected status
+                    updatePlatformStatus(platform, true);
+                } else {
+                    showStatus(`❌ Failed to connect ${platform}: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Error connecting ${platform}: ${error.message}`, 'error');
+            }
+        }
+
+        function updatePlatformStatus(platform, connected) {
+            const cards = document.querySelectorAll('.platform-card');
+            cards.forEach(card => {
+                const platformName = card.querySelector('.platform-name').textContent.toLowerCase();
+                if (platformName === platform) {
+                    const indicator = card.querySelector('.status-indicator');
+                    const statusText = indicator.nextElementSibling;
+                    
+                    if (connected) {
+                        indicator.className = 'status-indicator status-connected';
+                        statusText.textContent = 'Connected';
+                        statusText.style.color = '#00ff00';
+                    }
+                }
+            });
+        }
+
+        async function generateDirectLink() {
+            const eventName = document.getElementById('eventName').value;
+            const eventDate = document.getElementById('eventDate').value;
+            const venue = document.getElementById('venue').value;
+            const ticketPrice = document.getElementById('ticketPrice').value;
+            const platform = document.getElementById('ticketPlatform').value;
+            const externalUrl = document.getElementById('externalUrl').value;
+
+            if (!eventName || !eventDate || !venue || !platform) {
+                showStatus('Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                showStatus('Generating direct booking link...', 'success');
+
+                const response = await fetch('/api/integrations/tickets/generate-link', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        eventName,
+                        eventDate,
+                        venue,
+                        ticketPrice,
+                        platform,
+                        externalUrl,
+                        memberId: 'demo_member_' + Date.now()
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Show generated link
+                    const resultDiv = document.getElementById('linkResult');
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = `
+                        <div class="generated-link">
+                            <h4 style="color: #00ff00; margin-bottom: 10px;">🎉 Direct Link Generated!</h4>
+                            <p style="margin-bottom: 10px;"><strong>Event:</strong> ${eventName}</p>
+                            <p style="margin-bottom: 10px;"><strong>Date:</strong> ${new Date(eventDate).toLocaleDateString()}</p>
+                            <p style="margin-bottom: 10px;"><strong>Venue:</strong> ${venue}</p>
+                            <p style="margin-bottom: 10px;"><strong>Price:</strong> $${ticketPrice || 'Free'}</p>
+                            <p style="margin-bottom: 10px;"><strong>Booking Method:</strong> ${result.bookingMethod}</p>
+                            <p style="margin-bottom: 15px;"><strong>Direct Link:</strong></p>
+                            <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; display: flex; align-items: center;">
+                                <span id="generatedLink" style="flex: 1; word-break: break-all;">${result.directLink}</span>
+                                <button class="copy-btn" onclick="copyLink('${result.directLink}')">Copy</button>
+                            </div>
+                            <div style="margin-top: 15px; display: flex; gap: 10px;">
+                                <button class="copy-btn" onclick="testLink('${result.directLink}')">Test Link</button>
+                                <button class="copy-btn" onclick="shareLink('${result.directLink}', '${eventName}')">Share</button>
+                            </div>
+                            <p style="margin-top: 15px; color: rgba(255,255,255,0.8); font-size: 0.9rem;">
+                                Share this link with members for instant event booking! Link ID: ${result.eventId}
+                            </p>
+                        </div>
+                    `;
+
+                    showStatus(`✅ Direct link generated successfully! Event ID: ${result.eventId}`, 'success');
+                } else {
+                    showStatus('❌ Failed to generate link: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showStatus('❌ Error generating link: ' + error.message, 'error');
+            }
+        }
+
+        function copyLink(link) {
+            navigator.clipboard.writeText(link).then(() => {
+                showStatus('📋 Link copied to clipboard!', 'success');
+            }).catch(() => {
+                showStatus('❌ Failed to copy link', 'error');
+            });
+        }
+
+        function testLink(link) {
+            window.open(link, '_blank');
+            showStatus('🔗 Opening link in new tab for testing...', 'success');
+        }
+
+        function shareLink(link, eventName) {
+            if (navigator.share) {
+                navigator.share({
+                    title: `Book ${eventName} - MarketPace`,
+                    text: `Check out this event: ${eventName}`,
+                    url: link
+                }).then(() => {
+                    showStatus('📤 Link shared successfully!', 'success');
+                }).catch(() => {
+                    copyLink(link);
+                });
+            } else {
+                copyLink(link);
+            }
+        }
+
+        // Initialize page
+        createParticles();
+    </script>
+</body>
+</html>
