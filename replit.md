@@ -210,6 +210,16 @@ MarketPace is a React Native mobile application that prioritizes community empow
 
 ## Recent Changes
 
+✓ **ENHANCED TRANSPARENCY FEATURES WITH ESTIMATED PAYOUTS** (January 11, 2025)
+✓ Updated "Protection Fee" terminology to "Marketplace Protection Fee™" throughout platform
+✓ Renamed driver insurance to "Driver Accountability Coverage" at $3.75/month
+✓ Added comprehensive estimated payout displays showing driver, seller, and platform earnings
+✓ Enhanced cart.html with transparent cost breakdowns including 85% driver mileage earnings and 15% platform commission
+✓ Implemented detailed payout calculations for both standard routes and shop delivery days
+✓ Added visual breakdown showing Marketplace Protection Fund™ coverage up to $100/item
+✓ Updated fee breakdown modals and driver protection information with new terminology
+✓ Enhanced transparency messaging throughout cart system with clear commission structure
+
 ✓ **SHOPIFY CUSTOM APP INTEGRATION - API 2025-07 WITH GRAPHQL SUPPORT** (January 11, 2025)
 ✓ Upgraded Shopify integration to use latest 2025-07 API version following official Custom App documentation
 ✓ Integrated live Shopify API credentials (API Key: 691d5f8b804efb161442db006cee3210) into environment configuration

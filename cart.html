@@ -509,7 +509,7 @@
                     <span class="cost-value" id="platformFee">$0.00</span>
                 </div>
                 <div class="cost-row">
-                    <span class="cost-label">Membership Protection ($0.50):</span>
+                    <span class="cost-label">Marketplace Protection Fee™:</span>
                     <span class="cost-value" id="protectionFee">$0.50</span>
                 </div>
                 <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-left: 20px; margin-top: -5px; margin-bottom: 10px;">
@@ -694,17 +694,17 @@
         function updateCosts() {
             const subtotal = cartData.items.reduce((sum, item) => sum + item.price, 0);
             const platformFee = calculatePlatformFee(subtotal);
-            const protectionFee = 0.50; // Fixed membership protection fee
+            const marketplaceProtectionFee = 0.50; // Marketplace Protection Fee™
             const deliveryFee = calculateDeliveryFee();
             const largeItemFee = calculateLargeItemFee();
             const mileageFee = calculateMileageFee();
             const urgentFee = cartData.urgentDelivery ? 10.00 : 0;
             
-            const total = subtotal + platformFee + protectionFee + deliveryFee + largeItemFee + mileageFee + urgentFee;
+            const total = subtotal + platformFee + marketplaceProtectionFee + deliveryFee + largeItemFee + mileageFee + urgentFee;
 
             document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
             document.getElementById('platformFee').textContent = `$${platformFee.toFixed(2)}`;
-            document.getElementById('protectionFee').textContent = `$${protectionFee.toFixed(2)}`;
+            document.getElementById('protectionFee').textContent = `$${marketplaceProtectionFee.toFixed(2)}`;
             document.getElementById('deliveryFee').textContent = `$${deliveryFee.toFixed(2)}`;
             document.getElementById('largeItemFee').textContent = `$${largeItemFee.toFixed(2)}`;
             document.getElementById('mileageFee').textContent = `$${mileageFee.toFixed(2)}`;
@@ -712,6 +712,7 @@
             
             // Update mileage breakdown display
             updateMileageBreakdown();
+            displayEstimatedPayouts();
             
             // Show/hide urgent fee
             const urgentFeeRow = document.getElementById('urgentFeeRow');
@@ -896,12 +897,12 @@
             
             // Add driver insurance and protection information
             stepsHTML += `<div style="margin-top: 6px; padding: 6px; background: rgba(0,255,255,0.1); border: 1px solid rgba(0,255,255,0.3); border-radius: 5px;">
-                <div style="color: #00ffff; font-weight: bold; font-size: 11px;">🛡️ Driver Protection System</div>
+                <div style="color: #00ffff; font-weight: bold; font-size: 11px;">🛡️ Driver Accountability Coverage</div>
                 <div style="font-size: 10px; color: rgba(255,255,255,0.8); line-height: 1.3;">
-                    • Drivers pay $4/month insurance (deducted from first route)<br>
+                    • Drivers pay $3.75/month Driver Accountability Coverage<br>
                     • Required to take before/after photos of all items<br>
                     • Good drivers get appreciation bonuses for avoiding damages<br>
-                    • Membership protection covers buyer damages up to $100/item
+                    • Marketplace Protection Fund™ covers buyer damages up to $100/item
                 </div>
             </div>`;
             
@@ -1375,7 +1376,7 @@
                 costs: {
                     subtotal: subtotal,
                     platformFee: calculatePlatformFee(subtotal),
-                    protectionFee: 0.50,
+                    marketplaceProtectionFee: 0.50,
                     deliveryFee: calculateDeliveryFee(),
                     largeItemFee: calculateLargeItemFee(),
                     mileageFee: calculateMileageFee(),
@@ -1532,6 +1533,89 @@
             showNotification('Cart cleared', 'info');
         }
 
+        // Display estimated payouts function
+        function displayEstimatedPayouts() {
+            if (cartData.items.length === 0 || !cartData.deliveryRoute) return;
+
+            const subtotal = cartData.items.reduce((sum, item) => sum + item.price, 0);
+            const platformFee = calculatePlatformFee(subtotal);
+            const marketplaceProtectionFee = 0.50;
+            const mileageFee = calculateMileageFee();
+            const largeItemFee = calculateLargeItemFee();
+            
+            // Calculate driver payout
+            let driverPayout = 0;
+            let platformMileageCommission = 0;
+            
+            if (cartData.deliveryRoute.isShopDeliveryDay) {
+                // Shop delivery: $4 pickup + $2 per dropoff, no mileage
+                const pickupFee = 4.00;
+                const dropoffFees = cartData.items.length * 2.00;
+                driverPayout = pickupFee + dropoffFees + largeItemFee; // Large item fee goes to driver
+            } else {
+                // Standard route: $4 pickup + $2 dropoff + mileage
+                const route = cartData.deliveryRoute.route;
+                const pickups = route.filter(step => step.type === 'pickup').length;
+                const dropoffs = route.filter(step => step.type === 'dropoff').length;
+                
+                const pickupFees = pickups * 4.00;
+                const dropoffFees = dropoffs * 2.00;
+                
+                // Calculate driver's mileage earnings (85% of mileage charges)
+                const totalMileageCharges = mileageFee;
+                platformMileageCommission = totalMileageCharges * 0.15;
+                const driverMileagePayment = totalMileageCharges * 0.85;
+                
+                driverPayout = pickupFees + dropoffFees + driverMileagePayment + largeItemFee;
+            }
+            
+            // Calculate seller earnings (after 5% commission and protection fee)
+            const sellerEarnings = subtotal - platformFee - marketplaceProtectionFee;
+            
+            // Update payout displays
+            const existingPayoutDisplay = document.getElementById('estimatedPayouts');
+            if (existingPayoutDisplay) {
+                existingPayoutDisplay.remove();
+            }
+            
+            const payoutHTML = `
+                <div id="estimatedPayouts" style="margin-top: 15px; padding: 15px; background: rgba(0,255,255,0.1); border: 1px solid rgba(0,255,255,0.3); border-radius: 10px;">
+                    <div style="font-size: 14px; font-weight: bold; color: #00ffff; margin-bottom: 10px;">💰 Estimated Payouts</div>
+                    <div style="font-size: 12px; line-height: 1.4;">
+                        <div style="margin-bottom: 8px; padding: 8px; background: rgba(34,197,94,0.2); border-radius: 5px;">
+                            <div style="color: #22c55e; font-weight: bold;">🚗 Driver Estimated Payout: $${driverPayout.toFixed(2)}</div>
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.8); margin-top: 2px;">
+                                Includes pickup/dropoff fees, 85% mileage earnings${largeItemFee > 0 ? ', large delivery bonus' : ''}, and 100% tips
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 8px; padding: 8px; background: rgba(59,130,246,0.2); border-radius: 5px;">
+                            <div style="color: #3b82f6; font-weight: bold;">🏪 Seller Earnings: $${sellerEarnings.toFixed(2)}</div>
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.8); margin-top: 2px;">
+                                After 5% commission and $0.50 Marketplace Protection Fee™
+                            </div>
+                        </div>
+                        ${platformMileageCommission > 0 ? `
+                        <div style="margin-bottom: 8px; padding: 8px; background: rgba(139,92,246,0.2); border-radius: 5px;">
+                            <div style="color: #8b5cf6; font-weight: bold;">🏢 Platform Mileage Commission: $${platformMileageCommission.toFixed(2)}</div>
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.8); margin-top: 2px;">
+                                15% commission on mileage charges only
+                            </div>
+                        </div>
+                        ` : ''}
+                        <div style="margin-top: 8px; padding: 6px; background: rgba(255,255,255,0.1); border-radius: 5px;">
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.7); text-align: center;">
+                                💡 Max reimbursement: $100/item. Items above $100 not fully insured unless self pickup selected.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Insert after the cost breakdown
+            const costBreakdown = document.querySelector('.cost-breakdown');
+            costBreakdown.insertAdjacentHTML('afterend', payoutHTML);
+        }
+
         // Show driver insurance demo modal
         function showDriverInsuranceDemo() {
             const modalHTML = `
@@ -1600,7 +1684,7 @@
                                 <span style="color: #ff6b35;">$${platformFee.toFixed(2)}</span>
                             </div>
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                <span>Membership Protection:</span>
+                                <span>Marketplace Protection Fee™:</span>
                                 <span style="color: #22c55e;">$${protectionFee.toFixed(2)}</span>
                             </div>
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
