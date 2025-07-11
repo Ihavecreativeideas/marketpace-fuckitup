@@ -338,6 +338,10 @@
             <button class="demo-button" onclick="syncMenu()">
                 📋 Sync Menu
             </button>
+            
+            <button class="demo-button success" onclick="getWebhookConfig()">
+                🔗 Get Webhook Config
+            </button>
 
             <div class="status-display" id="oauth-status">
                 <div class="status-title">OAuth Status:</div>
@@ -397,6 +401,40 @@ curl -F 'client_secret=TG8de43ETuHu2sActoi6hVZJsUqpQLJ6xhAuQE96'
                 <div class="code-block">
 Authorization: Bearer &lt;ACCESS_TOKEN&gt;
 GET https://api.uber.com/v1/eats/stores
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2 class="section-title">🔗 Webhook Configuration</h2>
+            
+            <div class="api-documentation">
+                <h3>Uber Eats Webhook Setup Instructions</h3>
+                <p style="color: #ccc; margin-bottom: 20px;">Use these exact values when configuring your Uber Eats webhook:</p>
+                
+                <div class="code-block">
+<strong>Webhook Delivery URL:</strong>
+https://www.marketpace.shop/api/integrations/uber-eats/webhook
+
+<strong>Authentication Type:</strong>
+oAuth
+
+<strong>Client ID:</strong>
+xIC8cXF3k1opCrVZvVg_MAW0lMh8vVIG
+
+<strong>Client Secret:</strong>
+TG8de43ETuHu2sActoi6hVZJsUqpQLJ6xhAuQE96
+
+<strong>Token URL:</strong>
+https://auth.uber.com/oauth/v2/token
+
+<strong>Recommended Scopes:</strong>
+eats.store eats.orders eats.menus profile
+                </div>
+                
+                <div style="background: rgba(255, 165, 0, 0.1); border: 1px solid rgba(255, 165, 0, 0.3); border-radius: 10px; padding: 15px; margin: 15px 0;">
+                    <strong style="color: #ffa500;">⚠️ Fix for "UNKNOWN: invalid webhook authentication type"</strong><br>
+                    Make sure to select <strong>"oAuth"</strong> (not "Basic") as the Authentication Type in the Uber Eats webhook configuration.
                 </div>
             </div>
         </div>
@@ -654,6 +692,41 @@ GET https://api.uber.com/v1/eats/stores
             
             showNotification('Credentials cleared', 'info');
             updateStatus('🗑️ Credentials Cleared', 'All stored data removed');
+        }
+
+        // Get webhook configuration
+        async function getWebhookConfig() {
+            try {
+                showNotification('Fetching webhook configuration...', 'info');
+                updateStatus('Getting Webhook Config...', 'Retrieving setup instructions');
+                
+                const response = await fetch('/api/integrations/uber-eats/webhook-config');
+                const result = await response.json();
+                
+                if (result.success) {
+                    updateStatus('✅ Webhook Config Retrieved', 'Configuration ready for setup');
+                    showNotification('Webhook configuration retrieved successfully!', 'success');
+                    
+                    // Display configuration in console for easy copying
+                    console.log('=== UBER EATS WEBHOOK CONFIGURATION ===');
+                    console.log('Webhook Delivery URL:', result.setup_instructions.webhook_delivery_url);
+                    console.log('Authentication Type:', result.setup_instructions.authentication_type);
+                    console.log('Client ID:', result.setup_instructions.client_id);
+                    console.log('Client Secret:', result.setup_instructions.client_secret);
+                    console.log('Token URL:', result.setup_instructions.token_url);
+                    console.log('Recommended Scopes:', result.setup_instructions.recommended_scopes);
+                    console.log('=== END CONFIGURATION ===');
+                    
+                    showNotification('Check browser console for copy-paste ready configuration', 'info');
+                } else {
+                    updateStatus('❌ Config Fetch Failed', 'Unable to retrieve webhook configuration');
+                    showNotification('Failed to get webhook config', 'error');
+                }
+            } catch (error) {
+                console.error('Webhook config error:', error);
+                updateStatus('❌ Config Error', error.message);
+                showNotification('Failed to get webhook config: ' + error.message, 'error');
+            }
         }
 
         // Load saved credentials on page load
