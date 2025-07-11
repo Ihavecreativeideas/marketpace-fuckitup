@@ -1038,7 +1038,7 @@ const DriverJobDescriptionScreen = ({ navigation }: any) => {
             💰 Earnings Breakdown
           </Text>
           <View style={{ marginBottom: 8 }}>
-            <Text style={{ fontSize: 16, color: '#fff', fontWeight: '600' }}>$15 per route</Text>
+            <Text style={{ fontSize: 16, color: '#fff', fontWeight: '600' }}>$4 pickup + $2 dropoff</Text>
             <Text style={{ fontSize: 14, color: '#ccc' }}>Collect items from sellers</Text>
           </View>
           <View style={{ marginBottom: 8 }}>
@@ -1570,7 +1570,7 @@ const CampaignLandingScreen = ({ navigation }: any) => (
             Apply to Drive
           </Text>
           <Text style={{ fontSize: 14, color: 'rgba(255, 255, 255, 0.9)' }}>
-            Earn $15 per route + $0.50/mile + $25 large delivery bonus + 100% tips
+            Earn $4 pickup + $2 dropoff + $0.50/mile + $25 large delivery bonus + 100% tips
           </Text>
         </LinearGradient>
       </TouchableOpacity>
