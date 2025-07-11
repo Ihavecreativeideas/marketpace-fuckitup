@@ -336,8 +336,8 @@ router.post('/shopify/connect', async (req, res) => {
     // Clean store URL format
     const cleanStoreUrl = storeUrl.replace(/\/+$/, ''); // Remove trailing slashes
     
-    // Test connection to Shopify Admin API
-    const shopResponse = await fetch(`${cleanStoreUrl}/admin/api/2023-10/shop.json`, {
+    // Test connection using latest 2025-07 API version (REST API)
+    const shopResponse = await fetch(`${cleanStoreUrl}/admin/api/2025-07/shop.json`, {
       headers: {
         'X-Shopify-Access-Token': accessToken,
         'Content-Type': 'application/json'
@@ -354,18 +354,53 @@ router.post('/shopify/connect', async (req, res) => {
 
     const shopData = await shopResponse.json();
     
-    // Get product count
-    const productsResponse = await fetch(`${cleanStoreUrl}/admin/api/2023-10/products/count.json`, {
+    // Get product count using GraphQL API (as per documentation)
+    const graphqlQuery = {
+      query: `query {
+        products(first: 250) {
+          edges {
+            node {
+              id
+              handle
+              title
+              status
+            }
+          }
+          pageInfo {
+            hasNextPage
+          }
+        }
+        shop {
+          name
+          id
+          myshopifyDomain
+          plan {
+            displayName
+          }
+          currencyCode
+          timezoneAbbreviation
+        }
+      }`
+    };
+
+    const productsResponse = await fetch(`${cleanStoreUrl}/admin/api/2025-07/graphql.json`, {
+      method: 'POST',
       headers: {
         'X-Shopify-Access-Token': accessToken,
         'Content-Type': 'application/json'
-      }
+      },
+      body: JSON.stringify(graphqlQuery)
     });
 
     let productCount = 0;
+    let graphqlShopData = null;
+    
     if (productsResponse.ok) {
-      const productsData = await productsResponse.json();
-      productCount = productsData.count || 0;
+      const graphqlData = await productsResponse.json();
+      if (graphqlData.data) {
+        productCount = graphqlData.data.products.edges.length;
+        graphqlShopData = graphqlData.data.shop;
+      }
     }
 
     // Store Shopify connection for authenticated user
@@ -394,12 +429,17 @@ router.post('/shopify/connect', async (req, res) => {
         currency: shopData.shop.currency,
         timezone: shopData.shop.timezone
       },
+      graphql_data: graphqlShopData,
+      api_version: '2025-07',
+      integration_method: 'Custom App with Private Access Token',
       capabilities: [
         'product_sync',
         'order_management', 
         'inventory_tracking',
         'customer_data',
-        'analytics'
+        'analytics',
+        'graphql_api_access',
+        'rest_api_access'
       ]
     });
   } catch (error) {
@@ -417,8 +457,8 @@ router.post('/website/test', async (req, res) => {
     const { websiteUrl, platformType, accessToken } = req.body;
     
     if (platformType === 'shopify' && accessToken) {
-      // Test real Shopify connection
-      const response = await fetch(`${websiteUrl}/admin/api/2023-10/shop.json`, {
+      // Test real Shopify connection using 2025-07 API
+      const response = await fetch(`${websiteUrl}/admin/api/2025-07/shop.json`, {
         headers: {
           'X-Shopify-Access-Token': accessToken,
           'Content-Type': 'application/json'
@@ -432,18 +472,40 @@ router.post('/website/test', async (req, res) => {
 
       const data = await response.json();
       
-      // Get product count
-      const productsResponse = await fetch(`${websiteUrl}/admin/api/2023-10/products/count.json`, {
+      // Get product data using GraphQL as per official documentation
+      const graphqlQuery = {
+        query: `query {
+          products(first: 10) {
+            edges {
+              node {
+                id
+                handle
+                title
+                status
+              }
+            }
+            pageInfo {
+              hasNextPage
+            }
+          }
+        }`
+      };
+
+      const productsResponse = await fetch(`${websiteUrl}/admin/api/2025-07/graphql.json`, {
+        method: 'POST',
         headers: {
           'X-Shopify-Access-Token': accessToken,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify(graphqlQuery)
       });
 
       let productCount = 0;
       if (productsResponse.ok) {
-        const productsData = await productsResponse.json();
-        productCount = productsData.count || 0;
+        const graphqlData = await productsResponse.json();
+        if (graphqlData.data && graphqlData.data.products) {
+          productCount = graphqlData.data.products.edges.length;
+        }
       }
 
       return res.json({
@@ -453,7 +515,9 @@ router.post('/website/test', async (req, res) => {
         plan: data.shop?.plan_name || 'Unknown Plan',
         domain: data.shop?.domain,
         currency: data.shop?.currency,
-        id: data.shop?.id
+        id: data.shop?.id,
+        api_version: '2025-07',
+        integration_method: 'Custom App (Private Access Token)'
       });
     } else {
       return res.json({ success: false, error: 'Invalid platform or missing access token' });
