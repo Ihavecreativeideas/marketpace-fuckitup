@@ -1,4 +1,13 @@
 import type { Express } from "express";
+import { 
+  validateAndSanitize, 
+  validateEmail, 
+  validateBandzoogleUrl,
+  rateLimit,
+  preventSqlInjection
+} from "./security/validation";
+import { body } from "express-validator";
+import { SecurityMonitor } from "./security/environment";
 
 // Website Integration Types
 export interface WebsiteIntegration {
@@ -842,7 +851,19 @@ export function registerIntegrationRoutes(app: Express): void {
   });
 
   // Bandzoogle Integration Setup (Workaround for no API)
-  app.post('/api/integrations/bandzoogle/setup', async (req, res) => {
+  app.post('/api/integrations/bandzoogle/setup', [
+    validateBandzoogleUrl,
+    body('bandName')
+      .isLength({ min: 1, max: 100 })
+      .matches(/^[a-zA-Z0-9\s\-_&\.]+$/)
+      .withMessage('Band name contains invalid characters'),
+    validateEmail.withMessage('Valid contact email is required'),
+    body('integrationGoals')
+      .isLength({ max: 1000 })
+      .withMessage('Integration goals must be under 1000 characters'),
+    validateAndSanitize,
+    rateLimit(15 * 60 * 1000, 5) // 5 requests per 15 minutes
+  ], async (req, res) => {
     try {
       const { bandzoogleUrl, bandName, musicGenre, contactEmail, integrationGoals } = req.body;
       
@@ -887,6 +908,13 @@ export function registerIntegrationRoutes(app: Express): void {
         ]
       };
 
+      // Log successful integration
+      SecurityMonitor.logSecurityEvent('bandzoogle_integration_created', {
+        integrationId,
+        bandName,
+        contactEmail
+      });
+
       res.json({
         success: true,
         integrationId: integrationId,
@@ -897,9 +925,14 @@ export function registerIntegrationRoutes(app: Express): void {
         supportEmail: 'integrations@marketpace.shop'
       });
     } catch (error) {
+      SecurityMonitor.logSecurityEvent('bandzoogle_integration_error', {
+        error: error.message,
+        bandName: req.body?.bandName
+      });
+      
       res.status(500).json({ 
         success: false, 
-        error: 'Failed to setup Bandzoogle integration: ' + error.message 
+        error: 'Failed to setup Bandzoogle integration'
       });
     }
   });
