@@ -262,6 +262,19 @@ MarketPace is a React Native mobile application that prioritizes community empow
 ✓ Added restaurant search, location-aware ordering, and seamless Uber Eats redirection
 ✓ API endpoints: uber-eats-redirect and restaurants with Orange Beach, AL local business focus
 
+✓ **OVERAGE MILEAGE FEE SYSTEM IMPLEMENTATION** (January 11, 2025)
+✓ Implemented comprehensive overage mileage fee system with $1 extra per mile after 15 miles
+✓ Added platform commission structure: 15% of all mileage charges go to MarketPace
+✓ Updated server/revenue.ts with OVERAGE_MILEAGE_RATE (1.50) and OVERAGE_THRESHOLD (15 miles)
+✓ Enhanced calculateDriverPayout function to properly calculate base and overage mileage fees
+✓ Added calculateMileageWithOverage helper function with platform commission calculations
+✓ Updated cart.html mileage calculation logic to include overage fees and platform commission
+✓ Modified driver payment structure throughout platform: $4 pickup + $2 dropoff + $0.50/mile + $1 extra per mile after 15 miles + $25 large delivery bonus + 100% tips
+✓ Updated pitch page, driver application page, and mobile app to display new overage mileage structure
+✓ Enhanced cart system to show detailed mileage breakdown with base fees, overage fees, and platform commission
+✓ Platform now earns 15% commission on all mileage charges while drivers receive full pickup/dropoff fees and 100% tips
+✓ System automatically calculates overage fees for routes exceeding 15 miles with transparent pricing display
+
 ✓ **AI PLATFORM EDITOR ASSISTANT INTEGRATION** (January 10, 2025)
 ✓ Added comprehensive AI Platform Editor Assistant to admin dashboard with OpenAI GPT-4o integration
 ✓ Built complete chat interface with message history, thinking indicators, and real-time response system
@@ -567,7 +580,7 @@ MarketPace is a React Native mobile application that prioritizes community empow
 
 ✓ **DRIVER PAYMENT STRUCTURE CLARIFICATION** (January 09, 2025)
 ✓ Confirmed and restored proper pickup/dropoff payment model as specified by user requirements
-✓ Driver payment structure: $4 per pickup + $2 per dropoff + $0.50 per mile + $25 large delivery bonus + 100% tips
+✓ Driver payment structure: $4 per pickup + $2 per dropoff + $0.50 per mile + $1 extra per mile after 15 miles + $25 large delivery bonus + 100% tips
 ✓ Shop delivery routes: 1 pickup can have multiple dropoffs, allowing drivers to earn more per route
 ✓ Updated server/revenue.ts to use PICKUP_FEE and DROPOFF_FEE constants instead of BASE_PAY
 ✓ Modified calculateDriverPayout function to accept pickups, dropoffs, miles, and tips parameters

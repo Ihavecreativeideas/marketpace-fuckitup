@@ -1244,18 +1244,35 @@
                         totalMilesForBuyer += routeData.route[i + 1].distance;
                     }
                     
-                    // Calculate fees for this buyer
-                    const baseMileageFee = totalMilesForBuyer * 0.50;
-                    const extraMiles = Math.max(0, totalMilesForBuyer - 15);
-                    const premiumFee = extraMiles * 1.00;
-                    const totalFee = baseMileageFee + premiumFee;
+                    // Calculate fees for this buyer with overage structure
+                    let baseMileageFee = 0;
+                    let overageFee = 0;
+                    let totalDriverPay = 0;
+                    
+                    if (totalMilesForBuyer <= 15) {
+                        // All miles at base rate
+                        baseMileageFee = totalMilesForBuyer * 0.50;
+                        totalDriverPay = baseMileageFee;
+                    } else {
+                        // First 15 miles at base rate, remaining at overage rate
+                        baseMileageFee = 15 * 0.50; // $7.50 for first 15 miles
+                        const extraMiles = totalMilesForBuyer - 15;
+                        overageFee = extraMiles * 1.50; // $1.50 per mile after 15 miles
+                        totalDriverPay = baseMileageFee + overageFee;
+                    }
+                    
+                    // Platform takes 15% commission on all mileage charges
+                    const platformCommission = totalDriverPay * 0.15;
+                    const totalFee = totalDriverPay + platformCommission;
                     
                     buyerMileageFees.push({
                         itemId: item.id,
                         itemName: item.name,
                         miles: Math.round(totalMilesForBuyer * 100) / 100,
                         baseFee: baseMileageFee,
-                        premiumFee: premiumFee,
+                        overageFee: overageFee,
+                        totalDriverPay: totalDriverPay,
+                        platformCommission: platformCommission,
                         totalFee: totalFee,
                         sellerLocation: sellerLocation.name,
                         buyerLocation: buyerLocation.name,

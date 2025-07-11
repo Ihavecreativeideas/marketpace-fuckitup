@@ -1570,7 +1570,7 @@ const CampaignLandingScreen = ({ navigation }: any) => (
             Apply to Drive
           </Text>
           <Text style={{ fontSize: 14, color: 'rgba(255, 255, 255, 0.9)' }}>
-            Earn $4 pickup + $2 dropoff + $0.50/mile + $25 large delivery bonus + 100% tips
+            Earn $4 pickup + $2 dropoff + $0.50/mile + $1 extra per mile after 15 miles + $25 large delivery bonus + 100% tips
           </Text>
         </LinearGradient>
       </TouchableOpacity>

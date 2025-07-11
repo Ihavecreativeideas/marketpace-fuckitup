@@ -72,14 +72,17 @@ export const FEE_STRUCTURE = {
   VERIFICATION_FEE: 1.00, // Optional verification fee
   LARGE_ITEM_FEE: 25.00, // $25 fee for large items requiring truck/trailer
   WALLET_BONUS_PERCENT: 0.10, // 10% bonus when loading wallet ($10 = $11 in app)
-  DELIVERY_PLATFORM_PERCENT: 0.05 // 5% of delivery/order total (except tips)
+  DELIVERY_PLATFORM_PERCENT: 0.05, // 5% of delivery/order total (except tips)
+  MILEAGE_COMMISSION_PERCENT: 0.15 // 15% of all mileage charges go to platform
 };
 
 // Driver Payment Structure
 export const DRIVER_PAYMENTS = {
   PICKUP_FEE: 4.00, // Per pickup
   DROPOFF_FEE: 2.00, // Per dropoff
-  MILEAGE_RATE: 0.50,
+  MILEAGE_RATE: 0.50, // Base mileage rate for first 15 miles
+  OVERAGE_MILEAGE_RATE: 1.50, // $1.50 per mile after 15 miles (includes $0.50 base + $1.00 overage)
+  OVERAGE_THRESHOLD: 15, // Miles before overage fees apply
   LARGE_DELIVERY_BONUS: 25.00,
   TIP_PERCENTAGE: 1.00 // 100% of tips go to drivers
 };
@@ -158,7 +161,19 @@ export function calculateDriverPayout(
 ): number {
   const pickupPay = pickups * DRIVER_PAYMENTS.PICKUP_FEE;
   const dropoffPay = dropoffs * DRIVER_PAYMENTS.DROPOFF_FEE;
-  const mileagePay = miles * DRIVER_PAYMENTS.MILEAGE_RATE;
+  
+  // Calculate mileage pay with overage fees
+  let mileagePay = 0;
+  if (miles <= DRIVER_PAYMENTS.OVERAGE_THRESHOLD) {
+    // All miles at base rate
+    mileagePay = miles * DRIVER_PAYMENTS.MILEAGE_RATE;
+  } else {
+    // First 15 miles at base rate, remaining at overage rate
+    const baseMiles = DRIVER_PAYMENTS.OVERAGE_THRESHOLD;
+    const overageMiles = miles - DRIVER_PAYMENTS.OVERAGE_THRESHOLD;
+    mileagePay = (baseMiles * DRIVER_PAYMENTS.MILEAGE_RATE) + (overageMiles * DRIVER_PAYMENTS.OVERAGE_MILEAGE_RATE);
+  }
+  
   const tipPay = tips * DRIVER_PAYMENTS.TIP_PERCENTAGE;
   const largeBonusPay = hasLargeItems ? DRIVER_PAYMENTS.LARGE_DELIVERY_BONUS : 0;
   
@@ -167,6 +182,43 @@ export function calculateDriverPayout(
 
 export function calculateDeliveryPlatformFee(orderTotal: number): number {
   return orderTotal * FEE_STRUCTURE.DELIVERY_PLATFORM_PERCENT;
+}
+
+export function calculateMileageWithOverage(miles: number): {
+  baseMileage: number;
+  overageMileage: number;
+  totalDriverPay: number;
+  platformCommission: number;
+  totalCustomerCost: number;
+} {
+  let baseMileage = 0;
+  let overageMileage = 0;
+  let totalDriverPay = 0;
+  
+  if (miles <= DRIVER_PAYMENTS.OVERAGE_THRESHOLD) {
+    // All miles at base rate
+    baseMileage = miles * DRIVER_PAYMENTS.MILEAGE_RATE;
+    totalDriverPay = baseMileage;
+  } else {
+    // First 15 miles at base rate, remaining at overage rate
+    const baseMiles = DRIVER_PAYMENTS.OVERAGE_THRESHOLD;
+    const overageMiles = miles - DRIVER_PAYMENTS.OVERAGE_THRESHOLD;
+    baseMileage = baseMiles * DRIVER_PAYMENTS.MILEAGE_RATE;
+    overageMileage = overageMiles * DRIVER_PAYMENTS.OVERAGE_MILEAGE_RATE;
+    totalDriverPay = baseMileage + overageMileage;
+  }
+  
+  // Platform takes 15% commission on all mileage charges
+  const platformCommission = totalDriverPay * FEE_STRUCTURE.MILEAGE_COMMISSION_PERCENT;
+  const totalCustomerCost = totalDriverPay + platformCommission;
+  
+  return {
+    baseMileage,
+    overageMileage,
+    totalDriverPay,
+    platformCommission,
+    totalCustomerCost
+  };
 }
 
 export function calculateCustomDeliveryFee(
