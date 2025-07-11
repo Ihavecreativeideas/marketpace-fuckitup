@@ -155,6 +155,63 @@ app.get('/member-business-profile', (req, res) => {
   res.sendFile(path.join(__dirname, '../member-business-profile.html'));
 });
 
+// Ticket integration demo route
+app.get('/ticket-integration-demo', (req, res) => {
+  res.sendFile(path.join(__dirname, '../ticket-integration-demo.html'));
+});
+
+// Event booking routes for direct links
+app.get('/book-event/:eventId', (req, res) => {
+  const { eventId } = req.params;
+  const platform = req.query.platform;
+  
+  // This would typically redirect to a booking page or handle the booking
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Book Event - MarketPace</title>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: Arial, sans-serif; background: #0d0221; color: white; padding: 40px; text-align: center;">
+      <h1>🎟️ Event Booking</h1>
+      <p>Event ID: ${eventId}</p>
+      ${platform ? `<p>Platform: ${platform}</p>` : ''}
+      <p>This would redirect to the actual booking system or display event details.</p>
+      <a href="/" style="color: #00ffff;">← Back to MarketPace</a>
+    </body>
+    </html>
+  `);
+});
+
+app.get('/redirect-ticket/:eventId', (req, res) => {
+  const { eventId } = req.params;
+  const externalUrl = req.query.external;
+  
+  if (externalUrl) {
+    // Redirect to external ticket platform
+    res.redirect(decodeURIComponent(externalUrl as string));
+  } else {
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Ticket Redirect - MarketPace</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="font-family: Arial, sans-serif; background: #0d0221; color: white; padding: 40px; text-align: center;">
+        <h1>🎟️ Ticket Redirect</h1>
+        <p>Event ID: ${eventId}</p>
+        <p>No external URL provided for redirect.</p>
+        <a href="/" style="color: #00ffff;">← Back to MarketPace</a>
+      </body>
+      </html>
+    `);
+  }
+});
+
 // Food ordering page
 app.get('/food-ordering', (req, res) => {
   res.sendFile(path.join(__dirname, '../food-ordering.html'));

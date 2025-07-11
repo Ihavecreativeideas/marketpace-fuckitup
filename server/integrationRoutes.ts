@@ -841,6 +841,67 @@ export function registerIntegrationRoutes(app: Express): void {
     }
   });
 
+  // Direct Link Generation for Events
+  app.post('/api/integrations/tickets/generate-link', async (req, res) => {
+    try {
+      const { eventName, eventDate, venue, ticketPrice, platform, externalUrl, memberId } = req.body;
+      
+      if (!eventName || !eventDate || !venue || !platform) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Event name, date, venue, and platform are required' 
+        });
+      }
+
+      // Generate unique event ID
+      const eventId = 'evt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      
+      // Create direct link based on platform
+      let directLink;
+      let bookingMethod;
+      
+      if (platform === 'direct') {
+        directLink = `https://marketpace.shop/book-event/${eventId}`;
+        bookingMethod = 'Direct MarketPace Booking';
+      } else if (externalUrl) {
+        directLink = `https://marketpace.shop/redirect-ticket/${eventId}?external=${encodeURIComponent(externalUrl)}`;
+        bookingMethod = `Redirect to ${platform.charAt(0).toUpperCase() + platform.slice(1)}`;
+      } else {
+        directLink = `https://marketpace.shop/book-event/${eventId}?platform=${platform}`;
+        bookingMethod = `${platform.charAt(0).toUpperCase() + platform.slice(1)} Integration`;
+      }
+
+      // Store event details for later retrieval
+      const eventDetails = {
+        id: eventId,
+        name: eventName,
+        date: new Date(eventDate),
+        venue: venue,
+        price: parseFloat(ticketPrice) || 0,
+        platform: platform,
+        externalUrl: externalUrl,
+        directLink: directLink,
+        memberId: memberId || 'anonymous',
+        createdAt: new Date(),
+        isActive: true
+      };
+
+      res.json({
+        success: true,
+        eventId: eventId,
+        directLink: directLink,
+        bookingMethod: bookingMethod,
+        eventDetails: eventDetails,
+        message: 'Direct booking link generated successfully'
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to generate direct link: ' + error.message 
+      });
+    }
+  });
+
   // Ticket Platform Integration Routes
   app.post('/api/integrations/tickets/connect', async (req, res) => {
     try {
