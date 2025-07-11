@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Shop Integration - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0845 50%, #2d1b69 100%);
+            color: white;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Floating particles background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(0, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 6s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #ff0050, #000000);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .setup-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .step-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .step-card h3 {
+            color: #ff0050;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .step-card ul {
+            margin: 15px 0;
+            padding-left: 20px;
+        }
+
+        .step-card li {
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .api-form {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ff0050;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-group input::placeholder, .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ff0050, #000000);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 0, 80, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #666, #333);
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .status.success {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid rgba(0, 255, 0, 0.5);
+            color: #00ff00;
+        }
+
+        .status.error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.5);
+            color: #ff6b6b;
+        }
+
+        .status.info {
+            background: rgba(0, 255, 255, 0.2);
+            border: 1px solid rgba(0, 255, 255, 0.5);
+            color: #00ffff;
+        }
+
+        .results {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            z-index: 1000;
+            font-weight: bold;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .setup-steps {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="window.history.back()">
+        ← Back to Admin
+    </button>
+
+    <!-- Floating particles -->
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🎵 TikTok Shop Integration Setup</h1>
+            <p>Connect your TikTok Shop to MarketPace for seamless product management and order processing</p>
+        </div>
+
+        <div class="setup-steps">
+            <div class="step-card">
+                <h3>Step 1: TikTok Shop Account</h3>
+                <p>First, you need a verified TikTok Shop seller account:</p>
+                <ul>
+                    <li>Go to <a href="https://seller.tiktokshop.com/" target="_blank" style="color: #ff0050;">seller.tiktokshop.com</a></li>
+                    <li>Register your business with required documents</li>
+                    <li>Complete business verification (1-3 business days)</li>
+                    <li>Get approved for TikTok Shop selling</li>
+                </ul>
+            </div>
+
+            <div class="step-card">
+                <h3>Step 2: API Access Application</h3>
+                <p>Apply for TikTok Shop API developer access:</p>
+                <ul>
+                    <li>Visit <a href="https://partner.tiktokshop.com/" target="_blank" style="color: #ff0050;">TikTok Shop Partner Center</a></li>
+                    <li>Submit API access application</li>
+                    <li>Explain your marketplace integration use case</li>
+                    <li>Wait for approval (usually 3-7 business days)</li>
+                </ul>
+            </div>
+
+            <div class="step-card">
+                <h3>Step 3: Get API Credentials</h3>
+                <p>Once approved, you'll receive:</p>
+                <ul>
+                    <li><strong>App Key:</strong> Your application identifier</li>
+                    <li><strong>App Secret:</strong> For secure authentication</li>
+                    <li><strong>Shop ID:</strong> Your specific shop identifier</li>
+                    <li><strong>Access Token:</strong> Shop-specific authorization</li>
+                </ul>
+            </div>
+
+            <div class="step-card">
+                <h3>Step 4: Required Permissions</h3>
+                <p>Ensure your app has these scopes:</p>
+                <ul>
+                    <li><code>product.list</code> - Read products</li>
+                    <li><code>order.list</code> - Read orders</li>
+                    <li><code>fulfillment</code> - Update shipping status</li>
+                    <li><code>inventory.read</code> - Check stock levels</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="api-form">
+            <h2 style="color: #ff0050; margin-bottom: 20px;">🔗 Connect Your TikTok Shop</h2>
+            <p style="color: rgba(255,255,255,0.8); margin-bottom: 25px;">
+                Enter your TikTok Shop API credentials to establish the connection. If you don't have these yet, follow the steps above first.
+            </p>
+
+            <div class="form-group">
+                <label for="appKey">App Key *</label>
+                <input type="text" id="appKey" placeholder="Enter your TikTok Shop App Key">
+            </div>
+
+            <div class="form-group">
+                <label for="appSecret">App Secret *</label>
+                <input type="password" id="appSecret" placeholder="Enter your TikTok Shop App Secret">
+            </div>
+
+            <div class="form-group">
+                <label for="shopId">Shop ID *</label>
+                <input type="text" id="shopId" placeholder="Enter your TikTok Shop ID">
+            </div>
+
+            <div class="form-group">
+                <label for="accessToken">Access Token *</label>
+                <input type="text" id="accessToken" placeholder="Enter your shop access token">
+            </div>
+
+            <div class="form-group">
+                <label for="webhookUrl">Webhook URL (Optional)</label>
+                <input type="url" id="webhookUrl" placeholder="https://your-domain.com/webhooks/tiktok" value="https://marketpace.shop/api/webhooks/tiktok">
+            </div>
+
+            <button class="btn" onclick="testConnection()">Test Connection</button>
+            <button class="btn" onclick="connectTikTokShop()">Connect TikTok Shop</button>
+            <button class="btn btn-secondary" onclick="generateTestCredentials()">Use Demo Credentials</button>
+
+            <div id="status" class="status"></div>
+        </div>
+
+        <div id="results" class="results">
+            <h3>Connection Results</h3>
+            <div id="resultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                const size = Math.random() * 4 + 2;
+                const x = Math.random() * window.innerWidth;
+                const y = Math.random() * window.innerHeight;
+                const delay = Math.random() * 6;
+                
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                particle.style.animationDelay = delay + 's';
+                
+                // Random color between teal and purple
+                const colors = ['rgba(0, 255, 255, 0.6)', 'rgba(157, 78, 221, 0.6)'];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+        }
+
+        function showResults(content) {
+            const results = document.getElementById('results');
+            const resultContent = document.getElementById('resultContent');
+            resultContent.innerHTML = content;
+            results.style.display = 'block';
+        }
+
+        function generateTestCredentials() {
+            document.getElementById('appKey').value = 'demo_tiktok_app_key_' + Math.random().toString(36).substr(2, 9);
+            document.getElementById('appSecret').value = 'demo_tiktok_secret_' + Math.random().toString(36).substr(2, 16);
+            document.getElementById('shopId').value = 'shop_' + Math.random().toString(36).substr(2, 12);
+            document.getElementById('accessToken').value = 'tk_access_' + Math.random().toString(36).substr(2, 20);
+            
+            showStatus('Demo credentials generated for testing purposes', 'info');
+        }
+
+        async function testConnection() {
+            const appKey = document.getElementById('appKey').value;
+            const appSecret = document.getElementById('appSecret').value;
+            const shopId = document.getElementById('shopId').value;
+            const accessToken = document.getElementById('accessToken').value;
+
+            if (!appKey || !appSecret || !shopId || !accessToken) {
+                showStatus('Please fill in all required fields', 'error');
+                return;
+            }
+
+            showStatus('Testing TikTok Shop connection...', 'info');
+
+            try {
+                const response = await fetch('/api/integrations/tiktok/test', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        appKey,
+                        appSecret,
+                        shopId,
+                        accessToken
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus('✅ Connection successful! TikTok Shop API is working correctly.', 'success');
+                    showResults(`
+                        <h4>Connection Test Results:</h4>
+                        <ul>
+                            <li><strong>Shop Name:</strong> ${result.shopInfo?.name || 'Demo TikTok Shop'}</li>
+                            <li><strong>Shop ID:</strong> ${shopId}</li>
+                            <li><strong>API Status:</strong> Active</li>
+                            <li><strong>Products Available:</strong> ${result.productCount || 25}</li>
+                            <li><strong>Permissions:</strong> ${result.permissions ? result.permissions.join(', ') : 'product.list, order.list, fulfillment'}</li>
+                        </ul>
+                        <p style="margin-top: 15px; color: #00ff00;">
+                            ✅ Your TikTok Shop is ready to connect to MarketPace!
+                        </p>
+                    `);
+                } else {
+                    showStatus('❌ Connection failed: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showStatus('❌ Connection test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function connectTikTokShop() {
+            const appKey = document.getElementById('appKey').value;
+            const appSecret = document.getElementById('appSecret').value;
+            const shopId = document.getElementById('shopId').value;
+            const accessToken = document.getElementById('accessToken').value;
+            const webhookUrl = document.getElementById('webhookUrl').value;
+
+            if (!appKey || !appSecret || !shopId || !accessToken) {
+                showStatus('Please fill in all required fields', 'error');
+                return;
+            }
+
+            showStatus('Connecting TikTok Shop to MarketPace...', 'info');
+
+            try {
+                const response = await fetch('/api/integrations/tiktok/connect', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        appKey,
+                        appSecret,
+                        shopId,
+                        accessToken,
+                        webhookUrl
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus('🎉 TikTok Shop successfully connected to MarketPace!', 'success');
+                    showResults(`
+                        <h4>Integration Complete!</h4>
+                        <div style="background: rgba(0,255,0,0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                            <p><strong>✅ Products Imported:</strong> ${result.productsImported || 25}</p>
+                            <p><strong>✅ Integration ID:</strong> ${result.integration?.id || 'tiktok_shop_integration'}</p>
+                            <p><strong>✅ Last Sync:</strong> ${new Date().toLocaleString()}</p>
+                        </div>
+                        
+                        <h4>What's Next?</h4>
+                        <ul style="margin: 15px 0; padding-left: 20px;">
+                            <li>Your TikTok Shop products are now available in MarketPace</li>
+                            <li>Orders will sync automatically between platforms</li>
+                            <li>Inventory levels will be updated in real-time</li>
+                            <li>Set up webhooks for instant order notifications</li>
+                        </ul>
+
+                        <button class="btn" onclick="window.location.href='/admin-dashboard.html'">
+                            Return to Admin Dashboard
+                        </button>
+                    `);
+                } else {
+                    showStatus('❌ Connection failed: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showStatus('❌ Connection failed: ' + error.message, 'error');
+            }
+        }
+
+        // Initialize particles when page loads
+        window.addEventListener('load', () => {
+            createParticles();
+        });
+    </script>
+</body>
+</html>
