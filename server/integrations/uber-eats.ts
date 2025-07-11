@@ -6,7 +6,9 @@ const router = Router();
 // Uber Eats OAuth Configuration
 const UBER_CLIENT_ID = process.env.UBER_CLIENT_ID || 'xIC8cXF3k1opCrVZvVg_MAW0lMh8vVIG';
 const UBER_CLIENT_SECRET = process.env.UBER_CLIENT_SECRET || 'TG8de43ETuHu2sActoi6hVZJsUqpQLJ6xhAuQE96';
-const UBER_REDIRECT_URI = process.env.UBER_REDIRECT_URI || 'https://your-domain.com/api/integrations/uber-eats/callback';
+const UBER_REDIRECT_URI = process.env.UBER_REDIRECT_URI || 'https://www.marketpace.shop/api/integrations/uber-eats/callback';
+const UBER_WEBHOOK_URL = process.env.UBER_WEBHOOK_URL || 'https://www.marketpace.shop/api/integrations/uber-eats/webhook';
+const UBER_TOKEN_URL = 'https://auth.uber.com/oauth/v2/token';
 
 interface UberEatsStore {
   id: string;
@@ -390,6 +392,97 @@ router.get('/test', async (req, res) => {
       details: error.message
     });
   }
+});
+
+// Webhook endpoint for Uber Eats order updates
+router.post('/webhook', (req, res) => {
+  try {
+    console.log('Uber Eats webhook received:', req.body);
+    
+    const { event_type, resource_href, resource_type, store_id, event_time } = req.body;
+    
+    // Verify webhook authenticity (in production, add proper verification)
+    if (!event_type || !resource_href) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid webhook payload'
+      });
+    }
+    
+    // Handle different webhook event types
+    switch (event_type) {
+      case 'orders.notification':
+        console.log(`New order notification for store ${store_id}`);
+        // Handle new order
+        break;
+        
+      case 'orders.status_changed':
+        console.log(`Order status changed for store ${store_id}`);
+        // Handle order status updates
+        break;
+        
+      case 'orders.cancel':
+        console.log(`Order cancelled for store ${store_id}`);
+        // Handle order cancellation
+        break;
+        
+      case 'store.status_changed':
+        console.log(`Store status changed for store ${store_id}`);
+        // Handle store status updates
+        break;
+        
+      default:
+        console.log(`Unknown webhook event type: ${event_type}`);
+    }
+    
+    // Respond with success (Uber expects 200 status)
+    res.status(200).json({
+      success: true,
+      message: 'Webhook processed successfully',
+      event_id: req.headers['x-uber-signature'] || 'unknown'
+    });
+    
+  } catch (error) {
+    console.error('Webhook processing error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Webhook processing failed'
+    });
+  }
+});
+
+// Get webhook configuration info
+router.get('/webhook-config', (req, res) => {
+  res.json({
+    success: true,
+    webhook_config: {
+      webhook_url: UBER_WEBHOOK_URL,
+      authentication_type: 'oAuth',
+      client_id: UBER_CLIENT_ID,
+      client_secret: UBER_CLIENT_SECRET.substring(0, 8) + '...',
+      token_url: UBER_TOKEN_URL,
+      scopes: [
+        'eats.store',
+        'eats.orders',
+        'eats.menus',
+        'profile'
+      ],
+      supported_events: [
+        'orders.notification',
+        'orders.status_changed', 
+        'orders.cancel',
+        'store.status_changed'
+      ]
+    },
+    setup_instructions: {
+      webhook_delivery_url: UBER_WEBHOOK_URL,
+      authentication_type: 'oAuth',
+      client_id: UBER_CLIENT_ID,
+      client_secret: UBER_CLIENT_SECRET,
+      token_url: UBER_TOKEN_URL,
+      recommended_scopes: 'eats.store eats.orders eats.menus profile'
+    }
+  });
 });
 
 export default router;
