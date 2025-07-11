@@ -1,5 +1,6 @@
 import { Router } from "express";
 import fetch from "node-fetch";
+import { randomUUID } from "crypto";
 
 const router = Router();
 
@@ -9,6 +10,7 @@ const UBER_CLIENT_SECRET = process.env.UBER_CLIENT_SECRET || 'TG8de43ETuHu2sActo
 const UBER_REDIRECT_URI = process.env.UBER_REDIRECT_URI || 'https://www.marketpace.shop/api/integrations/uber-eats/callback';
 const UBER_WEBHOOK_URL = process.env.UBER_WEBHOOK_URL || 'https://www.marketpace.shop/api/integrations/uber-eats/webhook';
 const UBER_TOKEN_URL = 'https://auth.uber.com/oauth/v2/token';
+const UBER_DEVELOPER_UUID = process.env.UBER_DEVELOPER_UUID || '82650352-3b80-41aa-8148-cbaf9cb9c58c';
 
 interface UberEatsStore {
   id: string;
@@ -451,12 +453,69 @@ router.post('/webhook', (req, res) => {
   }
 });
 
+// Generate new UUID for developers who need one
+router.get('/generate-uuid', (req, res) => {
+  const newUUID = randomUUID();
+  res.json({
+    success: true,
+    uuid: newUUID,
+    message: 'Use this UUID in your webhook configuration'
+  });
+});
+
+// Register OAuth client with Uber (for fixing OAuth registration errors)
+router.post('/register-oauth-client', async (req, res) => {
+  try {
+    const registrationData = {
+      client_id: UBER_CLIENT_ID,
+      client_secret: UBER_CLIENT_SECRET,
+      redirect_uris: [UBER_REDIRECT_URI],
+      scope: 'eats.store eats.orders eats.menus profile',
+      grant_types: ['authorization_code', 'refresh_token']
+    };
+
+    console.log('Attempting OAuth client registration with Uber...');
+    
+    // This would typically be done through Uber's developer console
+    // For now, we'll provide instructions for manual registration
+    res.json({
+      success: true,
+      message: 'OAuth client registration instructions provided',
+      registration_required: true,
+      instructions: {
+        step1: 'Visit https://developer.uber.com/dashboard/apps',
+        step2: 'Create new app or update existing app',
+        step3: 'Add redirect URI: ' + UBER_REDIRECT_URI,
+        step4: 'Enable required scopes: eats.store, eats.orders, eats.menus, profile',
+        step5: 'Save app configuration',
+        step6: 'Use the Client ID and Secret from your app dashboard'
+      },
+      current_config: registrationData,
+      troubleshooting: {
+        'OAuth registration failed': 'Ensure your app is properly configured in Uber Developer Dashboard',
+        'Invalid scopes': 'Verify you have access to Eats Marketplace API',
+        'Redirect URI mismatch': 'Add https://www.marketpace.shop/api/integrations/uber-eats/callback to your app'
+      }
+    });
+  } catch (error) {
+    console.error('OAuth registration error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'OAuth registration failed',
+      details: error.message
+    });
+  }
+});
+
 // Get webhook configuration info
 router.get('/webhook-config', (req, res) => {
+  const freshUUID = randomUUID(); // Generate fresh UUID each time
+  
   res.json({
     success: true,
     webhook_config: {
       webhook_url: UBER_WEBHOOK_URL,
+      developer_uuid: freshUUID,
       authentication_type: 'oAuth',
       client_id: UBER_CLIENT_ID,
       client_secret: UBER_CLIENT_SECRET.substring(0, 8) + '...',
@@ -476,11 +535,18 @@ router.get('/webhook-config', (req, res) => {
     },
     setup_instructions: {
       webhook_delivery_url: UBER_WEBHOOK_URL,
+      developer_uuid: freshUUID,
       authentication_type: 'oAuth',
       client_id: UBER_CLIENT_ID,
       client_secret: UBER_CLIENT_SECRET,
       token_url: UBER_TOKEN_URL,
       recommended_scopes: 'eats.store eats.orders eats.menus profile'
+    },
+    troubleshooting: {
+      'Missing UUID': 'Use the generated UUID above',
+      'Invalid UUID format': 'Ensure UUID follows format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+      'OAuth client registration failed': 'Register your app properly in Uber Developer Dashboard',
+      'Invalid authentication type': 'Select oAuth, not Basic authentication'
     }
   });
 });
