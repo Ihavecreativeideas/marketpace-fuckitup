@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Food Ordering - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0845 50%, #2d1b69 100%);
+            color: white;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Floating particles background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(0, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 6s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #00ffff, #ff6b35);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 20px;
+        }
+
+        .delivery-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .delivery-option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .delivery-option.active {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .delivery-option:hover {
+            transform: translateY(-2px);
+            border-color: rgba(0, 255, 255, 0.5);
+        }
+
+        .restaurants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .restaurant-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .restaurant-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 255, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+        }
+
+        .restaurant-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .restaurant-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #ff6b35, #f9ca24);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .restaurant-info h3 {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        .restaurant-info p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .restaurant-stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .menu-preview {
+            margin-bottom: 20px;
+        }
+
+        .menu-preview h4 {
+            margin-bottom: 10px;
+            color: #00ffff;
+        }
+
+        .menu-items {
+            display: grid;
+            gap: 10px;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-item-info {
+            flex: 1;
+        }
+
+        .menu-item-name {
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
+
+        .menu-item-description {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .menu-item-price {
+            font-weight: bold;
+            color: #00ffff;
+        }
+
+        .order-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00ffff, #0099cc);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .delivery-info {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .delivery-info h3 {
+            color: #00ffff;
+            margin-bottom: 10px;
+        }
+
+        .search-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 15px 25px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 30px auto;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-bar:focus {
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+        }
+
+        .search-bar::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .restaurants-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .delivery-options {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .order-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🍽️ Local Food Ordering</h1>
+            <p>Support local restaurants with MarketPace + Uber Eats delivery</p>
+        </div>
+
+        <div class="delivery-info">
+            <h3>How It Works</h3>
+            <p>Order from your favorite local restaurants on MarketPace. We partner with Uber Eats for fast, reliable delivery to your door. Support local businesses while enjoying convenient food delivery!</p>
+        </div>
+
+        <input type="text" class="search-bar" placeholder="Search restaurants, cuisines, or dishes..." id="searchBar">
+
+        <div class="delivery-options">
+            <div class="delivery-option active" data-delivery="uber-eats">
+                <strong>🚗 Uber Eats Delivery</strong><br>
+                <small>Fast delivery by Uber drivers</small>
+            </div>
+            <div class="delivery-option" data-delivery="pickup">
+                <strong>🏪 Restaurant Pickup</strong><br>
+                <small>Order ahead, pickup when ready</small>
+            </div>
+        </div>
+
+        <div class="restaurants-grid" id="restaurantsGrid">
+            <!-- Restaurants will be loaded here -->
+        </div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Sample restaurant data
+        const restaurants = [
+            {
+                id: 1,
+                name: "Giuseppe's Italian Kitchen",
+                cuisine: "Italian",
+                logo: "🍝",
+                rating: 4.8,
+                deliveryTime: "25-35 min",
+                deliveryFee: "$2.99",
+                menu: [
+                    { name: "Margherita Pizza", description: "Fresh mozzarella, basil, tomato sauce", price: "$16.99" },
+                    { name: "Chicken Alfredo", description: "Grilled chicken, creamy alfredo sauce", price: "$19.99" },
+                    { name: "Caesar Salad", description: "Romaine, parmesan, croutons, caesar dressing", price: "$12.99" }
+                ]
+            },
+            {
+                id: 2,
+                name: "Sakura Sushi Bar",
+                cuisine: "Japanese",
+                logo: "🍣",
+                rating: 4.9,
+                deliveryTime: "30-40 min",
+                deliveryFee: "$3.49",
+                menu: [
+                    { name: "California Roll", description: "Crab, avocado, cucumber", price: "$8.99" },
+                    { name: "Salmon Teriyaki", description: "Grilled salmon, teriyaki glaze, rice", price: "$22.99" },
+                    { name: "Miso Soup", description: "Traditional soybean soup", price: "$4.99" }
+                ]
+            },
+            {
+                id: 3,
+                name: "Local Burger Co.",
+                cuisine: "American",
+                logo: "🍔",
+                rating: 4.6,
+                deliveryTime: "20-30 min",
+                deliveryFee: "$1.99",
+                menu: [
+                    { name: "Classic Cheeseburger", description: "Beef patty, cheese, lettuce, tomato", price: "$13.99" },
+                    { name: "Sweet Potato Fries", description: "Crispy sweet potato fries", price: "$6.99" },
+                    { name: "Chocolate Shake", description: "Rich chocolate milkshake", price: "$5.99" }
+                ]
+            },
+            {
+                id: 4,
+                name: "Spice Garden Indian",
+                cuisine: "Indian",
+                logo: "🍛",
+                rating: 4.7,
+                deliveryTime: "35-45 min",
+                deliveryFee: "$2.49",
+                menu: [
+                    { name: "Butter Chicken", description: "Creamy tomato curry with chicken", price: "$17.99" },
+                    { name: "Garlic Naan", description: "Fresh baked garlic bread", price: "$4.99" },
+                    { name: "Biryani Rice", description: "Aromatic basmati rice with spices", price: "$15.99" }
+                ]
+            }
+        ];
+
+        // Render restaurants
+        function renderRestaurants(restaurantList = restaurants) {
+            const grid = document.getElementById('restaurantsGrid');
+            
+            grid.innerHTML = restaurantList.map(restaurant => `
+                <div class="restaurant-card">
+                    <div class="restaurant-header">
+                        <div class="restaurant-logo">${restaurant.logo}</div>
+                        <div class="restaurant-info">
+                            <h3>${restaurant.name}</h3>
+                            <p>${restaurant.cuisine} Cuisine</p>
+                        </div>
+                    </div>
+                    
+                    <div class="restaurant-stats">
+                        <div class="stat">⭐ ${restaurant.rating}</div>
+                        <div class="stat">🕒 ${restaurant.deliveryTime}</div>
+                        <div class="stat">🚗 ${restaurant.deliveryFee}</div>
+                    </div>
+                    
+                    <div class="menu-preview">
+                        <h4>Popular Items</h4>
+                        <div class="menu-items">
+                            ${restaurant.menu.slice(0, 3).map(item => `
+                                <div class="menu-item">
+                                    <div class="menu-item-info">
+                                        <div class="menu-item-name">${item.name}</div>
+                                        <div class="menu-item-description">${item.description}</div>
+                                    </div>
+                                    <div class="menu-item-price">${item.price}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="order-buttons">
+                        <button class="btn btn-primary" onclick="orderWithUberEats(${restaurant.id})">
+                            🚗 Order via Uber Eats
+                        </button>
+                        <button class="btn btn-secondary" onclick="viewFullMenu(${restaurant.id})">
+                            📋 View Full Menu
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Order via Uber Eats
+        async function orderWithUberEats(restaurantId) {
+            const restaurant = restaurants.find(r => r.id === restaurantId);
+            
+            try {
+                // Call MarketPace API to initiate Uber Eats order
+                const response = await fetch('/api/food-ordering/uber-eats-redirect', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        restaurantId: restaurantId,
+                        restaurantName: restaurant.name,
+                        userLocation: await getUserLocation()
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification(`Redirecting to Uber Eats for ${restaurant.name}...`, 'success');
+                    // Redirect to Uber Eats with pre-filled restaurant
+                    window.open(result.uberEatsUrl, '_blank');
+                } else {
+                    showNotification('Unable to connect to Uber Eats. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Error initiating Uber Eats order:', error);
+                // Fallback: direct link to Uber Eats
+                const fallbackUrl = `https://www.ubereats.com/search?q=${encodeURIComponent(restaurant.name)}`;
+                window.open(fallbackUrl, '_blank');
+                showNotification(`Opening Uber Eats to search for ${restaurant.name}`, 'info');
+            }
+        }
+
+        // View full menu
+        function viewFullMenu(restaurantId) {
+            const restaurant = restaurants.find(r => r.id === restaurantId);
+            showNotification(`Opening full menu for ${restaurant.name}...`, 'info');
+            // Here you would open a detailed menu modal or page
+        }
+
+        // Get user location for better Uber Eats integration
+        async function getUserLocation() {
+            return new Promise((resolve) => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            resolve({
+                                lat: position.coords.latitude,
+                                lng: position.coords.longitude
+                            });
+                        },
+                        () => {
+                            // Default to demo location if permission denied
+                            resolve({ lat: 40.7128, lng: -74.0060 }); // NYC
+                        }
+                    );
+                } else {
+                    resolve({ lat: 40.7128, lng: -74.0060 }); // NYC default
+                }
+            });
+        }
+
+        // Search functionality
+        document.getElementById('searchBar').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = restaurants.filter(restaurant => 
+                restaurant.name.toLowerCase().includes(query) ||
+                restaurant.cuisine.toLowerCase().includes(query) ||
+                restaurant.menu.some(item => 
+                    item.name.toLowerCase().includes(query) ||
+                    item.description.toLowerCase().includes(query)
+                )
+            );
+            renderRestaurants(filtered);
+        });
+
+        // Delivery option selection
+        document.querySelectorAll('.delivery-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.delivery-option').forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+                
+                const deliveryType = option.dataset.delivery;
+                updateDeliveryDisplay(deliveryType);
+            });
+        });
+
+        function updateDeliveryDisplay(deliveryType) {
+            const buttons = document.querySelectorAll('.btn-primary');
+            buttons.forEach(button => {
+                if (deliveryType === 'uber-eats') {
+                    button.innerHTML = '🚗 Order via Uber Eats';
+                    button.onclick = function() {
+                        const restaurantId = this.closest('.restaurant-card').querySelector('[onclick*="orderWithUberEats"]').onclick.toString().match(/\d+/)[0];
+                        orderWithUberEats(parseInt(restaurantId));
+                    };
+                } else {
+                    button.innerHTML = '🏪 Order for Pickup';
+                    button.onclick = function() {
+                        showNotification('Pickup ordering coming soon!', 'info');
+                    };
+                }
+            });
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 25px;
+                border-radius: 10px;
+                color: white;
+                font-weight: 600;
+                z-index: 1000;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                animation: slideIn 0.3s ease;
+            `;
+            
+            switch (type) {
+                case 'success':
+                    notification.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+                    break;
+                case 'error':
+                    notification.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+                    break;
+                default:
+                    notification.style.background = 'linear-gradient(135deg, #3b82f6, #1d4ed8)';
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            renderRestaurants();
+        });
+    </script>
+</body>
+</html>

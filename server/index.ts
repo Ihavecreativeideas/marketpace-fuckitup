@@ -145,6 +145,11 @@ app.get('/platform-integrations', (req, res) => {
   res.sendFile(path.join(__dirname, '../platform-integrations.html'));
 });
 
+// Food ordering page
+app.get('/food-ordering', (req, res) => {
+  res.sendFile(path.join(__dirname, '../food-ordering.html'));
+});
+
 // Button test page route
 app.get('/button-test', (req, res) => {
   res.sendFile(path.join(__dirname, '../button-test.html'));
