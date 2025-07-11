@@ -757,6 +757,40 @@
                         <i class="fas fa-envelope"></i> Send Messages
                     </button>
                 </div>
+
+                <!-- Quarterly Bonus Management -->
+                <div style="margin-top: 2rem; padding: 2rem; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <div class="section-header">
+                        <h3 style="color: #667eea; margin-bottom: 1rem;">
+                            <i class="fas fa-trophy"></i> Quarterly Driver Bonus Program
+                        </h3>
+                        <button class="btn btn-success" onclick="generateBonusReport()">
+                            <i class="fas fa-chart-line"></i> Generate Report
+                        </button>
+                    </div>
+                    
+                    <p style="color: #666; margin-bottom: 1.5rem;">
+                        Reward excellent drivers with quarterly bonuses from the security fund pool. Eligible drivers have good ratings, avoid customer conflicts, and maintain damage-free deliveries.
+                    </p>
+
+                    <div id="bonusDriversList" style="display: none;">
+                        <h4 style="color: #333; margin-bottom: 1rem;">Eligible Drivers This Quarter</h4>
+                        <div id="eligibleDriversTable" style="background: #f8f9fa; border-radius: 8px; padding: 1rem;">
+                            <!-- Driver bonus table will be populated here -->
+                        </div>
+                        
+                        <div style="margin-top: 1.5rem; padding: 1rem; background: #e8f5e8; border-radius: 8px; border-left: 4px solid #28a745;">
+                            <h5 style="color: #28a745; margin-bottom: 0.5rem;">Security Fund Pool Available</h5>
+                            <p style="margin: 0; font-size: 1.1rem; font-weight: bold;">$<span id="securityFundBalance">0</span></p>
+                        </div>
+                        
+                        <div style="margin-top: 1rem;">
+                            <button class="btn btn-primary" onclick="showBonusModal()">
+                                <i class="fas fa-gift"></i> Award Bonuses
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Protection & Funds -->
@@ -1710,6 +1744,167 @@
                 </div>
                 <button class="btn btn-primary" onclick="sendMessage()">Send Message</button>
             `);
+        }
+
+        function generateBonusReport() {
+            // Sample eligible drivers data
+            const eligibleDrivers = [
+                {
+                    id: 1,
+                    name: "Sarah Johnson",
+                    rating: 4.9,
+                    deliveriesCompleted: 156,
+                    damageIncidents: 0,
+                    customerComplaints: 0,
+                    quarterlyScore: 98
+                },
+                {
+                    id: 2,
+                    name: "Mike Rodriguez",
+                    rating: 4.8,
+                    deliveriesCompleted: 203,
+                    damageIncidents: 0,
+                    customerComplaints: 1,
+                    quarterlyScore: 94
+                },
+                {
+                    id: 3,
+                    name: "Emily Chen",
+                    rating: 4.7,
+                    deliveriesCompleted: 189,
+                    damageIncidents: 1,
+                    customerComplaints: 0,
+                    quarterlyScore: 91
+                }
+            ];
+
+            // Update security fund balance (sample data)
+            document.getElementById('securityFundBalance').textContent = '2,450';
+
+            // Generate driver table
+            let tableHTML = `
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f1f3f5;">
+                            <th style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: left;">Driver</th>
+                            <th style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: center;">Rating</th>
+                            <th style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: center;">Deliveries</th>
+                            <th style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: center;">Damage Free</th>
+                            <th style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: center;">Conflict Free</th>
+                            <th style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: center;">Score</th>
+                            <th style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            eligibleDrivers.forEach(driver => {
+                const damageStatus = driver.damageIncidents === 0 ? '✅ Yes' : '❌ No';
+                const conflictStatus = driver.customerComplaints === 0 ? '✅ Yes' : '❌ No';
+                
+                tableHTML += `
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #dee2e6;">${driver.name}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: center;">⭐ ${driver.rating}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: center;">${driver.deliveriesCompleted}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: center;">${damageStatus}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: center;">${conflictStatus}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: center; font-weight: bold; color: #28a745;">${driver.quarterlyScore}%</td>
+                        <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: center;">
+                            <input type="checkbox" id="driver_${driver.id}" style="margin-right: 5px;">
+                            <label for="driver_${driver.id}" style="font-size: 12px;">Select</label>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('eligibleDriversTable').innerHTML = tableHTML;
+            document.getElementById('bonusDriversList').style.display = 'block';
+            
+            showNotification('Quarterly bonus report generated! Eligible drivers loaded.', 'success');
+        }
+
+        function showBonusModal() {
+            const selectedDrivers = [];
+            const checkboxes = document.querySelectorAll('#eligibleDriversTable input[type="checkbox"]:checked');
+            
+            if (checkboxes.length === 0) {
+                showNotification('Please select at least one driver for bonus payout.', 'warning');
+                return;
+            }
+
+            checkboxes.forEach(checkbox => {
+                const driverId = checkbox.id.split('_')[1];
+                const row = checkbox.closest('tr');
+                const driverName = row.cells[0].textContent;
+                selectedDrivers.push({id: driverId, name: driverName});
+            });
+
+            const securityFundBalance = document.getElementById('securityFundBalance').textContent;
+
+            showModal('Award Quarterly Bonuses', `
+                <div style="margin-bottom: 1rem;">
+                    <h5>Selected Drivers for Bonus:</h5>
+                    <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                        ${selectedDrivers.map(driver => `<li>${driver.name}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div style="background: #e8f5e8; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <strong>Available Security Fund: $${securityFundBalance}</strong>
+                </div>
+                
+                <div class="form-group">
+                    <label>Bonus Amount Per Driver</label>
+                    <input type="number" id="bonusAmount" class="form-control" placeholder="Enter bonus amount (e.g., 100)" step="25" min="25">
+                    <small style="color: #666;">Recommended: $50-200 based on performance score</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Bonus Message</label>
+                    <textarea id="bonusMessage" class="form-control" rows="3" placeholder="Congratulations on your excellent performance this quarter!">Congratulations on your outstanding performance this quarter! Your commitment to damage-free deliveries and excellent customer service has earned you this quarterly bonus. Keep up the great work!</textarea>
+                </div>
+                
+                <button class="btn btn-success" onclick="processBonusPayments()">
+                    <i class="fas fa-gift"></i> Process Bonus Payments
+                </button>
+            `);
+        }
+
+        function processBonusPayments() {
+            const bonusAmount = document.getElementById('bonusAmount').value;
+            const bonusMessage = document.getElementById('bonusMessage').value;
+            
+            if (!bonusAmount || bonusAmount < 25) {
+                showNotification('Please enter a valid bonus amount (minimum $25).', 'warning');
+                return;
+            }
+
+            const selectedDrivers = document.querySelectorAll('#eligibleDriversTable input[type="checkbox"]:checked').length;
+            const totalAmount = bonusAmount * selectedDrivers;
+            const currentFund = parseFloat(document.getElementById('securityFundBalance').textContent.replace(',', ''));
+
+            if (totalAmount > currentFund) {
+                showNotification('Insufficient funds in security pool. Please reduce bonus amount or select fewer drivers.', 'error');
+                return;
+            }
+
+            // Update security fund balance
+            const newBalance = currentFund - totalAmount;
+            document.getElementById('securityFundBalance').textContent = newBalance.toLocaleString();
+
+            // Close modal
+            closeModal();
+
+            showNotification(`Quarterly bonuses of $${bonusAmount} each processed for ${selectedDrivers} drivers! Total: $${totalAmount}`, 'success');
+            
+            // Reset the bonus section
+            document.getElementById('bonusDriversList').style.display = 'none';
         }
 
         function viewClaimHistory() {
