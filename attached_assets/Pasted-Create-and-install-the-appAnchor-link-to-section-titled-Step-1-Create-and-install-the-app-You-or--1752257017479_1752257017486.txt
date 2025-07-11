@@ -1,0 +1,111 @@
+Create and install the appAnchor link to section titled "Step 1: Create and install the app"
+You or the user can create and install a custom app in the Shopify admin by following the Custom apps documentation on the Shopify Help Center.
+
+Step 2: Make authenticated requestsAnchor link to section titled "Step 2: Make authenticated requests"
+A custom app can make authenticated requests to the GraphQL Admin API using the API access tokens that are generated when the app is installed on the store.
+
+The following example shows how to retrieve a list of products using the GraphQL Admin API.
+
+Terminal
+
+Copy
+$
+$
+$
+$
+$
+$
+$
+$
+$
+$
+$
+$
+$
+$
+$
+$
+$
+$
+$
+curl -X POST \
+  https://{shop}.myshopify.com/admin/api/2025-07/graphql.json \
+  -H 'Content-Type: application/json' \
+  -H 'X-Shopify-Access-Token: {access_token}' \
+  -d '{
+    "query": "query {
+      products(first: 5) {
+        edges {
+          node {
+            id
+            handle
+          }
+        }
+        pageInfo {
+          hasNextPage
+        }
+      }
+    }"
+  }'
+Rotating API credentials or generating new access tokens for admin-created appsAnchor link to section titled "Rotating API credentials or generating new access tokens for admin-created apps"
+You can't rotate API credentials for custom apps created in the Shopify admin. You need to delete the app and create a new custom app which will have new API credentials.
+
+To create new access tokens for a custom app that was created in the Shopify admin, you need to uninstall and reinstall your app.
+
+Caution
+Your app's requests and webhooks will be disrupted until you update your app's code with the new API credentials or access token.
+
+If you want to rotate access tokens for a custom storefront that you build with the Headless channel, refer to the documentation on rotating private access tokens in the Shopify admin.
+
+Changing API scopesAnchor link to section titled "Changing API scopes"
+Anyone with a staff or collaborator account on a store can change what store resources an admin-created custom app can access, but only if they have all the following permissions:
+
+the Manage and install apps and channels permission and the Develop apps permission
+the relevant permissions for the respective store resource
+For example, if a staff or collaborator account has the View or manage products, variants, and collections permission for the store, then they can only change API scopes related to the store's products, variants, and collections.
+
+The store owner can change the permissions for a staff or collaborator account in the Shopify admin.
+
+Permissions required to assign scopes to a custom appAnchor link to section titled "Permissions required to assign scopes to a custom app"
+The following table shows what store permissions a staff account or collaborator account needs to assign Admin API access scopes to an admin-created custom app. In all cases, the account must also have the Develop apps permission.
+
+Admin API scope name	Permissions required for the staff or collaborator account
+read_analytics	View store metrics
+read_assigned_fulfillment_orders, write_assigned_fulfillment_orders	View or manage fulfillment orders
+read_customer_merge, write_customer_merge	View or manage customer profile merges
+read_customers, write_customers	View or manage customers, customer addresses, order history, and customer groups
+read_discounts, write_discounts	View or manage automatic discounts and discount codes
+read_draft_orders, write_draft_orders	View or manage orders created by app users on behalf of customers
+read_files, write_files	View or manage files
+read_fulfillments, write_fulfillments	View or manage fulfillment services
+read_gdpr_data_request	View GDPR data requests
+read_gift_cards, write_gift_cards	View or manage gift cards (Available to Plus merchants only)
+read_inventory, write_inventory	View or manage inventory across multiple locations
+read_legal_policies, write_legal_policies	View or manage a shop’s legal policies
+read_locations	View the geographic location of stores, headquarters, and warehouses
+read_marketing_events, write_marketing_events	View or manage marketing events and engagement data
+read_merchant_managed_fulfillment_orders, write_merchant_managed_fulfillment_orders	View or manage fulfilment orders assigned to merchant-managed locations
+read_metaobject_definitions, write_metaobject_definitions	View or manage metaobject definitions
+read_metaobjects, write_metaobjects	View or manage metaobject entries
+read_online_store_navigation	View menus for display on the storefront
+read_online_store_pages, write_online_store_pages	View or manage Online Store pages
+read_order_edits, write_order_edits	View or manage edits to orders
+read_orders, write_orders, read_all_orders	View or manage orders, transactions, fulfillments, and abandoned checkouts from the last 60 days, or View all past and future orders
+read_price_rules, write_price_rules	View or manage conditional discounts
+read_products, write_products	View or manage products, variants, and collections
+read_product_listings, write_product_listings	View or manage product or collection listings
+read_reports, write_reports	View or manage reports on the Reports page in the Shopify admin
+read_resource_feedbacks, write_resource_feedbacks	View or manage the status of shops and resources
+read_script_tags, write_script_tags	View or manage the JavaScript code in storefront or orders status pages
+read_shipping, write_shipping	View or manage shipping carriers, countries, and provinces
+read_shopify_payments_accounts	View Shopify Payments accounts
+read_shopify_payments_bank_accounts	View bank accounts that can receive Shopify Payment payouts
+read_shopify_payments_disputes	View Shopify Payment disputes raised by buyers
+read_shopify_payments_payouts	View Shopify Payments payouts and the account’s current balance
+read_content, write_content	View or manage articles, blogs, comments, pages, and redirects
+read_themes, write_themes	View or manage theme templates and assets
+read_third_party_fulfillment_orders, write_third_party_fulfillment_orders	View or manage fulfillment orders assigned to a location managed by any fulfillment service
+read_translations, write_translations	View or manage content that can be translated
+Next stepsAnchor link to section titled "Next steps"
+Learn how to configure a webhook for your app and manage webhooks for different API versions.
+Explore the Webhooks references and GraphQL Admin API references.

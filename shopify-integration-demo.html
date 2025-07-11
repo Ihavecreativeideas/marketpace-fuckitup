@@ -276,6 +276,10 @@
                 📦 Sync Products
             </button>
             
+            <button class="demo-button" onclick="testGraphQL()">
+                🔍 Test GraphQL API
+            </button>
+            
             <div class="status-display" id="connection-status">
                 <div class="status-title">Connection Status</div>
                 <div class="status-content" id="status-content">Ready to connect your Shopify store...</div>
@@ -295,23 +299,44 @@
             <h2 class="section-title">📖 Setup Instructions</h2>
             
             <div class="api-documentation">
-                <h3>How to Get Your Shopify Access Token</h3>
+                <h3>How to Create a Custom Shopify App (Official Method)</h3>
                 <ol style="color: #ccc; margin: 15px 0; padding-left: 20px;">
                     <li>Go to your Shopify Admin panel</li>
                     <li>Navigate to <strong>Settings → Apps and sales channels</strong></li>
                     <li>Click <strong>Develop apps</strong></li>
                     <li>Click <strong>Create an app</strong></li>
-                    <li>Configure Admin API access scopes (read_products, read_orders, etc.)</li>
+                    <li>Configure Admin API access scopes (see required scopes below)</li>
+                    <li>Click <strong>Install app</strong></li>
                     <li>Generate and copy your <strong>Admin API access token</strong></li>
                 </ol>
                 
                 <div class="code-block">
-<strong>Required Scopes:</strong>
+<strong>API Version:</strong> 2025-07 (Latest)
+<strong>Integration Method:</strong> Custom App with Private Access Token
+
+<strong>Required Scopes for MarketPace Integration:</strong>
 • read_products (view product catalog)
+• write_products (sync products to MarketPace)
 • read_orders (access order information)
+• write_orders (manage orders)
 • read_customers (customer data)
 • read_inventory (stock levels)
-• write_products (sync products to MarketPace)
+• write_inventory (update inventory)
+• read_locations (store locations)
+• read_fulfillments (delivery tracking)
+• write_fulfillments (update delivery status)
+
+<strong>Endpoints Used:</strong>
+• REST API: /admin/api/2025-07/shop.json
+• GraphQL API: /admin/api/2025-07/graphql.json
+                </div>
+                
+                <div style="background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 10px; padding: 15px; margin: 15px 0;">
+                    <h4 style="color: #00ff88; margin-bottom: 10px;">✅ Official Shopify Documentation Compliance</h4>
+                    <p style="color: #ccc; font-size: 14px;">
+                        This integration follows the exact specifications from Shopify's Custom Apps documentation.
+                        We use both REST and GraphQL APIs as recommended by Shopify.
+                    </p>
                 </div>
             </div>
         </div>
@@ -460,7 +485,7 @@ ${result.capabilities.map(cap => `• ${cap}`).join('\n')}
             }
         }
 
-        // Sync products from Shopify
+        // Sync products from Shopify using REST API
         async function syncProducts() {
             const storeUrl = document.getElementById('store-url').value || localStorage.getItem('shopify_store_url');
             const accessToken = document.getElementById('access-token').value || localStorage.getItem('shopify_access_token');
@@ -470,12 +495,12 @@ ${result.capabilities.map(cap => `• ${cap}`).join('\n')}
                 return;
             }
             
-            updateStatus('Syncing products from Shopify...');
+            updateStatus('Syncing products from Shopify (REST API 2025-07)...');
             showNotification('Syncing products from your store...', 'info');
             
             try {
-                // For now, just test the products endpoint
-                const response = await fetch(`${storeUrl}/admin/api/2023-10/products.json?limit=10`, {
+                // Use latest 2025-07 API version
+                const response = await fetch(`${storeUrl}/admin/api/2025-07/products.json?limit=10`, {
                     headers: {
                         'X-Shopify-Access-Token': accessToken,
                         'Content-Type': 'application/json'
@@ -484,10 +509,10 @@ ${result.capabilities.map(cap => `• ${cap}`).join('\n')}
                 
                 if (response.ok) {
                     const data = await response.json();
-                    updateStatus(`✅ Found ${data.products.length} products ready for sync`);
-                    showNotification(`Found ${data.products.length} products!`, 'success');
+                    updateStatus(`✅ Found ${data.products.length} products ready for sync (REST API)`);
+                    showNotification(`Found ${data.products.length} products via REST API!`, 'success');
                     
-                    console.log('Products:', data.products);
+                    console.log('Products (REST):', data.products);
                 } else {
                     updateStatus(`❌ Product sync failed: ${response.status}`);
                     showNotification('Product sync failed', 'error');
@@ -495,6 +520,113 @@ ${result.capabilities.map(cap => `• ${cap}`).join('\n')}
             } catch (error) {
                 updateStatus(`❌ Sync error: ${error.message}`);
                 showNotification('Sync error: ' + error.message, 'error');
+            }
+        }
+
+        // Test GraphQL API (official Shopify recommendation)
+        async function testGraphQL() {
+            const storeUrl = document.getElementById('store-url').value || localStorage.getItem('shopify_store_url');
+            const accessToken = document.getElementById('access-token').value || localStorage.getItem('shopify_access_token');
+            
+            if (!storeUrl || !accessToken) {
+                showNotification('Please connect your store first', 'error');
+                return;
+            }
+            
+            updateStatus('Testing GraphQL API (2025-07)...');
+            showNotification('Testing GraphQL API...', 'info');
+            
+            try {
+                // Use GraphQL query as per official documentation
+                const graphqlQuery = {
+                    query: `query {
+                        products(first: 5) {
+                            edges {
+                                node {
+                                    id
+                                    handle
+                                    title
+                                    status
+                                    createdAt
+                                    tags
+                                    vendor
+                                    productType
+                                    variants(first: 1) {
+                                        edges {
+                                            node {
+                                                id
+                                                price
+                                                compareAtPrice
+                                                inventoryQuantity
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            pageInfo {
+                                hasNextPage
+                            }
+                        }
+                        shop {
+                            name
+                            id
+                            myshopifyDomain
+                            plan {
+                                displayName
+                            }
+                            currencyCode
+                        }
+                    }`
+                };
+
+                const response = await fetch(`${storeUrl}/admin/api/2025-07/graphql.json`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Shopify-Access-Token': accessToken,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(graphqlQuery)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.data) {
+                        const productCount = data.data.products.edges.length;
+                        updateStatus(`✅ GraphQL API test successful! Found ${productCount} products`);
+                        showNotification(`GraphQL API working! ${productCount} products retrieved`, 'success');
+                        
+                        console.log('GraphQL Response:', data.data);
+                        
+                        // Display some product details
+                        if (data.data.products.edges.length > 0) {
+                            const firstProduct = data.data.products.edges[0].node;
+                            updateStoreInfo(`
+<strong>GraphQL API Test Results:</strong>
+<strong>Products Found:</strong> ${productCount}
+<strong>Sample Product:</strong> ${firstProduct.title}
+<strong>Product ID:</strong> ${firstProduct.id}
+<strong>Handle:</strong> ${firstProduct.handle}
+<strong>Status:</strong> ${firstProduct.status}
+<strong>Vendor:</strong> ${firstProduct.vendor || 'N/A'}
+
+<strong>Shop Information:</strong>
+<strong>Name:</strong> ${data.data.shop.name}
+<strong>Domain:</strong> ${data.data.shop.myshopifyDomain}
+<strong>Plan:</strong> ${data.data.shop.plan.displayName}
+<strong>Currency:</strong> ${data.data.shop.currencyCode}
+                            `);
+                        }
+                    } else {
+                        updateStatus(`❌ GraphQL query failed: ${JSON.stringify(data.errors)}`);
+                        showNotification('GraphQL query failed', 'error');
+                    }
+                } else {
+                    updateStatus(`❌ GraphQL API test failed: ${response.status}`);
+                    showNotification('GraphQL API test failed', 'error');
+                }
+            } catch (error) {
+                updateStatus(`❌ GraphQL test error: ${error.message}`);
+                showNotification('GraphQL test error: ' + error.message, 'error');
             }
         }
 

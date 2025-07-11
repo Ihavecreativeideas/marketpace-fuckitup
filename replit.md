@@ -210,6 +210,21 @@ MarketPace is a React Native mobile application that prioritizes community empow
 
 ## Recent Changes
 
+✓ **SHOPIFY CUSTOM APP INTEGRATION - API 2025-07 WITH GRAPHQL SUPPORT** (January 11, 2025)
+✓ Upgraded Shopify integration to use latest 2025-07 API version following official Custom App documentation
+✓ Integrated live Shopify API credentials (API Key: 691d5f8b804efb161442db006cee3210) into environment configuration
+✓ Implemented dual REST/GraphQL endpoints for maximum Shopify compatibility and official best practices
+✓ Built comprehensive GraphQL integration using exact query format from Shopify documentation
+✓ Enhanced /api/integrations/shopify/connect endpoint with GraphQL product retrieval and shop information
+✓ Updated /api/integrations/website/test endpoint to use 2025-07 API with GraphQL support
+✓ Created enhanced /shopify-integration-demo page with comprehensive testing tools
+✓ Added "Test GraphQL API" functionality demonstrating official Shopify integration methods
+✓ Implemented complete scopes documentation for Custom App creation (read/write products, orders, customers, inventory, fulfillments)
+✓ Enhanced demo page with step-by-step Custom App setup instructions following Shopify Help Center documentation
+✓ System now supports both REST API (for compatibility) and GraphQL API (for advanced queries) with 2025-07 version
+✓ Added comprehensive error handling and detailed store information display for live store connections
+✓ Integration ready for real Shopify store connections with Private Access Tokens following official Custom App workflow
+
 ✓ **COMPREHENSIVE UBER EATS OAUTH 2.0 INTEGRATION SYSTEM** (January 11, 2025)
 ✓ Implemented complete Uber Eats OAuth authentication flow following official API documentation
 ✓ Built dedicated OAuth integration endpoints: /api/integrations/uber-eats/auth, /callback, /test, /store-info, /sync-menu
