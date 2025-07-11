@@ -303,18 +303,23 @@ router.post('/ticketmaster/connect', async (req, res) => {
   }
 });
 
-// Get user's connected integrations
+// Get user's connected integrations (demo version without authentication)
 router.get('/user/connections', async (req, res) => {
   try {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: 'Authentication required' });
-    }
-
-    const connections = await storage.getUserIntegrations(req.user.claims.sub);
+    // For demo purposes, return mock connections
+    // In production, this would check authentication and fetch real user data
+    const mockConnections = [
+      {
+        platform: 'doordash',
+        status: 'sandbox',
+        externalName: 'Demo Restaurant',
+        lastSyncAt: new Date().toISOString()
+      }
+    ];
     
     res.json({ 
       success: true, 
-      connections: connections || [] 
+      connections: mockConnections
     });
   } catch (error) {
     console.error('Error fetching user connections:', error);
