@@ -597,32 +597,44 @@
         }
 
         async function connectUberEats() {
-            const storeId = prompt('Enter your Uber Eats Store ID:');
-            const clientId = prompt('Enter your Uber Eats Client ID:');
-            
-            if (!storeId || !clientId) return;
-            
             try {
-                updateStatus('uber-eats-status', 'Connecting...', 'status-sandbox');
+                showNotification('Initiating Uber Eats OAuth authentication...', 'info');
+                updateStatus('uber-eats-status', 'Starting OAuth...', 'status-sandbox');
                 
-                const response = await fetch('/api/integrations/uber-eats/connect', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ storeId, clientId })
-                });
+                // Get OAuth authorization URL from your integration steps
+                const authResponse = await fetch('/api/integrations/uber-eats/auth');
+                const authData = await authResponse.json();
                 
-                const result = await response.json();
-                
-                if (result.success) {
-                    updateStatus('uber-eats-status', 'Connected Successfully', 'status-connected');
-                    showNotification('Uber Eats connected successfully!', 'success');
+                if (authData.success && authData.authUrl) {
+                    showNotification('Redirecting to Uber Eats authorization...', 'info');
+                    
+                    // Open OAuth flow in new window - uses the exact flow from your attached steps
+                    const popup = window.open(
+                        authData.authUrl,
+                        'uber-eats-auth',
+                        'width=600,height=700,scrollbars=yes,resizable=yes'
+                    );
+                    
+                    // Monitor for OAuth completion
+                    const checkClosed = setInterval(() => {
+                        if (popup.closed) {
+                            clearInterval(checkClosed);
+                            updateStatus('uber-eats-status', 'Checking connection...', 'status-sandbox');
+                            
+                            // Check if integration was successful
+                            setTimeout(() => {
+                                testUberEatsAPI();
+                                loadConnections();
+                            }, 1000);
+                        }
+                    }, 1000);
                 } else {
-                    updateStatus('uber-eats-status', 'Connection Failed', 'status-disconnected');
-                    showNotification('Failed to connect Uber Eats: ' + result.message, 'error');
+                    throw new Error(authData.message || 'Failed to get authorization URL');
                 }
             } catch (error) {
-                updateStatus('uber-eats-status', 'Connection Error', 'status-disconnected');
-                showNotification('Error connecting Uber Eats: ' + error.message, 'error');
+                console.error('Uber Eats connection error:', error);
+                updateStatus('uber-eats-status', 'Connection Failed', 'status-disconnected');
+                showNotification('Failed to connect Uber Eats: ' + error.message, 'error');
             }
         }
 
@@ -674,7 +686,53 @@
         }
 
         async function testUberEatsAPI() {
-            showNotification('Testing Uber Eats API connection...', 'info');
+            try {
+                showNotification('Testing Uber Eats OAuth integration...', 'info');
+                
+                // Test with stored credentials or check connection status
+                const token = localStorage.getItem('uber_eats_access_token');
+                
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+                
+                const response = await fetch('/api/integrations/uber-eats/test', {
+                    method: 'GET',
+                    headers
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.status === 'connected') {
+                    updateStatus('uber-eats-status', 'Connected ✓', 'status-connected');
+                    showNotification('Uber Eats OAuth integration working successfully!', 'success');
+                    
+                    if (result.user_info) {
+                        showNotification(`Connected as: ${result.user_info.first_name} ${result.user_info.last_name}`, 'info');
+                    }
+                    
+                    // Show available actions
+                    console.log('Available Uber Eats actions:', result.available_actions);
+                } else if (result.status === 'not_connected') {
+                    updateStatus('uber-eats-status', 'OAuth Required', 'status-disconnected');
+                    showNotification('Uber Eats OAuth flow needed. Click Connect to start.', 'info');
+                    
+                    if (result.next_steps) {
+                        console.log('OAuth setup steps:', result.next_steps);
+                    }
+                } else {
+                    updateStatus('uber-eats-status', 'Connection Failed', 'status-error');
+                    showNotification('Uber Eats test failed: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Uber Eats test error:', error);
+                updateStatus('uber-eats-status', 'Test Failed', 'status-error');
+                showNotification('Failed to test Uber Eats connection: ' + error.message, 'error');
+            }
         }
 
         async function testTicketmasterAPI() {

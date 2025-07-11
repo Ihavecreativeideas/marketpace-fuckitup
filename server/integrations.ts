@@ -1,7 +1,11 @@
 import express from 'express';
 import { storage } from './storage';
+import uberEatsRoutes from './integrations/uber-eats';
 
 const router = express.Router();
+
+// Mount Uber Eats OAuth integration routes
+router.use('/uber-eats', uberEatsRoutes);
 
 // Facebook OAuth Integration
 router.post('/facebook/connect', async (req, res) => {
