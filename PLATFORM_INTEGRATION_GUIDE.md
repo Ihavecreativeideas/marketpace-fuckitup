@@ -137,7 +137,48 @@
 
 **API Documentation Reference:**
 - Website: https://partner.tiktokshop.com/docv2/page/6507ead7b99d5302be949ba9
-- Required Permissions: `product.list`, `order.list`, `fulfillment`, `inventory.read`entory events
+- Required Permissions: `product.list`, `order.list`, `fulfillment`, `inventory.read`
+
+---
+
+### Bandzoogle Integration (Music Platform)
+
+**Purpose:** Enable musicians and bands using Bandzoogle websites to connect with MarketPace for local community engagement and event promotion.
+
+**Integration Type:** Workaround Integration (No Public API Available)
+
+**Limitation:** Bandzoogle does not provide a public REST API for developers.
+
+**Available Integration Methods:**
+1. **Form Webhooks** - Connect Bandzoogle contact forms to MarketPace
+2. **Embedded Widgets** - Add MarketPace community widgets to Bandzoogle sites
+3. **Event Cross-Promotion** - Manually promote Bandzoogle events on MarketPace
+4. **Social Media Integration** - Connect external social platforms
+
+**Member Integration Flow:**
+1. Member visits `/bandzoogle-integration`
+2. Provides Bandzoogle website URL and band details
+3. Receives webhook URL for form integration
+4. Gets embed code for MarketPace community widget
+5. Manual setup of cross-promotion campaigns
+
+**Integration Features:**
+- Event promotion on MarketPace community
+- Merchandise cross-selling to local audience
+- Fan engagement across platforms
+- Local venue and musician networking
+- Combined analytics reporting
+
+**Setup Requirements:**
+- Valid Bandzoogle website URL
+- Band/artist contact information
+- Manual webhook and embed code implementation
+- Cross-platform content coordination
+
+**API Endpoints:**
+- `/api/integrations/bandzoogle/setup` - Initialize integration setup
+- `/api/webhooks/bandzoogle/:integrationId` - Receive form submissions
+- `/bandzoogle-integration` - Integration setup interfaceentory events
 
 ---
 

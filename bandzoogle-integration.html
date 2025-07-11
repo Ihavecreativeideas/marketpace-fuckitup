@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bandzoogle Integration - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0845 50%, #2d1b69 100%);
+            color: white;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #ff6b35, transparent);
+            border-radius: 50%;
+            animation: float 10s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) translateX(100px) rotate(360deg); opacity: 0; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #ff6b35, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+
+        .integration-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .integration-card h3 {
+            color: #ff6b35;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00ffff;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .connect-btn {
+            background: linear-gradient(135deg, #ff6b35, #00ffff);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .connect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .status-success {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid rgba(0, 255, 0, 0.5);
+            color: #00ff00;
+        }
+
+        .status-warning {
+            background: rgba(255, 165, 0, 0.2);
+            border: 1px solid rgba(255, 165, 0, 0.5);
+            color: #ffaa00;
+        }
+
+        .status-error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.5);
+            color: #ff4444;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .feature-card {
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .feature-card h4 {
+            color: #ff6b35;
+            margin-bottom: 10px;
+        }
+
+        .integration-steps {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .step-number {
+            background: #ff6b35;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating particles -->
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🎸 Bandzoogle Integration</h1>
+            <p>Connect your music website to MarketPace for cross-platform promotion and fan engagement</p>
+            
+            <div class="status-message status-warning">
+                <strong>Important:</strong> Bandzoogle doesn't provide a public API. This integration uses workaround methods including form webhooks, embedded widgets, and cross-promotion features.
+            </div>
+        </div>
+
+        <!-- Integration Setup -->
+        <div class="integration-card">
+            <h3>🔗 Connect Your Bandzoogle Website</h3>
+            <p style="margin-bottom: 20px; color: rgba(255,255,255,0.8);">
+                While we can't directly access your Bandzoogle data, we can help you promote your music and events on MarketPace.
+            </p>
+
+            <div class="form-group">
+                <label for="bandzoogleUrl">Your Bandzoogle Website URL</label>
+                <input type="url" id="bandzoogleUrl" placeholder="https://yourbandname.bandzoogle.com">
+            </div>
+
+            <div class="form-group">
+                <label for="bandName">Band/Artist Name</label>
+                <input type="text" id="bandName" placeholder="Enter your band or artist name">
+            </div>
+
+            <div class="form-group">
+                <label for="musicGenre">Music Genre</label>
+                <select id="musicGenre">
+                    <option value="">Select Genre</option>
+                    <option value="rock">Rock</option>
+                    <option value="pop">Pop</option>
+                    <option value="hip-hop">Hip-Hop</option>
+                    <option value="country">Country</option>
+                    <option value="electronic">Electronic</option>
+                    <option value="jazz">Jazz</option>
+                    <option value="classical">Classical</option>
+                    <option value="indie">Indie</option>
+                    <option value="metal">Metal</option>
+                    <option value="folk">Folk</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="contactEmail">Contact Email</label>
+                <input type="email" id="contactEmail" placeholder="your@email.com">
+            </div>
+
+            <div class="form-group">
+                <label for="integrationGoals">Integration Goals</label>
+                <textarea id="integrationGoals" rows="3" placeholder="What would you like to achieve? (e.g., promote upcoming shows, sell merchandise, grow fanbase in local community)"></textarea>
+            </div>
+
+            <button class="connect-btn" onclick="setupBandzoogleIntegration()">
+                🎵 Set Up Integration
+            </button>
+        </div>
+
+        <!-- Available Features -->
+        <div class="integration-card">
+            <h3>🚀 Available Integration Features</h3>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>🎤 Event Promotion</h4>
+                    <p>Cross-promote your Bandzoogle events on MarketPace to reach local fans. We'll help create direct booking links for your shows.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4>🛍️ Merchandise Cross-Selling</h4>
+                    <p>Promote your band merch to MarketPace community members. Drive traffic back to your Bandzoogle store.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4>📱 Social Media Integration</h4>
+                    <p>Connect your social media profiles to create a unified fan engagement strategy across platforms.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4>🎯 Local Audience Building</h4>
+                    <p>Reach potential fans in your local area through MarketPace's community-focused platform.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4>📊 Analytics & Insights</h4>
+                    <p>Track engagement and fan growth across both platforms with combined analytics reporting.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4>🤝 Collaboration Opportunities</h4>
+                    <p>Connect with local venues, other musicians, and event organizers in your area.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Setup Instructions -->
+        <div class="integration-steps">
+            <h3 style="color: #00ffff; margin-bottom: 20px;">📋 Integration Setup Process</h3>
+            
+            <div class="step">
+                <div class="step-number">1</div>
+                <div>
+                    <strong>Connect Basic Info:</strong> Enter your Bandzoogle website URL and band details above
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div>
+                    <strong>Set Up Webhooks:</strong> Add MarketPace webhook URL to your Bandzoogle contact forms for fan engagement
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <div>
+                    <strong>Create Event Links:</strong> Use our ticket integration system to create direct booking links for your shows
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">4</div>
+                <div>
+                    <strong>Embed MarketPace Widget:</strong> Add our community widget to your Bandzoogle site for cross-promotion
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">5</div>
+                <div>
+                    <strong>Launch Campaign:</strong> Start promoting your music and events to the MarketPace community
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Display -->
+        <div id="statusMessage"></div>
+    </div>
+
+    <script>
+        // Initialize floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.innerHTML = `<div class="status-message status-${type}">${message}</div>`;
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 8000);
+        }
+
+        async function setupBandzoogleIntegration() {
+            const bandzoogleUrl = document.getElementById('bandzoogleUrl').value;
+            const bandName = document.getElementById('bandName').value;
+            const musicGenre = document.getElementById('musicGenre').value;
+            const contactEmail = document.getElementById('contactEmail').value;
+            const integrationGoals = document.getElementById('integrationGoals').value;
+
+            if (!bandzoogleUrl || !bandName || !contactEmail) {
+                showStatus('Please fill in all required fields (Website URL, Band Name, and Contact Email)', 'error');
+                return;
+            }
+
+            // Validate Bandzoogle URL
+            if (!bandzoogleUrl.includes('bandzoogle.com') && !bandzoogleUrl.includes('.band')) {
+                showStatus('Please enter a valid Bandzoogle website URL', 'error');
+                return;
+            }
+
+            try {
+                showStatus('Setting up your Bandzoogle integration...', 'success');
+
+                const response = await fetch('/api/integrations/bandzoogle/setup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        bandzoogleUrl,
+                        bandName,
+                        musicGenre,
+                        contactEmail,
+                        integrationGoals,
+                        integrationType: 'music_promotion',
+                        timestamp: new Date().toISOString()
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus(`🎉 Integration setup complete! Welcome ${bandName} to MarketPace! Check your email for next steps including webhook URLs and embed codes.`, 'success');
+                    
+                    // Clear form
+                    document.getElementById('bandzoogleUrl').value = '';
+                    document.getElementById('bandName').value = '';
+                    document.getElementById('musicGenre').value = '';
+                    document.getElementById('contactEmail').value = '';
+                    document.getElementById('integrationGoals').value = '';
+                } else {
+                    showStatus('❌ Setup failed: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showStatus('❌ Connection error: ' + error.message, 'error');
+            }
+        }
+
+        // Initialize page
+        createParticles();
+    </script>
+</body>
+</html>

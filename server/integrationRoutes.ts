@@ -841,6 +841,91 @@ export function registerIntegrationRoutes(app: Express): void {
     }
   });
 
+  // Bandzoogle Integration Setup (Workaround for no API)
+  app.post('/api/integrations/bandzoogle/setup', async (req, res) => {
+    try {
+      const { bandzoogleUrl, bandName, musicGenre, contactEmail, integrationGoals } = req.body;
+      
+      if (!bandzoogleUrl || !bandName || !contactEmail) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Website URL, band name, and contact email are required' 
+        });
+      }
+
+      // Validate Bandzoogle URL
+      if (!bandzoogleUrl.includes('bandzoogle.com') && !bandzoogleUrl.includes('.band')) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Please provide a valid Bandzoogle website URL' 
+        });
+      }
+
+      // Generate integration ID and setup details
+      const integrationId = 'bandzoogle_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      const webhookUrl = `https://marketpace.shop/api/webhooks/bandzoogle/${integrationId}`;
+      const embedCode = generateMarketPaceEmbed(integrationId, bandName);
+      
+      // Store integration details (in real app, this would go to database)
+      const integrationData = {
+        id: integrationId,
+        platform: 'bandzoogle',
+        bandzoogleUrl: bandzoogleUrl,
+        bandName: bandName,
+        musicGenre: musicGenre,
+        contactEmail: contactEmail,
+        integrationGoals: integrationGoals,
+        webhookUrl: webhookUrl,
+        embedCode: embedCode,
+        status: 'pending_webhook_setup',
+        createdAt: new Date(),
+        setupInstructions: [
+          'Add the webhook URL to your Bandzoogle contact forms',
+          'Embed the MarketPace widget on your website',
+          'Create event promotion campaigns',
+          'Cross-promote merchandise to local community'
+        ]
+      };
+
+      res.json({
+        success: true,
+        integrationId: integrationId,
+        message: `Bandzoogle integration setup for ${bandName}`,
+        webhookUrl: webhookUrl,
+        embedCode: embedCode,
+        nextSteps: integrationData.setupInstructions,
+        supportEmail: 'integrations@marketpace.shop'
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to setup Bandzoogle integration: ' + error.message 
+      });
+    }
+  });
+
+  function generateMarketPaceEmbed(integrationId: string, bandName: string): string {
+    return `
+<!-- MarketPace Community Widget for ${bandName} -->
+<div id="marketpace-widget-${integrationId}" style="background: #0d0221; color: white; padding: 20px; border-radius: 10px; margin: 20px 0;">
+  <h3 style="color: #00ffff;">Connect with ${bandName} on MarketPace</h3>
+  <p>Join our local community for exclusive updates, events, and fan engagement!</p>
+  <a href="https://marketpace.shop/artist/${integrationId}" style="background: linear-gradient(135deg, #ff6b35, #00ffff); color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">Join Community</a>
+</div>
+<script>
+// MarketPace integration tracking
+(function() {
+  var mp = document.createElement('script');
+  mp.async = true;
+  mp.src = 'https://marketpace.shop/js/bandzoogle-integration.js';
+  mp.setAttribute('data-integration-id', '${integrationId}');
+  mp.setAttribute('data-band-name', '${bandName}');
+  var s = document.getElementsByTagName('script')[0];
+  s.parentNode.insertBefore(mp, s);
+})();
+</script>`;
+  }
+
   // Direct Link Generation for Events
   app.post('/api/integrations/tickets/generate-link', async (req, res) => {
     try {
