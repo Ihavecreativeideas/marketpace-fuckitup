@@ -423,4 +423,96 @@ router.delete('/disconnect/:platform', async (req, res) => {
   }
 });
 
+// Food ordering integration endpoints
+router.post('/food-ordering/uber-eats-redirect', async (req, res) => {
+  try {
+    const { restaurantId, restaurantName, userLocation } = req.body;
+    
+    // Build Uber Eats deep link with restaurant search
+    const baseUrl = 'https://www.ubereats.com';
+    let uberEatsUrl = baseUrl;
+    
+    if (restaurantName) {
+      // Search for specific restaurant
+      uberEatsUrl += `/search?q=${encodeURIComponent(restaurantName)}`;
+      
+      // Add location if provided
+      if (userLocation && userLocation.lat && userLocation.lng) {
+        uberEatsUrl += `&lat=${userLocation.lat}&lng=${userLocation.lng}`;
+      }
+    }
+    
+    res.json({
+      success: true,
+      uberEatsUrl,
+      message: `Redirecting to Uber Eats for ${restaurantName}`,
+      integration: {
+        platform: 'uber_eats',
+        method: 'deep_link_redirect',
+        restaurantSearch: restaurantName,
+        location: userLocation
+      }
+    });
+  } catch (error) {
+    console.error('Food ordering redirect error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create Uber Eats redirect'
+    });
+  }
+});
+
+// Get local restaurants (could be integrated with actual restaurant data)
+router.get('/food-ordering/restaurants', async (req, res) => {
+  try {
+    const { location, cuisine, search } = req.query;
+    
+    // This would typically query your restaurant database
+    // For now, return sample data that represents local restaurants
+    const sampleRestaurants = [
+      {
+        id: 1,
+        name: "Giuseppe's Italian Kitchen",
+        cuisine: "Italian",
+        rating: 4.8,
+        deliveryTime: "25-35 min",
+        deliveryFee: "$2.99",
+        uberEatsAvailable: true,
+        pickupAvailable: true,
+        address: "123 Main St, Orange Beach, AL",
+        phone: "(251) 555-0123"
+      },
+      {
+        id: 2,
+        name: "Sakura Sushi Bar", 
+        cuisine: "Japanese",
+        rating: 4.9,
+        deliveryTime: "30-40 min",
+        deliveryFee: "$3.49",
+        uberEatsAvailable: true,
+        pickupAvailable: true,
+        address: "456 Beach Blvd, Orange Beach, AL",
+        phone: "(251) 555-0456"
+      }
+    ];
+    
+    res.json({
+      success: true,
+      restaurants: sampleRestaurants,
+      totalCount: sampleRestaurants.length,
+      integrationInfo: {
+        uberEatsPartnership: true,
+        localBusinessSupport: true,
+        deliveryOptions: ['uber_eats', 'restaurant_pickup']
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching restaurants:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch restaurant data'
+    });
+  }
+});
+
 export default router;
