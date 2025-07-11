@@ -321,6 +321,148 @@ router.post('/uber-eats/connect', async (req, res) => {
   }
 });
 
+// Shopify Integration with Admin API
+router.post('/shopify/connect', async (req, res) => {
+  try {
+    const { storeUrl, accessToken } = req.body;
+    
+    if (!storeUrl || !accessToken) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Store URL and access token are required' 
+      });
+    }
+
+    // Clean store URL format
+    const cleanStoreUrl = storeUrl.replace(/\/+$/, ''); // Remove trailing slashes
+    
+    // Test connection to Shopify Admin API
+    const shopResponse = await fetch(`${cleanStoreUrl}/admin/api/2023-10/shop.json`, {
+      headers: {
+        'X-Shopify-Access-Token': accessToken,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!shopResponse.ok) {
+      const errorText = await shopResponse.text();
+      return res.status(400).json({ 
+        success: false, 
+        message: `Failed to connect to Shopify store: ${shopResponse.status} - ${errorText}` 
+      });
+    }
+
+    const shopData = await shopResponse.json();
+    
+    // Get product count
+    const productsResponse = await fetch(`${cleanStoreUrl}/admin/api/2023-10/products/count.json`, {
+      headers: {
+        'X-Shopify-Access-Token': accessToken,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    let productCount = 0;
+    if (productsResponse.ok) {
+      const productsData = await productsResponse.json();
+      productCount = productsData.count || 0;
+    }
+
+    // Store Shopify connection for authenticated user
+    if (req.isAuthenticated()) {
+      await storage.updateUserIntegration(req.user.claims.sub, {
+        platform: 'shopify',
+        accessToken,
+        externalId: shopData.shop.id.toString(),
+        storeUrl: cleanStoreUrl,
+        storeName: shopData.shop.name,
+        domain: shopData.shop.domain,
+        productCount,
+        plan: shopData.shop.plan_name
+      });
+    }
+
+    res.json({ 
+      success: true, 
+      message: 'Shopify store connected successfully',
+      store: {
+        id: shopData.shop.id,
+        name: shopData.shop.name,
+        domain: shopData.shop.domain,
+        plan: shopData.shop.plan_name,
+        productCount,
+        currency: shopData.shop.currency,
+        timezone: shopData.shop.timezone
+      },
+      capabilities: [
+        'product_sync',
+        'order_management', 
+        'inventory_tracking',
+        'customer_data',
+        'analytics'
+      ]
+    });
+  } catch (error) {
+    console.error('Shopify connection error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to connect Shopify store: ' + error.message 
+    });
+  }
+});
+
+// Website Integration Testing (includes Shopify)
+router.post('/website/test', async (req, res) => {
+  try {
+    const { websiteUrl, platformType, accessToken } = req.body;
+    
+    if (platformType === 'shopify' && accessToken) {
+      // Test real Shopify connection
+      const response = await fetch(`${websiteUrl}/admin/api/2023-10/shop.json`, {
+        headers: {
+          'X-Shopify-Access-Token': accessToken,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return res.json({ success: false, error: `HTTP ${response.status}: ${errorText}` });
+      }
+
+      const data = await response.json();
+      
+      // Get product count
+      const productsResponse = await fetch(`${websiteUrl}/admin/api/2023-10/products/count.json`, {
+        headers: {
+          'X-Shopify-Access-Token': accessToken,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      let productCount = 0;
+      if (productsResponse.ok) {
+        const productsData = await productsResponse.json();
+        productCount = productsData.count || 0;
+      }
+
+      return res.json({
+        success: true,
+        productCount,
+        store: data.shop?.name || 'Unknown Store',
+        plan: data.shop?.plan_name || 'Unknown Plan',
+        domain: data.shop?.domain,
+        currency: data.shop?.currency,
+        id: data.shop?.id
+      });
+    } else {
+      return res.json({ success: false, error: 'Invalid platform or missing access token' });
+    }
+  } catch (error) {
+    res.json({ success: false, error: error.message });
+  }
+});
+
 // Ticketmaster Integration (for legal ticket sales)
 router.post('/ticketmaster/connect', async (req, res) => {
   try {
