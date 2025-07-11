@@ -342,6 +342,14 @@
             <button class="demo-button success" onclick="getWebhookConfig()">
                 🔗 Get Webhook Config
             </button>
+            
+            <button class="demo-button" onclick="generateUUID()">
+                🆔 Generate UUID
+            </button>
+            
+            <button class="demo-button" onclick="fixOAuthClient()">
+                🔧 Fix OAuth Issues
+            </button>
 
             <div class="status-display" id="oauth-status">
                 <div class="status-title">OAuth Status:</div>
@@ -412,9 +420,12 @@ GET https://api.uber.com/v1/eats/stores
                 <h3>Uber Eats Webhook Setup Instructions</h3>
                 <p style="color: #ccc; margin-bottom: 20px;">Use these exact values when configuring your Uber Eats webhook:</p>
                 
-                <div class="code-block">
+                <div class="code-block" id="webhook-config-display">
 <strong>Webhook Delivery URL:</strong>
 https://www.marketpace.shop/api/integrations/uber-eats/webhook
+
+<strong>Developer UUID:</strong>
+<span id="current-uuid">Click "Get Webhook Config" to generate fresh UUID</span>
 
 <strong>Authentication Type:</strong>
 oAuth
@@ -715,7 +726,11 @@ eats.store eats.orders eats.menus profile
                     console.log('Client Secret:', result.setup_instructions.client_secret);
                     console.log('Token URL:', result.setup_instructions.token_url);
                     console.log('Recommended Scopes:', result.setup_instructions.recommended_scopes);
+                    console.log('Developer UUID:', result.setup_instructions.developer_uuid);
                     console.log('=== END CONFIGURATION ===');
+                    
+                    // Update the UUID in the display
+                    document.getElementById('current-uuid').textContent = result.setup_instructions.developer_uuid;
                     
                     showNotification('Check browser console for copy-paste ready configuration', 'info');
                 } else {
@@ -726,6 +741,80 @@ eats.store eats.orders eats.menus profile
                 console.error('Webhook config error:', error);
                 updateStatus('❌ Config Error', error.message);
                 showNotification('Failed to get webhook config: ' + error.message, 'error');
+            }
+        }
+
+        // Generate new UUID
+        async function generateUUID() {
+            try {
+                showNotification('Generating fresh UUID...', 'info');
+                updateStatus('Generating UUID...', 'Creating unique identifier');
+                
+                const response = await fetch('/api/integrations/uber-eats/generate-uuid');
+                const result = await response.json();
+                
+                if (result.success) {
+                    updateStatus('✅ UUID Generated', result.uuid);
+                    showNotification('New UUID generated successfully!', 'success');
+                    
+                    // Update the display
+                    document.getElementById('current-uuid').textContent = result.uuid;
+                    
+                    // Copy to clipboard if possible
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(result.uuid);
+                        showNotification('UUID copied to clipboard!', 'info');
+                    }
+                    
+                    console.log('Generated UUID:', result.uuid);
+                } else {
+                    updateStatus('❌ UUID Generation Failed', 'Unable to generate UUID');
+                    showNotification('Failed to generate UUID', 'error');
+                }
+            } catch (error) {
+                console.error('UUID generation error:', error);
+                updateStatus('❌ UUID Error', error.message);
+                showNotification('UUID generation failed: ' + error.message, 'error');
+            }
+        }
+
+        // Fix OAuth client registration issues
+        async function fixOAuthClient() {
+            try {
+                showNotification('Getting OAuth troubleshooting info...', 'info');
+                updateStatus('Troubleshooting OAuth...', 'Checking registration requirements');
+                
+                const response = await fetch('/api/integrations/uber-eats/register-oauth-client', {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    updateStatus('✅ OAuth Instructions Retrieved', 'Check console for steps');
+                    showNotification('OAuth troubleshooting info retrieved!', 'success');
+                    
+                    console.log('=== OAUTH CLIENT REGISTRATION INSTRUCTIONS ===');
+                    console.log('Registration Required:', result.registration_required);
+                    console.log('Instructions:');
+                    Object.entries(result.instructions).forEach(([key, value]) => {
+                        console.log(`${key}: ${value}`);
+                    });
+                    console.log('Current Config:', result.current_config);
+                    console.log('Troubleshooting:');
+                    Object.entries(result.troubleshooting).forEach(([issue, solution]) => {
+                        console.log(`${issue}: ${solution}`);
+                    });
+                    console.log('=== END INSTRUCTIONS ===');
+                    
+                    showNotification('Check browser console for detailed OAuth setup instructions', 'info');
+                } else {
+                    updateStatus('❌ OAuth Troubleshooting Failed', result.error);
+                    showNotification('Failed to get OAuth instructions: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('OAuth troubleshooting error:', error);
+                updateStatus('❌ OAuth Error', error.message);
+                showNotification('OAuth troubleshooting failed: ' + error.message, 'error');
             }
         }
 
