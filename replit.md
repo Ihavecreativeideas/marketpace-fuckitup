@@ -210,18 +210,29 @@ MarketPace is a React Native mobile application that prioritizes community empow
 
 ## Recent Changes
 
+✓ **QUARTERLY DRIVER BONUS SYSTEM WITH ADMIN MANAGEMENT** (January 11, 2025)
+✓ Added quarterly bonus payouts for drivers with good ratings who avoid customer conflicts and deliver damage-free items
+✓ Created comprehensive admin dashboard section for managing driver bonuses from security fund pool
+✓ Built driver eligibility report showing ratings, deliveries completed, damage incidents, and customer complaints
+✓ Implemented bonus award system with selectable drivers and customizable bonus amounts from security fund
+✓ Added quarterly performance scoring system tracking damage-free deliveries and conflict avoidance
+✓ Enhanced driver application to highlight quarterly bonus program as additional benefit
+✓ Updated driver insurance demo modal to promote quarterly bonus eligibility requirements
+✓ Created admin interface for generating eligible driver reports and processing bonus payments
+✓ Integrated fund balance tracking to ensure sufficient security pool funds before bonus distribution
+✓ Added professional bonus message system for congratulating high-performing drivers
+
 ✓ **ENHANCED TRANSPARENCY FEATURES WITH ESTIMATED PAYOUTS** (January 11, 2025)
 ✓ Updated "Protection Fee" terminology to "Marketplace Protection Fee™" throughout platform
-✓ Renamed driver insurance to "Driver Accountability Coverage" at $3.75/month
+✓ Clarified $4/month Driver Accountability Coverage is automatically deducted from first delivery route pay each month
 ✓ Added comprehensive estimated payout displays showing driver, seller, and platform earnings
 ✓ Enhanced cart.html with transparent cost breakdowns including 85% driver mileage earnings and 15% platform commission
 ✓ Implemented detailed payout calculations for both standard routes and shop delivery days
 ✓ Added visual breakdown showing Marketplace Protection Fund™ coverage up to $100/item
-✓ Updated fee breakdown modals and driver protection information with new terminology
+✓ Updated fee breakdown modals and driver protection information with automatic monthly deduction terminology
 ✓ Enhanced transparency messaging throughout cart system with clear commission structure
-✓ Added mandatory $4/month Driver Accountability Coverage to driver application responsibilities
-✓ Updated driver application form to include insurance coverage agreement checkbox
-✓ Enhanced form validation to require driver insurance coverage agreement before submission
+✓ Updated driver application responsibilities section with automatic deduction details
+✓ Enhanced form validation to require driver insurance coverage agreement with automatic payment terms
 
 ✓ **SHOPIFY CUSTOM APP INTEGRATION - API 2025-07 WITH GRAPHQL SUPPORT** (January 11, 2025)
 ✓ Upgraded Shopify integration to use latest 2025-07 API version following official Custom App documentation
