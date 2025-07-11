@@ -150,6 +150,11 @@ app.get('/tiktok-integration-demo', (req, res) => {
   res.sendFile(path.join(__dirname, '../tiktok-integration-demo.html'));
 });
 
+// Member business profile route
+app.get('/member-business-profile', (req, res) => {
+  res.sendFile(path.join(__dirname, '../member-business-profile.html'));
+});
+
 // Food ordering page
 app.get('/food-ordering', (req, res) => {
   res.sendFile(path.join(__dirname, '../food-ordering.html'));

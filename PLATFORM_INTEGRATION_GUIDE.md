@@ -108,35 +108,36 @@
 
 ## 📱 SOCIAL MEDIA PLATFORMS
 
-### TikTok Shop Integration
+### TikTok Shop Integration (For Members)
 
-**Website:** https://seller.tiktokshop.com/account/developer
+**Purpose:** Enable MarketPace members who already have TikTok Shops to integrate their existing shops for unified inventory and order management.
 
-**Step-by-Step Setup:**
+**Member Requirements:**
+1. **Existing TikTok Shop** - Must have verified, active TikTok Shop
+2. **API Developer Access** - Applied and approved for TikTok Shop API
+3. **Required Credentials** - App Key, App Secret, Shop ID, Access Token
 
-1. **TikTok Shop Seller Account**
-   - Go to https://seller.tiktokshop.com/
-   - Complete business verification
-   - Get approved for TikTok Shop
+**Integration Benefits:**
+- Unified inventory management across platforms
+- Cross-platform order processing
+- Local delivery through MarketPace network
+- 5% commission on MarketPace sales vs higher TikTok fees
 
-2. **Developer Application**
-   - Visit https://partner.tiktokshop.com/docv2/page/6507ead7b99d5302be949ba9
-   - Apply for API access
-   - Submit business use case
+**API Endpoints:**
+- `/api/integrations/tiktok/test` - Test member's API credentials
+- `/api/integrations/tiktok/active-shops` - Retrieve member's active shops
+- `/api/integrations/tiktok/connect` - Connect member's TikTok Shop to MarketPace
 
-3. **API Credentials**
-   - App Key: Your application identifier
-   - App Secret: For authentication
-   - Access Token: Per-shop authorization
+**Member Integration Flow:**
+1. Member visits `/member-business-profile` or `/tiktok-integration-demo`
+2. Member enters their existing TikTok Shop API credentials
+3. System tests connection and retrieves active shops
+4. Products automatically sync to MarketPace marketplace
+5. Orders managed through unified dashboard
 
-4. **Required Permissions**
-   - `product.list` (read products)
-   - `order.list` (read orders)
-   - `fulfillment` (update shipping)
-
-5. **Webhook Setup**
-   - Configure webhook URL for real-time updates
-   - Subscribe to order and inventory events
+**API Documentation Reference:**
+- Website: https://partner.tiktokshop.com/docv2/page/6507ead7b99d5302be949ba9
+- Required Permissions: `product.list`, `order.list`, `fulfillment`, `inventory.read`entory events
 
 ---
 
