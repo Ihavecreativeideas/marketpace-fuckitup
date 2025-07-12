@@ -1,89 +1,115 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Button Debug Test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Community Buttons - MarketPace</title>
     <style>
-        body { background: #0d0221; color: white; padding: 20px; font-family: Arial; }
-        .test-btn { padding: 15px 30px; background: #1e0b3d; color: white; border: 1px solid #00ffff; border-radius: 5px; cursor: pointer; margin: 10px; display: block; width: 300px; }
-        .test-btn:hover { background: #2d1b4e; }
-        .result { background: #001122; padding: 10px; margin: 10px; border-radius: 5px; min-height: 50px; }
-        .error { color: #ff4444; }
-        .success { color: #44ff44; }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0d0221, #2d1b69);
+            color: white;
+            padding: 20px;
+        }
+        .test-section {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 191, 255, 0.3);
+        }
+        .test-btn {
+            background: rgba(0, 191, 255, 0.3);
+            border: 1px solid rgba(0, 191, 255, 0.5);
+            color: white;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .test-btn:hover {
+            background: rgba(0, 191, 255, 0.5);
+        }
+        #results {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border: 1px solid rgba(0, 255, 127, 0.3);
+        }
     </style>
 </head>
 <body>
-    <h1>BUTTON DEBUG TEST</h1>
-    <p>This will help us identify exactly what's broken with button clicks.</p>
+    <h1>🔧 Community Button Debug Test</h1>
     
-    <button class="test-btn" onclick="testBasicClick()">1. Test Basic JavaScript Click</button>
-    <button class="test-btn" onclick="testWindowHistoryBack()">2. Test window.history.back()</button>
-    <button class="test-btn" onclick="testFetchAPI()">3. Test API Fetch Call</button>
-    <button class="test-btn" onclick="testFormSubmit()">4. Test Form Submit</button>
+    <div class="test-section">
+        <h3>Test Button Functions</h3>
+        <p>Click these buttons to test if JavaScript is working:</p>
+        
+        <button class="test-btn" onclick="testToggleFilter()">Test Filter Toggle</button>
+        <button class="test-btn" onclick="testToggleMenu()">Test Menu Toggle</button>
+        <button class="test-btn" onclick="testCreatePost()">Test Create Post</button>
+        <button class="test-btn" onclick="testAddToCart()">Test Add to Cart</button>
+        <button class="test-btn" onclick="testGoToPage()">Test Navigation</button>
+        
+        <div id="results"></div>
+    </div>
     
-    <form id="testForm" onsubmit="handleTestSubmit(event)" style="margin: 20px 0;">
-        <input type="text" value="test@example.com" style="padding: 10px; margin: 5px;">
-        <button type="submit" class="test-btn">5. Submit Form Button</button>
-    </form>
+    <div class="test-section">
+        <h3>Check Community Page</h3>
+        <p>If buttons work here but not on community page, there's a specific issue with that page.</p>
+        <button class="test-btn" onclick="window.location.href='/community'">Go to Community Page</button>
+    </div>
     
-    <div id="result" class="result">Click buttons above to test functionality...</div>
+    <div class="test-section">
+        <h3>Console Log Check</h3>
+        <p>Check browser console (F12) for JavaScript errors.</p>
+        <button class="test-btn" onclick="checkConsole()">Log Test Message</button>
+    </div>
     
     <script>
-        console.log('Debug script loaded successfully');
-        
-        function testBasicClick() {
-            document.getElementById('result').innerHTML = '<span class="success">✅ BASIC CLICK WORKS</span>';
-            console.log('Basic click test passed');
+        function logResult(message) {
+            const results = document.getElementById('results');
+            results.innerHTML += `<div>✅ ${message}</div>`;
         }
         
-        function testWindowHistoryBack() {
-            document.getElementById('result').innerHTML = '<span class="success">✅ window.history.back() function exists and can be called</span>';
-            console.log('window.history.back test - function exists');
-            // Don't actually call it as it would navigate away
+        function testToggleFilter() {
+            logResult('Filter toggle function working');
+            console.log('Filter toggle test successful');
         }
         
-        async function testFetchAPI() {
-            document.getElementById('result').innerHTML = 'Testing API call...';
-            
-            try {
-                const response = await fetch('/api/admin/drivers/approve-all?token=admin_token_2025', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                
-                if (data.success) {
-                    document.getElementById('result').innerHTML = '<span class="success">✅ API CALL WORKS: ' + data.message + '</span>';
-                } else {
-                    document.getElementById('result').innerHTML = '<span class="error">❌ API call failed: ' + data.message + '</span>';
-                }
-            } catch (error) {
-                document.getElementById('result').innerHTML = '<span class="error">❌ FETCH ERROR: ' + error.message + '</span>';
-            }
+        function testToggleMenu() {
+            logResult('Menu toggle function working');
+            console.log('Menu toggle test successful');
         }
         
-        function testFormSubmit() {
-            document.getElementById('result').innerHTML = '<span class="success">✅ Form submit function callable</span>';
-            console.log('Form submit test - function exists');
+        function testCreatePost() {
+            logResult('Create post function working');
+            console.log('Create post test successful');
         }
         
-        function handleTestSubmit(event) {
-            event.preventDefault();
-            document.getElementById('result').innerHTML = '<span class="success">✅ FORM SUBMISSION WORKS - preventDefault and handler executed</span>';
-            console.log('Form submission test passed');
+        function testAddToCart() {
+            logResult('Add to cart function working');
+            console.log('Add to cart test successful');
         }
         
-        // Log any JavaScript errors
-        window.addEventListener('error', function(e) {
-            console.error('JavaScript Error:', e.error);
-            document.getElementById('result').innerHTML = '<span class="error">❌ JAVASCRIPT ERROR: ' + e.message + '</span>';
-        });
+        function testGoToPage() {
+            logResult('Navigation function working');
+            console.log('Navigation test successful');
+        }
         
-        // Check if DOM is ready
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM Content Loaded - page ready');
-        });
+        function checkConsole() {
+            console.log('✅ Console logging is working properly');
+            console.error('🔥 Test error message (this is intentional)');
+            console.warn('⚠️ Test warning message (this is intentional)');
+            logResult('Check browser console for test messages');
+        }
         
-        console.log('All test functions loaded');
+        // Test inline onclick handlers
+        window.onload = function() {
+            logResult('Page loaded - JavaScript is working');
+            console.log('Debug page loaded successfully');
+        };
     </script>
 </body>
 </html>

@@ -2103,6 +2103,14 @@ app.get('/tiktok-partner-center-guide', (req, res) => {
   res.sendFile(path.join(__dirname, '../tiktok-partner-center-guide.html'));
 });
 
+app.get('/debug-buttons', (req, res) => {
+  res.sendFile(path.join(__dirname, '../debug-buttons.html'));
+});
+
+app.get('/tiktok-access-helper', (req, res) => {
+  res.sendFile(path.join(__dirname, '../tiktok-access-helper.html'));
+});
+
 // *** TIKTOK SHOP AUTO-SETUP SYSTEM ***
 app.post('/api/integrations/tiktok/auto-setup', async (req, res) => {
   try {
