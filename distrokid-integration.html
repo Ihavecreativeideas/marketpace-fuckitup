@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DistroKid Music Integration - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+            50% { transform: translateY(-100px) rotate(180deg); opacity: 0.5; }
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-top: 40px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b35, #ff9500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .integration-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #e0e0e0;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #ff6b35;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff6b35, #ff9500);
+            border: none;
+            color: white;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #8a2be2, #00bfff);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 8px 25px rgba(138, 43, 226, 0.4);
+        }
+
+        .btn-tertiary {
+            background: linear-gradient(45deg, #00ff88, #00cc66);
+        }
+
+        .btn-tertiary:hover {
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.4);
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .success-message {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid rgba(0, 255, 136, 0.5);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .artist-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .artist-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .artist-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ff6b35;
+            margin-bottom: 8px;
+        }
+
+        .release-info {
+            font-size: 14px;
+            color: #e0e0e0;
+            margin-bottom: 8px;
+        }
+
+        .promotion-badge {
+            background: linear-gradient(45deg, #ff6b35, #ff9500);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .local-badge {
+            background: linear-gradient(45deg, #00ff88, #00cc66);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .features-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+        }
+
+        .features-list li:before {
+            content: "🎵";
+            margin-right: 10px;
+        }
+
+        .integration-status {
+            background: rgba(255, 107, 53, 0.2);
+            border: 1px solid rgba(255, 107, 53, 0.5);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-particles"></div>
+    
+    <button class="back-btn" onclick="window.history.back()">
+        ← Back
+    </button>
+
+    <div class="container">
+        <div class="header">
+            <h1>🎵 DistroKid Music Integration</h1>
+            <p>Promote local artist releases to hometown communities</p>
+        </div>
+
+        <div class="integration-card">
+            <h3 style="margin-bottom: 16px; color: #ff6b35;">Artist Setup</h3>
+            <form id="distrokid-form">
+                <div class="form-group">
+                    <label for="artist-name">Artist/Band Name</label>
+                    <input type="text" id="artist-name" name="artist-name" placeholder="Enter your artist name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="distrokid-email">DistroKid Account Email</label>
+                    <input type="email" id="distrokid-email" name="distrokid-email" placeholder="Your DistroKid login email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="hometown">Hometown/Local Area</label>
+                    <input type="text" id="hometown" name="hometown" placeholder="e.g., Orange Beach, Alabama" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="genre">Music Genre</label>
+                    <select id="genre" name="genre" required>
+                        <option value="">Select genre</option>
+                        <option value="pop">Pop</option>
+                        <option value="rock">Rock</option>
+                        <option value="hip-hop">Hip-Hop/Rap</option>
+                        <option value="country">Country</option>
+                        <option value="electronic">Electronic</option>
+                        <option value="folk">Folk</option>
+                        <option value="jazz">Jazz</option>
+                        <option value="classical">Classical</option>
+                        <option value="r&b">R&B</option>
+                        <option value="alternative">Alternative</option>
+                        <option value="indie">Indie</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <button type="button" class="btn" onclick="connectDistroKid()">
+                    🎵 Connect DistroKid Account
+                </button>
+
+                <button type="button" class="btn btn-secondary" onclick="testIntegration()">
+                    🔄 Test Release Notifications
+                </button>
+
+                <button type="button" class="btn btn-tertiary" onclick="enablePromotion()">
+                    📢 Enable Release Day Promotion
+                </button>
+            </form>
+
+            <div id="success-message" class="success-message">
+                <h3>✅ DistroKid integration successful!</h3>
+                <ul id="integration-details"></ul>
+            </div>
+        </div>
+
+        <div class="integration-card">
+            <h3 style="margin-bottom: 16px; color: #ff6b35;">How It Works</h3>
+            <ul class="features-list">
+                <li>Connect your DistroKid account to MarketPace</li>
+                <li>Automatic detection of new song releases</li>
+                <li>Community notifications: "New song release today by [Artist]"</li>
+                <li>Hometown-targeted promotion to local MarketPace members</li>
+                <li>Direct streaming links to Spotify, Apple Music, etc.</li>
+                <li>Artist profile integration with local events</li>
+                <li>Fan engagement tracking and analytics</li>
+            </ul>
+        </div>
+
+        <div class="integration-status">
+            <h3 style="margin-bottom: 12px;">Integration Status</h3>
+            <p>DistroKid Webhook API: Ready for setup</p>
+            <p>Release Detection: Automated via DistroKid notifications</p>
+            <p>Community Promotion: Active for connected artists</p>
+        </div>
+
+        <div class="integration-card">
+            <h3 style="margin-bottom: 16px; color: #ff6b35;">Recent Local Releases</h3>
+            <div id="local-releases">
+                <!-- Sample local artist releases will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particleContainer = document.querySelector('.floating-particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 5) + 's';
+                particleContainer.appendChild(particle);
+            }
+        }
+
+        createParticles();
+
+        // DistroKid Integration Functions
+        async function connectDistroKid() {
+            const artistName = document.getElementById('artist-name').value;
+            const email = document.getElementById('distrokid-email').value;
+            const hometown = document.getElementById('hometown').value;
+            const genre = document.getElementById('genre').value;
+
+            if (!artistName || !email || !hometown || !genre) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/integrations/distrokid/connect', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        artistName: artistName,
+                        email: email,
+                        hometown: hometown,
+                        genre: genre
+                    })
+                });
+
+                const data = await response.json();
+                console.log('DistroKid connected:', data);
+
+                if (data.success) {
+                    showSuccessMessage(data);
+                    loadLocalReleases();
+                }
+            } catch (error) {
+                console.error('Error connecting DistroKid:', error);
+                alert('Failed to connect DistroKid account');
+            }
+        }
+
+        async function testIntegration() {
+            try {
+                const response = await fetch('/api/integrations/distrokid/test-webhook');
+                const data = await response.json();
+                console.log('Test webhook result:', data);
+                
+                if (data.success) {
+                    alert('Test successful! Release notifications are working.');
+                    loadLocalReleases();
+                }
+            } catch (error) {
+                console.error('Error testing integration:', error);
+                alert('Integration test failed');
+            }
+        }
+
+        async function enablePromotion() {
+            const artistName = document.getElementById('artist-name').value;
+            const hometown = document.getElementById('hometown').value;
+
+            if (!artistName || !hometown) {
+                alert('Please fill in artist name and hometown first');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/integrations/distrokid/enable-promotion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        artistName: artistName,
+                        hometown: hometown,
+                        enableAutoPromotion: true
+                    })
+                });
+
+                const data = await response.json();
+                console.log('Promotion enabled:', data);
+
+                if (data.success) {
+                    alert('Release day promotion enabled! Your new songs will be automatically promoted to your hometown community.');
+                }
+            } catch (error) {
+                console.error('Error enabling promotion:', error);
+                alert('Failed to enable promotion');
+            }
+        }
+
+        function showSuccessMessage(data) {
+            const successDiv = document.getElementById('success-message');
+            const detailsList = document.getElementById('integration-details');
+            
+            detailsList.innerHTML = `
+                <li>✅ Artist: ${data.artistData?.name || 'Connected'}</li>
+                <li>✅ Hometown: ${data.artistData?.hometown || 'Set'}</li>
+                <li>✅ Release notifications: Active</li>
+                <li>✅ Community promotion: Enabled</li>
+                <li>✅ Webhook endpoint: Configured</li>
+            `;
+            
+            successDiv.classList.add('show');
+            
+            setTimeout(() => {
+                successDiv.classList.remove('show');
+            }, 5000);
+        }
+
+        async function loadLocalReleases() {
+            try {
+                const response = await fetch('/api/integrations/distrokid/local-releases');
+                const data = await response.json();
+                console.log('Local releases loaded:', data);
+                
+                displayLocalReleases(data.releases);
+            } catch (error) {
+                console.error('Error loading local releases:', error);
+            }
+        }
+
+        function displayLocalReleases(releases) {
+            const releasesDiv = document.getElementById('local-releases');
+            
+            if (!releases || releases.length === 0) {
+                releasesDiv.innerHTML = '<p style="text-align: center; color: #888;">No recent local releases found.</p>';
+                return;
+            }
+            
+            releasesDiv.innerHTML = '';
+            
+            releases.forEach(release => {
+                const releaseCard = document.createElement('div');
+                releaseCard.className = 'artist-card';
+                releaseCard.innerHTML = `
+                    <div class="artist-name">${release.artistName}</div>
+                    <div class="release-info">🎵 "${release.songTitle}" • Released: ${release.releaseDate}</div>
+                    <div class="release-info">📍 ${release.hometown} • ${release.genre}</div>
+                    <span class="promotion-badge">NEW RELEASE</span>
+                    <span class="local-badge">LOCAL ARTIST</span>
+                `;
+                
+                releasesDiv.appendChild(releaseCard);
+            });
+        }
+
+        // Load sample data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLocalReleases();
+        });
+    </script>
+</body>
+</html>
