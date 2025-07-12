@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPace Internal Advertising System - Facebook-Style Ad Builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* Floating particles animation */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0px);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .privacy-notice {
+            background: rgba(0, 255, 136, 0.2);
+            border: 2px solid rgba(0, 255, 136, 0.5);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .ad-builder, .ad-preview {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 16px;
+            backdrop-filter: blur(5px);
+        }
+
+        .form-group input::placeholder, .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.5);
+        }
+
+        .targeting-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .budget-section {
+            background: rgba(0, 191, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .budget-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .ad-preview-card {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .ad-preview-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+
+        .ad-preview-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #1a73e8;
+        }
+
+        .ad-preview-description {
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .ad-preview-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #00bfff, #1e90ff);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .targeting-insights {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .insight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            text-align: center;
+        }
+
+        .insight-item {
+            background: rgba(0, 191, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .insight-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00bfff;
+        }
+
+        .insight-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .ad-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .ad-type-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .ad-type-card:hover, .ad-type-card.selected {
+            border-color: #00bfff;
+            background: rgba(0, 191, 255, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .ad-type-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .ad-type-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .ad-type-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            line-height: 1.3;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .targeting-options, .budget-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🎯 MarketPace Internal Advertising System</h1>
+            <p>Create Facebook-style ads to reach other MarketPace members in your community</p>
+            
+            <div class="privacy-notice">
+                <strong>🔒 Privacy Protected:</strong> All targeting uses only MarketPace member data. 
+                Your information never leaves our platform and is never sold to outside companies.
+            </div>
+        </div>
+
+        <div class="ad-types">
+            <div class="ad-type-card" data-type="marketplace_listing">
+                <div class="ad-type-icon">🛍️</div>
+                <div class="ad-type-title">Marketplace Listing</div>
+                <div class="ad-type-description">Promote items you're selling to interested buyers</div>
+            </div>
+            <div class="ad-type-card" data-type="service_promotion">
+                <div class="ad-type-icon">🔧</div>
+                <div class="ad-type-title">Service Promotion</div>
+                <div class="ad-type-description">Advertise your services to local community members</div>
+            </div>
+            <div class="ad-type-card" data-type="event_announcement">
+                <div class="ad-type-icon">🎉</div>
+                <div class="ad-type-title">Event Announcement</div>
+                <div class="ad-type-description">Get the word out about your upcoming events</div>
+            </div>
+            <div class="ad-type-card" data-type="business_spotlight">
+                <div class="ad-type-icon">⭐</div>
+                <div class="ad-type-title">Business Spotlight</div>
+                <div class="ad-type-description">Showcase your business to potential customers</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="ad-builder">
+                <h2 class="section-title">📝 Create Your Ad</h2>
+                
+                <div class="form-group">
+                    <label for="adTitle">Ad Title</label>
+                    <input type="text" id="adTitle" placeholder="Enter a compelling title..." maxlength="50">
+                </div>
+
+                <div class="form-group">
+                    <label for="adDescription">Ad Description</label>
+                    <textarea id="adDescription" rows="4" placeholder="Describe what you're promoting..." maxlength="200"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="adImage">Image URL (optional)</label>
+                    <input type="url" id="adImage" placeholder="https://example.com/image.jpg">
+                </div>
+
+                <h3 class="section-title">🎯 Target Your Audience</h3>
+                
+                <div class="form-group">
+                    <label for="targetLocation">Location</label>
+                    <select id="targetLocation">
+                        <option value="">Select location...</option>
+                        <option value="Orange Beach, AL">Orange Beach, AL</option>
+                        <option value="Gulf Shores, AL">Gulf Shores, AL</option>
+                        <option value="Pensacola, FL">Pensacola, FL</option>
+                        <option value="Mobile, AL">Mobile, AL</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="targetRadius">Radius (miles)</label>
+                    <select id="targetRadius">
+                        <option value="5">5 miles</option>
+                        <option value="10" selected>10 miles</option>
+                        <option value="15">15 miles</option>
+                        <option value="25">25 miles</option>
+                        <option value="50">50 miles</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Target Audience</label>
+                    <div class="targeting-options">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="recentBuyers">
+                            <label for="recentBuyers">Recent Buyers</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="recentSellers">
+                            <label for="recentSellers">Recent Sellers</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="serviceProviders">
+                            <label for="serviceProviders">Service Providers</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="businessOwners">
+                            <label for="businessOwners">Business Owners</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="budget-section">
+                    <h3 style="margin-bottom: 15px;">💰 Budget & Bidding</h3>
+                    <div class="budget-grid">
+                        <div class="form-group">
+                            <label for="totalBudget">Total Budget</label>
+                            <input type="number" id="totalBudget" placeholder="100" min="10" step="5">
+                        </div>
+                        <div class="form-group">
+                            <label for="dailyBudget">Daily Budget</label>
+                            <input type="number" id="dailyBudget" placeholder="10" min="5" step="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="bidAmount">Cost per Click</label>
+                            <input type="number" id="bidAmount" placeholder="0.50" min="0.25" step="0.05">
+                        </div>
+                        <div class="form-group">
+                            <label for="duration">Campaign Duration</label>
+                            <select id="duration">
+                                <option value="7">7 days</option>
+                                <option value="14" selected>14 days</option>
+                                <option value="21">21 days</option>
+                                <option value="30">30 days</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="targeting-insights">
+                    <h3 style="margin-bottom: 15px;">📊 Targeting Insights</h3>
+                    <div class="insight-grid">
+                        <div class="insight-item">
+                            <div class="insight-number" id="estimatedReach">245</div>
+                            <div class="insight-label">Estimated Reach</div>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-number" id="expectedClicks">12</div>
+                            <div class="insight-label">Expected Clicks</div>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-number" id="costEstimate">$6.00</div>
+                            <div class="insight-label">Estimated Cost</div>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-number" id="competitionLevel">Low</div>
+                            <div class="insight-label">Competition</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ad-preview">
+                <h2 class="section-title">👀 Ad Preview</h2>
+                
+                <div class="ad-preview-card">
+                    <div class="ad-preview-image" id="previewImage">
+                        📸 Your Ad Image
+                    </div>
+                    <div class="ad-preview-title" id="previewTitle">
+                        Your Ad Title Will Appear Here
+                    </div>
+                    <div class="ad-preview-description" id="previewDescription">
+                        Your ad description will be displayed here. Make it compelling to encourage members to take action!
+                    </div>
+                    <div class="ad-preview-actions">
+                        <button class="btn btn-primary">Learn More</button>
+                        <button class="btn btn-secondary">Contact</button>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <h3 style="margin-bottom: 15px;">📈 Expected Performance</h3>
+                    <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px;">
+                        <div style="margin-bottom: 10px;">
+                            <strong>Click-through Rate:</strong> <span style="color: #00bfff;">4.8%</span>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <strong>Cost per Click:</strong> <span style="color: #00bfff;">$0.50</span>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <strong>Conversion Rate:</strong> <span style="color: #00bfff;">8.2%</span>
+                        </div>
+                        <div>
+                            <strong>ROI Estimate:</strong> <span style="color: #00ff88;">245%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn btn-primary" onclick="createAdCampaign()" style="font-size: 18px; padding: 15px 30px;">
+                        🚀 Launch Campaign
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particles = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                particles.appendChild(particle);
+            }
+        }
+
+        // Update ad preview in real-time
+        function updatePreview() {
+            const title = document.getElementById('adTitle').value || 'Your Ad Title Will Appear Here';
+            const description = document.getElementById('adDescription').value || 'Your ad description will be displayed here. Make it compelling to encourage members to take action!';
+            const imageUrl = document.getElementById('adImage').value;
+
+            document.getElementById('previewTitle').textContent = title;
+            document.getElementById('previewDescription').textContent = description;
+            
+            const previewImage = document.getElementById('previewImage');
+            if (imageUrl) {
+                previewImage.style.backgroundImage = `url(${imageUrl})`;
+                previewImage.style.backgroundSize = 'cover';
+                previewImage.style.backgroundPosition = 'center';
+                previewImage.textContent = '';
+            } else {
+                previewImage.style.backgroundImage = 'linear-gradient(45deg, #667eea, #764ba2)';
+                previewImage.textContent = '📸 Your Ad Image';
+            }
+            
+            updateTargetingInsights();
+        }
+
+        // Update targeting insights based on form inputs
+        function updateTargetingInsights() {
+            const budget = parseFloat(document.getElementById('totalBudget').value) || 100;
+            const bid = parseFloat(document.getElementById('bidAmount').value) || 0.50;
+            const radius = parseInt(document.getElementById('targetRadius').value) || 10;
+            
+            // Calculate estimates based on targeting
+            const baseReach = radius * 25; // Rough estimate
+            const estimatedReach = Math.min(baseReach + Math.random() * 100, 500);
+            const expectedClicks = Math.round(estimatedReach * 0.05);
+            const costEstimate = expectedClicks * bid;
+            
+            document.getElementById('estimatedReach').textContent = Math.round(estimatedReach).toLocaleString();
+            document.getElementById('expectedClicks').textContent = expectedClicks;
+            document.getElementById('costEstimate').textContent = '$' + costEstimate.toFixed(2);
+            
+            // Competition level based on targeting specificity
+            const checkboxes = document.querySelectorAll('.targeting-options input[type="checkbox"]:checked');
+            const competitionLevel = checkboxes.length > 2 ? 'High' : checkboxes.length > 0 ? 'Medium' : 'Low';
+            document.getElementById('competitionLevel').textContent = competitionLevel;
+        }
+
+        // Handle ad type selection
+        function selectAdType(type) {
+            document.querySelectorAll('.ad-type-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.ad-type-card').classList.add('selected');
+            
+            // Update form based on ad type
+            const typeData = {
+                'marketplace_listing': {
+                    titlePlaceholder: 'e.g., "Vintage Furniture Sale - Moving Sale!"',
+                    descriptionPlaceholder: 'Describe your items, condition, and why buyers should be interested...'
+                },
+                'service_promotion': {
+                    titlePlaceholder: 'e.g., "Professional House Cleaning Services"',
+                    descriptionPlaceholder: 'Describe your services, experience, and what makes you different...'
+                },
+                'event_announcement': {
+                    titlePlaceholder: 'e.g., "Community BBQ - Everyone Welcome!"',
+                    descriptionPlaceholder: 'Event details, date, time, location, and what to expect...'
+                },
+                'business_spotlight': {
+                    titlePlaceholder: 'e.g., "Grand Opening - Local Coffee Shop"',
+                    descriptionPlaceholder: 'Tell the community about your business and special offers...'
+                }
+            };
+            
+            const data = typeData[type];
+            if (data) {
+                document.getElementById('adTitle').placeholder = data.titlePlaceholder;
+                document.getElementById('adDescription').placeholder = data.descriptionPlaceholder;
+            }
+        }
+
+        // Create ad campaign
+        async function createAdCampaign() {
+            const campaignData = {
+                title: document.getElementById('adTitle').value,
+                description: document.getElementById('adDescription').value,
+                imageUrl: document.getElementById('adImage').value,
+                targetingRules: {
+                    cities: [document.getElementById('targetLocation').value],
+                    radius: parseInt(document.getElementById('targetRadius').value),
+                    recentBuyers: document.getElementById('recentBuyers').checked,
+                    recentSellers: document.getElementById('recentSellers').checked,
+                    serviceProviders: document.getElementById('serviceProviders').checked,
+                    businessOwners: document.getElementById('businessOwners').checked
+                },
+                budget: parseFloat(document.getElementById('totalBudget').value),
+                dailyBudget: parseFloat(document.getElementById('dailyBudget').value),
+                bidAmount: parseFloat(document.getElementById('bidAmount').value),
+                adType: document.querySelector('.ad-type-card.selected')?.dataset.type || 'marketplace_listing'
+            };
+
+            if (!campaignData.title || !campaignData.description) {
+                alert('Please fill in the title and description for your ad.');
+                return;
+            }
+
+            if (!campaignData.budget || campaignData.budget < 10) {
+                alert('Please set a budget of at least $10.');
+                return;
+            }
+
+            try {
+                // In real implementation, this would call the API
+                console.log('Creating ad campaign:', campaignData);
+                
+                alert(`🎉 Ad Campaign Created Successfully!\n\nYour "${campaignData.title}" campaign will be reviewed and go live within 24 hours.\n\nEstimated reach: ${document.getElementById('estimatedReach').textContent} members\nBudget: $${campaignData.budget}\n\nRemember: All targeting uses only MarketPace member data and stays within our platform.`);
+                
+                // Reset form
+                document.getElementById('adTitle').value = '';
+                document.getElementById('adDescription').value = '';
+                document.getElementById('adImage').value = '';
+                updatePreview();
+                
+            } catch (error) {
+                alert('Failed to create ad campaign. Please try again.');
+                console.error('Ad creation error:', error);
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            
+            // Add event listeners for real-time preview updates
+            ['adTitle', 'adDescription', 'adImage', 'totalBudget', 'bidAmount', 'targetRadius'].forEach(id => {
+                document.getElementById(id).addEventListener('input', updatePreview);
+            });
+            
+            // Add event listeners for ad type selection
+            document.querySelectorAll('.ad-type-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    selectAdType(this.dataset.type);
+                });
+            });
+            
+            // Add event listeners for targeting checkboxes
+            document.querySelectorAll('.targeting-options input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', updateTargetingInsights);
+            });
+            
+            // Initial preview update
+            updatePreview();
+        });
+    </script>
+</body>
+</html>
