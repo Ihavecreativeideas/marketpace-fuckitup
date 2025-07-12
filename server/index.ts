@@ -730,9 +730,12 @@ app.post('/api/ads/impressions', (req, res) => {
   });
 });
 
-app.get('/api/ads/analytics/:campaignId?', (req, res) => {
+// Analytics route with campaign ID
+app.get('/api/ads/analytics/:campaignId', (req, res) => {
+  const { campaignId } = req.params;
   res.json({
     success: true,
+    campaignId,
     analytics: {
       impressions: 1250,
       clicks: 87,
@@ -741,6 +744,24 @@ app.get('/api/ads/analytics/:campaignId?', (req, res) => {
       cpc: 0.75,
       totalSpent: 65.25,
       reachWithinMarketPace: 450
+    },
+    privacy: 'Analytics limited to MarketPace member interactions only'
+  });
+});
+
+// Analytics route without campaign ID (all campaigns)
+app.get('/api/ads/analytics', (req, res) => {
+  res.json({
+    success: true,
+    analytics: {
+      totalCampaigns: 5,
+      totalImpressions: 6250,
+      totalClicks: 435,
+      totalConversions: 60,
+      avgCtr: 6.96,
+      avgCpc: 0.75,
+      totalSpent: 326.25,
+      reachWithinMarketPace: 2250
     },
     privacy: 'Analytics limited to MarketPace member interactions only'
   });

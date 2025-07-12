@@ -191,12 +191,12 @@ app.post('/api/ads/impressions', (req, res) => {
   });
 });
 
-app.get('/api/ads/analytics/:campaignId?', (req, res) => {
+// Analytics route with campaign ID
+app.get('/api/ads/analytics/:campaignId', (req, res) => {
   const { campaignId } = req.params;
-  
   res.json({
     success: true,
-    campaignId: campaignId || 'all_campaigns',
+    campaignId,
     analytics: {
       period: 'Last 7 days',
       impressions: 1250,
@@ -216,6 +216,33 @@ app.get('/api/ads/analytics/:campaignId?', (req, res) => {
         'Morning (6-12)': 35,
         'Afternoon (12-6)': 45,
         'Evening (6-12)': 20
+      }
+    },
+    privacy: 'Analytics limited to MarketPace member interactions only',
+    dataScope: 'Internal platform metrics - no external data sharing'
+  });
+});
+
+// Analytics route without campaign ID (all campaigns)
+app.get('/api/ads/analytics', (req, res) => {
+  res.json({
+    success: true,
+    campaignId: 'all_campaigns',
+    analytics: {
+      period: 'Last 7 days',
+      totalCampaigns: 5,
+      totalImpressions: 6250,
+      totalClicks: 435,
+      totalConversions: 60,
+      avgCtr: 6.96,
+      avgCpc: 0.75,
+      totalSpent: 326.25,
+      reachWithinMarketPace: 2250,
+      topPerformingAd: 'Local Coffee Shop Grand Opening',
+      demographics: {
+        'Orange Beach': 65,
+        'Gulf Shores': 22,
+        'Other': 13
       }
     },
     privacy: 'Analytics limited to MarketPace member interactions only',
