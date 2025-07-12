@@ -17,6 +17,7 @@ class SMSService {
           process.env.TWILIO_ACCOUNT_SID,
           process.env.TWILIO_AUTH_TOKEN
         );
+        console.log('SMS Service initialized successfully with Twilio');
       } catch (error) {
         console.log('Twilio initialization failed:', error);
       }
@@ -32,15 +33,16 @@ class SMSService {
   async sendVerificationCode(phoneNumber: string, code: string): Promise<boolean> {
     if (!this.isEnabled()) {
       console.log(`SMS Service not configured. Verification code for ${phoneNumber}: ${code}`);
-      return true; // Return true for demo purposes
+      return false; // Return false to indicate SMS not sent
     }
 
     try {
-      await this.client!.messages.create({
+      const message = await this.client!.messages.create({
         body: `Your MarketPace verification code is: ${code}. This code expires in 10 minutes. Don't share this code with anyone.`,
         from: process.env.TWILIO_PHONE_NUMBER,
         to: phoneNumber,
       });
+      console.log(`SMS sent successfully to ${phoneNumber}, SID: ${message.sid}`);
       return true;
     } catch (error) {
       console.error('SMS verification error:', error);
