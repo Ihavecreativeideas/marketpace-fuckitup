@@ -1008,6 +1008,54 @@ export const dataPrivacySettings = pgTable("data_privacy_settings", {
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
+// Anti-Bot Protection Tables
+export const suspiciousActivity = pgTable("suspicious_activity", {
+  id: varchar("id").primaryKey().notNull().$defaultFn(() => `activity_${Math.random().toString(36).substr(2, 9)}`),
+  email: varchar("email").notNull(),
+  activityType: varchar("activity_type").notNull(), // 'signup_attempt', 'login_attempt', 'bot_detected'
+  details: text("details"), // JSON string with detection details
+  ipAddress: varchar("ip_address").notNull(),
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+  riskScore: varchar("risk_score"), // Bot detection risk score
+});
+
+export const bannedUsers = pgTable("banned_users", {
+  id: varchar("id").primaryKey().notNull().$defaultFn(() => `ban_${Math.random().toString(36).substr(2, 9)}`),
+  email: varchar("email").notNull(),
+  reason: varchar("reason").notNull(), // 'bot_detected', 'suspicious_activity', 'manual_ban'
+  evidence: text("evidence"), // JSON string with ban evidence
+  ipAddress: varchar("ip_address").notNull(),
+  bannedAt: timestamp("banned_at").defaultNow().notNull(),
+});
+
+export const humanVerification = pgTable("human_verification", {
+  id: varchar("id").primaryKey().notNull().$defaultFn(() => `verify_${Math.random().toString(36).substr(2, 9)}`),
+  email: varchar("email").notNull(),
+  verificationMethod: varchar("verification_method").notNull(), // 'sms', 'email', 'captcha', 'phone_call'
+  verificationCode: varchar("verification_code"),
+  isVerified: boolean("is_verified").default(false),
+  verifiedAt: timestamp("verified_at"),
+  attempts: integer("attempts").default(0),
+  maxAttempts: integer("max_attempts").default(3),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const dataAccessLog = pgTable("data_access_log", {
+  id: varchar("id").primaryKey().notNull().$defaultFn(() => `log_${Math.random().toString(36).substr(2, 9)}`),
+  userId: varchar("user_id").notNull(),
+  dataType: varchar("data_type").notNull(), // 'personal_info', 'financial_data', 'communication'
+  purpose: varchar("purpose").notNull(), // Why the data was accessed
+  accessor: varchar("accessor").notNull(), // Who accessed the data
+  accessedAt: timestamp("accessed_at").defaultNow().notNull(),
+  ipAddress: varchar("ip_address"),
+});
+
+export type SuspiciousActivity = typeof suspiciousActivity.$inferSelect;
+export type BannedUser = typeof bannedUsers.$inferSelect;
+export type HumanVerification = typeof humanVerification.$inferSelect;
+export type DataAccessLog = typeof dataAccessLog.$inferSelect;
+
 export type InsertPasswordResetToken = typeof passwordResetTokens.$inferInsert;
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 

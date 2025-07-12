@@ -14,6 +14,7 @@ import {
   validateAndSanitize,
   csrfProtection 
 } from "./security/validation";
+import { DataPrivacyMiddleware, enforceNeverSellDataPolicy, logUserDataAccess } from "./dataPrivacyMiddleware";
 import { 
   validateEnvironment, 
   SecurityMonitor,
@@ -130,6 +131,11 @@ app.use(express.urlencoded({
 
 // Rate limiting for all requests
 app.use(rateLimit(SECURITY_CONFIG.RATE_LIMIT_WINDOW, SECURITY_CONFIG.RATE_LIMIT_MAX_REQUESTS));
+
+// CRITICAL: Data Privacy Protection Middleware
+app.use(enforceNeverSellDataPolicy);
+app.use(...DataPrivacyMiddleware.fullPrivacyProtection);
+app.use(logUserDataAccess);
 
 // Static file serving with security headers
 app.use(express.static("client/dist", {

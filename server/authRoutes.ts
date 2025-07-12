@@ -7,6 +7,7 @@ import { eq, and, lt } from 'drizzle-orm';
 import { emailService } from './emailService';
 import { smsService } from './smsService';
 import { sessionManager, type AuthenticatedRequest } from './sessionManager';
+import { AntiScammerProtection, DataPrivacyProtection } from './antiScammerProtection';
 
 interface AuthenticatedRequest extends Request {
   user?: any;
@@ -108,6 +109,8 @@ export function registerAuthRoutes(app: Express): void {
   app.post('/api/seamless-signup', async (req: Request, res: Response) => {
     try {
       const { email, password, phone } = req.body;
+      const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+      const userAgent = req.get('User-Agent') || 'unknown';
 
       // Validate input
       if (!email || !password || !phone) {
@@ -116,6 +119,88 @@ export function registerAuthRoutes(app: Express): void {
           message: 'Email, password, and phone number are required'
         });
       }
+
+      // CRITICAL: Check if user/IP is banned first
+      const isBanned = await AntiScammerProtection.isUserBanned(email, ipAddress);
+      if (isBanned) {
+        console.log(`🚫 BANNED USER BLOCKED: ${email} from ${ipAddress}`);
+        return res.status(403).json({
+          success: false,
+          message: 'Account registration is not available for this email or location.'
+        });
+      }
+
+      // CRITICAL: Check signup rate limiting
+      const rateLimitOk = await AntiScammerProtection.checkSignupRateLimit(ipAddress);
+      if (!rateLimitOk) {
+        await AntiScammerProtection.logSuspiciousActivity(
+          email,
+          'rate_limit_exceeded',
+          { attemptedSignups: 'exceeded_hourly_limit' },
+          ipAddress
+        );
+        return res.status(429).json({
+          success: false,
+          message: 'Too many signup attempts. Please try again in an hour.'
+        });
+      }
+
+      // CRITICAL: Anti-bot detection analysis
+      const verificationData = {
+        email,
+        phoneNumber: phone || '',
+        ipAddress,
+        userAgent,
+        signupBehavior: req.body.behaviorData || {},
+        deviceFingerprint: req.body.deviceFingerprint || ''
+      };
+
+      const botAnalysis = AntiScammerProtection.analyzeBotBehavior(verificationData);
+      
+      if (botAnalysis.isBot) {
+        console.log(`🤖 BOT DETECTED: ${email} - Risk Score: ${botAnalysis.riskScore}%`);
+        console.log(`Detection reasons:`, botAnalysis.reasons);
+        
+        // Log bot detection
+        await AntiScammerProtection.logSuspiciousActivity(
+          email,
+          'bot_detected',
+          {
+            riskScore: botAnalysis.riskScore,
+            confidence: botAnalysis.confidence,
+            reasons: botAnalysis.reasons,
+            userAgent,
+            deviceFingerprint: req.body.deviceFingerprint
+          },
+          ipAddress
+        );
+
+        // Ban user if confidence is very high (80%+)
+        if (botAnalysis.confidence >= 0.8) {
+          await AntiScammerProtection.banUser(
+            email,
+            'bot_detected',
+            botAnalysis,
+            ipAddress
+          );
+          console.log(`🔨 USER BANNED: ${email} - High confidence bot detection`);
+        }
+
+        return res.status(403).json({
+          success: false,
+          message: 'Account verification failed. Only real humans can join MarketPace. If this is an error, please contact support.'
+        });
+      }
+
+      // Log legitimate signup attempt
+      await AntiScammerProtection.logSuspiciousActivity(
+        email,
+        'signup_attempt',
+        { riskScore: botAnalysis.riskScore, passed: true },
+        ipAddress
+      );
+
+      console.log(`✅ HUMAN VERIFIED: ${email} - Risk Score: ${botAnalysis.riskScore}%`);
 
       // Validate email format
       if (!validateEmail(email)) {
