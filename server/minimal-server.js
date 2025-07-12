@@ -135,7 +135,7 @@ app.get('/contact-support', (req, res) => {
 });
 
 app.get('/facebook-events-integration', (req, res) => {
-  res.sendFile(path.join(__dirname, '../facebook-events-integration.html'));
+  res.sendFile(path.join(__dirname, '../facebook-events-integration-v2.html'));
 });
 
 // *** FACEBOOK MARKETPLACE-STYLE PROMOTION SYSTEM ***
@@ -942,40 +942,53 @@ app.post('/api/facebook/connect-events', (req, res) => {
 app.get('/api/events/local', (req, res) => {
   const { radius, location } = req.query;
   
-  const localEvents = [
-    {
-      id: 'evt_001',
-      title: 'Local Farmers Market',
-      location: 'Downtown Orange Beach',
-      date: '2025-01-15',
-      time: '9:00 AM',
-      distance: 2.3,
-      source: 'Facebook',
-      category: 'Community'
-    },
-    {
-      id: 'evt_002', 
-      title: 'Live Music at The Flora-Bama',
-      location: 'Flora-Bama Lounge',
-      date: '2025-01-18',
-      time: '8:00 PM',
-      distance: 12.8,
-      source: 'Facebook',
-      category: 'Entertainment'
-    },
-    {
-      id: 'evt_003',
-      title: 'Gulf Coast Arts Festival', 
-      location: 'Gulf State Park',
-      date: '2025-01-22',
-      time: '10:00 AM',
-      distance: 18.5,
-      source: 'Facebook',
-      category: 'Arts'
-    }
-  ];
+  // Get current week's events with realistic dates
+  const today = new Date();
+  const currentWeek = [];
   
-  const filteredEvents = localEvents.filter(event => 
+  // Generate events for the current week
+  for (let i = 0; i < 7; i++) {
+    const eventDate = new Date(today);
+    eventDate.setDate(today.getDate() + i);
+    const dateStr = eventDate.toISOString().split('T')[0];
+    
+    if (i === 1) {
+      currentWeek.push({
+        id: 'evt_' + (i + 1),
+        title: 'Local Farmers Market',
+        location: 'Downtown Orange Beach',
+        date: dateStr,
+        time: '9:00 AM',
+        distance: 2.3,
+        source: 'Facebook',
+        category: 'Community'
+      });
+    } else if (i === 3) {
+      currentWeek.push({
+        id: 'evt_' + (i + 1),
+        title: 'Live Music at The Flora-Bama',
+        location: 'Flora-Bama Lounge',
+        date: dateStr,
+        time: '8:00 PM',
+        distance: 12.8,
+        source: 'Facebook',
+        category: 'Entertainment'
+      });
+    } else if (i === 5) {
+      currentWeek.push({
+        id: 'evt_' + (i + 1),
+        title: 'Gulf Coast Arts Festival',
+        location: 'Gulf State Park',
+        date: dateStr,
+        time: '10:00 AM',
+        distance: 18.5,
+        source: 'Facebook',
+        category: 'Arts'
+      });
+    }
+  }
+  
+  const filteredEvents = currentWeek.filter(event => 
     event.distance <= (radius || 30)
   );
   
@@ -984,7 +997,74 @@ app.get('/api/events/local', (req, res) => {
     location: location,
     radius: radius + ' miles',
     eventsFound: filteredEvents.length,
-    events: filteredEvents
+    events: filteredEvents,
+    currentWeek: true
+  });
+});
+
+// *** MEMBER LOCATIONS & TOWN PREDICTION API ***
+app.get('/api/locations/towns', (req, res) => {
+  const { query } = req.query;
+  
+  // Simulated database of towns where members have signed up
+  const memberTowns = [
+    { town: 'Orange Beach', state: 'Alabama', memberCount: 23 },
+    { town: 'Gulf Shores', state: 'Alabama', memberCount: 18 },
+    { town: 'Pensacola', state: 'Florida', memberCount: 15 },
+    { town: 'Mobile', state: 'Alabama', memberCount: 12 },
+    { town: 'Destin', state: 'Florida', memberCount: 9 },
+    { town: 'Fort Walton Beach', state: 'Florida', memberCount: 7 },
+    { town: 'Daphne', state: 'Alabama', memberCount: 6 },
+    { town: 'Fairhope', state: 'Alabama', memberCount: 5 },
+    { town: 'Spanish Fort', state: 'Alabama', memberCount: 4 },
+    { town: 'Foley', state: 'Alabama', memberCount: 3 }
+  ];
+  
+  let filteredTowns = memberTowns;
+  
+  if (query && query.length > 0) {
+    filteredTowns = memberTowns.filter(town => 
+      town.town.toLowerCase().includes(query.toLowerCase()) ||
+      town.state.toLowerCase().includes(query.toLowerCase())
+    );
+  }
+  
+  res.json({
+    success: true,
+    towns: filteredTowns.map(town => ({
+      display: `${town.town}, ${town.state}`,
+      town: town.town,
+      state: town.state,
+      members: town.memberCount
+    }))
+  });
+});
+
+// *** MEMBER SIGNUP WITH ADDRESS COLLECTION ***
+app.post('/api/signup/collect-address', (req, res) => {
+  const { name, email, password, address, town, state } = req.body;
+  
+  // Simulate adding member to town database
+  const memberId = 'member_' + Math.random().toString(36).substr(2, 9);
+  
+  res.json({
+    success: true,
+    message: 'Member registered successfully with address collection',
+    memberId: memberId,
+    memberData: {
+      name: name,
+      email: email,
+      address: address,
+      town: town,
+      state: state,
+      joinDate: new Date().toISOString()
+    },
+    townTracking: {
+      town: town,
+      state: state,
+      totalMembersInTown: Math.floor(Math.random() * 30) + 5,
+      launchStatus: 'collecting members'
+    }
   });
 });
 

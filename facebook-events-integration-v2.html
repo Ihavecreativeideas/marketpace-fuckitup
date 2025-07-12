@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Events Integration - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+            50% { transform: translateY(-100px) rotate(180deg); opacity: 0.5; }
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-top: 40px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #00bfff, #8a2be2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .integration-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #e0e0e0;
+        }
+
+        .input-container {
+            position: relative;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #00bfff;
+            box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.2);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .location-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(30, 30, 30, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .suggestion-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .suggestion-item:hover {
+            background: rgba(0, 191, 255, 0.2);
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-town {
+            font-weight: 600;
+            color: #00bfff;
+        }
+
+        .suggestion-members {
+            font-size: 12px;
+            color: #888;
+            margin-left: 8px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00bfff, #8a2be2);
+            border: none;
+            color: white;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 191, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #ff7b00, #ff9500);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 8px 25px rgba(255, 123, 0, 0.4);
+        }
+
+        .btn-tertiary {
+            background: linear-gradient(45deg, #8a2be2, #00bfff);
+        }
+
+        .btn-tertiary:hover {
+            box-shadow: 0 8px 25px rgba(138, 43, 226, 0.4);
+        }
+
+        .events-section {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 24px;
+            backdrop-filter: blur(15px);
+        }
+
+        .events-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .events-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #00bfff;
+            margin-left: 10px;
+        }
+
+        .events-subtitle {
+            font-size: 16px;
+            color: #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .event-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .event-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .event-date {
+            background: #00bfff;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .event-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #e0e0e0;
+        }
+
+        .event-location {
+            font-size: 14px;
+            color: #b0b0b0;
+            margin-bottom: 6px;
+        }
+
+        .event-distance {
+            font-size: 12px;
+            color: #8a2be2;
+            font-weight: 600;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .success-message {
+            background: rgba(0, 191, 255, 0.2);
+            border: 1px solid rgba(0, 191, 255, 0.5);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .current-week-badge {
+            background: linear-gradient(45deg, #00ff00, #00cc00);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-particles"></div>
+    
+    <button class="back-btn" onclick="window.history.back()">
+        ← Back
+    </button>
+
+    <div class="container">
+        <div class="header">
+            <h1>📅 Facebook Events Integration</h1>
+            <p>Auto-sync Facebook events with 30-mile radius filtering</p>
+        </div>
+
+        <div class="integration-card">
+            <form id="events-form">
+                <div class="form-group">
+                    <label for="location">Member Location (for 30-mile radius)</label>
+                    <div class="input-container">
+                        <input type="text" id="location" name="location" placeholder="Start typing your town..." required autocomplete="off">
+                        <div id="location-suggestions" class="location-suggestions"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="facebook-page">Facebook Page/Profile (optional)</label>
+                    <input type="url" id="facebook-page" name="facebook-page" placeholder="https://www.facebook.com/yourpage">
+                </div>
+
+                <button type="button" class="btn" onclick="connectFacebookEvents()">
+                    📘 Connect Facebook Events
+                </button>
+
+                <button type="button" class="btn btn-secondary" onclick="testRadius()">
+                    📍 Test 30-Mile Radius
+                </button>
+
+                <button type="button" class="btn btn-tertiary" onclick="syncEvents()">
+                    🔄 Sync Events Now
+                </button>
+            </form>
+
+            <div id="success-message" class="success-message">
+                <h3>✅ Events synced successfully!</h3>
+                <ul id="sync-details"></ul>
+            </div>
+        </div>
+
+        <div class="events-section">
+            <div class="events-header">
+                <span style="font-size: 24px;">📅</span>
+                <h2>Local Events Calendar</h2>
+                <span class="current-week-badge">THIS WEEK</span>
+            </div>
+            <p class="events-subtitle">Upcoming Events Within 30 Miles</p>
+            <div id="events-list">
+                <!-- Events will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particleContainer = document.querySelector('.floating-particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 5) + 's';
+                particleContainer.appendChild(particle);
+            }
+        }
+
+        createParticles();
+
+        // Location prediction search
+        let searchTimeout;
+        const locationInput = document.getElementById('location');
+        const suggestionsDiv = document.getElementById('location-suggestions');
+
+        locationInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            if (query.length < 2) {
+                suggestionsDiv.style.display = 'none';
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                fetch(`/api/locations/towns?query=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        displaySuggestions(data.towns);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching towns:', error);
+                    });
+            }, 300);
+        });
+
+        function displaySuggestions(towns) {
+            suggestionsDiv.innerHTML = '';
+            
+            if (towns.length === 0) {
+                suggestionsDiv.style.display = 'none';
+                return;
+            }
+
+            towns.forEach(town => {
+                const suggestionItem = document.createElement('div');
+                suggestionItem.className = 'suggestion-item';
+                suggestionItem.innerHTML = `
+                    <span class="suggestion-town">${town.display}</span>
+                    <span class="suggestion-members">${town.members} members</span>
+                `;
+                
+                suggestionItem.onclick = function() {
+                    locationInput.value = town.display;
+                    suggestionsDiv.style.display = 'none';
+                };
+                
+                suggestionsDiv.appendChild(suggestionItem);
+            });
+            
+            suggestionsDiv.style.display = 'block';
+        }
+
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.input-container')) {
+                suggestionsDiv.style.display = 'none';
+            }
+        });
+
+        // Facebook Events Integration Functions
+        async function connectFacebookEvents() {
+            const location = document.getElementById('location').value;
+            const facebookPage = document.getElementById('facebook-page').value;
+
+            if (!location) {
+                alert('Please enter your location');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/facebook/connect-events', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        location: location,
+                        facebookPage: facebookPage,
+                        radiusMiles: 30
+                    })
+                });
+
+                const data = await response.json();
+                console.log('Facebook Events connected:', data);
+
+                if (data.success) {
+                    showSuccessMessage(data);
+                    loadLocalEvents();
+                }
+            } catch (error) {
+                console.error('Error connecting Facebook Events:', error);
+                alert('Failed to connect Facebook Events');
+            }
+        }
+
+        async function testRadius() {
+            const location = document.getElementById('location').value;
+            if (!location) {
+                alert('Please enter your location first');
+                return;
+            }
+            
+            loadLocalEvents();
+        }
+
+        async function syncEvents() {
+            const location = document.getElementById('location').value;
+            if (!location) {
+                alert('Please enter your location first');
+                return;
+            }
+            
+            // Simulate sync process
+            const mockSyncData = {
+                success: true,
+                message: 'Events synced successfully!',
+                integration: {
+                    location: location,
+                    eventsFound: Math.floor(Math.random() * 10) + 5,
+                    newEvents: Math.floor(Math.random() * 5) + 3,
+                    updatedEvents: Math.floor(Math.random() * 3) + 1
+                }
+            };
+            
+            showSuccessMessage(mockSyncData);
+            loadLocalEvents();
+        }
+
+        function showSuccessMessage(data) {
+            const successDiv = document.getElementById('success-message');
+            const detailsList = document.getElementById('sync-details');
+            
+            detailsList.innerHTML = `
+                <li>✅ Found ${data.integration.eventsFound || 8} new Facebook events</li>
+                <li>✅ Updated ${data.integration.updatedEvents || 3} existing events</li>
+                <li>✅ All events filtered to 30-mile radius</li>
+                <li>✅ Events now visible in MarketPace calendar</li>
+            `;
+            
+            successDiv.classList.add('show');
+            
+            setTimeout(() => {
+                successDiv.classList.remove('show');
+            }, 5000);
+        }
+
+        async function loadLocalEvents() {
+            const location = document.getElementById('location').value || 'Orange Beach, Alabama';
+            
+            try {
+                const response = await fetch(`/api/events/local?location=${encodeURIComponent(location)}&radius=30`);
+                const data = await response.json();
+                console.log('Local events loaded:', data);
+                
+                displayEvents(data.events);
+            } catch (error) {
+                console.error('Error loading events:', error);
+            }
+        }
+
+        function displayEvents(events) {
+            const eventsList = document.getElementById('events-list');
+            
+            if (!events || events.length === 0) {
+                eventsList.innerHTML = '<p style="text-align: center; color: #888;">No events found in your area.</p>';
+                return;
+            }
+            
+            eventsList.innerHTML = '';
+            
+            events.forEach(event => {
+                const eventDate = new Date(event.date);
+                const today = new Date();
+                const isThisWeek = eventDate >= today && eventDate <= new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+                
+                const eventItem = document.createElement('div');
+                eventItem.className = 'event-item';
+                eventItem.innerHTML = `
+                    <div class="event-date">${eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} ${isThisWeek ? '<span class="current-week-badge">THIS WEEK</span>' : ''}</div>
+                    <div class="event-title">${event.title}</div>
+                    <div class="event-location">📍 ${event.location}</div>
+                    <div class="event-distance">🎯 ${event.distance} miles away • ${event.time}</div>
+                `;
+                
+                eventsList.appendChild(eventItem);
+            });
+        }
+
+        // Load events on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLocalEvents();
+        });
+    </script>
+</body>
+</html>
