@@ -1435,6 +1435,39 @@ export function registerAuthRoutes(app: Express): void {
     }
   });
 
+  // Check if user exists (for Facebook-style login flow)
+  app.post('/api/check-user-exists', async (req: Request, res: Response) => {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email is required'
+        });
+      }
+
+      // Check if user exists
+      const [user] = await db.select()
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+
+      res.json({
+        success: true,
+        exists: !!user,
+        message: user ? 'User found' : 'User not found'
+      });
+
+    } catch (error) {
+      console.error('Check user exists error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to check user existence'
+      });
+    }
+  });
+
   // Add security alert
   app.post('/api/user/security-alert', sessionManager.authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
