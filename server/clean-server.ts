@@ -573,9 +573,39 @@ app.post('/api/auth/facebook/callback', async (req, res) => {
       });
     }
 
+    // Check if user already exists
+    const existingUserId = 'facebook_' + userData.facebookId;
+    const existingUser = userDatabase.get(existingUserId);
+    
+    if (existingUser && type === 'login') {
+      // User logging in - update last login
+      existingUser.lastLoginAt = new Date().toISOString();
+      userDatabase.set(existingUserId, existingUser);
+      
+      const userSession = {
+        loggedIn: true,
+        ...existingUser
+      };
+      
+      return res.json({
+        success: true,
+        message: `Welcome back, ${existingUser.firstName}!`,
+        user: userSession,
+        profileData: {
+          name: existingUser.fullName,
+          email: existingUser.email,
+          phone: existingUser.phoneNumber,
+          address: existingUser.address,
+          profilePicture: existingUser.profileImageUrl,
+          friendsCount: existingUser.friendsCount
+        },
+        redirectUrl: '/community'
+      });
+    }
+
     // Create comprehensive user profile from Facebook data
     const profile = {
-      id: userData.id,
+      id: existingUserId,
       facebookId: userData.facebookId,
       firstName: userData.firstName || userData.name?.split(' ')[0] || 'User',
       lastName: userData.lastName || userData.name?.split(' ').slice(1).join(' ') || '',
@@ -589,7 +619,7 @@ app.post('/api/auth/facebook/callback', async (req, res) => {
       provider: 'facebook',
       accessToken: accessToken,
       accountType: 'member',
-      profileComplete: true,
+      profileComplete: userData.phoneNumber ? true : false,
       loggedIn: true,
       createdAt: new Date().toISOString(),
       lastLoginAt: new Date().toISOString(),
@@ -659,7 +689,7 @@ app.post('/api/auth/google/callback', async (req, res) => {
           body: new URLSearchParams({
             code: code,
             client_id: '167280787729-dgvuodnecaeraphr8rulh5u0028f7qbk.apps.googleusercontent.com',
-            client_secret: 'GOCSPX-your-secret-here', // This should be in environment variables
+            client_secret: process.env.GOOGLE_CLIENT_SECRET,
             redirect_uri: redirectUri,
             grant_type: 'authorization_code'
           })
