@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Debug - MarketPace</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a0b3d, #6b46c1);
+            color: white;
+            min-height: 100vh;
+        }
+        .debug-info {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .redirect-uri {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+        .test-button {
+            background: linear-gradient(45deg, #4a5568, #2d3748);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .test-button:hover {
+            background: linear-gradient(45deg, #2d3748, #1a202c);
+        }
+    </style>
+</head>
+<body>
+    <h1>OAuth Debug Helper</h1>
+    
+    <div class="debug-info">
+        <h2>Current Replit Domain:</h2>
+        <div class="redirect-uri" id="current-domain"></div>
+        
+        <h2>Required Redirect URIs for Developer Consoles:</h2>
+        <h3>Facebook App Settings:</h3>
+        <div class="redirect-uri" id="facebook-uri"></div>
+        
+        <h3>Google OAuth Client Settings:</h3>
+        <div class="redirect-uri" id="google-uri"></div>
+    </div>
+    
+    <div class="debug-info">
+        <h2>Test OAuth Endpoints:</h2>
+        <a href="/api/auth/facebook" class="test-button">Test Facebook OAuth</a>
+        <a href="/api/auth/google" class="test-button">Test Google OAuth</a>
+    </div>
+    
+    <div class="debug-info">
+        <h2>Test Callback Endpoints:</h2>
+        <a href="/api/auth/facebook/callback?code=test123" class="test-button">Test Facebook Callback</a>
+        <a href="/api/auth/google/callback?code=test123" class="test-button">Test Google Callback</a>
+    </div>
+
+    <script>
+        const currentHost = window.location.host;
+        const protocol = window.location.protocol;
+        
+        document.getElementById('current-domain').textContent = currentHost;
+        document.getElementById('facebook-uri').textContent = `${protocol}//${currentHost}/api/auth/facebook/callback`;
+        document.getElementById('google-uri').textContent = `${protocol}//${currentHost}/api/auth/google/callback`;
+        
+        console.log('OAuth Debug Info:');
+        console.log('Current domain:', currentHost);
+        console.log('Facebook redirect URI:', `${protocol}//${currentHost}/api/auth/facebook/callback`);
+        console.log('Google redirect URI:', `${protocol}//${currentHost}/api/auth/google/callback`);
+    </script>
+</body>
+</html>
