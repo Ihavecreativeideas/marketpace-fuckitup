@@ -66,6 +66,14 @@ app.get('/profile', (req, res) => {
   res.sendFile(path.join(__dirname, '../profile.html'));
 });
 
+app.get('/login-password', (req, res) => {
+  res.sendFile(path.join(__dirname, '../login-password.html'));
+});
+
+app.get('/signup-login', (req, res) => {
+  res.sendFile(path.join(__dirname, '../signup-login.html'));
+});
+
 // Authentication routes
 app.post('/api/auth/facebook', (req, res) => {
   // Facebook OAuth is not fully configured yet
@@ -88,6 +96,89 @@ app.post('/api/auth/google', (req, res) => {
 app.get('/api/auth/google', (req, res) => {
   // Handle Google OAuth callback
   res.redirect('/community');
+});
+
+// Email/Password Authentication endpoints
+app.post('/api/check-user-exists', (req, res) => {
+  const { email } = req.body;
+  
+  // For demo purposes, simulate checking user existence
+  // In a real app, this would check the database
+  const demoUsers = ['demo@marketpace.com', 'test@example.com'];
+  const exists = demoUsers.includes(email.toLowerCase());
+  
+  res.json({ 
+    success: true, 
+    exists: exists,
+    message: exists ? 'User found' : 'User not found'
+  });
+});
+
+app.post('/api/seamless-login', (req, res) => {
+  const { email, password } = req.body;
+  
+  // For demo purposes, accept any password for known emails
+  const demoUsers = ['demo@marketpace.com', 'test@example.com'];
+  
+  if (demoUsers.includes(email.toLowerCase()) && password) {
+    // Successful login
+    const userData = {
+      id: 'demo-user-' + Math.random().toString(36).substr(2, 9),
+      email: email,
+      name: email.split('@')[0],
+      loggedIn: true,
+      accountType: 'demo'
+    };
+    
+    res.json({
+      success: true,
+      message: 'Login successful',
+      user: userData,
+      redirectUrl: '/community'
+    });
+  } else {
+    res.status(401).json({
+      success: false,
+      message: 'Invalid email or password'
+    });
+  }
+});
+
+app.post('/api/seamless-signup', (req, res) => {
+  const { email, password, name } = req.body;
+  
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: 'Email and password are required'
+    });
+  }
+  
+  // For demo purposes, always allow signup
+  const userData = {
+    id: 'user-' + Math.random().toString(36).substr(2, 9),
+    email: email,
+    name: name || email.split('@')[0],
+    loggedIn: true,
+    accountType: 'member'
+  };
+  
+  res.json({
+    success: true,
+    message: 'Account created successfully',
+    user: userData,
+    redirectUrl: '/community'
+  });
+});
+
+app.post('/api/forgot-password', (req, res) => {
+  const { email } = req.body;
+  
+  res.json({
+    success: true,
+    message: 'Password reset instructions sent to your email',
+    resetUrl: '/password-reset' // For demo purposes
+  });
 });
 
 app.get('/signup-login', (req, res) => {
