@@ -9,6 +9,7 @@ MarketPace is a React Native mobile application that prioritizes community empow
 **Core Concept:** Community + Marketplace + Delivery platform designed to uplift neighborhoods
 
 **Production Domain:** www.marketpace.shop
+**Development Domain:** workspace.ihavecreativeid.repl.co (for testing)
 
 ## System Architecture
 
