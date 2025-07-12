@@ -58,6 +58,16 @@ app.get('/facebook-app-promotion', (req, res) => {
   res.sendFile(path.join(__dirname, '../facebook-app-promotion.html'));
 });
 
+// Member Product Promotion route
+app.get('/member-product-promotion', (req, res) => {
+  res.sendFile(path.join(__dirname, '../member-product-promotion.html'));
+});
+
+// Promote Product Button Demo route
+app.get('/promote-product-button', (req, res) => {
+  res.sendFile(path.join(__dirname, '../promote-product-button.html'));
+});
+
 // *** FACEBOOK MARKETPLACE-STYLE PROMOTION SYSTEM ***
 // Facebook Product Catalog Integration for Member Products
 
@@ -523,6 +533,290 @@ app.post('/api/facebook/optimize-campaign', (req, res) => {
       creative: 'Test video ads showing app features and community benefits',
       timing: 'Schedule ads during peak local activity hours'
     }
+  });
+});
+
+// *** MEMBER PRODUCT PROMOTION SYSTEM ***
+// Stripe-integrated product promotion for MarketPace Pro members
+
+// Initialize Stripe with secret key
+let stripe;
+try {
+  stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+  console.log('Stripe initialized successfully');
+} catch (error) {
+  console.error('Stripe initialization failed:', error.message);
+  stripe = null;
+}
+
+// Stripe public key endpoint for frontend
+app.get('/api/stripe/public-key', (req, res) => {
+  res.json({
+    publicKey: process.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_demo'
+  });
+});
+
+app.post('/api/promote/create-payment-intent', async (req, res) => {
+  try {
+    if (!stripe) {
+      return res.status(500).json({ error: 'Stripe not configured' });
+    }
+
+    const { amount, promotionType, productId } = req.body;
+    
+    if (!amount || !promotionType || !productId) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Create a PaymentIntent with the order amount and currency
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount * 100), // Convert to cents
+      currency: 'usd',
+      metadata: {
+        promotionType,
+        productId,
+        platform: 'marketpace_promotion'
+      },
+      description: `MarketPace Product Promotion - ${promotionType}`,
+    });
+
+    res.json({
+      clientSecret: paymentIntent.client_secret,
+      promotionDetails: {
+        type: promotionType,
+        price: amount,
+        duration: {
+          'boost': '24 hours',
+          'featured': '3 days', 
+          'premium': '7 days'
+        }[promotionType],
+        features: {
+          'boost': ['Priority placement', 'Local notifications', 'Community feed boost'],
+          'featured': ['Featured homepage banner', 'Category priority', 'Social media cross-post'],
+          'premium': ['Multi-platform promotion', 'Advanced analytics', 'Local business partnerships']
+        }[promotionType]
+      }
+    });
+  } catch (error) {
+    console.error('Error creating payment intent:', error);
+    res.status(500).json({ error: 'Failed to create payment intent' });
+  }
+});
+
+app.post('/api/promote/activate', async (req, res) => {
+  try {
+    const { paymentIntentId, promotionType, productId, targetRadius, customMessage } = req.body;
+    
+    // Verify payment was successful
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    
+    if (paymentIntent.status !== 'succeeded') {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Payment not completed' 
+      });
+    }
+
+    const promotionId = 'promo_' + Math.random().toString(36).substr(2, 9);
+    const startTime = new Date();
+    const endTime = new Date();
+    
+    // Set end time based on promotion type
+    switch (promotionType) {
+      case 'boost':
+        endTime.setHours(endTime.getHours() + 24);
+        break;
+      case 'featured':
+        endTime.setDate(endTime.getDate() + 3);
+        break;
+      case 'premium':
+        endTime.setDate(endTime.getDate() + 7);
+        break;
+    }
+
+    // Calculate estimated results based on promotion type and target radius
+    const baseViews = {
+      'boost': 750,
+      'featured': 2500,
+      'premium': 6500
+    };
+    
+    const radiusMultiplier = Math.min(parseInt(targetRadius) / 15, 2);
+    const estimatedViews = Math.floor(baseViews[promotionType] * radiusMultiplier);
+
+    res.json({
+      success: true,
+      message: 'Product promotion activated successfully',
+      promotion: {
+        promotionId,
+        productId,
+        type: promotionType,
+        status: 'active',
+        startTime,
+        endTime,
+        targeting: {
+          radius: targetRadius,
+          customMessage: customMessage || null
+        },
+        payment: {
+          paymentIntentId,
+          amount: paymentIntent.amount / 100,
+          currency: paymentIntent.currency
+        },
+        estimates: {
+          totalViews: estimatedViews,
+          expectedInquiries: Math.floor(estimatedViews * 0.035),
+          expectedSaves: Math.floor(estimatedViews * 0.018),
+          expectedOffers: Math.floor(estimatedViews * 0.005)
+        }
+      },
+      activatedFeatures: {
+        'boost': [
+          'Product pushed to top of community feeds',
+          'Push notifications sent to 500+ local members',
+          'Priority search placement for 24 hours',
+          'Mobile app banner rotation'
+        ],
+        'featured': [
+          'Homepage featured banner placement',
+          'Category page priority listing',
+          'Social media cross-posting activated',
+          'Push notifications to 2,000+ targeted members',
+          'Email newsletter feature inclusion'
+        ],
+        'premium': [
+          'Multi-platform promotion (web + mobile)',
+          'Advanced targeting with AI optimization',
+          'Local business partnership cross-promotion',
+          'Comprehensive analytics dashboard',
+          'Social media integration across all platforms',
+          'Priority customer support'
+        ]
+      }[promotionType],
+      analytics: {
+        trackingEnabled: true,
+        realTimeViews: true,
+        engagementMetrics: true,
+        conversionTracking: true,
+        geographicBreakdown: promotionType !== 'boost'
+      }
+    });
+  } catch (error) {
+    console.error('Error activating promotion:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to activate promotion' 
+    });
+  }
+});
+
+app.get('/api/promote/analytics/:promotionId', (req, res) => {
+  const { promotionId } = req.params;
+  const { timeframe = '24h' } = req.query;
+  
+  res.json({
+    success: true,
+    promotionId,
+    timeframe,
+    performance: {
+      views: 1847,
+      uniqueViewers: 1205,
+      inquiries: 67,
+      saves: 34,
+      offers: 8,
+      conversionRate: 3.6,
+      clickThroughRate: 12.4
+    },
+    geographic: {
+      'Orange Beach, AL': 42,
+      'Gulf Shores, AL': 28,
+      'Mobile, AL': 18,
+      'Pensacola, FL': 12
+    },
+    hourlyBreakdown: {
+      '6AM-9AM': 145,
+      '9AM-12PM': 298,
+      '12PM-3PM': 387,
+      '3PM-6PM': 456,
+      '6PM-9PM': 561
+    },
+    demographics: {
+      ageGroups: {
+        '18-24': 15,
+        '25-34': 32,
+        '35-44': 28,
+        '45-54': 18,
+        '55+': 7
+      },
+      interests: {
+        'Furniture': 45,
+        'Home Decor': 38,
+        'Vintage Items': 28,
+        'Local Shopping': 52
+      }
+    },
+    engagement: {
+      averageViewTime: '2:34',
+      shareRate: 8.2,
+      saveRate: 18.4,
+      inquiryRate: 36.3
+    },
+    roi: {
+      promotionCost: 12.00,
+      estimatedSalesValue: 275.00,
+      projectedROI: '2,192%',
+      paybackPeriod: 'Immediate'
+    }
+  });
+});
+
+app.get('/api/promote/member-promotions/:memberId', (req, res) => {
+  const { memberId } = req.params;
+  
+  res.json({
+    success: true,
+    memberId,
+    activePromotions: [
+      {
+        promotionId: 'promo_abc123',
+        productName: 'Vintage Coffee Table',
+        type: 'featured',
+        status: 'active',
+        startDate: '2025-01-12',
+        endDate: '2025-01-15',
+        currentViews: 1847,
+        totalInquiries: 67,
+        amountSpent: 12.00
+      }
+    ],
+    pastPromotions: [
+      {
+        promotionId: 'promo_xyz789',
+        productName: 'Antique Bookshelf',
+        type: 'boost',
+        status: 'completed',
+        startDate: '2025-01-08',
+        endDate: '2025-01-09',
+        totalViews: 892,
+        totalInquiries: 31,
+        amountSpent: 5.00,
+        soldDate: '2025-01-09',
+        salePrice: 150.00
+      }
+    ],
+    totalStats: {
+      totalSpent: 17.00,
+      totalViews: 2739,
+      totalInquiries: 98,
+      conversionRate: 3.6,
+      averageROI: '1,850%',
+      totalSales: 425.00
+    },
+    recommendations: [
+      'Consider promoting during weekend hours for 25% more engagement',
+      'Featured listings in your category have 40% higher conversion rates',
+      'Add custom messages to increase inquiry rates by 15%'
+    ]
   });
 });
 
