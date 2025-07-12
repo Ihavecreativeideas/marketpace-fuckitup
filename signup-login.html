@@ -357,7 +357,7 @@
         function signupWithFacebook() {
             console.log('Facebook signup clicked - using server-side OAuth');
             // Use server-side OAuth flow to bypass JavaScript SDK domain issues
-            window.location.href = '/api/auth/facebook/signup';
+            window.location.href = '/api/auth/facebook';
         }
 
         function signupWithGoogle() {
@@ -370,15 +370,8 @@
             window.googleAuthInProgress = true;
             
             try {
-                // Use simple OAuth redirect approach
-                const redirectUri = encodeURIComponent(window.location.origin + '/signup-login.html');
-                const clientId = '167280787729-dgvuodnecaeraphr8rulh5u0028f7qbk.apps.googleusercontent.com';
-                const scope = encodeURIComponent('openid email profile');
-                const state = encodeURIComponent('signup');
-                
-                const googleAuthUrl = `https://accounts.google.com/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code&state=${state}`;
-                
-                window.location.href = googleAuthUrl;
+                // Use server OAuth endpoint instead of direct Google redirect
+                window.location.href = '/api/auth/google';
             } catch (error) {
                 window.googleAuthInProgress = false;
                 console.error('Google auth error:', error);
@@ -416,7 +409,7 @@
         function loginWithFacebook() {
             console.log('Facebook login clicked - using server-side OAuth');
             // Use server-side OAuth flow to bypass JavaScript SDK domain issues
-            window.location.href = '/api/auth/facebook/login';
+            window.location.href = '/api/auth/facebook';
         }
 
         function loginWithGoogle() {

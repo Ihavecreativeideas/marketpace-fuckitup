@@ -75,15 +75,21 @@ app.get('/signup-login', (req, res) => {
 });
 
 // Facebook Authentication routes
+app.get('/api/auth/facebook', (req, res) => {
+  // Redirect to Facebook OAuth
+  const facebookAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${process.env.FACEBOOK_APP_ID}&redirect_uri=${encodeURIComponent(process.env.FACEBOOK_REDIRECT_URI || 'https://workspace-latest-replit.repl.co/api/auth/facebook/callback')}&scope=email,public_profile&response_type=code`;
+  res.redirect(facebookAuthUrl);
+});
+
 app.get('/api/auth/facebook/signup', (req, res) => {
-  // Redirect to Facebook OAuth for signup
-  const facebookAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=1043690817269912&redirect_uri=${encodeURIComponent(req.protocol + '://' + req.get('host') + '/api/auth/facebook/callback')}&scope=email,public_profile,user_friends&state=signup`;
+  // Same as above but with state parameter
+  const facebookAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${process.env.FACEBOOK_APP_ID}&redirect_uri=${encodeURIComponent(process.env.FACEBOOK_REDIRECT_URI || 'https://workspace-latest-replit.repl.co/api/auth/facebook/callback')}&scope=email,public_profile&response_type=code&state=signup`;
   res.redirect(facebookAuthUrl);
 });
 
 app.get('/api/auth/facebook/login', (req, res) => {
-  // Redirect to Facebook OAuth for login
-  const facebookAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=1043690817269912&redirect_uri=${encodeURIComponent(req.protocol + '://' + req.get('host') + '/api/auth/facebook/callback')}&scope=email,public_profile,user_friends&state=login`;
+  // Same as above but with state parameter
+  const facebookAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${process.env.FACEBOOK_APP_ID}&redirect_uri=${encodeURIComponent(process.env.FACEBOOK_REDIRECT_URI || 'https://workspace-latest-replit.repl.co/api/auth/facebook/callback')}&scope=email,public_profile&response_type=code&state=login`;
   res.redirect(facebookAuthUrl);
 });
 
@@ -101,21 +107,95 @@ app.post('/api/auth/facebook/callback', (req, res) => {
   });
 });
 
-app.get('/api/auth/facebook/callback', (req, res) => {
-  // Handle Facebook OAuth redirect callback
-  const { code, state } = req.query;
+app.get('/api/auth/facebook/callback', async (req, res) => {
+  const { code, state, error } = req.query;
+  
+  if (error) {
+    return res.redirect('/signup-login?error=facebook_auth_failed');
+  }
   
   if (code) {
-    // In a real implementation, exchange code for access token
-    // For now, redirect to signup page with success
-    res.redirect('/signup-login?facebook=success&type=' + (state || 'login'));
+    try {
+      // Exchange code for access token
+      const tokenResponse = await fetch(`https://graph.facebook.com/v18.0/oauth/access_token?client_id=${process.env.FACEBOOK_APP_ID}&redirect_uri=${encodeURIComponent(process.env.FACEBOOK_REDIRECT_URI)}&client_secret=${process.env.FACEBOOK_APP_SECRET}&code=${code}`);
+      
+      const tokenData = await tokenResponse.json();
+      
+      if (tokenData.access_token) {
+        // Get user profile
+        const profileResponse = await fetch(`https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${tokenData.access_token}`);
+        const profile = await profileResponse.json();
+        
+        console.log('Facebook OAuth successful for user:', profile.name, profile.email);
+        
+        // Redirect to community with success
+        res.redirect('/community?facebook=success');
+      } else {
+        res.redirect('/signup-login?error=facebook_token_failed');
+      }
+    } catch (error) {
+      console.error('Facebook OAuth error:', error);
+      res.redirect('/signup-login?error=facebook_auth_failed');
+    }
   } else {
-    res.redirect('/signup-login?error=facebook_auth_failed');
+    res.redirect('/signup-login?error=facebook_no_code');
+  }
+});
+
+// Google Authentication routes
+app.get('/api/auth/google', (req, res) => {
+  // Redirect to Google OAuth
+  const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(process.env.GOOGLE_REDIRECT_URI || 'https://workspace-latest-replit.repl.co/api/auth/google/callback')}&scope=openid email profile&response_type=code`;
+  res.redirect(googleAuthUrl);
+});
+
+app.get('/api/auth/google/callback', async (req, res) => {
+  const { code, error } = req.query;
+  
+  if (error) {
+    return res.redirect('/signup-login?error=google_auth_failed');
+  }
+  
+  if (code) {
+    try {
+      // Exchange code for access token
+      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_id: process.env.GOOGLE_CLIENT_ID,
+          client_secret: process.env.GOOGLE_CLIENT_SECRET,
+          code: code,
+          grant_type: 'authorization_code',
+          redirect_uri: process.env.GOOGLE_REDIRECT_URI || 'https://workspace-latest-replit.repl.co/api/auth/google/callback'
+        })
+      });
+      
+      const tokenData = await tokenResponse.json();
+      
+      if (tokenData.access_token) {
+        // Get user profile
+        const profileResponse = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${tokenData.access_token}`);
+        const profile = await profileResponse.json();
+        
+        console.log('Google OAuth successful for user:', profile.name, profile.email);
+        
+        // Redirect to community with success
+        res.redirect('/community?google=success');
+      } else {
+        res.redirect('/signup-login?error=google_token_failed');
+      }
+    } catch (error) {
+      console.error('Google OAuth error:', error);
+      res.redirect('/signup-login?error=google_auth_failed');
+    }
+  } else {
+    res.redirect('/signup-login?error=google_no_code');
   }
 });
 
 app.post('/api/auth/google', (req, res) => {
-  // Google OAuth endpoint
+  // Legacy POST endpoint
   res.status(200).json({
     success: false,
     message: 'Google authentication is being configured. Please use email signup for now.',
