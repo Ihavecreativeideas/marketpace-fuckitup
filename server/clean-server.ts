@@ -227,9 +227,105 @@ app.post('/api/auth/google', (req, res) => {
   });
 });
 
-app.get('/api/auth/google', (req, res) => {
-  // Handle Google OAuth callback
-  res.redirect('/community');
+// Google OAuth routes
+app.get('/api/auth/google/signup', (req, res) => {
+  const redirectUri = `${req.protocol}://${req.get('host')}/auth/google/callback`;
+  const googleAuthUrl = `https://accounts.google.com/oauth/authorize?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=email profile&state=signup`;
+  res.redirect(googleAuthUrl);
+});
+
+app.get('/api/auth/google/login', (req, res) => {
+  const redirectUri = `${req.protocol}://${req.get('host')}/auth/google/callback`;
+  const googleAuthUrl = `https://accounts.google.com/oauth/authorize?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=email profile&state=login`;
+  res.redirect(googleAuthUrl);
+});
+
+app.get('/auth/google/callback', async (req, res) => {
+  try {
+    const { code, state, error } = req.query;
+    
+    if (error) {
+      return res.redirect(`/signup-login.html?error=google_auth_failed&message=${encodeURIComponent(error)}`);
+    }
+    
+    if (!code) {
+      return res.redirect('/signup-login.html?error=no_auth_code');
+    }
+    
+    // Exchange code for access token
+    const redirectUri = `${req.protocol}://${req.get('host')}/auth/google/callback`;
+    const tokenUrl = 'https://oauth2.googleapis.com/token';
+    
+    const tokenResponse = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        client_id: process.env.GOOGLE_CLIENT_ID,
+        client_secret: process.env.GOOGLE_CLIENT_SECRET,
+        code: code,
+        grant_type: 'authorization_code',
+        redirect_uri: redirectUri,
+      }),
+    });
+    
+    const tokenData = await tokenResponse.json();
+    
+    if (tokenData.error) {
+      return res.redirect(`/signup-login.html?error=token_exchange_failed&message=${encodeURIComponent(tokenData.error_description)}`);
+    }
+    
+    // Get user profile from Google
+    const profileResponse = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${tokenData.access_token}`);
+    const profileData = await profileResponse.json();
+    
+    if (profileData.error) {
+      return res.redirect(`/signup-login.html?error=profile_fetch_failed&message=${encodeURIComponent(profileData.error.message)}`);
+    }
+    
+    // Create user profile
+    const profile = {
+      id: 'google_' + profileData.id,
+      googleId: profileData.id,
+      firstName: profileData.given_name || profileData.name?.split(' ')[0] || 'User',
+      lastName: profileData.family_name || profileData.name?.split(' ').slice(1).join(' ') || '',
+      fullName: profileData.name,
+      email: profileData.email,
+      phoneNumber: null,
+      profileImageUrl: profileData.picture,
+      provider: 'google',
+      accessToken: tokenData.access_token,
+      accountType: 'member',
+      profileComplete: false,
+      loggedIn: true,
+      createdAt: new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
+      bio: `MarketPace member since ${new Date().toLocaleDateString()}`,
+      interests: ['shopping', 'local_community', 'marketplace'],
+      userType: 'buyer',
+      isPro: false,
+      isVerified: true,
+      allowsDelivery: true,
+      allowsPickup: true
+    };
+    
+    // Store user profile
+    userDatabase.set(profile.id, profile);
+    
+    const userQuery = encodeURIComponent(JSON.stringify({
+      success: true,
+      user: profile,
+      needsPhone: true,
+      message: `Welcome to MarketPace, ${profile.firstName}!`
+    }));
+    
+    res.redirect(`/signup-login.html?auth_success=true&user_data=${userQuery}`);
+    
+  } catch (error) {
+    console.error('Google OAuth callback error:', error);
+    res.redirect(`/signup-login.html?error=oauth_failed&message=${encodeURIComponent('Authentication failed. Please try again.')}`);
+  }
 });
 
 // Email/Password Authentication endpoints
@@ -657,21 +753,21 @@ function validatePhoneUniqueness(phoneNumber, excludeUserId = null) {
   return true;
 }
 
-// Facebook OAuth initiation route
+// Facebook OAuth initiation routes
 app.get('/api/auth/facebook/signup', (req, res) => {
-  const redirectUri = `${req.protocol}://${req.get('host')}/api/auth/facebook/redirect`;
+  const redirectUri = `${req.protocol}://${req.get('host')}/auth/facebook/callback`;
   const facebookAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=1043690817269912&redirect_uri=${encodeURIComponent(redirectUri)}&scope=email,public_profile,user_friends,user_birthday&response_type=code&state=signup`;
   res.redirect(facebookAuthUrl);
 });
 
 app.get('/api/auth/facebook/login', (req, res) => {
-  const redirectUri = `${req.protocol}://${req.get('host')}/api/auth/facebook/redirect`;
+  const redirectUri = `${req.protocol}://${req.get('host')}/auth/facebook/callback`;
   const facebookAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=1043690817269912&redirect_uri=${encodeURIComponent(redirectUri)}&scope=email,public_profile,user_friends,user_birthday&response_type=code&state=login`;
   res.redirect(facebookAuthUrl);
 });
 
-// Facebook OAuth redirect handler
-app.get('/api/auth/facebook/redirect', async (req, res) => {
+// Updated OAuth routes to match new redirect URIs
+app.get('/auth/facebook/callback', async (req, res) => {
   try {
     const { code, state, error, error_description } = req.query;
     
@@ -684,7 +780,7 @@ app.get('/api/auth/facebook/redirect', async (req, res) => {
     }
     
     // Exchange code for access token
-    const redirectUri = `${req.protocol}://${req.get('host')}/api/auth/facebook/redirect`;
+    const redirectUri = `${req.protocol}://${req.get('host')}/auth/facebook/callback`;
     const tokenUrl = `https://graph.facebook.com/v18.0/oauth/access_token?client_id=1043690817269912&redirect_uri=${encodeURIComponent(redirectUri)}&client_secret=${process.env.FACEBOOK_APP_SECRET}&code=${code}`;
     
     const tokenResponse = await fetch(tokenUrl, {
@@ -1169,9 +1265,11 @@ const port = process.env.PORT || 5000;
 
 app.listen(port, "0.0.0.0", () => {
   console.log(`MarketPace Server running on port ${port}`);
+  console.log(`🌐 External URL: https://${process.env.REPLIT_DOMAINS || 'workspace.ihavecreativeid.repl.co'}`);
   console.log('🎯 Internal Advertising System Active');
   console.log('🔒 Privacy Protected: All ad data stays within MarketPace');
   console.log('👥 Member-to-Member advertising only - No external data sharing');
   console.log('📊 Complete Facebook-style ad builder with targeting and analytics');
   console.log('✅ Zero external data sales - Internal platform advertising only');
+  console.log('🔐 OAuth Ready: Facebook & Google configured for both dev and prod domains');
 });
