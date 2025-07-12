@@ -2099,6 +2099,10 @@ app.get('/tiktok-shop-auto-setup', (req, res) => {
   res.sendFile(path.join(__dirname, '../tiktok-shop-auto-setup.html'));
 });
 
+app.get('/tiktok-partner-center-guide', (req, res) => {
+  res.sendFile(path.join(__dirname, '../tiktok-partner-center-guide.html'));
+});
+
 // *** TIKTOK SHOP AUTO-SETUP SYSTEM ***
 app.post('/api/integrations/tiktok/auto-setup', async (req, res) => {
   try {
