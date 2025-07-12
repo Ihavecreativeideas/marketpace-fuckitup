@@ -20,6 +20,9 @@ import * as Location from 'expo-location';
 import { colors } from '../../utils/colors';
 import { useAuth } from '../../context/AuthContext';
 import RouteService from '../../services/routeService';
+import PaymentManager from '../../components/driver/PaymentManager';
+import DeliveryMethodSelector from '../../components/driver/DeliveryMethodSelector';
+import { StripeProvider } from '@stripe/stripe-react-native';
 
 export default function EnhancedDriverDashboard({ navigation }) {
   const { user } = useAuth();
@@ -36,6 +39,8 @@ export default function EnhancedDriverDashboard({ navigation }) {
   const [imageModal, setImageModal] = useState({ visible: false, delivery: null, image: null });
   const [bailModal, setBailModal] = useState({ visible: false, reason: '' });
   const [messageModal, setMessageModal] = useState({ visible: false, customer: null, message: '' });
+  const [paymentModal, setPaymentModal] = useState({ visible: false, delivery: null });
+  const [deliveryMethodModal, setDeliveryMethodModal] = useState({ visible: false, delivery: null });
 
   useEffect(() => {
     initializeDriver();
@@ -222,10 +227,23 @@ export default function EnhancedDriverDashboard({ navigation }) {
   };
 
   const completeDelivery = async (delivery, isLate = false) => {
+    // Show payment processing first
+    setPaymentModal({ visible: true, delivery: { ...delivery, isLate } });
+  };
+
+  const handlePaymentComplete = async (paymentBreakdown) => {
     try {
-      await RouteService.completeDelivery(delivery.id, isLate);
+      const delivery = paymentModal.delivery;
+      await RouteService.completeDelivery(delivery.id, delivery.isLate);
       
       setActiveDeliveries(prev => prev.filter(d => d.id !== delivery.id));
+      setPaymentModal({ visible: false, delivery: null });
+      
+      // Update earnings
+      setEarnings(prev => ({
+        ...prev,
+        today: prev.today + paymentBreakdown.driverTotal
+      }));
       
       // Check if route is complete
       if (activeDeliveries.length === 1) {
@@ -235,6 +253,19 @@ export default function EnhancedDriverDashboard({ navigation }) {
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to complete delivery');
+    }
+  };
+
+  const showDeliveryMethodSelector = (delivery) => {
+    setDeliveryMethodModal({ visible: true, delivery });
+  };
+
+  const handleDeliveryMethodSelected = async (method, delivery) => {
+    try {
+      await RouteService.updateDeliveryMethod(delivery.id, method.id);
+      Alert.alert('Method Updated', `Delivery method changed to: ${method.title}`);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update delivery method');
     }
   };
 
@@ -379,13 +410,23 @@ export default function EnhancedDriverDashboard({ navigation }) {
         )}
 
         {delivery.status === 'delivering' && (
-          <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: colors.success }]}
-            onPress={() => completeDelivery(delivery)}
-          >
-            <Ionicons name="checkmark-circle" size={16} color={colors.white} />
-            <Text style={styles.actionButtonText}>Complete</Text>
-          </TouchableOpacity>
+          <>
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: colors.success }]}
+              onPress={() => completeDelivery(delivery)}
+            >
+              <Ionicons name="checkmark-circle" size={16} color={colors.white} />
+              <Text style={styles.actionButtonText}>Complete & Pay</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={() => showDeliveryMethodSelector(delivery)}
+            >
+              <Ionicons name="options" size={16} color={colors.primary} />
+              <Text style={styles.secondaryButtonText}>Method</Text>
+            </TouchableOpacity>
+          </>
         )}
       </View>
     </View>
@@ -403,7 +444,8 @@ export default function EnhancedDriverDashboard({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <StripeProvider publishableKey={process.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_...'}>
+      <SafeAreaView style={styles.container}>
       {/* Header with status toggle */}
       <View style={styles.header}>
         <View style={styles.statusSection}>
@@ -620,7 +662,24 @@ export default function EnhancedDriverDashboard({ navigation }) {
           </View>
         </View>
       </Modal>
+
+      {/* Payment Manager Modal */}
+      <PaymentManager
+        delivery={paymentModal.delivery}
+        visible={paymentModal.visible}
+        onClose={() => setPaymentModal({ visible: false, delivery: null })}
+        onPaymentComplete={handlePaymentComplete}
+      />
+
+      {/* Delivery Method Selector */}
+      <DeliveryMethodSelector
+        delivery={deliveryMethodModal.delivery}
+        visible={deliveryMethodModal.visible}
+        onClose={() => setDeliveryMethodModal({ visible: false, delivery: null })}
+        onMethodSelected={(method) => handleDeliveryMethodSelected(method, deliveryMethodModal.delivery)}
+      />
     </SafeAreaView>
+    </StripeProvider>
   );
 }
 

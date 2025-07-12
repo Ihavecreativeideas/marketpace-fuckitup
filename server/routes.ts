@@ -778,6 +778,146 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced Payment Processing Endpoints
+
+  // Create payment intent for driver earnings
+  app.post('/api/drivers/payment-intent', isAuthenticated, async (req: any, res) => {
+    try {
+      const { amount, deliveryId, paymentType } = req.body;
+      
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'usd',
+        metadata: {
+          deliveryId: deliveryId,
+          paymentType: paymentType,
+          driverId: req.user.claims.sub
+        },
+        description: `MarketPace Driver Payment - Delivery #${deliveryId}`
+      });
+
+      res.json({
+        success: true,
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id
+      });
+    } catch (error) {
+      console.error('Error creating driver payment intent:', error);
+      res.status(500).json({ error: 'Failed to create payment intent' });
+    }
+  });
+
+  // Process buyer rejection payment
+  app.post('/api/drivers/buyer-rejection-payment', isAuthenticated, async (req: any, res) => {
+    try {
+      const { deliveryId, buyerCharge, driverCompensation, reason } = req.body;
+      
+      // Create payment intent for buyer charge
+      const buyerPayment = await stripe.paymentIntents.create({
+        amount: Math.round(buyerCharge * 100),
+        currency: 'usd',
+        metadata: {
+          deliveryId: deliveryId,
+          reason: reason,
+          type: 'buyer_rejection_fee'
+        },
+        description: `Delivery fee for rejected item - Delivery #${deliveryId}`
+      });
+
+      // Create payout for driver compensation
+      const driverPayout = await stripe.paymentIntents.create({
+        amount: Math.round(driverCompensation * 100),
+        currency: 'usd',
+        metadata: {
+          deliveryId: deliveryId,
+          driverId: req.user.claims.sub,
+          type: 'rejection_compensation'
+        },
+        description: `Driver compensation for rejected delivery #${deliveryId}`
+      });
+
+      res.json({
+        success: true,
+        buyerPayment: buyerPayment.id,
+        driverPayout: driverPayout.id,
+        buyerCharge: buyerCharge,
+        driverCompensation: driverCompensation
+      });
+    } catch (error) {
+      console.error('Error processing buyer rejection payment:', error);
+      res.status(500).json({ error: 'Failed to process rejection payment' });
+    }
+  });
+
+  // Process tips from buyers and sellers
+  app.post('/api/drivers/process-tip', isAuthenticated, async (req: any, res) => {
+    try {
+      const { deliveryId, tipAmount, tipperType, driverReceives } = req.body;
+      
+      const tipPayment = await stripe.paymentIntents.create({
+        amount: Math.round(tipAmount * 100),
+        currency: 'usd',
+        metadata: {
+          deliveryId: deliveryId,
+          tipperType: tipperType,
+          driverId: req.user.claims.sub,
+          type: 'driver_tip'
+        },
+        description: `Tip for driver from ${tipperType} - Delivery #${deliveryId}`
+      });
+
+      res.json({
+        success: true,
+        tipPayment: tipPayment.id,
+        tipAmount: tipAmount,
+        driverReceives: driverReceives,
+        tipperType: tipperType,
+        platformFee: 0 // 100% to driver
+      });
+    } catch (error) {
+      console.error('Error processing tip:', error);
+      res.status(500).json({ error: 'Failed to process tip' });
+    }
+  });
+
+  // Update delivery method
+  app.patch('/api/drivers/deliveries/:deliveryId/method', isAuthenticated, async (req: any, res) => {
+    try {
+      const { deliveryId } = req.params;
+      const { methodId, methodDetails } = req.body;
+      
+      const mockUpdate = {
+        deliveryId: deliveryId,
+        previousMethod: 'marketpace_delivery',
+        newMethod: methodId,
+        methodDetails: methodDetails,
+        updatedAt: new Date(),
+        feeAdjustment: calculateMethodFeeAdjustment(methodId)
+      };
+
+      res.json({
+        success: true,
+        message: 'Delivery method updated successfully',
+        update: mockUpdate
+      });
+    } catch (error) {
+      console.error('Error updating delivery method:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  function calculateMethodFeeAdjustment(methodId: string): number {
+    const adjustments: { [key: string]: number } = {
+      'same_day_delivery': 10.00,
+      'self_pickup': -6.00, // Remove delivery fees
+      'contactless_delivery': 0.00,
+      'scheduled_delivery': 0.00,
+      'counter_offer': 0.00 // Negotiable
+    };
+    
+    return adjustments[methodId] || 0.00;
+  }
+
   app.post('/api/complete-stop/:routeId/:stopIndex', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
