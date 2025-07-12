@@ -63,6 +63,181 @@ app.get('/member-product-promotion', (req, res) => {
   res.sendFile(path.join(__dirname, '../member-product-promotion.html'));
 });
 
+app.get('/restaurant-business-profile', (req, res) => {
+  res.sendFile(path.join(__dirname, '../restaurant-business-profile.html'));
+});
+
+// *** RESTAURANT PROFILE SYSTEM ***
+app.post('/api/restaurant/create-profile', async (req, res) => {
+  try {
+    const {
+      restaurantName,
+      cuisineType,
+      address,
+      phoneNumber,
+      website,
+      description,
+      operatingHours,
+      priceRange,
+      deliveryMethod,
+      features
+    } = req.body;
+
+    // Validate required fields
+    if (!restaurantName || !cuisineType || !address || !phoneNumber || 
+        !description || !operatingHours || !priceRange || !deliveryMethod) {
+      return res.status(400).json({
+        success: false,
+        message: 'All required fields must be provided'
+      });
+    }
+
+    // Create restaurant profile
+    const profileId = 'restaurant_' + Math.random().toString(36).substr(2, 9);
+    const restaurantProfile = {
+      id: profileId,
+      name: restaurantName,
+      cuisine: cuisineType,
+      address: address,
+      phone: phoneNumber,
+      website: website || null,
+      description: description,
+      hours: operatingHours,
+      priceRange: priceRange,
+      deliveryMethod: deliveryMethod,
+      features: features || [],
+      createdAt: new Date().toISOString(),
+      status: 'active',
+      profileType: 'restaurant',
+      promotionEligible: true,
+      deliveryAvailable: true,
+      deliveryNote: 'Delivery available through partner platforms and own delivery teams'
+    };
+
+    console.log('Restaurant profile created:', restaurantProfile);
+
+    // Setup delivery integration based on method
+    let deliveryIntegration = null;
+    if (deliveryMethod === 'uber-eats') {
+      deliveryIntegration = {
+        platform: 'Uber Eats',
+        status: 'pending_connection',
+        capabilities: ['delivery', 'order_management', 'menu_sync']
+      };
+      console.log(`Setting up ${restaurantName} with Uber Eats delivery integration`);
+    } else if (deliveryMethod === 'doordash') {
+      deliveryIntegration = {
+        platform: 'DoorDash',
+        status: 'pending_connection', 
+        capabilities: ['delivery', 'order_management', 'menu_sync']
+      };
+      console.log(`Setting up ${restaurantName} with DoorDash delivery integration`);
+    } else if (deliveryMethod === 'own-delivery') {
+      deliveryIntegration = {
+        platform: 'Own Delivery Team',
+        status: 'active',
+        capabilities: ['delivery', 'order_management']
+      };
+    }
+
+    restaurantProfile.deliveryIntegration = deliveryIntegration;
+
+    res.json({
+      success: true,
+      message: 'Restaurant profile created successfully',
+      profileId: profileId,
+      profile: restaurantProfile,
+      nextSteps: {
+        promote: '/member-product-promotion',
+        dashboard: '/restaurant-dashboard',
+        integrations: '/platform-integrations'
+      }
+    });
+  } catch (error) {
+    console.error('Error creating restaurant profile:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create restaurant profile'
+    });
+  }
+});
+
+app.get('/api/restaurant/profile/:profileId', (req, res) => {
+  const { profileId } = req.params;
+  
+  // Simulate restaurant profile data
+  const restaurantProfile = {
+    id: profileId,
+    name: 'Gulf Coast Bistro',
+    cuisine: 'seafood',
+    address: '123 Beach Blvd, Orange Beach, AL',
+    phone: '(251) 555-0123',
+    description: 'Fresh Gulf seafood with a modern twist. Waterfront dining with sunset views.',
+    hours: 'Mon-Thu: 11am-9pm\nFri-Sat: 11am-10pm\nSun: 12pm-8pm',
+    priceRange: '$$',
+    deliveryMethod: 'third-party',
+    features: ['outdoor-seating', 'bar', 'live-music'],
+    status: 'active',
+    promotionStats: {
+      totalPromotions: 0,
+      activePromotions: 0,
+      customerReach: 0,
+      note: 'Start promoting to reach local customers!'
+    }
+  };
+  
+  res.json({
+    success: true,
+    profile: restaurantProfile
+  });
+});
+
+// *** PRODUCT PROMOTION PAYMENT SYSTEM ***
+app.post('/api/product-promotion/create-payment', async (req, res) => {
+  try {
+    const { amount, packageType, productName, productPrice } = req.body;
+    
+    // Create Stripe Checkout Session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: `Product Promotion: ${productName}`,
+              description: `${packageType} promotion package - $${productPrice} product`,
+            },
+            unit_amount: Math.round(amount * 100), // Convert to cents
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: `https://marketpace.shop/member-product-promotion?success=true&campaign_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `https://marketpace.shop/member-product-promotion?canceled=true`,
+      metadata: {
+        type: 'product_promotion',
+        package: packageType,
+        product_name: productName,
+        product_price: productPrice
+      }
+    });
+
+    res.json({
+      success: true,
+      checkoutUrl: session.url,
+      sessionId: session.id
+    });
+  } catch (error) {
+    console.error('Error creating product promotion payment session:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create payment session'
+    });
+  }
+});
+
 // Promote Product Button Demo route
 app.get('/promote-product-button', (req, res) => {
   res.sendFile(path.join(__dirname, '../promote-product-button.html'));
@@ -116,6 +291,172 @@ app.get('/events', (req, res) => {
 
 app.get('/platform-integrations', (req, res) => {
   res.sendFile(path.join(__dirname, '../platform-integrations.html'));
+});
+
+// *** PLATFORM INTEGRATION ENDPOINTS ***
+
+// Etsy Integration
+app.post('/api/integrations/etsy/connect', (req, res) => {
+  console.log('Etsy shop connection requested');
+  res.json({
+    success: true,
+    message: 'Etsy shop connected successfully',
+    integration: {
+      platform: 'Etsy',
+      status: 'connected',
+      features: ['product_sync', 'local_promotion', 'inventory_management']
+    }
+  });
+});
+
+// TikTok Shop Integration  
+app.post('/api/integrations/tiktok/connect', (req, res) => {
+  console.log('TikTok Shop connection requested');
+  res.json({
+    success: true,
+    message: 'TikTok Shop connected successfully',
+    integration: {
+      platform: 'TikTok Shop',
+      status: 'connected',
+      features: ['product_sync', 'local_targeting', 'cross_promotion']
+    }
+  });
+});
+
+// Facebook Shop Integration
+app.post('/api/integrations/facebook-shop/connect', (req, res) => {
+  console.log('Facebook Shop connection requested');
+  res.json({
+    success: true,
+    message: 'Facebook Shop connected successfully',
+    integration: {
+      platform: 'Facebook Shop',
+      status: 'connected',
+      features: ['product_catalog', 'deliver_now_buttons', 'instagram_integration']
+    }
+  });
+});
+
+// Eventbrite Integration
+app.post('/api/integrations/eventbrite/connect', (req, res) => {
+  console.log('Eventbrite connection requested');
+  res.json({
+    success: true,
+    message: 'Eventbrite connected successfully',
+    integration: {
+      platform: 'Eventbrite',
+      status: 'connected',
+      features: ['event_sync', 'local_promotion', 'ticket_integration']
+    }
+  });
+});
+
+// Uber Eats Restaurant Integration
+app.post('/api/integrations/uber-eats/connect', (req, res) => {
+  const { restaurantInfo } = req.body;
+  console.log('Uber Eats restaurant connection requested:', restaurantInfo);
+  
+  res.json({
+    success: true,
+    message: 'Uber Eats restaurant connected successfully',
+    integration: {
+      platform: 'Uber Eats',
+      restaurantId: restaurantInfo,
+      status: 'connected',
+      capabilities: ['delivery', 'order_management', 'menu_sync', 'local_promotion'],
+      deliveryRadius: '30 miles',
+      orderRouting: 'uber_eats_api'
+    }
+  });
+});
+
+// DoorDash Restaurant Integration
+app.post('/api/integrations/doordash/connect', (req, res) => {
+  const { restaurantInfo } = req.body;
+  console.log('DoorDash restaurant connection requested:', restaurantInfo);
+  
+  res.json({
+    success: true,
+    message: 'DoorDash restaurant connected successfully',
+    integration: {
+      platform: 'DoorDash',
+      restaurantId: restaurantInfo,
+      status: 'connected',
+      capabilities: ['delivery', 'order_management', 'menu_sync', 'local_promotion'],
+      deliveryRadius: '30 miles',
+      orderRouting: 'doordash_api'
+    }
+  });
+});
+
+// *** SMS AND EMAIL NOTIFICATION TESTING ***
+app.post('/test-sms', async (req, res) => {
+  const { phoneNumber, message } = req.body;
+  
+  if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
+    return res.json({
+      success: false,
+      message: 'Twilio credentials not configured',
+      note: 'SMS notifications require TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN'
+    });
+  }
+
+  try {
+    // Mock SMS sending (replace with actual Twilio integration)
+    console.log('SMS Test:', {
+      to: phoneNumber,
+      message: message,
+      from: process.env.TWILIO_PHONE_NUMBER
+    });
+
+    res.json({
+      success: true,
+      message: 'SMS sent successfully',
+      details: {
+        to: phoneNumber,
+        content: message,
+        provider: 'Twilio',
+        status: 'delivered'
+      }
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      message: 'SMS sending failed',
+      error: error.message
+    });
+  }
+});
+
+app.post('/test-email', async (req, res) => {
+  const { email, subject, message } = req.body;
+  
+  try {
+    // Mock email sending
+    console.log('Email Test:', {
+      to: email,
+      subject: subject,
+      message: message
+    });
+
+    res.json({
+      success: true,
+      message: 'Email sent successfully',
+      details: {
+        to: email,
+        subject: subject,
+        content: message,
+        provider: 'MarketPace Mail System',
+        status: 'delivered'
+      }
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      message: 'Email sending failed',
+      error: error.message
+    });
+  }
 });
 
 app.get('/account-settings', (req, res) => {

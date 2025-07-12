@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Business Profile - MarketPace Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+            50% { transform: translateY(-100px) rotate(180deg); opacity: 0.5; }
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-top: 40px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b35, #ff9500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .profile-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .important-notice {
+            background: linear-gradient(45deg, #ff6b35, #ff9500);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .notice-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #e0e0e0;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #ff6b35;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+        }
+
+        .form-group input::placeholder, .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .checkbox-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 8px;
+            transform: scale(1.2);
+        }
+
+        .checkbox-item label {
+            font-size: 14px;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff6b35, #ff9500);
+            border: none;
+            color: white;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #00ff88, #00cc66);
+            margin-top: 12px;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .delivery-options {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .delivery-option {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .delivery-option:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .delivery-option input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.3);
+        }
+
+        .delivery-option-content {
+            flex: 1;
+        }
+
+        .delivery-option-title {
+            font-weight: 600;
+            color: #ff6b35;
+            margin-bottom: 4px;
+        }
+
+        .delivery-option-description {
+            font-size: 14px;
+            color: #e0e0e0;
+            line-height: 1.4;
+        }
+
+        .promotion-features {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            color: #e0e0e0;
+            display: flex;
+            align-items: center;
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            color: #00ff88;
+            font-weight: bold;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+
+        .warning-box {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid rgba(255, 193, 7, 0.5);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+            text-align: center;
+        }
+
+        .warning-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-particles"></div>
+    
+    <button class="back-btn" onclick="window.history.back()">
+        ← Back
+    </button>
+
+    <div class="container">
+        <div class="header">
+            <h1>🍽️ Restaurant Business Profile</h1>
+            <p>Promote your restaurant to local customers and build your community presence</p>
+        </div>
+
+        <div class="important-notice">
+            <span class="notice-icon">🍽️</span>
+            <strong>RESTAURANT DELIVERY OPTIONS</strong><br>
+            MarketPace drivers are not licensed for food delivery.<br>
+            Connect with Uber Eats, DoorDash, or use your own delivery team!
+        </div>
+
+        <div class="profile-card">
+            <h3 style="margin-bottom: 20px; color: #ff6b35;">Restaurant Information</h3>
+            
+            <form id="restaurant-form">
+                <div class="form-group">
+                    <label for="restaurant-name">Restaurant Name *</label>
+                    <input type="text" id="restaurant-name" name="restaurant-name" placeholder="Enter your restaurant name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="cuisine-type">Cuisine Type *</label>
+                    <select id="cuisine-type" name="cuisine-type" required>
+                        <option value="">Select cuisine type</option>
+                        <option value="american">American</option>
+                        <option value="italian">Italian</option>
+                        <option value="mexican">Mexican</option>
+                        <option value="chinese">Chinese</option>
+                        <option value="indian">Indian</option>
+                        <option value="japanese">Japanese</option>
+                        <option value="thai">Thai</option>
+                        <option value="mediterranean">Mediterranean</option>
+                        <option value="seafood">Seafood</option>
+                        <option value="bbq">BBQ</option>
+                        <option value="steakhouse">Steakhouse</option>
+                        <option value="pizza">Pizza</option>
+                        <option value="cafe">Cafe</option>
+                        <option value="bakery">Bakery</option>
+                        <option value="fastfood">Fast Food</option>
+                        <option value="fusion">Fusion</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="restaurant-address">Address *</label>
+                    <input type="text" id="restaurant-address" name="restaurant-address" placeholder="Full restaurant address" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone-number">Phone Number *</label>
+                    <input type="tel" id="phone-number" name="phone-number" placeholder="(555) 123-4567" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="website-url">Website (Optional)</label>
+                    <input type="url" id="website-url" name="website-url" placeholder="https://yourrestaurant.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="restaurant-description">Restaurant Description *</label>
+                    <textarea id="restaurant-description" name="restaurant-description" rows="4" placeholder="Describe your restaurant, signature dishes, atmosphere, and what makes you special..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="operating-hours">Operating Hours *</label>
+                    <textarea id="operating-hours" name="operating-hours" rows="3" placeholder="Mon-Fri: 11am-9pm&#10;Saturday: 10am-10pm&#10;Sunday: 12pm-8pm" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="price-range">Price Range *</label>
+                    <select id="price-range" name="price-range" required>
+                        <option value="">Select price range</option>
+                        <option value="$">$ - Budget Friendly (Under $15 per person)</option>
+                        <option value="$$">$$ - Moderate ($15-30 per person)</option>
+                        <option value="$$$">$$$ - Upscale ($30-50 per person)</option>
+                        <option value="$$$$">$$$$ - Fine Dining ($50+ per person)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Restaurant Features</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="outdoor-seating" name="features" value="outdoor-seating">
+                            <label for="outdoor-seating">Outdoor Seating</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="takeout" name="features" value="takeout">
+                            <label for="takeout">Takeout Available</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="catering" name="features" value="catering">
+                            <label for="catering">Catering Services</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="live-music" name="features" value="live-music">
+                            <label for="live-music">Live Music</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="bar" name="features" value="bar">
+                            <label for="bar">Full Bar</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="private-events" name="features" value="private-events">
+                            <label for="private-events">Private Events</label>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="delivery-options">
+            <h3 style="margin-bottom: 16px; color: #ff6b35;">How do customers get your food?</h3>
+            <p style="font-size: 14px; color: #e0e0e0; margin-bottom: 16px;">
+                Since MarketPace drivers aren't licensed for food delivery, choose your preferred option:
+            </p>
+            
+            <div class="delivery-option">
+                <input type="radio" id="pickup-only" name="delivery-method" value="pickup-only" required>
+                <div class="delivery-option-content">
+                    <div class="delivery-option-title">Customer Pickup Only</div>
+                    <div class="delivery-option-description">Customers order through MarketPace and pick up at your restaurant</div>
+                </div>
+            </div>
+
+            <div class="delivery-option">
+                <input type="radio" id="uber-eats" name="delivery-method" value="uber-eats" required>
+                <div class="delivery-option-content">
+                    <div class="delivery-option-title">Uber Eats Integration</div>
+                    <div class="delivery-option-description">Connect your Uber Eats restaurant for seamless delivery integration</div>
+                </div>
+            </div>
+
+            <div class="delivery-option">
+                <input type="radio" id="doordash" name="delivery-method" value="doordash" required>
+                <div class="delivery-option-content">
+                    <div class="delivery-option-title">DoorDash Integration</div>
+                    <div class="delivery-option-description">Connect your DoorDash restaurant for delivery partnership</div>
+                </div>
+            </div>
+
+            <div class="delivery-option">
+                <input type="radio" id="third-party" name="delivery-method" value="third-party" required>
+                <div class="delivery-option-content">
+                    <div class="delivery-option-title">Other Delivery Service</div>
+                    <div class="delivery-option-description">Use Grubhub, Postmates, or another delivery partner</div>
+                </div>
+            </div>
+
+            <div class="delivery-option">
+                <input type="radio" id="own-delivery" name="delivery-method" value="own-delivery" required>
+                <div class="delivery-option-content">
+                    <div class="delivery-option-title">Your Own Delivery Team</div>
+                    <div class="delivery-option-description">Use your restaurant's delivery drivers for orders</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="warning-box">
+            <span class="warning-icon">✅</span>
+            <strong>Delivery Available:</strong> Connect with our delivery partners<br>
+            or use your own delivery team for food orders.
+        </div>
+
+        <div class="promotion-features">
+            <h3 style="margin-bottom: 16px; color: #00ff88;">What You Get with MarketPace Pro</h3>
+            <ul class="feature-list">
+                <li>Local community promotion and visibility</li>
+                <li>Direct connection with neighborhood customers</li>
+                <li>Event hosting and special occasion marketing</li>
+                <li>Menu showcase and signature dish highlights</li>
+                <li>Customer review and rating system</li>
+                <li>Social media integration and cross-promotion</li>
+                <li>Local event calendar for restaurant promotions</li>
+                <li>Community engagement through MarketPace feed</li>
+                <li>Delivery integration with Uber Eats, DoorDash & more</li>
+            </ul>
+        </div>
+
+        <button type="button" class="btn" onclick="createRestaurantProfile()">
+            Create Restaurant Profile
+        </button>
+
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='/member-product-promotion'">
+            Promote Menu Items
+        </button>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particleContainer = document.querySelector('.floating-particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 5) + 's';
+                particleContainer.appendChild(particle);
+            }
+        }
+
+        createParticles();
+
+        async function createRestaurantProfile() {
+            const formData = {
+                restaurantName: document.getElementById('restaurant-name').value,
+                cuisineType: document.getElementById('cuisine-type').value,
+                address: document.getElementById('restaurant-address').value,
+                phoneNumber: document.getElementById('phone-number').value,
+                website: document.getElementById('website-url').value,
+                description: document.getElementById('restaurant-description').value,
+                operatingHours: document.getElementById('operating-hours').value,
+                priceRange: document.getElementById('price-range').value,
+                deliveryMethod: document.querySelector('input[name="delivery-method"]:checked')?.value,
+                features: Array.from(document.querySelectorAll('input[name="features"]:checked')).map(cb => cb.value)
+            };
+
+            // Validate required fields
+            if (!formData.restaurantName || !formData.cuisineType || !formData.address || 
+                !formData.phoneNumber || !formData.description || !formData.operatingHours || 
+                !formData.priceRange || !formData.deliveryMethod) {
+                alert('Please fill in all required fields and select a delivery method');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/restaurant/create-profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`🎉 Restaurant profile created successfully!\n\nProfile ID: ${result.profileId}\nYour restaurant is now discoverable by local customers on MarketPace!\n\nNext Steps:\n• Connect your delivery partner\n• Start promoting menu items\n• Build local customer base`);
+                    
+                    // Redirect to restaurant dashboard or promotion page
+                    setTimeout(() => {
+                        window.location.href = '/member-product-promotion';
+                    }, 2000);
+                } else {
+                    alert('Failed to create restaurant profile. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error creating restaurant profile:', error);
+                alert('Failed to create restaurant profile. Please check your connection and try again.');
+            }
+        }
+
+        // Auto-format phone number
+        document.getElementById('phone-number').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 6) {
+                value = value.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+            } else if (value.length >= 3) {
+                value = value.replace(/(\d{3})(\d{0,3})/, '($1) $2');
+            }
+            e.target.value = value;
+        });
+    </script>
+</body>
+</html>
