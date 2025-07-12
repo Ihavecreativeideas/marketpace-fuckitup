@@ -8,6 +8,8 @@ import {
   Alert,
   RefreshControl,
   FlatList,
+  Modal,
+  TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,16 +18,22 @@ import Header from '../../components/common/Header';
 import RouteCard from '../../components/driver/RouteCard';
 import { colors } from '../../utils/colors';
 import { api } from '../../services/api';
+import RouteService from '../../services/routeService';
 
 export default function DriverDashboardScreen({ navigation }) {
   const [driverStatus, setDriverStatus] = useState('offline'); // offline, online, busy
   const [currentRoute, setCurrentRoute] = useState(null);
   const [availableRoutes, setAvailableRoutes] = useState([]);
+  const [nearbyRoutes, setNearbyRoutes] = useState([]);
+  const [acceptedRoutes, setAcceptedRoutes] = useState([]);
   const [todayEarnings, setTodayEarnings] = useState(0);
   const [weeklyEarnings, setWeeklyEarnings] = useState(0);
   const [completedDeliveries, setCompletedDeliveries] = useState(0);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [driverLocation, setDriverLocation] = useState(null);
+  const [messageModal, setMessageModal] = useState({ visible: false, customer: null });
+  const [customerMessage, setCustomerMessage] = useState('');
   const { user } = useAuth();
 
   useEffect(() => {
@@ -35,17 +43,26 @@ export default function DriverDashboardScreen({ navigation }) {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const [routesResponse, statsResponse] = await Promise.all([
+      const [routesResponse, statsResponse, locationResponse] = await Promise.all([
         api.get('/drivers/routes/available'),
-        api.get('/drivers/stats')
+        api.get('/drivers/stats'),
+        api.get('/drivers/location')
       ]);
 
       setAvailableRoutes(routesResponse.data.routes);
       setCurrentRoute(routesResponse.data.currentRoute);
+      setAcceptedRoutes(routesResponse.data.acceptedRoutes || []);
       setTodayEarnings(statsResponse.data.todayEarnings);
       setWeeklyEarnings(statsResponse.data.weeklyEarnings);
       setCompletedDeliveries(statsResponse.data.completedDeliveries);
       setDriverStatus(statsResponse.data.status);
+      setDriverLocation(locationResponse.data.location);
+
+      // Load nearby routes if location is available
+      if (locationResponse.data.location) {
+        const nearbyResponse = await RouteService.getNearbyRoutes(locationResponse.data.location);
+        setNearbyRoutes(nearbyResponse.routes);
+      }
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     } finally {
@@ -76,23 +93,71 @@ export default function DriverDashboardScreen({ navigation }) {
     }
   };
 
-  const acceptRoute = async (routeId) => {
+  const acceptRoute = async (route) => {
     try {
-      await api.post(`/drivers/routes/${routeId}/accept`);
+      // Check if route can be accepted without conflicts
+      const canAccept = RouteService.canAcceptRoute(acceptedRoutes, route);
+      
+      if (!canAccept.canAccept) {
+        Alert.alert('Cannot Accept Route', canAccept.reason);
+        return;
+      }
+
+      await RouteService.acceptRoute(route.id);
       Alert.alert('Route Accepted', 'You have accepted this delivery route!');
       loadDashboardData();
-      navigation.navigate('Route', { routeId });
+      navigation.navigate('Route', { routeId: route.id });
     } catch (error) {
       console.error('Error accepting route:', error);
       Alert.alert('Error', 'Failed to accept route');
     }
   };
 
+  const sendCustomerMessage = async (customer, message) => {
+    try {
+      await RouteService.sendCustomerMessage(customer.id, message);
+      Alert.alert('Message Sent', 'Your message has been sent to the customer!');
+      setMessageModal({ visible: false, customer: null });
+      setCustomerMessage('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      Alert.alert('Error', 'Failed to send message');
+    }
+  };
+
+  const openMessageModal = (customer, suggestedMessage) => {
+    setMessageModal({ visible: true, customer });
+    setCustomerMessage(suggestedMessage);
+  };
+
   const renderRouteCard = ({ item }) => (
     <RouteCard
       route={item}
-      onAccept={() => acceptRoute(item.id)}
+      onAccept={() => acceptRoute(item)}
       onViewDetails={() => navigation.navigate('RouteDetails', { routeId: item.id })}
+      onMessageCustomer={(customer) => {
+        const feeAdjustment = RouteService.calculateDeliveryFeeAdjustment(item.originalMileage, item.mileage);
+        const message = RouteService.generateCustomerMessage(customer.name, feeAdjustment);
+        openMessageModal(customer, message);
+      }}
+      canStartPickup={RouteService.canStartPickup(item.startTime)}
+      estimatedTime={RouteService.calculateRouteTime(item.pickups, item.dropoffs, item.mileage)}
+    />
+  );
+
+  const renderNearbyRouteCard = ({ item }) => (
+    <RouteCard
+      route={item}
+      onAccept={() => acceptRoute(item)}
+      onViewDetails={() => navigation.navigate('RouteDetails', { routeId: item.id })}
+      onMessageCustomer={(customer) => {
+        const feeAdjustment = RouteService.calculateDeliveryFeeAdjustment(item.originalMileage, item.mileage);
+        const message = RouteService.generateCustomerMessage(customer.name, feeAdjustment);
+        openMessageModal(customer, message);
+      }}
+      isNearby={true}
+      distance={item.distanceFromDriver}
+      estimatedTime={RouteService.calculateRouteTime(item.pickups, item.dropoffs, item.mileage)}
     />
   );
 
@@ -219,6 +284,20 @@ export default function DriverDashboardScreen({ navigation }) {
           </View>
         </View>
 
+        {/* Accepted Routes */}
+        {acceptedRoutes.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>My Accepted Routes</Text>
+            <FlatList
+              data={acceptedRoutes}
+              renderItem={renderRouteCard}
+              keyExtractor={(item) => item.id.toString()}
+              scrollEnabled={false}
+              showsVerticalScrollIndicator={false}
+            />
+          </View>
+        )}
+
         {/* Available Routes */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -254,6 +333,23 @@ export default function DriverDashboardScreen({ navigation }) {
           )}
         </View>
 
+        {/* Nearby Routes */}
+        {nearbyRoutes.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Nearby Routes</Text>
+            <Text style={styles.sectionSubtitle}>
+              Ordered by distance from your location
+            </Text>
+            <FlatList
+              data={nearbyRoutes}
+              renderItem={renderNearbyRouteCard}
+              keyExtractor={(item) => item.id.toString()}
+              scrollEnabled={false}
+              showsVerticalScrollIndicator={false}
+            />
+          </View>
+        )}
+
         {/* Driver Tips */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Driver Tips</Text>
@@ -268,6 +364,55 @@ export default function DriverDashboardScreen({ navigation }) {
           </View>
         </View>
       </ScrollView>
+
+      {/* Customer Message Modal */}
+      <Modal
+        visible={messageModal.visible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setMessageModal({ visible: false, customer: null })}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Message Customer</Text>
+              <TouchableOpacity
+                onPress={() => setMessageModal({ visible: false, customer: null })}
+              >
+                <Ionicons name="close" size={24} color={colors.gray} />
+              </TouchableOpacity>
+            </View>
+            
+            <Text style={styles.customerName}>
+              {messageModal.customer?.name}
+            </Text>
+            
+            <TextInput
+              style={styles.messageInput}
+              multiline
+              numberOfLines={4}
+              placeholder="Type your message..."
+              value={customerMessage}
+              onChangeText={setCustomerMessage}
+            />
+            
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setMessageModal({ visible: false, customer: null })}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.sendButton]}
+                onPress={() => sendCustomerMessage(messageModal.customer, customerMessage)}
+              >
+                <Text style={styles.sendButtonText}>Send Message</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -432,5 +577,78 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.gray,
     lineHeight: 20,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    color: colors.gray,
+    marginBottom: 12,
+    marginTop: -8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 20,
+    width: '90%',
+    maxWidth: 400,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.text,
+  },
+  customerName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.primary,
+    marginBottom: 12,
+  },
+  messageInput: {
+    borderWidth: 1,
+    borderColor: colors.lightGray,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    minHeight: 100,
+    textAlignVertical: 'top',
+    marginBottom: 16,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginHorizontal: 8,
+  },
+  cancelButton: {
+    backgroundColor: colors.lightGray,
+  },
+  sendButton: {
+    backgroundColor: colors.primary,
+  },
+  cancelButtonText: {
+    color: colors.gray,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  sendButtonText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

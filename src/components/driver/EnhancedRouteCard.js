@@ -4,11 +4,12 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../utils/colors';
 
-export default function RouteCard({ 
+export default function EnhancedRouteCard({ 
   route, 
   onAccept, 
   onViewDetails, 
@@ -103,7 +104,7 @@ export default function RouteCard({
         <View style={styles.detailRow}>
           <Ionicons name="wallet" size={16} color={colors.gray} />
           <Text style={styles.detailText}>
-            Earnings: ${route.earnings?.toFixed(2) || '0.00'}
+            Earnings: ${route.earnings.toFixed(2)}
           </Text>
         </View>
 
