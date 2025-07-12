@@ -40,13 +40,21 @@ Facebook Login is essential for MarketPace's community-first marketplace to conn
 
 ## Question 2: Payment/Membership Access Requirements
 
-**No Payment or Membership Required**
+**Currently No Payment Required - Future Pro Plans Disclosed**
 
 MarketPace provides **completely free access** to all core functionality for Facebook App Review testing:
 
+**Current Status (For Review):**
 - **Free Access:** All features are available without payment, subscription, or membership
 - **No Barriers:** Reviewers can immediately test all functionality
 - **No Test Credentials Needed:** Direct access to full platform capabilities
+
+**Future Business Model (Transparency):**
+MarketPace plans to introduce optional Pro subscription tiers approximately 6 months after launch. These future subscriptions will enhance existing features but will not restrict access to core Facebook integration functionality:
+
+- **Free Tier:** Facebook Login, community features, basic marketplace access (always free)
+- **Pro Tiers:** Enhanced business tools, advanced analytics, premium promotion features
+- **Facebook Features:** All Facebook Login and Graph API functionality remains accessible in free tier
 
 **Facebook Test Users (Optional):**
 While not required, you may create Facebook test users in your App Dashboard for comprehensive OAuth flow testing. All features are accessible with regular Facebook accounts or test users.
