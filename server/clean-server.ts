@@ -74,6 +74,10 @@ app.get('/signup-login', (req, res) => {
   res.sendFile(path.join(__dirname, '../signup-login.html'));
 });
 
+app.get('/demo-login', (req, res) => {
+  res.sendFile(path.join(__dirname, '../demo-login.html'));
+});
+
 // Facebook Authentication routes
 app.get('/api/auth/facebook', (req, res) => {
   console.log('Facebook OAuth initiated with App ID:', process.env.FACEBOOK_APP_ID);
@@ -182,6 +186,11 @@ app.get('/api/auth/google/callback', async (req, res) => {
   
   if (code) {
     try {
+      // Determine environment based on host for callback
+      const host = req.get('host') || '';
+      const isDev = host.includes('repl.co') || host.includes('replit.dev') || host.includes('localhost');
+      const redirectUri = isDev ? `https://${req.get('host')}/api/auth/google/callback` : process.env.GOOGLE_REDIRECT_URI_PROD;
+      
       // Exchange code for access token
       const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
@@ -191,7 +200,7 @@ app.get('/api/auth/google/callback', async (req, res) => {
           client_secret: process.env.GOOGLE_CLIENT_SECRET,
           code: code,
           grant_type: 'authorization_code',
-          redirect_uri: process.env.GOOGLE_REDIRECT_URI || 'https://workspace-latest-replit.repl.co/api/auth/google/callback'
+          redirect_uri: redirectUri
         })
       });
       
