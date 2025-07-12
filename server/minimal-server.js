@@ -2120,6 +2120,38 @@ app.get('/google-oauth-status', (req, res) => {
   res.sendFile(path.join(__dirname, '../google-oauth-status.html'));
 });
 
+// Logout endpoint
+app.post('/api/logout', (req, res) => {
+  try {
+    // Clear any server-side session data
+    if (req.session) {
+      req.session.destroy((err) => {
+        if (err) {
+          console.error('Session destruction error:', err);
+        }
+      });
+    }
+    
+    // Clear auth-related cookies
+    res.clearCookie('marketpace_session');
+    res.clearCookie('auth_token');
+    res.clearCookie('user_id');
+    
+    res.json({ 
+      success: true, 
+      message: 'Successfully logged out',
+      redirectUrl: '/signup-login'
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Logout failed',
+      error: error.message 
+    });
+  }
+});
+
 // Google OAuth routes
 app.get('/api/auth/google', (req, res) => {
   const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5000/api/auth/google/callback')}&scope=openid email profile&response_type=code`;
