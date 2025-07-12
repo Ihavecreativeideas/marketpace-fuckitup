@@ -67,17 +67,26 @@ Admin dashboard and security monitoring tools are available upon request for the
 
 ## Question 3: App Store Download Requirements
 
-**Not Applicable - Web Application**
+**Not Applicable - Web Application with Future Pro Gift Codes**
 
 MarketPace is a **web-based application** accessible directly through browsers at:
 https://marketplace-delivery-platform.replit.app/
 
+**Current Access:**
 - **No App Store Download Required:** Direct browser access
 - **No Download Fees:** Completely free web application
-- **No Gift Codes Needed:** Immediate access without payment
-- **No In-App Purchases:** All features available without additional costs
+- **No Payment Barriers:** All features currently available without cost
 
-The platform is designed for immediate testing access through web browsers on any device.
+**Future Pro Subscription Gift Codes:**
+For the planned Pro subscription features (launching approximately 6 months from now), we will provide **8-10 gift codes** for Facebook reviewers to access Pro features when subscriptions begin:
+
+- **Gift Code Duration:** Active for one year after Pro subscription launch
+- **Full Pro Access:** Complete access to enhanced business tools, analytics, and premium features
+- **Pricing Range:** $2-$8/month Pro features (when subscriptions activate)
+- **Reviewer Benefit:** Free Pro access for comprehensive ongoing review
+
+**Current Review Status:**
+All Pro features are currently accessible for free during the launch campaign, so no gift codes are needed for immediate review. Gift codes will be provided to Facebook when Pro subscriptions activate.
 
 ---
 

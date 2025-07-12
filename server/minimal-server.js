@@ -277,6 +277,11 @@ app.get('/restaurant-business-profile', (req, res) => {
   res.sendFile(path.join(__dirname, '../restaurant-business-profile.html'));
 });
 
+// MarketPace Pro Signup route
+app.get('/marketpace-pro-signup', (req, res) => {
+  res.sendFile(path.join(__dirname, '../marketpace-pro-signup.html'));
+});
+
 // *** RESTAURANT PROFILE SYSTEM ***
 app.post('/api/restaurant/create-profile', [
   // Input validation
@@ -792,6 +797,121 @@ app.get('/contact-support', (req, res) => {
 
 app.get('/facebook-events-integration', (req, res) => {
   res.sendFile(path.join(__dirname, '../facebook-events-integration-v2.html'));
+});
+
+// *** MARKETPACE PRO SIGNUP SYSTEM ***
+app.post('/api/pro-signup', [
+  // Input validation
+  body('businessName')
+    .isLength({ min: 2, max: 100 })
+    .withMessage('Business name must be between 2 and 100 characters')
+    .matches(/^[a-zA-Z0-9\s\-'&.]+$/)
+    .withMessage('Business name contains invalid characters'),
+  body('businessType')
+    .isIn(['shop', 'service', 'entertainment', 'restaurant', 'other'])
+    .withMessage('Invalid business type'),
+  body('contactEmail')
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Invalid email address'),
+  body('phone')
+    .matches(/^\(\d{3}\) \d{3}-\d{4}$/)
+    .withMessage('Phone number must be in format (XXX) XXX-XXXX')
+], async (req, res) => {
+  try {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
+    const {
+      businessName,
+      businessType,
+      contactEmail,
+      phone,
+      notifications,
+      signupDate,
+      trialStatus,
+      source
+    } = req.body;
+
+    // Create Pro signup record
+    const proMemberId = 'pro_' + Math.random().toString(36).substr(2, 9);
+    const proSignup = {
+      id: proMemberId,
+      businessName: DOMPurify.sanitize(businessName),
+      businessType: businessType,
+      contactEmail: contactEmail,
+      phone: phone,
+      notifications: notifications || [],
+      signupDate: signupDate || new Date().toISOString(),
+      trialStatus: 'active_free_trial',
+      trialEndDate: null, // Will be set when subscriptions launch
+      source: source || 'pro_signup_page',
+      features: {
+        enhancedProfile: true,
+        productPromotion: true,
+        analytics: true,
+        prioritySupport: true,
+        eventCalendar: true,
+        platformIntegrations: true
+      },
+      subscriptionInfo: {
+        currentPlan: 'free_trial',
+        willCharge: false,
+        futurePrice: '$2-$8/month (not finalized)',
+        chargeDate: null,
+        giftCodeEligible: true
+      },
+      notificationPreferences: {
+        trialUpdates: notifications.includes('trial'),
+        pricingUpdates: notifications.includes('pricing'),
+        featureUpdates: notifications.includes('features'),
+        marketingTips: notifications.includes('marketing')
+      }
+    };
+
+    console.log('MarketPace Pro signup created:', proSignup);
+
+    // Log security event for Pro signup
+    await logSecurityEvent(null, 'pro_signup', {
+      businessName: businessName,
+      businessType: businessType,
+      email: contactEmail,
+      source: source
+    });
+
+    res.json({
+      success: true,
+      message: 'Successfully signed up for MarketPace Pro!',
+      proMember: {
+        id: proMemberId,
+        businessName: businessName,
+        businessType: businessType,
+        trialStatus: 'active_free_trial',
+        features: Object.keys(proSignup.features),
+        notificationPreferences: proSignup.notificationPreferences
+      },
+      benefits: [
+        'All Pro features currently FREE during launch campaign',
+        'You\'ll be notified before any subscription charges begin',
+        'Facebook App Review team has full access to test Pro features',
+        'Future gift codes will be provided for ongoing review access'
+      ]
+    });
+  } catch (error) {
+    console.error('Pro signup error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Pro signup failed',
+      error: 'Internal server error'
+    });
+  }
 });
 
 // *** FACEBOOK MARKETPLACE-STYLE PROMOTION SYSTEM ***
