@@ -694,39 +694,95 @@
             document.getElementById('menuDropdown').classList.remove('show');
         }
 
-        function logout() {
-            alert('Logging out...');
-            window.location.href = '/';
-            document.getElementById('menuDropdown').classList.remove('show');
+        async function logout() {
+            try {
+                // Call server logout endpoint
+                const response = await fetch('/api/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                // Clear all user data from localStorage regardless of server response
+                localStorage.removeItem('marketpaceUser');
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('userProfile');
+                localStorage.removeItem('sessionData');
+                localStorage.removeItem('marketplaceCart');
+                localStorage.removeItem('userFavorites');
+                
+                // Clear any other stored user information
+                sessionStorage.clear();
+                
+                // Show logout confirmation
+                alert('Successfully logged out. You can now test Facebook and Google authentication.');
+                
+                // Redirect to signup/login page
+                window.location.href = '/signup-login';
+                
+            } catch (error) {
+                console.error('Logout error:', error);
+                
+                // Clear local data even if server call fails
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                alert('Logged out (local session cleared). You can now test authentication.');
+                window.location.href = '/signup-login';
+            }
+            
+            // Close dropdown menu if open
+            const menuDropdown = document.getElementById('menuDropdown');
+            if (menuDropdown) {
+                menuDropdown.classList.remove('show');
+            }
         }
 
         function goToPage(page) {
-            // Update active nav item
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            event.target.closest('.nav-item').classList.add('active');
+            try {
+                // Update active nav item
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // Add active class to clicked item
+                if (event && event.target) {
+                    const navItem = event.target.closest('.nav-item');
+                    if (navItem) {
+                        navItem.classList.add('active');
+                    }
+                }
 
-            // Navigate to different pages/sections
-            switch(page) {
-                case 'home':
-                    // Already on home/community feed
-                    break;
-                case 'shop':
-                    window.location.href = '/shops';
-                    break;
-                case 'services':
-                    window.location.href = '/services';
-                    break;
-                case 'hub':
-                    window.location.href = '/the-hub';
-                    break;
-                case 'delivery':
-                    window.location.href = '/delivery';
-                    break;
-                case 'menu':
-                    window.location.href = '/marketpace-menu';
-                    break;
+                // Navigate to different pages/sections
+                switch(page) {
+                    case 'home':
+                        // Already on home/community feed - refresh page
+                        window.location.reload();
+                        break;
+                    case 'shop':
+                        window.location.href = '/shops';
+                        break;
+                    case 'services':
+                        window.location.href = '/services';
+                        break;
+                    case 'hub':
+                        window.location.href = '/the-hub';
+                        break;
+                    case 'delivery':
+                        window.location.href = '/delivery';
+                        break;
+                    case 'menu':
+                        window.location.href = '/marketpace-menu';
+                        break;
+                    default:
+                        console.warn('Unknown page:', page);
+                }
+            } catch (error) {
+                console.error('Navigation error:', error);
+                alert('Navigation error occurred. Please try again.');
             }
         }
 
