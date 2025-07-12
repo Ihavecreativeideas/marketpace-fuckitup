@@ -128,9 +128,13 @@ app.get('/api/auth/facebook/callback', async (req, res) => {
       console.log('Callback Host detected:', host, 'isDev:', isDev);
       
       // Exchange code for access token
-      const tokenResponse = await fetch(`https://graph.facebook.com/v18.0/oauth/access_token?client_id=${process.env.FACEBOOK_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&client_secret=${process.env.FACEBOOK_APP_SECRET}&code=${code}`);
+      const tokenUrl = `https://graph.facebook.com/v18.0/oauth/access_token?client_id=${process.env.FACEBOOK_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&client_secret=${process.env.FACEBOOK_APP_SECRET}&code=${code}`;
+      console.log('Token exchange URL:', tokenUrl);
       
+      const tokenResponse = await fetch(tokenUrl);
       const tokenData = await tokenResponse.json();
+      
+      console.log('Facebook token response:', tokenData);
       
       if (tokenData.access_token) {
         // Get user profile
@@ -143,6 +147,7 @@ app.get('/api/auth/facebook/callback', async (req, res) => {
         // For now, redirect to community feed
         res.redirect('/community');
       } else {
+        console.log('Facebook token exchange failed:', tokenData);
         res.redirect('/signup-login?error=facebook_token_failed');
       }
     } catch (error) {
