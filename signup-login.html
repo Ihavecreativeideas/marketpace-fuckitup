@@ -397,10 +397,20 @@
                                 .then(response => response.json())
                                 .then(result => {
                                     if (result.success) {
-                                        // Always prompt for phone number since Facebook doesn't provide it reliably
-                                        promptForPhoneNumber(userData, result.user);
+                                        // Check if phone number is needed
+                                        if (!result.user.phoneNumber) {
+                                            promptForPhoneNumber(userData, result.user);
+                                        } else {
+                                            alert(`Welcome to MarketPace, ${result.user.firstName}!`);
+                                            window.location.href = '/community';
+                                        }
                                     } else {
-                                        alert('Failed to complete Facebook signup: ' + result.message);
+                                        if (result.message.includes('phone number')) {
+                                            alert(result.message + '\n\nPlease provide a unique phone number to continue.');
+                                            promptForPhoneNumber(userData, result.user);
+                                        } else {
+                                            alert('Failed to complete Facebook signup: ' + result.message);
+                                        }
                                     }
                                 })
                                 .catch(error => {
@@ -518,10 +528,20 @@
                                 .then(response => response.json())
                                 .then(result => {
                                     if (result.success) {
-                                        // Always prompt for phone number since Facebook doesn't provide it reliably
-                                        promptForPhoneNumber(userData, result.user);
+                                        // Check if phone number is needed
+                                        if (!result.user.phoneNumber) {
+                                            promptForPhoneNumber(userData, result.user);
+                                        } else {
+                                            alert(`Welcome back, ${result.user.firstName}!`);
+                                            window.location.href = '/community';
+                                        }
                                     } else {
-                                        alert('Failed to complete Facebook login: ' + result.message);
+                                        if (result.message.includes('phone number')) {
+                                            alert(result.message + '\n\nPlease provide a unique phone number to continue.');
+                                            promptForPhoneNumber(userData, result.user);
+                                        } else {
+                                            alert('Failed to complete Facebook login: ' + result.message);
+                                        }
                                     }
                                 })
                                 .catch(error => {
@@ -1205,10 +1225,37 @@
             }
         }
 
+        // Initialize Facebook SDK
+        function loadFacebookSDK() {
+            (function(d, s, id) {
+                var js, fjs = d.getElementsByTagName(s)[0];
+                if (d.getElementById(id)) return;
+                js = d.createElement(s); js.id = id;
+                js.src = "https://connect.facebook.net/en_US/sdk.js";
+                fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));
+        }
+
+        // Initialize Facebook after SDK loads
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId: '1043690817269912',
+                cookie: true,
+                xfbml: true,
+                version: 'v18.0'
+            });
+            
+            console.log('Facebook SDK initialized');
+        };
+
         // Initialize everything when page loads
         document.addEventListener('DOMContentLoaded', function() {
             loadGoogleIdentityServices();
+            loadFacebookSDK();
             handleGoogleOAuthCallback();
+            
+            console.log('DOM loaded, setting up login form');
+            console.log('All functions loaded successfully');
         });
     </script>
 </body>
