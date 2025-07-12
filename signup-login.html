@@ -68,10 +68,10 @@
         }
 
         .tab-btn.active {
-            background: rgba(255, 255, 255, 0.3);
-            color: #00ffff;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            color: #1a0233;
             font-weight: bold;
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.5), inset 0 0 20px rgba(0, 255, 255, 0.2);
         }
 
         .form-group {
@@ -302,12 +302,27 @@
                     <label for="loginEmail">Email</label>
                     <input type="email" id="loginEmail" name="email" placeholder="Enter your email" required>
                 </div>
+                <button type="submit" class="submit-btn">Continue</button>
+                <a href="#" class="forgot-password" onclick="showForgotPassword()">Forgot Password?</a>
+            </form>
+        </div>
+
+        <!-- Forgot Password Form -->
+        <div id="forgotPasswordForm" style="display: none;">
+            <div class="form-header">
+                <h2 style="color: #00ffff; margin-bottom: 10px;">Reset Your Password</h2>
+                <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 20px;">
+                    Enter your email address and we'll send you a link to reset your password.
+                </p>
+            </div>
+
+            <form onsubmit="handleForgotPassword(event)">
                 <div class="form-group">
-                    <label for="loginPassword">Password</label>
-                    <input type="password" id="loginPassword" name="password" placeholder="Enter your password" required>
+                    <label for="forgotEmail">Email</label>
+                    <input type="email" id="forgotEmail" name="email" placeholder="Enter your email" required>
                 </div>
-                <button type="submit" class="submit-btn">Sign In</button>
-                <a href="#" class="forgot-password" onclick="forgotPassword()">Forgot Password?</a>
+                <button type="submit" class="submit-btn">Send Reset Link</button>
+                <a href="#" class="forgot-password" onclick="showLogin()">Back to Login</a>
             </form>
         </div>
 
@@ -325,6 +340,16 @@
         function showLogin() {
             document.getElementById('signupForm').style.display = 'none';
             document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('forgotPasswordForm').style.display = 'none';
+            document.querySelectorAll('.tab-btn')[0].classList.remove('active');
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        }
+
+        function showForgotPassword() {
+            document.getElementById('signupForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('forgotPasswordForm').style.display = 'block';
+            // Keep login tab active
             document.querySelectorAll('.tab-btn')[0].classList.remove('active');
             document.querySelectorAll('.tab-btn')[1].classList.add('active');
         }
@@ -469,47 +494,62 @@
 
         async function handleLogin(event) {
             event.preventDefault();
+            
             const formData = new FormData(event.target);
             const email = formData.get('email');
-            const password = formData.get('password');
-            
+
+            // Check if user exists first
             try {
-                const response = await fetch('/api/seamless-login', {
+                const response = await fetch('/api/check-user-exists', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ email, password }),
+                    body: JSON.stringify({ email })
                 });
+
+                const data = await response.json();
                 
+                if (data.exists) {
+                    // User exists, redirect to password page
+                    localStorage.setItem('loginEmail', email);
+                    window.location.href = `/login-password?email=${encodeURIComponent(email)}`;
+                } else {
+                    // User doesn't exist, show helpful message
+                    alert('No account found with this email address. Please sign up first or check your email address.');
+                }
+            } catch (error) {
+                console.error('Login check error:', error);
+                alert('Unable to check account. Please try again.');
+            }
+        }
+
+        async function handleForgotPassword(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const email = formData.get('email');
+
+            try {
+                const response = await fetch('/api/forgot-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
+                });
+
                 const data = await response.json();
                 
                 if (data.success) {
-                    // Store login state with enhanced user data
-                    const userData = {
-                        email: email,
-                        userId: data.user?.id,
-                        firstName: data.user?.firstName,
-                        lastName: data.user?.lastName,
-                        userType: data.user?.userType,
-                        accountType: data.user?.accountType,
-                        isPro: data.user?.isPro,
-                        loggedIn: true,
-                        loginTime: Date.now()
-                    };
-                    
-                    localStorage.setItem('marketpaceUser', JSON.stringify(userData));
-                    
-                    alert(`Welcome back! ${data.message}`);
-                    
-                    // Redirect to community feed
-                    window.location.href = '/community';
+                    alert('Password reset link sent! Check your email for instructions to reset your password.');
+                    showLogin(); // Return to login form
                 } else {
-                    alert('Login failed: ' + data.message);
+                    alert('Unable to send reset link. Please check your email address and try again.');
                 }
             } catch (error) {
-                console.error('Login error:', error);
-                alert('Login failed. Please try again.');
+                console.error('Forgot password error:', error);
+                alert('Unable to send reset link. Please try again.');
             }
         }
 

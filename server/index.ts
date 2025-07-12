@@ -155,6 +155,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../pitch-page.html'));
 });
 
+// Password login page route (Facebook-style login flow)
+app.get('/login-password', (req, res) => {
+  res.sendFile(path.join(__dirname, '../login-password.html'));
+});
+
 // Facebook integration demo route
 app.get('/facebook-demo', (req, res) => {
   res.sendFile(path.join(__dirname, '../facebook-integration-demo.html'));
