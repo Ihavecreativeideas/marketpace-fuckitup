@@ -210,6 +210,16 @@ MarketPace is a React Native mobile application that prioritizes community empow
 
 ## Recent Changes
 
+✓ **COMMUNITY FEED NAVIGATION & LOGOUT FUNCTIONALITY FIXED** (January 12, 2025)
+✓ Fixed Content Security Policy (CSP) blocking onclick handlers by adding scriptSrcAttr: ["'unsafe-inline'"]
+✓ Enhanced logout function to completely clear user data (localStorage, sessionStorage, cart, favorites)
+✓ Added server-side logout endpoint (/api/logout) with proper session and cookie clearing
+✓ Improved navigation buttons with error handling and active state management
+✓ Added DOMContentLoaded initialization with success notifications for better user feedback
+✓ All bottom navigation buttons now work properly: Home, Shops, Services, The Hub, Delivery, Menu
+✓ Google OAuth authentication confirmed working with proper Client ID loading after server restart
+✓ Facebook app approval status maintained with full production integration capabilities
+
 ✓ **FACEBOOK APP APPROVAL & FULL INTEGRATION ACTIVATION** (January 12, 2025)
 ✓ Facebook has officially approved the MarketPace application for production use
 ✓ Created comprehensive Facebook app approval celebration page at /facebook-app-approved
