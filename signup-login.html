@@ -365,7 +365,7 @@
                         } else {
                             console.log('User cancelled login or did not fully authorize.');
                         }
-                    }, {scope: 'email,public_profile,user_friends'});
+                    }, {scope: 'email,public_profile,user_friends,user_location,user_mobile_phone'});
                 } else {
                     // Fallback to server-side OAuth
                     window.location.href = '/api/auth/facebook/signup';
@@ -408,7 +408,7 @@
                         } else {
                             console.log('User cancelled login or did not fully authorize.');
                         }
-                    }, {scope: 'email,public_profile,user_friends'});
+                    }, {scope: 'email,public_profile,user_friends,user_location,user_mobile_phone'});
                 } else {
                     // Fallback to server-side OAuth
                     window.location.href = '/api/auth/facebook/login';
@@ -620,19 +620,26 @@
         // Handle Facebook authentication response
         async function handleFacebookAuthResponse(authResponse, type) {
             try {
-                // Get user profile data from Facebook
-                FB.api('/me', {fields: 'name,email,picture.width(200).height(200),friends'}, async function(profile) {
+                // Get user profile data from Facebook with enhanced fields
+                FB.api('/me', {fields: 'name,first_name,last_name,email,picture.width(200).height(200),friends,location,mobile_phone,hometown,birthday'}, async function(profile) {
                     const userData = {
                         id: 'fb_' + profile.id,
                         facebookId: profile.id,
                         name: profile.name,
+                        firstName: profile.first_name,
+                        lastName: profile.last_name,
                         email: profile.email,
                         profilePicture: profile.picture?.data?.url || null,
                         friendsCount: profile.friends?.summary?.total_count || 0,
+                        location: profile.location?.name || profile.hometown?.name || null,
+                        phoneNumber: profile.mobile_phone || null,
+                        birthday: profile.birthday || null,
                         loggedIn: true,
                         accountType: 'facebook',
                         provider: 'facebook',
-                        accessToken: authResponse.accessToken
+                        accessToken: authResponse.accessToken,
+                        createdAt: new Date().toISOString(),
+                        profileComplete: true
                     };
 
                     // Store user data

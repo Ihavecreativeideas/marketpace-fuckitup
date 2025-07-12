@@ -537,6 +537,82 @@ app.delete('/api/ads/campaigns/:id', (req, res) => {
   });
 });
 
+// Facebook Authentication Callback
+app.post('/api/auth/facebook/callback', async (req, res) => {
+  try {
+    const { type, userData, accessToken } = req.body;
+    
+    if (!userData || !accessToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required authentication data'
+      });
+    }
+
+    // Create comprehensive user profile from Facebook data
+    const profile = {
+      id: userData.id,
+      facebookId: userData.facebookId,
+      firstName: userData.firstName || userData.name?.split(' ')[0] || 'User',
+      lastName: userData.lastName || userData.name?.split(' ').slice(1).join(' ') || '',
+      fullName: userData.name,
+      email: userData.email,
+      phoneNumber: userData.phoneNumber,
+      profileImageUrl: userData.profilePicture,
+      address: userData.location,
+      birthday: userData.birthday,
+      friendsCount: userData.friendsCount || 0,
+      provider: 'facebook',
+      accessToken: accessToken,
+      accountType: 'member',
+      profileComplete: true,
+      loggedIn: true,
+      createdAt: new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
+      bio: `MarketPace member since ${new Date().toLocaleDateString()}`,
+      interests: ['shopping', 'local_community', 'marketplace'],
+      userType: 'buyer',
+      isPro: false,
+      isVerified: true, // Facebook verified
+      allowsDelivery: true,
+      allowsPickup: true
+    };
+
+    // Store user profile (in production, this would go to database)
+    console.log(`Facebook ${type} successful for:`, profile.fullName, profile.email);
+    console.log('Profile data:', JSON.stringify(profile, null, 2));
+
+    // Simulate profile storage
+    const userSession = {
+      ...profile,
+      sessionId: 'fb_session_' + Math.random().toString(36).substr(2, 9),
+      loginTime: Date.now()
+    };
+
+    res.json({
+      success: true,
+      message: `Welcome to MarketPace, ${profile.firstName}! Your profile has been created.`,
+      user: userSession,
+      profileData: {
+        name: profile.fullName,
+        email: profile.email,
+        phone: profile.phoneNumber,
+        address: profile.address,
+        profilePicture: profile.profileImageUrl,
+        friendsCount: profile.friendsCount
+      },
+      redirectUrl: '/community'
+    });
+
+  } catch (error) {
+    console.error('Facebook auth callback error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Authentication failed. Please try again.'
+    });
+  }
+});
+
 // Basic API endpoints for authentication simulation
 app.post('/api/seamless-signup', (req, res) => {
   res.json({
