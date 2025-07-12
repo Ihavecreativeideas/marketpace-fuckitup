@@ -3,10 +3,10 @@
 ## Question 1: App Access Instructions and Meta API Confirmation
 
 ### How to Access the App
-**Primary URL:** https://marketplace-delivery-platform.replit.app/
+**Primary URL:** https://www.marketpace.shop/
 
 **Step-by-Step Testing Instructions:**
-1. Navigate to: https://marketplace-delivery-platform.replit.app/
+1. Navigate to: https://www.marketpace.shop/
 2. You will see the MarketPace landing page with community-focused messaging
 3. Click "Sign Up / Login" to access authentication options
 4. Click "Facebook" button to test Facebook Login integration
@@ -70,7 +70,7 @@ Admin dashboard and security monitoring tools are available upon request for the
 **Not Applicable - Web Application with Future Pro Gift Codes**
 
 MarketPace is a **web-based application** accessible directly through browsers at:
-https://marketplace-delivery-platform.replit.app/
+https://www.marketpace.shop/
 
 **Current Access:**
 - **No App Store Download Required:** Direct browser access
@@ -148,9 +148,9 @@ MarketPace maintains published information security policies and implements robu
 - **Regular Security Audits:** Quarterly internal and annual external security assessments
 
 ### Documentation Links:
-- Information Security Policy: https://marketplace-delivery-platform.replit.app/INFORMATION_SECURITY_POLICY.md
-- Network Security Policy: https://marketplace-delivery-platform.replit.app/NETWORK_SECURITY_POLICY.md
-- Security Implementation Status: https://marketplace-delivery-platform.replit.app/SECURITY_IMPLEMENTATION_STATUS.md
+- Information Security Policy: https://www.marketpace.shop/INFORMATION_SECURITY_POLICY.md
+- Network Security Policy: https://www.marketpace.shop/NETWORK_SECURITY_POLICY.md
+- Security Implementation Status: https://www.marketpace.shop/SECURITY_IMPLEMENTATION_STATUS.md
 - Database Security Configuration: Available for review team inspection
 
 **MarketPace exceeds industry standards for information security and network protection, ensuring comprehensive user data safety and platform integrity.**
