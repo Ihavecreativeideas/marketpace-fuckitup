@@ -127,8 +127,9 @@ app.get('/api/auth/facebook/callback', async (req, res) => {
         
         console.log('Facebook OAuth successful for user:', profile.name, profile.email);
         
-        // Redirect to community with success
-        res.redirect('/community?facebook=success');
+        // Store user data in session or database here if needed
+        // For now, redirect to community feed
+        res.redirect('/community');
       } else {
         res.redirect('/signup-login?error=facebook_token_failed');
       }
@@ -193,8 +194,9 @@ app.get('/api/auth/google/callback', async (req, res) => {
         
         console.log('Google OAuth successful for user:', profile.name, profile.email);
         
-        // Redirect to community with success
-        res.redirect('/community?google=success');
+        // Store user data in session or database here if needed
+        // For now, redirect to community feed
+        res.redirect('/community');
       } else {
         res.redirect('/signup-login?error=google_token_failed');
       }
