@@ -78,8 +78,10 @@ app.get('/signup-login', (req, res) => {
 app.get('/api/auth/facebook', (req, res) => {
   console.log('Facebook OAuth initiated with App ID:', process.env.FACEBOOK_APP_ID);
   // Determine environment based on host
-  const isDev = req.get('host')?.includes('repl.co');
+  const host = req.get('host') || '';
+  const isDev = host.includes('repl.co') || host.includes('localhost');
   const redirectUri = isDev ? process.env.FACEBOOK_REDIRECT_URI_DEV : process.env.FACEBOOK_REDIRECT_URI_PROD;
+  console.log('Host detected:', host, 'isDev:', isDev);
   
   const facebookAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${process.env.FACEBOOK_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri || 'https://workspace.ihavecreativeid.repl.co/api/auth/facebook/callback')}&scope=email,public_profile&response_type=code`;
   console.log('Environment:', isDev ? 'Development' : 'Production');
@@ -124,8 +126,10 @@ app.get('/api/auth/facebook/callback', async (req, res) => {
   if (code) {
     try {
       // Determine environment based on host
-      const isDev = req.get('host')?.includes('repl.co');
+      const host = req.get('host') || '';
+      const isDev = host.includes('repl.co') || host.includes('localhost');
       const redirectUri = isDev ? process.env.FACEBOOK_REDIRECT_URI_DEV : process.env.FACEBOOK_REDIRECT_URI_PROD;
+      console.log('Callback Host detected:', host, 'isDev:', isDev);
       
       // Exchange code for access token
       const tokenResponse = await fetch(`https://graph.facebook.com/v18.0/oauth/access_token?client_id=${process.env.FACEBOOK_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&client_secret=${process.env.FACEBOOK_APP_SECRET}&code=${code}`);
@@ -157,8 +161,10 @@ app.get('/api/auth/facebook/callback', async (req, res) => {
 app.get('/api/auth/google', (req, res) => {
   console.log('Google OAuth initiated with Client ID:', process.env.GOOGLE_CLIENT_ID);
   // Determine environment based on host
-  const isDev = req.get('host')?.includes('repl.co');
+  const host = req.get('host') || '';
+  const isDev = host.includes('repl.co') || host.includes('localhost');
   const redirectUri = isDev ? process.env.GOOGLE_REDIRECT_URI_DEV : process.env.GOOGLE_REDIRECT_URI_PROD;
+  console.log('Host detected:', host, 'isDev:', isDev);
   
   const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri || 'https://workspace.ihavecreativeid.repl.co/api/auth/google/callback')}&scope=openid email profile&response_type=code`;
   console.log('Environment:', isDev ? 'Development' : 'Production');
