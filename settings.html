@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0233 50%, #2d1b69 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 15px;
+        }
+
+        .back-btn {
+            background: rgba(0, 0, 0, 0.6);
+            border: none;
+            color: #00ffff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .settings-section {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(20px);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #00ffff;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-size: 16px;
+        }
+
+        .setting-description {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: #00ffff;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(22px);
+        }
+
+        .settings-button {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .settings-button:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="window.history.back()">← Back</button>
+            <h1>Settings</h1>
+        </div>
+
+        <div class="settings-section">
+            <div class="section-title">Account Settings</div>
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Profile Visibility</div>
+                    <div class="setting-description">Allow others to view your profile</div>
+                </div>
+                <div class="toggle-switch active" onclick="toggleSetting(this)">
+                    <div class="toggle-slider"></div>
+                </div>
+            </div>
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Show Online Status</div>
+                    <div class="setting-description">Let others see when you're active</div>
+                </div>
+                <div class="toggle-switch" onclick="toggleSetting(this)">
+                    <div class="toggle-slider"></div>
+                </div>
+            </div>
+            <button class="settings-button" onclick="editProfile()">Edit Profile</button>
+        </div>
+
+        <div class="settings-section">
+            <div class="section-title">Privacy & Security</div>
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Two-Factor Authentication</div>
+                    <div class="setting-description">Add extra security to your account</div>
+                </div>
+                <div class="toggle-switch" onclick="toggleSetting(this)">
+                    <div class="toggle-slider"></div>
+                </div>
+            </div>
+            <button class="settings-button" onclick="window.location.href='/device-security'">Device Security</button>
+            <button class="settings-button" onclick="changePassword()">Change Password</button>
+        </div>
+
+        <div class="settings-section">
+            <div class="section-title">Notifications</div>
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Push Notifications</div>
+                    <div class="setting-description">Receive notifications about activity</div>
+                </div>
+                <div class="toggle-switch active" onclick="toggleSetting(this)">
+                    <div class="toggle-slider"></div>
+                </div>
+            </div>
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Email Notifications</div>
+                    <div class="setting-description">Get updates via email</div>
+                </div>
+                <div class="toggle-switch active" onclick="toggleSetting(this)">
+                    <div class="toggle-slider"></div>
+                </div>
+            </div>
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Marketing Communications</div>
+                    <div class="setting-description">Receive promotional offers</div>
+                </div>
+                <div class="toggle-switch" onclick="toggleSetting(this)">
+                    <div class="toggle-slider"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <div class="section-title">App Preferences</div>
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Dark Mode</div>
+                    <div class="setting-description">Use dark theme (always on)</div>
+                </div>
+                <div class="toggle-switch active">
+                    <div class="toggle-slider"></div>
+                </div>
+            </div>
+            <button class="settings-button" onclick="clearCache()">Clear Cache</button>
+            <button class="settings-button" onclick="window.location.href='/platform-integrations'">Platform Integrations</button>
+        </div>
+
+        <div class="settings-section">
+            <div class="section-title">Support</div>
+            <button class="settings-button" onclick="contactSupport()">Contact Support</button>
+            <button class="settings-button" onclick="window.location.href='/privacy-policy'">Privacy Policy</button>
+            <button class="settings-button" onclick="window.location.href='/terms-of-service'">Terms of Service</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleSetting(element) {
+            element.classList.toggle('active');
+            // Save setting to localStorage
+            const label = element.parentElement.querySelector('.setting-label').textContent;
+            const isActive = element.classList.contains('active');
+            localStorage.setItem(`setting_${label.replace(/\s+/g, '_').toLowerCase()}`, isActive);
+        }
+
+        function editProfile() {
+            window.location.href = '/profile';
+        }
+
+        function changePassword() {
+            alert('Password change feature - redirecting to security settings...');
+            window.location.href = '/device-security';
+        }
+
+        function clearCache() {
+            if (confirm('Clear all cached data? This will log you out.')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                alert('Cache cleared successfully!');
+                window.location.href = '/';
+            }
+        }
+
+        function contactSupport() {
+            alert('Contact Support:\n\nEmail: support@marketpace.shop\nResponse time: 24-48 hours\n\nFor urgent issues, please include your user ID and describe the problem in detail.');
+        }
+
+        // Load saved settings on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.toggle-switch').forEach(toggle => {
+                const label = toggle.parentElement.querySelector('.setting-label')?.textContent;
+                if (label) {
+                    const savedSetting = localStorage.getItem(`setting_${label.replace(/\s+/g, '_').toLowerCase()}`);
+                    if (savedSetting === 'false') {
+                        toggle.classList.remove('active');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

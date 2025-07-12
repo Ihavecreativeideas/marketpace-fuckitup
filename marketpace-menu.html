@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MarketPace Menu</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Menu - MarketPace</title>
     <style>
         * {
             margin: 0;
@@ -13,1000 +12,460 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f0f2f5;
-            color: #1c1e21;
-            line-height: 1.34;
-        }
-
-        .menu-container {
-            max-width: 500px;
-            margin: 0 auto;
-            background: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0233 50%, #2d1b69 100%);
+            color: white;
             min-height: 100vh;
             position: relative;
+            overflow-x: hidden;
         }
 
-        .menu-header {
-            background: white;
-            padding: 12px 16px;
-            border-bottom: 1px solid #e4e6ea;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
+        /* Floating Particles */
+        .particles {
+            position: fixed;
             top: 0;
-            z-index: 100;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
         }
 
-        .menu-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #1c1e21;
-        }
-
-        .menu-icons {
-            display: flex;
-            gap: 12px;
-        }
-
-        .menu-icon {
-            width: 36px;
-            height: 36px;
-            background: #e4e6ea;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .menu-icon:hover {
-            background: #d8dadf;
-        }
-
-        .profile-switcher {
-            padding: 16px;
-            margin-bottom: 20px;
-            background: #f0f2f5;
-            border-radius: 12px;
-            margin: 0 16px 20px;
-            display: none;
-        }
-
-        .profile-switcher.visible {
-            display: block;
-        }
-
-        .switcher-header {
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #dadde1;
-        }
-
-        .profile-option {
-            display: flex;
-            align-items: center;
-            padding: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            position: relative;
-        }
-
-        .profile-option:hover {
-            background: #e4e6ea;
-        }
-
-        .profile-option.active {
-            background: #1877f2;
-            color: white;
-        }
-
-        .profile-option.active .profile-details .profile-name,
-        .profile-option.active .profile-details .profile-type {
-            color: white;
-        }
-
-        .profile-details {
-            flex: 1;
-        }
-
-        .profile-type {
-            font-size: 12px;
-            color: #65676b;
-        }
-
-        .active-indicator {
+        .particle {
             position: absolute;
-            right: 12px;
-            font-size: 14px;
-            color: white;
-            font-weight: bold;
+            width: 4px;
+            height: 4px;
+            background: rgba(0, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 6s infinite ease-in-out;
         }
 
-        .active-profile-display {
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
             display: flex;
             align-items: center;
-            padding: 16px;
+            margin-bottom: 30px;
+            gap: 15px;
+        }
+
+        .back-btn {
+            background: rgba(0, 0, 0, 0.6);
+            border: none;
+            color: #00ffff;
+            padding: 10px 15px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .header-title {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-profile {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 12px;
-            margin: 0 16px 20px;
-            position: relative;
-            background: white;
-            border: 2px solid #1877f2;
+            padding: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
-        .active-profile-display:hover {
-            background: #f0f2f5;
-        }
-
-        .active-avatar {
+        .profile-pic {
             width: 60px;
             height: 60px;
-            background: linear-gradient(45deg, #1877f2, #42a5f5);
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: bold;
             font-size: 24px;
-            margin-right: 12px;
-        }
-
-        .switch-indicator {
-            position: absolute;
-            top: 10px;
-            right: 16px;
-            background: #1877f2;
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-        }
-
-        .profile-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
             font-weight: bold;
-            font-size: 16px;
-            margin-right: 12px;
+            color: white;
         }
 
-        .profile-avatar.personal {
-            background: linear-gradient(45deg, #1877f2, #42a5f5);
-        }
-
-        .profile-avatar.business {
-            background: linear-gradient(45deg, #ff6b35, #8a2be2);
-        }
-
-        .profile-info {
-            flex: 1;
-        }
-
-        .profile-name {
-            font-size: 20px;
-            font-weight: 600;
-            color: #1c1e21;
+        .profile-info h3 {
+            font-size: 18px;
             margin-bottom: 4px;
         }
 
-        .profile-status {
+        .profile-info p {
+            color: rgba(255, 255, 255, 0.7);
             font-size: 14px;
-            color: #65676b;
-        }
-
-        .notification-badge {
-            position: absolute;
-            top: 10px;
-            right: 50px;
-            background: #e41e3f;
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
         }
 
         .menu-section {
-            padding: 16px;
+            margin-bottom: 20px;
         }
 
         .section-title {
             font-size: 16px;
             font-weight: 600;
-            color: #65676b;
-            margin-bottom: 16px;
-        }
-
-        .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-bottom: 24px;
+            color: #00ffff;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .menu-item {
-            background: white;
-            border: 1px solid #e4e6ea;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
-            padding: 16px;
+            padding: 15px;
+            margin-bottom: 8px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
             display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 8px;
+            align-items: center;
+            gap: 15px;
+            backdrop-filter: blur(10px);
         }
 
         .menu-item:hover {
-            background: #f0f2f5;
-            transform: translateY(-2px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(0, 255, 255, 0.3);
+            transform: translateX(5px);
         }
 
-        .menu-item-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .menu-icon {
             font-size: 20px;
-            color: white;
-            font-weight: bold;
+            width: 30px;
+            text-align: center;
         }
 
-        .menu-item-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1c1e21;
-        }
-
-        .menu-item-subtitle {
-            font-size: 12px;
-            color: #65676b;
-            line-height: 1.3;
-        }
-
-        .see-more-btn {
-            background: #e4e6ea;
-            border: none;
-            border-radius: 8px;
-            padding: 12px;
-            width: 100%;
-            font-size: 15px;
-            font-weight: 600;
-            color: #1c1e21;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            margin-bottom: 16px;
-        }
-
-        .see-more-btn:hover {
-            background: #d8dadf;
-        }
-
-        .collapsible-section {
-            border-top: 1px solid #e4e6ea;
-            padding: 16px;
-        }
-
-        .collapsible-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            padding: 12px 0;
-            transition: background-color 0.2s;
-        }
-
-        .collapsible-header:hover {
-            background: #f0f2f5;
-        }
-
-        .collapsible-icon {
-            width: 36px;
-            height: 36px;
-            background: #e4e6ea;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            color: #65676b;
-        }
-
-        .collapsible-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1c1e21;
+        .menu-content {
             flex: 1;
         }
 
-        .collapsible-arrow {
-            font-size: 12px;
-            color: #65676b;
-            transition: transform 0.2s;
-        }
-
-        .collapsible-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-
-        .collapsible-content.expanded {
-            max-height: 1000px;
-        }
-
-        .logout-btn {
-            background: #e4e6ea;
-            border: none;
-            border-radius: 8px;
-            padding: 12px;
-            width: 100%;
-            font-size: 15px;
+        .menu-title {
+            font-size: 16px;
             font-weight: 600;
-            color: #1c1e21;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            margin: 16px;
-        }
-
-        .logout-btn:hover {
-            background: #d8dadf;
-        }
-
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            max-width: 500px;
-            width: 100%;
-            background: white;
-            border-top: 1px solid #e4e6ea;
-            display: flex;
-            justify-content: space-around;
-            padding: 8px 0;
-            z-index: 100;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 4px 8px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            border-radius: 8px;
-            min-width: 60px;
-        }
-
-        .nav-item:hover {
-            background: #f0f2f5;
-        }
-
-        .nav-item.active {
-            color: #1877f2;
-        }
-
-        .nav-icon {
-            font-size: 24px;
             margin-bottom: 2px;
         }
 
-        .nav-label {
-            font-size: 10px;
-            font-weight: 500;
-        }
-
-        .featured-items {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-top: 16px;
-        }
-
-        .featured-item {
-            background: white;
-            border: 1px solid #e4e6ea;
-            border-radius: 12px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .featured-item:hover {
-            transform: translateY(-2px);
-        }
-
-        .featured-image {
-            width: 100%;
-            height: 120px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            color: white;
-        }
-
-        .featured-content {
-            padding: 12px;
-        }
-
-        .featured-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #1c1e21;
-            margin-bottom: 4px;
-        }
-
-        .featured-subtitle {
+        .menu-description {
             font-size: 12px;
-            color: #65676b;
-            line-height: 1.3;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .menu-arrow {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+        }
+
+        .badge {
+            background: #ff4757;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: bold;
         }
 
         .pro-badge {
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #000;
             font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
             font-weight: bold;
-            display: inline-block;
-            margin-left: 8px;
-        }
-
-        @media (max-width: 500px) {
-            .menu-container {
-                max-width: 100%;
-            }
-
-            .bottom-nav {
-                max-width: 100%;
-            }
+            margin-left: auto;
         }
     </style>
 </head>
 <body>
-    <div class="menu-container">
-        <div class="menu-header">
-            <div class="menu-title">Menu</div>
-            <div class="menu-icons">
-                <div class="menu-icon" onclick="openSettings()">⚙️</div>
-                <div class="menu-icon" onclick="openSearch()">🔍</div>
-            </div>
+    <!-- Floating Particles -->
+    <div class="particles"></div>
+
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="window.history.back()">← Back</button>
+            <h1 class="header-title">MarketPace Menu</h1>
         </div>
 
-        <!-- Profile Switcher Section -->
-        <div class="profile-switcher">
-            <div class="switcher-header">
-                <span style="font-size: 14px; color: #65676b; font-weight: 600;">Switch Profile</span>
-            </div>
-            
-            <div class="profile-option active" id="personalProfile" onclick="switchProfile('personal')">
-                <div class="profile-avatar personal">
-                    <span>BB</span>
-                </div>
-                <div class="profile-details">
-                    <div class="profile-name">Brooke Brown</div>
-                    <div class="profile-type">Personal</div>
-                </div>
-                <div class="active-indicator">✓</div>
-            </div>
-            
-            <div class="profile-option" id="businessProfile" onclick="switchProfile('business')">
-                <div class="profile-avatar business">
-                    <span>MP</span>
-                </div>
-                <div class="profile-details">
-                    <div class="profile-name">MarketPace Pro</div>
-                    <div class="profile-type">Business</div>
-                </div>
-                <div class="active-indicator" style="opacity: 0;">✓</div>
-            </div>
-        </div>
-
-        <!-- Current Active Profile Display -->
-        <div class="active-profile-display" id="activeProfileDisplay" onclick="toggleProfileSwitcher()">
-            <div class="profile-avatar active-avatar" id="currentAvatar">
-                <span id="activeAvatar">BB</span>
-            </div>
+        <div class="user-profile">
+            <div class="profile-pic" id="userProfilePic">DU</div>
             <div class="profile-info">
-                <div class="profile-name" id="activeName">Brooke Brown</div>
-                <div class="profile-status" id="activeStatus">Personal Profile</div>
+                <h3 id="userName">Demo User</h3>
+                <p id="userStatus">MarketPace Member • Orange Beach, AL</p>
             </div>
-            <div class="notification-badge">3</div>
-            <div class="switch-indicator" title="Switch Profile">
-                <i class="fas fa-exchange-alt"></i>
+        </div>
+
+        <div class="menu-section">
+            <div class="section-title">MarketPace Features</div>
+            <div class="menu-item" onclick="goToPage('/community')">
+                <div class="menu-icon">🏠</div>
+                <div class="menu-content">
+                    <div class="menu-title">Community Feed</div>
+                    <div class="menu-description">Connect with neighbors and local updates</div>
+                </div>
+                <div class="menu-arrow">›</div>
+            </div>
+            <div class="menu-item" onclick="goToPage('/shops')">
+                <div class="menu-icon">🛍️</div>
+                <div class="menu-content">
+                    <div class="menu-title">Local Shops</div>
+                    <div class="menu-description">Browse nearby businesses and products</div>
+                </div>
+                <div class="menu-arrow">›</div>
+            </div>
+            <div class="menu-item" onclick="goToPage('/services')">
+                <div class="menu-icon">🔧</div>
+                <div class="menu-content">
+                    <div class="menu-title">Services</div>
+                    <div class="menu-description">Find local service providers and contractors</div>
+                </div>
+                <div class="menu-arrow">›</div>
+            </div>
+            <div class="menu-item" onclick="goToPage('/the-hub')">
+                <div class="menu-icon">🎭</div>
+                <div class="menu-content">
+                    <div class="menu-title">The Hub</div>
+                    <div class="menu-description">Entertainment, events, and local artists</div>
+                </div>
+                <div class="menu-arrow">›</div>
+            </div>
+            <div class="menu-item" onclick="goToPage('/delivery')">
+                <div class="menu-icon">🚚</div>
+                <div class="menu-content">
+                    <div class="menu-title">Delivery Dashboard</div>
+                    <div class="menu-description">Track your orders and delivery status</div>
+                </div>
+                <div class="badge">2</div>
+                <div class="menu-arrow">›</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="section-title">Your Account</div>
+            <div class="menu-item" onclick="goToPage('/profile')">
+                <div class="menu-icon">👤</div>
+                <div class="menu-content">
+                    <div class="menu-title">My Profile</div>
+                    <div class="menu-description">Edit your profile and preferences</div>
+                </div>
+                <div class="menu-arrow">›</div>
+            </div>
+            <div class="menu-item" onclick="goToPage('/cart')">
+                <div class="menu-icon">🛒</div>
+                <div class="menu-content">
+                    <div class="menu-title">Shopping Cart</div>
+                    <div class="menu-description">Review items and checkout</div>
+                </div>
+                <div class="badge" id="cartBadge">0</div>
+                <div class="menu-arrow">›</div>
+            </div>
+            <div class="menu-item" onclick="goToPage('/deliveries')">
+                <div class="menu-icon">📦</div>
+                <div class="menu-content">
+                    <div class="menu-title">My Orders</div>
+                    <div class="menu-description">Order history and tracking</div>
+                </div>
+                <div class="menu-arrow">›</div>
             </div>
         </div>
 
         <div class="menu-section">
             <div class="section-title">Professional Tools</div>
-            <div class="menu-grid">
-                <div class="menu-item" onclick="openDashboard()">
-                    <div class="menu-item-icon" style="background: #1877f2;">📊</div>
-                    <div class="menu-item-title">Business Dashboard</div>
-                    <div class="menu-item-subtitle">Track sales, views, and analytics</div>
+            <div class="menu-item" onclick="goToPage('/platform-integrations')">
+                <div class="menu-icon">🔗</div>
+                <div class="menu-content">
+                    <div class="menu-title">Platform Integrations</div>
+                    <div class="menu-description">Connect your business accounts</div>
                 </div>
-                <div class="menu-item" onclick="openPromoteProducts()">
-                    <div class="menu-item-icon" style="background: #42a5f5;">🚀</div>
-                    <div class="menu-item-title">Promote Products</div>
-                    <div class="menu-item-subtitle">Boost visibility and sales</div>
+                <div class="pro-badge">PRO</div>
+                <div class="menu-arrow">›</div>
+            </div>
+            <div class="menu-item" onclick="businessDashboard()">
+                <div class="menu-icon">📊</div>
+                <div class="menu-content">
+                    <div class="menu-title">Business Dashboard</div>
+                    <div class="menu-description">Analytics and revenue tracking</div>
                 </div>
-                <div class="menu-item" onclick="openSupport()">
-                    <div class="menu-item-icon" style="background: #26c6da;">💬</div>
-                    <div class="menu-item-title">Support Center</div>
-                    <div class="menu-item-subtitle">Get help and guidance</div>
+                <div class="pro-badge">PRO</div>
+                <div class="menu-arrow">›</div>
+            </div>
+            <div class="menu-item" onclick="goToPage('/driver-application')">
+                <div class="menu-icon">🚗</div>
+                <div class="menu-content">
+                    <div class="menu-title">Driver Application</div>
+                    <div class="menu-description">Join our delivery network</div>
                 </div>
-                <div class="menu-item" onclick="openRevenue()">
-                    <div class="menu-item-icon" style="background: #66bb6a;">💰</div>
-                    <div class="menu-item-title">Revenue Tracking</div>
-                    <div class="menu-item-subtitle">Monitor earnings and payouts</div>
-                </div>
+                <div class="menu-arrow">›</div>
             </div>
         </div>
 
         <div class="menu-section">
-            <div class="section-title">More from MarketPace</div>
-            <div class="menu-grid">
-                <div class="menu-item" onclick="openCommunity()">
-                    <div class="menu-item-icon" style="background: #7e57c2;">👥</div>
-                    <div class="menu-item-title">Community</div>
-                    <div class="menu-item-subtitle">Local feed and connections</div>
+            <div class="section-title">Settings & Support</div>
+            <div class="menu-item" onclick="goToPage('/settings')">
+                <div class="menu-icon">⚙️</div>
+                <div class="menu-content">
+                    <div class="menu-title">Settings</div>
+                    <div class="menu-description">Account preferences and privacy</div>
                 </div>
-                <div class="menu-item" onclick="openShops()">
-                    <div class="menu-item-icon" style="background: #ff7043;">🏪</div>
-                    <div class="menu-item-title">Local Shops</div>
-                    <div class="menu-item-subtitle">Discover businesses nearby</div>
-                </div>
-                <div class="menu-item" onclick="openServices()">
-                    <div class="menu-item-icon" style="background: #ab47bc;">🔧</div>
-                    <div class="menu-item-title">Services</div>
-                    <div class="menu-item-subtitle">Find local professionals</div>
-                </div>
-                <div class="menu-item" onclick="openMarketplace()">
-                    <div class="menu-item-icon" style="background: #29b6f6;">🛒</div>
-                    <div class="menu-item-title">Marketplace</div>
-                    <div class="menu-item-subtitle">Buy, sell, and rent items</div>
-                </div>
-                <div class="menu-item" onclick="openDelivery()">
-                    <div class="menu-item-icon" style="background: #ffa726;">📦</div>
-                    <div class="menu-item-title">Delivery</div>
-                    <div class="menu-item-subtitle">Track orders and routes</div>
-                </div>
-                <div class="menu-item" onclick="openTheHub()">
-                    <div class="menu-item-icon" style="background: #ec407a;">🎭</div>
-                    <div class="menu-item-title">The Hub</div>
-                    <div class="menu-item-subtitle">Entertainment and events</div>
-                </div>
-                <div class="menu-item" onclick="openSaved()">
-                    <div class="menu-item-icon" style="background: #8d6e63;">🔖</div>
-                    <div class="menu-item-title">Saved Items</div>
-                    <div class="menu-item-subtitle">Your favorites and bookmarks</div>
-                </div>
-                <div class="menu-item" onclick="openEvents()">
-                    <div class="menu-item-icon" style="background: #f06292;">🎉</div>
-                    <div class="menu-item-title">Events</div>
-                    <div class="menu-item-subtitle">Local happenings and activities</div>
-                </div>
+                <div class="menu-arrow">›</div>
             </div>
-        </div>
-
-        <button class="see-more-btn" onclick="toggleSeeMore()">See more</button>
-
-        <div class="collapsible-section">
-            <div class="collapsible-header" onclick="toggleCollapsible('help')">
-                <div class="collapsible-icon">❓</div>
-                <div class="collapsible-title">Help & Support</div>
-                <div class="collapsible-arrow" id="help-arrow">▼</div>
-            </div>
-            <div class="collapsible-content" id="help-content">
-                <div class="featured-items">
-                    <div class="featured-item" onclick="openHelpCenter()">
-                        <div class="featured-image">📚</div>
-                        <div class="featured-content">
-                            <div class="featured-title">Help Center</div>
-                            <div class="featured-subtitle">Find answers to common questions</div>
-                        </div>
-                    </div>
-                    <div class="featured-item" onclick="openContactSupport()">
-                        <div class="featured-image">💬</div>
-                        <div class="featured-content">
-                            <div class="featured-title">Contact Support</div>
-                            <div class="featured-subtitle">Get personalized assistance</div>
-                        </div>
-                    </div>
+            <div class="menu-item" onclick="goToPage('/security')">
+                <div class="menu-icon">🔒</div>
+                <div class="menu-content">
+                    <div class="menu-title">Security</div>
+                    <div class="menu-description">Two-factor auth and device management</div>
                 </div>
+                <div class="menu-arrow">›</div>
             </div>
-        </div>
-
-        <div class="collapsible-section">
-            <div class="collapsible-header" onclick="toggleCollapsible('settings')">
-                <div class="collapsible-icon">⚙️</div>
-                <div class="collapsible-title">Settings & Privacy</div>
-                <div class="collapsible-arrow" id="settings-arrow">▼</div>
-            </div>
-            <div class="collapsible-content" id="settings-content">
-                <div class="featured-items">
-                    <div class="featured-item" onclick="openAccountSettings()">
-                        <div class="featured-image">👤</div>
-                        <div class="featured-content">
-                            <div class="featured-title">Account Settings</div>
-                            <div class="featured-subtitle">Manage your profile and preferences</div>
-                        </div>
-                    </div>
-                    <div class="featured-item" onclick="openPrivacySettings()">
-                        <div class="featured-image">🔒</div>
-                        <div class="featured-content">
-                            <div class="featured-title">Privacy Settings</div>
-                            <div class="featured-subtitle">Control your data and visibility</div>
-                        </div>
-                    </div>
+            <div class="menu-item" onclick="goToPage('/sponsorship.html')">
+                <div class="menu-icon">💝</div>
+                <div class="menu-content">
+                    <div class="menu-title">Sponsor MarketPace</div>
+                    <div class="menu-description">Support our community platform</div>
                 </div>
+                <div class="menu-arrow">›</div>
             </div>
-        </div>
-
-        <div class="collapsible-section">
-            <div class="collapsible-header" onclick="toggleCollapsible('integrations')">
-                <div class="collapsible-icon">🔗</div>
-                <div class="collapsible-title">Platform Integrations <span class="pro-badge">PRO</span></div>
-                <div class="collapsible-arrow" id="integrations-arrow">▼</div>
-            </div>
-            <div class="collapsible-content" id="integrations-content">
-                <div class="featured-items">
-                    <div class="featured-item" onclick="openFacebookIntegration()">
-                        <div class="featured-image">📘</div>
-                        <div class="featured-content">
-                            <div class="featured-title">Facebook Marketplace</div>
-                            <div class="featured-subtitle">Cross-post your listings automatically</div>
-                        </div>
-                    </div>
-                    <div class="featured-item" onclick="openShopifyIntegration()">
-                        <div class="featured-image">🛍️</div>
-                        <div class="featured-content">
-                            <div class="featured-title">Shopify Store</div>
-                            <div class="featured-subtitle">Sync your online store inventory</div>
-                        </div>
-                    </div>
-                    <div class="featured-item" onclick="openStripeIntegration()">
-                        <div class="featured-image">💳</div>
-                        <div class="featured-content">
-                            <div class="featured-title">Stripe Payments</div>
-                            <div class="featured-subtitle">Secure payment processing</div>
-                        </div>
-                    </div>
-                    <div class="featured-item" onclick="window.location.href='/facebook-events-integration'">
-                        <div class="featured-image">📅</div>
-                        <div class="featured-content">
-                            <div class="featured-title">Facebook Events</div>
-                            <div class="featured-subtitle">Auto-sync with 30-mile radius filtering</div>
-                        </div>
-                    </div>
-                    
-                    <div class="featured-item" onclick="window.location.href='/distrokid-integration'">
-                        <div class="featured-image">🎵</div>
-                        <div class="featured-content">
-                            <div class="featured-title">DistroKid Music <span class="pro-badge">PRO</span></div>
-                            <div class="featured-subtitle">Local artist promotion + calendar events</div>
-                        </div>
-                    </div>
-
-                    <div class="featured-item" onclick="openDeliveryIntegration()">
-                        <div class="featured-image">🚚</div>
-                        <div class="featured-content">
-                            <div class="featured-title">Delivery Partners</div>
-                            <div class="featured-subtitle">DoorDash, Uber Eats integration</div>
-                        </div>
-                    </div>
+            <div class="menu-item" onclick="contactSupport()">
+                <div class="menu-icon">💬</div>
+                <div class="menu-content">
+                    <div class="menu-title">Help & Support</div>
+                    <div class="menu-description">Get help and contact our team</div>
                 </div>
+                <div class="menu-arrow">›</div>
             </div>
-        </div>
-
-        <button class="logout-btn" onclick="logout()">Log out</button>
-
-        <div style="height: 80px;"></div>
-    </div>
-
-    <div class="bottom-nav">
-        <div class="nav-item" onclick="navigateTo('home')">
-            <div class="nav-icon">🏠</div>
-            <div class="nav-label">Home</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('community')">
-            <div class="nav-icon">👥</div>
-            <div class="nav-label">Community</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('marketplace')">
-            <div class="nav-icon">🛒</div>
-            <div class="nav-label">Marketplace</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('delivery')">
-            <div class="nav-icon">📦</div>
-            <div class="nav-label">Delivery</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('notifications')">
-            <div class="nav-icon">🔔</div>
-            <div class="nav-label">Notifications</div>
-        </div>
-        <div class="nav-item active" onclick="navigateTo('menu')">
-            <div class="nav-icon">☰</div>
-            <div class="nav-label">Menu</div>
+            <div class="menu-item" onclick="logout()" style="border-color: rgba(255, 68, 87, 0.3);">
+                <div class="menu-icon">🚪</div>
+                <div class="menu-content">
+                    <div class="menu-title">Logout</div>
+                    <div class="menu-description">Sign out of your account</div>
+                </div>
+                <div class="menu-arrow">›</div>
+            </div>
         </div>
     </div>
 
     <script>
-        function toggleCollapsible(sectionId) {
-            const content = document.getElementById(sectionId + '-content');
-            const arrow = document.getElementById(sectionId + '-arrow');
-            
-            if (content.classList.contains('expanded')) {
-                content.classList.remove('expanded');
-                arrow.style.transform = 'rotate(0deg)';
-            } else {
-                content.classList.add('expanded');
-                arrow.style.transform = 'rotate(180deg)';
+        function goToPage(url) {
+            window.location.href = url;
+        }
+
+        function businessDashboard() {
+            alert('Business Dashboard\n\nAccess analytics, revenue tracking, and business tools.\n\nUpgrade to MarketPace Pro to unlock advanced business features.');
+        }
+
+        function contactSupport() {
+            alert('Help & Support\n\nEmail: support@marketpace.shop\nPhone: 1-800-MKTPACE\nResponse time: 24-48 hours\n\nFor urgent issues, please include your user ID and describe the problem in detail.');
+        }
+
+        async function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    // Call server logout endpoint
+                    const response = await fetch('/api/logout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    // Clear all user data from localStorage
+                    localStorage.removeItem('marketpaceUser');
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('userProfile');
+                    localStorage.removeItem('sessionData');
+                    localStorage.removeItem('marketplaceCart');
+                    localStorage.removeItem('userFavorites');
+                    
+                    // Clear any other stored user information
+                    sessionStorage.clear();
+                    
+                    alert('Successfully logged out!');
+                    window.location.href = '/signup-login';
+                    
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    
+                    // Clear local data even if server call fails
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    
+                    alert('Logged out successfully!');
+                    window.location.href = '/signup-login';
+                }
             }
         }
 
-        function toggleSeeMore() {
-            // Toggle visibility of additional menu items
-            const hiddenItems = document.querySelectorAll('.menu-item.hidden');
-            hiddenItems.forEach(item => {
-                item.classList.toggle('hidden');
-            });
-        }
-
-        // Navigation functions
-        function navigateTo(section) {
-            const routes = {
-                'home': '/',
-                'community': '/community',
-                'marketplace': '/marketplace',
-                'delivery': '/delivery',
-                'notifications': '/notifications',
-                'menu': '/marketpace-menu'
-            };
-            
-            if (routes[section]) {
-                window.location.href = routes[section];
+        function updateCartBadge() {
+            const cartData = JSON.parse(localStorage.getItem('marketplaceCart')) || { items: [] };
+            const badge = document.getElementById('cartBadge');
+            if (badge) {
+                badge.textContent = cartData.items.length;
+                badge.style.display = cartData.items.length > 0 ? 'inline-block' : 'none';
             }
         }
 
-        // Professional Tools
-        function openDashboard() {
-            window.location.href = '/admin-dashboard';
-        }
-
-        function openPromoteProducts() {
-            window.location.href = '/promote-product-button';
-        }
-
-        function openSupport() {
-            window.location.href = '/support-center';
-        }
-
-        function openRevenue() {
-            window.location.href = '/revenue-tracking';
-        }
-
-        // MarketPace Features
-        function openCommunity() {
-            window.location.href = '/community';
-        }
-
-        function openShops() {
-            window.location.href = '/shops';
-        }
-
-        function openServices() {
-            window.location.href = '/services';
-        }
-
-        function openMarketplace() {
-            window.location.href = '/marketplace';
-        }
-
-        function openDelivery() {
-            window.location.href = '/delivery';
-        }
-
-        function openTheHub() {
-            window.location.href = '/the-hub';
-        }
-
-        function openSaved() {
-            window.location.href = '/saved-items';
-        }
-
-        function openEvents() {
-            window.location.href = '/events';
-        }
-
-        // Profile and Settings
-        function toggleProfileSwitcher() {
-            const switcher = document.querySelector('.profile-switcher');
-            switcher.classList.toggle('visible');
-        }
-
-        function switchProfile(profileType) {
-            const personalOption = document.getElementById('personalProfile');
-            const businessOption = document.getElementById('businessProfile');
-            const activeAvatar = document.getElementById('activeAvatar');
-            const activeName = document.getElementById('activeName');
-            const activeStatus = document.getElementById('activeStatus');
-            const currentAvatar = document.getElementById('currentAvatar');
-            
-            // Update active states
-            personalOption.classList.remove('active');
-            businessOption.classList.remove('active');
-            
-            // Update active indicators
-            personalOption.querySelector('.active-indicator').style.opacity = '0';
-            businessOption.querySelector('.active-indicator').style.opacity = '0';
-            
-            if (profileType === 'personal') {
-                personalOption.classList.add('active');
-                personalOption.querySelector('.active-indicator').style.opacity = '1';
+        function updateUserProfile() {
+            const userData = localStorage.getItem('marketpaceUser');
+            if (userData) {
+                const user = JSON.parse(userData);
+                const userNameEl = document.getElementById('userName');
+                const userProfilePic = document.getElementById('userProfilePic');
                 
-                // Update display
-                activeAvatar.textContent = 'BB';
-                activeName.textContent = 'Brooke Brown';
-                activeStatus.textContent = 'Personal Profile';
-                currentAvatar.className = 'profile-avatar active-avatar';
-                currentAvatar.style.background = 'linear-gradient(45deg, #1877f2, #42a5f5)';
-                
-                // Update menu sections based on profile
-                updateMenuForProfile('personal');
-                
-            } else if (profileType === 'business') {
-                businessOption.classList.add('active');
-                businessOption.querySelector('.active-indicator').style.opacity = '1';
-                
-                // Update display
-                activeAvatar.textContent = 'MP';
-                activeName.textContent = 'MarketPace Pro';
-                activeStatus.textContent = 'Business Profile';
-                currentAvatar.className = 'profile-avatar active-avatar';
-                currentAvatar.style.background = 'linear-gradient(45deg, #ff6b35, #8a2be2)';
-                
-                // Update menu sections based on profile
-                updateMenuForProfile('business');
-            }
-            
-            // Hide switcher after selection
-            document.querySelector('.profile-switcher').classList.remove('visible');
-            
-            // Store preference
-            localStorage.setItem('marketpace-active-profile', profileType);
-        }
-
-        function updateMenuForProfile(profileType) {
-            // Show/hide menu sections based on profile type
-            const professionalTools = document.querySelector('.menu-section');
-            
-            if (profileType === 'business') {
-                // Highlight business features
-                professionalTools.style.border = '2px solid #ff6b35';
-                professionalTools.style.background = 'rgba(255, 107, 53, 0.05)';
-            } else {
-                // Remove business highlighting
-                professionalTools.style.border = 'none';
-                professionalTools.style.background = 'transparent';
+                if (user.name) {
+                    userNameEl.textContent = user.name;
+                    const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                    userProfilePic.textContent = initials;
+                } else if (user.email) {
+                    userNameEl.textContent = user.email.split('@')[0];
+                    const initials = user.email.substring(0, 2).toUpperCase();
+                    userProfilePic.textContent = initials;
+                }
             }
         }
 
-        function openProfile() {
-            window.location.href = '/profile';
-        }
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.querySelector('.particles');
+            const particleCount = 30;
 
-        function openSettings() {
-            window.location.href = '/settings';
-        }
-
-        function openSearch() {
-            window.location.href = '/search';
-        }
-
-        function openAccountSettings() {
-            window.location.href = '/account-settings';
-        }
-
-        function openPrivacySettings() {
-            window.location.href = '/privacy-settings';
-        }
-
-        // Help & Support
-        function openHelpCenter() {
-            window.location.href = '/help-center';
-        }
-
-        function openContactSupport() {
-            window.location.href = '/contact-support';
-        }
-
-        // Platform Integrations
-        function openFacebookIntegration() {
-            window.location.href = '/facebook-marketplace-integration';
-        }
-
-        function openShopifyIntegration() {
-            window.location.href = '/shopify-integration-demo';
-        }
-
-        function openStripeIntegration() {
-            window.location.href = '/stripe-integration';
-        }
-
-        function openDeliveryIntegration() {
-            window.location.href = '/platform-integrations';
-        }
-
-        function logout() {
-            if (confirm('Are you sure you want to log out?')) {
-                localStorage.clear();
-                window.location.href = '/';
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
             }
         }
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
-            // Add smooth scrolling
-            document.querySelectorAll('.menu-item, .featured-item').forEach(item => {
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Add click animation
-                    this.style.transform = 'scale(0.95)';
-                    setTimeout(() => {
-                        this.style.transform = '';
-                    }, 150);
-                });
-            });
-
-            // Load saved profile preference
-            const savedProfile = localStorage.getItem('marketpace-active-profile') || 'personal';
-            switchProfile(savedProfile);
-
-            // Update notification badge dynamically
-            updateNotificationBadge();
+            createParticles();
+            updateCartBadge();
+            updateUserProfile();
         });
-
-        function updateNotificationBadge() {
-            // Simulate real-time notification updates
-            const badge = document.querySelector('.notification-badge');
-            let count = 3;
-            
-            setInterval(() => {
-                if (Math.random() > 0.8) {
-                    count += Math.floor(Math.random() * 2) + 1;
-                    badge.textContent = count > 99 ? '99+' : count;
-                }
-            }, 30000);
-        }
     </script>
 </body>
 </html>
