@@ -98,31 +98,7 @@ app.get('/api/auth/facebook', (req, res) => {
   res.redirect(facebookAuthUrl);
 });
 
-app.get('/api/auth/facebook/signup', (req, res) => {
-  // Same as above but with state parameter
-  const facebookAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${process.env.FACEBOOK_APP_ID}&redirect_uri=${encodeURIComponent(process.env.FACEBOOK_REDIRECT_URI || 'https://workspace-latest-replit.repl.co/api/auth/facebook/callback')}&scope=email,public_profile&response_type=code&state=signup`;
-  res.redirect(facebookAuthUrl);
-});
 
-app.get('/api/auth/facebook/login', (req, res) => {
-  // Same as above but with state parameter
-  const facebookAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${process.env.FACEBOOK_APP_ID}&redirect_uri=${encodeURIComponent(process.env.FACEBOOK_REDIRECT_URI || 'https://workspace-latest-replit.repl.co/api/auth/facebook/callback')}&scope=email,public_profile&response_type=code&state=login`;
-  res.redirect(facebookAuthUrl);
-});
-
-app.post('/api/auth/facebook/callback', (req, res) => {
-  const { type, userData, accessToken } = req.body;
-  
-  // Store user data (in a real app, this would save to database)
-  console.log(`Facebook ${type} for user:`, userData.name, userData.email);
-  
-  res.json({
-    success: true,
-    message: `Facebook ${type} successful`,
-    user: userData,
-    redirectUrl: '/community'
-  });
-});
 
 app.get('/api/auth/facebook/callback', async (req, res) => {
   const { code, state, error } = req.query;
