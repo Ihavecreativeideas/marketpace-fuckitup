@@ -2111,6 +2111,10 @@ app.get('/tiktok-access-helper', (req, res) => {
   res.sendFile(path.join(__dirname, '../tiktok-access-helper.html'));
 });
 
+app.get('/facebook-app-approved', (req, res) => {
+  res.sendFile(path.join(__dirname, '../facebook-app-approved.html'));
+});
+
 // *** TIKTOK SHOP AUTO-SETUP SYSTEM ***
 app.post('/api/integrations/tiktok/auto-setup', async (req, res) => {
   try {
