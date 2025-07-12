@@ -92,6 +92,10 @@ app.get('/oauth-debug', (req, res) => {
   res.sendFile(path.join(__dirname, '../oauth-debug.html'));
 });
 
+app.get('/oauth-fix', (req, res) => {
+  res.sendFile(path.join(__dirname, '../oauth-fix.html'));
+});
+
 // Facebook Authentication routes
 app.get('/api/auth/facebook', (req, res) => {
   console.log('Facebook OAuth initiated with App ID:', process.env.FACEBOOK_APP_ID);
