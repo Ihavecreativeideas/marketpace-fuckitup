@@ -246,6 +246,181 @@ class RouteService {
       }
     };
   }
+
+  // Enhanced Shipt-style driver functions
+
+  // Update delivery status with customer notifications
+  async updateDeliveryStatus(deliveryId, status) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/drivers/deliveries/${deliveryId}/status`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update delivery status');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating delivery status:', error);
+      throw error;
+    }
+  }
+
+  // Send pickup photo to buyer for confirmation
+  async sendPickupPhoto(deliveryId, imageUri) {
+    try {
+      const formData = new FormData();
+      formData.append('image', {
+        uri: imageUri,
+        type: 'image/jpeg',
+        name: 'pickup_photo.jpg',
+      });
+      formData.append('deliveryId', deliveryId);
+
+      const response = await fetch(`${API_BASE_URL}/api/drivers/deliveries/${deliveryId}/photo`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to send pickup photo');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error sending pickup photo:', error);
+      throw error;
+    }
+  }
+
+  // Handle buyer rejection and return to seller
+  async returnToSeller(deliveryId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/drivers/deliveries/${deliveryId}/return`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          reason: 'buyer_rejection',
+          chargeBuyer: true // Buyer pays their delivery fee portion
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to return to seller');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error returning to seller:', error);
+      throw error;
+    }
+  }
+
+  // Bail on route and return to job board
+  async bailRoute(routeId, reason) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/drivers/routes/${routeId}/bail`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reason }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to bail on route');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error bailing on route:', error);
+      throw error;
+    }
+  }
+
+  // Pause route functionality
+  async pauseRoute(routeId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/drivers/routes/${routeId}/pause`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to pause route');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error pausing route:', error);
+      throw error;
+    }
+  }
+
+  // Resume route functionality
+  async resumeRoute(routeId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/drivers/routes/${routeId}/resume`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to resume route');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error resuming route:', error);
+      throw error;
+    }
+  }
+
+  // Calculate real-time ETA updates
+  calculateUpdatedETA(delivery, currentTime) {
+    const baseTime = 15; // Base time per delivery in minutes
+    const distance = delivery.distance || 5; // Default 5 miles if unknown
+    const driveTime = distance * 3; // 3 minutes per mile
+    
+    return new Date(currentTime.getTime() + (baseTime + driveTime) * 60 * 1000);
+  }
+
+  // Handle tipping from both buyer and seller
+  async submitTip(deliveryId, tipAmount, tipperType) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/drivers/deliveries/${deliveryId}/tip`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: tipAmount,
+          tipperType: tipperType // 'buyer' or 'seller'
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to submit tip');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error submitting tip:', error);
+      throw error;
+    }
+  }
 }
 
 export default new RouteService();

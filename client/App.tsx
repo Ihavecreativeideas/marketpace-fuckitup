@@ -320,6 +320,7 @@ import DeliveryHub from './src/screens/DeliveryHub';
 import DeliveryTrackingDemo from './src/screens/demo/DeliveryTrackingDemo';
 import EnhancedDriverApplication from './src/screens/driver/EnhancedDriverApplication';
 import UberEatsStyleDashboard from './src/screens/driver/UberEatsStyleDashboard';
+import EnhancedDriverDashboard from '../src/screens/driver/EnhancedDriverDashboard';
 import ProfessionalProfile from './src/screens/ProfessionalProfile';
 
 // Guest mode screens
@@ -1662,6 +1663,7 @@ function DeliveryStack() {
       <Stack.Screen name="DeliveryTrackingDemo" component={DeliveryTrackingDemo} options={{ title: 'Route Demo' }} />
       <Stack.Screen name="EnhancedDriverApplication" component={EnhancedDriverApplication} options={{ title: 'Driver Application' }} />
       <Stack.Screen name="UberEatsStyleDashboard" component={UberEatsStyleDashboard} options={{ title: 'Driver Dashboard' }} />
+      <Stack.Screen name="EnhancedDriverDashboard" component={EnhancedDriverDashboard} options={{ title: 'Driver Dashboard' }} />
     </Stack.Navigator>
   );
 }
