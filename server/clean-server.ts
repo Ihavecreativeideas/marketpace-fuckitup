@@ -553,6 +553,121 @@ function validatePhoneUniqueness(phoneNumber, excludeUserId = null) {
   return true;
 }
 
+// Facebook OAuth initiation route
+app.get('/api/auth/facebook/signup', (req, res) => {
+  const redirectUri = `${req.protocol}://${req.get('host')}/api/auth/facebook/redirect`;
+  const facebookAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=1043690817269912&redirect_uri=${encodeURIComponent(redirectUri)}&scope=email,public_profile,user_friends,user_birthday&response_type=code&state=signup`;
+  res.redirect(facebookAuthUrl);
+});
+
+app.get('/api/auth/facebook/login', (req, res) => {
+  const redirectUri = `${req.protocol}://${req.get('host')}/api/auth/facebook/redirect`;
+  const facebookAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=1043690817269912&redirect_uri=${encodeURIComponent(redirectUri)}&scope=email,public_profile,user_friends,user_birthday&response_type=code&state=login`;
+  res.redirect(facebookAuthUrl);
+});
+
+// Facebook OAuth redirect handler
+app.get('/api/auth/facebook/redirect', async (req, res) => {
+  try {
+    const { code, state, error, error_description } = req.query;
+    
+    if (error) {
+      return res.redirect(`/signup-login.html?error=facebook_auth_failed&message=${encodeURIComponent(error_description || 'Facebook authentication failed')}`);
+    }
+    
+    if (!code) {
+      return res.redirect('/signup-login.html?error=no_auth_code');
+    }
+    
+    // Exchange code for access token
+    const redirectUri = `${req.protocol}://${req.get('host')}/api/auth/facebook/redirect`;
+    const tokenUrl = `https://graph.facebook.com/v18.0/oauth/access_token?client_id=1043690817269912&redirect_uri=${encodeURIComponent(redirectUri)}&client_secret=${process.env.FACEBOOK_APP_SECRET}&code=${code}`;
+    
+    const tokenResponse = await fetch(tokenUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    const tokenData = await tokenResponse.json();
+    
+    if (tokenData.error) {
+      return res.redirect(`/signup-login.html?error=token_exchange_failed&message=${encodeURIComponent(tokenData.error.message)}`);
+    }
+    
+    // Get user profile from Facebook
+    const profileResponse = await fetch(`https://graph.facebook.com/v18.0/me?fields=id,name,email,first_name,last_name,picture.width(200).height(200),birthday,friends&access_token=${tokenData.access_token}`);
+    const profileData = await profileResponse.json();
+    
+    if (profileData.error) {
+      return res.redirect(`/signup-login.html?error=profile_fetch_failed&message=${encodeURIComponent(profileData.error.message)}`);
+    }
+    
+    // Check if user already exists
+    const existingUserId = 'facebook_' + profileData.id;
+    const existingUser = userDatabase.get(existingUserId);
+    
+    if (existingUser && state === 'login') {
+      // User logging in
+      existingUser.lastLoginAt = new Date().toISOString();
+      userDatabase.set(existingUserId, existingUser);
+      
+      const userQuery = encodeURIComponent(JSON.stringify({
+        success: true,
+        user: existingUser,
+        message: `Welcome back, ${existingUser.firstName}!`
+      }));
+      
+      return res.redirect(`/signup-login.html?auth_success=true&user_data=${userQuery}`);
+    }
+    
+    // Create new user profile
+    const profile = {
+      id: existingUserId,
+      facebookId: profileData.id,
+      firstName: profileData.first_name || profileData.name?.split(' ')[0] || 'User',
+      lastName: profileData.last_name || profileData.name?.split(' ').slice(1).join(' ') || '',
+      fullName: profileData.name,
+      email: profileData.email,
+      phoneNumber: null, // Will be collected later
+      profileImageUrl: profileData.picture?.data?.url,
+      birthday: profileData.birthday,
+      friendsCount: profileData.friends?.summary?.total_count || 0,
+      provider: 'facebook',
+      accessToken: tokenData.access_token,
+      accountType: 'member',
+      profileComplete: false,
+      loggedIn: true,
+      createdAt: new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
+      bio: `MarketPace member since ${new Date().toLocaleDateString()}`,
+      interests: ['shopping', 'local_community', 'marketplace'],
+      userType: 'buyer',
+      isPro: false,
+      isVerified: true,
+      allowsDelivery: true,
+      allowsPickup: true
+    };
+    
+    // Store user profile
+    userDatabase.set(profile.id, profile);
+    
+    const userQuery = encodeURIComponent(JSON.stringify({
+      success: true,
+      user: profile,
+      needsPhone: true,
+      message: `Welcome to MarketPace, ${profile.firstName}!`
+    }));
+    
+    res.redirect(`/signup-login.html?auth_success=true&user_data=${userQuery}`);
+    
+  } catch (error) {
+    console.error('Facebook OAuth redirect error:', error);
+    res.redirect(`/signup-login.html?error=oauth_failed&message=${encodeURIComponent('Authentication failed. Please try again.')}`);
+  }
+});
+
 // Facebook Authentication Callback
 app.post('/api/auth/facebook/callback', async (req, res) => {
   try {
