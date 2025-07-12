@@ -580,6 +580,204 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced Shipt-style Driver API Endpoints
+
+  // Update delivery status with customer notifications
+  app.patch('/api/drivers/deliveries/:deliveryId/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { deliveryId } = req.params;
+      const { status } = req.body;
+      
+      const validStatuses = ['pending', 'en_route', 'picked_up', 'delivering', 'completed'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ error: 'Invalid status' });
+      }
+
+      // Mock status update with customer notification
+      const mockUpdate = {
+        id: deliveryId,
+        status: status,
+        updatedAt: new Date(),
+        customerNotified: true,
+        message: `Driver has updated status to: ${status.replace('_', ' ')}`
+      };
+
+      res.json({
+        success: true,
+        message: 'Status updated and customer notified',
+        delivery: mockUpdate
+      });
+    } catch (error) {
+      console.error('Error updating delivery status:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Send pickup photo to buyer
+  app.post('/api/drivers/deliveries/:deliveryId/photo', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { deliveryId } = req.params;
+      
+      // In production, handle image upload to cloud storage
+      const mockPhotoResponse = {
+        id: deliveryId,
+        photoUrl: 'https://example.com/pickup-photos/' + deliveryId + '.jpg',
+        sentToBuyer: true,
+        sentAt: new Date(),
+        buyerResponse: null // Will be updated when buyer responds
+      };
+
+      res.json({
+        success: true,
+        message: 'Pickup photo sent to buyer for confirmation',
+        photo: mockPhotoResponse
+      });
+    } catch (error) {
+      console.error('Error sending pickup photo:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Handle buyer rejection and return to seller
+  app.post('/api/drivers/deliveries/:deliveryId/return', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { deliveryId } = req.params;
+      const { reason, chargeBuyer } = req.body;
+      
+      // Mock return processing
+      const mockReturn = {
+        id: deliveryId,
+        status: 'returning_to_seller',
+        reason: reason,
+        buyerCharged: chargeBuyer,
+        returnFee: 5.00, // Return fee charged to buyer
+        driverCompensation: 8.00, // Driver still gets compensation
+        processedAt: new Date()
+      };
+
+      res.json({
+        success: true,
+        message: 'Return initiated. Buyer charged delivery fee portion.',
+        return: mockReturn
+      });
+    } catch (error) {
+      console.error('Error processing return:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Bail on route functionality
+  app.post('/api/drivers/routes/:routeId/bail', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { routeId } = req.params;
+      const { reason } = req.body;
+      
+      // Mock route bail processing
+      const mockBail = {
+        routeId: routeId,
+        originalDriverId: userId,
+        bailReason: reason,
+        bailedAt: new Date(),
+        routeStatus: 'available', // Route goes back to job board
+        penalty: false, // No penalty for legitimate bails
+        compensation: 5.00 // Partial compensation for time spent
+      };
+
+      res.json({
+        success: true,
+        message: 'Route returned to job board for reassignment',
+        bail: mockBail
+      });
+    } catch (error) {
+      console.error('Error processing route bail:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Pause route functionality
+  app.post('/api/drivers/routes/:routeId/pause', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { routeId } = req.params;
+      
+      const mockPause = {
+        routeId: routeId,
+        status: 'paused',
+        pausedAt: new Date(),
+        customerNotification: 'Driver has temporarily paused deliveries',
+        etaAdjustment: 15 // 15 minute delay added to all ETAs
+      };
+
+      res.json({
+        success: true,
+        message: 'Route paused. Customers have been notified.',
+        pause: mockPause
+      });
+    } catch (error) {
+      console.error('Error pausing route:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Resume route functionality
+  app.post('/api/drivers/routes/:routeId/resume', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { routeId } = req.params;
+      
+      const mockResume = {
+        routeId: routeId,
+        status: 'active',
+        resumedAt: new Date(),
+        customerNotification: 'Driver has resumed deliveries',
+        recalculatedETAs: true
+      };
+
+      res.json({
+        success: true,
+        message: 'Route resumed. ETAs recalculated.',
+        resume: mockResume
+      });
+    } catch (error) {
+      console.error('Error resuming route:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Handle tips from both buyer and seller
+  app.post('/api/drivers/deliveries/:deliveryId/tip', isAuthenticated, async (req: any, res) => {
+    try {
+      const { deliveryId } = req.params;
+      const { amount, tipperType } = req.body;
+      
+      if (!['buyer', 'seller'].includes(tipperType)) {
+        return res.status(400).json({ error: 'Invalid tipper type' });
+      }
+
+      const mockTip = {
+        deliveryId: deliveryId,
+        amount: amount,
+        tipperType: tipperType,
+        processedAt: new Date(),
+        driverReceives: amount, // Driver gets 100% of tips
+        platformFee: 0
+      };
+
+      res.json({
+        success: true,
+        message: `Tip received from ${tipperType}. 100% goes to driver.`,
+        tip: mockTip
+      });
+    } catch (error) {
+      console.error('Error processing tip:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   app.post('/api/complete-stop/:routeId/:stopIndex', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;

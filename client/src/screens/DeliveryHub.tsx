@@ -196,7 +196,7 @@ export default function DeliveryHub({ navigation }: any) {
 
           <Button
             title="Open Driver Dashboard"
-            onPress={() => navigation.navigate('UberEatsStyleDashboard')}
+            onPress={() => navigation.navigate('EnhancedDriverDashboard')}
             style={styles.dashboardButton}
           />
         </Card>
