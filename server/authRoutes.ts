@@ -1203,6 +1203,238 @@ export function registerAuthRoutes(app: Express): void {
     }
   });
   
+  // Verify email verification code
+  app.post('/api/verify-email', async (req: Request, res: Response) => {
+    try {
+      const { email, code } = req.body;
+
+      if (!email || !code) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email and verification code are required'
+        });
+      }
+
+      // Find the verification token
+      const [token] = await db.select()
+        .from(emailVerificationTokens)
+        .where(
+          and(
+            eq(emailVerificationTokens.email, email),
+            eq(emailVerificationTokens.code, code),
+            eq(emailVerificationTokens.isUsed, false)
+          )
+        )
+        .limit(1);
+
+      if (!token) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid or expired verification code'
+        });
+      }
+
+      // Check if token has expired
+      if (new Date() > token.expiresAt) {
+        return res.status(400).json({
+          success: false,
+          message: 'Verification code has expired'
+        });
+      }
+
+      // Mark token as used
+      await db.update(emailVerificationTokens)
+        .set({ isUsed: true })
+        .where(eq(emailVerificationTokens.id, token.id));
+
+      // Update user's email verification status
+      await db.update(users)
+        .set({ 
+          emailVerifiedAt: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, token.userId));
+
+      res.json({
+        success: true,
+        message: 'Email verified successfully'
+      });
+
+    } catch (error) {
+      console.error('Email verification error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to verify email'
+      });
+    }
+  });
+
+  // Verify SMS verification code
+  app.post('/api/verify-sms', async (req: Request, res: Response) => {
+    try {
+      const { phone, code, purpose = 'signup' } = req.body;
+
+      if (!phone || !code) {
+        return res.status(400).json({
+          success: false,
+          message: 'Phone number and verification code are required'
+        });
+      }
+
+      // Find the verification code
+      const [smsCode] = await db.select()
+        .from(smsVerificationCodes)
+        .where(
+          and(
+            eq(smsVerificationCodes.phoneNumber, phone),
+            eq(smsVerificationCodes.code, code),
+            eq(smsVerificationCodes.purpose, purpose),
+            eq(smsVerificationCodes.isUsed, false)
+          )
+        )
+        .limit(1);
+
+      if (!smsCode) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid or expired verification code'
+        });
+      }
+
+      // Check if code has expired
+      if (new Date() > smsCode.expiresAt) {
+        return res.status(400).json({
+          success: false,
+          message: 'Verification code has expired'
+        });
+      }
+
+      // Mark code as used
+      await db.update(smsVerificationCodes)
+        .set({ isUsed: true })
+        .where(eq(smsVerificationCodes.id, smsCode.id));
+
+      // Update user's phone verification status
+      await db.update(users)
+        .set({ 
+          phoneVerifiedAt: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, smsCode.userId));
+
+      res.json({
+        success: true,
+        message: 'Phone number verified successfully'
+      });
+
+    } catch (error) {
+      console.error('SMS verification error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to verify phone number'
+      });
+    }
+  });
+
+  // Resend verification code
+  app.post('/api/resend-verification', async (req: Request, res: Response) => {
+    try {
+      const { email, phone, type } = req.body;
+
+      if (type === 'email' && email) {
+        // Generate new email verification code
+        const emailCode = generateVerificationCode();
+        const emailExpiresAt = new Date();
+        emailExpiresAt.setHours(emailExpiresAt.getHours() + 1);
+
+        // Find user by email
+        const [user] = await db.select()
+          .from(users)
+          .where(eq(users.email, email))
+          .limit(1);
+
+        if (!user) {
+          return res.status(404).json({
+            success: false,
+            message: 'User not found'
+          });
+        }
+
+        // Create new verification token
+        await db.insert(emailVerificationTokens).values({
+          userId: user.id,
+          email: email,
+          token: generateResetToken(),
+          code: emailCode,
+          expiresAt: emailExpiresAt,
+          isUsed: false,
+          attempts: 0,
+          createdAt: new Date()
+        });
+
+        // Send verification email
+        await emailService.sendVerificationEmail(email, emailCode);
+
+        res.json({
+          success: true,
+          message: 'Verification email sent successfully'
+        });
+
+      } else if (type === 'sms' && phone) {
+        // Generate new SMS verification code
+        const smsCode = generateVerificationCode();
+        const smsExpiresAt = new Date();
+        smsExpiresAt.setMinutes(smsExpiresAt.getMinutes() + 10);
+
+        // Find user by phone
+        const [user] = await db.select()
+          .from(users)
+          .where(eq(users.phoneNumber, phone))
+          .limit(1);
+
+        if (!user) {
+          return res.status(404).json({
+            success: false,
+            message: 'User not found'
+          });
+        }
+
+        // Create new verification code
+        await db.insert(smsVerificationCodes).values({
+          userId: user.id,
+          phoneNumber: phone,
+          code: smsCode,
+          purpose: 'signup',
+          expiresAt: smsExpiresAt,
+          isUsed: false,
+          attempts: 0,
+          createdAt: new Date()
+        });
+
+        // Send SMS verification code
+        await smsService.sendVerificationCode(phone, smsCode);
+
+        res.json({
+          success: true,
+          message: 'SMS verification code sent successfully'
+        });
+
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid verification type or missing contact information'
+        });
+      }
+
+    } catch (error) {
+      console.error('Resend verification error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to resend verification code'
+      });
+    }
+  });
+
   // Add security alert
   app.post('/api/user/security-alert', sessionManager.authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
