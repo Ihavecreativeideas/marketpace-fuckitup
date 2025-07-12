@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MarketPace Menu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -65,31 +66,132 @@
             background: #d8dadf;
         }
 
-        .profile-section {
+        .profile-switcher {
             padding: 16px;
-            border-bottom: 1px solid #e4e6ea;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: background-color 0.2s;
+            margin-bottom: 20px;
+            background: #f0f2f5;
+            border-radius: 12px;
+            margin: 0 16px 20px;
+            display: none;
         }
 
-        .profile-section:hover {
+        .profile-switcher.visible {
+            display: block;
+        }
+
+        .switcher-header {
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #dadde1;
+        }
+
+        .profile-option {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .profile-option:hover {
+            background: #e4e6ea;
+        }
+
+        .profile-option.active {
+            background: #1877f2;
+            color: white;
+        }
+
+        .profile-option.active .profile-details .profile-name,
+        .profile-option.active .profile-details .profile-type {
+            color: white;
+        }
+
+        .profile-details {
+            flex: 1;
+        }
+
+        .profile-type {
+            font-size: 12px;
+            color: #65676b;
+        }
+
+        .active-indicator {
+            position: absolute;
+            right: 12px;
+            font-size: 14px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .active-profile-display {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-radius: 12px;
+            margin: 0 16px 20px;
+            position: relative;
+            background: white;
+            border: 2px solid #1877f2;
+        }
+
+        .active-profile-display:hover {
             background: #f0f2f5;
         }
 
-        .profile-avatar {
+        .active-avatar {
             width: 60px;
             height: 60px;
+            background: linear-gradient(45deg, #1877f2, #42a5f5);
             border-radius: 50%;
-            background: linear-gradient(45deg, #667eea, #764ba2);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
             color: white;
             font-weight: bold;
+            font-size: 24px;
+            margin-right: 12px;
+        }
+
+        .switch-indicator {
+            position: absolute;
+            top: 10px;
+            right: 16px;
+            background: #1877f2;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            margin-right: 12px;
+        }
+
+        .profile-avatar.personal {
+            background: linear-gradient(45deg, #1877f2, #42a5f5);
+        }
+
+        .profile-avatar.business {
+            background: linear-gradient(45deg, #ff6b35, #8a2be2);
         }
 
         .profile-info {
@@ -110,8 +212,8 @@
 
         .notification-badge {
             position: absolute;
-            top: -4px;
-            right: -4px;
+            top: 10px;
+            right: 50px;
             background: #e41e3f;
             color: white;
             border-radius: 50%;
@@ -398,13 +500,48 @@
             </div>
         </div>
 
-        <div class="profile-section" onclick="openProfile()">
-            <div class="profile-avatar">BB</div>
+        <!-- Profile Switcher Section -->
+        <div class="profile-switcher">
+            <div class="switcher-header">
+                <span style="font-size: 14px; color: #65676b; font-weight: 600;">Switch Profile</span>
+            </div>
+            
+            <div class="profile-option active" id="personalProfile" onclick="switchProfile('personal')">
+                <div class="profile-avatar personal">
+                    <span>BB</span>
+                </div>
+                <div class="profile-details">
+                    <div class="profile-name">Brooke Brown</div>
+                    <div class="profile-type">Personal</div>
+                </div>
+                <div class="active-indicator">✓</div>
+            </div>
+            
+            <div class="profile-option" id="businessProfile" onclick="switchProfile('business')">
+                <div class="profile-avatar business">
+                    <span>MP</span>
+                </div>
+                <div class="profile-details">
+                    <div class="profile-name">MarketPace Pro</div>
+                    <div class="profile-type">Business</div>
+                </div>
+                <div class="active-indicator" style="opacity: 0;">✓</div>
+            </div>
+        </div>
+
+        <!-- Current Active Profile Display -->
+        <div class="active-profile-display" id="activeProfileDisplay" onclick="toggleProfileSwitcher()">
+            <div class="profile-avatar active-avatar" id="currentAvatar">
+                <span id="activeAvatar">BB</span>
+            </div>
             <div class="profile-info">
-                <div class="profile-name">Brooke Brown</div>
-                <div class="profile-status">MarketPace Pro Member</div>
+                <div class="profile-name" id="activeName">Brooke Brown</div>
+                <div class="profile-status" id="activeStatus">Personal Profile</div>
             </div>
             <div class="notification-badge">3</div>
+            <div class="switch-indicator" title="Switch Profile">
+                <i class="fas fa-exchange-alt"></i>
+            </div>
         </div>
 
         <div class="menu-section">
@@ -694,6 +831,78 @@
         }
 
         // Profile and Settings
+        function toggleProfileSwitcher() {
+            const switcher = document.querySelector('.profile-switcher');
+            switcher.classList.toggle('visible');
+        }
+
+        function switchProfile(profileType) {
+            const personalOption = document.getElementById('personalProfile');
+            const businessOption = document.getElementById('businessProfile');
+            const activeAvatar = document.getElementById('activeAvatar');
+            const activeName = document.getElementById('activeName');
+            const activeStatus = document.getElementById('activeStatus');
+            const currentAvatar = document.getElementById('currentAvatar');
+            
+            // Update active states
+            personalOption.classList.remove('active');
+            businessOption.classList.remove('active');
+            
+            // Update active indicators
+            personalOption.querySelector('.active-indicator').style.opacity = '0';
+            businessOption.querySelector('.active-indicator').style.opacity = '0';
+            
+            if (profileType === 'personal') {
+                personalOption.classList.add('active');
+                personalOption.querySelector('.active-indicator').style.opacity = '1';
+                
+                // Update display
+                activeAvatar.textContent = 'BB';
+                activeName.textContent = 'Brooke Brown';
+                activeStatus.textContent = 'Personal Profile';
+                currentAvatar.className = 'profile-avatar active-avatar';
+                currentAvatar.style.background = 'linear-gradient(45deg, #1877f2, #42a5f5)';
+                
+                // Update menu sections based on profile
+                updateMenuForProfile('personal');
+                
+            } else if (profileType === 'business') {
+                businessOption.classList.add('active');
+                businessOption.querySelector('.active-indicator').style.opacity = '1';
+                
+                // Update display
+                activeAvatar.textContent = 'MP';
+                activeName.textContent = 'MarketPace Pro';
+                activeStatus.textContent = 'Business Profile';
+                currentAvatar.className = 'profile-avatar active-avatar';
+                currentAvatar.style.background = 'linear-gradient(45deg, #ff6b35, #8a2be2)';
+                
+                // Update menu sections based on profile
+                updateMenuForProfile('business');
+            }
+            
+            // Hide switcher after selection
+            document.querySelector('.profile-switcher').classList.remove('visible');
+            
+            // Store preference
+            localStorage.setItem('marketpace-active-profile', profileType);
+        }
+
+        function updateMenuForProfile(profileType) {
+            // Show/hide menu sections based on profile type
+            const professionalTools = document.querySelector('.menu-section');
+            
+            if (profileType === 'business') {
+                // Highlight business features
+                professionalTools.style.border = '2px solid #ff6b35';
+                professionalTools.style.background = 'rgba(255, 107, 53, 0.05)';
+            } else {
+                // Remove business highlighting
+                professionalTools.style.border = 'none';
+                professionalTools.style.background = 'transparent';
+            }
+        }
+
         function openProfile() {
             window.location.href = '/profile';
         }
@@ -761,6 +970,10 @@
                     }, 150);
                 });
             });
+
+            // Load saved profile preference
+            const savedProfile = localStorage.getItem('marketpace-active-profile') || 'personal';
+            switchProfile(savedProfile);
 
             // Update notification badge dynamically
             updateNotificationBadge();
