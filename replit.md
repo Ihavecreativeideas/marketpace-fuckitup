@@ -278,6 +278,15 @@ MarketPace is a React Native mobile application that prioritizes community empow
 ✓ Google OAuth authentication confirmed working with proper Client ID loading after server restart
 ✓ Facebook app approval status maintained with full production integration capabilities
 
+✓ **CRITICAL OAUTH ROUTING FIX - REPLIT EXTERNAL URL RESOLVED** (January 12, 2025)
+✓ Fixed critical server routing issue by using process.env.PORT instead of hardcoded port 5000
+✓ Updated OAuth redirect URIs from /api/auth/* to /auth/* endpoints for Facebook and Google
+✓ Server now properly binds to Replit's external URL system using dynamic port assignment
+✓ External URL confirmed working: https://faf26e36-4adc-420b-9f18-2050868598c7-00-16nyruavjog3u.spock.replit.dev
+✓ OAuth endpoints returning proper 302 redirects - Facebook and Google authentication ready for testing
+✓ Updated server to display correct external URL using process.env.REPLIT_DOMAINS
+✓ All OAuth configurations properly updated with correct redirect URIs for both development and production
+
 ✓ **FACEBOOK APP APPROVAL & FULL INTEGRATION ACTIVATION** (January 12, 2025)
 ✓ Facebook has officially approved the MarketPace application for production use
 ✓ Created comprehensive Facebook app approval celebration page at /facebook-app-approved
