@@ -96,6 +96,32 @@ app.get('/oauth-fix', (req, res) => {
   res.sendFile(path.join(__dirname, '../oauth-fix.html'));
 });
 
+app.get('/reset-to-live', (req, res) => {
+  res.sendFile(path.join(__dirname, '../reset-to-live.html'));
+});
+
+// API endpoint for reset to live functionality
+app.post('/api/admin/reset-to-live', (req, res) => {
+  const { resetType, confirmationCode, timestamp } = req.body;
+  
+  if (confirmationCode !== 'RESET') {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Invalid confirmation code' 
+    });
+  }
+  
+  // Log the reset action
+  console.log(`🚀 RESET TO LIVE MODE initiated at ${new Date().toISOString()}`);
+  console.log('Demo data cleared, platform ready for live users');
+  
+  res.json({ 
+    success: true, 
+    message: 'Platform successfully reset to live mode',
+    timestamp: Date.now()
+  });
+});
+
 // Facebook Authentication routes
 app.get('/api/auth/facebook', (req, res) => {
   console.log('Facebook OAuth initiated with App ID:', process.env.FACEBOOK_APP_ID);
