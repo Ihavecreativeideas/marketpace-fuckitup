@@ -355,81 +355,9 @@
         }
 
         function signupWithFacebook() {
-            console.log('Facebook signup clicked');
-            try {
-                // Initialize Facebook Login
-                if (typeof FB !== 'undefined') {
-                    FB.login(function(response) {
-                        if (response.authResponse) {
-                            // Get user info from Facebook
-                            FB.api('/me', { fields: 'name,email,picture.type(large),location,friends' }, function(userInfo) {
-                                console.log('Facebook user info:', userInfo);
-                                
-                                const userData = {
-                                    id: userInfo.id,
-                                    facebookId: userInfo.id,
-                                    name: userInfo.name,
-                                    email: userInfo.email,
-                                    profilePicture: userInfo.picture ? userInfo.picture.data.url : null,
-                                    location: userInfo.location ? userInfo.location.name : null,
-                                    phoneNumber: null, // Facebook doesn't provide phone reliably
-                                    friendsCount: userInfo.friends ? userInfo.friends.data.length : 0,
-                                    loggedIn: true,
-                                    accountType: 'facebook',
-                                    provider: 'facebook'
-                                };
-                                
-                                // Store user data
-                                localStorage.setItem('marketpaceUser', JSON.stringify(userData));
-                                
-                                // Send to server
-                                fetch('/api/auth/facebook/callback', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify({
-                                        type: 'signup',
-                                        userData: userData,
-                                        accessToken: response.authResponse.accessToken
-                                    })
-                                })
-                                .then(response => response.json())
-                                .then(result => {
-                                    if (result.success) {
-                                        // Check if phone number is needed
-                                        if (!result.user.phoneNumber) {
-                                            promptForPhoneNumber(userData, result.user);
-                                        } else {
-                                            alert(`Welcome to MarketPace, ${result.user.firstName}!`);
-                                            window.location.href = '/community';
-                                        }
-                                    } else {
-                                        if (result.message.includes('phone number')) {
-                                            alert(result.message + '\n\nPlease provide a unique phone number to continue.');
-                                            promptForPhoneNumber(userData, result.user);
-                                        } else {
-                                            alert('Failed to complete Facebook signup: ' + result.message);
-                                        }
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Facebook signup error:', error);
-                                    alert('Facebook signup failed. Please try again.');
-                                });
-                            });
-                        } else {
-                            console.log('User cancelled login or did not fully authorize.');
-                        }
-                    }, {scope: 'email,public_profile,user_friends,user_location'});
-                } else {
-                    // Fallback to server-side OAuth
-                    window.location.href = '/api/auth/facebook/signup';
-                }
-            } catch (error) {
-                console.error('Facebook auth error:', error);
-                alert('Facebook authentication failed. Please try again.');
-            }
+            console.log('Facebook signup clicked - using server-side OAuth');
+            // Use server-side OAuth flow to bypass JavaScript SDK domain issues
+            window.location.href = '/api/auth/facebook/signup';
         }
 
         function signupWithGoogle() {
@@ -486,81 +414,9 @@
         }
 
         function loginWithFacebook() {
-            console.log('Facebook login clicked');
-            try {
-                // Initialize Facebook Login
-                if (typeof FB !== 'undefined') {
-                    FB.login(function(response) {
-                        if (response.authResponse) {
-                            // Get user info from Facebook
-                            FB.api('/me', { fields: 'name,email,picture.type(large),location,friends' }, function(userInfo) {
-                                console.log('Facebook user info:', userInfo);
-                                
-                                const userData = {
-                                    id: userInfo.id,
-                                    facebookId: userInfo.id,
-                                    name: userInfo.name,
-                                    email: userInfo.email,
-                                    profilePicture: userInfo.picture ? userInfo.picture.data.url : null,
-                                    location: userInfo.location ? userInfo.location.name : null,
-                                    phoneNumber: null, // Facebook doesn't provide phone reliably
-                                    friendsCount: userInfo.friends ? userInfo.friends.data.length : 0,
-                                    loggedIn: true,
-                                    accountType: 'facebook',
-                                    provider: 'facebook'
-                                };
-                                
-                                // Store user data
-                                localStorage.setItem('marketpaceUser', JSON.stringify(userData));
-                                
-                                // Send to server
-                                fetch('/api/auth/facebook/callback', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify({
-                                        type: 'login',
-                                        userData: userData,
-                                        accessToken: response.authResponse.accessToken
-                                    })
-                                })
-                                .then(response => response.json())
-                                .then(result => {
-                                    if (result.success) {
-                                        // Check if phone number is needed
-                                        if (!result.user.phoneNumber) {
-                                            promptForPhoneNumber(userData, result.user);
-                                        } else {
-                                            alert(`Welcome back, ${result.user.firstName}!`);
-                                            window.location.href = '/community';
-                                        }
-                                    } else {
-                                        if (result.message.includes('phone number')) {
-                                            alert(result.message + '\n\nPlease provide a unique phone number to continue.');
-                                            promptForPhoneNumber(userData, result.user);
-                                        } else {
-                                            alert('Failed to complete Facebook login: ' + result.message);
-                                        }
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Facebook login error:', error);
-                                    alert('Facebook login failed. Please try again.');
-                                });
-                            });
-                        } else {
-                            console.log('User cancelled login or did not fully authorize.');
-                        }
-                    }, {scope: 'email,public_profile,user_friends,user_location'});
-                } else {
-                    // Fallback to server-side OAuth
-                    window.location.href = '/api/auth/facebook/login';
-                }
-            } catch (error) {
-                console.error('Facebook auth error:', error);
-                alert('Facebook authentication failed. Please try again.');
-            }
+            console.log('Facebook login clicked - using server-side OAuth');
+            // Use server-side OAuth flow to bypass JavaScript SDK domain issues
+            window.location.href = '/api/auth/facebook/login';
         }
 
         function loginWithGoogle() {
@@ -1250,11 +1106,47 @@
 
         // Initialize everything when page loads
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, setting up login form');
+            
+            // Check for OAuth callback parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const authSuccess = urlParams.get('auth_success');
+            const userData = urlParams.get('user_data');
+            const error = urlParams.get('error');
+            const message = urlParams.get('message');
+            
+            if (authSuccess && userData) {
+                try {
+                    const user = JSON.parse(decodeURIComponent(userData));
+                    console.log('OAuth success:', user);
+                    
+                    // Store user data
+                    localStorage.setItem('marketpaceUser', JSON.stringify(user.user));
+                    
+                    if (user.needsPhone) {
+                        promptForPhoneNumber(user.user, user.user);
+                    } else {
+                        alert(user.message);
+                        window.location.href = '/community';
+                    }
+                    return;
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
+            }
+            
+            if (error) {
+                const errorMessage = decodeURIComponent(message || 'Authentication failed');
+                alert('Authentication Error: ' + errorMessage);
+                
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            
             loadGoogleIdentityServices();
             loadFacebookSDK();
             handleGoogleOAuthCallback();
             
-            console.log('DOM loaded, setting up login form');
             console.log('All functions loaded successfully');
         });
     </script>

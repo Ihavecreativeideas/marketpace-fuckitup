@@ -4,28 +4,17 @@
 
 ### Facebook Configuration Required
 
-**1. Enable JavaScript SDK in Facebook Developer Console:**
-- Go to https://developers.facebook.com/
-- Select your app: **MarketPace** (App ID: 1043690817269912)
-- Go to **Facebook Login** → **Settings**
-- Toggle **"Login with Javascript SDK"** to **YES**
+**ALTERNATIVE SOLUTION IMPLEMENTED:** Server-side OAuth flow that bypasses JavaScript SDK domain issues!
 
-**2. Add App Domains:**
-- In your Facebook app settings → **Basic Settings**
-- Add these domains to **App Domains** field:
+**Required Facebook App Configuration:**
+- Go to https://developers.facebook.com/apps/1043690817269912
+- Navigate to **Facebook Login** → **Settings**
+- Add to **Valid OAuth Redirect URIs**:
   ```
-  replit.dev
-  replit.co
-  ihavecreativeid-workspace.replit.dev
+  https://ihavecreativeid-workspace.replit.dev/api/auth/facebook/redirect
   ```
 
-**3. Add Valid OAuth Redirect URIs:**
-- Go to **Facebook Login** → **Settings**
-- Add these to **Valid OAuth Redirect URIs**:
-  ```
-  https://ihavecreativeid-workspace.replit.dev/signup-login.html
-  https://ihavecreativeid-workspace.replit.dev/api/auth/facebook/callback
-  ```
+**No JavaScript SDK configuration needed!** The authentication now uses server-side OAuth flow that works without domain restrictions.
 
 ### Google OAuth Configuration Required
 
