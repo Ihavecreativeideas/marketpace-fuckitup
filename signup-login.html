@@ -379,21 +379,49 @@
         function signupWithGoogle() {
             console.log('Google signup clicked');
             try {
-                // Create demo user for Google signup
-                const userData = {
-                    id: 'google-user-' + Math.random().toString(36).substr(2, 9),
-                    email: 'google.user@demo.com',
-                    name: 'Google User',
-                    loggedIn: true,
-                    accountType: 'google',
-                    provider: 'google'
-                };
+                // Set signup mode for callback
+                window.googleAuthMode = 'signup';
                 
-                localStorage.setItem('marketpaceUser', JSON.stringify(userData));
-                window.location.href = '/community';
+                // Initialize Google Sign-In
+                if (typeof google !== 'undefined' && google.accounts) {
+                    // Use One Tap or popup
+                    google.accounts.id.prompt((notification) => {
+                        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                            // If One Tap doesn't work, create custom sign-in button
+                            triggerGoogleSignIn();
+                        }
+                    });
+                } else {
+                    // Fallback: trigger sign-in when Google loads
+                    setTimeout(() => signupWithGoogle(), 1000);
+                }
             } catch (error) {
                 console.error('Google auth error:', error);
                 alert('Google authentication failed. Please try again.');
+            }
+        }
+
+        function triggerGoogleSignIn() {
+            if (typeof google !== 'undefined' && google.accounts) {
+                // Create a temporary div for the sign-in button
+                const tempDiv = document.createElement('div');
+                tempDiv.style.position = 'absolute';
+                tempDiv.style.left = '-9999px';
+                document.body.appendChild(tempDiv);
+                
+                google.accounts.id.renderButton(tempDiv, {
+                    theme: 'outline',
+                    size: 'large'
+                });
+                
+                // Trigger click on the button
+                setTimeout(() => {
+                    const button = tempDiv.querySelector('div[role="button"]');
+                    if (button) {
+                        button.click();
+                    }
+                    document.body.removeChild(tempDiv);
+                }, 100);
             }
         }
 
@@ -422,18 +450,22 @@
         function loginWithGoogle() {
             console.log('Google login clicked');
             try {
-                // Create demo user for Google login
-                const userData = {
-                    id: 'google-user-' + Math.random().toString(36).substr(2, 9),
-                    email: 'google.user@demo.com',
-                    name: 'Google User',
-                    loggedIn: true,
-                    accountType: 'google',
-                    provider: 'google'
-                };
+                // Set login mode for callback
+                window.googleAuthMode = 'login';
                 
-                localStorage.setItem('marketpaceUser', JSON.stringify(userData));
-                window.location.href = '/community';
+                // Initialize Google Sign-In
+                if (typeof google !== 'undefined' && google.accounts) {
+                    // Use One Tap or popup
+                    google.accounts.id.prompt((notification) => {
+                        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                            // If One Tap doesn't work, create custom sign-in button
+                            triggerGoogleSignIn();
+                        }
+                    });
+                } else {
+                    // Fallback: trigger sign-in when Google loads
+                    setTimeout(() => loginWithGoogle(), 1000);
+                }
             } catch (error) {
                 console.error('Google auth error:', error);
                 alert('Google authentication failed. Please try again.');
@@ -748,6 +780,82 @@
             window.location.href = '/community';
         }
 
+        // Google Client ID
+        const GOOGLE_CLIENT_ID = '167280787729-dgvuodnecaeraphr8rulh5u0028f7qbk.apps.googleusercontent.com';
+
+        // Initialize Google Sign-In
+        function initializeGoogleSignIn() {
+            if (typeof google !== 'undefined' && google.accounts) {
+                google.accounts.id.initialize({
+                    client_id: GOOGLE_CLIENT_ID,
+                    callback: handleGoogleAuthResponse,
+                    auto_select: false,
+                    cancel_on_tap_outside: false
+                });
+            }
+        }
+
+        // Handle Google authentication response
+        async function handleGoogleAuthResponse(response) {
+            try {
+                // Decode the JWT token to get user info
+                const payload = JSON.parse(atob(response.credential.split('.')[1]));
+                
+                const userData = {
+                    id: payload.sub,
+                    email: payload.email,
+                    name: payload.name,
+                    given_name: payload.given_name,
+                    family_name: payload.family_name,
+                    picture: payload.picture,
+                    email_verified: payload.email_verified,
+                    loggedIn: true,
+                    accountType: 'google',
+                    provider: 'google',
+                    accessToken: response.credential
+                };
+
+                // Store user data
+                localStorage.setItem('marketpaceUser', JSON.stringify(userData));
+
+                // Send to server for account creation/login
+                const serverResponse = await fetch('/api/auth/google/callback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        type: window.googleAuthMode || 'signup', // Use the mode set by the button
+                        userData: userData,
+                        accessToken: response.credential,
+                        idToken: response.credential
+                    })
+                });
+
+                const result = await serverResponse.json();
+                
+                if (result.success) {
+                    // Check if phone number is needed
+                    if (!userData.phoneNumber) {
+                        promptForPhoneNumber(userData, result.user);
+                    } else {
+                        alert(`Welcome to MarketPace, ${userData.given_name || userData.name}!`);
+                        window.location.href = '/community';
+                    }
+                } else {
+                    if (result.message.includes('phone number')) {
+                        alert(result.message + '\n\nPlease provide a unique phone number to continue.');
+                        promptForPhoneNumber(userData, userData);
+                    } else {
+                        alert('Failed to complete Google authentication: ' + result.message);
+                    }
+                }
+            } catch (error) {
+                console.error('Google auth response error:', error);
+                alert('Failed to process Google authentication.');
+            }
+        }
+
         // Initialize Facebook SDK
         window.fbAsyncInit = function() {
             FB.init({
@@ -758,6 +866,16 @@
             });
         };
 
+        // Load Google Identity Services
+        function loadGoogleIdentityServices() {
+            const script = document.createElement('script');
+            script.src = 'https://accounts.google.com/gsi/client';
+            script.async = true;
+            script.defer = true;
+            script.onload = initializeGoogleSignIn;
+            document.head.appendChild(script);
+        }
+
         // Load Facebook SDK
         (function(d, s, id) {
             var js, fjs = d.getElementsByTagName(s)[0];
@@ -766,6 +884,162 @@
             js.src = "https://connect.facebook.net/en_US/sdk.js";
             fjs.parentNode.insertBefore(js, fjs);
         }(document, 'script', 'facebook-jssdk'));
+
+        // Phone number collection modal
+        function promptForPhoneNumber(userData, userSession) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            `;
+            
+            modal.innerHTML = `
+                <div style="
+                    background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 100%);
+                    padding: 30px;
+                    border-radius: 20px;
+                    border: 2px solid #6b46c1;
+                    box-shadow: 0 0 30px rgba(107, 70, 193, 0.3);
+                    max-width: 400px;
+                    width: 90%;
+                    color: #e2e8f0;
+                    text-align: center;
+                ">
+                    <h2 style="margin: 0 0 20px 0; color: #93c5fd;">Complete Your Profile</h2>
+                    <p style="margin: 0 0 20px 0; line-height: 1.5;">
+                        To ensure account security, please provide a unique phone number. Only one account per phone number is allowed.
+                    </p>
+                    <input type="tel" id="phoneInput" placeholder="Enter your phone number" style="
+                        width: 100%;
+                        padding: 12px;
+                        border: 2px solid #6b46c1;
+                        border-radius: 10px;
+                        background: rgba(0, 0, 0, 0.3);
+                        color: #e2e8f0;
+                        font-size: 16px;
+                        margin-bottom: 20px;
+                        box-sizing: border-box;
+                    ">
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button onclick="submitPhoneNumber()" style="
+                            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+                            color: white;
+                            border: none;
+                            padding: 12px 24px;
+                            border-radius: 10px;
+                            cursor: pointer;
+                            font-size: 16px;
+                            font-weight: 600;
+                        ">Complete Registration</button>
+                        <button onclick="skipPhoneNumber()" style="
+                            background: rgba(255, 255, 255, 0.1);
+                            color: #e2e8f0;
+                            border: 2px solid #6b46c1;
+                            padding: 12px 24px;
+                            border-radius: 10px;
+                            cursor: pointer;
+                            font-size: 16px;
+                        ">Skip for Now</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Store userData for later use
+            window.pendingUserData = userData;
+            window.pendingUserSession = userSession;
+            
+            // Focus phone input
+            document.getElementById('phoneInput').focus();
+            
+            // Handle Enter key
+            document.getElementById('phoneInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    submitPhoneNumber();
+                }
+            });
+        }
+
+        async function submitPhoneNumber() {
+            const phoneInput = document.getElementById('phoneInput');
+            const phoneNumber = phoneInput.value.trim();
+            
+            if (!phoneNumber) {
+                alert('Please enter a phone number.');
+                return;
+            }
+            
+            // Validate phone number format
+            const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+            if (!phoneRegex.test(phoneNumber.replace(/[\s\-\(\)]/g, ''))) {
+                alert('Please enter a valid phone number.');
+                return;
+            }
+            
+            try {
+                // Update user profile with phone number
+                const userData = window.pendingUserData;
+                userData.phoneNumber = phoneNumber;
+                
+                // Send updated profile to server
+                const response = await fetch('/api/auth/google/callback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        type: 'update_phone',
+                        userData: userData,
+                        accessToken: userData.accessToken,
+                        idToken: userData.accessToken
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update localStorage
+                    localStorage.setItem('marketpaceUser', JSON.stringify(userData));
+                    
+                    // Remove modal
+                    document.body.removeChild(document.querySelector('[style*="position: fixed"]'));
+                    
+                    alert(`Welcome to MarketPace, ${userData.given_name || userData.name}! Your phone number has been added.`);
+                    window.location.href = '/community';
+                } else {
+                    alert('Failed to update phone number: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Phone update error:', error);
+                alert('Failed to update phone number. Please try again.');
+            }
+        }
+
+        function skipPhoneNumber() {
+            // Remove modal
+            document.body.removeChild(document.querySelector('[style*="position: fixed"]'));
+            
+            // Continue to community with incomplete profile
+            const userData = window.pendingUserData;
+            localStorage.setItem('marketpaceUser', JSON.stringify(userData));
+            
+            alert(`Welcome to MarketPace, ${userData.given_name || userData.name}! You can add your phone number later in your profile.`);
+            window.location.href = '/community';
+        }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadGoogleIdentityServices();
+        });
     </script>
 </body>
 </html>
