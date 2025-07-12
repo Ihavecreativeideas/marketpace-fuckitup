@@ -143,9 +143,17 @@ app.get('/api/auth/facebook/callback', async (req, res) => {
         
         console.log('Facebook OAuth successful for user:', profile.name, profile.email);
         
-        // Store user data in session or database here if needed
-        // For now, redirect to community feed
-        res.redirect('/community');
+        // Encode user data to pass to community page
+        const userDataEncoded = encodeURIComponent(JSON.stringify({
+          name: profile.name,
+          email: profile.email,
+          profilePicture: profile.picture?.data?.url || null,
+          loggedIn: true,
+          provider: 'facebook'
+        }));
+        
+        // Redirect to community with user data
+        res.redirect(`/community?user=${userDataEncoded}`);
       } else {
         console.log('Facebook token exchange failed:', tokenData);
         res.redirect('/signup-login?error=facebook_token_failed');
