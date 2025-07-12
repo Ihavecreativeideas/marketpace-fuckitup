@@ -11,6 +11,7 @@ import { registerScammerProtectionRoutes } from "./antiScammerProtection";
 import { registerFacebookRoutes } from "./facebookIntegration";
 import { setupFacebookAuth } from "./facebookAuth";
 import { facebookAPI } from "./facebookGraphAPI";
+import { registerAuthRoutes } from "./authRoutes";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -25,6 +26,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Facebook Auth setup (optional - requires credentials)
   setupFacebookAuth(app);
+
+  // Enhanced authentication routes (signup, login, password reset)
+  registerAuthRoutes(app);
 
   // RLS Context middleware - sets user context for database security policies
   app.use(async (req: any, res, next) => {

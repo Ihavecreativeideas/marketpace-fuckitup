@@ -398,13 +398,16 @@
                     const userData = {
                         email: email,
                         phone: phone,
+                        userId: data.user?.id,
+                        firstName: data.user?.firstName,
+                        lastName: data.user?.lastName,
                         loggedIn: true,
                         loginTime: Date.now()
                     };
                     
                     localStorage.setItem('marketpaceUser', JSON.stringify(userData));
                     
-                    alert(`Welcome to MarketPace! A verification code has been sent to ${phone}. You're now logged in and will stay logged in for future visits.`);
+                    alert(`Welcome to MarketPace! ${data.message} You're now logged in and will stay logged in for future visits.`);
                     
                     // Redirect to community feed
                     window.location.href = '/community';
@@ -417,28 +420,42 @@
             }
         }
 
-        function forgotPassword() {
+        async function forgotPassword() {
             const email = prompt('Enter your email address to reset your password:');
-            if (email) {
-                // Simulate sending reset email
-                fetch('/api/forgot-password', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email: email }),
-                })
-                .then(response => response.json())
-                .then(data => {
+            if (email && email.trim()) {
+                try {
+                    const response = await fetch('/api/forgot-password', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email: email.trim() }),
+                    });
+
+                    const data = await response.json();
+                    
                     if (data.success) {
-                        alert(`Password reset email sent to ${email}. Check your inbox for reset instructions.`);
+                        // Show success message with reset link for demo
+                        let message = `Password reset email sent to ${email}. Check your inbox for reset instructions.`;
+                        
+                        if (data.resetUrl) {
+                            // In demo mode, show the reset link
+                            message += `\n\nDemo Mode: Click here to reset password: ${window.location.origin}${data.resetUrl}`;
+                        }
+                        
+                        alert(message);
+                        
+                        // In demo mode, offer to open reset page directly
+                        if (data.resetUrl && confirm('Demo Mode: Would you like to go to the password reset page now?')) {
+                            window.location.href = data.resetUrl;
+                        }
                     } else {
-                        alert('Email not found. Please check your email address or sign up for a new account.');
+                        alert(data.message || 'Failed to send password reset email. Please try again.');
                     }
-                })
-                .catch(error => {
-                    alert('Password reset email sent! (Demo mode)');
-                });
+                } catch (error) {
+                    console.error('Forgot password error:', error);
+                    alert('Failed to send password reset email. Please try again.');
+                }
             }
         }
 
@@ -460,16 +477,22 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    // Store login state
+                    // Store login state with enhanced user data
                     const userData = {
                         email: email,
+                        userId: data.user?.id,
+                        firstName: data.user?.firstName,
+                        lastName: data.user?.lastName,
+                        userType: data.user?.userType,
+                        accountType: data.user?.accountType,
+                        isPro: data.user?.isPro,
                         loggedIn: true,
                         loginTime: Date.now()
                     };
                     
                     localStorage.setItem('marketpaceUser', JSON.stringify(userData));
                     
-                    alert('Welcome back! You\'re now logged in.');
+                    alert(`Welcome back! ${data.message}`);
                     
                     // Redirect to community feed
                     window.location.href = '/community';

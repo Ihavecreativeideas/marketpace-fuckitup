@@ -1,5 +1,6 @@
 import {
   users,
+  passwordResetTokens,
   userIntegrations,
   categories,
   listings,
@@ -15,6 +16,8 @@ import {
   appSettings,
   type User,
   type UpsertUser,
+  type PasswordResetToken,
+  type InsertPasswordResetToken,
   type Category,
   type InsertCategory,
   type Listing,
