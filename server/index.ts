@@ -368,6 +368,31 @@ app.get('/checkout', (req, res) => {
   res.sendFile(path.join(__dirname, '../checkout.html'));
 });
 
+// Settings route
+app.get('/settings', (req, res) => {
+  res.sendFile(path.join(__dirname, '../settings.html'));
+});
+
+// Deliveries route
+app.get('/deliveries', (req, res) => {
+  res.sendFile(path.join(__dirname, '../deliveries.html'));
+});
+
+// Security route
+app.get('/security', (req, res) => {
+  res.sendFile(path.join(__dirname, '../security.html'));
+});
+
+// MarketPace Menu route
+app.get('/marketpace-menu', (req, res) => {
+  res.sendFile(path.join(__dirname, '../marketpace-menu.html'));
+});
+
+// Delivery route (alias for deliveries)
+app.get('/delivery', (req, res) => {
+  res.sendFile(path.join(__dirname, '../deliveries.html'));
+});
+
 // Seamless signup API endpoint
 app.post('/api/seamless-signup', async (req, res) => {
   const { email, password, phone } = req.body;
