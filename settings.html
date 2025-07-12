@@ -13,15 +13,58 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0d0221 0%, #1a0233 50%, #2d1b69 100%);
-            color: white;
+            background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 30%, #4c2885 60%, #6b46c1 100%);
+            color: #e2e8f0;
             min-height: 100vh;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(147, 197, 253, 0.8);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0px) translateX(0px) rotate(0deg); 
+                opacity: 0.4; 
+            }
+            25% { 
+                transform: translateY(-30px) translateX(10px) rotate(90deg); 
+                opacity: 0.8; 
+            }
+            50% { 
+                transform: translateY(-15px) translateX(-10px) rotate(180deg); 
+                opacity: 1; 
+            }
+            75% { 
+                transform: translateY(-25px) translateX(5px) rotate(270deg); 
+                opacity: 0.6; 
+            }
         }
 
         .container {
             max-width: 600px;
             margin: 0 auto;
+            position: relative;
+            z-index: 2;
         }
 
         .header {
@@ -34,16 +77,17 @@
         .back-btn {
             background: rgba(0, 0, 0, 0.6);
             border: none;
-            color: #00ffff;
+            color: #93c5fd;
             padding: 10px 15px;
             border-radius: 8px;
             cursor: pointer;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 255, 255, 0.3);
+            border: 1px solid rgba(147, 197, 253, 0.3);
         }
 
         .back-btn:hover {
-            background: rgba(0, 255, 255, 0.1);
+            background: rgba(147, 197, 253, 0.1);
+            color: #ddd6fe;
         }
 
         h1 {
@@ -64,7 +108,7 @@
             font-size: 18px;
             font-weight: 600;
             margin-bottom: 15px;
-            color: #00ffff;
+            color: #93c5fd;
         }
 
         .setting-item {
@@ -99,7 +143,7 @@
         }
 
         .toggle-switch.active {
-            background: #00ffff;
+            background: #93c5fd;
         }
 
         .toggle-slider {
@@ -119,8 +163,8 @@
 
         .settings-button {
             background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(0, 255, 255, 0.3);
-            color: #00ffff;
+            border: 1px solid rgba(147, 197, 253, 0.3);
+            color: #93c5fd;
             padding: 12px 20px;
             border-radius: 8px;
             cursor: pointer;
@@ -130,11 +174,15 @@
         }
 
         .settings-button:hover {
-            background: rgba(0, 255, 255, 0.1);
+            background: rgba(147, 197, 253, 0.1);
+            color: #ddd6fe;
         }
     </style>
 </head>
 <body>
+    <!-- Floating Particles -->
+    <div class="particles"></div>
+    
     <div class="container">
         <div class="header">
             <button class="back-btn" onclick="window.history.back()">← Back</button>
@@ -264,8 +312,28 @@
             alert('Contact Support:\n\nEmail: support@marketpace.shop\nResponse time: 24-48 hours\n\nFor urgent issues, please include your user ID and describe the problem in detail.');
         }
 
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.querySelector('.particles');
+            if (!particlesContainer) return;
+            
+            const particleCount = 40;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
         // Load saved settings on page load
         document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            
             document.querySelectorAll('.toggle-switch').forEach(toggle => {
                 const label = toggle.parentElement.querySelector('.setting-label')?.textContent;
                 if (label) {

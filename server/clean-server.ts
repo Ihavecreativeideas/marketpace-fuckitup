@@ -26,6 +26,21 @@ app.get('/community', (req, res) => {
   res.sendFile(path.join(__dirname, '../community.html'));
 });
 
+// Settings route
+app.get('/settings', (req, res) => {
+  res.sendFile(path.join(__dirname, '../settings.html'));
+});
+
+// Deliveries route
+app.get('/deliveries', (req, res) => {
+  res.sendFile(path.join(__dirname, '../deliveries.html'));
+});
+
+// Security route
+app.get('/security', (req, res) => {
+  res.sendFile(path.join(__dirname, '../security.html'));
+});
+
 app.get('/signup-login', (req, res) => {
   res.sendFile(path.join(__dirname, '../signup-login.html'));
 });
