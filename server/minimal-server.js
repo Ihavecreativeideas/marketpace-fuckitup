@@ -131,7 +131,12 @@ app.use((req, res, next) => {
     console.warn('🔍 SUSPICIOUS ADMIN ACCESS:', logData);
   }
   
-  console.log('📊 REQUEST:', logData);
+  // Only log API requests and suspicious activity (not static files)
+  if (req.originalUrl.startsWith('/api/') || req.originalUrl.includes('admin') || 
+      (req.originalUrl.includes('.') && !req.originalUrl.match(/\.(html|css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|map)$/))) {
+    console.log('📊 API REQUEST:', logData);
+  }
+  
   next();
 });
 
@@ -2414,4 +2419,5 @@ app.listen(port, "0.0.0.0", () => {
   console.log('📊 AUDIT LOGGING: Comprehensive security monitoring');
   console.log('🎯 Internal Advertising System ready - Member-to-Member ads only');
   console.log('📍 Facebook Events Integration ready - 30-mile radius filtering');
+  console.log('📝 LOGGING: Reduced verbosity - API requests only (static files filtered)');
 });
