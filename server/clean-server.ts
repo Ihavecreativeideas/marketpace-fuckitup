@@ -41,6 +41,55 @@ app.get('/security', (req, res) => {
   res.sendFile(path.join(__dirname, '../security.html'));
 });
 
+// Navigation pages routes
+app.get('/shops', (req, res) => {
+  res.sendFile(path.join(__dirname, '../shops.html'));
+});
+
+app.get('/services', (req, res) => {
+  res.sendFile(path.join(__dirname, '../services.html'));
+});
+
+app.get('/the-hub', (req, res) => {
+  res.sendFile(path.join(__dirname, '../the-hub.html'));
+});
+
+app.get('/cart', (req, res) => {
+  res.sendFile(path.join(__dirname, '../cart.html'));
+});
+
+app.get('/marketpace-menu', (req, res) => {
+  res.sendFile(path.join(__dirname, '../marketpace-menu.html'));
+});
+
+app.get('/profile', (req, res) => {
+  res.sendFile(path.join(__dirname, '../profile.html'));
+});
+
+// Authentication routes
+app.post('/api/auth/facebook', (req, res) => {
+  // Facebook OAuth is not fully configured yet
+  res.status(200).json({
+    success: false,
+    message: 'Facebook signup integration requires Facebook Developer App setup. For now, please use email signup or try the demo at /community',
+    redirectUrl: '/community'
+  });
+});
+
+app.post('/api/auth/google', (req, res) => {
+  // Google OAuth endpoint
+  res.status(200).json({
+    success: false,
+    message: 'Google authentication is being configured. Please use email signup for now.',
+    redirectUrl: '/community'
+  });
+});
+
+app.get('/api/auth/google', (req, res) => {
+  // Handle Google OAuth callback
+  res.redirect('/community');
+});
+
 app.get('/signup-login', (req, res) => {
   res.sendFile(path.join(__dirname, '../signup-login.html'));
 });
