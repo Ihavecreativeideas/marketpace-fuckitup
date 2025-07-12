@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Promote Your Product - MarketPace Pro</title>
-    <script src="https://js.stripe.com/v3/"></script>
+    <title>Product Promotion - MarketPace Pro</title>
     <style>
         * {
             margin: 0;
@@ -15,181 +14,139 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
         }
 
-        /* Floating particles animation */
-        .particles {
+        .floating-particles {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1;
+            overflow: hidden;
             pointer-events: none;
+            z-index: 1;
         }
 
         .particle {
             position: absolute;
-            background: rgba(255, 255, 255, 0.1);
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
             border-radius: 50%;
-            animation: float 6s ease-in-out infinite;
+            animation: float 8s infinite ease-in-out;
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
-            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+            50% { transform: translateY(-100px) rotate(180deg); opacity: 0.5; }
         }
 
         .container {
-            position: relative;
-            z-index: 2;
-            max-width: 900px;
+            max-width: 500px;
             margin: 0 auto;
             padding: 20px;
+            position: relative;
+            z-index: 2;
         }
 
         .header {
             text-align: center;
             margin-bottom: 30px;
-            color: white;
+            padding-top: 40px;
         }
 
         .header h1 {
-            font-size: 2.2rem;
+            font-size: 28px;
+            font-weight: 700;
             margin-bottom: 10px;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            background: linear-gradient(45deg, #ff6b35, #ff9500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .header p {
-            font-size: 1.1rem;
+            font-size: 16px;
             opacity: 0.9;
+            line-height: 1.5;
         }
 
         .promotion-card {
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            color: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(15px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
-        .product-preview {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .product-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .product-image {
-            width: 80px;
-            height: 80px;
-            border-radius: 10px;
-            background: linear-gradient(45deg, #00bfff, #764ba2);
-            margin-right: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: white;
-        }
-
-        .product-info h3 {
-            color: #00bfff;
-            margin-bottom: 5px;
-        }
-
-        .product-info .price {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #4ecdc4;
-        }
-
-        .promotion-options {
+        .package-selector {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin: 25px 0;
+            gap: 16px;
+            margin-bottom: 24px;
         }
 
-        .promotion-option {
+        .package-option {
             background: rgba(255, 255, 255, 0.1);
-            padding: 25px;
-            border-radius: 15px;
             border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-align: center;
+            position: relative;
         }
 
-        .promotion-option:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-5px);
+        .package-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         }
 
-        .promotion-option.selected {
-            background: linear-gradient(45deg, rgba(0, 191, 255, 0.3), rgba(78, 205, 196, 0.3));
-            border: 2px solid rgba(0, 191, 255, 0.5);
+        .package-option.selected {
+            border-color: #ff6b35;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+            background: rgba(255, 107, 53, 0.1);
         }
 
-        .promotion-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
+        .package-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
         }
 
-        .promotion-title {
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: #00bfff;
-            margin-bottom: 10px;
+        .package-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ff6b35;
         }
 
-        .promotion-price {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #4ecdc4;
-            margin-bottom: 10px;
-        }
-
-        .promotion-savings {
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+        .package-price {
+            font-size: 24px;
+            font-weight: 700;
             color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.9rem;
+        }
+
+        .package-features {
+            list-style: none;
+            padding: 0;
+        }
+
+        .package-features li {
+            padding: 6px 0;
+            font-size: 14px;
+            color: #e0e0e0;
+        }
+
+        .package-features li:before {
+            content: "✓";
+            color: #00ff88;
             font-weight: bold;
-            margin-bottom: 15px;
-            display: inline-block;
-        }
-
-        .promotion-features {
-            font-size: 0.95rem;
-            opacity: 0.9;
-            line-height: 1.5;
-            text-align: left;
-        }
-
-        .promotion-features li {
-            margin-bottom: 5px;
-        }
-
-        .targeting-section {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 25px;
-            border-radius: 15px;
-            margin: 25px 0;
+            margin-right: 8px;
         }
 
         .form-group {
@@ -198,646 +155,409 @@
 
         .form-group label {
             display: block;
+            font-weight: 600;
             margin-bottom: 8px;
-            font-weight: bold;
-            color: #00bfff;
+            color: #e0e0e0;
         }
 
         .form-group input, .form-group select, .form-group textarea {
             width: 100%;
-            padding: 12px;
+            padding: 12px 16px;
             border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
+            border-radius: 8px;
             background: rgba(255, 255, 255, 0.1);
             color: white;
             font-size: 16px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #ff6b35;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
         }
 
         .form-group input::placeholder, .form-group textarea::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .range-slider {
-            width: 100%;
-            margin: 15px 0;
-        }
-
-        .range-value {
-            background: rgba(0, 191, 255, 0.2);
-            padding: 8px 15px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-top: 10px;
-            color: #00bfff;
-            font-weight: bold;
+            color: rgba(255, 255, 255, 0.6);
         }
 
         .btn {
-            background: linear-gradient(45deg, #00bfff, #0066cc);
-            color: white;
+            background: linear-gradient(45deg, #ff6b35, #ff9500);
             border: none;
-            padding: 15px 30px;
-            border-radius: 25px;
+            color: white;
+            padding: 14px 28px;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 600;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 191, 255, 0.3);
+            width: 100%;
+            margin-bottom: 12px;
+            backdrop-filter: blur(10px);
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 191, 255, 0.4);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
         }
 
-        .btn-success {
-            background: linear-gradient(45deg, #4ecdc4, #44a08d);
-            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
-        .btn-success:hover {
-            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
-        }
-
-        .payment-section {
-            background: linear-gradient(45deg, rgba(0, 191, 255, 0.2), rgba(78, 205, 196, 0.2));
-            padding: 25px;
-            border-radius: 15px;
-            margin: 25px 0;
-            border: 2px solid rgba(0, 191, 255, 0.3);
-        }
-
-        .price-comparison {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px 0;
-        }
-
-        .comparison-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            text-align: center;
-        }
-
-        .comparison-item {
-            padding: 15px;
-            border-radius: 10px;
-        }
-
-        .comparison-facebook {
-            background: rgba(255, 107, 107, 0.2);
-            border: 1px solid rgba(255, 107, 107, 0.3);
-        }
-
-        .comparison-marketpace {
-            background: rgba(78, 205, 196, 0.2);
-            border: 1px solid rgba(78, 205, 196, 0.3);
-        }
-
-        .comparison-title {
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .comparison-price {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .comparison-savings {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-
-        .estimated-results {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px 0;
-        }
-
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            text-align: center;
-        }
-
-        .result-metric {
-            padding: 15px;
-            background: rgba(0, 191, 255, 0.1);
-            border-radius: 10px;
-        }
-
-        .result-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #00bfff;
-            margin-bottom: 5px;
-        }
-
-        .result-label {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-
-        .checkout-form {
-            display: none;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 25px;
-            border-radius: 15px;
-            margin: 20px 0;
-        }
-
-        .stripe-element {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 12px;
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 12px 16px;
             border-radius: 8px;
-            margin: 10px 0;
+            cursor: pointer;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            transition: all 0.3s ease;
         }
 
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-            }
-            
-            .header h1 {
-                font-size: 1.8rem;
-            }
-            
-            .promotion-options {
-                grid-template-columns: 1fr;
-            }
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .savings-badge {
+            background: linear-gradient(45deg, #00ff88, #00cc66);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin-left: 8px;
+        }
+
+        .cost-breakdown {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cost-item:last-child {
+            border-bottom: none;
+            font-weight: 600;
+            font-size: 18px;
+            color: #ff6b35;
+        }
+
+        .platform-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0;
+        }
+
+        .platform-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .facebook-badge {
+            background: linear-gradient(45deg, #1877f2, #42a5f5);
+        }
+
+        .instagram-badge {
+            background: linear-gradient(45deg, #e91e63, #f06292);
+        }
+
+        .marketplace-badge {
+            background: linear-gradient(45deg, #ff6b35, #ff9500);
         }
     </style>
 </head>
 <body>
-    <div class="particles"></div>
+    <div class="floating-particles"></div>
+    
+    <button class="back-btn" onclick="window.history.back()">
+        ← Back
+    </button>
 
     <div class="container">
         <div class="header">
-            <h1>🚀 Promote Your Product</h1>
-            <p>Boost visibility and sales with MarketPace Pro advertising</p>
+            <h1>🛍️ Product Promotion</h1>
+            <p>Promote your products to local customers at affordable rates</p>
         </div>
 
         <div class="promotion-card">
-            <div class="product-preview">
-                <div class="product-header">
-                    <div class="product-image">📱</div>
-                    <div class="product-info">
-                        <h3 id="productName">Vintage Coffee Table</h3>
-                        <div class="price" id="productPrice">$275.00</div>
-                        <div style="color: #ccc; font-size: 0.9rem;">Posted 2 hours ago</div>
-                    </div>
-                </div>
-                <p style="opacity: 0.9;">Beautiful antique coffee table perfect for any living room. Solid wood construction with unique vintage details.</p>
-            </div>
-
-            <h2 style="color: #00bfff; margin-bottom: 20px; text-align: center;">Choose Your Promotion Package</h2>
-
-            <div class="price-comparison">
-                <h3 style="color: #00bfff; margin-bottom: 15px; text-align: center;">Price Comparison: MarketPace vs Facebook</h3>
-                <div class="comparison-grid">
-                    <div class="comparison-item comparison-facebook">
-                        <div class="comparison-title">Facebook Ads</div>
-                        <div class="comparison-price">$15-50</div>
-                        <div class="comparison-savings">+ 30% Apple Fees</div>
-                    </div>
-                    <div class="comparison-item comparison-marketpace">
-                        <div class="comparison-title">MarketPace Pro</div>
-                        <div class="comparison-price">$5-25</div>
-                        <div class="comparison-savings" style="color: #4ecdc4;">No Apple Fees!</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="promotion-options">
-                <div class="promotion-option" onclick="selectPromotion('boost', 5)">
-                    <div class="promotion-icon">⚡</div>
-                    <div class="promotion-title">Quick Boost</div>
-                    <div class="promotion-price">$5</div>
-                    <div class="promotion-savings">50% Less than Facebook</div>
-                    <ul class="promotion-features">
-                        <li>✅ 24-hour priority placement</li>
-                        <li>✅ 500-1,000 local views</li>
-                        <li>✅ Community feed promotion</li>
-                        <li>✅ Mobile app notifications</li>
-                    </ul>
-                </div>
-                
-                <div class="promotion-option" onclick="selectPromotion('featured', 12)">
-                    <div class="promotion-icon">🌟</div>
-                    <div class="promotion-title">Featured Listing</div>
-                    <div class="promotion-price">$12</div>
-                    <div class="promotion-savings">60% Less than Facebook</div>
-                    <ul class="promotion-features">
-                        <li>✅ 3-day featured placement</li>
-                        <li>✅ 2,000-4,000 local views</li>
-                        <li>✅ Homepage banner rotation</li>
-                        <li>✅ Category page priority</li>
-                        <li>✅ Social media cross-posting</li>
-                    </ul>
-                </div>
-                
-                <div class="promotion-option" onclick="selectPromotion('premium', 25)">
-                    <div class="promotion-icon">🚀</div>
-                    <div class="promotion-title">Premium Campaign</div>
-                    <div class="promotion-price">$25</div>
-                    <div class="promotion-savings">70% Less than Facebook</div>
-                    <ul class="promotion-features">
-                        <li>✅ 7-day premium placement</li>
-                        <li>✅ 5,000-10,000 local views</li>
-                        <li>✅ Multi-platform promotion</li>
-                        <li>✅ Advanced targeting options</li>
-                        <li>✅ Performance analytics</li>
-                        <li>✅ Local business partnerships</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="promotion-card" id="targetingSection" style="display: none;">
-            <h2 style="color: #00bfff; margin-bottom: 20px;">Smart Targeting Options</h2>
+            <h3 style="margin-bottom: 20px; color: #ff6b35;">Select Promotion Package</h3>
             
-            <div class="targeting-section">
-                <div class="form-group">
-                    <label for="targetRadius">Target Radius (miles)</label>
-                    <input type="range" id="targetRadius" class="range-slider" min="5" max="50" value="15" onchange="updateRadius(this.value)">
-                    <div class="range-value" id="radiusValue">15 miles from your location</div>
+            <div class="package-selector">
+                <div class="package-option" data-package="quick" onclick="selectPackage('quick')">
+                    <div class="package-header">
+                        <div class="package-name">Quick Boost</div>
+                        <div class="package-price">$5</div>
+                    </div>
+                    <div class="platform-badges">
+                        <span class="platform-badge marketplace-badge">MarketPace</span>
+                    </div>
+                    <ul class="package-features">
+                        <li>24-hour featured placement</li>
+                        <li>Local member notifications</li>
+                        <li>Priority in search results</li>
+                        <li>Community feed promotion</li>
+                    </ul>
                 </div>
-                
+
+                <div class="package-option" data-package="featured" onclick="selectPackage('featured')">
+                    <div class="package-header">
+                        <div class="package-name">Featured Listing</div>
+                        <div class="package-price">$12 <span class="savings-badge">60% cheaper</span></div>
+                    </div>
+                    <div class="platform-badges">
+                        <span class="platform-badge marketplace-badge">MarketPace</span>
+                        <span class="platform-badge facebook-badge">Facebook</span>
+                    </div>
+                    <ul class="package-features">
+                        <li>Everything in Quick Boost</li>
+                        <li>Facebook Marketplace promotion</li>
+                        <li>Automatic "Deliver Now" button</li>
+                        <li>Cross-platform analytics</li>
+                        <li>Extended 3-day campaign</li>
+                    </ul>
+                </div>
+
+                <div class="package-option" data-package="premium" onclick="selectPackage('premium')">
+                    <div class="package-header">
+                        <div class="package-name">Premium Campaign</div>
+                        <div class="package-price">$25 <span class="savings-badge">70% cheaper</span></div>
+                    </div>
+                    <div class="platform-badges">
+                        <span class="platform-badge marketplace-badge">MarketPace</span>
+                        <span class="platform-badge facebook-badge">Facebook</span>
+                        <span class="platform-badge instagram-badge">Instagram</span>
+                    </div>
+                    <ul class="package-features">
+                        <li>Everything in Featured Listing</li>
+                        <li>Instagram Shopping integration</li>
+                        <li>Professional ad creative design</li>
+                        <li>7-day extended campaign</li>
+                        <li>Advanced targeting options</li>
+                        <li>ROI tracking and optimization</li>
+                    </ul>
+                </div>
+            </div>
+
+            <form id="promotion-form">
                 <div class="form-group">
-                    <label for="targetInterests">Target Interests</label>
-                    <select id="targetInterests" multiple>
-                        <option value="furniture">Furniture Enthusiasts</option>
-                        <option value="vintage">Vintage Collectors</option>
-                        <option value="home-decor">Home Decorators</option>
-                        <option value="local-shopping">Local Shoppers</option>
-                        <option value="antiques">Antique Lovers</option>
-                        <option value="interior-design">Interior Designers</option>
+                    <label for="product-name">Product Name</label>
+                    <input type="text" id="product-name" name="product-name" placeholder="Enter your product name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="product-category">Category</label>
+                    <select id="product-category" name="product-category" required>
+                        <option value="">Select category</option>
+                        <option value="clothing">Clothing & Accessories</option>
+                        <option value="electronics">Electronics</option>
+                        <option value="home">Home & Garden</option>
+                        <option value="beauty">Beauty & Personal Care</option>
+                        <option value="sports">Sports & Outdoors</option>
+                        <option value="books">Books & Media</option>
+                        <option value="toys">Toys & Games</option>
+                        <option value="automotive">Automotive</option>
+                        <option value="health">Health & Wellness</option>
+                        <option value="other">Other</option>
                     </select>
                 </div>
-                
+
                 <div class="form-group">
-                    <label for="customMessage">Custom Promotion Message (Optional)</label>
-                    <textarea id="customMessage" rows="3" placeholder="Add a special message to attract buyers..."></textarea>
+                    <label for="product-price">Price</label>
+                    <input type="number" id="product-price" name="product-price" placeholder="Product price" step="0.01" min="0" required>
                 </div>
-            </div>
 
-            <div class="estimated-results">
-                <h3 style="color: #00bfff; margin-bottom: 15px; text-align: center;">Estimated Results</h3>
-                <div class="results-grid">
-                    <div class="result-metric">
-                        <div class="result-value" id="estimatedViews">2,500</div>
-                        <div class="result-label">Local Views</div>
+                <div class="form-group">
+                    <label for="target-location">Target Location</label>
+                    <input type="text" id="target-location" name="target-location" placeholder="e.g., Orange Beach, Alabama" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="product-description">Product Description</label>
+                    <textarea id="product-description" name="product-description" rows="3" placeholder="Describe your product and why customers should buy it..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="product-images">Product Images (URLs)</label>
+                    <input type="url" id="product-images" name="product-images" placeholder="https://example.com/product-image.jpg">
+                    <small style="color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 4px; display: block;">
+                        Add your main product image URL for best results
+                    </small>
+                </div>
+
+                <div class="cost-breakdown" id="cost-breakdown">
+                    <div class="cost-item">
+                        <span>Package:</span>
+                        <span id="package-cost">Select a package</span>
                     </div>
-                    <div class="result-metric">
-                        <div class="result-value" id="estimatedInquiries">85</div>
-                        <div class="result-label">Inquiries</div>
+                    <div class="cost-item">
+                        <span>Processing Fee:</span>
+                        <span>$0.30</span>
                     </div>
-                    <div class="result-metric">
-                        <div class="result-value" id="estimatedSaves">45</div>
-                        <div class="result-label">Saves/Favorites</div>
-                    </div>
-                    <div class="result-metric">
-                        <div class="result-value" id="estimatedOffers">12</div>
-                        <div class="result-label">Offers</div>
+                    <div class="cost-item">
+                        <span>Total:</span>
+                        <span id="total-cost">$0.00</span>
                     </div>
                 </div>
-            </div>
 
-            <div style="text-align: center; margin-top: 25px;">
-                <button class="btn btn-success" onclick="proceedToPayment()" style="font-size: 18px; padding: 18px 40px;">
-                    Promote Now - Pay <span id="finalPrice">$12</span>
+                <button type="button" class="btn" id="promote-btn" onclick="startPromotion()" disabled>
+                    Select Package to Continue
                 </button>
-            </div>
+            </form>
         </div>
 
-        <div class="promotion-card" id="paymentSection" style="display: none;">
-            <h2 style="color: #00bfff; margin-bottom: 20px;">Secure Payment</h2>
-            
-            <div class="payment-section">
-                <div style="background: rgba(78, 205, 196, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(78, 205, 196, 0.3);">
-                    <h3 style="color: #4ecdc4; margin-bottom: 10px;">✅ No Apple Fees • ✅ Secure Stripe Payment • ✅ Instant Activation</h3>
-                    <p style="opacity: 0.9;">Your promotion will go live immediately after payment confirmation</p>
-                </div>
-
-                <div class="checkout-form" id="checkoutForm">
-                    <div class="form-group">
-                        <label for="cardholderName">Cardholder Name</label>
-                        <input type="text" id="cardholderName" placeholder="Enter your name" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Card Information</label>
-                        <div id="card-element" class="stripe-element">
-                            <!-- Stripe Elements will create form elements here -->
-                        </div>
-                        <div id="card-errors" role="alert" style="color: #ff6b6b; margin-top: 10px;"></div>
-                    </div>
-
-                    <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; margin: 20px 0;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <span>Promotion Package:</span>
-                            <span id="packageName">Featured Listing</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <span>Duration:</span>
-                            <span id="packageDuration">3 days</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2rem; color: #4ecdc4; border-top: 1px solid rgba(255, 255, 255, 0.3); padding-top: 10px;">
-                            <span>Total:</span>
-                            <span id="totalAmount">$12.00</span>
-                        </div>
-                    </div>
-
-                    <button class="btn btn-success" id="submitPayment" style="width: 100%; font-size: 18px;" onclick="submitPayment()">
-                        Complete Payment & Start Promotion
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="promotion-card" id="successSection" style="display: none;">
-            <div style="text-align: center;">
-                <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
-                <h2 style="color: #4ecdc4; margin-bottom: 15px;">Promotion Activated Successfully!</h2>
-                <p style="font-size: 1.1rem; margin-bottom: 25px;">Your product is now being promoted to local MarketPace members</p>
-                
-                <div style="background: rgba(78, 205, 196, 0.1); padding: 20px; border-radius: 15px; margin: 20px 0; border: 1px solid rgba(78, 205, 196, 0.3);">
-                    <h3 style="color: #4ecdc4; margin-bottom: 15px;">What's Happening Now:</h3>
-                    <ul style="text-align: left; line-height: 1.8;">
-                        <li>✅ Your product is featured in community feeds</li>
-                        <li>✅ Push notifications sent to interested local members</li>
-                        <li>✅ Premium placement in category searches</li>
-                        <li>✅ Social media cross-posting activated</li>
-                        <li>✅ Real-time analytics tracking started</li>
-                    </ul>
-                </div>
-
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 25px 0;">
-                    <button class="btn" onclick="viewAnalytics()">View Analytics</button>
-                    <button class="btn" onclick="promoteAnother()">Promote Another Product</button>
-                    <button class="btn" onclick="window.location.href='/community'">Back to Community</button>
-                </div>
-            </div>
+        <div class="promotion-card">
+            <h3 style="margin-bottom: 16px; color: #ff6b35;">Why Promote Through MarketPace?</h3>
+            <ul style="list-style: none; padding: 0;">
+                <li style="padding: 8px 0; color: #e0e0e0;">💰 60-70% cheaper than direct Facebook ads</li>
+                <li style="padding: 8px 0; color: #e0e0e0;">🎯 Hyper-local targeting to your area</li>
+                <li style="padding: 8px 0; color: #e0e0e0;">🚚 Automatic "Deliver Now" button integration</li>
+                <li style="padding: 8px 0; color: #e0e0e0;">📊 Cross-platform analytics tracking</li>
+                <li style="padding: 8px 0; color: #e0e0e0;">⚡ Instant campaign activation</li>
+                <li style="padding: 8px 0; color: #e0e0e0;">🛍️ Facebook Shop integration</li>
+            </ul>
         </div>
     </div>
 
     <script>
-        let selectedPromotion = null;
-        let promotionPrice = 0;
-        let stripe = null;
-        let cardElement = null;
-
-        // Initialize Stripe with Replit environment variable
-        if (window.Stripe && window.location.hostname.includes('replit')) {
-            // Use Replit's VITE_STRIPE_PUBLIC_KEY environment variable
-            fetch('/api/stripe/public-key')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.publicKey) {
-                        stripe = Stripe(data.publicKey);
-                        const elements = stripe.elements();
-                        cardElement = elements.create('card', {
-                            style: {
-                                base: {
-                                    fontSize: '16px',
-                                    color: '#424770',
-                                    '::placeholder': {
-                                        color: '#aab7c4',
-                                    },
-                                },
-                            },
-                        });
-                    }
-                })
-                .catch(error => console.error('Error loading Stripe key:', error));
-        } else if (window.Stripe) {
-            // Fallback for development
-            stripe = Stripe('pk_test_demo_key');
-        }
+        let selectedPackage = null;
+        const packages = {
+            quick: { name: 'Quick Boost', price: 5, platforms: ['MarketPace'] },
+            featured: { name: 'Featured Listing', price: 12, platforms: ['MarketPace', 'Facebook'] },
+            premium: { name: 'Premium Campaign', price: 25, platforms: ['MarketPace', 'Facebook', 'Instagram'] }
+        };
 
         // Create floating particles
         function createParticles() {
-            const particlesContainer = document.querySelector('.particles');
-            const particleCount = 50;
-
-            for (let i = 0; i < particleCount; i++) {
+            const particleContainer = document.querySelector('.floating-particles');
+            for (let i = 0; i < 50; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
-                
-                const size = Math.random() * 4 + 2;
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
                 particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 6 + 's';
-                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
-                
-                particlesContainer.appendChild(particle);
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 5) + 's';
+                particleContainer.appendChild(particle);
             }
         }
 
-        function selectPromotion(type, price) {
-            selectedPromotion = type;
-            promotionPrice = price;
-            
-            // Remove previous selections
-            document.querySelectorAll('.promotion-option').forEach(el => {
-                el.classList.remove('selected');
+        createParticles();
+
+        function selectPackage(packageType) {
+            // Remove previous selection
+            document.querySelectorAll('.package-option').forEach(option => {
+                option.classList.remove('selected');
             });
+
+            // Select new package
+            document.querySelector(`[data-package="${packageType}"]`).classList.add('selected');
+            selectedPackage = packageType;
+
+            // Update cost breakdown
+            updateCostBreakdown();
             
-            // Select current
-            event.target.closest('.promotion-option').classList.add('selected');
-            
-            // Update final price display
-            document.getElementById('finalPrice').textContent = '$' + price;
-            
-            // Show targeting section
-            document.getElementById('targetingSection').style.display = 'block';
-            document.getElementById('targetingSection').scrollIntoView({ behavior: 'smooth' });
-            
-            // Update estimated results based on promotion type
-            updateEstimatedResults(type);
+            // Enable promote button
+            const promoteBtn = document.getElementById('promote-btn');
+            promoteBtn.disabled = false;
+            promoteBtn.textContent = `Start ${packages[packageType].name} - $${packages[packageType].price + 0.30}`;
         }
 
-        function updateEstimatedResults(type) {
-            const results = {
-                'boost': { views: 750, inquiries: 25, saves: 15, offers: 4 },
-                'featured': { views: 2500, inquiries: 85, saves: 45, offers: 12 },
-                'premium': { views: 6500, inquiries: 220, saves: 120, offers: 35 }
-            };
-            
-            const result = results[type];
-            document.getElementById('estimatedViews').textContent = result.views.toLocaleString();
-            document.getElementById('estimatedInquiries').textContent = result.inquiries;
-            document.getElementById('estimatedSaves').textContent = result.saves;
-            document.getElementById('estimatedOffers').textContent = result.offers;
+        function updateCostBreakdown() {
+            if (!selectedPackage) return;
+
+            const package = packages[selectedPackage];
+            const processingFee = 0.30;
+            const total = package.price + processingFee;
+
+            document.getElementById('package-cost').textContent = `$${package.price}`;
+            document.getElementById('total-cost').textContent = `$${total.toFixed(2)}`;
         }
 
-        function updateRadius(value) {
-            document.getElementById('radiusValue').textContent = value + ' miles from your location';
-        }
-
-        function proceedToPayment() {
-            if (!selectedPromotion) {
+        async function startPromotion() {
+            if (!selectedPackage) {
                 alert('Please select a promotion package first');
                 return;
             }
 
-            // Update payment section with selected package details
-            const packageNames = {
-                'boost': 'Quick Boost',
-                'featured': 'Featured Listing', 
-                'premium': 'Premium Campaign'
-            };
-            
-            const packageDurations = {
-                'boost': '24 hours',
-                'featured': '3 days',
-                'premium': '7 days'
+            const formData = {
+                productName: document.getElementById('product-name').value,
+                productCategory: document.getElementById('product-category').value,
+                productPrice: document.getElementById('product-price').value,
+                targetLocation: document.getElementById('target-location').value,
+                productDescription: document.getElementById('product-description').value,
+                productImages: document.getElementById('product-images').value,
+                package: selectedPackage,
+                packageDetails: packages[selectedPackage]
             };
 
-            document.getElementById('packageName').textContent = packageNames[selectedPromotion];
-            document.getElementById('packageDuration').textContent = packageDurations[selectedPromotion];
-            document.getElementById('totalAmount').textContent = '$' + promotionPrice.toFixed(2);
+            // Validate required fields
+            if (!formData.productName || !formData.productCategory || !formData.productPrice || 
+                !formData.targetLocation || !formData.productDescription) {
+                alert('Please fill in all required fields');
+                return;
+            }
 
-            // Show payment section
-            document.getElementById('paymentSection').style.display = 'block';
-            document.getElementById('checkoutForm').style.display = 'block';
-            document.getElementById('paymentSection').scrollIntoView({ behavior: 'smooth' });
+            try {
+                // Process payment
+                const paymentResponse = await fetch('/api/product-promotion/create-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        amount: packages[selectedPackage].price + 0.30,
+                        packageType: selectedPackage,
+                        productName: formData.productName,
+                        productPrice: formData.productPrice
+                    })
+                });
 
-            // Mount Stripe card element
-            if (cardElement && !document.getElementById('card-element').firstChild) {
-                cardElement.mount('#card-element');
+                const paymentData = await paymentResponse.json();
                 
-                cardElement.on('change', ({error}) => {
-                    const displayError = document.getElementById('card-errors');
-                    if (error) {
-                        displayError.textContent = error.message;
-                    } else {
-                        displayError.textContent = '';
-                    }
-                });
-            }
-        }
-
-        async function submitPayment() {
-            if (!stripe || !cardElement) {
-                alert('Payment system not initialized. Please refresh the page.');
-                return;
-            }
-
-            const cardholderName = document.getElementById('cardholderName').value;
-            if (!cardholderName) {
-                alert('Please enter cardholder name');
-                return;
-            }
-
-            // Disable submit button
-            const submitButton = document.getElementById('submitPayment');
-            submitButton.disabled = true;
-            submitButton.textContent = 'Processing...';
-
-            try {
-                // Create payment intent
-                const response = await fetch('/api/promote/create-payment-intent', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        amount: promotionPrice,
-                        promotionType: selectedPromotion,
-                        productId: 'prod_demo_123' // This would be passed from the product page
-                    })
-                });
-
-                const { clientSecret, error } = await response.json();
-
-                if (error) {
-                    throw new Error(error);
-                }
-
-                // Confirm payment
-                const result = await stripe.confirmCardPayment(clientSecret, {
-                    payment_method: {
-                        card: cardElement,
-                        billing_details: {
-                            name: cardholderName,
-                        },
-                    }
-                });
-
-                if (result.error) {
-                    throw new Error(result.error.message);
+                if (paymentData.success) {
+                    // Redirect to Stripe Checkout
+                    window.location.href = paymentData.checkoutUrl;
                 } else {
-                    // Payment succeeded
-                    activatePromotion(result.paymentIntent.id);
+                    alert('Payment processing failed. Please try again.');
                 }
             } catch (error) {
-                alert('Payment failed: ' + error.message);
-                submitButton.disabled = false;
-                submitButton.textContent = 'Complete Payment & Start Promotion';
+                console.error('Error processing promotion:', error);
+                alert('Failed to start promotion campaign');
             }
         }
 
-        async function activatePromotion(paymentIntentId) {
-            try {
-                const response = await fetch('/api/promote/activate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        paymentIntentId,
-                        promotionType: selectedPromotion,
-                        productId: 'prod_demo_123',
-                        targetRadius: document.getElementById('targetRadius').value,
-                        customMessage: document.getElementById('customMessage').value
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    // Show success section
-                    document.getElementById('successSection').style.display = 'block';
-                    document.getElementById('successSection').scrollIntoView({ behavior: 'smooth' });
-                } else {
-                    throw new Error(result.message);
-                }
-            } catch (error) {
-                alert('Error activating promotion: ' + error.message);
-            }
+        // Handle successful payment return
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('success') === 'true') {
+            showSuccessMessage(urlParams.get('campaign_id'));
         }
 
-        function viewAnalytics() {
-            alert('Analytics Dashboard:\n\n• Real-time view tracking\n• Inquiry and offer monitoring\n• Geographic performance data\n• Engagement metrics\n• ROI calculations');
+        function showSuccessMessage(campaignId) {
+            alert(`🎉 Product promotion campaign started!\n\nCampaign ID: ${campaignId}\nYour product is now being promoted to local customers!`);
         }
-
-        function promoteAnother() {
-            // Reset form
-            selectedPromotion = null;
-            promotionPrice = 0;
-            
-            document.querySelectorAll('.promotion-option').forEach(el => {
-                el.classList.remove('selected');
-            });
-            
-            document.getElementById('targetingSection').style.display = 'none';
-            document.getElementById('paymentSection').style.display = 'none';
-            document.getElementById('successSection').style.display = 'none';
-            
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // Initialize particles when page loads
-        document.addEventListener('DOMContentLoaded', createParticles);
     </script>
 </body>
 </html>
