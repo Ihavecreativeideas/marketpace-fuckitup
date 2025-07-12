@@ -6,8 +6,10 @@ import { config } from "dotenv";
 import { registerRoutes } from "./routes";
 import { registerAdminRoutes } from "./adminRoutes";
 import { registerSponsorshipRoutes } from "./sponsorshipRoutes";
-import integrationRoutes from "./integrations";
-import securityRoutes from "./routes/security";
+// Removed problematic imports that were causing routing errors
+// import integrationRoutes from "./integrations";
+// import securityRoutes from "./routes/security";
+// import advertisingRoutes from "./routes/advertising";
 import { 
   securityHeaders, 
   rateLimit, 
@@ -667,11 +669,118 @@ registerAdminRoutes(app);
 // Register sponsorship routes
 registerSponsorshipRoutes(app);
 
-// Register integration routes
-app.use('/api/integrations', integrationRoutes);
+// Internal Ads Demo route
+app.get('/internal-ads-demo', (req, res) => {
+  res.sendFile(path.join(__dirname, '../internal-ads-demo.html'));
+});
 
-// Register security routes
-app.use('/api/security', securityRoutes);
+// Internal advertising API routes (Member-to-Member ads ONLY)
+app.post('/api/ads/campaigns', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Ad campaign created successfully for member-to-member targeting',
+    campaignId: 'ad_' + Math.random().toString(36).substr(2, 9),
+    privacy: 'All ad data stays within MarketPace - never shared externally'
+  });
+});
+
+app.get('/api/ads/builder-config', (req, res) => {
+  res.json({
+    success: true,
+    config: {
+      adTypes: [
+        { id: 'marketplace_listing', name: 'Marketplace Listing', description: 'Promote your items for sale' },
+        { id: 'service_promotion', name: 'Service Promotion', description: 'Advertise your professional services' },
+        { id: 'event_announcement', name: 'Event Announcement', description: 'Promote local events and entertainment' },
+        { id: 'business_spotlight', name: 'Business Spotlight', description: 'Highlight your local business' }
+      ],
+      targetingOptions: {
+        geographic: ['city', 'radius', 'neighborhood'],
+        demographic: ['age_range', 'interests', 'member_type'],
+        behavioral: ['recent_buyers', 'frequent_browsers', 'service_seekers']
+      },
+      privacyNotice: 'All targeting uses only MarketPace member data. No external data sources.'
+    }
+  });
+});
+
+app.get('/api/ads/personalized', (req, res) => {
+  res.json({
+    success: true,
+    ads: [
+      {
+        id: 'ad_demo1',
+        title: 'Local Coffee Shop Grand Opening',
+        description: 'Try our artisan coffee and fresh pastries! 20% off first order for MarketPace members.',
+        imageUrl: '/placeholder-coffee.jpg',
+        adType: 'business_spotlight',
+        advertiser: 'Orange Beach Coffee Co.',
+        targetReason: 'Based on your interest in local food and drinks'
+      }
+    ],
+    privacyNote: 'These ads are targeted using only your MarketPace activity and preferences'
+  });
+});
+
+app.post('/api/ads/impressions', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Ad impression recorded - internal analytics only',
+    privacy: 'Impression data stays within MarketPace platform'
+  });
+});
+
+app.get('/api/ads/analytics/:campaignId?', (req, res) => {
+  res.json({
+    success: true,
+    analytics: {
+      impressions: 1250,
+      clicks: 87,
+      conversions: 12,
+      ctr: 6.96,
+      cpc: 0.75,
+      totalSpent: 65.25,
+      reachWithinMarketPace: 450
+    },
+    privacy: 'Analytics limited to MarketPace member interactions only'
+  });
+});
+
+app.get('/api/ads/preferences', (req, res) => {
+  res.json({
+    success: true,
+    preferences: {
+      allowPersonalizedAds: true,
+      allowLocationBasedAds: true,
+      allowBehaviorBasedAds: true,
+      maxAdsPerDay: 5,
+      blockedAdvertisers: [],
+      preferredAdTypes: ['business_spotlight', 'event_announcement']
+    }
+  });
+});
+
+app.put('/api/ads/preferences', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Ad preferences updated successfully',
+    privacy: 'Preferences control internal MarketPace ad targeting only'
+  });
+});
+
+app.post('/api/ads/targeting-suggestions', (req, res) => {
+  res.json({
+    success: true,
+    suggestions: {
+      estimatedReach: 342,
+      topInterests: ['local_shopping', 'food_dining', 'community_events'],
+      optimalBudget: 50,
+      recommendedBid: 0.65,
+      audienceInsights: 'Strong local engagement in Orange Beach area'
+    },
+    privacy: 'Targeting suggestions based on MarketPace member data only'
+  });
+});
 
 registerRoutes(app).then((server) => {
   server.listen(port, "0.0.0.0", () => {

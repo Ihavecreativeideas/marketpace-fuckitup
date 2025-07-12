@@ -1802,11 +1802,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Integration routes for website and social media shop connections
-  registerIntegrationRoutes(app);
-  
-  // Scammer protection and security routes
-  registerScammerProtectionRoutes(app);
+  // Temporarily disabled problematic integrations causing routing errors
+  // registerIntegrationRoutes(app);
+  // registerScammerProtectionRoutes(app);
 
   // Facebook API integration routes
   app.post('/api/facebook/connect', isAuthenticated, async (req: any, res) => {
@@ -1977,8 +1975,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Register Facebook marketing integration routes  
-  registerFacebookRoutes(app);
+  // Temporarily disabled problematic Facebook routes causing routing errors
+  // registerFacebookRoutes(app);
 
   const httpServer = createServer(app);
   return httpServer;

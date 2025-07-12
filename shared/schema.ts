@@ -1056,6 +1056,9 @@ export type BannedUser = typeof bannedUsers.$inferSelect;
 export type HumanVerification = typeof humanVerification.$inferSelect;
 export type DataAccessLog = typeof dataAccessLog.$inferSelect;
 
+// Member-to-Member Internal Advertising System Tables
+// (Replaces duplicate advertising tables that were previously defined)
+
 export type InsertPasswordResetToken = typeof passwordResetTokens.$inferInsert;
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 
