@@ -361,11 +361,57 @@
                 if (typeof FB !== 'undefined') {
                     FB.login(function(response) {
                         if (response.authResponse) {
-                            handleFacebookAuthResponse(response.authResponse, 'signup');
+                            // Get user info from Facebook
+                            FB.api('/me', { fields: 'name,email,picture.type(large),location,friends' }, function(userInfo) {
+                                console.log('Facebook user info:', userInfo);
+                                
+                                const userData = {
+                                    id: userInfo.id,
+                                    facebookId: userInfo.id,
+                                    name: userInfo.name,
+                                    email: userInfo.email,
+                                    profilePicture: userInfo.picture ? userInfo.picture.data.url : null,
+                                    location: userInfo.location ? userInfo.location.name : null,
+                                    phoneNumber: null, // Facebook doesn't provide phone reliably
+                                    friendsCount: userInfo.friends ? userInfo.friends.data.length : 0,
+                                    loggedIn: true,
+                                    accountType: 'facebook',
+                                    provider: 'facebook'
+                                };
+                                
+                                // Store user data
+                                localStorage.setItem('marketpaceUser', JSON.stringify(userData));
+                                
+                                // Send to server
+                                fetch('/api/auth/facebook/callback', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        type: 'signup',
+                                        userData: userData,
+                                        accessToken: response.authResponse.accessToken
+                                    })
+                                })
+                                .then(response => response.json())
+                                .then(result => {
+                                    if (result.success) {
+                                        // Always prompt for phone number since Facebook doesn't provide it reliably
+                                        promptForPhoneNumber(userData, result.user);
+                                    } else {
+                                        alert('Failed to complete Facebook signup: ' + result.message);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Facebook signup error:', error);
+                                    alert('Facebook signup failed. Please try again.');
+                                });
+                            });
                         } else {
                             console.log('User cancelled login or did not fully authorize.');
                         }
-                    }, {scope: 'email,public_profile,user_friends,user_location,user_mobile_phone'});
+                    }, {scope: 'email,public_profile,user_friends,user_location'});
                 } else {
                     // Fallback to server-side OAuth
                     window.location.href = '/api/auth/facebook/signup';
@@ -378,24 +424,25 @@
 
         function signupWithGoogle() {
             console.log('Google signup clicked');
+            
+            // Prevent multiple rapid clicks
+            if (window.googleAuthInProgress) {
+                return;
+            }
+            window.googleAuthInProgress = true;
+            
             try {
-                // Set signup mode for callback
-                window.googleAuthMode = 'signup';
+                // Use simple OAuth redirect approach
+                const redirectUri = encodeURIComponent(window.location.origin + '/signup-login.html');
+                const clientId = '167280787729-dgvuodnecaeraphr8rulh5u0028f7qbk.apps.googleusercontent.com';
+                const scope = encodeURIComponent('openid email profile');
+                const state = encodeURIComponent('signup');
                 
-                // Initialize Google Sign-In
-                if (typeof google !== 'undefined' && google.accounts) {
-                    // Use One Tap or popup
-                    google.accounts.id.prompt((notification) => {
-                        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                            // If One Tap doesn't work, create custom sign-in button
-                            triggerGoogleSignIn();
-                        }
-                    });
-                } else {
-                    // Fallback: trigger sign-in when Google loads
-                    setTimeout(() => signupWithGoogle(), 1000);
-                }
+                const googleAuthUrl = `https://accounts.google.com/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code&state=${state}`;
+                
+                window.location.href = googleAuthUrl;
             } catch (error) {
+                window.googleAuthInProgress = false;
                 console.error('Google auth error:', error);
                 alert('Google authentication failed. Please try again.');
             }
@@ -421,7 +468,10 @@
                         button.click();
                     }
                     document.body.removeChild(tempDiv);
+                    window.googleAuthInProgress = false; // Reset the flag
                 }, 100);
+            } else {
+                window.googleAuthInProgress = false; // Reset the flag
             }
         }
 
@@ -432,11 +482,57 @@
                 if (typeof FB !== 'undefined') {
                     FB.login(function(response) {
                         if (response.authResponse) {
-                            handleFacebookAuthResponse(response.authResponse, 'login');
+                            // Get user info from Facebook
+                            FB.api('/me', { fields: 'name,email,picture.type(large),location,friends' }, function(userInfo) {
+                                console.log('Facebook user info:', userInfo);
+                                
+                                const userData = {
+                                    id: userInfo.id,
+                                    facebookId: userInfo.id,
+                                    name: userInfo.name,
+                                    email: userInfo.email,
+                                    profilePicture: userInfo.picture ? userInfo.picture.data.url : null,
+                                    location: userInfo.location ? userInfo.location.name : null,
+                                    phoneNumber: null, // Facebook doesn't provide phone reliably
+                                    friendsCount: userInfo.friends ? userInfo.friends.data.length : 0,
+                                    loggedIn: true,
+                                    accountType: 'facebook',
+                                    provider: 'facebook'
+                                };
+                                
+                                // Store user data
+                                localStorage.setItem('marketpaceUser', JSON.stringify(userData));
+                                
+                                // Send to server
+                                fetch('/api/auth/facebook/callback', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        type: 'login',
+                                        userData: userData,
+                                        accessToken: response.authResponse.accessToken
+                                    })
+                                })
+                                .then(response => response.json())
+                                .then(result => {
+                                    if (result.success) {
+                                        // Always prompt for phone number since Facebook doesn't provide it reliably
+                                        promptForPhoneNumber(userData, result.user);
+                                    } else {
+                                        alert('Failed to complete Facebook login: ' + result.message);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Facebook login error:', error);
+                                    alert('Facebook login failed. Please try again.');
+                                });
+                            });
                         } else {
                             console.log('User cancelled login or did not fully authorize.');
                         }
-                    }, {scope: 'email,public_profile,user_friends,user_location,user_mobile_phone'});
+                    }, {scope: 'email,public_profile,user_friends,user_location'});
                 } else {
                     // Fallback to server-side OAuth
                     window.location.href = '/api/auth/facebook/login';
@@ -449,24 +545,25 @@
 
         function loginWithGoogle() {
             console.log('Google login clicked');
+            
+            // Prevent multiple rapid clicks
+            if (window.googleAuthInProgress) {
+                return;
+            }
+            window.googleAuthInProgress = true;
+            
             try {
-                // Set login mode for callback
-                window.googleAuthMode = 'login';
+                // Use simple OAuth redirect approach
+                const redirectUri = encodeURIComponent(window.location.origin + '/signup-login.html');
+                const clientId = '167280787729-dgvuodnecaeraphr8rulh5u0028f7qbk.apps.googleusercontent.com';
+                const scope = encodeURIComponent('openid email profile');
+                const state = encodeURIComponent('login');
                 
-                // Initialize Google Sign-In
-                if (typeof google !== 'undefined' && google.accounts) {
-                    // Use One Tap or popup
-                    google.accounts.id.prompt((notification) => {
-                        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                            // If One Tap doesn't work, create custom sign-in button
-                            triggerGoogleSignIn();
-                        }
-                    });
-                } else {
-                    // Fallback: trigger sign-in when Google loads
-                    setTimeout(() => loginWithGoogle(), 1000);
-                }
+                const googleAuthUrl = `https://accounts.google.com/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code&state=${state}`;
+                
+                window.location.href = googleAuthUrl;
             } catch (error) {
+                window.googleAuthInProgress = false;
                 console.error('Google auth error:', error);
                 alert('Google authentication failed. Please try again.');
             }
@@ -1036,9 +1133,82 @@
             window.location.href = '/community';
         }
 
+        // Handle Google OAuth redirect callback
+        function handleGoogleOAuthCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+            const error = urlParams.get('error');
+            
+            if (error) {
+                console.error('Google OAuth error:', error);
+                alert('Google authentication failed: ' + error);
+                // Clean up URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+                return;
+            }
+            
+            if (code && state) {
+                console.log('Processing Google OAuth callback...');
+                
+                // Exchange code for tokens
+                fetch('/api/auth/google/callback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        type: state, // 'signup' or 'login'
+                        code: code,
+                        redirectUri: window.location.origin + '/signup-login.html'
+                    })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        // Store user data
+                        localStorage.setItem('marketpaceUser', JSON.stringify(result.user));
+                        
+                        // Check if phone number is needed
+                        if (!result.user.phoneNumber) {
+                            promptForPhoneNumber(result.user, result.user);
+                        } else {
+                            alert(`Welcome to MarketPace, ${result.user.firstName || result.user.fullName}!`);
+                            window.location.href = '/community';
+                        }
+                    } else {
+                        if (result.message.includes('phone number')) {
+                            alert(result.message + '\n\nPlease provide a unique phone number to continue.');
+                            // Create a mock user object for phone prompt
+                            const mockUser = { 
+                                name: 'Google User',
+                                given_name: 'Google',
+                                family_name: 'User',
+                                email: 'google@example.com',
+                                id: 'temp_' + Date.now()
+                            };
+                            promptForPhoneNumber(mockUser, mockUser);
+                        } else {
+                            alert('Failed to complete Google authentication: ' + result.message);
+                        }
+                    }
+                    
+                    // Clean up URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                })
+                .catch(error => {
+                    console.error('Google OAuth callback error:', error);
+                    alert('Failed to complete Google authentication. Please try again.');
+                    // Clean up URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                });
+            }
+        }
+
         // Initialize everything when page loads
         document.addEventListener('DOMContentLoaded', function() {
             loadGoogleIdentityServices();
+            handleGoogleOAuthCallback();
         });
     </script>
 </body>

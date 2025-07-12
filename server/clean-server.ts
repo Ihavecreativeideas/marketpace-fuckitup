@@ -645,7 +645,107 @@ app.post('/api/auth/facebook/callback', async (req, res) => {
 // Google Authentication Callback
 app.post('/api/auth/google/callback', async (req, res) => {
   try {
-    const { type, userData, accessToken, idToken } = req.body;
+    const { type, userData, accessToken, idToken, code, redirectUri } = req.body;
+    
+    // Handle OAuth code exchange
+    if (code && redirectUri) {
+      try {
+        // Exchange authorization code for tokens
+        const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            code: code,
+            client_id: '167280787729-dgvuodnecaeraphr8rulh5u0028f7qbk.apps.googleusercontent.com',
+            client_secret: 'GOCSPX-your-secret-here', // This should be in environment variables
+            redirect_uri: redirectUri,
+            grant_type: 'authorization_code'
+          })
+        });
+
+        const tokenData = await tokenResponse.json();
+        
+        if (tokenData.error) {
+          return res.status(400).json({
+            success: false,
+            message: 'Failed to exchange authorization code: ' + tokenData.error_description
+          });
+        }
+
+        // Get user info from Google
+        const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+          headers: {
+            'Authorization': `Bearer ${tokenData.access_token}`
+          }
+        });
+
+        const googleUserData = await userResponse.json();
+        
+        if (!googleUserData.id) {
+          return res.status(400).json({
+            success: false,
+            message: 'Failed to get user information from Google'
+          });
+        }
+
+        // Create comprehensive user profile from Google data
+        const profile = {
+          id: 'google_' + googleUserData.id,
+          googleId: googleUserData.id,
+          firstName: googleUserData.given_name || googleUserData.name?.split(' ')[0] || 'User',
+          lastName: googleUserData.family_name || googleUserData.name?.split(' ').slice(1).join(' ') || '',
+          fullName: googleUserData.name,
+          email: googleUserData.email,
+          phoneNumber: null, // Will be collected later
+          profileImageUrl: googleUserData.picture,
+          address: null,
+          provider: 'google',
+          accessToken: tokenData.access_token,
+          idToken: tokenData.id_token,
+          accountType: 'member',
+          profileComplete: false, // Will be true after phone number is added
+          loggedIn: true,
+          createdAt: new Date().toISOString(),
+          lastLoginAt: new Date().toISOString(),
+          bio: `MarketPace member since ${new Date().toLocaleDateString()}`,
+          interests: ['shopping', 'local_community', 'marketplace'],
+          userType: 'buyer',
+          isPro: false,
+          isVerified: true,
+          allowsDelivery: true,
+          allowsPickup: true,
+          emailVerified: googleUserData.verified_email || true
+        };
+
+        // Store user profile in database
+        userDatabase.set(profile.id, profile);
+        
+        console.log(`Google ${type} successful for:`, profile.fullName, profile.email);
+        
+        return res.json({
+          success: true,
+          message: `Welcome to MarketPace, ${profile.firstName}! Please add your phone number to complete registration.`,
+          user: profile,
+          profileData: {
+            name: profile.fullName,
+            email: profile.email,
+            phone: profile.phoneNumber,
+            profilePicture: profile.profileImageUrl,
+            emailVerified: profile.emailVerified
+          },
+          redirectUrl: '/community'
+        });
+
+      } catch (error) {
+        console.error('Google OAuth token exchange error:', error);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to authenticate with Google. Please try again.'
+        });
+      }
+    }
     
     if (!userData || !accessToken) {
       return res.status(400).json({
