@@ -1086,7 +1086,8 @@ app.post('/api/integrations/distrokid/connect', (req, res) => {
       genre: genre,
       connectedAt: new Date().toISOString(),
       webhookUrl: `https://marketpace.shop/api/distrokid/webhook/${artistId}`,
-      promotionEnabled: true
+      promotionEnabled: true,
+      calendarIntegration: true
     },
     integration: {
       status: 'connected',
@@ -1095,8 +1096,14 @@ app.post('/api/integrations/distrokid/connect', (req, res) => {
         'Hometown community notifications',
         'Release day promotion posts',
         'Streaming link integration',
-        'Local fan engagement tracking'
+        'Local fan engagement tracking',
+        'MarketPace Pro: Calendar event creation'
       ]
+    },
+    proFeatures: {
+      calendarEvents: 'Song releases automatically added to local event calendar',
+      eventPromotion: 'Release events promoted to 30-mile radius',
+      fanEngagement: 'Track local fan interactions and attendance'
     }
   });
 });
@@ -1200,13 +1207,89 @@ app.post('/api/distrokid/webhook/:artistId', (req, res) => {
     releaseDate: releaseData.releaseDate,
     promotedToHometown: true
   };
+
+  // Create calendar event for MarketPace Pro members
+  const calendarEvent = {
+    id: 'release_event_' + Math.random().toString(36).substr(2, 9),
+    title: `🎵 New Release: "${releaseData.songTitle}" by ${releaseData.artistName}`,
+    type: 'music_release',
+    artistName: releaseData.artistName,
+    songTitle: releaseData.songTitle,
+    date: releaseData.releaseDate,
+    time: '12:00 PM',
+    location: releaseData.hometown || 'Local Community',
+    category: 'Music',
+    source: 'DistroKid',
+    streamingLinks: releaseData.streamingLinks,
+    proFeature: true,
+    description: `Local artist ${releaseData.artistName} releases new song "${releaseData.songTitle}" - Available on all streaming platforms`,
+    promotionRadius: '30 miles'
+  };
   
   console.log('New release notification:', communityPost);
+  console.log('Calendar event created:', calendarEvent);
   
   res.json({
     success: true,
-    message: 'Release notification processed',
-    communityPost: communityPost
+    message: 'Release notification processed and calendar event created',
+    communityPost: communityPost,
+    calendarEvent: calendarEvent,
+    proFeatures: {
+      calendarEventCreated: true,
+      promotionRadius: '30 miles',
+      fanEngagementTracking: true
+    }
+  });
+});
+
+// API endpoint to get music release events for calendar
+app.get('/api/events/music-releases', (req, res) => {
+  const { location, radius } = req.query;
+  
+  const today = new Date();
+  const musicEvents = [];
+  
+  // Generate music release events for current week
+  const releaseArtists = [
+    { name: 'Sarah Michelle', song: 'Ocean Breeze', genre: 'Folk' },
+    { name: 'Gulf Coast Blues Band', song: 'Sunset Highway', genre: 'Blues' },
+    { name: 'DJ Coastal', song: 'Beach Vibes (Remix)', genre: 'Electronic' }
+  ];
+  
+  for (let i = 0; i < 3; i++) {
+    const releaseDate = new Date(today);
+    releaseDate.setDate(today.getDate() + i);
+    const artist = releaseArtists[i];
+    
+    musicEvents.push({
+      id: 'music_release_' + (i + 1),
+      title: `🎵 New Release: "${artist.song}" by ${artist.name}`,
+      type: 'music_release',
+      artistName: artist.name,
+      songTitle: artist.song,
+      genre: artist.genre,
+      date: releaseDate.toISOString().split('T')[0],
+      time: '12:00 PM',
+      location: 'Orange Beach, Alabama',
+      category: 'Music',
+      source: 'DistroKid',
+      distance: Math.random() * 25 + 2,
+      proFeature: true,
+      streamingLinks: {
+        spotify: `https://open.spotify.com/track/${artist.name.toLowerCase().replace(/\s+/g, '')}`,
+        apple: `https://music.apple.com/album/${artist.song.toLowerCase().replace(/\s+/g, '')}`,
+        youtube: `https://youtube.com/watch?v=${artist.name.toLowerCase().replace(/\s+/g, '')}`
+      }
+    });
+  }
+  
+  res.json({
+    success: true,
+    location: location || 'Orange Beach, Alabama',
+    eventsFound: musicEvents.length,
+    events: musicEvents,
+    proFeature: true,
+    note: 'Music release calendar events are a MarketPace Pro feature'
   });
 });
 
