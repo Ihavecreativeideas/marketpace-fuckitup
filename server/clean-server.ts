@@ -537,6 +537,22 @@ app.delete('/api/ads/campaigns/:id', (req, res) => {
   });
 });
 
+// In-memory storage for demo (in production, use database)
+const userDatabase = new Map();
+const phoneNumbers = new Set();
+
+// Phone number validation helper
+function validatePhoneUniqueness(phoneNumber, excludeUserId = null) {
+  if (!phoneNumber) return true; // Allow null phone numbers
+  
+  for (const [userId, user] of userDatabase) {
+    if (user.phoneNumber === phoneNumber && userId !== excludeUserId) {
+      return false;
+    }
+  }
+  return true;
+}
+
 // Facebook Authentication Callback
 app.post('/api/auth/facebook/callback', async (req, res) => {
   try {
@@ -546,6 +562,14 @@ app.post('/api/auth/facebook/callback', async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'Missing required authentication data'
+      });
+    }
+
+    // Check if phone number is already used (if provided)
+    if (userData.phoneNumber && !validatePhoneUniqueness(userData.phoneNumber)) {
+      return res.status(400).json({
+        success: false,
+        message: 'This phone number is already associated with another account. Please use a different phone number or contact support.'
       });
     }
 
@@ -578,11 +602,16 @@ app.post('/api/auth/facebook/callback', async (req, res) => {
       allowsPickup: true
     };
 
-    // Store user profile (in production, this would go to database)
+    // Store user profile in database
+    userDatabase.set(profile.id, profile);
+    if (profile.phoneNumber) {
+      phoneNumbers.add(profile.phoneNumber);
+    }
+    
     console.log(`Facebook ${type} successful for:`, profile.fullName, profile.email);
     console.log('Profile data:', JSON.stringify(profile, null, 2));
 
-    // Simulate profile storage
+    // Create user session
     const userSession = {
       ...profile,
       sessionId: 'fb_session_' + Math.random().toString(36).substr(2, 9),
@@ -613,12 +642,169 @@ app.post('/api/auth/facebook/callback', async (req, res) => {
   }
 });
 
+// Google Authentication Callback
+app.post('/api/auth/google/callback', async (req, res) => {
+  try {
+    const { type, userData, accessToken, idToken } = req.body;
+    
+    if (!userData || !accessToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required authentication data'
+      });
+    }
+
+    // Handle phone number update request
+    if (type === 'update_phone') {
+      if (!userData.phoneNumber) {
+        return res.status(400).json({
+          success: false,
+          message: 'Phone number is required for update'
+        });
+      }
+
+      // Check if phone number is already used
+      if (!validatePhoneUniqueness(userData.phoneNumber)) {
+        return res.status(400).json({
+          success: false,
+          message: 'This phone number is already associated with another account. Please use a different phone number.'
+        });
+      }
+
+      // Update existing user profile
+      const existingUserId = 'google_' + userData.id;
+      const existingUser = userDatabase.get(existingUserId);
+      
+      if (existingUser) {
+        existingUser.phoneNumber = userData.phoneNumber;
+        existingUser.profileComplete = true;
+        existingUser.lastUpdated = new Date().toISOString();
+        
+        userDatabase.set(existingUserId, existingUser);
+        phoneNumbers.add(userData.phoneNumber);
+        
+        console.log(`Phone number updated for user:`, userData.name, userData.phoneNumber);
+        
+        return res.json({
+          success: true,
+          message: 'Phone number updated successfully',
+          user: existingUser
+        });
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: 'User not found. Please sign in again.'
+        });
+      }
+    }
+
+    // Check if phone number is already used (if provided)
+    if (userData.phoneNumber && !validatePhoneUniqueness(userData.phoneNumber)) {
+      return res.status(400).json({
+        success: false,
+        message: 'This phone number is already associated with another account. Please use a different phone number or contact support.'
+      });
+    }
+
+    // Create comprehensive user profile from Google data
+    const profile = {
+      id: 'google_' + userData.id,
+      googleId: userData.id,
+      firstName: userData.given_name || userData.name?.split(' ')[0] || 'User',
+      lastName: userData.family_name || userData.name?.split(' ').slice(1).join(' ') || '',
+      fullName: userData.name,
+      email: userData.email,
+      phoneNumber: userData.phoneNumber || null,
+      profileImageUrl: userData.picture,
+      address: userData.address || null,
+      provider: 'google',
+      accessToken: accessToken,
+      idToken: idToken,
+      accountType: 'member',
+      profileComplete: true,
+      loggedIn: true,
+      createdAt: new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
+      bio: `MarketPace member since ${new Date().toLocaleDateString()}`,
+      interests: ['shopping', 'local_community', 'marketplace'],
+      userType: 'buyer',
+      isPro: false,
+      isVerified: true, // Google verified
+      allowsDelivery: true,
+      allowsPickup: true,
+      emailVerified: userData.email_verified || true
+    };
+
+    // Store user profile in database
+    userDatabase.set(profile.id, profile);
+    if (profile.phoneNumber) {
+      phoneNumbers.add(profile.phoneNumber);
+    }
+    
+    console.log(`Google ${type} successful for:`, profile.fullName, profile.email);
+    console.log('Profile data:', JSON.stringify(profile, null, 2));
+
+    // Create user session
+    const userSession = {
+      ...profile,
+      sessionId: 'google_session_' + Math.random().toString(36).substr(2, 9),
+      loginTime: Date.now()
+    };
+
+    res.json({
+      success: true,
+      message: `Welcome to MarketPace, ${profile.firstName}! Your Google account has been connected.`,
+      user: userSession,
+      profileData: {
+        name: profile.fullName,
+        email: profile.email,
+        phone: profile.phoneNumber,
+        address: profile.address,
+        profilePicture: profile.profileImageUrl,
+        emailVerified: profile.emailVerified
+      },
+      redirectUrl: '/community'
+    });
+
+  } catch (error) {
+    console.error('Google auth callback error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Authentication failed. Please try again.'
+    });
+  }
+});
+
 // Basic API endpoints for authentication simulation
 app.post('/api/seamless-signup', (req, res) => {
+  const { email, password, phone } = req.body;
+  
+  // Check if phone number is already used
+  if (phone && !validatePhoneUniqueness(phone)) {
+    return res.status(400).json({
+      success: false,
+      message: 'This phone number is already associated with another account. Please use a different phone number.'
+    });
+  }
+  
+  const userData = {
+    id: 'user_' + Math.random().toString(36).substr(2, 9),
+    email: email,
+    phoneNumber: phone,
+    loggedIn: true,
+    accountType: 'member'
+  };
+  
+  // Store user in database
+  userDatabase.set(userData.id, userData);
+  if (phone) {
+    phoneNumbers.add(phone);
+  }
+  
   res.json({
     success: true,
     message: 'User registered successfully',
-    user: { id: 'user_123', ...req.body }
+    user: userData
   });
 });
 
