@@ -421,6 +421,29 @@ class RouteService {
       throw error;
     }
   }
+
+  // Update delivery method
+  async updateDeliveryMethod(deliveryId, methodId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/drivers/deliveries/${deliveryId}/method`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ methodId }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update delivery method');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating delivery method:', error);
+      throw error;
+    }
+  }
 }
 
 export default new RouteService();
