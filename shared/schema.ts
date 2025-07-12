@@ -59,6 +59,17 @@ export const users = pgTable("users", {
   loginAttempts: integer("login_attempts").default(0),
   isLocked: boolean("is_locked").default(false),
   lockedUntil: timestamp("locked_until"),
+  twoFactorEnabled: boolean("two_factor_enabled").default(false),
+  twoFactorMethod: varchar("two_factor_method"),
+  twoFactorSecret: text("two_factor_secret"),
+  twoFactorRecoveryCodes: text("two_factor_recovery_codes"),
+  biometricEnabled: boolean("biometric_enabled").default(false),
+  biometricSettings: jsonb("biometric_settings"),
+  trustedDevices: jsonb("trusted_devices"),
+  securityAlerts: jsonb("security_alerts"),
+  loginHistory: jsonb("login_history"),
+  emailVerifiedAt: timestamp("email_verified_at"),
+  phoneVerifiedAt: timestamp("phone_verified_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -72,6 +83,47 @@ export const passwordResetTokens = pgTable("password_reset_tokens", {
   method: varchar("method").notNull(), // email, sms
   expiresAt: timestamp("expires_at").notNull(),
   isUsed: boolean("is_used").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Email verification tokens table
+export const emailVerificationTokens = pgTable("email_verification_tokens", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  userId: varchar("user_id").notNull(),
+  email: varchar("email").notNull(),
+  token: varchar("token").notNull(),
+  code: varchar("code", { length: 6 }), // 6-digit verification code
+  expiresAt: timestamp("expires_at").notNull(),
+  isUsed: boolean("is_used").default(false),
+  attempts: integer("attempts").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// SMS verification codes table
+export const smsVerificationCodes = pgTable("sms_verification_codes", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  userId: varchar("user_id").notNull(),
+  phoneNumber: varchar("phone_number").notNull(),
+  code: varchar("code", { length: 6 }).notNull(),
+  purpose: varchar("purpose").notNull(), // signup, login, password_reset, phone_change
+  expiresAt: timestamp("expires_at").notNull(),
+  isUsed: boolean("is_used").default(false),
+  attempts: integer("attempts").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User sessions table for JWT management
+export const userSessions = pgTable("user_sessions", {
+  id: varchar("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  sessionToken: text("session_token").notNull(),
+  refreshToken: text("refresh_token").notNull(),
+  deviceInfo: jsonb("device_info"), // Browser, OS, IP, etc.
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  isActive: boolean("is_active").default(true),
+  lastActivityAt: timestamp("last_activity_at").defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -682,8 +734,8 @@ export const appSettingsRelations = relations(appSettings, ({ one }) => ({
 
 // ============ DATA COLLECTION & ANALYTICS SYSTEM ============
 
-// User session tracking for detailed analytics
-export const userSessions = pgTable("user_sessions", {
+// User analytics sessions tracking for detailed analytics
+export const userAnalyticsSessions = pgTable("user_analytics_sessions", {
   id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
   userId: varchar("user_id").references(() => users.id),
   sessionId: varchar("session_id").notNull().unique(),
@@ -708,7 +760,7 @@ export const userSessions = pgTable("user_sessions", {
 export const userBehavior = pgTable("user_behavior", {
   id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
   userId: varchar("user_id").references(() => users.id),
-  sessionId: varchar("session_id").references(() => userSessions.sessionId),
+  sessionId: varchar("session_id").references(() => userAnalyticsSessions.sessionId),
   eventType: varchar("event_type").notNull(), // page_view, click, search, scroll, hover, purchase, etc.
   page: varchar("page"), // marketplace, profile, listing_detail, etc.
   section: varchar("section"), // header, sidebar, feed, product_grid, etc.
@@ -958,6 +1010,15 @@ export type User = typeof users.$inferSelect;
 
 export type InsertPasswordResetToken = typeof passwordResetTokens.$inferInsert;
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+
+export type InsertEmailVerificationToken = typeof emailVerificationTokens.$inferInsert;
+export type EmailVerificationToken = typeof emailVerificationTokens.$inferSelect;
+
+export type InsertSmsVerificationCode = typeof smsVerificationCodes.$inferInsert;
+export type SmsVerificationCode = typeof smsVerificationCodes.$inferSelect;
+
+export type InsertUserSession = typeof userSessions.$inferInsert;
+export type UserSession = typeof userSessions.$inferSelect;
 export type Category = typeof categories.$inferSelect;
 export type InsertCategory = typeof categories.$inferInsert;
 export type Listing = typeof listings.$inferSelect;

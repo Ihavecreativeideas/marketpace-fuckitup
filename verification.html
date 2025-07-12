@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Verification - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0233 50%, #2d1b69 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Floating particles animation */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .verification-card {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .logo {
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .verification-icon {
+            font-size: 72px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5));
+        }
+
+        .verification-method {
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .method-title {
+            color: #00ffff;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .method-description {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .verification-input {
+            width: 100%;
+            max-width: 300px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            margin: 15px auto;
+            text-align: center;
+            letter-spacing: 3px;
+            display: block;
+        }
+
+        .verification-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            min-width: 150px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .status-success {
+            background: rgba(74, 222, 128, 0.2);
+            border: 1px solid rgba(74, 222, 128, 0.5);
+            color: #4ade80;
+        }
+
+        .status-error {
+            background: rgba(248, 113, 113, 0.2);
+            border: 1px solid rgba(248, 113, 113, 0.5);
+            color: #f87171;
+        }
+
+        .status-info {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            color: #3b82f6;
+        }
+
+        .countdown {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        @media (max-width: 600px) {
+            .verification-card {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+
+            .logo {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <button class="back-btn" onclick="window.history.back()">← Back</button>
+    
+    <div class="container">
+        <div class="verification-card">
+            <h1 class="logo">MarketPace</h1>
+            <p class="subtitle">Account Verification Required</p>
+            
+            <div class="verification-icon">📧</div>
+            
+            <div id="statusMessage" class="status-message" style="display: none;"></div>
+            
+            <!-- Email Verification -->
+            <div id="emailVerification" class="verification-method">
+                <div class="method-title">📧 Email Verification</div>
+                <div class="method-description">
+                    We've sent a verification code to your email address. Please enter the 6-digit code below.
+                </div>
+                
+                <input type="text" id="emailCode" class="verification-input" placeholder="000000" maxlength="6">
+                
+                <div>
+                    <button class="btn" onclick="verifyEmail()">Verify Email</button>
+                    <button class="btn btn-secondary" onclick="resendEmail()">Resend Code</button>
+                </div>
+                
+                <div class="countdown" id="emailCountdown"></div>
+            </div>
+            
+            <!-- SMS Verification -->
+            <div id="smsVerification" class="verification-method" style="display: none;">
+                <div class="method-title">💬 SMS Verification</div>
+                <div class="method-description">
+                    We've sent a verification code to your phone number. Please enter the 6-digit code below.
+                </div>
+                
+                <input type="text" id="smsCode" class="verification-input" placeholder="000000" maxlength="6">
+                
+                <div>
+                    <button class="btn" onclick="verifySMS()">Verify Phone</button>
+                    <button class="btn btn-secondary" onclick="resendSMS()">Resend Code</button>
+                </div>
+                
+                <div class="countdown" id="smsCountdown"></div>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <button class="btn btn-secondary" onclick="skipVerification()">Skip for Now</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let emailTimer = 0;
+        let smsTimer = 0;
+        let userData = {};
+
+        // Floating particles animation
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const numberOfParticles = 40;
+
+            for (let i = 0; i < numberOfParticles; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const size = Math.random() * 4 + 1;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 5) + 's';
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Show status message
+        function showMessage(message, type = 'info') {
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message status-${type}`;
+            statusMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Start countdown timer
+        function startCountdown(type, duration = 60) {
+            const countdownEl = document.getElementById(`${type}Countdown`);
+            let timeLeft = duration;
+            
+            if (type === 'email') emailTimer = timeLeft;
+            if (type === 'sms') smsTimer = timeLeft;
+            
+            const timer = setInterval(() => {
+                timeLeft--;
+                
+                if (timeLeft > 0) {
+                    countdownEl.textContent = `Resend available in ${timeLeft} seconds`;
+                } else {
+                    countdownEl.textContent = 'You can now resend the code';
+                    clearInterval(timer);
+                }
+            }, 1000);
+        }
+
+        // Verify email code
+        async function verifyEmail() {
+            const code = document.getElementById('emailCode').value.trim();
+            
+            if (!code || code.length !== 6) {
+                showMessage('Please enter a valid 6-digit code', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/verify-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: userData.email,
+                        code: code
+                    }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('Email verified successfully!', 'success');
+                    
+                    // Update user data
+                    userData.emailVerified = true;
+                    localStorage.setItem('marketpaceUser', JSON.stringify(userData));
+                    
+                    // Check if we need phone verification too
+                    if (userData.phoneNumber && !userData.phoneVerified) {
+                        document.getElementById('emailVerification').style.display = 'none';
+                        document.getElementById('smsVerification').style.display = 'block';
+                        startCountdown('sms', 60);
+                    } else {
+                        // All verifications complete
+                        setTimeout(() => {
+                            window.location.href = '/community';
+                        }, 2000);
+                    }
+                } else {
+                    showMessage(data.message || 'Invalid verification code', 'error');
+                }
+            } catch (error) {
+                console.error('Email verification error:', error);
+                showMessage('Verification failed. Please try again.', 'error');
+            }
+        }
+
+        // Verify SMS code
+        async function verifySMS() {
+            const code = document.getElementById('smsCode').value.trim();
+            
+            if (!code || code.length !== 6) {
+                showMessage('Please enter a valid 6-digit code', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/verify-sms', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        phone: userData.phoneNumber,
+                        code: code,
+                        purpose: 'signup'
+                    }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('Phone number verified successfully!', 'success');
+                    
+                    // Update user data
+                    userData.phoneVerified = true;
+                    localStorage.setItem('marketpaceUser', JSON.stringify(userData));
+                    
+                    // All verifications complete
+                    setTimeout(() => {
+                        window.location.href = '/community';
+                    }, 2000);
+                } else {
+                    showMessage(data.message || 'Invalid verification code', 'error');
+                }
+            } catch (error) {
+                console.error('SMS verification error:', error);
+                showMessage('Verification failed. Please try again.', 'error');
+            }
+        }
+
+        // Resend email verification
+        async function resendEmail() {
+            if (emailTimer > 0) {
+                showMessage('Please wait before requesting another code', 'info');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/resend-verification', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: userData.email,
+                        type: 'email'
+                    }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('Verification email sent!', 'success');
+                    startCountdown('email', 60);
+                } else {
+                    showMessage(data.message || 'Failed to resend email', 'error');
+                }
+            } catch (error) {
+                console.error('Resend email error:', error);
+                showMessage('Failed to resend email. Please try again.', 'error');
+            }
+        }
+
+        // Resend SMS verification
+        async function resendSMS() {
+            if (smsTimer > 0) {
+                showMessage('Please wait before requesting another code', 'info');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/resend-verification', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        phone: userData.phoneNumber,
+                        type: 'sms'
+                    }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('Verification code sent!', 'success');
+                    startCountdown('sms', 60);
+                } else {
+                    showMessage(data.message || 'Failed to resend SMS', 'error');
+                }
+            } catch (error) {
+                console.error('Resend SMS error:', error);
+                showMessage('Failed to resend SMS. Please try again.', 'error');
+            }
+        }
+
+        // Skip verification for now
+        function skipVerification() {
+            if (confirm('Are you sure you want to skip verification? You can verify your account later in settings.')) {
+                window.location.href = '/community';
+            }
+        }
+
+        // Auto-format verification codes
+        document.getElementById('emailCode').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 6) value = value.slice(0, 6);
+            e.target.value = value;
+        });
+
+        document.getElementById('smsCode').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 6) value = value.slice(0, 6);
+            e.target.value = value;
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            
+            // Get user data from localStorage
+            const userDataString = localStorage.getItem('marketpaceUser');
+            if (userDataString) {
+                userData = JSON.parse(userDataString);
+            } else {
+                showMessage('No user data found. Redirecting to login...', 'error');
+                setTimeout(() => {
+                    window.location.href = '/signup-login';
+                }, 2000);
+                return;
+            }
+            
+            // Start email verification countdown
+            startCountdown('email', 60);
+            
+            // Show appropriate verification methods
+            if (!userData.emailVerified && userData.email) {
+                document.getElementById('emailVerification').style.display = 'block';
+            } else if (!userData.phoneVerified && userData.phoneNumber) {
+                document.getElementById('emailVerification').style.display = 'none';
+                document.getElementById('smsVerification').style.display = 'block';
+                startCountdown('sms', 60);
+            } else {
+                // Already verified, redirect to community
+                window.location.href = '/community';
+            }
+        });
+    </script>
+</body>
+</html>
