@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Promotion - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+            50% { transform: translateY(-100px) rotate(180deg); opacity: 0.5; }
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-top: 40px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b35, #ff9500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .promotion-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .package-selector {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .package-option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .package-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .package-option.selected {
+            border-color: #ff6b35;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .package-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .package-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ff6b35;
+        }
+
+        .package-price {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .package-features {
+            list-style: none;
+            padding: 0;
+        }
+
+        .package-features li {
+            padding: 6px 0;
+            font-size: 14px;
+            color: #e0e0e0;
+        }
+
+        .package-features li:before {
+            content: "✓";
+            color: #00ff88;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #e0e0e0;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #ff6b35;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+        }
+
+        .form-group input::placeholder, .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff6b35, #ff9500);
+            border: none;
+            color: white;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .success-message {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid rgba(0, 255, 136, 0.5);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .cost-breakdown {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cost-item:last-child {
+            border-bottom: none;
+            font-weight: 600;
+            font-size: 18px;
+            color: #ff6b35;
+        }
+
+        .platform-toggle {
+            display: flex;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .platform-option {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .platform-option.selected {
+            border-color: #ff6b35;
+            background: rgba(255, 107, 53, 0.2);
+        }
+
+        .platform-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .platform-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .savings-badge {
+            background: linear-gradient(45deg, #00ff88, #00cc66);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-particles"></div>
+    
+    <button class="back-btn" onclick="window.history.back()">
+        ← Back
+    </button>
+
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Music Promotion</h1>
+            <p>Promote your music releases at affordable prices</p>
+        </div>
+
+        <div class="promotion-card">
+            <h3 style="margin-bottom: 20px; color: #ff6b35;">Select Promotion Package</h3>
+            
+            <div class="package-selector">
+                <div class="package-option" data-package="basic" onclick="selectPackage('basic')">
+                    <div class="package-header">
+                        <div class="package-name">Quick Boost</div>
+                        <div class="package-price">$3</div>
+                    </div>
+                    <ul class="package-features">
+                        <li>MarketPace community promotion</li>
+                        <li>24-hour featured placement</li>
+                        <li>Basic engagement tracking</li>
+                        <li>Local member notifications</li>
+                    </ul>
+                </div>
+
+                <div class="package-option" data-package="facebook" onclick="selectPackage('facebook')">
+                    <div class="package-header">
+                        <div class="package-name">Facebook Promotion</div>
+                        <div class="package-price">$8 <span class="savings-badge">40% cheaper</span></div>
+                    </div>
+                    <ul class="package-features">
+                        <li>Everything in Quick Boost</li>
+                        <li>Facebook targeted ads (30-mile radius)</li>
+                        <li>Instagram story promotion</li>
+                        <li>Advanced analytics dashboard</li>
+                        <li>Cross-platform streaming links</li>
+                    </ul>
+                </div>
+
+                <div class="package-option" data-package="premium" onclick="selectPackage('premium')">
+                    <div class="package-header">
+                        <div class="package-name">Premium Campaign</div>
+                        <div class="package-price">$15 <span class="savings-badge">50% cheaper</span></div>
+                    </div>
+                    <ul class="package-features">
+                        <li>Everything in Facebook Promotion</li>
+                        <li>Extended 7-day campaign</li>
+                        <li>Multiple Facebook audience targeting</li>
+                        <li>Professional ad creative design</li>
+                        <li>Fan engagement optimization</li>
+                        <li>Real-time performance reports</li>
+                    </ul>
+                </div>
+            </div>
+
+            <form id="promotion-form">
+                <div class="form-group">
+                    <label for="song-title">Song Title</label>
+                    <input type="text" id="song-title" name="song-title" placeholder="Enter your song title" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="artist-name">Artist Name</label>
+                    <input type="text" id="artist-name" name="artist-name" placeholder="Your artist/band name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="target-location">Target Location</label>
+                    <input type="text" id="target-location" name="target-location" placeholder="e.g., Orange Beach, Alabama" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="spotify-link">Spotify Link</label>
+                    <input type="url" id="spotify-link" name="spotify-link" placeholder="https://open.spotify.com/track/..." required>
+                </div>
+
+                <div class="form-group">
+                    <label for="apple-link">Apple Music Link (Optional)</label>
+                    <input type="url" id="apple-link" name="apple-link" placeholder="https://music.apple.com/...">
+                </div>
+
+                <div class="form-group">
+                    <label for="promotion-message">Promotion Message</label>
+                    <textarea id="promotion-message" name="promotion-message" rows="3" placeholder="Write a compelling message about your new release..." required></textarea>
+                </div>
+
+                <div class="cost-breakdown" id="cost-breakdown">
+                    <div class="cost-item">
+                        <span>Package:</span>
+                        <span id="package-cost">Select a package</span>
+                    </div>
+                    <div class="cost-item">
+                        <span>Processing Fee:</span>
+                        <span>$0.30</span>
+                    </div>
+                    <div class="cost-item">
+                        <span>Total:</span>
+                        <span id="total-cost">$0.00</span>
+                    </div>
+                </div>
+
+                <button type="button" class="btn" id="promote-btn" onclick="startPromotion()" disabled>
+                    Select Package to Continue
+                </button>
+            </form>
+
+            <div id="success-message" class="success-message">
+                <h3>🎉 Promotion Campaign Started!</h3>
+                <p id="campaign-details"></p>
+            </div>
+        </div>
+
+        <div class="promotion-card">
+            <h3 style="margin-bottom: 16px; color: #ff6b35;">Why Promote Through MarketPace?</h3>
+            <ul style="list-style: none; padding: 0;">
+                <li style="padding: 8px 0; color: #e0e0e0;">💰 40-50% cheaper than direct Facebook ads</li>
+                <li style="padding: 8px 0; color: #e0e0e0;">🎯 Hyper-local targeting to your hometown area</li>
+                <li style="padding: 8px 0; color: #e0e0e0;">📊 Simple, clear analytics without complexity</li>
+                <li style="padding: 8px 0; color: #e0e0e0;">🔗 Automatic streaming platform integration</li>
+                <li style="padding: 8px 0; color: #e0e0e0;">⚡ Instant campaign activation</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let selectedPackage = null;
+        const packages = {
+            basic: { name: 'Quick Boost', price: 3, platforms: ['MarketPace'] },
+            facebook: { name: 'Facebook Promotion', price: 8, platforms: ['MarketPace', 'Facebook'] },
+            premium: { name: 'Premium Campaign', price: 15, platforms: ['MarketPace', 'Facebook', 'Instagram'] }
+        };
+
+        // Create floating particles
+        function createParticles() {
+            const particleContainer = document.querySelector('.floating-particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 5) + 's';
+                particleContainer.appendChild(particle);
+            }
+        }
+
+        createParticles();
+
+        function selectPackage(packageType) {
+            // Remove previous selection
+            document.querySelectorAll('.package-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+
+            // Select new package
+            document.querySelector(`[data-package="${packageType}"]`).classList.add('selected');
+            selectedPackage = packageType;
+
+            // Update cost breakdown
+            updateCostBreakdown();
+            
+            // Enable promote button
+            const promoteBtn = document.getElementById('promote-btn');
+            promoteBtn.disabled = false;
+            promoteBtn.textContent = `Start ${packages[packageType].name} - $${packages[packageType].price + 0.30}`;
+        }
+
+        function updateCostBreakdown() {
+            if (!selectedPackage) return;
+
+            const package = packages[selectedPackage];
+            const processingFee = 0.30;
+            const total = package.price + processingFee;
+
+            document.getElementById('package-cost').textContent = `$${package.price}`;
+            document.getElementById('total-cost').textContent = `$${total.toFixed(2)}`;
+        }
+
+        async function startPromotion() {
+            if (!selectedPackage) {
+                alert('Please select a promotion package first');
+                return;
+            }
+
+            const formData = {
+                songTitle: document.getElementById('song-title').value,
+                artistName: document.getElementById('artist-name').value,
+                targetLocation: document.getElementById('target-location').value,
+                spotifyLink: document.getElementById('spotify-link').value,
+                appleMusicLink: document.getElementById('apple-link').value,
+                promotionMessage: document.getElementById('promotion-message').value,
+                package: selectedPackage,
+                packageDetails: packages[selectedPackage]
+            };
+
+            // Validate required fields
+            if (!formData.songTitle || !formData.artistName || !formData.targetLocation || 
+                !formData.spotifyLink || !formData.promotionMessage) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            try {
+                // Process payment first
+                const paymentResponse = await fetch('/api/music-promotion/create-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        amount: packages[selectedPackage].price + 0.30,
+                        packageType: selectedPackage,
+                        songTitle: formData.songTitle,
+                        artistName: formData.artistName
+                    })
+                });
+
+                const paymentData = await paymentResponse.json();
+                
+                if (paymentData.success) {
+                    // Redirect to Stripe Checkout
+                    window.location.href = paymentData.checkoutUrl;
+                } else {
+                    alert('Payment processing failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error processing promotion:', error);
+                alert('Failed to start promotion campaign');
+            }
+        }
+
+        // Handle successful payment return
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('success') === 'true') {
+            showSuccessMessage(urlParams.get('campaign_id'));
+        }
+
+        function showSuccessMessage(campaignId) {
+            const successDiv = document.getElementById('success-message');
+            const detailsDiv = document.getElementById('campaign-details');
+            
+            detailsDiv.innerHTML = `
+                <strong>Campaign ID:</strong> ${campaignId}<br>
+                <strong>Status:</strong> Active and promoting<br>
+                <strong>Platforms:</strong> ${packages[selectedPackage]?.platforms.join(', ') || 'MarketPace + Facebook'}<br>
+                <strong>Duration:</strong> ${selectedPackage === 'premium' ? '7 days' : '24 hours'}<br>
+                <em>Your music is now being promoted to local fans!</em>
+            `;
+            
+            successDiv.classList.add('show');
+        }
+    </script>
+</body>
+</html>
