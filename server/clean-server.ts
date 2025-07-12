@@ -80,7 +80,7 @@ app.get('/api/auth/facebook', (req, res) => {
   // Determine environment based on host
   const host = req.get('host') || '';
   const isDev = host.includes('repl.co') || host.includes('replit.dev') || host.includes('localhost');
-  const redirectUri = isDev ? `https://${req.get('host')}/auth/facebook/callback` : process.env.FACEBOOK_REDIRECT_URI_PROD;
+  const redirectUri = isDev ? `https://${req.get('host')}/api/auth/facebook/callback` : process.env.FACEBOOK_REDIRECT_URI_PROD;
   console.log('Host detected:', host, 'isDev:', isDev);
   
   const facebookAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${process.env.FACEBOOK_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri || 'https://workspace.ihavecreativeid.repl.co/api/auth/facebook/callback')}&scope=email,public_profile&response_type=code`;
@@ -128,7 +128,7 @@ app.get('/api/auth/facebook/callback', async (req, res) => {
       // Determine environment based on host
       const host = req.get('host') || '';
       const isDev = host.includes('repl.co') || host.includes('replit.dev') || host.includes('localhost');
-      const redirectUri = isDev ? `https://${req.get('host')}/auth/facebook/callback` : process.env.FACEBOOK_REDIRECT_URI_PROD;
+      const redirectUri = isDev ? `https://${req.get('host')}/api/auth/facebook/callback` : process.env.FACEBOOK_REDIRECT_URI_PROD;
       console.log('Callback Host detected:', host, 'isDev:', isDev);
       
       // Exchange code for access token
@@ -163,7 +163,7 @@ app.get('/api/auth/google', (req, res) => {
   // Determine environment based on host
   const host = req.get('host') || '';
   const isDev = host.includes('repl.co') || host.includes('replit.dev') || host.includes('localhost');
-  const redirectUri = isDev ? `https://${req.get('host')}/auth/google/callback` : process.env.GOOGLE_REDIRECT_URI_PROD;
+  const redirectUri = isDev ? `https://${req.get('host')}/api/auth/google/callback` : process.env.GOOGLE_REDIRECT_URI_PROD;
   console.log('Host detected:', host, 'isDev:', isDev);
   
   const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri || 'https://workspace.ihavecreativeid.repl.co/api/auth/google/callback')}&scope=openid email profile&response_type=code`;
