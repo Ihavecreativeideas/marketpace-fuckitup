@@ -70,6 +70,11 @@ export const users = pgTable("users", {
   loginHistory: jsonb("login_history"),
   emailVerifiedAt: timestamp("email_verified_at"),
   phoneVerifiedAt: timestamp("phone_verified_at"),
+  // Driver location and status fields
+  lat: real("lat"),
+  lng: real("lng"),
+  isOnline: boolean("is_online").default(false),
+  lastOnlineAt: timestamp("last_online_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -243,10 +248,20 @@ export const orderItems = pgTable("order_items", {
 // Delivery routes
 export const deliveryRoutes = pgTable("delivery_routes", {
   id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
-  driverId: varchar("driver_id").notNull(),
-  status: varchar("status").notNull().default("active"), // active, completed, cancelled
+  driverId: varchar("driver_id"),
+  status: varchar("status").notNull().default("available"), // available, accepted, in_progress, completed, cancelled
   maxOrders: integer("max_orders").default(6),
   timeSlot: varchar("time_slot").notNull(), // "9am-12pm", "12pm-3pm", "3pm-6pm", "6pm-9pm"
+  timeBlock: varchar("time_block").notNull(), // morning, afternoon, evening, night
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  pickups: integer("pickups").default(0),
+  dropoffs: integer("dropoffs").default(0),
+  mileage: decimal("mileage", { precision: 8, scale: 2 }).default("0.00"),
+  originalMileage: decimal("original_mileage", { precision: 8, scale: 2 }).default("0.00"),
+  earnings: decimal("earnings", { precision: 10, scale: 2 }).default("0.00"),
+  pickupLat: real("pickup_lat"),
+  pickupLng: real("pickup_lng"),
   colorCode: varchar("color_code"), // For UI organization
   routeOptimization: jsonb("route_optimization"), // Optimized stop order
   totalDistance: decimal("total_distance", { precision: 8, scale: 2 }), // in miles
@@ -255,6 +270,7 @@ export const deliveryRoutes = pgTable("delivery_routes", {
   basePay: decimal("base_pay", { precision: 10, scale: 2 }).default("0.00"),
   mileagePay: decimal("mileage_pay", { precision: 10, scale: 2 }).default("0.00"),
   tips: decimal("tips", { precision: 10, scale: 2 }).default("0.00"),
+  acceptedAt: timestamp("accepted_at"),
   createdAt: timestamp("created_at").defaultNow(),
   completedAt: timestamp("completed_at"),
 });
@@ -299,6 +315,59 @@ export const driverApplications = pgTable("driver_applications", {
   reviewedAt: timestamp("reviewed_at"),
   approvedAt: timestamp("approved_at"),
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Individual deliveries
+export const deliveries = pgTable("deliveries", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  routeId: integer("route_id").notNull(),
+  orderId: integer("order_id").notNull(),
+  customerId: varchar("customer_id").notNull(),
+  sellerId: varchar("seller_id").notNull(),
+  driverId: varchar("driver_id"),
+  pickupAddress: text("pickup_address").notNull(),
+  deliveryAddress: text("delivery_address").notNull(),
+  pickupLat: real("pickup_lat"),
+  pickupLng: real("pickup_lng"),
+  deliveryLat: real("delivery_lat"),
+  deliveryLng: real("delivery_lng"),
+  status: varchar("status").notNull().default("pending"), // pending, picked_up, in_transit, delivered, failed
+  driverEarnings: decimal("driver_earnings", { precision: 10, scale: 2 }).default("0.00"),
+  isLate: boolean("is_late").default(false),
+  estimatedPickupTime: timestamp("estimated_pickup_time"),
+  actualPickupTime: timestamp("actual_pickup_time"),
+  estimatedDeliveryTime: timestamp("estimated_delivery_time"),
+  actualDeliveryTime: timestamp("actual_delivery_time"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Driver performance notes
+export const driverNotes = pgTable("driver_notes", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  driverId: varchar("driver_id").notNull(),
+  noteType: varchar("note_type").notNull(), // late_delivery, good_performance, customer_complaint, bonus_eligible
+  note: text("note").notNull(),
+  deliveryId: integer("delivery_id"),
+  routeId: integer("route_id"),
+  affectsBonuses: boolean("affects_bonuses").default(false),
+  createdBy: varchar("created_by").notNull(), // admin user id or 'system'
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Customer messages from drivers
+export const customerMessages = pgTable("customer_messages", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+  driverId: varchar("driver_id").notNull(),
+  customerId: varchar("customer_id").notNull(),
+  message: text("message").notNull(),
+  messageType: varchar("message_type").notNull(), // route_offer, schedule_change, delivery_update
+  routeId: integer("route_id"),
+  deliveryId: integer("delivery_id"),
+  feeAdjustment: decimal("fee_adjustment", { precision: 10, scale: 2 }).default("0.00"),
+  customerResponse: text("customer_response"),
+  responseAt: timestamp("response_at"),
+  sentAt: timestamp("sent_at").defaultNow(),
 });
 
 // Community posts

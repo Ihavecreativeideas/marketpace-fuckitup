@@ -379,6 +379,207 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced Driver Dashboard API Endpoints
+  
+  // Get driver's current location
+  app.get('/api/drivers/location', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: 'Driver not found' });
+      }
+
+      res.json({
+        location: {
+          address: user.address,
+          lat: user.lat,
+          lng: user.lng
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching driver location:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Get nearby routes ordered by distance
+  app.get('/api/drivers/routes/nearby', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { lat, lng } = req.query;
+      
+      if (!lat || !lng) {
+        return res.status(400).json({ error: 'Driver location required' });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: 'Driver not found' });
+      }
+
+      // Get mock nearby routes for demo
+      const mockRoutes = [
+        {
+          id: 1,
+          timeSlot: 'afternoon',
+          startTime: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
+          endTime: new Date(Date.now() + 4 * 60 * 60 * 1000),
+          pickups: 2,
+          dropoffs: 4,
+          mileage: 8.5,
+          originalMileage: 8.5,
+          earnings: 28.25,
+          pickupLat: parseFloat(lat) + 0.01,
+          pickupLng: parseFloat(lng) + 0.01,
+          status: 'available',
+          distance: 0.7,
+          customers: [
+            { id: 'cust1', name: 'Sarah M.', email: 'sarah@example.com' },
+            { id: 'cust2', name: 'Mike K.', email: 'mike@example.com' }
+          ]
+        },
+        {
+          id: 2,
+          timeSlot: 'evening',
+          startTime: new Date(Date.now() + 4 * 60 * 60 * 1000), // 4 hours from now
+          endTime: new Date(Date.now() + 6 * 60 * 60 * 1000),
+          pickups: 3,
+          dropoffs: 5,
+          mileage: 12.3,
+          originalMileage: 12.3,
+          earnings: 41.65,
+          pickupLat: parseFloat(lat) + 0.02,
+          pickupLng: parseFloat(lng) - 0.01,
+          status: 'available',
+          distance: 1.4,
+          customers: [
+            { id: 'cust3', name: 'Anna L.', email: 'anna@example.com' }
+          ]
+        }
+      ];
+
+      res.json({
+        routes: mockRoutes
+      });
+    } catch (error) {
+      console.error('Error fetching nearby routes:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Send message to customer about earlier delivery
+  app.post('/api/drivers/messages/customer', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { customerId, message, feeAdjustment } = req.body;
+      
+      if (!customerId || !message) {
+        return res.status(400).json({ error: 'Customer ID and message are required' });
+      }
+
+      // Mock message sending for demo
+      const messageData = {
+        id: 'msg_' + Math.random().toString(36).substr(2, 9),
+        driverId: userId,
+        customerId: customerId,
+        message: message,
+        messageType: 'route_offer',
+        feeAdjustment: feeAdjustment || 0,
+        sentAt: new Date()
+      };
+
+      res.json({
+        success: true,
+        message: 'Message sent successfully',
+        messageData: messageData
+      });
+    } catch (error) {
+      console.error('Error sending customer message:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Update driver status (online/offline)
+  app.post('/api/drivers/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { status } = req.body;
+      
+      if (!['online', 'offline'].includes(status)) {
+        return res.status(400).json({ error: 'Invalid status' });
+      }
+
+      await storage.updateUserProfile(userId, {
+        isOnline: status === 'online',
+        lastOnlineAt: new Date()
+      });
+
+      res.json({
+        success: true,
+        message: 'Status updated successfully',
+        status: status
+      });
+    } catch (error) {
+      console.error('Error updating driver status:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Get driver stats and earnings
+  app.get('/api/drivers/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Mock stats for demo
+      const mockStats = {
+        todayEarnings: 47.50,
+        weeklyEarnings: 312.75,
+        completedDeliveries: 23,
+        status: 'online',
+        averageRating: 4.8,
+        totalEarnings: 1247.30
+      };
+
+      res.json(mockStats);
+    } catch (error) {
+      console.error('Error fetching driver stats:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Mark delivery as complete with late tracking
+  app.post('/api/drivers/deliveries/:deliveryId/complete', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { deliveryId } = req.params;
+      const { isLate = false, completedAt } = req.body;
+      
+      const completionTime = new Date(completedAt || Date.now());
+
+      // Mock delivery completion for demo
+      const mockCompletion = {
+        id: deliveryId,
+        status: 'completed',
+        completedAt: completionTime,
+        isLate: isLate,
+        driverEarnings: isLate ? 8.50 : 12.75, // Reduced earnings for late delivery
+        notes: isLate ? 'Late delivery - admin note added' : 'Completed on time'
+      };
+
+      res.json({
+        success: true,
+        message: 'Delivery marked as complete',
+        delivery: mockCompletion,
+        isLate: isLate
+      });
+    } catch (error) {
+      console.error('Error marking delivery complete:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   app.post('/api/complete-stop/:routeId/:stopIndex', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
