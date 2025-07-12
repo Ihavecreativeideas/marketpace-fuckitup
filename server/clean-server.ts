@@ -101,9 +101,11 @@ app.get('/api/auth/facebook', (req, res) => {
 
 
 app.get('/api/auth/facebook/callback', async (req, res) => {
+  console.log('Facebook callback received:', req.query);
   const { code, state, error } = req.query;
   
   if (error) {
+    console.log('Facebook OAuth error:', error);
     return res.redirect('/signup-login?error=facebook_auth_failed');
   }
   
@@ -159,9 +161,11 @@ app.get('/api/auth/google', (req, res) => {
 });
 
 app.get('/api/auth/google/callback', async (req, res) => {
+  console.log('Google callback received:', req.query);
   const { code, error } = req.query;
   
   if (error) {
+    console.log('Google OAuth error:', error);
     return res.redirect('/signup-login?error=google_auth_failed');
   }
   
