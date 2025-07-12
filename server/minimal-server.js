@@ -864,9 +864,22 @@ app.post('/api/pro-signup', [
       subscriptionInfo: {
         currentPlan: 'free_trial',
         willCharge: false,
-        futurePrice: '$2-$8/month (not finalized)',
+        subscriptionLaunchDate: '2026-01-01',
+        pricingOptions: {
+          monthly: '$5/month',
+          annual: '$50/year'
+        },
         chargeDate: null,
-        giftCodeEligible: true
+        giftCodeEligible: true,
+        features: {
+          personalBusinessPage: true,
+          webAppIntegrations: true,
+          analytics: true,
+          promotionTools: true,
+          localMarketing: true,
+          monthlySpotlight: true,
+          freeNewBusinessSpotlight: true
+        }
       },
       notificationPreferences: {
         trialUpdates: notifications.includes('trial'),

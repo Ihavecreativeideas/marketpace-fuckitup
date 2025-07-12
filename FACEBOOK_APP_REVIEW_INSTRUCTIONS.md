@@ -50,11 +50,11 @@ MarketPace provides **completely free access** to all core functionality for Fac
 - **No Test Credentials Needed:** Direct access to full platform capabilities
 
 **Future Business Model (Transparency):**
-MarketPace plans to introduce optional Pro subscription tiers approximately 6 months after launch with pricing under consideration between $2-$8 per month. These future subscriptions will enhance existing features but will not restrict access to core Facebook integration functionality:
+MarketPace will introduce optional Pro subscription tiers on January 1, 2026 (approximately 6 months after launch). These future subscriptions will enhance existing features but will not restrict access to core Facebook integration functionality:
 
 - **Free Tier:** Facebook Login, community features, basic marketplace access (always free)
-- **Pro Tiers (Future):** Enhanced business tools, advanced analytics, premium promotion features
-- **Pricing Range:** Considering $2-$8 monthly for Pro features (pricing not finalized)
+- **Pro Subscription:** $5/month or $50/year for enhanced business tools
+- **Pro Features:** Personal business pages, web/app integrations, analytics, promotion tools, local marketing, monthly business spotlight opportunities, and free new business spotlight posts
 - **Facebook Features:** All Facebook Login and Graph API functionality remains accessible in free tier permanently
 
 **Facebook Test Users (Optional):**
@@ -78,12 +78,12 @@ https://marketplace-delivery-platform.replit.app/
 - **No Payment Barriers:** All features currently available without cost
 
 **Future Pro Subscription Gift Codes:**
-For the planned Pro subscription features (launching approximately 6 months from now), we will provide **8-10 gift codes** for Facebook reviewers to access Pro features when subscriptions begin:
+For the Pro subscription features launching January 1, 2026, we will provide **8-10 gift codes** for Facebook reviewers to access Pro features when subscriptions begin:
 
 - **Gift Code Duration:** Active for one year after Pro subscription launch
-- **Full Pro Access:** Complete access to enhanced business tools, analytics, and premium features
-- **Pricing Range:** $2-$8/month Pro features (when subscriptions activate)
-- **Reviewer Benefit:** Free Pro access for comprehensive ongoing review
+- **Full Pro Access:** Complete access to personal business pages, analytics, promotion tools, local marketing, and business spotlight features
+- **Subscription Value:** $60/year Pro features (regular price $5/month or $50/year)
+- **Reviewer Benefit:** Free Pro access for comprehensive ongoing review and platform testing
 
 **Current Review Status:**
 All Pro features are currently accessible for free during the launch campaign, so no gift codes are needed for immediate review. Gift codes will be provided to Facebook when Pro subscriptions activate.
