@@ -79,7 +79,7 @@ app.get('/api/auth/facebook', (req, res) => {
   console.log('Facebook OAuth initiated with App ID:', process.env.FACEBOOK_APP_ID);
   // Determine environment based on host
   const host = req.get('host') || '';
-  const isDev = host.includes('repl.co') || host.includes('localhost');
+  const isDev = host.includes('repl.co') || host.includes('replit.dev') || host.includes('localhost');
   const redirectUri = isDev ? process.env.FACEBOOK_REDIRECT_URI_DEV : process.env.FACEBOOK_REDIRECT_URI_PROD;
   console.log('Host detected:', host, 'isDev:', isDev);
   
@@ -127,7 +127,7 @@ app.get('/api/auth/facebook/callback', async (req, res) => {
     try {
       // Determine environment based on host
       const host = req.get('host') || '';
-      const isDev = host.includes('repl.co') || host.includes('localhost');
+      const isDev = host.includes('repl.co') || host.includes('replit.dev') || host.includes('localhost');
       const redirectUri = isDev ? process.env.FACEBOOK_REDIRECT_URI_DEV : process.env.FACEBOOK_REDIRECT_URI_PROD;
       console.log('Callback Host detected:', host, 'isDev:', isDev);
       
@@ -162,7 +162,7 @@ app.get('/api/auth/google', (req, res) => {
   console.log('Google OAuth initiated with Client ID:', process.env.GOOGLE_CLIENT_ID);
   // Determine environment based on host
   const host = req.get('host') || '';
-  const isDev = host.includes('repl.co') || host.includes('localhost');
+  const isDev = host.includes('repl.co') || host.includes('replit.dev') || host.includes('localhost');
   const redirectUri = isDev ? process.env.GOOGLE_REDIRECT_URI_DEV : process.env.GOOGLE_REDIRECT_URI_PROD;
   console.log('Host detected:', host, 'isDev:', isDev);
   
