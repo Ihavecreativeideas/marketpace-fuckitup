@@ -69,6 +69,12 @@
         <h2>Test Callback Endpoints:</h2>
         <a href="/api/auth/facebook/callback?code=test123" class="test-button">Test Facebook Callback</a>
         <a href="/api/auth/google/callback?code=test123" class="test-button">Test Google Callback</a>
+        
+        <h3>Direct Test Links:</h3>
+        <button onclick="testCallback('facebook')" class="test-button">Test Facebook Callback Route</button>
+        <button onclick="testCallback('google')" class="test-button">Test Google Callback Route</button>
+        
+        <div id="test-results" style="margin-top: 20px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 5px;"></div>
     </div>
 
     <script>
@@ -83,6 +89,24 @@
         console.log('Current domain:', currentHost);
         console.log('Facebook redirect URI:', `${protocol}//${currentHost}/api/auth/facebook/callback`);
         console.log('Google redirect URI:', `${protocol}//${currentHost}/api/auth/google/callback`);
+        
+        async function testCallback(provider) {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = `Testing ${provider} callback...`;
+            
+            try {
+                const response = await fetch(`/api/auth/${provider}/callback?code=test123&state=test`);
+                const isRedirect = response.redirected || response.status === 302;
+                
+                resultsDiv.innerHTML = `
+                    <strong>${provider} callback test:</strong><br>
+                    Status: ${response.status}<br>
+                    ${isRedirect ? 'Redirected to: ' + response.url : 'Response received'}
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `<strong>Error testing ${provider}:</strong><br>${error.message}`;
+            }
+        }
     </script>
 </body>
 </html>

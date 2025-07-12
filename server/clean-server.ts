@@ -8,6 +8,12 @@ config();
 
 const app = express();
 
+// Add middleware to log all requests
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path} - Query:`, req.query);
+  next();
+});
+
 // Basic middleware
 app.use(cors());
 app.use(express.json());
@@ -144,6 +150,7 @@ app.get('/api/auth/facebook/callback', async (req, res) => {
       res.redirect('/signup-login?error=facebook_auth_failed');
     }
   } else {
+    console.log('Facebook callback: No code received, redirecting to signup-login');
     res.redirect('/signup-login?error=facebook_no_code');
   }
 });
