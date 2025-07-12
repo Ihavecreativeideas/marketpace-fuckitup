@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Center - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0d0221, #1a0633, #2d1b4e, #1e0b3d);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            color: #fff;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(138, 43, 226, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(0, 191, 255, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 191, 255, 0.3);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            backdrop-filter: blur(15px);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+            border-color: rgba(0, 191, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .title {
+            font-size: 3rem;
+            color: #C4A5E1;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(196, 165, 225, 0.5);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
+
+        .search-container {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(0, 191, 255, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 0 40px rgba(0, 191, 255, 0.2);
+        }
+
+        .search-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 191, 255, 0.3);
+            border-radius: 15px;
+            padding: 15px 20px;
+            color: #fff;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: rgba(0, 191, 255, 0.6);
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .search-btn {
+            background: linear-gradient(45deg, #00BFFF, #8A2BE2);
+            border: none;
+            border-radius: 15px;
+            padding: 15px 25px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 25px rgba(0, 191, 255, 0.4);
+        }
+
+        .search-results {
+            margin-top: 20px;
+        }
+
+        .faq-section {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(0, 191, 255, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 40px rgba(0, 191, 255, 0.2);
+        }
+
+        .faq-title {
+            font-size: 2rem;
+            color: #C4A5E1;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .faq-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 191, 255, 0.2);
+        }
+
+        .faq-question {
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .faq-question:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .faq-question h3 {
+            color: #00BFFF;
+            font-size: 1.1rem;
+        }
+
+        .faq-answer {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .faq-answer.active {
+            padding: 20px;
+            max-height: 300px;
+        }
+
+        .contact-section {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(138, 43, 226, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(138, 43, 226, 0.2);
+        }
+
+        .contact-title {
+            font-size: 2rem;
+            color: #C4A5E1;
+            margin-bottom: 15px;
+        }
+
+        .contact-text {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            opacity: 0.9;
+        }
+
+        .email-btn {
+            background: linear-gradient(45deg, #8A2BE2, #FF6B35);
+            border: none;
+            border-radius: 15px;
+            padding: 15px 30px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);
+        }
+
+        .email-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 25px rgba(138, 43, 226, 0.4);
+        }
+
+        .result-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #00BFFF;
+        }
+
+        .result-title {
+            color: #00BFFF;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/marketpace-menu" class="back-btn">← Back to Menu</a>
+
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Support Center</h1>
+            <p class="subtitle">Get help with MarketPace features, account settings, and more</p>
+        </div>
+
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" class="search-input" id="searchInput" placeholder="Type your question here... (e.g., 'How do I sell items?', 'Payment issues', 'Driver application')">
+                <button class="search-btn" onclick="searchSupport()">Search</button>
+            </div>
+            <div class="search-results" id="searchResults"></div>
+        </div>
+
+        <div class="faq-section">
+            <h2 class="faq-title">Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <h3>How do I start selling on MarketPace?</h3>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>To start selling on MarketPace: 1) Create your account through Sign Up/Login, 2) Go to the Community page and click "Post" to create a sale listing, 3) Add photos, description, and price, 4) Choose delivery options (MarketPace delivery or self pickup), 5) Your item will appear in the community feed for local buyers to discover.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <h3>How does MarketPace delivery work?</h3>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>MarketPace delivery connects buyers and sellers with local drivers. When you purchase an item, you can choose MarketPace delivery. Our drivers pick up from the seller and deliver to your address. Delivery fees are split 50/50 between buyer and seller. Track your delivery in real-time through the Delivery dashboard.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <h3>What is MarketPace Pro?</h3>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>MarketPace Pro offers enhanced business features including: product promotion tools, business dashboard, revenue tracking, platform integrations (Facebook, Shopify), and priority support. Pro members can promote products 50-70% cheaper than Facebook ads with no Apple fees.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <h3>How do I become a driver?</h3>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>To become a MarketPace driver: 1) Complete the driver application with required documents (Driver's License, Insurance, Background Check), 2) Wait for admin approval, 3) Once approved, access delivery routes through the Driver Dashboard, 4) Choose time slots and routes that work for your schedule. Earn $4 per pickup + $2 per dropoff + $0.50/mile + 100% tips.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <h3>Payment and fees information</h3>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>MarketPace uses Stripe for secure payments. Platform takes 5% commission on sales. Delivery fees are split 50/50 between buyer and seller. Drivers receive 100% of customer tips. Pro member promotions have no additional fees beyond the promotion cost. All payments are processed securely with industry-standard encryption.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <h3>Account and privacy settings</h3>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Access your account settings through the Menu > Account Settings. You can update personal information, payment methods, delivery addresses, and privacy preferences. MarketPace NEVER sells user data to outside parties. All data stays within the platform for community commerce purposes only.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <h3>The Hub - Entertainment features</h3>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>The Hub is MarketPace's entertainment network for musicians, DJs, comedians, and performers. Features include: 100% commission-free ticket sharing, gear marketplace, professional profiles, event promotion, and social networking. All entertainment professionals can promote events and connect with local audiences at no cost.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-section">
+            <h2 class="contact-title">Need Additional Support?</h2>
+            <p class="contact-text">Can't find the answer you're looking for? Our support team is here to help!</p>
+            <a href="mailto:MarketPace.contact@gmail.com?subject=MarketPace Support Request" class="email-btn">Email Support Team</a>
+        </div>
+    </div>
+
+    <script>
+        const supportDatabase = {
+            "sell": {
+                title: "Selling on MarketPace",
+                content: "Create account → Community page → Post → Add photos & price → Choose delivery options → Item goes live for local buyers"
+            },
+            "selling": {
+                title: "How to Start Selling",
+                content: "Sign up, go to Community, click Post, add your item details, set price, choose delivery method. Your item appears in local community feed."
+            },
+            "delivery": {
+                title: "MarketPace Delivery Service",
+                content: "Local drivers pick up from seller and deliver to buyer. 50/50 fee split. Real-time tracking available. $4 pickup + $2 dropoff + mileage."
+            },
+            "driver": {
+                title: "Becoming a Driver",
+                content: "Apply with driver's license, insurance, background check. Get approved by admin. Choose time slots. Earn $4 pickup + $2 dropoff + $0.50/mile + 100% tips."
+            },
+            "payment": {
+                title: "Payments and Fees",
+                content: "Stripe secure payments. 5% platform commission. 50/50 delivery fees. 100% tips to drivers. Pro promotions have no extra fees."
+            },
+            "pro": {
+                title: "MarketPace Pro Features",
+                content: "Business dashboard, product promotion, revenue tracking, platform integrations, priority support. 50-70% cheaper than Facebook ads."
+            },
+            "promotion": {
+                title: "Product Promotion",
+                content: "Pro members can promote products for $5 (Quick Boost), $12 (Featured), $25 (Premium). Much cheaper than Facebook with better local targeting."
+            },
+            "account": {
+                title: "Account Settings",
+                content: "Access through Menu → Account Settings. Update profile, payment methods, addresses, privacy settings. Full control over your data."
+            },
+            "privacy": {
+                title: "Privacy and Data Protection",
+                content: "MarketPace NEVER sells user data. All information stays within platform. Enterprise-grade security. You control your privacy settings."
+            },
+            "hub": {
+                title: "The Hub - Entertainment Network",
+                content: "100% commission-free for musicians, DJs, comedians. Share tickets, sell gear, promote events, network with local artists."
+            },
+            "fees": {
+                title: "Fee Structure",
+                content: "5% platform commission on sales. Delivery fees split buyer/seller. 100% tips to drivers. No hidden fees. Transparent pricing."
+            },
+            "support": {
+                title: "Getting Help",
+                content: "Search this support center, check FAQs, or email MarketPace.contact@gmail.com for personalized assistance."
+            }
+        };
+
+        function searchSupport() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const resultsContainer = document.getElementById('searchResults');
+            
+            if (!query.trim()) {
+                resultsContainer.innerHTML = '<p style="color: #ff6b6b;">Please enter a search term</p>';
+                return;
+            }
+
+            let results = [];
+            
+            // Search through support database
+            for (let key in supportDatabase) {
+                if (query.includes(key) || supportDatabase[key].title.toLowerCase().includes(query) || 
+                    supportDatabase[key].content.toLowerCase().includes(query)) {
+                    results.push(supportDatabase[key]);
+                }
+            }
+
+            // Display results
+            if (results.length > 0) {
+                resultsContainer.innerHTML = '<h3 style="color: #00BFFF; margin-bottom: 15px;">Search Results:</h3>' +
+                    results.map(result => `
+                        <div class="result-item">
+                            <div class="result-title">${result.title}</div>
+                            <div>${result.content}</div>
+                        </div>
+                    `).join('');
+            } else {
+                resultsContainer.innerHTML = `
+                    <div class="result-item">
+                        <div class="result-title">No exact matches found</div>
+                        <div>Try different keywords or <a href="mailto:MarketPace.contact@gmail.com?subject=Support: ${query}" style="color: #00BFFF;">email our support team</a> for personalized help with: "${query}"</div>
+                    </div>
+                `;
+            }
+        }
+
+        function toggleFAQ(element) {
+            const answer = element.nextElementSibling;
+            const icon = element.querySelector('span');
+            
+            answer.classList.toggle('active');
+            icon.textContent = answer.classList.contains('active') ? '-' : '+';
+        }
+
+        // Allow Enter key to search
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchSupport();
+            }
+        });
+    </script>
+</body>
+</html>

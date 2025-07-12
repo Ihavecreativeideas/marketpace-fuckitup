@@ -73,6 +73,67 @@ app.get('/marketpace-menu', (req, res) => {
   res.sendFile(path.join(__dirname, '../marketpace-menu.html'));
 });
 
+// Menu Navigation Routes
+app.get('/business-dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '../business-dashboard.html'));
+});
+
+app.get('/promote-products', (req, res) => {
+  res.sendFile(path.join(__dirname, '../member-product-promotion.html'));
+});
+
+app.get('/support-center', (req, res) => {
+  res.sendFile(path.join(__dirname, '../support-center.html'));
+});
+
+app.get('/revenue-tracking', (req, res) => {
+  res.sendFile(path.join(__dirname, '../revenue-tracking.html'));
+});
+
+app.get('/shops', (req, res) => {
+  res.sendFile(path.join(__dirname, '../shops.html'));
+});
+
+app.get('/services', (req, res) => {
+  res.sendFile(path.join(__dirname, '../services.html'));
+});
+
+app.get('/the-hub', (req, res) => {
+  res.sendFile(path.join(__dirname, '../the-hub.html'));
+});
+
+app.get('/delivery', (req, res) => {
+  res.sendFile(path.join(__dirname, '../delivery.html'));
+});
+
+app.get('/saved-items', (req, res) => {
+  res.sendFile(path.join(__dirname, '../saved-items.html'));
+});
+
+app.get('/events', (req, res) => {
+  res.sendFile(path.join(__dirname, '../events.html'));
+});
+
+app.get('/platform-integrations', (req, res) => {
+  res.sendFile(path.join(__dirname, '../platform-integrations.html'));
+});
+
+app.get('/account-settings', (req, res) => {
+  res.sendFile(path.join(__dirname, '../account-settings.html'));
+});
+
+app.get('/privacy-settings', (req, res) => {
+  res.sendFile(path.join(__dirname, '../privacy-settings.html'));
+});
+
+app.get('/help-center', (req, res) => {
+  res.sendFile(path.join(__dirname, '../help-center.html'));
+});
+
+app.get('/contact-support', (req, res) => {
+  res.sendFile(path.join(__dirname, '../contact-support.html'));
+});
+
 // *** FACEBOOK MARKETPLACE-STYLE PROMOTION SYSTEM ***
 // Facebook Product Catalog Integration for Member Products
 
