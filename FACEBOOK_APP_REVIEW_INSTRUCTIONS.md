@@ -50,11 +50,12 @@ MarketPace provides **completely free access** to all core functionality for Fac
 - **No Test Credentials Needed:** Direct access to full platform capabilities
 
 **Future Business Model (Transparency):**
-MarketPace plans to introduce optional Pro subscription tiers approximately 6 months after launch. These future subscriptions will enhance existing features but will not restrict access to core Facebook integration functionality:
+MarketPace plans to introduce optional Pro subscription tiers approximately 6 months after launch with pricing under consideration between $2-$8 per month. These future subscriptions will enhance existing features but will not restrict access to core Facebook integration functionality:
 
 - **Free Tier:** Facebook Login, community features, basic marketplace access (always free)
-- **Pro Tiers:** Enhanced business tools, advanced analytics, premium promotion features
-- **Facebook Features:** All Facebook Login and Graph API functionality remains accessible in free tier
+- **Pro Tiers (Future):** Enhanced business tools, advanced analytics, premium promotion features
+- **Pricing Range:** Considering $2-$8 monthly for Pro features (pricing not finalized)
+- **Facebook Features:** All Facebook Login and Graph API functionality remains accessible in free tier permanently
 
 **Facebook Test Users (Optional):**
 While not required, you may create Facebook test users in your App Dashboard for comprehensive OAuth flow testing. All features are accessible with regular Facebook accounts or test users.
