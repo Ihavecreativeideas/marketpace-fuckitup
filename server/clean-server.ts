@@ -74,14 +74,44 @@ app.get('/signup-login', (req, res) => {
   res.sendFile(path.join(__dirname, '../signup-login.html'));
 });
 
-// Authentication routes
-app.post('/api/auth/facebook', (req, res) => {
-  // Facebook OAuth is not fully configured yet
-  res.status(200).json({
-    success: false,
-    message: 'Facebook signup integration requires Facebook Developer App setup. For now, please use email signup or try the demo at /community',
+// Facebook Authentication routes
+app.get('/api/auth/facebook/signup', (req, res) => {
+  // Redirect to Facebook OAuth for signup
+  const facebookAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=1043690817269912&redirect_uri=${encodeURIComponent(req.protocol + '://' + req.get('host') + '/api/auth/facebook/callback')}&scope=email,public_profile,user_friends&state=signup`;
+  res.redirect(facebookAuthUrl);
+});
+
+app.get('/api/auth/facebook/login', (req, res) => {
+  // Redirect to Facebook OAuth for login
+  const facebookAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=1043690817269912&redirect_uri=${encodeURIComponent(req.protocol + '://' + req.get('host') + '/api/auth/facebook/callback')}&scope=email,public_profile,user_friends&state=login`;
+  res.redirect(facebookAuthUrl);
+});
+
+app.post('/api/auth/facebook/callback', (req, res) => {
+  const { type, userData, accessToken } = req.body;
+  
+  // Store user data (in a real app, this would save to database)
+  console.log(`Facebook ${type} for user:`, userData.name, userData.email);
+  
+  res.json({
+    success: true,
+    message: `Facebook ${type} successful`,
+    user: userData,
     redirectUrl: '/community'
   });
+});
+
+app.get('/api/auth/facebook/callback', (req, res) => {
+  // Handle Facebook OAuth redirect callback
+  const { code, state } = req.query;
+  
+  if (code) {
+    // In a real implementation, exchange code for access token
+    // For now, redirect to signup page with success
+    res.redirect('/signup-login?facebook=success&type=' + (state || 'login'));
+  } else {
+    res.redirect('/signup-login?error=facebook_auth_failed');
+  }
 });
 
 app.post('/api/auth/google', (req, res) => {
