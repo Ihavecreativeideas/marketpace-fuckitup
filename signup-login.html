@@ -357,18 +357,19 @@
         function signupWithFacebook() {
             console.log('Facebook signup clicked');
             try {
-                // Create demo user for Facebook signup
-                const userData = {
-                    id: 'facebook-user-' + Math.random().toString(36).substr(2, 9),
-                    email: 'facebook.user@demo.com',
-                    name: 'Facebook User',
-                    loggedIn: true,
-                    accountType: 'facebook',
-                    provider: 'facebook'
-                };
-                
-                localStorage.setItem('marketpaceUser', JSON.stringify(userData));
-                window.location.href = '/community';
+                // Initialize Facebook Login
+                if (typeof FB !== 'undefined') {
+                    FB.login(function(response) {
+                        if (response.authResponse) {
+                            handleFacebookAuthResponse(response.authResponse, 'signup');
+                        } else {
+                            console.log('User cancelled login or did not fully authorize.');
+                        }
+                    }, {scope: 'email,public_profile,user_friends'});
+                } else {
+                    // Fallback to server-side OAuth
+                    window.location.href = '/api/auth/facebook/signup';
+                }
             } catch (error) {
                 console.error('Facebook auth error:', error);
                 alert('Facebook authentication failed. Please try again.');
@@ -399,18 +400,19 @@
         function loginWithFacebook() {
             console.log('Facebook login clicked');
             try {
-                // Create demo user for Facebook login
-                const userData = {
-                    id: 'facebook-user-' + Math.random().toString(36).substr(2, 9),
-                    email: 'facebook.user@demo.com',
-                    name: 'Facebook User',
-                    loggedIn: true,
-                    accountType: 'facebook',
-                    provider: 'facebook'
-                };
-                
-                localStorage.setItem('marketpaceUser', JSON.stringify(userData));
-                window.location.href = '/community';
+                // Initialize Facebook Login
+                if (typeof FB !== 'undefined') {
+                    FB.login(function(response) {
+                        if (response.authResponse) {
+                            handleFacebookAuthResponse(response.authResponse, 'login');
+                        } else {
+                            console.log('User cancelled login or did not fully authorize.');
+                        }
+                    }, {scope: 'email,public_profile,user_friends'});
+                } else {
+                    // Fallback to server-side OAuth
+                    window.location.href = '/api/auth/facebook/login';
+                }
             } catch (error) {
                 console.error('Facebook auth error:', error);
                 alert('Facebook authentication failed. Please try again.');
@@ -615,6 +617,148 @@
                 console.error('Some functions failed to load');
             }
         });
+        // Handle Facebook authentication response
+        async function handleFacebookAuthResponse(authResponse, type) {
+            try {
+                // Get user profile data from Facebook
+                FB.api('/me', {fields: 'name,email,picture.width(200).height(200),friends'}, async function(profile) {
+                    const userData = {
+                        id: 'fb_' + profile.id,
+                        facebookId: profile.id,
+                        name: profile.name,
+                        email: profile.email,
+                        profilePicture: profile.picture?.data?.url || null,
+                        friendsCount: profile.friends?.summary?.total_count || 0,
+                        loggedIn: true,
+                        accountType: 'facebook',
+                        provider: 'facebook',
+                        accessToken: authResponse.accessToken
+                    };
+
+                    // Store user data
+                    localStorage.setItem('marketpaceUser', JSON.stringify(userData));
+
+                    // Send to server for account creation/login
+                    const response = await fetch('/api/auth/facebook/callback', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            type: type,
+                            userData: userData,
+                            accessToken: authResponse.accessToken
+                        })
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Show friend invitation option for new signups
+                        if (type === 'signup' && userData.friendsCount > 0) {
+                            showFriendInviteModal(userData);
+                        } else {
+                            // Redirect to community
+                            window.location.href = '/community';
+                        }
+                    } else {
+                        alert('Failed to complete Facebook authentication: ' + result.message);
+                    }
+                });
+            } catch (error) {
+                console.error('Facebook profile fetch error:', error);
+                alert('Failed to get Facebook profile information.');
+            }
+        }
+
+        // Show friend invitation modal
+        function showFriendInviteModal(userData) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center;
+                z-index: 10000; backdrop-filter: blur(10px);
+            `;
+            
+            modal.innerHTML = `
+                <div style="
+                    background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 30%, #4c2885 60%, #6b46c1 100%);
+                    border: 1px solid rgba(147, 197, 253, 0.3);
+                    border-radius: 20px; padding: 30px; max-width: 400px; text-align: center;
+                    color: #e2e8f0; position: relative;
+                ">
+                    <h2 style="color: #93c5fd; margin-bottom: 15px;">Welcome to MarketPace, ${userData.name}!</h2>
+                    <img src="${userData.profilePicture}" alt="Profile" style="
+                        width: 80px; height: 80px; border-radius: 50%; margin: 15px auto;
+                        border: 3px solid #93c5fd; display: block;
+                    ">
+                    <p style="margin-bottom: 20px; color: rgba(147, 197, 253, 0.8);">
+                        Would you like to invite your Facebook friends to join MarketPace?
+                        You have ${userData.friendsCount} friends who might be interested in your local marketplace.
+                    </p>
+                    <div style="display: flex; gap: 15px; justify-content: center;">
+                        <button onclick="inviteFriends()" style="
+                            background: rgba(29, 11, 61, 0.7); backdrop-filter: blur(20px);
+                            border: 1px solid rgba(147, 197, 253, 0.3); color: white;
+                            padding: 12px 20px; border-radius: 8px; cursor: pointer;
+                            font-weight: 600; transition: all 0.3s ease;
+                        ">Invite Friends</button>
+                        <button onclick="skipInvite()" style="
+                            background: transparent; border: 1px solid rgba(147, 197, 253, 0.3);
+                            color: #93c5fd; padding: 12px 20px; border-radius: 8px;
+                            cursor: pointer; transition: all 0.3s ease;
+                        ">Skip for Now</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        // Invite Facebook friends
+        function inviteFriends() {
+            if (typeof FB !== 'undefined') {
+                FB.ui({
+                    method: 'send',
+                    link: window.location.origin,
+                    description: 'Join me on MarketPace - your local community marketplace! Buy, sell, and connect with neighbors in our area.'
+                }, function(response) {
+                    if (response && !response.error_message) {
+                        alert('Invitations sent! Your friends will receive your invitation.');
+                    }
+                    document.querySelector('[style*="position: fixed"]').remove();
+                    window.location.href = '/community';
+                });
+            } else {
+                alert('Friend invitation feature is loading...');
+                skipInvite();
+            }
+        }
+
+        // Skip friend invitation
+        function skipInvite() {
+            document.querySelector('[style*="position: fixed"]').remove();
+            window.location.href = '/community';
+        }
+
+        // Initialize Facebook SDK
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId: '1043690817269912', // Your Facebook App ID
+                cookie: true,
+                xfbml: true,
+                version: 'v18.0'
+            });
+        };
+
+        // Load Facebook SDK
+        (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = "https://connect.facebook.net/en_US/sdk.js";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
     </script>
 </body>
 </html>

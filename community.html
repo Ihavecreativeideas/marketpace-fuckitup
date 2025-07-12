@@ -1019,7 +1019,12 @@
         
         function updateProfileDisplay(user) {
             // Update profile display with user info
-            if (user.name) {
+            if (user.profilePicture) {
+                // Use Facebook profile picture
+                document.querySelectorAll('.profile-pic').forEach(pic => {
+                    pic.innerHTML = `<img src="${user.profilePicture}" alt="${user.name}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                });
+            } else if (user.name) {
                 const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
                 document.querySelectorAll('.profile-pic span').forEach(span => {
                     span.textContent = initials;
@@ -1029,6 +1034,19 @@
                 document.querySelectorAll('.profile-pic span').forEach(span => {
                     span.textContent = initials;
                 });
+            }
+            
+            // Update any display name elements
+            if (user.name) {
+                document.querySelectorAll('.user-name').forEach(nameEl => {
+                    nameEl.textContent = user.name;
+                });
+                
+                // Update placeholder text to use real name
+                const statusInput = document.querySelector('.status-input');
+                if (statusInput) {
+                    statusInput.placeholder = `What's on your mind, ${user.name.split(' ')[0]}?`;
+                }
             }
         }
 
