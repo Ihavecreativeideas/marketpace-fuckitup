@@ -183,6 +183,21 @@ app.get('/signup-login', (req, res) => {
   res.sendFile(path.join(__dirname, '../signup-login.html'));
 });
 
+// Verification route
+app.get('/verification', (req, res) => {
+  res.sendFile(path.join(__dirname, '../verification.html'));
+});
+
+// Two-Factor Authentication route
+app.get('/two-factor-auth', (req, res) => {
+  res.sendFile(path.join(__dirname, '../two-factor-auth.html'));
+});
+
+// Device Security route
+app.get('/device-security', (req, res) => {
+  res.sendFile(path.join(__dirname, '../device-security.html'));
+});
+
 // The Hub route
 app.get('/the-hub', (req, res) => {
   res.sendFile(path.join(__dirname, '../the-hub.html'));

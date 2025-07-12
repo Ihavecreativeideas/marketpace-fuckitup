@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two-Factor Authentication - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0233 50%, #2d1b69 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Floating particles animation */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .logo {
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .security-shield {
+            font-size: 72px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5));
+        }
+
+        .setup-section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 15px;
+            text-align: left;
+        }
+
+        .setup-section h3 {
+            color: #00ffff;
+            margin-bottom: 15px;
+            font-size: 20px;
+            text-align: center;
+        }
+
+        .qr-code-container {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            display: inline-block;
+        }
+
+        .qr-placeholder {
+            width: 200px;
+            height: 200px;
+            background: #f0f0f0;
+            border: 2px dashed #999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #666;
+            border-radius: 10px;
+        }
+
+        .secret-key {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            color: #00ffff;
+            word-break: break-all;
+            font-size: 14px;
+        }
+
+        .verification-input {
+            width: 100%;
+            max-width: 300px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            margin: 15px auto;
+            text-align: center;
+            letter-spacing: 3px;
+            display: block;
+        }
+
+        .verification-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            min-width: 150px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4757, #c44569);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .status-success {
+            background: rgba(74, 222, 128, 0.2);
+            border: 1px solid rgba(74, 222, 128, 0.5);
+            color: #4ade80;
+        }
+
+        .status-error {
+            background: rgba(248, 113, 113, 0.2);
+            border: 1px solid rgba(248, 113, 113, 0.5);
+            color: #f87171;
+        }
+
+        .status-info {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            color: #3b82f6;
+        }
+
+        .app-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .app-item {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .app-item img {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 10px;
+        }
+
+        .recovery-codes {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .recovery-code {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            color: #00ffff;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .progress-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .progress-step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+            position: relative;
+        }
+
+        .progress-step.active {
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
+            border-color: #00ffff;
+        }
+
+        .progress-step.completed {
+            background: #4ade80;
+            border-color: #4ade80;
+        }
+
+        .progress-step::after {
+            content: '';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .progress-step:last-child::after {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .auth-card {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+
+            .logo {
+                font-size: 36px;
+            }
+
+            .recovery-codes {
+                grid-template-columns: 1fr;
+            }
+
+            .app-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <button class="back-btn" onclick="window.history.back()">← Back</button>
+    
+    <div class="container">
+        <div class="auth-card">
+            <h1 class="logo">MarketPace</h1>
+            <p class="subtitle">Enhanced Security Setup</p>
+            
+            <div class="security-shield">🛡️</div>
+            
+            <div id="statusMessage" class="status-message" style="display: none;"></div>
+            
+            <!-- Progress Indicator -->
+            <div class="progress-indicator">
+                <div class="progress-step active" id="step1">1</div>
+                <div class="progress-step" id="step2">2</div>
+                <div class="progress-step" id="step3">3</div>
+                <div class="progress-step" id="step4">4</div>
+            </div>
+            
+            <!-- Step 1: Choose Authentication Method -->
+            <div id="methodSelection" class="setup-section">
+                <h3>🔐 Choose Your Security Method</h3>
+                <p style="margin-bottom: 20px; color: rgba(255, 255, 255, 0.8);">
+                    Enhance your account security with two-factor authentication.
+                </p>
+                
+                <div style="display: grid; gap: 15px;">
+                    <button class="btn" onclick="selectMethod('authenticator')">
+                        📱 Authenticator App (Recommended)
+                    </button>
+                    <button class="btn btn-secondary" onclick="selectMethod('sms')">
+                        💬 SMS Text Messages
+                    </button>
+                    <button class="btn btn-secondary" onclick="selectMethod('email')">
+                        📧 Email Verification
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 2: Authenticator App Setup -->
+            <div id="authenticatorSetup" class="setup-section" style="display: none;">
+                <h3>📱 Set Up Authenticator App</h3>
+                
+                <p style="margin-bottom: 20px; color: rgba(255, 255, 255, 0.8);">
+                    Download one of these authenticator apps:
+                </p>
+                
+                <div class="app-list">
+                    <div class="app-item">
+                        <div style="font-size: 24px;">🔐</div>
+                        <div>Google Authenticator</div>
+                    </div>
+                    <div class="app-item">
+                        <div style="font-size: 24px;">🛡️</div>
+                        <div>Microsoft Authenticator</div>
+                    </div>
+                    <div class="app-item">
+                        <div style="font-size: 24px;">🔒</div>
+                        <div>Authy</div>
+                    </div>
+                    <div class="app-item">
+                        <div style="font-size: 24px;">🗝️</div>
+                        <div>1Password</div>
+                    </div>
+                </div>
+                
+                <p style="margin: 20px 0; color: rgba(255, 255, 255, 0.8);">
+                    Scan this QR code with your authenticator app:
+                </p>
+                
+                <div class="qr-code-container">
+                    <div class="qr-placeholder" id="qrCode">
+                        QR Code will appear here
+                    </div>
+                </div>
+                
+                <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 15px;">
+                    Or manually enter this secret key:
+                </p>
+                
+                <div class="secret-key" id="secretKey">
+                    XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX
+                </div>
+                
+                <button class="btn" onclick="nextStep(3)">Continue to Verification</button>
+            </div>
+            
+            <!-- Step 3: Verify Setup -->
+            <div id="verificationStep" class="setup-section" style="display: none;">
+                <h3>✅ Verify Your Setup</h3>
+                
+                <p style="margin-bottom: 20px; color: rgba(255, 255, 255, 0.8);">
+                    Enter the 6-digit code from your authenticator app:
+                </p>
+                
+                <input type="text" id="verificationCode" class="verification-input" placeholder="000000" maxlength="6">
+                
+                <div>
+                    <button class="btn" onclick="verifyCode()">Verify Code</button>
+                    <button class="btn btn-secondary" onclick="previousStep(2)">Back</button>
+                </div>
+            </div>
+            
+            <!-- Step 4: Recovery Codes -->
+            <div id="recoveryCodesStep" class="setup-section" style="display: none;">
+                <h3>🔑 Save Your Recovery Codes</h3>
+                
+                <p style="margin-bottom: 20px; color: rgba(255, 255, 255, 0.8);">
+                    Save these recovery codes in a safe place. You can use them to access your account if you lose your phone.
+                </p>
+                
+                <div class="recovery-codes" id="recoveryCodes">
+                    <!-- Recovery codes will be generated here -->
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <button class="btn btn-secondary" onclick="downloadCodes()">📥 Download Codes</button>
+                    <button class="btn btn-secondary" onclick="printCodes()">🖨️ Print Codes</button>
+                </div>
+                
+                <label style="display: flex; align-items: center; margin: 20px 0; color: rgba(255, 255, 255, 0.8);">
+                    <input type="checkbox" id="codesConfirm" style="margin-right: 10px;">
+                    I have saved my recovery codes in a safe place
+                </label>
+                
+                <button class="btn btn-success" onclick="completeTwoFactorSetup()" disabled id="completeBtn">
+                    Complete Setup
+                </button>
+            </div>
+            
+            <!-- SMS Setup -->
+            <div id="smsSetup" class="setup-section" style="display: none;">
+                <h3>💬 SMS Two-Factor Authentication</h3>
+                
+                <p style="margin-bottom: 20px; color: rgba(255, 255, 255, 0.8);">
+                    We'll send a verification code to your phone number.
+                </p>
+                
+                <input type="tel" id="phoneNumber" class="verification-input" placeholder="Enter phone number" style="text-align: left; letter-spacing: normal;">
+                
+                <div>
+                    <button class="btn" onclick="setupSMS()">Setup SMS</button>
+                    <button class="btn btn-secondary" onclick="previousStep(1)">Back</button>
+                </div>
+            </div>
+            
+            <!-- Email Setup -->
+            <div id="emailSetup" class="setup-section" style="display: none;">
+                <h3>📧 Email Two-Factor Authentication</h3>
+                
+                <p style="margin-bottom: 20px; color: rgba(255, 255, 255, 0.8);">
+                    We'll send a verification code to your email address.
+                </p>
+                
+                <input type="email" id="emailAddress" class="verification-input" placeholder="Enter email address" style="text-align: left; letter-spacing: normal;">
+                
+                <div>
+                    <button class="btn" onclick="setupEmail()">Setup Email</button>
+                    <button class="btn btn-secondary" onclick="previousStep(1)">Back</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let selectedMethod = '';
+        let secretKey = '';
+        let recoveryCodes = [];
+
+        // Floating particles animation
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const numberOfParticles = 40;
+
+            for (let i = 0; i < numberOfParticles; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const size = Math.random() * 4 + 1;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 5) + 's';
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Show status message
+        function showMessage(message, type = 'info') {
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message status-${type}`;
+            statusMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Update progress indicator
+        function updateProgress(step) {
+            for (let i = 1; i <= 4; i++) {
+                const stepEl = document.getElementById(`step${i}`);
+                if (i < step) {
+                    stepEl.className = 'progress-step completed';
+                    stepEl.innerHTML = '✓';
+                } else if (i === step) {
+                    stepEl.className = 'progress-step active';
+                    stepEl.innerHTML = i;
+                } else {
+                    stepEl.className = 'progress-step';
+                    stepEl.innerHTML = i;
+                }
+            }
+        }
+
+        // Hide all sections
+        function hideAllSections() {
+            const sections = ['methodSelection', 'authenticatorSetup', 'verificationStep', 'recoveryCodesStep', 'smsSetup', 'emailSetup'];
+            sections.forEach(id => {
+                document.getElementById(id).style.display = 'none';
+            });
+        }
+
+        // Select authentication method
+        function selectMethod(method) {
+            selectedMethod = method;
+            hideAllSections();
+            
+            switch (method) {
+                case 'authenticator':
+                    setupAuthenticator();
+                    break;
+                case 'sms':
+                    document.getElementById('smsSetup').style.display = 'block';
+                    break;
+                case 'email':
+                    document.getElementById('emailSetup').style.display = 'block';
+                    break;
+            }
+        }
+
+        // Setup authenticator app
+        function setupAuthenticator() {
+            generateSecretKey();
+            generateQRCode();
+            document.getElementById('authenticatorSetup').style.display = 'block';
+            nextStep(2);
+        }
+
+        // Generate secret key
+        function generateSecretKey() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+            secretKey = '';
+            for (let i = 0; i < 32; i++) {
+                secretKey += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            
+            // Format for display
+            const formatted = secretKey.match(/.{1,4}/g).join(' ');
+            document.getElementById('secretKey').textContent = formatted;
+        }
+
+        // Generate QR code (simulated)
+        function generateQRCode() {
+            const user = JSON.parse(localStorage.getItem('marketpaceUser') || '{}');
+            const email = user.email || 'user@marketpace.shop';
+            const issuer = 'MarketPace';
+            
+            // In a real implementation, you would generate an actual QR code
+            document.getElementById('qrCode').innerHTML = `
+                <div style="padding: 20px; text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 10px;">📱</div>
+                    <div style="color: #666; font-size: 12px;">Scan with authenticator app</div>
+                    <div style="color: #999; font-size: 10px; margin-top: 10px;">
+                        otpauth://totp/${issuer}:${email}?secret=${secretKey}&issuer=${issuer}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Navigate to next step
+        function nextStep(step) {
+            currentStep = step;
+            updateProgress(step);
+        }
+
+        // Navigate to previous step
+        function previousStep(step) {
+            currentStep = step;
+            updateProgress(step);
+            hideAllSections();
+            
+            switch (step) {
+                case 1:
+                    document.getElementById('methodSelection').style.display = 'block';
+                    break;
+                case 2:
+                    document.getElementById('authenticatorSetup').style.display = 'block';
+                    break;
+            }
+        }
+
+        // Verify authentication code
+        async function verifyCode() {
+            const code = document.getElementById('verificationCode').value.trim();
+            
+            if (!code || code.length !== 6) {
+                showMessage('Please enter a valid 6-digit code', 'error');
+                return;
+            }
+            
+            try {
+                const user = JSON.parse(localStorage.getItem('marketpaceUser') || '{}');
+                
+                const response = await fetch('/api/verify-2fa-setup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: user.id,
+                        code: code,
+                        secretKey: secretKey,
+                        method: selectedMethod
+                    }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('Two-factor authentication verified!', 'success');
+                    generateRecoveryCodes();
+                    hideAllSections();
+                    document.getElementById('recoveryCodesStep').style.display = 'block';
+                    nextStep(4);
+                } else {
+                    showMessage(data.message || 'Invalid verification code', 'error');
+                }
+            } catch (error) {
+                console.error('2FA verification error:', error);
+                showMessage('Verification failed. Please try again.', 'error');
+            }
+        }
+
+        // Generate recovery codes
+        function generateRecoveryCodes() {
+            recoveryCodes = [];
+            for (let i = 0; i < 10; i++) {
+                const code = Math.random().toString(36).substr(2, 8).toUpperCase();
+                recoveryCodes.push(code);
+            }
+            
+            const container = document.getElementById('recoveryCodes');
+            container.innerHTML = '';
+            recoveryCodes.forEach(code => {
+                const codeEl = document.createElement('div');
+                codeEl.className = 'recovery-code';
+                codeEl.textContent = code;
+                container.appendChild(codeEl);
+            });
+        }
+
+        // Setup SMS 2FA
+        async function setupSMS() {
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            
+            if (!phoneNumber) {
+                showMessage('Please enter a valid phone number', 'error');
+                return;
+            }
+            
+            try {
+                const user = JSON.parse(localStorage.getItem('marketpaceUser') || '{}');
+                
+                const response = await fetch('/api/setup-2fa-sms', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: user.id,
+                        phoneNumber: phoneNumber
+                    }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('SMS verification sent! Please check your phone.', 'success');
+                    hideAllSections();
+                    document.getElementById('verificationStep').style.display = 'block';
+                    nextStep(3);
+                } else {
+                    showMessage(data.message || 'SMS setup failed', 'error');
+                }
+            } catch (error) {
+                console.error('SMS setup error:', error);
+                showMessage('SMS setup failed. Please try again.', 'error');
+            }
+        }
+
+        // Setup Email 2FA
+        async function setupEmail() {
+            const emailAddress = document.getElementById('emailAddress').value.trim();
+            
+            if (!emailAddress) {
+                showMessage('Please enter a valid email address', 'error');
+                return;
+            }
+            
+            try {
+                const user = JSON.parse(localStorage.getItem('marketpaceUser') || '{}');
+                
+                const response = await fetch('/api/setup-2fa-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: user.id,
+                        emailAddress: emailAddress
+                    }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('Verification email sent! Please check your inbox.', 'success');
+                    hideAllSections();
+                    document.getElementById('verificationStep').style.display = 'block';
+                    nextStep(3);
+                } else {
+                    showMessage(data.message || 'Email setup failed', 'error');
+                }
+            } catch (error) {
+                console.error('Email setup error:', error);
+                showMessage('Email setup failed. Please try again.', 'error');
+            }
+        }
+
+        // Download recovery codes
+        function downloadCodes() {
+            const content = `MarketPace Recovery Codes\n\nSave these codes in a safe place. You can use them to access your account if you lose access to your primary 2FA method.\n\n${recoveryCodes.join('\n')}\n\nGenerated: ${new Date().toLocaleString()}`;
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'marketpace-recovery-codes.txt';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Print recovery codes
+        function printCodes() {
+            const printWindow = window.open('', '', 'width=600,height=800');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>MarketPace Recovery Codes</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 40px; }
+                        h1 { color: #333; }
+                        .codes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 20px 0; }
+                        .code { padding: 10px; border: 1px solid #ccc; font-family: monospace; }
+                    </style>
+                </head>
+                <body>
+                    <h1>MarketPace Recovery Codes</h1>
+                    <p>Save these codes in a safe place. You can use them to access your account if you lose access to your primary 2FA method.</p>
+                    <div class="codes">
+                        ${recoveryCodes.map(code => `<div class="code">${code}</div>`).join('')}
+                    </div>
+                    <p>Generated: ${new Date().toLocaleString()}</p>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // Complete two-factor setup
+        async function completeTwoFactorSetup() {
+            try {
+                const user = JSON.parse(localStorage.getItem('marketpaceUser') || '{}');
+                
+                const response = await fetch('/api/complete-2fa-setup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: user.id,
+                        method: selectedMethod,
+                        secretKey: secretKey,
+                        recoveryCodes: recoveryCodes
+                    }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('Two-factor authentication setup complete!', 'success');
+                    
+                    // Update user data
+                    user.twoFactorEnabled = true;
+                    user.twoFactorMethod = selectedMethod;
+                    localStorage.setItem('marketpaceUser', JSON.stringify(user));
+                    
+                    setTimeout(() => {
+                        window.location.href = '/community';
+                    }, 2000);
+                } else {
+                    showMessage(data.message || 'Setup failed', 'error');
+                }
+            } catch (error) {
+                console.error('2FA setup completion error:', error);
+                showMessage('Setup failed. Please try again.', 'error');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('verificationCode').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 6) value = value.slice(0, 6);
+            e.target.value = value;
+        });
+
+        document.getElementById('codesConfirm').addEventListener('change', function(e) {
+            document.getElementById('completeBtn').disabled = !e.target.checked;
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            updateProgress(1);
+            
+            // Check if user is logged in
+            const userData = localStorage.getItem('marketpaceUser');
+            if (!userData) {
+                showMessage('Please log in first', 'error');
+                setTimeout(() => {
+                    window.location.href = '/signup-login';
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>

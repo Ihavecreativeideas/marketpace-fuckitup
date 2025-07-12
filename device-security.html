@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Security & Trust Management - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0233 50%, #2d1b69 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Floating particles animation */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .security-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .security-card {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            font-size: 32px;
+            margin-right: 15px;
+            filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.5));
+        }
+
+        .card-title {
+            color: #00ffff;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .device-item {
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .device-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .device-name {
+            font-weight: bold;
+            color: white;
+            font-size: 16px;
+        }
+
+        .device-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-trusted {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(74, 222, 128, 0.5);
+        }
+
+        .status-current {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.5);
+        }
+
+        .status-unknown {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.5);
+        }
+
+        .device-details {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .device-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4757, #c44569);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .biometric-section {
+            margin-bottom: 30px;
+        }
+
+        .biometric-option {
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .biometric-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .biometric-icon {
+            font-size: 24px;
+            margin-right: 15px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(30px);
+        }
+
+        .security-alert {
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .alert-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .alert-icon {
+            color: #f87171;
+            font-size: 20px;
+            margin-right: 10px;
+        }
+
+        .alert-title {
+            color: #f87171;
+            font-weight: bold;
+        }
+
+        .alert-time {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            margin-left: auto;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .status-success {
+            background: rgba(74, 222, 128, 0.2);
+            border: 1px solid rgba(74, 222, 128, 0.5);
+            color: #4ade80;
+        }
+
+        .status-error {
+            background: rgba(248, 113, 113, 0.2);
+            border: 1px solid rgba(248, 113, 113, 0.5);
+            color: #f87171;
+        }
+
+        .status-info {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            color: #3b82f6;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .security-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .device-actions {
+                flex-direction: column;
+            }
+            
+            .device-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <button class="back-btn" onclick="window.history.back()">← Back</button>
+    
+    <div class="container">
+        <div class="header">
+            <h1 class="logo">MarketPace</h1>
+            <p class="subtitle">Device Security & Trust Management</p>
+        </div>
+        
+        <div id="statusMessage" class="status-message" style="display: none;"></div>
+        
+        <div class="security-grid">
+            <!-- Trusted Devices -->
+            <div class="security-card">
+                <div class="card-header">
+                    <div class="card-icon">📱</div>
+                    <div class="card-title">Trusted Devices</div>
+                </div>
+                
+                <div id="trustedDevices">
+                    <!-- Devices will be loaded here -->
+                </div>
+                
+                <button class="btn btn-primary" onclick="refreshDevices()">
+                    🔄 Refresh Devices
+                </button>
+            </div>
+            
+            <!-- Biometric Authentication -->
+            <div class="security-card">
+                <div class="card-header">
+                    <div class="card-icon">👤</div>
+                    <div class="card-title">Biometric Authentication</div>
+                </div>
+                
+                <div class="biometric-section">
+                    <div class="biometric-option">
+                        <div class="biometric-info">
+                            <div class="biometric-icon">👆</div>
+                            <div>
+                                <div style="font-weight: bold;">Fingerprint</div>
+                                <div style="color: rgba(255, 255, 255, 0.7); font-size: 14px;">
+                                    Quick and secure login
+                                </div>
+                            </div>
+                        </div>
+                        <div class="toggle-switch" id="fingerprintToggle" onclick="toggleBiometric('fingerprint')"></div>
+                    </div>
+                    
+                    <div class="biometric-option">
+                        <div class="biometric-info">
+                            <div class="biometric-icon">👁️</div>
+                            <div>
+                                <div style="font-weight: bold;">Face Recognition</div>
+                                <div style="color: rgba(255, 255, 255, 0.7); font-size: 14px;">
+                                    Hands-free authentication
+                                </div>
+                            </div>
+                        </div>
+                        <div class="toggle-switch" id="faceToggle" onclick="toggleBiometric('face')"></div>
+                    </div>
+                    
+                    <div class="biometric-option">
+                        <div class="biometric-info">
+                            <div class="biometric-icon">🗣️</div>
+                            <div>
+                                <div style="font-weight: bold;">Voice Recognition</div>
+                                <div style="color: rgba(255, 255, 255, 0.7); font-size: 14px;">
+                                    Voice-based verification
+                                </div>
+                            </div>
+                        </div>
+                        <div class="toggle-switch" id="voiceToggle" onclick="toggleBiometric('voice')"></div>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="setupBiometric()">
+                    🔧 Setup Biometrics
+                </button>
+            </div>
+            
+            <!-- Security Alerts -->
+            <div class="security-card">
+                <div class="card-header">
+                    <div class="card-icon">🚨</div>
+                    <div class="card-title">Security Alerts</div>
+                </div>
+                
+                <div id="securityAlerts">
+                    <!-- Alerts will be loaded here -->
+                </div>
+                
+                <button class="btn btn-secondary" onclick="clearAlerts()">
+                    🗑️ Clear All Alerts
+                </button>
+            </div>
+            
+            <!-- Login History -->
+            <div class="security-card">
+                <div class="card-header">
+                    <div class="card-icon">📊</div>
+                    <div class="card-title">Recent Login Activity</div>
+                </div>
+                
+                <div id="loginHistory">
+                    <!-- Login history will be loaded here -->
+                </div>
+                
+                <button class="btn btn-secondary" onclick="downloadLoginHistory()">
+                    📥 Download History
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Current device info
+        let currentDevice = null;
+        let biometricSettings = {
+            fingerprint: false,
+            face: false,
+            voice: false
+        };
+
+        // Floating particles animation
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const numberOfParticles = 50;
+
+            for (let i = 0; i < numberOfParticles; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const size = Math.random() * 4 + 1;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Show status message
+        function showMessage(message, type = 'info') {
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message status-${type}`;
+            statusMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Get device fingerprint
+        function getDeviceFingerprint() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.textBaseline = 'top';
+            ctx.font = '14px Arial';
+            ctx.fillText('Device fingerprint', 2, 2);
+            
+            const fingerprint = {
+                userAgent: navigator.userAgent,
+                language: navigator.language,
+                platform: navigator.platform,
+                screenResolution: `${screen.width}x${screen.height}`,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                canvas: canvas.toDataURL(),
+                webgl: getWebGLFingerprint(),
+                timestamp: Date.now()
+            };
+            
+            return btoa(JSON.stringify(fingerprint));
+        }
+
+        // Get WebGL fingerprint
+        function getWebGLFingerprint() {
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            if (!gl) return '';
+            
+            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            return debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : '';
+        }
+
+        // Load trusted devices
+        async function loadTrustedDevices() {
+            try {
+                const user = JSON.parse(localStorage.getItem('marketpaceUser') || '{}');
+                
+                const response = await fetch('/api/user/devices', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${user.accessToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayTrustedDevices(data.devices);
+                } else {
+                    displayMockDevices();
+                }
+            } catch (error) {
+                console.error('Load devices error:', error);
+                displayMockDevices();
+            }
+        }
+
+        // Display trusted devices
+        function displayTrustedDevices(devices) {
+            const container = document.getElementById('trustedDevices');
+            container.innerHTML = '';
+            
+            if (devices.length === 0) {
+                container.innerHTML = '<div style="color: rgba(255, 255, 255, 0.7); text-align: center; padding: 20px;">No trusted devices found</div>';
+                return;
+            }
+            
+            devices.forEach(device => {
+                const deviceEl = createDeviceElement(device);
+                container.appendChild(deviceEl);
+            });
+        }
+
+        // Display mock devices for demo
+        function displayMockDevices() {
+            const mockDevices = [
+                {
+                    id: 'current',
+                    name: 'Current Device',
+                    type: 'browser',
+                    browser: getBrowserName(),
+                    os: getOperatingSystem(),
+                    location: 'Current Location',
+                    lastUsed: new Date(),
+                    trusted: true,
+                    current: true
+                },
+                {
+                    id: 'device2',
+                    name: 'iPhone 13 Pro',
+                    type: 'mobile',
+                    browser: 'Safari',
+                    os: 'iOS 16.2',
+                    location: 'New York, NY',
+                    lastUsed: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+                    trusted: true,
+                    current: false
+                },
+                {
+                    id: 'device3',
+                    name: 'Unknown Device',
+                    type: 'desktop',
+                    browser: 'Chrome',
+                    os: 'Windows 11',
+                    location: 'Los Angeles, CA',
+                    lastUsed: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+                    trusted: false,
+                    current: false
+                }
+            ];
+            
+            displayTrustedDevices(mockDevices);
+        }
+
+        // Create device element
+        function createDeviceElement(device) {
+            const deviceEl = document.createElement('div');
+            deviceEl.className = 'device-item';
+            
+            const statusClass = device.current ? 'status-current' : device.trusted ? 'status-trusted' : 'status-unknown';
+            const statusText = device.current ? 'Current Device' : device.trusted ? 'Trusted' : 'Unknown';
+            
+            deviceEl.innerHTML = `
+                <div class="device-header">
+                    <div class="device-name">${getDeviceIcon(device.type)} ${device.name}</div>
+                    <div class="device-status ${statusClass}">${statusText}</div>
+                </div>
+                <div class="device-details">
+                    <div>🌐 ${device.browser} on ${device.os}</div>
+                    <div>📍 ${device.location}</div>
+                    <div>🕒 Last used: ${formatDate(device.lastUsed)}</div>
+                </div>
+                <div class="device-actions">
+                    ${!device.current ? `
+                        ${device.trusted ? 
+                            `<button class="btn btn-danger" onclick="revokeDevice('${device.id}')">Remove Trust</button>` :
+                            `<button class="btn btn-primary" onclick="trustDevice('${device.id}')">Trust Device</button>`
+                        }
+                        <button class="btn btn-secondary" onclick="viewDeviceDetails('${device.id}')">View Details</button>
+                    ` : `
+                        <button class="btn btn-secondary" onclick="viewDeviceDetails('${device.id}')">View Details</button>
+                    `}
+                </div>
+            `;
+            
+            return deviceEl;
+        }
+
+        // Get device icon
+        function getDeviceIcon(type) {
+            switch (type) {
+                case 'mobile': return '📱';
+                case 'desktop': return '🖥️';
+                case 'tablet': return '📲';
+                default: return '🌐';
+            }
+        }
+
+        // Get browser name
+        function getBrowserName() {
+            const userAgent = navigator.userAgent;
+            if (userAgent.includes('Chrome')) return 'Chrome';
+            if (userAgent.includes('Firefox')) return 'Firefox';
+            if (userAgent.includes('Safari')) return 'Safari';
+            if (userAgent.includes('Edge')) return 'Edge';
+            return 'Unknown Browser';
+        }
+
+        // Get operating system
+        function getOperatingSystem() {
+            const userAgent = navigator.userAgent;
+            if (userAgent.includes('Windows')) return 'Windows';
+            if (userAgent.includes('Mac')) return 'macOS';
+            if (userAgent.includes('Linux')) return 'Linux';
+            if (userAgent.includes('Android')) return 'Android';
+            if (userAgent.includes('iOS')) return 'iOS';
+            return 'Unknown OS';
+        }
+
+        // Format date
+        function formatDate(date) {
+            const now = new Date();
+            const diff = now - new Date(date);
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            
+            if (days === 0) return 'Today';
+            if (days === 1) return 'Yesterday';
+            if (days < 7) return `${days} days ago`;
+            return new Date(date).toLocaleDateString();
+        }
+
+        // Toggle biometric setting
+        function toggleBiometric(type) {
+            biometricSettings[type] = !biometricSettings[type];
+            const toggle = document.getElementById(`${type}Toggle`);
+            
+            if (biometricSettings[type]) {
+                toggle.classList.add('active');
+                showMessage(`${type.charAt(0).toUpperCase() + type.slice(1)} authentication enabled`, 'success');
+            } else {
+                toggle.classList.remove('active');
+                showMessage(`${type.charAt(0).toUpperCase() + type.slice(1)} authentication disabled`, 'info');
+            }
+            
+            saveBiometricSettings();
+        }
+
+        // Setup biometric authentication
+        async function setupBiometric() {
+            if ('credentials' in navigator) {
+                try {
+                    // Check for WebAuthn support
+                    const credential = await navigator.credentials.create({
+                        publicKey: {
+                            challenge: new Uint8Array(32),
+                            rp: { name: "MarketPace" },
+                            user: {
+                                id: new Uint8Array(16),
+                                name: "user@marketpace.shop",
+                                displayName: "MarketPace User"
+                            },
+                            pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+                            authenticatorSelection: {
+                                authenticatorAttachment: "platform",
+                                userVerification: "required"
+                            }
+                        }
+                    });
+                    
+                    showMessage('Biometric authentication setup successful!', 'success');
+                } catch (error) {
+                    console.error('Biometric setup error:', error);
+                    showMessage('Biometric setup not supported on this device', 'info');
+                }
+            } else {
+                showMessage('Biometric authentication not supported on this browser', 'info');
+            }
+        }
+
+        // Save biometric settings
+        function saveBiometricSettings() {
+            localStorage.setItem('marketpaceBiometrics', JSON.stringify(biometricSettings));
+        }
+
+        // Load biometric settings
+        function loadBiometricSettings() {
+            const saved = localStorage.getItem('marketpaceBiometrics');
+            if (saved) {
+                biometricSettings = JSON.parse(saved);
+                
+                Object.keys(biometricSettings).forEach(type => {
+                    const toggle = document.getElementById(`${type}Toggle`);
+                    if (biometricSettings[type]) {
+                        toggle.classList.add('active');
+                    }
+                });
+            }
+        }
+
+        // Load security alerts
+        function loadSecurityAlerts() {
+            const alerts = [
+                {
+                    id: 1,
+                    type: 'login',
+                    title: 'New device login detected',
+                    message: 'Someone logged into your account from a new device in Los Angeles, CA',
+                    time: new Date(Date.now() - 2 * 60 * 60 * 1000),
+                    severity: 'warning'
+                },
+                {
+                    id: 2,
+                    type: 'password',
+                    title: 'Password change attempt',
+                    message: 'Failed password reset attempt from suspicious IP address',
+                    time: new Date(Date.now() - 24 * 60 * 60 * 1000),
+                    severity: 'high'
+                }
+            ];
+            
+            displaySecurityAlerts(alerts);
+        }
+
+        // Display security alerts
+        function displaySecurityAlerts(alerts) {
+            const container = document.getElementById('securityAlerts');
+            container.innerHTML = '';
+            
+            if (alerts.length === 0) {
+                container.innerHTML = '<div style="color: rgba(255, 255, 255, 0.7); text-align: center; padding: 20px;">No security alerts</div>';
+                return;
+            }
+            
+            alerts.forEach(alert => {
+                const alertEl = document.createElement('div');
+                alertEl.className = 'security-alert';
+                alertEl.innerHTML = `
+                    <div class="alert-header">
+                        <div class="alert-icon">🚨</div>
+                        <div class="alert-title">${alert.title}</div>
+                        <div class="alert-time">${formatDate(alert.time)}</div>
+                    </div>
+                    <div style="color: rgba(255, 255, 255, 0.8); margin-bottom: 10px;">
+                        ${alert.message}
+                    </div>
+                    <button class="btn btn-secondary" onclick="dismissAlert(${alert.id})">Dismiss</button>
+                `;
+                container.appendChild(alertEl);
+            });
+        }
+
+        // Load login history
+        function loadLoginHistory() {
+            const history = [
+                {
+                    device: 'Current Device',
+                    location: 'Current Location',
+                    time: new Date(),
+                    success: true
+                },
+                {
+                    device: 'iPhone 13 Pro',
+                    location: 'New York, NY',
+                    time: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+                    success: true
+                },
+                {
+                    device: 'Unknown Device',
+                    location: 'Los Angeles, CA',
+                    time: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+                    success: false
+                }
+            ];
+            
+            displayLoginHistory(history);
+        }
+
+        // Display login history
+        function displayLoginHistory(history) {
+            const container = document.getElementById('loginHistory');
+            container.innerHTML = '';
+            
+            history.forEach(entry => {
+                const entryEl = document.createElement('div');
+                entryEl.className = 'device-item';
+                entryEl.innerHTML = `
+                    <div class="device-header">
+                        <div class="device-name">
+                            ${entry.success ? '✅' : '❌'} ${entry.device}
+                        </div>
+                        <div class="device-status ${entry.success ? 'status-trusted' : 'status-unknown'}">
+                            ${entry.success ? 'Success' : 'Failed'}
+                        </div>
+                    </div>
+                    <div class="device-details">
+                        <div>📍 ${entry.location}</div>
+                        <div>🕒 ${formatDate(entry.time)}</div>
+                    </div>
+                `;
+                container.appendChild(entryEl);
+            });
+        }
+
+        // Device management functions
+        function refreshDevices() {
+            showMessage('Refreshing device list...', 'info');
+            loadTrustedDevices();
+        }
+
+        function trustDevice(deviceId) {
+            showMessage('Device trusted successfully', 'success');
+            loadTrustedDevices();
+        }
+
+        function revokeDevice(deviceId) {
+            if (confirm('Are you sure you want to remove trust from this device?')) {
+                showMessage('Device trust revoked', 'info');
+                loadTrustedDevices();
+            }
+        }
+
+        function viewDeviceDetails(deviceId) {
+            showMessage('Device details would open in a modal', 'info');
+        }
+
+        function dismissAlert(alertId) {
+            showMessage('Alert dismissed', 'info');
+            loadSecurityAlerts();
+        }
+
+        function clearAlerts() {
+            if (confirm('Are you sure you want to clear all security alerts?')) {
+                document.getElementById('securityAlerts').innerHTML = '<div style="color: rgba(255, 255, 255, 0.7); text-align: center; padding: 20px;">No security alerts</div>';
+                showMessage('All alerts cleared', 'info');
+            }
+        }
+
+        function downloadLoginHistory() {
+            showMessage('Login history download started', 'info');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            loadBiometricSettings();
+            loadTrustedDevices();
+            loadSecurityAlerts();
+            loadLoginHistory();
+            
+            // Check if user is logged in
+            const userData = localStorage.getItem('marketpaceUser');
+            if (!userData) {
+                showMessage('Please log in first', 'error');
+                setTimeout(() => {
+                    window.location.href = '/signup-login';
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>
