@@ -68,6 +68,11 @@ app.get('/promote-product-button', (req, res) => {
   res.sendFile(path.join(__dirname, '../promote-product-button.html'));
 });
 
+// MarketPace Menu route
+app.get('/marketpace-menu', (req, res) => {
+  res.sendFile(path.join(__dirname, '../marketpace-menu.html'));
+});
+
 // *** FACEBOOK MARKETPLACE-STYLE PROMOTION SYSTEM ***
 // Facebook Product Catalog Integration for Member Products
 
