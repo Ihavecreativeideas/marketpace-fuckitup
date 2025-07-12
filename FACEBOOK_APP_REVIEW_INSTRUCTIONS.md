@@ -151,6 +151,7 @@ MarketPace maintains published information security policies and implements robu
 - Information Security Policy: https://www.marketpace.shop/INFORMATION_SECURITY_POLICY.md
 - Network Security Policy: https://www.marketpace.shop/NETWORK_SECURITY_POLICY.md
 - Security Implementation Status: https://www.marketpace.shop/SECURITY_IMPLEMENTATION_STATUS.md
+- Security Compliance Questionnaire: https://www.marketpace.shop/SECURITY_COMPLIANCE_QUESTIONNAIRE.md
 - Database Security Configuration: Available for review team inspection
 
 **MarketPace exceeds industry standards for information security and network protection, ensuring comprehensive user data safety and platform integrity.**
