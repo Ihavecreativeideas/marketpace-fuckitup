@@ -1103,13 +1103,18 @@
         }
 
         .nav-icon {
-            width: 24px;
-            height: 24px;
+            width: 32px;
+            height: 32px;
             margin-bottom: 2px;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            border-radius: 6px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            padding: 4px;
         }
 
         .nav-icon svg {
@@ -1134,14 +1139,14 @@
     <div class="header">
         <div class="header-content">
             <div class="logo">
-                <div class="logo-container bl-style-button" onclick="openProfileSettings()" style="cursor: pointer;">
+                <div class="logo-container bl-style-button" onclick="toggleLogoDropdown()" style="cursor: pointer;">
                     <img src="/marketpace-logo-1.jpeg" alt="MarketPace" class="logo-image">
                     <div class="logo-particles" id="logoParticles"></div>
                 </div>
             </div>
             <div class="header-right">
                 <div class="top-section">
-                    <div class="bl-style-button" onclick="toggleMainMenu()" style="position: relative;">
+                    <div class="bl-style-button" onclick="goToProfile()" style="position: relative;">
                         <img id="profileMainPicture" class="bl-profile-picture" style="display: none;" alt="Profile">
                         <div id="profileMainInitials" class="bl-profile-initials">MP</div>
                         <div class="menu-dropdown" id="mainMenuDropdown">
@@ -2170,6 +2175,56 @@
         }
 
         // Profile Settings and Navigation Functions
+        function toggleLogoDropdown() {
+            const dropdown = document.getElementById('logoDropdown');
+            if (dropdown) {
+                dropdown.remove();
+            } else {
+                const dropdown = document.createElement('div');
+                dropdown.id = 'logoDropdown';
+                dropdown.className = 'modal-overlay';
+                dropdown.innerHTML = `
+                    <div class="modal-content" style="max-width: 400px; margin-top: 100px;">
+                        <h3 style="color: #00ffff; margin-bottom: 20px;">⚙️ Profile Settings</h3>
+                        
+                        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+                            <h4 style="color: #ef4444; margin: 0 0 10px 0;">🚀 Demo Mode Active</h4>
+                            <p style="color: #e2e8f0; margin: 0; font-size: 14px; line-height: 1.4;">
+                                You're currently in demo mode. Click "Reset to Live" to switch to the live platform.
+                            </p>
+                        </div>
+                        
+                        <div style="display: grid; gap: 10px; margin-bottom: 20px;">
+                            <button onclick="goToProfile(); closeLogoDropdown();" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer;">
+                                👤 My Profile
+                            </button>
+                            <button onclick="goToPage('/cart'); closeLogoDropdown();" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer;">
+                                🛒 Shopping Cart
+                            </button>
+                            <button onclick="goToPage('/settings'); closeLogoDropdown();" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer;">
+                                ⚙️ Settings
+                            </button>
+                            <button onclick="resetToLive(); closeLogoDropdown();" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer;">
+                                🔄 Reset to Live
+                            </button>
+                        </div>
+                        
+                        <button onclick="closeLogoDropdown()" style="background: rgba(107, 114, 128, 0.6); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; width: 100%;">Close</button>
+                    </div>
+                `;
+                document.body.appendChild(dropdown);
+            }
+        }
+
+        function closeLogoDropdown() {
+            const dropdown = document.getElementById('logoDropdown');
+            if (dropdown) dropdown.remove();
+        }
+
+        function goToProfile() {
+            window.location.href = '/profile';
+        }
+
         function openProfileSettings() {
             const settingsModal = document.createElement('div');
             settingsModal.className = 'modal-overlay';
