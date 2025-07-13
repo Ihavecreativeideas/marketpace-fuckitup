@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rental Details - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0233 50%, #2d1b69 100%);
+            color: white;
+            min-height: 100vh;
+            padding-top: 180px;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 12px 8px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #00ffff;
+            border-radius: 6px;
+            color: #00ffff;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00ffff;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .rental-header {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .rental-title {
+            font-size: 24px;
+            color: #00ffff;
+            margin-bottom: 10px;
+        }
+
+        .rental-owner {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 15px;
+        }
+
+        .rental-images {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        .rental-image {
+            width: 150px;
+            height: 150px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+        }
+
+        .pricing-section {
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .pricing-title {
+            font-size: 20px;
+            color: #00ffff;
+            margin-bottom: 15px;
+        }
+
+        .pricing-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .pricing-option {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+
+        .price-amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .price-period {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+
+        .delivery-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .delivery-title {
+            font-size: 18px;
+            color: #00ffff;
+            margin-bottom: 15px;
+        }
+
+        .delivery-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .delivery-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .delivery-option input[type="radio"] {
+            accent-color: #00ffff;
+        }
+
+        .time-selector {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .time-input {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            padding: 8px;
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .terms-section {
+            background: rgba(255, 193, 7, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .terms-title {
+            color: #ffc107;
+            margin-bottom: 15px;
+        }
+
+        .rent-button {
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            border: none;
+            border-radius: 10px;
+            color: black;
+            font-weight: bold;
+            font-size: 18px;
+            padding: 15px;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .rent-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
+        }
+
+        .availability-calendar {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .calendar-title {
+            font-size: 18px;
+            color: #00ffff;
+            margin-bottom: 15px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .calendar-day {
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-day.available {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        .calendar-day.unavailable {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff4444;
+        }
+
+        .calendar-day.selected {
+            background: #00ffff;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <button class="back-btn" onclick="goBack()">← Back</button>
+            <div class="header-title">Rental Details</div>
+            <div></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Rental Header -->
+        <div class="rental-header">
+            <h1 class="rental-title" id="rentalTitle">Power Washer - Commercial Grade</h1>
+            <div class="rental-owner">👤 Listed by: Mike Johnson • Orange Beach, AL</div>
+            
+            <!-- Images -->
+            <div class="rental-images">
+                <div class="rental-image">🚿</div>
+                <div class="rental-image">⚡</div>
+                <div class="rental-image">🔧</div>
+            </div>
+            
+            <p>Professional-grade pressure washer perfect for driveways, decks, and outdoor cleaning. 3000 PSI with multiple nozzle attachments included.</p>
+        </div>
+
+        <!-- Pricing -->
+        <div class="pricing-section">
+            <h3 class="pricing-title">💰 Rental Pricing</h3>
+            <div class="pricing-options">
+                <div class="pricing-option">
+                    <div class="price-amount">$15</div>
+                    <div class="price-period">per hour</div>
+                </div>
+                <div class="pricing-option">
+                    <div class="price-amount">$45</div>
+                    <div class="price-period">per day</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Availability Calendar -->
+        <div class="availability-calendar">
+            <h3 class="calendar-title">📅 Availability</h3>
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Calendar will be generated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Delivery Options -->
+        <div class="delivery-section">
+            <h3 class="delivery-title">🚚 Delivery & Pickup Options</h3>
+            <div class="delivery-options">
+                <label class="delivery-option">
+                    <input type="radio" name="delivery" value="self-pickup" checked>
+                    <div>
+                        <strong>Self Pickup & Return</strong> - FREE<br>
+                        <small>Pick up and return at owner's location</small>
+                    </div>
+                </label>
+                <label class="delivery-option">
+                    <input type="radio" name="delivery" value="delivery">
+                    <div>
+                        <strong>MarketPace Delivery</strong> - $4 total<br>
+                        <small>Delivery + pickup service (both ways included)</small>
+                    </div>
+                </label>
+            </div>
+            
+            <div class="time-selector" id="timeSelector">
+                <strong>⏰ Preferred Time:</strong>
+                <input type="text" class="time-input" placeholder="e.g., Early morning (7-9am), Late evening (7-9pm), Flexible" />
+                <div style="margin-top: 10px; font-size: 12px; color: rgba(255,255,255,0.7);">
+                    * Drivers are independent contractors. Early/late times available with $4 on-time bonus (tip upfront recommended)
+                </div>
+            </div>
+        </div>
+
+        <!-- Terms & Conditions -->
+        <div class="terms-section">
+            <h3 class="terms-title">⚠️ Important Terms & Conditions</h3>
+            <ul style="margin-left: 20px; line-height: 1.6;">
+                <li><strong>Damage/Loss:</strong> MarketPace is NOT responsible for lost, damaged, or stolen rental items</li>
+                <li><strong>Security Deposit:</strong> $50 hold on payment method (released after return)</li>
+                <li><strong>Owner Responsibility:</strong> Owner sets all rental terms and conditions</li>
+                <li><strong>Late Returns:</strong> $10/hour after agreed return time</li>
+                <li><strong>Condition:</strong> Return item in same condition as received</li>
+            </ul>
+        </div>
+
+        <!-- Rent Button -->
+        <button class="rent-button" onclick="proceedToRental()">
+            📝 Request Rental - Starting at $15/hour
+        </button>
+    </div>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+
+        function generateCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const today = new Date();
+            
+            // Generate next 14 days
+            for (let i = 0; i < 14; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = date.getDate();
+                
+                // Random availability for demo
+                if (Math.random() > 0.3) {
+                    dayElement.classList.add('available');
+                    dayElement.onclick = () => selectDate(dayElement, date);
+                } else {
+                    dayElement.classList.add('unavailable');
+                }
+                
+                grid.appendChild(dayElement);
+            }
+        }
+
+        function selectDate(element, date) {
+            // Remove previous selection
+            document.querySelectorAll('.calendar-day.selected').forEach(day => {
+                day.classList.remove('selected');
+                day.classList.add('available');
+            });
+            
+            // Select new date
+            element.classList.remove('available');
+            element.classList.add('selected');
+            
+            showNotification(`Selected: ${date.toLocaleDateString()}`, 'success');
+        }
+
+        function proceedToRental() {
+            const selectedDate = document.querySelector('.calendar-day.selected');
+            const deliveryOption = document.querySelector('input[name="delivery"]:checked').value;
+            
+            if (!selectedDate) {
+                alert('Please select an available date first.');
+                return;
+            }
+            
+            const message = `Rental request submitted!\n\nItem: Power Washer\nDate: ${selectedDate.textContent}\nDelivery: ${deliveryOption}\n\nOwner will be notified and you'll receive confirmation within 2 hours.`;
+            alert(message);
+            
+            // In real app, this would submit to backend
+            showNotification('Rental request sent to owner!', 'success');
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 200px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 15px 20px;
+                border-radius: 10px;
+                color: white;
+                font-weight: 600;
+                z-index: 10000;
+                max-width: 300px;
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            `;
+            
+            switch(type) {
+                case 'success':
+                    notification.style.background = 'rgba(34, 197, 94, 0.9)';
+                    break;
+                case 'error':
+                    notification.style.background = 'rgba(239, 68, 68, 0.9)';
+                    break;
+                default:
+                    notification.style.background = 'rgba(59, 130, 246, 0.9)';
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 3000);
+        }
+
+        // Initialize calendar on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            generateCalendar();
+        });
+    </script>
+</body>
+</html>
