@@ -96,12 +96,12 @@
 
         .top-section {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 12px;
         }
 
         .search-section {
-            flex: 1;
+            width: 100%;
         }
 
         .profile-main-button {
@@ -214,6 +214,39 @@
         .profile-cat-btn:hover {
             background: rgba(255, 255, 255, 0.2);
             color: #00ffff;
+        }
+
+        /* Posting Notice */
+        .posting-notice {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 8px 16px;
+            margin: 16px 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .notice-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .notice-icon {
+            font-size: 14px;
+        }
+
+        .notice-text a {
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .notice-text a:hover {
+            text-decoration: underline;
         }
         
         .logo-container {
@@ -330,6 +363,20 @@
             cursor: pointer;
             margin-left: 8px;
             font-size: 16px;
+        }
+
+        .radius-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            margin-left: 8px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .radius-btn:hover {
+            color: #00ffff;
         }
         
         .reset-live-btn {
@@ -1048,22 +1095,6 @@
             </div>
             <div class="header-right">
                 <div class="top-section">
-                    <div class="search-section">
-                        <div class="search-container">
-                            <div class="search-wrapper" onclick="toggleSearchPopup()">
-                                <input type="text" id="searchInput" name="search" class="search-input" placeholder="" readonly>
-                                <button class="filter-btn">🔍</button>
-                            </div>
-                            <div class="search-categories">
-                                <div class="search-cat-btn" onclick="searchFor('marketplace')">Shop</div>
-                                <div class="search-cat-btn" onclick="searchFor('services')">Service</div>
-                                <div class="search-cat-btn" onclick="searchFor('events')">Event</div>
-                                <div class="search-cat-btn" onclick="searchFor('jobs')">Job</div>
-                                <div class="search-cat-btn" onclick="searchFor('rentals')">Rent</div>
-                                <div class="search-cat-btn" onclick="searchFor('iso')">ISO</div>
-                            </div>
-                        </div>
-                    </div>
                     <div class="profile-main-button" onclick="toggleMainMenu()" style="position: relative;">
                         <img id="profileMainPicture" class="profile-main-picture" style="display: none;" alt="Profile">
                         <div id="profileMainInitials" class="profile-main-initials">MP</div>
@@ -1079,17 +1110,34 @@
                             <div class="menu-option" onclick="logout()">🚪 Logout</div>
                         </div>
                     </div>
-                </div>
-                <div class="profile-categories">
-                    <div class="profile-cat-row">
-                        <div class="profile-cat-btn" onclick="openAdvancedPostModal('sale')">Sell</div>
-                        <div class="profile-cat-btn" onclick="openAdvancedPostModal('rent')">Rent</div>
-                        <div class="profile-cat-btn" onclick="openAdvancedPostModal('service')">Service</div>
+                    <div class="profile-categories">
+                        <div class="profile-cat-row">
+                            <div class="profile-cat-btn" onclick="openAdvancedPostModal('sale')">Sell</div>
+                            <div class="profile-cat-btn" onclick="openAdvancedPostModal('rent')">Rent</div>
+                            <div class="profile-cat-btn" onclick="openAdvancedPostModal('service')">Service</div>
+                        </div>
+                        <div class="profile-cat-row">
+                            <div class="profile-cat-btn" onclick="openAdvancedPostModal('event')">Event</div>
+                            <div class="profile-cat-btn" onclick="openAdvancedPostModal('poll')">Poll</div>
+                            <div class="profile-cat-btn" onclick="openAdvancedPostModal('iso')">ISO</div>
+                        </div>
                     </div>
-                    <div class="profile-cat-row">
-                        <div class="profile-cat-btn" onclick="openAdvancedPostModal('event')">Event</div>
-                        <div class="profile-cat-btn" onclick="openAdvancedPostModal('poll')">Poll</div>
-                        <div class="profile-cat-btn" onclick="openAdvancedPostModal('iso')">ISO</div>
+                </div>
+                <div class="search-section">
+                    <div class="search-container">
+                        <div class="search-wrapper" onclick="toggleSearchPopup()">
+                            <input type="text" id="searchInput" name="search" class="search-input" placeholder="Search your 30-mile radius..." readonly>
+                            <button class="radius-btn" onclick="changeRadius()" title="Change search radius">📍</button>
+                            <button class="filter-btn">🔍</button>
+                        </div>
+                        <div class="search-categories">
+                            <div class="search-cat-btn" onclick="searchFor('marketplace')">Shop</div>
+                            <div class="search-cat-btn" onclick="searchFor('services')">Service</div>
+                            <div class="search-cat-btn" onclick="searchFor('events')">Event</div>
+                            <div class="search-cat-btn" onclick="searchFor('jobs')">Job</div>
+                            <div class="search-cat-btn" onclick="searchFor('rentals')">Rent</div>
+                            <div class="search-cat-btn" onclick="searchFor('iso')">ISO</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1101,6 +1149,14 @@
     <div class="particles"></div>
 
     <div class="main-content" style="position: relative; z-index: 2;">
+        <!-- Posting Rules Notice -->
+        <div class="posting-notice">
+            <div class="notice-content">
+                <span class="notice-icon">📍</span>
+                <span class="notice-text">Posts visible within your 30-mile radius • <a href="#" onclick="openPromoModal()" style="color: #00ffff;">Promote beyond 30 miles</a></span>
+            </div>
+        </div>
+
         <!-- Status Composer -->
         <div class="status-composer">
             <div class="composer-header">
@@ -2103,6 +2159,28 @@
         function toggleSearchPopup() {
             // Search popup removed - now using inline category buttons
             console.log('Search activated - categories shown in header');
+        }
+
+        function changeRadius() {
+            const currentRadius = localStorage.getItem('searchRadius') || '30';
+            const radiusOptions = ['5', '10', '15', '30', '50'];
+            const currentIndex = radiusOptions.indexOf(currentRadius);
+            const nextIndex = (currentIndex + 1) % radiusOptions.length;
+            const newRadius = radiusOptions[nextIndex];
+            
+            localStorage.setItem('searchRadius', newRadius);
+            document.getElementById('searchInput').placeholder = `Search your ${newRadius}-mile radius...`;
+            
+            // Show notification for paid promotion option
+            if (newRadius === '50') {
+                alert('🚀 50-mile radius! Members can post beyond 30 miles with MarketPace Pro promotion.');
+            }
+            
+            console.log(`Search radius changed to ${newRadius} miles`);
+        }
+
+        function openPromoModal() {
+            alert('🚀 MarketPace Pro Promotion\n\nExpand your reach beyond 30 miles:\n• Quick Boost ($5) - 48 hours, 50-mile radius\n• Featured Listing ($12) - 7 days, 75-mile radius\n• Premium Campaign ($25) - 14 days, 100-mile radius\n\nContact support to upgrade your posts!');
         }
 
         function searchFor(category) {
