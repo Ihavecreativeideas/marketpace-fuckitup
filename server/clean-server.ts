@@ -72,6 +72,22 @@ app.get('/marketpace-menu', (req, res) => {
   res.sendFile(path.join(__dirname, '../marketpace-menu.html'));
 });
 
+app.get('/support', (req, res) => {
+  res.sendFile(path.join(__dirname, '../support.html'));
+});
+
+app.get('/interactive-map', (req, res) => {
+  res.sendFile(path.join(__dirname, '../interactive-map.html'));
+});
+
+app.get('/driver-dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '../driver-dashboard.html'));
+});
+
+app.get('/signup-login', (req, res) => {
+  res.sendFile(path.join(__dirname, '../signup-login.html'));
+});
+
 app.get('/profile', (req, res) => {
   res.sendFile(path.join(__dirname, '../profile.html'));
 });
