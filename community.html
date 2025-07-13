@@ -80,18 +80,89 @@
         }
 
         .logo {
-            font-size: 18px;
-            font-weight: bold;
-            background: linear-gradient(135deg, #00ffff, #9d4edd);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 0;
+        }
+        
+        .logo-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .logo-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+            filter: drop-shadow(0 0 10px rgba(138, 43, 226, 0.5));
+            transition: transform 0.3s ease;
+            position: relative;
+            z-index: 5;
+        }
+        
+        .logo-particles {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            width: calc(100% + 10px);
+            height: calc(100% + 10px);
+            pointer-events: none;
+            z-index: 3;
+        }
+        
+        .logo-particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(0, 255, 255, 0.8);
+            border-radius: 50%;
+            box-shadow: 0 0 6px rgba(0, 255, 255, 0.9);
+            animation: logoFloat 4s infinite linear;
+        }
+        
+        .logo-particle:nth-child(odd) {
+            background: rgba(138, 43, 226, 0.8);
+            box-shadow: 0 0 6px rgba(138, 43, 226, 0.9);
+            animation-duration: 6s;
+        }
+        
+        .logo-particle:nth-child(3n) {
+            background: rgba(0, 191, 255, 0.7);
+            box-shadow: 0 0 4px rgba(0, 191, 255, 0.8);
+            animation-duration: 3s;
+        }
+        
+        @keyframes logoFloat {
+            0% { 
+                transform: rotate(0deg) translateX(25px) rotate(0deg);
+                opacity: 0.8; 
+            }
+            25% { 
+                transform: rotate(90deg) translateX(25px) rotate(-90deg);
+                opacity: 1; 
+            }
+            50% { 
+                transform: rotate(180deg) translateX(25px) rotate(-180deg);
+                opacity: 0.9; 
+            }
+            75% { 
+                transform: rotate(270deg) translateX(25px) rotate(-270deg);
+                opacity: 1; 
+            }
+            100% { 
+                transform: rotate(360deg) translateX(25px) rotate(-360deg);
+                opacity: 0.8; 
+            }
         }
 
         .search-container {
             flex: 1;
             position: relative;
+            max-width: 300px;
+            margin: 0 15px;
         }
 
         .search-wrapper {
@@ -99,10 +170,9 @@
             align-items: center;
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 25px;
-            padding: 10px 16px;
+            border-radius: 20px;
+            padding: 8px 12px;
             backdrop-filter: blur(10px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .search-input {
@@ -487,7 +557,10 @@
     <div class="header">
         <div class="header-content">
             <div class="logo">
-                <img src="/marketpace-logo-1.jpeg" alt="MarketPace" style="height: 32px; width: auto;">
+                <div class="logo-container">
+                    <img src="/marketpace-logo-1.jpeg" alt="MarketPace" class="logo-image">
+                    <div class="logo-particles" id="logoParticles"></div>
+                </div>
             </div>
             <div class="search-container">
                 <div class="search-wrapper">
@@ -1257,6 +1330,24 @@
             document.body.appendChild(welcomeModal);
         }
 
+        function createLogoParticles() {
+            const logoParticlesContainer = document.getElementById('logoParticles');
+            if (!logoParticlesContainer) return;
+            
+            // Create 6 logo particles
+            for (let i = 0; i < 6; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'logo-particle';
+                
+                // Random starting position around the logo
+                const angle = (360 / 6) * i + Math.random() * 20;
+                particle.style.setProperty('--start-angle', angle + 'deg');
+                particle.style.animationDelay = (i * 0.5) + 's';
+                
+                logoParticlesContainer.appendChild(particle);
+            }
+        }
+
         // Close dropdowns when clicking outside
         document.addEventListener('click', function(event) {
             if (!event.target.closest('.filter-btn') && !event.target.closest('.filter-dropdown')) {
@@ -1299,6 +1390,9 @@
             try {
                 // Create floating particles
                 createParticles();
+                
+                // Create logo particles
+                createLogoParticles();
                 
                 // Test cart badge update
                 updateCartBadge();
