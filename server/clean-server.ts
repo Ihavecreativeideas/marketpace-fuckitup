@@ -60,6 +60,10 @@ app.get('/the-hub', (req, res) => {
   res.sendFile(path.join(__dirname, '../the-hub.html'));
 });
 
+app.get('/deliveries', (req, res) => {
+  res.sendFile(path.join(__dirname, '../delivery.html'));
+});
+
 app.get('/cart', (req, res) => {
   res.sendFile(path.join(__dirname, '../cart.html'));
 });
