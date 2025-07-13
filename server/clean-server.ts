@@ -76,6 +76,11 @@ app.get('/profile', (req, res) => {
   res.sendFile(path.join(__dirname, '../profile.html'));
 });
 
+// Facebook Marketplace Integration route
+app.get('/facebook-marketplace-integration', (req, res) => {
+  res.sendFile(path.join(__dirname, '../facebook-marketplace-integration.html'));
+});
+
 app.get('/login-password', (req, res) => {
   res.sendFile(path.join(__dirname, '../login-password.html'));
 });

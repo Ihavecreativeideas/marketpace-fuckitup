@@ -16,6 +16,7 @@
             background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 30%, #4c2885 60%, #6b46c1 100%);
             color: #e2e8f0;
             min-height: 100vh;
+            padding-top: 180px;
             padding-bottom: 80px;
             position: relative;
             overflow-x: hidden;
@@ -66,9 +67,11 @@
             backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(0, 255, 255, 0.2);
             padding: 12px 8px;
-            position: sticky;
+            position: fixed;
             top: 0;
-            z-index: 100;
+            left: 0;
+            right: 0;
+            z-index: 1000;
         }
 
         .header-content {
@@ -1151,6 +1154,7 @@
                         <div class="menu-dropdown" id="mainMenuDropdown">
                             <div class="menu-option" onclick="goToResetLive()" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; font-weight: bold; text-align: center; animation: pulse-red 2s infinite;">🚀 RESET TO LIVE MODE</div>
                             <div class="menu-option" onclick="inviteFriends()" style="background: linear-gradient(135deg, #1877f2, #42a5f5); color: white; font-weight: bold; text-align: center;">👥 Invite Friends</div>
+                            <div class="menu-option" onclick="openFacebookShare()" style="background: linear-gradient(135deg, #1877f2, #42a5f5); color: white; font-weight: bold; text-align: center;">📱 Facebook Share</div>
                             <div class="menu-option" onclick="openProfileModal()">👤 Profile</div>
                             <div class="menu-option" onclick="goToCart()">🛒 Cart <span id="cartBadge" class="cart-badge">0</span></div>
                             <div class="menu-option" onclick="goToSettings()">⚙️ Settings</div>
@@ -2639,7 +2643,7 @@
             }
         }
 
-        // Filter Posts Function
+        // Filter Posts Function with Radius Integration
         function filterPosts(category) {
             // Remove active class from all filter items
             document.querySelectorAll('.filter-item').forEach(item => {
@@ -2651,16 +2655,113 @@
             
             console.log(`Filtering posts by: ${category}`);
             
-            // Filter feed posts based on category
+            // Get user's current location and radius preference
+            const userLocation = getUserLocation();
+            const radiusPreference = localStorage.getItem('searchRadius') || '10'; // Default 10 miles
+            
+            // Filter feed posts based on category and radius
             const feedPosts = document.querySelectorAll('.feed-post');
             feedPosts.forEach(post => {
+                let showPost = false;
+                
                 if (category === 'all') {
-                    post.style.display = 'block';
+                    showPost = true;
                 } else {
-                    // For now, show all posts (in real implementation, check data attributes)
-                    post.style.display = 'block';
+                    // Check category match (in real implementation, check data attributes)
+                    const postCategory = post.getAttribute('data-category') || 'general';
+                    showPost = (postCategory === category);
                 }
+                
+                // Apply radius filtering for launched towns only
+                if (showPost) {
+                    const postLocation = post.getAttribute('data-location');
+                    const postTown = post.getAttribute('data-town');
+                    
+                    // Check if town has launched MarketPace with active drivers
+                    if (postTown && !isLaunchedTown(postTown)) {
+                        showPost = false;
+                    }
+                    
+                    // Apply radius filtering if location available
+                    if (showPost && userLocation && postLocation) {
+                        const distance = calculateDistance(userLocation, postLocation);
+                        if (distance > parseInt(radiusPreference)) {
+                            showPost = false;
+                        }
+                    }
+                }
+                
+                post.style.display = showPost ? 'block' : 'none';
             });
+            
+            showNotification(`Showing ${category} posts within ${radiusPreference} miles`, 'info');
+        }
+
+        // Get user location from localStorage or prompt
+        function getUserLocation() {
+            return JSON.parse(localStorage.getItem('userLocation') || 'null');
+        }
+
+        // Check if town has launched MarketPace with active drivers and members
+        function isLaunchedTown(townName) {
+            const launchedTowns = [
+                'Orange Beach, AL', 'Gulf Shores, AL', 'Foley, AL', 'Spanish Fort, AL',
+                'Daphne, AL', 'Fairhope, AL', 'Mobile, AL', 'Pensacola, FL',
+                'Destin, FL', 'Fort Walton Beach, FL', 'Panama City, FL', 'Tallahassee, FL'
+            ];
+            return launchedTowns.some(town => town.toLowerCase().includes(townName.toLowerCase()));
+        }
+
+        // Calculate distance between two locations (simplified)
+        function calculateDistance(loc1, loc2) {
+            // Simplified distance calculation (in real implementation, use proper geo calculation)
+            const lat1 = loc1.lat, lon1 = loc1.lng;
+            const lat2 = loc2.lat, lon2 = loc2.lng;
+            
+            const R = 3959; // Earth radius in miles
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // Facebook Sharing Functions
+        function openFacebookShare() {
+            const shareModal = document.createElement('div');
+            shareModal.className = 'profile-modal';
+            shareModal.innerHTML = `
+                <div class="profile-modal-content">
+                    <div class="post-modal-header">
+                        <h3 class="post-modal-title">Share to Facebook</h3>
+                        <button class="close-modal" onclick="this.parentElement.parentElement.parentElement.remove()">&times;</button>
+                    </div>
+                    <div style="margin: 20px 0;">
+                        <button class="upload-btn" onclick="shareMarketPaceToFacebook()">Share MarketPace Community</button>
+                        <button class="upload-btn" onclick="shareSpecificItemToFacebook()">Share Specific Item</button>
+                        <button class="upload-btn" onclick="openMarketplaceIntegration()">Setup Marketplace Integration</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(shareModal);
+        }
+
+        function shareMarketPaceToFacebook() {
+            const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://marketpace.shop')}&quote=${encodeURIComponent('Join me on MarketPace - discover local commerce, jobs, and community opportunities! 🏠🛍️')}`;
+            window.open(shareUrl, '_blank', 'width=600,height=400');
+            showNotification('Facebook share opened!', 'success');
+        }
+
+        function shareSpecificItemToFacebook() {
+            const shareUrl = `https://www.facebook.com/marketplace/create/`;
+            window.open(shareUrl, '_blank');
+            showNotification('Opening Facebook Marketplace...', 'info');
+        }
+
+        function openMarketplaceIntegration() {
+            window.location.href = '/facebook-marketplace-integration';
         }
     </script>
 </body>
