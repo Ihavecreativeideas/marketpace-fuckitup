@@ -15,9 +15,21 @@ app.use((req, res, next) => {
 });
 
 // Basic middleware
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..')));
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'healthy', 
+    timestamp: new Date().toISOString(),
+    server: 'MarketPace Clean Server'
+  });
+});
 
 // Serve HTML files
 app.get('/', (req, res) => {
@@ -1358,7 +1370,7 @@ app.post('/api/seamless-login', (req, res) => {
 
 const port = process.env.PORT || 5000;
 
-app.listen(port, "0.0.0.0", () => {
+const server = app.listen(port, "0.0.0.0", () => {
   console.log(`MarketPace Server running on port ${port}`);
   console.log(`🌐 External URL: https://${process.env.REPLIT_DOMAINS || 'workspace.ihavecreativeid.repl.co'}`);
   console.log('🎯 Internal Advertising System Active');
@@ -1367,4 +1379,16 @@ app.listen(port, "0.0.0.0", () => {
   console.log('📊 Complete Facebook-style ad builder with targeting and analytics');
   console.log('✅ Zero external data sales - Internal platform advertising only');
   console.log('🔐 OAuth Ready: Facebook & Google configured for both dev and prod domains');
+  console.log('🩺 Health check available at /health');
+});
+
+server.on('error', (err) => {
+  console.error('Server error:', err);
+});
+
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    console.log('Process terminated');
+  });
 });
