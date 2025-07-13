@@ -99,8 +99,10 @@
             align-items: center;
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            padding: 8px 16px;
+            border-radius: 25px;
+            padding: 10px 16px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .search-input {
@@ -484,7 +486,9 @@
     <!-- Header -->
     <div class="header">
         <div class="header-content">
-            <div class="logo">MarketPace</div>
+            <div class="logo">
+                <img src="/marketpace-logo-1.jpeg" alt="MarketPace" style="height: 32px; width: auto;">
+            </div>
             <div class="search-container">
                 <div class="search-wrapper">
                     <input type="text" id="searchInput" name="search" class="search-input" placeholder="Search people, shops, services...">
@@ -502,6 +506,7 @@
                 <span id="userInitials">DU</span>
                 <div class="menu-dropdown" id="menuDropdown">
                     <div class="menu-option" onclick="goToResetLive()" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; font-weight: bold; text-align: center; animation: pulse-red 2s infinite;">🚀 RESET TO LIVE MODE</div>
+                    <div class="menu-option" onclick="inviteFriends()" style="background: linear-gradient(135deg, #1877f2, #42a5f5); color: white; font-weight: bold; text-align: center;">👥 Invite Friends</div>
                     <div class="menu-option" onclick="goToProfile()">👤 Profile</div>
                     <div class="menu-option" onclick="goToCart()">🛒 Cart <span id="cartBadge" class="cart-badge">0</span></div>
                     <div class="menu-option" onclick="goToSettings()">⚙️ Settings</div>
@@ -762,6 +767,135 @@
         function goToResetLive() {
             document.getElementById('menuDropdown').classList.remove('show');
             window.location.href = '/reset-to-live';
+        }
+        
+        function inviteFriends() {
+            document.getElementById('menuDropdown').classList.remove('show');
+            
+            // Check if user logged in with Facebook
+            const user = JSON.parse(localStorage.getItem('marketpaceUser') || '{}');
+            
+            if (user.provider === 'facebook') {
+                // Facebook-specific invitation
+                const inviteModal = document.createElement('div');
+                inviteModal.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                    background: rgba(0,0,0,0.8); z-index: 10000; display: flex; 
+                    align-items: center; justify-content: center;
+                `;
+                
+                inviteModal.innerHTML = `
+                    <div style="
+                        background: linear-gradient(135deg, #1a0b3d, #6b46c1); 
+                        padding: 30px; border-radius: 20px; max-width: 400px; 
+                        text-align: center; color: white; border: 2px solid #1877f2;
+                    ">
+                        <h2 style="color: #1877f2; margin-bottom: 20px;">📱 Invite Your Facebook Friends!</h2>
+                        <p style="margin-bottom: 20px; line-height: 1.5;">
+                            Help grow the MarketPace community by inviting your Facebook friends to join! 
+                            Share the platform with people in your area to create a thriving local marketplace.
+                        </p>
+                        <div style="margin: 20px 0;">
+                            <button onclick="shareFacebookPost()" style="
+                                background: #1877f2; color: white; border: none; 
+                                padding: 12px 24px; border-radius: 25px; margin: 5px;
+                                cursor: pointer; font-weight: bold;
+                            ">📝 Share Post</button>
+                            <button onclick="sendFacebookMessage()" style="
+                                background: #42a5f5; color: white; border: none; 
+                                padding: 12px 24px; border-radius: 25px; margin: 5px;
+                                cursor: pointer; font-weight: bold;
+                            ">💬 Send Message</button>
+                        </div>
+                        <button onclick="this.parentElement.parentElement.remove()" style="
+                            background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); 
+                            padding: 8px 20px; border-radius: 15px; cursor: pointer;
+                        ">Close</button>
+                    </div>
+                `;
+                
+                document.body.appendChild(inviteModal);
+            } else {
+                // Generic invitation for other login methods
+                showGenericInvite();
+            }
+        }
+        
+        function shareFacebookPost() {
+            const shareText = "🏪 Just joined MarketPace - the local community marketplace where neighbors buy, sell, and support each other! Find local businesses, rent items you need, and connect with your community. Join me! 🌟";
+            const shareUrl = window.location.origin;
+            
+            // Open Facebook share dialog
+            const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
+            window.open(facebookShareUrl, 'facebook-share', 'width=600,height=400');
+        }
+        
+        function sendFacebookMessage() {
+            const messageText = "Hey! I just joined MarketPace - it's an awesome local marketplace where we can buy/sell with neighbors and support local businesses. You should check it out!";
+            const shareUrl = window.location.origin;
+            
+            // Open Facebook Messenger share
+            const messengerUrl = `https://www.facebook.com/dialog/send?link=${encodeURIComponent(shareUrl)}&app_id=1043690817269912&redirect_uri=${encodeURIComponent(shareUrl)}`;
+            window.open(messengerUrl, 'facebook-messenger', 'width=600,height=400');
+        }
+        
+        function showGenericInvite() {
+            const inviteModal = document.createElement('div');
+            inviteModal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.8); z-index: 10000; display: flex; 
+                align-items: center; justify-content: center;
+            `;
+            
+            inviteModal.innerHTML = `
+                <div style="
+                    background: linear-gradient(135deg, #1a0b3d, #6b46c1); 
+                    padding: 30px; border-radius: 20px; max-width: 400px; 
+                    text-align: center; color: white; border: 2px solid #00ffff;
+                ">
+                    <h2 style="color: #00ffff; margin-bottom: 20px;">🌟 Invite Friends to MarketPace!</h2>
+                    <p style="margin-bottom: 20px; line-height: 1.5;">
+                        Share MarketPace with friends in your area to build a stronger local community marketplace!
+                    </p>
+                    <div style="margin: 20px 0;">
+                        <button onclick="copyInviteLink()" style="
+                            background: #00ffff; color: #1a0b3d; border: none; 
+                            padding: 12px 24px; border-radius: 25px; margin: 5px;
+                            cursor: pointer; font-weight: bold;
+                        ">📋 Copy Link</button>
+                        <button onclick="shareInvite()" style="
+                            background: #9d4edd; color: white; border: none; 
+                            padding: 12px 24px; border-radius: 25px; margin: 5px;
+                            cursor: pointer; font-weight: bold;
+                        ">📤 Share</button>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" style="
+                        background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); 
+                        padding: 8px 20px; border-radius: 15px; cursor: pointer;
+                    ">Close</button>
+                </div>
+            `;
+            
+            document.body.appendChild(inviteModal);
+        }
+        
+        function copyInviteLink() {
+            const inviteText = window.location.origin;
+            navigator.clipboard.writeText(inviteText).then(() => {
+                alert('MarketPace link copied to clipboard!');
+            });
+        }
+        
+        function shareInvite() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Join MarketPace Community',
+                    text: 'Join me on MarketPace - the local community marketplace!',
+                    url: window.location.origin
+                });
+            } else {
+                copyInviteLink();
+            }
         }
 
         function goToCart() {
@@ -1081,6 +1215,48 @@
             }
         }
 
+        function showFacebookWelcomeInvite() {
+            const welcomeModal = document.createElement('div');
+            welcomeModal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.9); z-index: 10000; display: flex; 
+                align-items: center; justify-content: center;
+            `;
+            
+            welcomeModal.innerHTML = `
+                <div style="
+                    background: linear-gradient(135deg, #1a0b3d, #6b46c1); 
+                    padding: 40px; border-radius: 20px; max-width: 450px; 
+                    text-align: center; color: white; border: 3px solid #1877f2;
+                    box-shadow: 0 20px 60px rgba(24, 119, 242, 0.3);
+                ">
+                    <h1 style="color: #1877f2; margin-bottom: 20px; font-size: 28px;">🎉 Welcome to MarketPace!</h1>
+                    <p style="margin-bottom: 25px; line-height: 1.6; font-size: 16px;">
+                        Hey Brooke! Thanks for joining with Facebook. Want to invite your Facebook friends 
+                        to join the MarketPace community? The more neighbors we have, the better our local marketplace becomes!
+                    </p>
+                    <div style="margin: 25px 0;">
+                        <button onclick="shareFacebookPost(); this.parentElement.parentElement.parentElement.remove();" style="
+                            background: #1877f2; color: white; border: none; 
+                            padding: 15px 25px; border-radius: 25px; margin: 8px;
+                            cursor: pointer; font-weight: bold; font-size: 14px;
+                        ">📝 Share on Facebook</button>
+                        <button onclick="sendFacebookMessage(); this.parentElement.parentElement.parentElement.remove();" style="
+                            background: #42a5f5; color: white; border: none; 
+                            padding: 15px 25px; border-radius: 25px; margin: 8px;
+                            cursor: pointer; font-weight: bold; font-size: 14px;
+                        ">💬 Message Friends</button>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" style="
+                        background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); 
+                        padding: 10px 25px; border-radius: 15px; cursor: pointer; margin-top: 10px;
+                    ">Maybe Later</button>
+                </div>
+            `;
+            
+            document.body.appendChild(welcomeModal);
+        }
+
         // Close dropdowns when clicking outside
         document.addEventListener('click', function(event) {
             if (!event.target.closest('.filter-btn') && !event.target.closest('.filter-dropdown')) {
@@ -1132,6 +1308,14 @@
                 
                 // Initialize post types
                 initializePostTypes();
+                
+                // Check if user just logged in with Facebook and should see invite prompt
+                if (localStorage.getItem('showFacebookInvite') === 'true') {
+                    localStorage.removeItem('showFacebookInvite');
+                    setTimeout(() => {
+                        showFacebookWelcomeInvite();
+                    }, 1500); // Show after page loads
+                }
                 
                 console.log('✅ All community functions initialized successfully');
                 
