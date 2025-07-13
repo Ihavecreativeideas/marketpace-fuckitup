@@ -502,6 +502,160 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
+        /* Profile Button */
+        .profile-button {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+
+        .profile-button:hover {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .profile-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+
+        .profile-initials {
+            color: #00ffff;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* Search Popup Gadget */
+        .search-popup {
+            position: absolute;
+            top: 50px;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #1a0b3d, #2d1b69);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .search-popup.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .search-popup h3 {
+            color: #00ffff;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .search-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .search-option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            color: white;
+        }
+
+        .search-option:hover {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+        }
+
+        /* Profile Modal */
+        .profile-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .profile-modal-content {
+            background: linear-gradient(135deg, #1a0b3d, #2d1b69);
+            border-radius: 20px;
+            max-width: 400px;
+            width: 90%;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            padding: 30px;
+            text-align: center;
+        }
+
+        .profile-pic-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 12px;
+            margin: 0 auto 20px;
+            border: 3px solid rgba(0, 255, 255, 0.3);
+            overflow: hidden;
+        }
+
+        .profile-pic-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-pic-placeholder {
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #00ffff;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #00ffff, #6b46c1);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: bold;
+        }
+
         /* Advanced Post Modal */
         .post-modal {
             position: fixed;
@@ -759,16 +913,30 @@
                 </div>
             </div>
             <div class="search-container">
-                <div class="search-wrapper">
-                    <input type="text" id="searchInput" name="search" class="search-input" placeholder="Search marketplace, services, events...">
-                    <button class="filter-btn" onclick="toggleFilter()">⚙️</button>
-                    <div class="filter-dropdown" id="filterDropdown">
-                        <div class="filter-option" onclick="filterBy('all')">All Posts</div>
-                        <div class="filter-option" onclick="filterBy('sale')">For Sale</div>
-                        <div class="filter-option" onclick="filterBy('rent')">For Rent</div>
-                        <div class="filter-option" onclick="filterBy('service')">Services</div>
-                        <div class="filter-option" onclick="filterBy('events')">Events</div>
+                <button class="profile-button" onclick="openProfileModal()">
+                    <div class="profile-initials" id="profileInitials">MP</div>
+                </button>
+                <div class="search-wrapper" onclick="toggleSearchPopup()">
+                    <input type="text" id="searchInput" name="search" class="search-input" placeholder="" readonly>
+                    <button class="filter-btn">🔍</button>
+                </div>
+                <div class="search-popup" id="searchPopup">
+                    <h3>What are you looking for?</h3>
+                    <div class="search-options">
+                        <div class="search-option" onclick="searchFor('marketplace')">🛍️ Marketplace</div>
+                        <div class="search-option" onclick="searchFor('services')">🔧 Services</div>
+                        <div class="search-option" onclick="searchFor('events')">🎉 Events</div>
+                        <div class="search-option" onclick="searchFor('jobs')">💼 Jobs</div>
+                        <div class="search-option" onclick="searchFor('rentals')">🏠 Rentals</div>
+                        <div class="search-option" onclick="searchFor('iso')">🔍 ISO Posts</div>
                     </div>
+                </div>
+                <div class="filter-dropdown" id="filterDropdown">
+                    <div class="filter-option" onclick="filterBy('all')">All Posts</div>
+                    <div class="filter-option" onclick="filterBy('sale')">For Sale</div>
+                    <div class="filter-option" onclick="filterBy('rent')">For Rent</div>
+                    <div class="filter-option" onclick="filterBy('service')">Services</div>
+                    <div class="filter-option" onclick="filterBy('events')">Events</div>
                 </div>
             </div>
             <div class="profile-pic" onclick="toggleMenu()" style="cursor: pointer; position: relative;">
@@ -963,6 +1131,24 @@
         </div>
     </div>
 
+    <!-- Profile Modal -->
+    <div id="profileModal" class="profile-modal" style="display: none;">
+        <div class="profile-modal-content">
+            <div class="post-modal-header">
+                <h3 class="post-modal-title">Edit Profile</h3>
+                <button class="close-modal" onclick="closeProfileModal()">&times;</button>
+            </div>
+            <div class="profile-pic-preview" id="profilePicPreview">
+                <div class="profile-pic-placeholder" id="profilePlaceholder">MP</div>
+            </div>
+            <h4 style="color: #00ffff; margin-bottom: 20px;">Change Profile Picture</h4>
+            <input type="file" id="profilePicInput" accept="image/*" style="display: none;" onchange="previewProfilePic()">
+            <button class="upload-btn" onclick="document.getElementById('profilePicInput').click()">Choose Photo</button>
+            <button class="upload-btn" onclick="saveProfilePic()">Save Changes</button>
+            <button class="upload-btn" style="background: #ef4444;" onclick="closeProfileModal()">Cancel</button>
+        </div>
+    </div>
+
     <!-- Advanced Post Modal -->
     <div id="postModal" class="post-modal" style="display: none;">
         <div class="post-modal-content">
@@ -1086,7 +1272,7 @@
                 <div class="nav-icon">🎭</div>
                 <div class="nav-label">The Hub</div>
             </button>
-            <button class="nav-item" onclick="goToPage('delivery')">
+            <button class="nav-item" onclick="goToPage('deliveries')">
                 <div class="nav-icon">🚚</div>
                 <div class="nav-label">Delivery</div>
             </button>
@@ -1743,8 +1929,109 @@
             }
         }
 
+        // Search Popup Functions
+        function toggleSearchPopup() {
+            const popup = document.getElementById('searchPopup');
+            popup.classList.toggle('show');
+        }
+
+        function searchFor(category) {
+            console.log('Searching for:', category);
+            showNotification(`Searching ${category}...`, 'info');
+            toggleSearchPopup();
+            // Add actual search logic here
+        }
+
+        // Profile Modal Functions
+        function openProfileModal() {
+            document.getElementById('profileModal').style.display = 'flex';
+            // Load user profile data
+            const user = JSON.parse(localStorage.getItem('marketpaceUser') || '{}');
+            const initials = user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'MP';
+            document.getElementById('profilePlaceholder').textContent = initials;
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').style.display = 'none';
+        }
+
+        function previewProfilePic() {
+            const file = document.getElementById('profilePicInput').files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('profilePicPreview');
+                    preview.innerHTML = `<img src="${e.target.result}" class="profile-avatar">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function saveProfilePic() {
+            const file = document.getElementById('profilePicInput').files[0];
+            if (file) {
+                // In a real app, upload to server
+                // For demo, save to localStorage
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    localStorage.setItem('userProfilePic', e.target.result);
+                    
+                    // Update profile button
+                    const profileButton = document.querySelector('.profile-button');
+                    profileButton.innerHTML = `<img src="${e.target.result}" class="profile-avatar">`;
+                    
+                    showNotification('Profile picture updated successfully!', 'success');
+                    closeProfileModal();
+                };
+                reader.readAsDataURL(file);
+            } else {
+                showNotification('Please select a photo first', 'error');
+            }
+        }
+
+        // Navigation Functions Update
+        function goToPage(page) {
+            console.log('Navigating to:', page);
+            
+            const routes = {
+                'community': '/community',
+                'shop': '/shops',
+                'shops': '/shops',
+                'services': '/services',
+                'hub': '/the-hub',
+                'deliveries': '/deliveries',
+                'delivery': '/deliveries',
+                'menu': '/marketpace-menu'
+            };
+            
+            const route = routes[page];
+            if (route) {
+                window.location.href = route;
+            } else {
+                console.error('Unknown page:', page);
+                showNotification('Page not found', 'error');
+            }
+        }
+
+        // Close popups when clicking outside
+        document.addEventListener('click', function(e) {
+            const searchPopup = document.getElementById('searchPopup');
+            const searchWrapper = document.querySelector('.search-wrapper');
+            
+            if (searchPopup && !searchWrapper.contains(e.target) && !searchPopup.contains(e.target)) {
+                searchPopup.classList.remove('show');
+            }
+        });
+
         // Category button click handlers
         document.addEventListener('DOMContentLoaded', function() {
+            // Load saved profile picture
+            const savedProfilePic = localStorage.getItem('userProfilePic');
+            if (savedProfilePic) {
+                const profileButton = document.querySelector('.profile-button');
+                profileButton.innerHTML = `<img src="${savedProfilePic}" class="profile-avatar">`;
+            }
+
             // Add category button click handlers
             document.querySelectorAll('.category-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
