@@ -121,6 +121,10 @@ app.get('/driver-application', (req, res) => {
   res.sendFile(path.join(__dirname, '../driver-application.html'));
 });
 
+app.get('/rental-details', (req, res) => {
+  res.sendFile(path.join(__dirname, '../rental-details.html'));
+});
+
 // API endpoint for reset to live functionality
 app.post('/api/admin/reset-to-live', (req, res) => {
   const { resetType, confirmationCode, timestamp } = req.body;
