@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPace Driver Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a0b3d, #2d1b69);
+            color: white;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(147, 197, 253, 0.8);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0px) translateX(0px) rotate(0deg); 
+                opacity: 0.4; 
+            }
+            25% { 
+                transform: translateY(-30px) translateX(10px) rotate(90deg); 
+                opacity: 0.8; 
+            }
+            50% { 
+                transform: translateY(-15px) translateX(-10px) rotate(180deg); 
+                opacity: 1; 
+            }
+            75% { 
+                transform: translateY(-25px) translateX(5px) rotate(270deg); 
+                opacity: 0.6; 
+            }
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 20px;
+            position: relative;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .driver-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .driver-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ffff, #6b46c1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .card h3 {
+            color: #00ffff;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-value {
+            color: #00ffff;
+            font-weight: bold;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #00ffff, #6b46c1);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+            margin: 5px;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .route-card {
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid #10b981;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .route-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .route-status {
+            background: #10b981;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .route-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+        }
+
+        .back-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(16, 185, 129, 0.9);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">🚗 MarketPace Driver Dashboard</div>
+            <div class="driver-info">
+                <div class="driver-avatar">AD</div>
+                <div>
+                    <div style="font-weight: bold;">Admin Driver</div>
+                    <div style="font-size: 14px; opacity: 0.8;">⭐ 4.9 Rating</div>
+                </div>
+                <button class="back-btn" onclick="goBack()">← Back to Community</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="dashboard-grid">
+            <!-- Today's Stats -->
+            <div class="card">
+                <h3>📊 Today's Stats</h3>
+                <div class="stat-item">
+                    <span>Routes Completed</span>
+                    <span class="stat-value">3</span>
+                </div>
+                <div class="stat-item">
+                    <span>Total Earnings</span>
+                    <span class="stat-value">$78.50</span>
+                </div>
+                <div class="stat-item">
+                    <span>Tips Received</span>
+                    <span class="stat-value">$15.00</span>
+                </div>
+                <div class="stat-item">
+                    <span>Miles Driven</span>
+                    <span class="stat-value">45.2</span>
+                </div>
+            </div>
+
+            <!-- Weekly Performance -->
+            <div class="card">
+                <h3>📈 Weekly Performance</h3>
+                <div class="stat-item">
+                    <span>Total Routes</span>
+                    <span class="stat-value">18</span>
+                </div>
+                <div class="stat-item">
+                    <span>Week Earnings</span>
+                    <span class="stat-value">$432.25</span>
+                </div>
+                <div class="stat-item">
+                    <span>Average Rating</span>
+                    <span class="stat-value">4.9 ⭐</span>
+                </div>
+                <div class="stat-item">
+                    <span>On-Time Rate</span>
+                    <span class="stat-value">97%</span>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <h3>⚡ Quick Actions</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <button class="action-btn" onclick="viewAvailableRoutes()">🗺️ View Routes</button>
+                    <button class="action-btn" onclick="updateStatus()">📍 Update Status</button>
+                    <button class="action-btn" onclick="viewEarnings()">💰 View Earnings</button>
+                    <button class="action-btn" onclick="contactSupport()">📞 Support</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Routes -->
+        <div class="card">
+            <h3>🚚 Active Routes</h3>
+            <div class="route-card">
+                <div class="route-header">
+                    <div>
+                        <strong>Route #MP-2025-001</strong>
+                        <div style="color: #94a3b8; font-size: 14px;">Morning Block: 9:00 AM - 12:00 PM</div>
+                    </div>
+                    <div class="route-status">ACTIVE</div>
+                </div>
+                <div class="route-details">
+                    <div>
+                        <strong>Stops:</strong> 4/6 completed
+                    </div>
+                    <div>
+                        <strong>Earnings:</strong> $32.50
+                    </div>
+                    <div>
+                        <strong>Miles:</strong> 18.5
+                    </div>
+                    <div>
+                        <strong>ETA:</strong> 11:30 AM
+                    </div>
+                </div>
+                <div style="margin-top: 15px;">
+                    <button class="action-btn" onclick="viewRouteDetails()">📋 View Details</button>
+                    <button class="action-btn" onclick="completeRoute()">✅ Complete Route</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Routes -->
+        <div class="card">
+            <h3>🎯 Available Routes</h3>
+            <div class="route-card" style="border-color: #f59e0b; background: rgba(245, 158, 11, 0.1);">
+                <div class="route-header">
+                    <div>
+                        <strong>Route #MP-2025-002</strong>
+                        <div style="color: #94a3b8; font-size: 14px;">Afternoon Block: 3:00 PM - 6:00 PM</div>
+                    </div>
+                    <div class="route-status" style="background: #f59e0b;">AVAILABLE</div>
+                </div>
+                <div class="route-details">
+                    <div>
+                        <strong>Stops:</strong> 5 pickups + 5 dropoffs
+                    </div>
+                    <div>
+                        <strong>Estimated Earnings:</strong> $45.00
+                    </div>
+                    <div>
+                        <strong>Estimated Miles:</strong> 22.3
+                    </div>
+                    <div>
+                        <strong>Start Time:</strong> 3:00 PM
+                    </div>
+                </div>
+                <div style="margin-top: 15px;">
+                    <button class="action-btn" onclick="acceptRoute()">✅ Accept Route</button>
+                    <button class="action-btn" onclick="viewRouteMap()">🗺️ View Map</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 5) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Initialize particles
+        createParticles();
+
+        // Navigation functions
+        function goBack() {
+            window.location.href = '/community';
+        }
+
+        function viewAvailableRoutes() {
+            showNotification('Loading available routes...');
+        }
+
+        function updateStatus() {
+            showNotification('Status updated to: Available');
+        }
+
+        function viewEarnings() {
+            showNotification('Opening earnings report...');
+        }
+
+        function contactSupport() {
+            showNotification('Connecting to MarketPace Support...');
+        }
+
+        function viewRouteDetails() {
+            showNotification('Loading route details...');
+        }
+
+        function completeRoute() {
+            if (confirm('Mark this route as complete?')) {
+                showNotification('Route marked as complete! Payment processing...');
+            }
+        }
+
+        function acceptRoute() {
+            if (confirm('Accept this route? You will be notified when it\'s time to start.')) {
+                showNotification('Route accepted! You will receive pickup notifications.');
+            }
+        }
+
+        function viewRouteMap() {
+            showNotification('Opening route map...');
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    document.body.removeChild(notification);
+                }
+            }, 3000);
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            showNotification('Welcome to MarketPace Driver Dashboard!');
+        });
+    </script>
+</body>
+</html>
