@@ -73,10 +73,10 @@
 
         .header-content {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             max-width: 600px;
             margin: 0 auto;
-            gap: 8px;
+            gap: 16px;
         }
 
         .logo {
@@ -85,6 +85,135 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+        }
+
+        .header-right {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            gap: 8px;
+        }
+
+        .top-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .search-section {
+            flex: 1;
+        }
+
+        .profile-main-button {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #00ffff;
+            border-radius: 6px;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .profile-main-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.2) 0%, transparent 70%);
+            animation: rotate 3s linear infinite;
+            pointer-events: none;
+        }
+
+        .profile-main-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+
+        .profile-main-picture {
+            width: 100%;
+            height: 100%;
+            border-radius: 6px;
+            object-fit: cover;
+            z-index: 1;
+            position: relative;
+        }
+
+        .profile-main-initials {
+            color: #00ffff;
+            font-weight: bold;
+            font-size: 18px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            z-index: 1;
+            position: relative;
+        }
+
+        .search-categories {
+            display: flex;
+            justify-content: space-between;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        .search-cat-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 2px 6px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 9px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1;
+            text-align: center;
+        }
+
+        .search-cat-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #00ffff;
+        }
+
+        .profile-categories {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-top: 4px;
+            width: 60px;
+        }
+
+        .profile-cat-row {
+            display: flex;
+            gap: 2px;
+        }
+
+        .profile-cat-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            padding: 1px 2px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1;
+            text-align: center;
+            min-height: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-cat-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #00ffff;
         }
         
         .logo-container {
@@ -159,11 +288,8 @@
         }
 
         .search-container {
-            position: absolute;
-            top: 120px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 300px;
+            position: relative;
+            width: 100%;
             z-index: 100;
         }
 
@@ -920,45 +1046,51 @@
                     <div class="logo-particles" id="logoParticles"></div>
                 </div>
             </div>
-            <button class="profile-button" onclick="openProfileModal()">
-                <div class="profile-initials" id="profileInitials">MP</div>
-            </button>
-            <div class="search-container">
-                <div class="search-wrapper" onclick="toggleSearchPopup()">
-                    <input type="text" id="searchInput" name="search" class="search-input" placeholder="" readonly>
-                    <button class="filter-btn">🔍</button>
-                </div>
-                <div class="search-popup" id="searchPopup">
-                    <h3>What are you looking for?</h3>
-                    <div class="search-options">
-                        <div class="search-option" onclick="searchFor('marketplace')">🛍️ Marketplace</div>
-                        <div class="search-option" onclick="searchFor('services')">🔧 Services</div>
-                        <div class="search-option" onclick="searchFor('events')">🎉 Events</div>
-                        <div class="search-option" onclick="searchFor('jobs')">💼 Jobs</div>
-                        <div class="search-option" onclick="searchFor('rentals')">🏠 Rentals</div>
-                        <div class="search-option" onclick="searchFor('iso')">🔍 ISO Posts</div>
+            <div class="header-right">
+                <div class="top-section">
+                    <div class="search-section">
+                        <div class="search-container">
+                            <div class="search-wrapper" onclick="toggleSearchPopup()">
+                                <input type="text" id="searchInput" name="search" class="search-input" placeholder="" readonly>
+                                <button class="filter-btn">🔍</button>
+                            </div>
+                            <div class="search-categories">
+                                <div class="search-cat-btn" onclick="searchFor('marketplace')">Shop</div>
+                                <div class="search-cat-btn" onclick="searchFor('services')">Service</div>
+                                <div class="search-cat-btn" onclick="searchFor('events')">Event</div>
+                                <div class="search-cat-btn" onclick="searchFor('jobs')">Job</div>
+                                <div class="search-cat-btn" onclick="searchFor('rentals')">Rent</div>
+                                <div class="search-cat-btn" onclick="searchFor('iso')">ISO</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="profile-main-button" onclick="toggleMainMenu()" style="position: relative;">
+                        <img id="profileMainPicture" class="profile-main-picture" style="display: none;" alt="Profile">
+                        <div id="profileMainInitials" class="profile-main-initials">MP</div>
+                        <div class="menu-dropdown" id="mainMenuDropdown">
+                            <div class="menu-option" onclick="goToResetLive()" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; font-weight: bold; text-align: center; animation: pulse-red 2s infinite;">🚀 RESET TO LIVE MODE</div>
+                            <div class="menu-option" onclick="inviteFriends()" style="background: linear-gradient(135deg, #1877f2, #42a5f5); color: white; font-weight: bold; text-align: center;">👥 Invite Friends</div>
+                            <div class="menu-option" onclick="openProfileModal()">👤 Profile</div>
+                            <div class="menu-option" onclick="goToCart()">🛒 Cart <span id="cartBadge" class="cart-badge">0</span></div>
+                            <div class="menu-option" onclick="goToSettings()">⚙️ Settings</div>
+                            <div class="menu-option" onclick="goToDeliveries()">🚚 Deliveries</div>
+                            <div class="menu-option" onclick="goToSponsor()">💝 Sponsor/Support</div>
+                            <div class="menu-option" onclick="goToSecurity()">🔒 Security</div>
+                            <div class="menu-option" onclick="logout()">🚪 Logout</div>
+                        </div>
                     </div>
                 </div>
-                <div class="filter-dropdown" id="filterDropdown">
-                    <div class="filter-option" onclick="filterBy('all')">All Posts</div>
-                    <div class="filter-option" onclick="filterBy('sale')">For Sale</div>
-                    <div class="filter-option" onclick="filterBy('rent')">For Rent</div>
-                    <div class="filter-option" onclick="filterBy('service')">Services</div>
-                    <div class="filter-option" onclick="filterBy('events')">Events</div>
-                </div>
-            </div>
-            <div class="profile-pic" onclick="toggleMenu()" style="cursor: pointer; position: relative;">
-                <span id="userInitials">DU</span>
-                <div class="menu-dropdown" id="menuDropdown">
-                    <div class="menu-option" onclick="goToResetLive()" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; font-weight: bold; text-align: center; animation: pulse-red 2s infinite;">🚀 RESET TO LIVE MODE</div>
-                    <div class="menu-option" onclick="inviteFriends()" style="background: linear-gradient(135deg, #1877f2, #42a5f5); color: white; font-weight: bold; text-align: center;">👥 Invite Friends</div>
-                    <div class="menu-option" onclick="goToProfile()">👤 Profile</div>
-                    <div class="menu-option" onclick="goToCart()">🛒 Cart <span id="cartBadge" class="cart-badge">0</span></div>
-                    <div class="menu-option" onclick="goToSettings()">⚙️ Settings</div>
-                    <div class="menu-option" onclick="goToDeliveries()">🚚 Deliveries</div>
-                    <div class="menu-option" onclick="goToSponsor()">💝 Sponsor/Support</div>
-                    <div class="menu-option" onclick="goToSecurity()">🔒 Security</div>
-                    <div class="menu-option" onclick="logout()">🚪 Logout</div>
+                <div class="profile-categories">
+                    <div class="profile-cat-row">
+                        <div class="profile-cat-btn" onclick="openAdvancedPostModal('sale')">Sell</div>
+                        <div class="profile-cat-btn" onclick="openAdvancedPostModal('rent')">Rent</div>
+                        <div class="profile-cat-btn" onclick="openAdvancedPostModal('service')">Service</div>
+                    </div>
+                    <div class="profile-cat-row">
+                        <div class="profile-cat-btn" onclick="openAdvancedPostModal('event')">Event</div>
+                        <div class="profile-cat-btn" onclick="openAdvancedPostModal('poll')">Poll</div>
+                        <div class="profile-cat-btn" onclick="openAdvancedPostModal('iso')">ISO</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1763,17 +1895,42 @@
         function updateProfileDisplay(user) {
             // Update profile display with user info
             if (user.profilePicture) {
-                // Use Facebook profile picture
+                // Use Facebook profile picture for main profile button
+                const mainProfilePic = document.getElementById('profileMainPicture');
+                const mainProfileInitials = document.getElementById('profileMainInitials');
+                if (mainProfilePic && mainProfileInitials) {
+                    mainProfilePic.src = user.profilePicture;
+                    mainProfilePic.style.display = 'block';
+                    mainProfileInitials.style.display = 'none';
+                }
+                
+                // Update all other profile pics in posts
                 document.querySelectorAll('.profile-pic').forEach(pic => {
                     pic.innerHTML = `<img src="${user.profilePicture}" alt="${user.name}" style="width: 100%; height: 100%; border-radius: 6px; object-fit: cover;">`;
                 });
             } else if (user.name) {
                 const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                
+                // Update main profile button
+                const mainProfileInitials = document.getElementById('profileMainInitials');
+                if (mainProfileInitials) {
+                    mainProfileInitials.textContent = initials;
+                }
+                
+                // Update other profile pics
                 document.querySelectorAll('.profile-pic span').forEach(span => {
                     span.textContent = initials;
                 });
             } else if (user.email) {
                 const initials = user.email.substring(0, 2).toUpperCase();
+                
+                // Update main profile button
+                const mainProfileInitials = document.getElementById('profileMainInitials');
+                if (mainProfileInitials) {
+                    mainProfileInitials.textContent = initials;
+                }
+                
+                // Update other profile pics
                 document.querySelectorAll('.profile-pic span').forEach(span => {
                     span.textContent = initials;
                 });
@@ -1944,8 +2101,8 @@
 
         // Search Popup Functions
         function toggleSearchPopup() {
-            const popup = document.getElementById('searchPopup');
-            popup.classList.toggle('show');
+            // Search popup removed - now using inline category buttons
+            console.log('Search activated - categories shown in header');
         }
 
         function searchFor(category) {
@@ -2181,13 +2338,21 @@
             });
         });
 
+        // New function for main menu toggle
+        function toggleMainMenu() {
+            const dropdown = document.getElementById('mainMenuDropdown');
+            dropdown.classList.toggle('show');
+        }
+
         // Close dropdowns when clicking outside
         document.addEventListener('click', function(event) {
             if (!event.target.closest('.filter-btn') && !event.target.closest('.filter-dropdown')) {
-                document.getElementById('filterDropdown').classList.remove('show');
+                const filterDropdown = document.getElementById('filterDropdown');
+                if (filterDropdown) filterDropdown.classList.remove('show');
             }
-            if (!event.target.closest('.profile-pic') && !event.target.closest('.menu-dropdown')) {
-                document.getElementById('menuDropdown').classList.remove('show');
+            if (!event.target.closest('.profile-main-button') && !event.target.closest('.menu-dropdown')) {
+                const mainMenuDropdown = document.getElementById('mainMenuDropdown');
+                if (mainMenuDropdown) mainMenuDropdown.classList.remove('show');
             }
         });
 
