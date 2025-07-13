@@ -1577,10 +1577,7 @@
                                 <input type="checkbox" id="bookNow" value="book">
                                 <span>📅 Book Now</span>
                             </label>
-                            <label class="action-checkbox">
-                                <input type="checkbox" id="counterOffer" value="counter">
-                                <span>💰 Counter Offer</span>
-                            </label>
+
                             <label class="action-checkbox">
                                 <input type="checkbox" id="contactSeller" value="contact">
                                 <span>💬 Contact Seller</span>
@@ -1902,12 +1899,14 @@
         }
 
         function selfPickup(itemName) {
-            alert(`Self pickup selected for ${itemName}. No delivery fees. Contact item owner to arrange pickup/dropoff times directly.`);
+            // Navigate to messaging page with item owner
+            window.location.href = `/message-owner?item=${encodeURIComponent(itemName)}&type=rental`;
         }
 
         function proceedWithRental(itemName, dailyPrice) {
             closeRentalModal();
-            alert(`Rental request sent for ${itemName} at $${dailyPrice}/day. Item owner will be notified. Delivery cost will be calculated based on your location.`);
+            // Navigate to rental delivery selection page
+            window.location.href = `/rental-delivery?item=${encodeURIComponent(itemName)}&price=${dailyPrice}`;
         }
 
         function closeRentalModal() {
@@ -2282,7 +2281,7 @@
             if (routes[page]) {
                 window.location.href = routes[page];
             } else {
-                console.log('Unknown page: ' + page);
+                window.location.href = '/' + page;
             }
         }
 
@@ -2788,21 +2787,24 @@
         }
         
         function shareFacebookPost() {
-            const shareText = "🏪 Just joined MarketPace - the local community marketplace where neighbors buy, sell, and support each other! Find local businesses, rent items you need, and connect with your community. Join me! 🌟";
-            const shareUrl = window.location.origin;
-            
-            // Open Facebook share dialog
-            const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
-            window.open(facebookShareUrl, 'facebook-share', 'width=600,height=400');
+            // Use simple text sharing instead of Facebook API
+            const message = "Join me on MarketPace! " + window.location.origin;
+            if (navigator.share) {
+                navigator.share({
+                    title: 'MarketPace',
+                    text: 'Join me on MarketPace!',
+                    url: window.location.origin
+                });
+            } else {
+                window.open(`sms:?body=${encodeURIComponent(message)}`);
+            }
         }
         
         function sendFacebookMessage() {
-            const messageText = "Hey! I just joined MarketPace - it's an awesome local marketplace where we can buy/sell with neighbors and support local businesses. You should check it out!";
-            const shareUrl = window.location.origin;
-            
-            // Open Facebook Messenger share
-            const messengerUrl = `https://www.facebook.com/dialog/send?link=${encodeURIComponent(shareUrl)}&app_id=1043690817269912&redirect_uri=${encodeURIComponent(shareUrl)}`;
-            window.open(messengerUrl, 'facebook-messenger', 'width=600,height=400');
+            // Use email sharing as fallback
+            const subject = "Join me on MarketPace!";
+            const body = "Check out MarketPace: " + window.location.origin;
+            window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
         }
         
         function showGenericInvite() {

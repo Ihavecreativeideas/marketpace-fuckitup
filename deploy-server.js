@@ -83,6 +83,15 @@ app.get('/deliveries', (req, res) => {
   res.sendFile(path.join(__dirname, 'deliveries.html'));
 });
 
+// Add rental flow pages
+app.get('/message-owner', (req, res) => {
+  res.sendFile(path.join(__dirname, 'message-owner.html'));
+});
+
+app.get('/rental-delivery', (req, res) => {
+  res.sendFile(path.join(__dirname, 'rental-delivery.html'));
+});
+
 // Catch-all for other HTML pages
 app.get('/:page', (req, res) => {
   const pageName = req.params.page;
