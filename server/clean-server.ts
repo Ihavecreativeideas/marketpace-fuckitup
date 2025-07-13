@@ -109,6 +109,18 @@ app.get('/reset-to-live', (req, res) => {
   res.sendFile(path.join(__dirname, '../reset-to-live.html'));
 });
 
+app.get('/platform-integrations', (req, res) => {
+  res.sendFile(path.join(__dirname, '../platform-integrations.html'));
+});
+
+app.get('/admin-dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '../admin-dashboard.html'));
+});
+
+app.get('/driver-application', (req, res) => {
+  res.sendFile(path.join(__dirname, '../driver-application.html'));
+});
+
 // API endpoint for reset to live functionality
 app.post('/api/admin/reset-to-live', (req, res) => {
   const { resetType, confirmationCode, timestamp } = req.body;
