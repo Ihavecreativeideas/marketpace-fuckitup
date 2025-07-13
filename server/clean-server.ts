@@ -1368,7 +1368,7 @@ app.post('/api/seamless-login', (req, res) => {
   });
 });
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 3000;
 
 const server = app.listen(port, "0.0.0.0", () => {
   console.log(`MarketPace Server running on port ${port}`);
