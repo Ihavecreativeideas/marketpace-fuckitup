@@ -211,6 +211,18 @@ MarketPace is a React Native mobile application that prioritizes community empow
 
 ## Recent Changes
 
+✓ **RENTAL-FOCUSED MARKETPLACE WITH LIABILITY DISCLAIMERS AND FILTER BAR REMOVAL** (January 13, 2025)
+✓ Completely removed filter bar system from community page for cleaner, simpler interface
+✓ Replaced "delivery" bottom navigation button with "rental" button that filters to local rentals only
+✓ Added comprehensive rental liability disclaimer system with clear warnings that MarketPace is NOT responsible for lost/damaged/stolen rental items
+✓ Implemented dual delivery options for rentals: self pickup/dropoff (free) or paid delivery service (2 fees: pickup + dropoff)
+✓ Created renter cost options allowing renters to pass full delivery cost to renter instead of splitting 50/50
+✓ Added rental terms notification requiring members to create their own rental terms and conditions
+✓ Enhanced Facebook share functionality with three options: Share Community, Share Item, Setup Integration
+✓ Maintained all profile button functionality including Reset to Live mode with red demo button
+✓ Streamlined interface focusing on rental marketplace functionality over complex filtering
+✓ Confirmed all existing OAuth, payment, and integration systems remain fully functional
+
 ✓ **UNIFIED iOS & WEB APP DEPLOYMENT WITH INTEGRATED DRIVER DASHBOARD** (January 12, 2025)
 ✓ Configured MarketPace as unified React Native app supporting both iOS mobile and web deployment
 ✓ Integrated driver dashboard into main app - users can switch between customer and driver modes seamlessly

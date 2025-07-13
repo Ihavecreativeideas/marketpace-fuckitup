@@ -570,48 +570,7 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        /* Filter Bar */
-        .filter-bar {
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            padding: 12px;
-            margin: 0 16px 20px 16px;
-        }
 
-        .filter-container {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding-bottom: 4px;
-        }
-
-        .filter-item {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            color: rgba(255, 255, 255, 0.8);
-            padding: 8px 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 14px;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        .filter-item:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border-color: rgba(0, 255, 255, 0.4);
-        }
-
-        .filter-item.active {
-            background: linear-gradient(135deg, #00ffff, #9d4edd);
-            color: white;
-            border-color: rgba(0, 255, 255, 0.6);
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
-        }
 
         /* Feed Posts */
         .feed-post {
@@ -1208,18 +1167,7 @@
             </div>
         </div>
 
-        <!-- Filter Bar -->
-        <div class="filter-bar">
-            <div class="filter-container">
-                <button class="filter-item active" onclick="filterPosts('all')" data-filter="all">All</button>
-                <button class="filter-item" onclick="filterPosts('sale')" data-filter="sale">For Sale</button>
-                <button class="filter-item" onclick="filterPosts('rent')" data-filter="rent">For Rent</button>
-                <button class="filter-item" onclick="filterPosts('service')" data-filter="service">Services</button>
-                <button class="filter-item" onclick="filterPosts('event')" data-filter="event">Events</button>
-                <button class="filter-item" onclick="filterPosts('job')" data-filter="job">Jobs</button>
-                <button class="filter-item" onclick="filterPosts('iso')" data-filter="iso">ISO</button>
-            </div>
-        </div>
+
 
         <!-- Feed Posts -->
         <div class="feed">
@@ -1507,9 +1455,9 @@
                 <div class="nav-icon">🎭</div>
                 <div class="nav-label">The Hub</div>
             </button>
-            <button class="nav-item" onclick="goToPage('deliveries')">
-                <div class="nav-icon">🚚</div>
-                <div class="nav-label">Delivery</div>
+            <button class="nav-item" onclick="filterRentals()">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">Rentals</div>
             </button>
             <button class="nav-item" onclick="goToPage('menu')">
                 <div class="nav-icon">☰</div>
@@ -1537,6 +1485,52 @@
         function filterBy(type) {
             alert(`Filtering by: ${type}`);
             document.getElementById('filterDropdown').classList.remove('show');
+        }
+
+        // Rental filtering function
+        function filterRentals() {
+            // Show rental liability disclaimer
+            const rentalModal = document.createElement('div');
+            rentalModal.className = 'modal-overlay';
+            rentalModal.innerHTML = `
+                <div class="modal-content" style="max-width: 500px;">
+                    <h3 style="color: #00ffff; margin-bottom: 20px;">🏠 Local Rentals</h3>
+                    <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+                        <h4 style="color: #ef4444; margin: 0 0 10px 0;">⚠️ Important Rental Disclaimer</h4>
+                        <p style="color: #e2e8f0; margin: 0; font-size: 14px; line-height: 1.4;">
+                            MarketPace is NOT responsible for lost, damaged, or stolen rental items. 
+                            Members must create their own rental terms and conditions. 
+                            All communication and liability is between renter and item owner.
+                        </p>
+                    </div>
+                    <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+                        <h4 style="color: #3b82f6; margin: 0 0 10px 0;">🚚 Delivery Options</h4>
+                        <p style="color: #e2e8f0; margin: 0; font-size: 14px; line-height: 1.4;">
+                            • Self pickup/dropoff (free)<br>
+                            • Paid delivery service (2 fees: pickup + dropoff)<br>
+                            • Renter can choose to pass full delivery cost to renter
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button onclick="closeRentalModal()" style="background: rgba(107, 114, 128, 0.6); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Cancel</button>
+                        <button onclick="showRentalListings()" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">View Rentals</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(rentalModal);
+        }
+
+        function closeRentalModal() {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+                document.body.removeChild(modal);
+            }
+        }
+
+        function showRentalListings() {
+            closeRentalModal();
+            alert('Filtering community feed to show local rentals only...');
+            // Here you would implement the actual rental filtering logic
         }
 
         function goToProfile() {
@@ -1567,6 +1561,57 @@
         function goToResetLive() {
             document.getElementById('menuDropdown').classList.remove('show');
             window.location.href = '/reset-to-live';
+        }
+
+        // Facebook share functionality
+        function openFacebookShare() {
+            document.getElementById('mainMenuDropdown').classList.remove('show');
+            
+            const facebookModal = document.createElement('div');
+            facebookModal.className = 'modal-overlay';
+            facebookModal.innerHTML = `
+                <div class="modal-content" style="max-width: 500px;">
+                    <h3 style="color: #00ffff; margin-bottom: 20px;">📱 Facebook Share Options</h3>
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <button onclick="shareMarketPaceIntegration()" style="background: linear-gradient(135deg, #1877f2, #42a5f5); color: white; border: none; padding: 15px; border-radius: 10px; cursor: pointer; font-weight: bold;">
+                            📊 Share Community
+                        </button>
+                        <button onclick="shareItemListing()" style="background: linear-gradient(135deg, #1877f2, #42a5f5); color: white; border: none; padding: 15px; border-radius: 10px; cursor: pointer; font-weight: bold;">
+                            🛍️ Share Item
+                        </button>
+                        <button onclick="openIntegrationSetup()" style="background: linear-gradient(135deg, #1877f2, #42a5f5); color: white; border: none; padding: 15px; border-radius: 10px; cursor: pointer; font-weight: bold;">
+                            ⚙️ Setup Integration
+                        </button>
+                    </div>
+                    <button onclick="closeFacebookShareModal()" style="background: rgba(107, 114, 128, 0.6); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 20px;">Close</button>
+                </div>
+            `;
+            document.body.appendChild(facebookModal);
+        }
+
+        function closeFacebookShareModal() {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+                document.body.removeChild(modal);
+            }
+        }
+
+        function shareMarketPaceIntegration() {
+            closeFacebookShareModal();
+            const shareText = "🏪 Join MarketPace - the local community marketplace! Buy, sell, rent items and support local businesses with delivery! 🌟";
+            const shareUrl = window.location.origin;
+            const facebookShareUrl = \`https://www.facebook.com/sharer/sharer.php?u=\${encodeURIComponent(shareUrl)}&quote=\${encodeURIComponent(shareText)}\`;
+            window.open(facebookShareUrl, '_blank', 'width=600,height=400');
+        }
+
+        function shareItemListing() {
+            closeFacebookShareModal();
+            alert('Select an item from your posts to share on Facebook');
+        }
+
+        function openIntegrationSetup() {
+            closeFacebookShareModal();
+            window.location.href = '/facebook-marketplace-integration';
         }
         
         function inviteFriends() {
@@ -1780,8 +1825,8 @@
                     case 'hub':
                         window.location.href = '/the-hub';
                         break;
-                    case 'delivery':
-                        window.location.href = '/delivery';
+                    case 'rental':
+                        filterRentals();
                         break;
                     case 'menu':
                         window.location.href = '/marketpace-menu';
