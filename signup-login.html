@@ -326,6 +326,34 @@
             </form>
         </div>
 
+        <!-- Driver/Admin Login Section -->
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+            <p style="font-size: 14px; color: rgba(255, 255, 255, 0.6); margin-bottom: 15px; text-align: center;">
+                Are you a driver or admin?
+            </p>
+            <button 
+                onclick="showDriverLogin()" 
+                style="
+                    width: 100%; 
+                    background: rgba(29, 11, 61, 0.7); 
+                    backdrop-filter: blur(20px); 
+                    border: 1px solid rgba(0, 255, 255, 0.3); 
+                    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3); 
+                    color: white; 
+                    padding: 12px; 
+                    border-radius: 8px; 
+                    cursor: pointer; 
+                    transition: all 0.3s ease; 
+                    font-size: 14px;
+                    margin-bottom: 20px;
+                "
+                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 0 30px rgba(0, 255, 255, 0.5)'"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 0 20px rgba(0, 255, 255, 0.3)'"
+            >
+                🚗 Driver & Admin Login
+            </button>
+        </div>
+
         <a href="/" class="back-link">← Back to MarketPace</a>
         <a href="/oauth-setup-helper" style="position: absolute; top: 20px; right: 20px; color: rgba(255, 255, 255, 0.8); text-decoration: none; font-size: 14px;">OAuth Setup Help</a>
     </div>
@@ -1146,6 +1174,118 @@
             
             console.log('All functions loaded successfully');
         });
+
+        // Driver/Admin Login functionality
+        function showDriverLogin() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(10px);
+            `;
+            
+            modal.innerHTML = `
+                <div style="
+                    background: linear-gradient(135deg, #1a0b3d, #2d1b69);
+                    border-radius: 20px;
+                    max-width: 400px;
+                    width: 90%;
+                    border: 2px solid rgba(0, 255, 255, 0.3);
+                    padding: 30px;
+                    text-align: center;
+                ">
+                    <h3 style="color: #00ffff; margin-bottom: 20px; font-size: 24px;">🚗 Driver & Admin Login</h3>
+                    <form id="driverLoginForm" style="text-align: left;">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 5px; color: rgba(255, 255, 255, 0.9); font-size: 14px;">Username</label>
+                            <input type="text" id="driverUsername" placeholder="Enter username" required style="
+                                width: 100%;
+                                background: rgba(255, 255, 255, 0.1);
+                                border: 1px solid rgba(255, 255, 255, 0.2);
+                                border-radius: 8px;
+                                padding: 12px 16px;
+                                color: white;
+                                font-size: 16px;
+                                outline: none;
+                            ">
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 5px; color: rgba(255, 255, 255, 0.9); font-size: 14px;">Password</label>
+                            <input type="password" id="driverPassword" placeholder="Enter password" required style="
+                                width: 100%;
+                                background: rgba(255, 255, 255, 0.1);
+                                border: 1px solid rgba(255, 255, 255, 0.2);
+                                border-radius: 8px;
+                                padding: 12px 16px;
+                                color: white;
+                                font-size: 16px;
+                                outline: none;
+                            ">
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 30px;">
+                            <button type="submit" style="
+                                background: linear-gradient(135deg, #10b981, #059669); 
+                                border: none; 
+                                color: white; 
+                                padding: 15px; 
+                                border-radius: 8px; 
+                                cursor: pointer; 
+                                flex: 1;
+                                font-size: 16px;
+                                transition: all 0.3s ease;
+                            ">Login</button>
+                            <button type="button" onclick="closeDriverModal()" style="
+                                background: linear-gradient(135deg, #6b7280, #4b5563); 
+                                border: none; 
+                                color: white; 
+                                padding: 15px; 
+                                border-radius: 8px; 
+                                cursor: pointer; 
+                                flex: 1;
+                                font-size: 16px;
+                                transition: all 0.3s ease;
+                            ">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            document.getElementById('driverLoginForm').onsubmit = function(e) {
+                e.preventDefault();
+                const username = document.getElementById('driverUsername').value;
+                const password = document.getElementById('driverPassword').value;
+                
+                // Check for demo admin credentials
+                if (username === 'admin' && password === 'admin') {
+                    alert('Driver login successful! Redirecting to driver dashboard...');
+                    closeDriverModal();
+                    window.location.href = '/driver-dashboard';
+                } else if (username === 'driver' && password === 'driver') {
+                    alert('Driver login successful! Redirecting to driver dashboard...');
+                    closeDriverModal();
+                    window.location.href = '/driver-dashboard';
+                } else {
+                    alert('Invalid credentials. Demo credentials: admin/admin or driver/driver');
+                }
+            };
+        }
+
+        function closeDriverModal() {
+            const modal = document.querySelector('div[style*="position: fixed"]');
+            if (modal) {
+                document.body.removeChild(modal);
+            }
+        }
     </script>
 </body>
 </html>
