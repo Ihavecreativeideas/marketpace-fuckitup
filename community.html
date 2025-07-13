@@ -1217,7 +1217,59 @@
                 </div>
             </div>
 
-            <!-- Post 2 -->
+            <!-- Post 2 - Rental Item -->
+            <div class="feed-post">
+                <div class="post-header">
+                    <div class="post-author">
+                        <div class="profile-pic">
+                            <span>TM</span>
+                        </div>
+                        <div class="author-info">
+                            <h4>Tom's Tool Rentals</h4>
+                            <p>2 hours ago • Orange Beach, AL</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-content">
+                    <div class="post-text">Power washer for rent - perfect for driveways and decks! Flat daily rate recommended.</div>
+                    <div class="post-image">
+                        <img src="https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?w=400" alt="Power Washer" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
+                    </div>
+                    
+                    <div class="commerce-info">
+                        <div class="price-tag">$45.00/day (Recommended flat rate)</div>
+                        <div class="rental-schedule">
+                            <small style="color: #00ffff;">📅 Pickup: 9am-12pm • Dropoff: 6pm-9pm</small><br>
+                            <small style="color: #ffd700;">⚠️ Custom timing: +$4 route break fee</small>
+                        </div>
+                        <div class="commerce-actions">
+                            <button class="commerce-btn primary" onclick="rentItem('power washer', 45.00)">Rent Now</button>
+                            <button class="commerce-btn" onclick="makeOffer('power washer rental')">Counter Offer</button>
+                            <button class="commerce-btn" onclick="selfPickup('power washer')">Self Pickup</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-interactions">
+                    <div class="interaction-buttons">
+                        <button class="interaction-btn" onclick="likePost(this)">
+                            🤍 Like
+                        </button>
+                        <button class="interaction-btn" onclick="commentPost()">
+                            💬 Comment
+                        </button>
+                        <button class="interaction-btn" onclick="favoritePost(this)">
+                            ☆ Favorite
+                        </button>
+                        <button class="interaction-btn" onclick="sharePost()">
+                            📤 Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Post 3 - Service Post -->
             <div class="feed-post">
                 <div class="post-header">
                     <div class="post-author">
@@ -1277,14 +1329,20 @@
                 
                 <div class="post-content">
                     <div class="post-text">Beach umbrella and chairs set available for weekend rental. Perfect for beach days!</div>
-                    <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400" alt="Beach setup" class="post-image">
+                    <div class="post-image">
+                        <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400" alt="Beach setup" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
+                    </div>
                     
                     <div class="commerce-info">
-                        <div class="price-tag">$25.00/day</div>
+                        <div class="price-tag">$25.00/day (Flat daily rate)</div>
+                        <div class="rental-schedule">
+                            <small style="color: #00ffff;">📅 Pickup: 9am-12pm • Dropoff: 6pm-9pm</small><br>
+                            <small style="color: #ffd700;">⚠️ Custom timing: +$4 route break fee</small>
+                        </div>
                         <div class="commerce-actions">
-                            <button class="commerce-btn primary" onclick="addToCart('Beach Umbrella Set', 25.00, 'Jessica Martinez', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400')">Add to Cart</button>
-                            <button class="commerce-btn" onclick="rentNow('beach chairs')">Rent Now</button>
-                            <button class="commerce-btn" onclick="makeOffer('beach chairs')">Counter Offer</button>
+                            <button class="commerce-btn primary" onclick="rentItem('beach umbrella set', 25.00)">Rent Now</button>
+                            <button class="commerce-btn" onclick="makeOffer('beach chairs rental')">Counter Offer</button>
+                            <button class="commerce-btn" onclick="selfPickup('beach chairs')">Self Pickup</button>
                         </div>
                     </div>
                 </div>
@@ -1533,6 +1591,128 @@
             // Here you would implement the actual rental filtering logic
         }
 
+        // Main rental filtering function called by the rental button
+        function filterRentals() {
+            console.log('Filtering to show rental items only...');
+            
+            // Show rental disclaimer modal
+            const rentalModal = document.createElement('div');
+            rentalModal.className = 'modal-overlay';
+            rentalModal.innerHTML = `
+                <div class="modal-content" style="max-width: 600px;">
+                    <h3 style="color: #ff6b6b; margin-bottom: 20px;">⚠️ Rental Liability Disclaimer</h3>
+                    <div style="background: rgba(255, 107, 107, 0.1); padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255, 107, 107, 0.3);">
+                        <p style="margin: 0 0 15px 0; font-weight: bold; color: #ff6b6b;">IMPORTANT: MarketPace is NOT responsible for:</p>
+                        <ul style="margin: 0; padding-left: 20px;">
+                            <li>Lost, damaged, or stolen rental items</li>
+                            <li>Member-to-member rental agreements</li>
+                            <li>Item condition or functionality</li>
+                            <li>Rental terms and conditions (set by item owner)</li>
+                        </ul>
+                        <p style="margin: 15px 0 0 0; font-style: italic;">All rentals are member-to-member transactions. Create your own rental terms and conditions.</p>
+                    </div>
+                    
+                    <h4 style="color: #00ffff; margin-bottom: 15px;">📋 Rental Pricing Structure</h4>
+                    <div style="background: rgba(0, 255, 255, 0.1); padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(0, 255, 255, 0.3);">
+                        <p><strong>Recommended:</strong> Flat daily rate (more flexible)</p>
+                        <p><strong>Pickup:</strong> Morning routes 9am-12pm</p>
+                        <p><strong>Dropoff:</strong> Evening routes 6pm-9pm</p>
+                        <p><strong>Route Break Fee:</strong> $4 extra for custom timing</p>
+                        <p><strong>Business Subscribers:</strong> $2 fee (3x/week renters)</p>
+                        <p><strong>Delivery Cost:</strong> Renter pays full amount (doubled for pickup + dropoff)</p>
+                        <p><strong>Tips:</strong> Both parties can tip drivers</p>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button onclick="closeRentalModal()" style="background: rgba(107, 114, 128, 0.6); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Cancel</button>
+                        <button onclick="showRentalFeed()" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">View Rentals</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(rentalModal);
+        }
+
+        function showRentalFeed() {
+            closeRentalModal();
+            
+            // Filter feed to show only rental items
+            const feedPosts = document.querySelectorAll('.feed-post');
+            let rentalCount = 0;
+            
+            feedPosts.forEach(post => {
+                const postText = post.textContent.toLowerCase();
+                if (postText.includes('rent') || postText.includes('rental') || postText.includes('for rent')) {
+                    post.style.display = 'block';
+                    rentalCount++;
+                } else {
+                    post.style.display = 'none';
+                }
+            });
+            
+            // Show notification
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 200px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                z-index: 1000;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            `;
+            notification.textContent = `Showing ${rentalCount} rental items in your area`;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    document.body.removeChild(notification);
+                }
+            }, 3000);
+        }
+
+        // Rental action functions
+        function rentItem(itemName, dailyPrice) {
+            const rentalModal = document.createElement('div');
+            rentalModal.className = 'modal-overlay';
+            rentalModal.innerHTML = `
+                <div class="modal-content" style="max-width: 600px;">
+                    <h3 style="color: #00ffff; margin-bottom: 20px;">🏠 Rent ${itemName}</h3>
+                    
+                    <div style="background: rgba(0, 255, 255, 0.1); padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(0, 255, 255, 0.3);">
+                        <h4 style="color: #00ffff; margin-bottom: 15px;">📋 Rental Details</h4>
+                        <p><strong>Daily Rate:</strong> $${dailyPrice.toFixed(2)} (Recommended flat rate)</p>
+                        <p><strong>Pickup Schedule:</strong> Morning routes 9am-12pm</p>
+                        <p><strong>Dropoff Schedule:</strong> Evening routes 6pm-9pm</p>
+                        <p><strong>Custom Timing:</strong> +$4 route break fee</p>
+                        <p><strong>Business Subscribers:</strong> $2 fee (for 3x/week renters)</p>
+                    </div>
+                    
+                    <div style="background: rgba(255, 107, 107, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255, 107, 107, 0.3);">
+                        <p style="margin: 0; font-weight: bold; color: #ff6b6b;">Delivery Cost: Renter pays full amount (doubled for pickup + dropoff)</p>
+                        <p style="margin: 5px 0 0 0; font-size: 14px;">Both parties can tip drivers. You create your own rental terms.</p>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button onclick="closeRentalModal()" style="background: rgba(107, 114, 128, 0.6); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Cancel</button>
+                        <button onclick="proceedWithRental('${itemName}', ${dailyPrice})" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Proceed to Rent</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(rentalModal);
+        }
+
+        function selfPickup(itemName) {
+            alert(`Self pickup selected for ${itemName}. No delivery fees. Contact item owner to arrange pickup/dropoff times directly.`);
+        }
+
+        function proceedWithRental(itemName, dailyPrice) {
+            closeRentalModal();
+            alert(`Rental request sent for ${itemName} at $${dailyPrice}/day. Item owner will be notified. Delivery cost will be calculated based on your location.`);
+        }
+
         function goToProfile() {
             window.location.href = '/profile';
             document.getElementById('menuDropdown').classList.remove('show');
@@ -1600,7 +1780,7 @@
             closeFacebookShareModal();
             const shareText = "🏪 Join MarketPace - the local community marketplace! Buy, sell, rent items and support local businesses with delivery! 🌟";
             const shareUrl = window.location.origin;
-            const facebookShareUrl = \`https://www.facebook.com/sharer/sharer.php?u=\${encodeURIComponent(shareUrl)}&quote=\${encodeURIComponent(shareText)}\`;
+            const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
             window.open(facebookShareUrl, '_blank', 'width=600,height=400');
         }
 
