@@ -211,18 +211,19 @@ MarketPace is a React Native mobile application that prioritizes community empow
 
 ## Recent Changes
 
-✓ **INTERACTIVE MAPS & CONDITION VERIFICATION SYSTEM WITH DRIVER PERFORMANCE TRACKING** (January 13, 2025)
-✓ Fixed rental and profile button functionality with proper navigation and modal systems
-✓ Implemented comprehensive interactive maps showing nearby rental items, sales, services, and shops
-✓ Added privacy-conscious location display: general area for rentals/sales, exact addresses for services/shops
+✓ **ENHANCED INTERACTIVE MAPS & CLICKABLE LOGO PROFILE SETTINGS** (January 13, 2025)
+✓ Made logo clickable to open profile settings modal with demo mode alert and quick access options
+✓ Updated profile button navigation to go to dedicated profile page instead of dropdown menu
+✓ Implemented comprehensive interactive map system with mileage display and clickable item details
+✓ Added radius control (5, 10, 25, 50 miles) and town selection for launched MarketPace areas
 ✓ Created condition verification system with photo upload, 1-5 star ratings, and detailed notes
-✓ Built driver performance rating and review system with stats, ratings, and delivery history
-✓ Added map access buttons in header: "🏠 Map" for rentals and "🚚 Drivers" for performance
-✓ Enhanced rental filtering with notification system directing users to interactive maps
-✓ Integrated condition verification buttons on all rental and sale items throughout platform
-✓ Created comprehensive modal system for item details, verification, and driver performance
-✓ Added real-time marker system with color-coded categories and clickable interactions
-✓ Implemented transparent condition verification process with owner confirmation workflow
+✓ Built transparent verification process where owner confirms before publishing
+✓ Enhanced map with privacy-conscious location display: general areas for rentals/sales, exact addresses for services/shops
+✓ Added comprehensive item filtering by category: rentals, sales, services, shops, and all
+✓ Integrated "Rentals" section into MarketPace menu with featured badge highlighting rental marketplace
+✓ Created comprehensive modal system for item details, condition verification, and seller contact
+✓ Added futuristic map icon in header matching logo theme with three-button layout design
+✓ Implemented real-time notifications for map radius changes and town filtering updates
 
 ✓ **RENTAL-FOCUSED MARKETPLACE WITH LIABILITY DISCLAIMERS AND FILTER BAR REMOVAL** (January 13, 2025)
 ✓ Completely removed filter bar system from community page for cleaner, simpler interface
