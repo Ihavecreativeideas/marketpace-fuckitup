@@ -2069,6 +2069,7 @@ const CommunityFeedScreen = ({ navigation }: any) => (
     {/* Bottom padding for floating navigation */}
     <View style={{ height: 100 }} />
   </ScrollView>
+  </View>
 );
 
 function MainTabs() {
