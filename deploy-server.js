@@ -4,8 +4,8 @@ const path = require('path');
 
 const app = express();
 
-// Use environment PORT or default to 3000
-let port = process.env.PORT || 3000;
+// Use environment PORT or default to 5000 (Replit's preference)
+let port = process.env.PORT || 5000;
 
 console.log(`🔍 Attempting to start on port: ${port}`);
 console.log(`🌐 Environment PORT: ${process.env.PORT || 'not set'}`);
@@ -44,6 +44,55 @@ app.get('/interactive-map', (req, res) => {
 
 app.get('/signup-login', (req, res) => {
   res.sendFile(path.join(__dirname, 'signup-login.html'));
+});
+
+// Add all missing navigation routes
+app.get('/shops', (req, res) => {
+  res.sendFile(path.join(__dirname, 'shops.html'));
+});
+
+app.get('/services', (req, res) => {
+  res.sendFile(path.join(__dirname, 'services.html'));
+});
+
+app.get('/the-hub', (req, res) => {
+  res.sendFile(path.join(__dirname, 'the-hub.html'));
+});
+
+app.get('/menu', (req, res) => {
+  res.sendFile(path.join(__dirname, 'marketpace-menu.html'));
+});
+
+app.get('/profile', (req, res) => {
+  res.sendFile(path.join(__dirname, 'profile.html'));
+});
+
+app.get('/cart', (req, res) => {
+  res.sendFile(path.join(__dirname, 'cart.html'));
+});
+
+app.get('/settings', (req, res) => {
+  res.sendFile(path.join(__dirname, 'settings.html'));
+});
+
+app.get('/delivery', (req, res) => {
+  res.sendFile(path.join(__dirname, 'delivery.html'));
+});
+
+app.get('/deliveries', (req, res) => {
+  res.sendFile(path.join(__dirname, 'deliveries.html'));
+});
+
+// Catch-all for other HTML pages
+app.get('/:page', (req, res) => {
+  const pageName = req.params.page;
+  const filePath = path.join(__dirname, pageName + '.html');
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      // If file doesn't exist, redirect to home
+      res.redirect('/');
+    }
+  });
 });
 
 app.listen(port, '0.0.0.0', () => {
