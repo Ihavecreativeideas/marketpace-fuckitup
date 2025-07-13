@@ -213,22 +213,53 @@
             transform: translateY(-2px);
         }
 
-        /* Ultrasonic Map Display */
+        /* Sonar Radar Display */
         .ultrasonic-map {
             width: 100%;
             height: 100%;
             position: relative;
             background: 
-                radial-gradient(circle at 30% 20%, rgba(0, 255, 255, 0.1) 1px, transparent 1px),
-                radial-gradient(circle at 70% 80%, rgba(138, 43, 226, 0.1) 1px, transparent 1px),
-                linear-gradient(45deg, transparent 24%, rgba(0, 255, 255, 0.05) 25%, rgba(0, 255, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 255, 0.05) 75%, rgba(0, 255, 255, 0.05) 76%, transparent 77%);
-            background-size: 40px 40px, 60px 60px, 30px 30px;
-            animation: mapScan 6s linear infinite;
+                radial-gradient(circle at 50% 50%, rgba(0, 255, 255, 0.15) 2px, transparent 2px),
+                radial-gradient(circle at 50% 50%, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 80px 80px, 40px 40px;
+            animation: sonarPulse 8s linear infinite;
         }
 
-        @keyframes mapScan {
-            0% { background-position: 0% 0%, 0% 0%, 0% 0%; }
-            100% { background-position: 100% 100%, -100% -100%, 50% 50%; }
+        @keyframes sonarPulse {
+            0% { background-position: 0% 0%, 0% 0%; }
+            100% { background-position: 100% 100%, -100% -100%; }
+        }
+
+        /* Sonar Radar Rings */
+        .sonar-radar {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            pointer-events: none;
+        }
+
+        .sonar-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 2px solid rgba(0, 255, 255, 0.4);
+            animation: sonarRing 4s ease-in-out infinite;
+        }
+
+        .sonar-ring:nth-child(1) { width: 150px; height: 150px; animation-delay: 0s; }
+        .sonar-ring:nth-child(2) { width: 300px; height: 300px; animation-delay: 0.8s; }
+        .sonar-ring:nth-child(3) { width: 450px; height: 450px; animation-delay: 1.6s; }
+        .sonar-ring:nth-child(4) { width: 600px; height: 600px; animation-delay: 2.4s; }
+
+        @keyframes sonarRing {
+            0% { opacity: 0.8; transform: translate(-50%, -50%) scale(0.3); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
         }
 
         /* Radar Sweep Effect */
@@ -236,29 +267,18 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 300px;
-            height: 300px;
-            margin: -150px 0 0 -150px;
-            border: 2px solid rgba(0, 255, 255, 0.3);
+            width: 600px;
+            height: 600px;
+            margin: -300px 0 0 -300px;
             border-radius: 50%;
-            animation: radarSweep 4s linear infinite;
-        }
-
-        .radar-sweep::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: 50%;
-            width: 2px;
-            height: 150px;
-            background: linear-gradient(to bottom, rgba(0, 255, 255, 0.8), transparent);
-            transform-origin: bottom;
-            animation: sweepRotate 4s linear infinite;
-        }
-
-        @keyframes radarSweep {
-            0% { transform: scale(0.5); opacity: 1; }
-            100% { transform: scale(2); opacity: 0; }
+            background: conic-gradient(
+                from 0deg,
+                transparent 60deg,
+                rgba(0, 255, 255, 0.6) 90deg,
+                rgba(0, 255, 255, 0.2) 120deg,
+                transparent 180deg
+            );
+            animation: sweepRotate 6s linear infinite;
         }
 
         @keyframes sweepRotate {
@@ -266,11 +286,115 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* Distance Grid Lines */
+        .distance-grid {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            pointer-events: none;
+        }
+
+        .distance-grid::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0, 255, 255, 0.3), transparent 50%, rgba(0, 255, 255, 0.3));
+            transform: translateX(-50%);
+        }
+
+        .distance-grid::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, rgba(0, 255, 255, 0.3), transparent 50%, rgba(0, 255, 255, 0.3));
+            transform: translateY(-50%);
+        }
+
+        /* Category Distance Indicators */
+        .category-indicator {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            min-width: 80px;
+            border: 2px solid;
+            animation: categoryPulse 3s ease-in-out infinite;
+        }
+
+        .category-indicator.rental {
+            color: #00ffff;
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+        }
+
+        .category-indicator.sale {
+            color: #10b981;
+            border-color: #10b981;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+        }
+
+        .category-indicator.service {
+            color: #8b5cf6;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+        }
+
+        .category-indicator.shop {
+            color: #f59e0b;
+            border-color: #f59e0b;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
+        }
+
+        .category-indicator.events {
+            color: #ef4444;
+            border-color: #ef4444;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+        }
+
+        @keyframes categoryPulse {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+
+        .category-indicator:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px currentColor;
+        }
+
+        .category-indicator .distance {
+            display: block;
+            font-size: 16px;
+            font-weight: 900;
+            margin-bottom: 2px;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        .category-indicator .count {
+            font-size: 10px;
+            opacity: 0.8;
+        }
+
         /* Item Markers */
         .item-marker {
             position: absolute;
-            width: 20px;
-            height: 20px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -300,6 +424,12 @@
             background: radial-gradient(circle, #f59e0b 30%, rgba(245, 158, 11, 0.3) 100%);
             border: 2px solid #f59e0b;
             box-shadow: 0 0 15px rgba(245, 158, 11, 0.8);
+        }
+
+        .item-marker.events {
+            background: radial-gradient(circle, #ef4444 30%, rgba(239, 68, 68, 0.3) 100%);
+            border: 2px solid #ef4444;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
         }
 
         @keyframes markerPulse {
@@ -438,6 +568,50 @@
         @keyframes spin {
             0% { transform: translate(-50%, -50%) rotate(0deg); }
             100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Map Container */
+        .map-container {
+            position: fixed;
+            top: 280px; /* Below controls panel */
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.9), rgba(10, 10, 10, 0.95));
+            z-index: 10;
+        }
+
+        /* Sonar Distance Labels */
+        .distance-label {
+            position: absolute;
+            color: rgba(0, 255, 255, 0.8);
+            font-size: 12px;
+            font-weight: bold;
+            pointer-events: none;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .controls-panel {
+                left: 10px;
+                right: 10px;
+                padding: 15px;
+            }
+            
+            .map-container {
+                top: 300px;
+            }
+            
+            .category-indicator {
+                min-width: 70px;
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+            
+            .category-indicator .distance {
+                font-size: 14px;
+            }
         }
     </style>
 </head>
@@ -599,16 +773,27 @@
 
     <!-- Map Container -->
     <div class="map-container">
-        <!-- Ultrasonic Map Display -->
+        <!-- Sonar Radar Map Display -->
         <div class="ultrasonic-map" id="ultrasonicMap">
             <!-- Loading Spinner -->
             <div class="loading-spinner" id="loadingSpinner"></div>
             
+            <!-- Sonar Radar Rings -->
+            <div class="sonar-radar" id="sonarRadar">
+                <div class="sonar-ring"></div>
+                <div class="sonar-ring"></div>
+                <div class="sonar-ring"></div>
+                <div class="sonar-ring"></div>
+            </div>
+            
+            <!-- Distance Grid Lines -->
+            <div class="distance-grid"></div>
+            
             <!-- Radar Sweep -->
             <div class="radar-sweep"></div>
             
-            <!-- Distance Ring (will be sized based on radius) -->
-            <div class="distance-ring" id="distanceRing"></div>
+            <!-- Category Distance Indicators -->
+            <div id="categoryIndicators"></div>
         </div>
     </div>
 
@@ -619,6 +804,7 @@
 
         // Sample map data with privacy-conscious locations
         const sampleMapData = [
+            // Rentals
             {
                 id: 1,
                 type: 'rental',
@@ -628,36 +814,6 @@
                 distance: 2.3,
                 area: 'Orange Beach Area',
                 condition: '4.5/5 stars'
-            },
-            {
-                id: 2,
-                type: 'sale',
-                title: 'Mountain Bike - Trek',
-                description: 'Excellent condition mountain bike, great for trails.',
-                price: '$350',
-                distance: 4.7,
-                area: 'Gulf Shores Area',
-                condition: '4.8/5 stars'
-            },
-            {
-                id: 3,
-                type: 'service',
-                title: 'House Cleaning Service',
-                description: 'Professional cleaning service for homes and apartments.',
-                price: '$80-120',
-                distance: 1.2,
-                area: 'Foley Area',
-                condition: '5.0/5 stars'
-            },
-            {
-                id: 4,
-                type: 'shop',
-                title: 'Beach Gear Rental Shop',
-                description: 'Umbrellas, chairs, boogie boards, and more beach essentials.',
-                price: 'Various',
-                distance: 3.8,
-                area: 'Mobile Bay Area',
-                condition: '4.6/5 stars'
             },
             {
                 id: 5,
@@ -670,6 +826,27 @@
                 condition: '4.2/5 stars'
             },
             {
+                id: 7,
+                type: 'rental',
+                title: 'Beach Umbrella & Chairs',
+                description: 'Complete beach setup for perfect day at the shore.',
+                price: '$20/day',
+                distance: 1.8,
+                area: 'Gulf Shores Area',
+                condition: '4.7/5 stars'
+            },
+            // Sales
+            {
+                id: 2,
+                type: 'sale',
+                title: 'Mountain Bike - Trek',
+                description: 'Excellent condition mountain bike, great for trails.',
+                price: '$350',
+                distance: 4.7,
+                area: 'Gulf Shores Area',
+                condition: '4.8/5 stars'
+            },
+            {
                 id: 6,
                 type: 'sale',
                 title: 'Kayak - Single Person',
@@ -678,6 +855,69 @@
                 distance: 8.4,
                 area: 'Daphne Area',
                 condition: '4.4/5 stars'
+            },
+            // Services
+            {
+                id: 3,
+                type: 'service',
+                title: 'House Cleaning Service',
+                description: 'Professional cleaning service for homes and apartments.',
+                price: '$80-120',
+                distance: 1.2,
+                area: 'Foley Area',
+                condition: '5.0/5 stars'
+            },
+            {
+                id: 8,
+                type: 'service',
+                title: 'Lawn Care & Landscaping',
+                description: 'Complete lawn maintenance and landscaping services.',
+                price: '$50-100',
+                distance: 3.5,
+                area: 'Mobile Area',
+                condition: '4.6/5 stars'
+            },
+            // Shops
+            {
+                id: 4,
+                type: 'shop',
+                title: 'Beach Gear Rental Shop',
+                description: 'Umbrellas, chairs, boogie boards, and more beach essentials.',
+                price: 'Various',
+                distance: 3.8,
+                area: 'Mobile Bay Area',
+                condition: '4.6/5 stars'
+            },
+            {
+                id: 9,
+                type: 'shop',
+                title: 'Local Artisan Market',
+                description: 'Handmade crafts, local art, and unique Gulf Coast items.',
+                price: 'Various',
+                distance: 2.9,
+                area: 'Orange Beach Area',
+                condition: '4.8/5 stars'
+            },
+            // Events
+            {
+                id: 10,
+                type: 'events',
+                title: 'Live Music at The Wharf',
+                description: 'Local band performing classic rock and blues.',
+                price: 'Free',
+                distance: 4.2,
+                area: 'Orange Beach Area',
+                condition: 'Tonight 7:00 PM'
+            },
+            {
+                id: 11,
+                type: 'events',
+                title: 'Beach Volleyball Tournament',
+                description: 'Community tournament open to all skill levels.',
+                price: '$10 entry',
+                distance: 1.5,
+                area: 'Gulf Shores Area',
+                condition: 'Saturday 2:00 PM'
             }
         ];
 
@@ -687,6 +927,7 @@
             setTimeout(() => {
                 document.getElementById('loadingSpinner').style.display = 'none';
                 loadMapItems();
+                addDistanceLabels();
             }, 2000);
         }
 
@@ -710,7 +951,7 @@
         function loadMapItems() {
             const mapContainer = document.getElementById('ultrasonicMap');
             
-            // Clear existing markers
+            // Clear existing markers and indicators
             const existingMarkers = mapContainer.querySelectorAll('.item-marker');
             existingMarkers.forEach(marker => marker.remove());
             
@@ -724,13 +965,127 @@
             // Update item count
             document.getElementById('itemCount').textContent = mapItems.length;
             
-            // Add markers to map
+            // Create category indicators and markers
+            createCategoryIndicators();
+            
+            // Add individual markers to map
             mapItems.forEach((item, index) => {
                 createItemMarker(item, index);
             });
+        }
+
+        // Create category distance indicators
+        function createCategoryIndicators() {
+            const indicatorsContainer = document.getElementById('categoryIndicators');
+            indicatorsContainer.innerHTML = '';
             
-            // Update distance ring
-            updateDistanceRing();
+            // Group items by category and calculate average distance
+            const categoryData = {};
+            const categories = ['rental', 'sale', 'service', 'shop', 'events'];
+            
+            categories.forEach(category => {
+                const categoryItems = mapItems.filter(item => item.type === category);
+                if (categoryItems.length > 0) {
+                    const avgDistance = categoryItems.reduce((sum, item) => sum + item.distance, 0) / categoryItems.length;
+                    categoryData[category] = {
+                        count: categoryItems.length,
+                        avgDistance: avgDistance.toFixed(1),
+                        items: categoryItems
+                    };
+                }
+            });
+            
+            // Position indicators around the radar
+            const positions = [
+                { x: '75%', y: '25%' }, // Top right
+                { x: '25%', y: '25%' }, // Top left
+                { x: '85%', y: '50%' }, // Middle right
+                { x: '15%', y: '50%' }, // Middle left
+                { x: '75%', y: '75%' }, // Bottom right
+                { x: '25%', y: '75%' }  // Bottom left
+            ];
+            
+            let positionIndex = 0;
+            
+            Object.keys(categoryData).forEach(category => {
+                const data = categoryData[category];
+                const position = positions[positionIndex % positions.length];
+                
+                const indicator = document.createElement('div');
+                indicator.className = `category-indicator ${category}`;
+                indicator.style.left = position.x;
+                indicator.style.top = position.y;
+                indicator.style.transform = 'translate(-50%, -50%)';
+                
+                indicator.innerHTML = `
+                    <div class="distance">${data.avgDistance} mi</div>
+                    <div>${category.charAt(0).toUpperCase() + category.slice(1)}s</div>
+                    <div class="count">${data.count} item${data.count > 1 ? 's' : ''}</div>
+                `;
+                
+                indicator.onclick = () => showCategoryItems(category, data.items);
+                indicatorsContainer.appendChild(indicator);
+                positionIndex++;
+            });
+        }
+
+        // Show category items modal
+        function showCategoryItems(category, items) {
+            const modal = document.createElement('div');
+            modal.className = 'item-modal';
+            modal.onclick = (e) => {
+                if (e.target === modal) modal.remove();
+            };
+            
+            const categoryColor = {
+                'rental': '#00ffff',
+                'sale': '#10b981',
+                'service': '#8b5cf6',
+                'shop': '#f59e0b',
+                'events': '#ef4444'
+            };
+            
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <button class="modal-close" onclick="this.parentElement.parentElement.remove()">×</button>
+                    <h2 class="item-title" style="color: ${categoryColor[category]}; display: flex; align-items: center; gap: 10px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="display: inline-block;">
+                            <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(0, 255, 255, 0.2)"/>
+                            <circle cx="12" cy="12" r="6" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        ${category.charAt(0).toUpperCase() + category.slice(1)}s Near You
+                    </h2>
+                    <div class="item-details">
+                        <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 20px;">
+                            Found ${items.length} ${category}${items.length > 1 ? 's' : ''} within ${currentRadius} miles
+                        </p>
+                        <div style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">
+                            ${items.map(item => `
+                                <div style="
+                                    background: rgba(0, 0, 0, 0.3);
+                                    border: 1px solid ${categoryColor[category]};
+                                    border-radius: 10px;
+                                    padding: 15px;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showItemDetails(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                        <h3 style="color: ${categoryColor[category]}; margin: 0; font-size: 16px;">${item.title}</h3>
+                                        <span style="color: #00ffff; font-weight: bold; font-size: 14px;">${item.distance} mi</span>
+                                    </div>
+                                    <p style="color: rgba(255, 255, 255, 0.8); margin: 0 0 8px 0; font-size: 14px;">${item.description}</p>
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="color: #10b981; font-weight: bold;">${item.price}</span>
+                                        <span style="color: rgba(255, 255, 255, 0.6); font-size: 12px;">${item.area}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
         }
 
         // Create item marker on map
@@ -778,12 +1133,31 @@
             document.getElementById('ultrasonicMap').appendChild(marker);
         }
 
-        // Update distance ring based on radius
-        function updateDistanceRing() {
-            const ring = document.getElementById('distanceRing');
-            const size = Math.min(currentRadius * 15, 400); // Scale ring size
-            ring.style.width = size + 'px';
-            ring.style.height = size + 'px';
+        // Add distance labels to sonar rings
+        function addDistanceLabels() {
+            const mapContainer = document.getElementById('ultrasonicMap');
+            
+            // Remove existing distance labels
+            const existingLabels = mapContainer.querySelectorAll('.distance-label');
+            existingLabels.forEach(label => label.remove());
+            
+            // Add distance labels to each ring
+            const ringDistances = [
+                { radius: 150, distance: Math.round(currentRadius * 0.25) },
+                { radius: 300, distance: Math.round(currentRadius * 0.5) },
+                { radius: 450, distance: Math.round(currentRadius * 0.75) },
+                { radius: 600, distance: currentRadius }
+            ];
+            
+            ringDistances.forEach(ring => {
+                const label = document.createElement('div');
+                label.className = 'distance-label';
+                label.style.left = '50%';
+                label.style.top = `calc(50% - ${ring.radius/2}px)`;
+                label.style.transform = 'translateX(-50%)';
+                label.textContent = `${ring.distance} mi`;
+                mapContainer.appendChild(label);
+            });
         }
 
         // Set search radius
@@ -799,6 +1173,7 @@
             });
             
             loadMapItems();
+            addDistanceLabels();
             showNotification(`Search radius set to ${radius} miles`);
         }
 
@@ -834,7 +1209,7 @@
                         <p><strong>General Location:</strong> ${item.area}</p>
                     </div>
                     <div class="distance-info">
-                        <strong>📍 Distance: ${item.distance} miles away</strong><br>
+                        <strong><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(239, 68, 68, 0.2)"/><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/></svg> Distance: ${item.distance} miles away</strong><br>
                         <small>Exact address shown after contact verification</small>
                     </div>
                     <div class="action-buttons">
