@@ -73,10 +73,11 @@
 
         .header-content {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
+            justify-content: center;
             max-width: 600px;
             margin: 0 auto;
-            gap: 16px;
+            gap: 20px;
         }
 
         .logo {
@@ -566,21 +567,47 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        /* Search Glass Button */
-        .search-glass-btn {
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.8);
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 16px;
+        /* Filter Bar */
+        .filter-bar {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 12px;
+            margin: 0 16px 20px 16px;
         }
 
-        .search-glass-btn:hover {
+        .filter-container {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .filter-item {
             background: rgba(255, 255, 255, 0.1);
-            color: #00ffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .filter-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-color: rgba(0, 255, 255, 0.4);
+        }
+
+        .filter-item.active {
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
+            color: white;
+            border-color: rgba(0, 255, 255, 0.6);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
         }
 
         /* Feed Posts */
@@ -1164,9 +1191,7 @@
                 <button class="action-btn" onclick="openAdvancedPostModal('service')">
                     🔧 Service
                 </button>
-                <button class="search-glass-btn" onclick="toggleSearchPopup()" title="Search MarketPace">
-                    🔍
-                </button>
+
                 <button class="action-btn" onclick="openAdvancedPostModal('event')">
                     🎉 Event
                 </button>
@@ -1176,6 +1201,19 @@
                 <button class="action-btn" onclick="openAdvancedPostModal('iso')">
                     🔍 ISO
                 </button>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="filter-container">
+                <button class="filter-item active" onclick="filterPosts('all')" data-filter="all">All</button>
+                <button class="filter-item" onclick="filterPosts('sale')" data-filter="sale">For Sale</button>
+                <button class="filter-item" onclick="filterPosts('rent')" data-filter="rent">For Rent</button>
+                <button class="filter-item" onclick="filterPosts('service')" data-filter="service">Services</button>
+                <button class="filter-item" onclick="filterPosts('event')" data-filter="event">Events</button>
+                <button class="filter-item" onclick="filterPosts('job')" data-filter="job">Jobs</button>
+                <button class="filter-item" onclick="filterPosts('iso')" data-filter="iso">ISO</button>
             </div>
         </div>
 
@@ -2599,6 +2637,30 @@
                 showNotification('Logout completed', 'info');
                 window.location.href = '/';
             }
+        }
+
+        // Filter Posts Function
+        function filterPosts(category) {
+            // Remove active class from all filter items
+            document.querySelectorAll('.filter-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to clicked filter
+            event.target.classList.add('active');
+            
+            console.log(`Filtering posts by: ${category}`);
+            
+            // Filter feed posts based on category
+            const feedPosts = document.querySelectorAll('.feed-post');
+            feedPosts.forEach(post => {
+                if (category === 'all') {
+                    post.style.display = 'block';
+                } else {
+                    // For now, show all posts (in real implementation, check data attributes)
+                    post.style.display = 'block';
+                }
+            });
         }
     </script>
 </body>
