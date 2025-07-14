@@ -84,6 +84,28 @@
             background: radial-gradient(circle, rgba(59, 130, 246, 0.8) 0%, rgba(59, 130, 246, 0.2) 70%, transparent 100%);
             border-radius: 50%;
             animation: float 8s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0) translateX(0) rotate(0deg);
+                opacity: 0.7;
+            }
+            25% { 
+                transform: translateY(-20px) translateX(10px) rotate(90deg);
+                opacity: 1;
+            }
+            50% { 
+                transform: translateY(-40px) translateX(-10px) rotate(180deg);
+                opacity: 0.8;
+            }
+            75% { 
+                transform: translateY(-20px) translateX(15px) rotate(270deg);
+                opacity: 1;
+            }
+        }
+
+        .header {
             backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(0, 255, 255, 0.2);
             padding: 12px 16px;
@@ -337,36 +359,61 @@
             z-index: 1000;
         }
 
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 8px 0;
+            z-index: 100;
+        }
+
         .nav-container {
             display: flex;
+            justify-content: space-around;
+            align-items: center;
             max-width: 600px;
             margin: 0 auto;
+            padding: 0 8px;
         }
 
         .nav-item {
-            flex: 1;
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.6);
-            padding: 8px 4px;
-            cursor: pointer;
-            transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            min-width: 60px;
+        }
+
+        .nav-item:hover {
+            color: #00ffff;
+            background: rgba(0, 255, 255, 0.1);
         }
 
         .nav-item.active {
-            color: #ffd93d;
+            color: #00ffff;
+            background: rgba(0, 255, 255, 0.2);
         }
 
         .nav-icon {
-            font-size: 18px;
+            width: 24px;
+            height: 24px;
             margin-bottom: 4px;
         }
 
         .nav-label {
-            font-size: 10px;
+            font-size: 12px;
+            font-weight: 500;
         }
 
         /* Release Calendar */
@@ -403,28 +450,32 @@
         }
 
         .calendar-day.today {
+            background: rgba(255, 217, 61, 0.3);
+            color: #ffd93d;
             font-weight: bold;
-            for (let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 6 + 's';
-                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
-                
-                // Space traveler particle colors
-                const colors = [
-                    'radial-gradient(circle, #64c8ff 0%, #4fb3ff 50%, transparent 100%)',
-                    'radial-gradient(circle, #85d4ff 0%, #64c8ff 50%, transparent 100%)',
-                    'radial-gradient(circle, #a3e0ff 0%, #85d4ff 50%, transparent 100%)'
-                ];
-                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-                particle.style.boxShadow = '0 0 ' + (Math.random() * 8 + 4) + 'px rgba(100, 200, 255, 0.6)';
-                
-                container.appendChild(particle);
-            }
         }
 
+        .calendar-day.has-release {
+            background: rgba(255, 107, 107, 0.3);
+            color: #ff6b6b;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+
+    <script>
         // Tab switching
         function switchTab(tabName) {
             // Remove active class from all tabs and sections
@@ -651,6 +702,46 @@
             alert(`Viewing releases for January ${day}th`);
         }
 
+        // Initialize floating particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            container.innerHTML = ''; // Clear existing particles
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Navigation functions
+        function goToPage(page) {
+            switch(page) {
+                case 'community':
+                    window.location.href = '/community';
+                    break;
+                case 'shops':
+                    window.location.href = '/shops';
+                    break;
+                case 'services':
+                    window.location.href = '/services';
+                    break;
+                case 'the-hub':
+                    // Already on The Hub
+                    break;
+                case 'delivery':
+                    window.location.href = '/delivery';
+                    break;
+            }
+        }
+
+        function openFullMenu() {
+            window.location.href = '/marketpace-menu';
+        }
+
         // Initialize particles when page loads
         createParticles();
     </script>
@@ -722,88 +813,6 @@
         </div>
     </div>
 
-    <style>
-        /* Bottom Navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(0, 255, 255, 0.2);
-            padding: 8px 0;
-            z-index: 100;
-        }
 
-        .nav-container {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 0 8px;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.6);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            padding: 8px 12px;
-            border-radius: 8px;
-            min-width: 60px;
-        }
-
-        .nav-item:hover {
-            color: #00ffff;
-            background: rgba(0, 255, 255, 0.1);
-        }
-
-        .nav-item.active {
-            color: #00ffff;
-            background: rgba(0, 255, 255, 0.2);
-        }
-
-        .nav-icon {
-            width: 24px;
-            height: 24px;
-            margin-bottom: 4px;
-        }
-
-        .nav-label {
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        /* Navigation functions */
-        function goToPage(page) {
-            switch(page) {
-                case 'community':
-                    window.location.href = '/community';
-                    break;
-                case 'shops':
-                    window.location.href = '/shops';
-                    break;
-                case 'services':
-                    window.location.href = '/services';
-                    break;
-                case 'the-hub':
-                    // Already on The Hub
-                    break;
-                case 'delivery':
-                    window.location.href = '/delivery';
-                    break;
-            }
-        }
-
-        function openFullMenu() {
-            window.location.href = '/marketpace-menu';
-        }
-    </style>
 </body>
 </html>
