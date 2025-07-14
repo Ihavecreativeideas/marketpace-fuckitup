@@ -96,6 +96,18 @@ app.get('/rental-delivery', (req, res) => {
   res.sendFile(path.join(__dirname, 'rental-delivery.html'));
 });
 
+app.get('/rental-booking', (req, res) => {
+  res.sendFile(path.join(__dirname, 'rental-booking.html'));
+});
+
+app.get('/platform-integrations', (req, res) => {
+  res.sendFile(path.join(__dirname, 'platform-integrations.html'));
+});
+
+app.get('/marketpace-menu', (req, res) => {
+  res.sendFile(path.join(__dirname, 'marketpace-menu.html'));
+});
+
 // Catch-all for other HTML pages
 app.get('/:page', (req, res) => {
   const pageName = req.params.page;
