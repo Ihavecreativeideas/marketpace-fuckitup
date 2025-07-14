@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPace Interactive Map</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a, #1a0b3d, #2d1b69);
+            color: #00ffff;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Ultrasonic Grid Background */
+        .ultrasonic-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.3;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            animation: gridPulse 3s ease-in-out infinite alternate;
+            z-index: 1;
+        }
+
+        @keyframes gridPulse {
+            0% { opacity: 0.2; }
+            100% { opacity: 0.5; }
+        }
+
+        /* Floating Energy Orbs */
+        .energy-orbs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.8) 0%, rgba(138, 43, 226, 0.4) 50%, transparent 100%);
+            animation: orbFloat 8s ease-in-out infinite;
+        }
+
+        @keyframes orbFloat {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+                opacity: 0.6;
+            }
+            50% {
+                transform: translate(30px, -40px) scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        /* Header */
+        .map-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+            padding: 15px 20px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .map-title {
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .close-btn {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid rgba(239, 68, 68, 0.5);
+            color: #ef4444;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .close-btn:hover {
+            background: rgba(239, 68, 68, 0.4);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Collapsible Controls Panel - Tiny floating widget */
+        .controls-panel {
+            position: fixed;
+            top: 85px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            border-radius: 8px;
+            padding: 6px;
+            z-index: 900;
+            box-shadow: 0 4px 20px rgba(0, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            max-width: 300px;
+        }
+
+        .controls-panel.collapsed {
+            padding: 4px 8px;
+        }
+
+        .controls-toggle {
+            background: rgba(0, 255, 255, 0.3);
+            border: 1px solid rgba(0, 255, 255, 0.5);
+            color: #00ffff;
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: bold;
+            margin-bottom: 6px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .controls-content {
+            transition: all 0.3s ease;
+        }
+
+        .controls-panel.collapsed .controls-content {
+            display: none;
+        }
+
+        /* Map Container - FULL SCREEN */
+        .map-container {
+            position: fixed;
+            top: 80px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(15px);
+            border: none;
+            border-radius: 0;
+            overflow: hidden;
+            z-index: 10;
+        }
+
+        .control-group {
+            margin-bottom: 8px;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-label {
+            font-size: 10px;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .radius-controls {
+            display: flex;
+            gap: 3px;
+            flex-wrap: wrap;
+        }
+
+        .radius-btn {
+            background: rgba(0, 255, 255, 0.2);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            padding: 2px 6px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 8px;
+            font-weight: bold;
+            white-space: nowrap;
+            flex: 1;
+            text-align: center;
+        }
+
+        .radius-btn.active {
+            background: rgba(0, 255, 255, 0.4);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+            transform: scale(1.05);
+        }
+
+        .radius-btn:hover {
+            background: rgba(0, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 3px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: rgba(138, 43, 226, 0.2);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            color: #8b5cf6;
+            padding: 2px 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 7px;
+            font-weight: bold;
+            white-space: nowrap;
+            flex: 1;
+            text-align: center;
+        }
+
+        .filter-btn.active {
+            background: rgba(138, 43, 226, 0.4);
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.6);
+            transform: scale(1.05);
+        }
+
+        .filter-btn:hover {
+            background: rgba(138, 43, 226, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Sonar Radar Display */
+        .ultrasonic-map {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: 
+                radial-gradient(circle at 50% 50%, rgba(0, 255, 255, 0.15) 2px, transparent 2px),
+                radial-gradient(circle at 50% 50%, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 80px 80px, 40px 40px;
+            animation: sonarPulse 8s linear infinite;
+        }
+
+        @keyframes sonarPulse {
+            0% { background-position: 0% 0%, 0% 0%; }
+            100% { background-position: 100% 100%, -100% -100%; }
+        }
+
+        /* Sonar Radar Rings */
+        .sonar-radar {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            pointer-events: none;
+        }
+
+        .sonar-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 2px solid rgba(0, 255, 255, 0.4);
+            animation: sonarRing 4s ease-in-out infinite;
+        }
+
+        .sonar-ring:nth-child(1) { width: 150px; height: 150px; animation-delay: 0s; }
+        .sonar-ring:nth-child(2) { width: 300px; height: 300px; animation-delay: 0.8s; }
+        .sonar-ring:nth-child(3) { width: 450px; height: 450px; animation-delay: 1.6s; }
+        .sonar-ring:nth-child(4) { width: 600px; height: 600px; animation-delay: 2.4s; }
+
+        @keyframes sonarRing {
+            0% { opacity: 0.8; transform: translate(-50%, -50%) scale(0.3); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        /* Radar Sweep Effect */
+        .radar-sweep {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 600px;
+            height: 600px;
+            margin: -300px 0 0 -300px;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                transparent 60deg,
+                rgba(0, 255, 255, 0.6) 90deg,
+                rgba(0, 255, 255, 0.2) 120deg,
+                transparent 180deg
+            );
+            animation: sweepRotate 6s linear infinite;
+        }
+
+        @keyframes sweepRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Distance Grid Lines */
+        .distance-grid {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            pointer-events: none;
+        }
+
+        .distance-grid::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0, 255, 255, 0.3), transparent 50%, rgba(0, 255, 255, 0.3));
+            transform: translateX(-50%);
+        }
+
+        .distance-grid::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, rgba(0, 255, 255, 0.3), transparent 50%, rgba(0, 255, 255, 0.3));
+            transform: translateY(-50%);
+        }
+
+        /* Category Distance Indicators */
+        .category-indicator {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            min-width: 80px;
+            border: 2px solid;
+            animation: categoryPulse 3s ease-in-out infinite;
+        }
+
+        .category-indicator.rental {
+            color: #00ffff;
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+        }
+
+        .category-indicator.sale {
+            color: #10b981;
+            border-color: #10b981;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+        }
+
+        .category-indicator.service {
+            color: #8b5cf6;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+        }
+
+        .category-indicator.shop {
+            color: #f59e0b;
+            border-color: #f59e0b;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
+        }
+
+        .category-indicator.events {
+            color: #ef4444;
+            border-color: #ef4444;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+        }
+
+        @keyframes categoryPulse {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+
+        .category-indicator:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px currentColor;
+        }
+
+        .category-indicator .distance {
+            display: block;
+            font-size: 16px;
+            font-weight: 900;
+            margin-bottom: 2px;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        .category-indicator .count {
+            font-size: 10px;
+            opacity: 0.8;
+        }
+
+        /* Item Markers */
+        .item-marker {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: markerPulse 2s ease-in-out infinite;
+            z-index: 50;
+        }
+
+        .item-marker.rental {
+            background: radial-gradient(circle, #00ffff 30%, rgba(0, 255, 255, 0.3) 100%);
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+        }
+
+        .item-marker.sale {
+            background: radial-gradient(circle, #10b981 30%, rgba(16, 185, 129, 0.3) 100%);
+            border: 2px solid #10b981;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.8);
+        }
+
+        .item-marker.service {
+            background: radial-gradient(circle, #8b5cf6 30%, rgba(139, 92, 246, 0.3) 100%);
+            border: 2px solid #8b5cf6;
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.8);
+        }
+
+        .item-marker.shop {
+            background: radial-gradient(circle, #f59e0b 30%, rgba(245, 158, 11, 0.3) 100%);
+            border: 2px solid #f59e0b;
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.8);
+        }
+
+        .item-marker.events {
+            background: radial-gradient(circle, #ef4444 30%, rgba(239, 68, 68, 0.3) 100%);
+            border: 2px solid #ef4444;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
+        }
+
+        @keyframes markerPulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+
+        .item-marker:hover {
+            transform: scale(1.5);
+            z-index: 100;
+        }
+
+        /* Distance Ring */
+        .distance-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            border: 2px solid rgba(0, 255, 255, 0.4);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            animation: ringPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes ringPulse {
+            0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.02); }
+        }
+
+        /* Item Details Modal */
+        .item-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a0b3d, #2d1b69);
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #ef4444;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            transform: scale(1.2);
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+        }
+
+        .item-title {
+            font-size: 24px;
+            color: #00ffff;
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+        }
+
+        .item-details {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .distance-info {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #00ffff, #8b5cf6);
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.4);
+        }
+
+        .action-btn.secondary {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+        }
+
+        /* Loading Animation */
+        .loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(0, 255, 255, 0.2);
+            border-top: 4px solid #00ffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Map Container */
+        .map-container {
+            position: fixed;
+            top: 280px; /* Below controls panel */
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.9), rgba(10, 10, 10, 0.95));
+            z-index: 10;
+        }
+
+        /* Sonar Distance Labels */
+        .distance-label {
+            position: absolute;
+            color: rgba(0, 255, 255, 0.8);
+            font-size: 12px;
+            font-weight: bold;
+            pointer-events: none;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .controls-panel {
+                top: 85px;
+                right: 10px;
+                max-width: 250px;
+            }
+            
+            .map-container {
+                top: 80px;
+            }
+            
+            .category-indicator {
+                min-width: 50px;
+                padding: 3px 6px;
+                font-size: 9px;
+            }
+            
+            .radius-btn {
+                padding: 2px 4px;
+                font-size: 7px;
+            }
+            
+            .filter-btn {
+                padding: 2px 4px;
+                font-size: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Ultrasonic Grid Background -->
+    <div class="ultrasonic-grid"></div>
+    
+    <!-- Energy Orbs -->
+    <div class="energy-orbs" id="energyOrbs"></div>
+
+    <!-- Header -->
+    <div class="map-header">
+        <div class="map-title">
+            <!-- Futuristic Map Icon -->
+            <svg width="40" height="40" viewBox="0 0 120 120" fill="none">
+                <defs>
+                    <pattern id="headerMapGrid" width="12" height="12" patternUnits="userSpaceOnUse">
+                        <path d="M 12 0 L 0 0 0 12" fill="none" stroke="#00ffff" stroke-width="0.5" opacity="0.3"/>
+                    </pattern>
+                    <radialGradient id="headerMapCenter" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" style="stop-color:#00ffff;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0.3" />
+                    </radialGradient>
+                </defs>
+                <rect width="120" height="120" fill="url(#headerMapGrid)" opacity="0.2"/>
+                <circle cx="60" cy="60" r="45" fill="none" stroke="#00ffff" stroke-width="2" opacity="0.6" stroke-dasharray="5,3"/>
+                <circle cx="60" cy="60" r="30" fill="none" stroke="#8b5cf6" stroke-width="2" opacity="0.8"/>
+                <circle cx="60" cy="60" r="15" fill="url(#headerMapCenter)"/>
+                <path d="M60 15 L65 25 L60 35 L55 25 Z" fill="#00ffff" opacity="0.8"/>
+                <circle cx="30" cy="30" r="3" fill="#10b981"/>
+                <circle cx="90" cy="40" r="3" fill="#f59e0b"/>
+                <circle cx="75" cy="85" r="3" fill="#8b5cf6"/>
+                <circle cx="45" cy="90" r="3" fill="#00ffff"/>
+            </svg>
+            MarketPace Interactive Map
+        </div>
+        <button class="close-btn" onclick="closeMap()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-right: 6px;">
+                <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(255, 255, 255, 0.2)"/>
+                <path d="m18 6-12 12M6 6l12 12" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Close
+        </button>
+    </div>
+
+    <!-- Collapsible Controls Panel -->
+    <div class="controls-panel" id="controlsPanel">
+        <button class="controls-toggle" onclick="toggleControls()">🔍 Controls</button>
+        <div class="controls-content">
+            <div class="control-group">
+                <div class="control-label">Search Radius</div>
+                <div class="radius-controls">
+                    <button class="radius-btn" onclick="setRadius(5)" data-radius="5">5mi</button>
+                    <button class="radius-btn active" onclick="setRadius(10)" data-radius="10">10mi</button>
+                    <button class="radius-btn" onclick="setRadius(25)" data-radius="25">25mi</button>
+                    <button class="radius-btn" onclick="setRadius(50)" data-radius="50">50mi</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">Item Filters</div>
+                <div class="filter-controls">
+                    <button class="filter-btn active" onclick="toggleFilter('all')" data-filter="all">All</button>
+                    <button class="filter-btn" onclick="toggleFilter('rental')" data-filter="rental">Rent</button>
+                    <button class="filter-btn" onclick="toggleFilter('sale')" data-filter="sale">Sale</button>
+                    <button class="filter-btn" onclick="toggleFilter('service')" data-filter="service">Serv</button>
+                    <button class="filter-btn" onclick="toggleFilter('shop')" data-filter="shop">Shop</button>
+                    <button class="filter-btn" onclick="toggleFilter('events')" data-filter="events">Event</button>
+                </div>
+            </div>
+        </div>
+
+
+                            </svg>
+                            Shop Sale
+                        </div>
+                        <div style="font-size: 11px; color: #e2e8f0;">Beach Gear 50% Off • Gulf Shores</div>
+                    </div>
+                    <div class="event-item" style="margin-bottom: 8px; padding: 8px; background: rgba(16, 185, 129, 0.2); border-radius: 6px; border-left: 3px solid #10b981;">
+                        <div style="font-size: 12px; color: #10b981; font-weight: bold;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 4px; vertical-align: middle;">
+                                <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(16, 185, 129, 0.2)"/>
+                                <ellipse cx="12" cy="12" rx="8" ry="10" stroke="currentColor" stroke-width="1.5"/>
+                                <path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            Comedy Show
+                        </div>
+                        <div style="font-size: 11px; color: #e2e8f0;">Flora-Bama • 9:00 PM</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                        <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(0, 255, 255, 0.2)"/>
+                        <rect x="3" y="8" width="3" height="8" fill="currentColor"/>
+                        <rect x="8" y="5" width="3" height="11" fill="currentColor"/>
+                        <rect x="13" y="10" width="3" height="6" fill="currentColor"/>
+                        <rect x="18" y="3" width="3" height="13" fill="currentColor"/>
+                    </svg>
+                    Found Items: <span id="itemCount">Loading...</span>
+                </div>
+                <div style="font-size: 12px; color: rgba(255, 255, 255, 0.7); margin-top: 5px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 4px; vertical-align: middle;">
+                        <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/>
+                        <rect x="9" y="9" width="6" height="6" rx="2" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.3)"/>
+                        <path d="m21 2-3 3M12 7v3M7 12h3" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Privacy: General areas shown for safety
+                </div>
+            </div>
+        </div>
+
+    <!-- Map Container -->
+    <div class="map-container">
+        <!-- Sonar Radar Map Display -->
+        <div class="ultrasonic-map" id="ultrasonicMap">
+            <!-- Loading Spinner -->
+            <div class="loading-spinner" id="loadingSpinner"></div>
+            
+            <!-- Sonar Radar Rings -->
+            <div class="sonar-radar" id="sonarRadar">
+                <div class="sonar-ring"></div>
+                <div class="sonar-ring"></div>
+                <div class="sonar-ring"></div>
+                <div class="sonar-ring"></div>
+            </div>
+            
+            <!-- Distance Grid Lines -->
+            <div class="distance-grid"></div>
+            
+            <!-- Radar Sweep -->
+            <div class="radar-sweep"></div>
+            
+            <!-- Category Distance Indicators -->
+            <div id="categoryIndicators"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentRadius = 10;
+        let currentFilter = 'all';
+        let mapItems = [];
+
+        // Sample map data with privacy-conscious locations
+        const sampleMapData = [
+            // Rentals
+            {
+                id: 1,
+                type: 'rental',
+                title: 'Camping Tent - 4 Person',
+                description: 'Perfect for weekend camping trips. Waterproof and easy setup.',
+                price: '$15/day',
+                distance: 2.3,
+                area: 'Orange Beach Area',
+                condition: '4.5/5 stars'
+            },
+            {
+                id: 5,
+                type: 'rental',
+                title: 'Power Tools Set',
+                description: 'Complete set of power tools for home projects.',
+                price: '$25/day',
+                distance: 6.1,
+                area: 'Spanish Fort Area',
+                condition: '4.2/5 stars'
+            },
+            {
+                id: 7,
+                type: 'rental',
+                title: 'Beach Umbrella & Chairs',
+                description: 'Complete beach setup for perfect day at the shore.',
+                price: '$20/day',
+                distance: 1.8,
+                area: 'Gulf Shores Area',
+                condition: '4.7/5 stars'
+            },
+            // Sales
+            {
+                id: 2,
+                type: 'sale',
+                title: 'Mountain Bike - Trek',
+                description: 'Excellent condition mountain bike, great for trails.',
+                price: '$350',
+                distance: 4.7,
+                area: 'Gulf Shores Area',
+                condition: '4.8/5 stars'
+            },
+            {
+                id: 6,
+                type: 'sale',
+                title: 'Kayak - Single Person',
+                description: 'Lightweight kayak perfect for coastal waters.',
+                price: '$200',
+                distance: 8.4,
+                area: 'Daphne Area',
+                condition: '4.4/5 stars'
+            },
+            // Services
+            {
+                id: 3,
+                type: 'service',
+                title: 'House Cleaning Service',
+                description: 'Professional cleaning service for homes and apartments.',
+                price: '$80-120',
+                distance: 1.2,
+                area: 'Foley Area',
+                condition: '5.0/5 stars'
+            },
+            {
+                id: 8,
+                type: 'service',
+                title: 'Lawn Care & Landscaping',
+                description: 'Complete lawn maintenance and landscaping services.',
+                price: '$50-100',
+                distance: 3.5,
+                area: 'Mobile Area',
+                condition: '4.6/5 stars'
+            },
+            // Shops
+            {
+                id: 4,
+                type: 'shop',
+                title: 'Beach Gear Rental Shop',
+                description: 'Umbrellas, chairs, boogie boards, and more beach essentials.',
+                price: 'Various',
+                distance: 3.8,
+                area: 'Mobile Bay Area',
+                condition: '4.6/5 stars'
+            },
+            {
+                id: 9,
+                type: 'shop',
+                title: 'Local Artisan Market',
+                description: 'Handmade crafts, local art, and unique Gulf Coast items.',
+                price: 'Various',
+                distance: 2.9,
+                area: 'Orange Beach Area',
+                condition: '4.8/5 stars'
+            },
+            // Events
+            {
+                id: 10,
+                type: 'events',
+                title: 'Live Music at The Wharf',
+                description: 'Local band performing classic rock and blues.',
+                price: 'Free',
+                distance: 4.2,
+                area: 'Orange Beach Area',
+                condition: 'Tonight 7:00 PM'
+            },
+            {
+                id: 11,
+                type: 'events',
+                title: 'Beach Volleyball Tournament',
+                description: 'Community tournament open to all skill levels.',
+                price: '$10 entry',
+                distance: 1.5,
+                area: 'Gulf Shores Area',
+                condition: 'Saturday 2:00 PM'
+            }
+        ];
+
+        // Initialize the map
+        function initializeMap() {
+            createEnergyOrbs();
+            setTimeout(() => {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                loadMapItems();
+                addDistanceLabels();
+            }, 2000);
+        }
+
+        // Create floating energy orbs
+        function createEnergyOrbs() {
+            const orbsContainer = document.getElementById('energyOrbs');
+            for (let i = 0; i < 20; i++) {
+                const orb = document.createElement('div');
+                orb.className = 'orb';
+                orb.style.left = Math.random() * 100 + '%';
+                orb.style.top = Math.random() * 100 + '%';
+                orb.style.width = Math.random() * 10 + 5 + 'px';
+                orb.style.height = orb.style.width;
+                orb.style.animationDelay = Math.random() * 8 + 's';
+                orb.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                orbsContainer.appendChild(orb);
+            }
+        }
+
+        // Load and display map items
+        function loadMapItems() {
+            const mapContainer = document.getElementById('ultrasonicMap');
+            
+            // Clear existing markers and indicators
+            const existingMarkers = mapContainer.querySelectorAll('.item-marker');
+            existingMarkers.forEach(marker => marker.remove());
+            
+            // Filter items based on current settings
+            mapItems = sampleMapData.filter(item => {
+                const withinRadius = item.distance <= currentRadius;
+                const matchesFilter = currentFilter === 'all' || item.type === currentFilter;
+                return withinRadius && matchesFilter;
+            });
+            
+            // Update item count
+            document.getElementById('itemCount').textContent = mapItems.length;
+            
+            // Create category indicators and markers
+            createCategoryIndicators();
+            
+            // Add individual markers to map
+            mapItems.forEach((item, index) => {
+                createItemMarker(item, index);
+            });
+        }
+
+        // Create category distance indicators
+        function createCategoryIndicators() {
+            const indicatorsContainer = document.getElementById('categoryIndicators');
+            indicatorsContainer.innerHTML = '';
+            
+            // Group items by category and calculate average distance
+            const categoryData = {};
+            const categories = ['rental', 'sale', 'service', 'shop', 'events'];
+            
+            categories.forEach(category => {
+                const categoryItems = mapItems.filter(item => item.type === category);
+                if (categoryItems.length > 0) {
+                    const avgDistance = categoryItems.reduce((sum, item) => sum + item.distance, 0) / categoryItems.length;
+                    categoryData[category] = {
+                        count: categoryItems.length,
+                        avgDistance: avgDistance.toFixed(1),
+                        items: categoryItems
+                    };
+                }
+            });
+            
+            // Position indicators around the radar
+            const positions = [
+                { x: '75%', y: '25%' }, // Top right
+                { x: '25%', y: '25%' }, // Top left
+                { x: '85%', y: '50%' }, // Middle right
+                { x: '15%', y: '50%' }, // Middle left
+                { x: '75%', y: '75%' }, // Bottom right
+                { x: '25%', y: '75%' }  // Bottom left
+            ];
+            
+            let positionIndex = 0;
+            
+            Object.keys(categoryData).forEach(category => {
+                const data = categoryData[category];
+                const position = positions[positionIndex % positions.length];
+                
+                const indicator = document.createElement('div');
+                indicator.className = `category-indicator ${category}`;
+                indicator.style.left = position.x;
+                indicator.style.top = position.y;
+                indicator.style.transform = 'translate(-50%, -50%)';
+                
+                indicator.innerHTML = `
+                    <div class="distance">${data.avgDistance} mi</div>
+                    <div>${category.charAt(0).toUpperCase() + category.slice(1)}s</div>
+                    <div class="count">${data.count} item${data.count > 1 ? 's' : ''}</div>
+                `;
+                
+                indicator.onclick = () => showCategoryItems(category, data.items);
+                indicatorsContainer.appendChild(indicator);
+                positionIndex++;
+            });
+        }
+
+        // Show category items modal
+        function showCategoryItems(category, items) {
+            const modal = document.createElement('div');
+            modal.className = 'item-modal';
+            modal.onclick = (e) => {
+                if (e.target === modal) modal.remove();
+            };
+            
+            const categoryColor = {
+                'rental': '#00ffff',
+                'sale': '#10b981',
+                'service': '#8b5cf6',
+                'shop': '#f59e0b',
+                'events': '#ef4444'
+            };
+            
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <button class="modal-close" onclick="this.parentElement.parentElement.remove()">×</button>
+                    <h2 class="item-title" style="color: ${categoryColor[category]}; display: flex; align-items: center; gap: 10px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="display: inline-block;">
+                            <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(0, 255, 255, 0.2)"/>
+                            <circle cx="12" cy="12" r="6" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        ${category.charAt(0).toUpperCase() + category.slice(1)}s Near You
+                    </h2>
+                    <div class="item-details">
+                        <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 20px;">
+                            Found ${items.length} ${category}${items.length > 1 ? 's' : ''} within ${currentRadius} miles
+                        </p>
+                        <div style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">
+                            ${items.map(item => `
+                                <div style="
+                                    background: rgba(0, 0, 0, 0.3);
+                                    border: 1px solid ${categoryColor[category]};
+                                    border-radius: 10px;
+                                    padding: 15px;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showItemDetails(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                        <h3 style="color: ${categoryColor[category]}; margin: 0; font-size: 16px;">${item.title}</h3>
+                                        <span style="color: #00ffff; font-weight: bold; font-size: 14px;">${item.distance} mi</span>
+                                    </div>
+                                    <p style="color: rgba(255, 255, 255, 0.8); margin: 0 0 8px 0; font-size: 14px;">${item.description}</p>
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="color: #10b981; font-weight: bold;">${item.price}</span>
+                                        <span style="color: rgba(255, 255, 255, 0.6); font-size: 12px;">${item.area}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        // Create item marker on map
+        function createItemMarker(item, index) {
+            const marker = document.createElement('div');
+            marker.className = `item-marker ${item.type}`;
+            
+            // Random position within the map (avoiding edges)
+            const x = 20 + Math.random() * 60; // 20% to 80% from left
+            const y = 20 + Math.random() * 60; // 20% to 80% from top
+            
+            marker.style.left = x + '%';
+            marker.style.top = y + '%';
+            marker.style.animationDelay = (index * 0.2) + 's';
+            
+            marker.onclick = () => showItemDetails(item);
+            
+            // Add distance label
+            const distanceLabel = document.createElement('div');
+            distanceLabel.style.cssText = `
+                position: absolute;
+                top: -25px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0, 0, 0, 0.8);
+                color: #00ffff;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-size: 10px;
+                font-weight: bold;
+                white-space: nowrap;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+            distanceLabel.textContent = item.distance + ' mi';
+            marker.appendChild(distanceLabel);
+            
+            marker.onmouseenter = () => {
+                distanceLabel.style.opacity = '1';
+            };
+            marker.onmouseleave = () => {
+                distanceLabel.style.opacity = '0';
+            };
+            
+            document.getElementById('ultrasonicMap').appendChild(marker);
+        }
+
+        // Add distance labels to sonar rings
+        function addDistanceLabels() {
+            const mapContainer = document.getElementById('ultrasonicMap');
+            
+            // Remove existing distance labels
+            const existingLabels = mapContainer.querySelectorAll('.distance-label');
+            existingLabels.forEach(label => label.remove());
+            
+            // Add distance labels to each ring
+            const ringDistances = [
+                { radius: 150, distance: Math.round(currentRadius * 0.25) },
+                { radius: 300, distance: Math.round(currentRadius * 0.5) },
+                { radius: 450, distance: Math.round(currentRadius * 0.75) },
+                { radius: 600, distance: currentRadius }
+            ];
+            
+            ringDistances.forEach(ring => {
+                const label = document.createElement('div');
+                label.className = 'distance-label';
+                label.style.left = '50%';
+                label.style.top = `calc(50% - ${ring.radius/2}px)`;
+                label.style.transform = 'translateX(-50%)';
+                label.textContent = `${ring.distance} mi`;
+                mapContainer.appendChild(label);
+            });
+        }
+
+        // Set search radius
+        function setRadius(radius) {
+            currentRadius = radius;
+            
+            // Update active button
+            document.querySelectorAll('.radius-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.radius == radius) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            loadMapItems();
+            addDistanceLabels();
+            showNotification(`Search radius set to ${radius} miles`);
+        }
+
+        // Toggle item filter
+        function toggleFilter(filter) {
+            currentFilter = filter;
+            
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.filter === filter) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            loadMapItems();
+            const filterText = filter === 'all' ? 'all items' : filter + 's';
+            showNotification(`Showing ${filterText}`);
+        }
+
+        // Show item details modal
+        function showItemDetails(item) {
+            const modal = document.createElement('div');
+            modal.className = 'item-modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <button class="modal-close" onclick="closeModal(this)">×</button>
+                    <h2 class="item-title">${item.title}</h2>
+                    <div class="item-details">
+                        <p><strong>Description:</strong> ${item.description}</p>
+                        <p><strong>Price:</strong> ${item.price}</p>
+                        <p><strong>Condition:</strong> ${item.condition}</p>
+                        <p><strong>General Location:</strong> ${item.area}</p>
+                    </div>
+                    <div class="distance-info">
+                        <strong><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(239, 68, 68, 0.2)"/><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/></svg> Distance: ${item.distance} miles away</strong><br>
+                        <small>Exact address shown after contact verification</small>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="contactSeller('${item.id}')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/><path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7" stroke="currentColor" stroke-width="1.5"/></svg> Contact Seller
+                        </button>
+                        <button class="action-btn" onclick="requestDelivery('${item.id}')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.2)"/><path d="M16 3h5v4h-5z" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.1)"/><path d="M2 21h20v-7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z" stroke="currentColor" stroke-width="1.5"/><circle cx="7" cy="17" r="2" stroke="currentColor" stroke-width="1.5"/><circle cx="17" cy="17" r="2" stroke="currentColor" stroke-width="1.5"/></svg> Request Delivery
+                        </button>
+                        <button class="action-btn secondary" onclick="closeModal(this.closest('.item-modal'))">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Close modal
+        function closeModal(element) {
+            const modal = element.closest ? element.closest('.item-modal') : element;
+            if (modal) {
+                document.body.removeChild(modal);
+            }
+        }
+
+        // Contact seller
+        function contactSeller(itemId) {
+            showNotification('Opening secure chat with seller...');
+            // Placeholder for contact functionality
+            setTimeout(() => {
+                showNotification('Chat opened! Messages are end-to-end encrypted.', 'success');
+            }, 1500);
+        }
+
+        // Request delivery
+        function requestDelivery(itemId) {
+            showNotification('Calculating delivery options...');
+            // Placeholder for delivery functionality
+            setTimeout(() => {
+                showNotification('Delivery request sent! You\'ll receive cost estimate within 5 minutes.', 'success');
+            }, 2000);
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: ${type === 'success' ? 'rgba(16, 185, 129, 0.9)' : 'rgba(0, 255, 255, 0.9)'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                border: 2px solid ${type === 'success' ? '#10b981' : '#00ffff'};
+                z-index: 10001;
+                max-width: 300px;
+                font-weight: bold;
+                text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Toggle controls panel
+        function toggleControls() {
+            const controlsPanel = document.getElementById('controlsPanel');
+            controlsPanel.classList.toggle('collapsed');
+        }
+
+        // Close map and return to community
+        function closeMap() {
+            window.history.back();
+        }
+
+        // Add CSS animations for notifications
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initializeMap);
+    </script>
+</body>
+</html>
