@@ -103,16 +103,21 @@
             padding: 4px;
             margin-bottom: 30px;
             backdrop-filter: blur(10px);
+            overflow-x: auto;
+            min-width: 100%;
         }
 
         .tab {
             flex: 1;
-            padding: 12px 20px;
+            min-width: 120px;
+            padding: 12px 16px;
             text-align: center;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 500;
+            white-space: nowrap;
+            font-size: 14px;
         }
 
         .tab.active {
@@ -122,6 +127,29 @@
 
         .tab:not(.active) {
             color: #94a3b8;
+        }
+
+        .tab.urgent {
+            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+            color: white !important;
+            animation: urgentPulse 2s infinite;
+        }
+
+        @keyframes urgentPulse {
+            0%, 100% { 
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            50% { 
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+        }
+
+        .invite-method {
+            display: none;
+        }
+
+        .invite-method.active {
+            display: block;
         }
 
         .tab:not(.active):hover {
@@ -624,22 +652,93 @@
                 <h3 class="modal-title">Invite Team Member</h3>
                 <button class="close-btn" onclick="closeModal('inviteEmployeeModal')">&times;</button>
             </div>
-            <form id="inviteEmployeeForm">
-                <div class="form-group">
-                    <label class="form-label">Email Address</label>
-                    <input type="email" class="form-input" name="email" placeholder="employee@example.com" required>
+            
+            <!-- Invitation Method Selection -->
+            <div class="form-group">
+                <label class="form-label">Invitation Method</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                    <button type="button" class="btn btn-primary" onclick="showInviteMethod('email')" id="emailMethodBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                            <polyline points="22,6 12,13 2,6"/>
+                        </svg>
+                        Email
+                    </button>
+                    <button type="button" class="btn" style="background: #1877f2; color: white;" onclick="showInviteMethod('facebook')" id="facebookMethodBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                        </svg>
+                        Facebook
+                    </button>
+                    <button type="button" class="btn" style="background: #25d366; color: white;" onclick="showInviteMethod('sms')" id="smsMethodBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                            <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                        </svg>
+                        Text Link
+                    </button>
                 </div>
+            </div>
+
+            <!-- Email Invitation Form -->
+            <div id="emailInviteForm" class="invite-method active">
+                <form id="inviteEmployeeForm">
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-input" name="email" placeholder="employee@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">First Name</label>
+                        <input type="text" class="form-input" name="firstName" placeholder="John" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" class="form-input" name="lastName" placeholder="Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Role</label>
+                        <select class="form-select" name="role" required>
+                            <option value="employee">Employee</option>
+                            <option value="manager">Manager</option>
+                            <option value="musician">Musician</option>
+                            <option value="chef">Chef</option>
+                            <option value="server">Server</option>
+                            <option value="bartender">Bartender</option>
+                            <option value="performer">Performer</option>
+                            <option value="technician">Technician</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 12px; margin-top: 20px;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">Send Email Invitation</button>
+                        <button type="button" class="btn" style="background: #6b7280; color: white; flex: 1;" onclick="closeModal('inviteEmployeeModal')">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Facebook Friends Invitation -->
+            <div id="facebookInviteForm" class="invite-method">
                 <div class="form-group">
-                    <label class="form-label">First Name</label>
-                    <input type="text" class="form-input" name="firstName" placeholder="John" required>
+                    <label class="form-label">Invite Facebook Friends</label>
+                    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 16px;">Select friends from your Facebook network to invite to your team:</p>
+                    
+                    <div id="facebookFriendsList" style="max-height: 300px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px;">
+                        <!-- Facebook friends will be loaded here -->
+                        <div style="text-align: center; color: #94a3b8; padding: 20px;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="margin-bottom: 8px;">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                            <div>Click "Load Friends" to connect with Facebook</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; margin-top: 16px;">
+                        <button type="button" class="btn" style="background: #1877f2; color: white; flex: 1;" onclick="loadFacebookFriends()">Load Friends</button>
+                        <button type="button" class="btn btn-primary" style="flex: 1;" onclick="inviteSelectedFriends()" disabled id="inviteFriendsBtn">Invite Selected</button>
+                    </div>
                 </div>
+                
                 <div class="form-group">
-                    <label class="form-label">Last Name</label>
-                    <input type="text" class="form-input" name="lastName" placeholder="Doe" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Role</label>
-                    <select class="form-select" name="role" required>
+                    <label class="form-label">Role for Invited Friends</label>
+                    <select class="form-select" id="facebookInviteRole">
                         <option value="employee">Employee</option>
                         <option value="manager">Manager</option>
                         <option value="musician">Musician</option>
@@ -650,11 +749,50 @@
                         <option value="technician">Technician</option>
                     </select>
                 </div>
-                <div style="display: flex; gap: 12px; margin-top: 20px;">
-                    <button type="submit" class="btn btn-primary" style="flex: 1;">Send Invitation</button>
-                    <button type="button" class="btn" style="background: #6b7280; color: white; flex: 1;" onclick="closeModal('inviteEmployeeModal')">Cancel</button>
+            </div>
+
+            <!-- SMS/Text Link Invitation -->
+            <div id="smsInviteForm" class="invite-method">
+                <div class="form-group">
+                    <label class="form-label">Share Invitation Link</label>
+                    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 16px;">Generate a secure invitation link to share via text message or other messaging apps:</p>
+                    
+                    <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                        <div style="color: #94a3b8; font-size: 14px; margin-bottom: 8px;">Invitation Link:</div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="text" class="form-input" id="inviteLinkInput" readonly value="https://marketpace.shop/invite/ABC123XYZ" style="flex: 1; font-family: monospace; font-size: 12px;">
+                            <button type="button" class="btn btn-primary" onclick="copyInviteLink()" style="padding: 8px 16px;">Copy</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Role for Invited Member</label>
+                        <select class="form-select" id="smsInviteRole">
+                            <option value="employee">Employee</option>
+                            <option value="manager">Manager</option>
+                            <option value="musician">Musician</option>
+                            <option value="chef">Chef</option>
+                            <option value="server">Server</option>
+                            <option value="bartender">Bartender</option>
+                            <option value="performer">Performer</option>
+                            <option value="technician">Technician</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Phone Number (Optional - for SMS)</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="tel" class="form-input" id="phoneNumber" placeholder="+1 (555) 123-4567" style="flex: 1;">
+                            <button type="button" class="btn" style="background: #25d366; color: white; padding: 8px 16px;" onclick="sendSMSInvite()">Send SMS</button>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; margin-top: 20px;">
+                        <button type="button" class="btn btn-primary" style="flex: 1;" onclick="shareInviteLink()">Share Link</button>
+                        <button type="button" class="btn" style="background: #6b7280; color: white; flex: 1;" onclick="closeModal('inviteEmployeeModal')">Cancel</button>
+                    </div>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 
@@ -1119,6 +1257,171 @@
             }
         }
 
+        // Invite method switching
+        function showInviteMethod(method) {
+            // Hide all invite methods
+            document.querySelectorAll('.invite-method').forEach(form => {
+                form.classList.remove('active');
+            });
+            
+            // Reset all method buttons
+            document.querySelectorAll('#emailMethodBtn, #facebookMethodBtn, #smsMethodBtn').forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.style.background = '#6b7280';
+                btn.style.color = 'white';
+            });
+            
+            // Show selected method and highlight button
+            document.getElementById(method + 'InviteForm').classList.add('active');
+            
+            if (method === 'email') {
+                document.getElementById('emailMethodBtn').classList.add('btn-primary');
+                document.getElementById('emailMethodBtn').style.background = '';
+            } else if (method === 'facebook') {
+                document.getElementById('facebookMethodBtn').style.background = '#1877f2';
+            } else if (method === 'sms') {
+                document.getElementById('smsMethodBtn').style.background = '#25d366';
+            }
+        }
+
+        // Facebook friends functionality
+        const demoFacebookFriends = [
+            { id: '1', name: 'Alex Johnson', profilePic: 'https://i.pravatar.cc/100?u=alex' },
+            { id: '2', name: 'Sarah Davis', profilePic: 'https://i.pravatar.cc/100?u=sarah' },
+            { id: '3', name: 'Mike Wilson', profilePic: 'https://i.pravatar.cc/100?u=mike' },
+            { id: '4', name: 'Emma Thompson', profilePic: 'https://i.pravatar.cc/100?u=emma' },
+            { id: '5', name: 'Chris Rodriguez', profilePic: 'https://i.pravatar.cc/100?u=chris' }
+        ];
+
+        function loadFacebookFriends() {
+            const friendsList = document.getElementById('facebookFriendsList');
+            friendsList.innerHTML = '';
+            
+            demoFacebookFriends.forEach(friend => {
+                friendsList.innerHTML += `
+                    <div style="display: flex; align-items: center; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <input type="checkbox" id="friend-${friend.id}" style="margin-right: 12px;" onchange="updateInviteButton()">
+                        <img src="${friend.profilePic}" alt="${friend.name}" style="width: 32px; height: 32px; border-radius: 50%; margin-right: 12px;">
+                        <label for="friend-${friend.id}" style="flex: 1; cursor: pointer; color: #e2e8f0;">${friend.name}</label>
+                    </div>
+                `;
+            });
+        }
+
+        function updateInviteButton() {
+            const selectedFriends = document.querySelectorAll('#facebookFriendsList input[type="checkbox"]:checked');
+            const inviteBtn = document.getElementById('inviteFriendsBtn');
+            
+            if (selectedFriends.length > 0) {
+                inviteBtn.disabled = false;
+                inviteBtn.textContent = `Invite Selected (${selectedFriends.length})`;
+            } else {
+                inviteBtn.disabled = true;
+                inviteBtn.textContent = 'Invite Selected';
+            }
+        }
+
+        function inviteSelectedFriends() {
+            const selectedFriends = document.querySelectorAll('#facebookFriendsList input[type="checkbox"]:checked');
+            const role = document.getElementById('facebookInviteRole').value;
+            
+            if (selectedFriends.length > 0) {
+                showNotification(`Invitations sent to ${selectedFriends.length} friends as ${role}!`, 'success');
+                closeModal('inviteEmployeeModal');
+                
+                // Send Facebook messages (simulated)
+                selectedFriends.forEach(checkbox => {
+                    const friendId = checkbox.id.replace('friend-', '');
+                    const friend = demoFacebookFriends.find(f => f.id === friendId);
+                    console.log(`Sending Facebook message to ${friend.name} for ${role} position`);
+                });
+            }
+        }
+
+        // SMS and text link functionality
+        function copyInviteLink() {
+            const linkInput = document.getElementById('inviteLinkInput');
+            linkInput.select();
+            document.execCommand('copy');
+            showNotification('Invitation link copied to clipboard!', 'success');
+        }
+
+        function generateInviteLink() {
+            const linkId = Math.random().toString(36).substring(2, 15);
+            const inviteLink = `https://marketpace.shop/invite/${linkId}`;
+            document.getElementById('inviteLinkInput').value = inviteLink;
+            return inviteLink;
+        }
+
+        async function sendSMSInvite() {
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const role = document.getElementById('smsInviteRole').value;
+            const inviteLink = generateInviteLink();
+            
+            if (!phoneNumber) {
+                showNotification('Please enter a phone number', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/business-scheduling/send-sms-invite', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        phoneNumber: phoneNumber,
+                        role: role,
+                        inviteLink: inviteLink,
+                        businessName: 'Your Business' // This would come from user profile
+                    })
+                });
+                
+                if (response.ok) {
+                    showNotification('SMS invitation sent successfully!', 'success');
+                    document.getElementById('phoneNumber').value = '';
+                } else {
+                    showNotification('Failed to send SMS invitation', 'error');
+                }
+            } catch (error) {
+                console.error('Error sending SMS:', error);
+                showNotification('Error sending SMS invitation', 'error');
+            }
+        }
+
+        function shareInviteLink() {
+            const inviteLink = document.getElementById('inviteLinkInput').value;
+            const role = document.getElementById('smsInviteRole').value;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Join Our Team - MarketPace',
+                    text: `You're invited to join our team as a ${role}! Click the link to get started:`,
+                    url: inviteLink
+                });
+            } else {
+                // Fallback for browsers without Web Share API
+                copyInviteLink();
+                showNotification('Link copied! Share it with your team member.', 'success');
+            }
+        }
+
+        // Check for urgent fill-ins and highlight tab
+        function checkUrgentFillIns() {
+            const urgentFillIns = demoFillIns.filter(fillIn => 
+                fillIn.urgencyLevel === 'critical' && fillIn.status === 'open'
+            );
+            
+            const fillInsTab = document.querySelector('.tab:nth-child(4)'); // Fill-ins tab
+            if (urgentFillIns.length > 0) {
+                fillInsTab.classList.add('urgent');
+                fillInsTab.innerHTML = `Fill-ins <span style="background: rgba(255,255,255,0.3); padding: 2px 6px; border-radius: 10px; font-size: 12px; margin-left: 4px;">${urgentFillIns.length}</span>`;
+            } else {
+                fillInsTab.classList.remove('urgent');
+                fillInsTab.innerHTML = 'Fill-ins';
+            }
+        }
+
         // Close modals when clicking outside
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('modal')) {
@@ -1130,6 +1433,8 @@
         document.addEventListener('DOMContentLoaded', function() {
             createParticles();
             loadTabData('dashboard');
+            checkUrgentFillIns();
+            generateInviteLink(); // Generate initial invite link
         });
     </script>
 </body>
