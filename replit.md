@@ -211,12 +211,15 @@ MarketPace is a React Native mobile application that prioritizes community empow
 
 ## Recent Changes
 
-✓ **RENTAL PAGE RESTORATION - ORIGINAL WORKING VERSION RESTORED** (January 14, 2025)
+✓ **CRITICAL NAVIGATION FIX - RENTAL PAGE ACCESS FULLY RESTORED** (January 14, 2025)
+✓ **ROOT CAUSE IDENTIFIED**: `filterToRentals()` function was incorrectly calling interactive map instead of navigating to rental page
+✓ **FIXED**: Updated filterToRentals() function in shops.html, services.html, and community.html to properly navigate to `/rentals`
+✓ **NAVIGATION NOW WORKS**: All "Rentals" buttons correctly navigate to rental page showing filtered community feed
 ✓ Successfully restored original working rentals.html from rentals-backup.html after it was corrupted during attempted fixes
 ✓ Added CSS filtering rules to hide non-rental posts: `.post-sale, .post-service { display: none !important; }`
 ✓ Confirmed rental page now shows only rental posts (Tom's Tool Rentals Power Washer, Jessica Martinez Beach Chairs)
 ✓ Navigation working correctly: Community → Shops → Services → **Rentals** → The Hub
-✓ Map functionality accessible only through header map button (not default view)
+✓ **MAP BUTTON RESTRICTION**: Only header map icon button navigates to interactive map (all other buttons go to respective pages)
 ✓ Rental page structure: Header + Status Composer + Filtered Community Feed (rentals only)
 ✓ Server verified serving correct content with proper CSS filtering applied
 
