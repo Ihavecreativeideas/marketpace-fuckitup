@@ -63,7 +63,7 @@ app.get('/the-hub', (req, res) => {
   res.sendFile(path.join(__dirname, 'the-hub.html'));
 });
 
-app.get('/menu', (req, res) => {
+app.get('/marketpace-menu', (req, res) => {
   res.sendFile(path.join(__dirname, 'marketpace-menu.html'));
 });
 
