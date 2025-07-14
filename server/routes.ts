@@ -269,6 +269,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Business Scheduling SMS API Route
+  app.post('/api/business-scheduling/send-sms-invite', isAuthenticated, async (req: any, res) => {
+    try {
+      const { BusinessSchedulingService } = await import('./business-scheduling');
+      const businessService = new BusinessSchedulingService();
+      
+      const { phoneNumber, role, inviteLink, businessName } = req.body;
+      
+      if (!phoneNumber || !role || !inviteLink || !businessName) {
+        return res.status(400).json({ 
+          message: 'Missing required fields: phoneNumber, role, inviteLink, businessName' 
+        });
+      }
+      
+      const result = await businessService.sendSMSInvitation({
+        phoneNumber,
+        role,
+        inviteLink,
+        businessName
+      });
+      
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error sending SMS invitation:", error);
+      res.status(500).json({ 
+        message: "Failed to send SMS invitation", 
+        error: error.message 
+      });
+    }
+  });
+
   // Driver application routes
   app.post('/api/driver-application', isAuthenticated, async (req: any, res) => {
     try {

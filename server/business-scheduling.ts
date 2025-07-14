@@ -402,4 +402,58 @@ export class BusinessSchedulingService {
       urgentFillIns: urgentFillIns.length
     };
   }
+
+  // SMS Invitation functionality
+  async sendSMSInvitation(data: {
+    phoneNumber: string;
+    role: string;
+    inviteLink: string;
+    businessName: string;
+  }) {
+    // Import Twilio client
+    const twilio = require('twilio');
+    
+    const accountSid = process.env.TWILIO_ACCOUNT_SID;
+    const authToken = process.env.TWILIO_AUTH_TOKEN;
+    const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
+    
+    if (!accountSid || !authToken || !twilioPhone) {
+      throw new Error('Twilio credentials not configured');
+    }
+    
+    const client = twilio(accountSid, authToken);
+    
+    const message = `🎯 You're invited to join ${data.businessName} as a ${data.role}! 
+
+Join our team on MarketPace:
+${data.inviteLink}
+
+MarketPace makes scheduling and team communication easy. Download the app and accept your invitation to get started!
+
+Questions? Reply to this message.`;
+    
+    try {
+      const result = await client.messages.create({
+        body: message,
+        from: twilioPhone,
+        to: data.phoneNumber
+      });
+      
+      return {
+        success: true,
+        messageId: result.sid,
+        status: result.status
+      };
+    } catch (error: any) {
+      console.error('Twilio SMS error:', error);
+      throw new Error(`Failed to send SMS: ${error.message}`);
+    }
+  }
+
+  // Generate secure invitation link
+  generateInviteLink(businessId: string, role: string): string {
+    const linkId = Math.random().toString(36).substring(2, 15) + 
+                   Math.random().toString(36).substring(2, 15);
+    return `https://marketpace.shop/invite/${linkId}?business=${businessId}&role=${role}`;
+  }
 }
