@@ -270,6 +270,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Business Scheduling SMS API Route
+  // Business scheduling settings endpoint
+  app.post('/api/business-scheduling/save-settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const { BusinessSchedulingService } = await import('./business-scheduling');
+      const schedulingService = new BusinessSchedulingService();
+      
+      const userId = req.user.claims.sub;
+      const settings = req.body;
+      
+      // For demo purposes, using userId as businessId
+      // In real implementation, would get businessId from user's businesses
+      const savedSettings = await schedulingService.saveBusinessSettings(userId, settings);
+      
+      res.json({ 
+        success: true, 
+        message: 'Business settings saved successfully',
+        settings: savedSettings 
+      });
+    } catch (error) {
+      console.error('Error saving business settings:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to save settings', 
+        error: error.message 
+      });
+    }
+  });
+
+  app.get('/api/business-scheduling/settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const { BusinessSchedulingService } = await import('./business-scheduling');
+      const schedulingService = new BusinessSchedulingService();
+      
+      const userId = req.user.claims.sub;
+      
+      // For demo purposes, using userId as businessId
+      const settings = await schedulingService.getBusinessSettings(userId);
+      
+      res.json({ success: true, settings });
+    } catch (error) {
+      console.error('Error getting business settings:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to get settings', 
+        error: error.message 
+      });
+    }
+  });
+
   app.post('/api/business-scheduling/send-sms-invite', isAuthenticated, async (req: any, res) => {
     try {
       const { BusinessSchedulingService } = await import('./business-scheduling');

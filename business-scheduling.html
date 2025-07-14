@@ -496,6 +496,7 @@
             <div class="tab" onclick="switchTab('schedule')">Schedule</div>
             <div class="tab" onclick="switchTab('fill-ins')">Fill-ins</div>
             <div class="tab" onclick="switchTab('announcements')">Announcements</div>
+            <div class="tab" onclick="switchTab('settings')">Settings</div>
         </div>
 
         <!-- Dashboard Tab -->
@@ -596,6 +597,221 @@
                 <div id="announcementsList">
                     <!-- Announcements will be loaded here -->
                 </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Notification Settings</h2>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+                    <h4 style="color: #e2e8f0; margin-bottom: 16px;">Employee Shift Notifications</h4>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                        <div>
+                            <label class="form-label">Notification Frequency</label>
+                            <select class="form-select" id="notificationFrequency">
+                                <option value="1">1 Time</option>
+                                <option value="2" selected>2 Times</option>
+                                <option value="3">3 Times</option>
+                                <option value="4">4 Times</option>
+                                <option value="5">5 Times</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Days Before Shift</label>
+                            <select class="form-select" id="daysBeforeNotification">
+                                <option value="0">Same Day</option>
+                                <option value="1" selected>1 Day Before</option>
+                                <option value="2">2 Days Before</option>
+                                <option value="3">3 Days Before</option>
+                                <option value="7">1 Week Before</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Hours Before Shift</label>
+                            <select class="form-select" id="hoursBeforeNotification">
+                                <option value="1">1 Hour</option>
+                                <option value="2" selected>2 Hours</option>
+                                <option value="4">4 Hours</option>
+                                <option value="8">8 Hours</option>
+                                <option value="12">12 Hours</option>
+                                <option value="24">24 Hours</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                        <div>
+                            <label class="form-label">Notification Method</label>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                    <input type="checkbox" checked style="margin-right: 8px;"> SMS Text Message
+                                </label>
+                                <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                    <input type="checkbox" checked style="margin-right: 8px;"> Email Notification
+                                </label>
+                                <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                    <input type="checkbox" style="margin-right: 8px;"> Push Notification
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="form-label">Late Arrival Policy</label>
+                            <select class="form-select" id="lateArrivalPolicy">
+                                <option value="5">5 Minute Grace Period</option>
+                                <option value="10" selected>10 Minute Grace Period</option>
+                                <option value="15">15 Minute Grace Period</option>
+                                <option value="0">No Grace Period</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Employee Payment Settings</h2>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                        <div>
+                            <label class="form-label">Payment Schedule</label>
+                            <select class="form-select" id="paymentSchedule" onchange="updatePaymentPreview()">
+                                <option value="upfront">Upfront (Before Shift Assignment)</option>
+                                <option value="before-shift">Before Each Shift</option>
+                                <option value="after-shift" selected>After Each Shift</option>
+                                <option value="weekly">Weekly (Every Friday)</option>
+                                <option value="bi-weekly">Bi-Weekly (Every Other Friday)</option>
+                                <option value="monthly">Monthly (1st of Month)</option>
+                                <option value="custom">Custom Schedule</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Payment Method</label>
+                            <select class="form-select" id="paymentMethod">
+                                <option value="direct-deposit">Direct Deposit (ACH)</option>
+                                <option value="instant-pay" selected>Instant Pay (Stripe)</option>
+                                <option value="paypal">PayPal Transfer</option>
+                                <option value="cash-app">Cash App</option>
+                                <option value="venmo">Venmo</option>
+                                <option value="check">Physical Check</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                        <div>
+                            <label class="form-label">Base Hourly Rate</label>
+                            <div style="position: relative;">
+                                <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;">$</span>
+                                <input type="number" class="form-input" id="baseHourlyRate" value="15.00" step="0.25" style="padding-left: 24px;" onchange="updatePaymentPreview()">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="form-label">Overtime Rate (1.5x)</label>
+                            <div style="position: relative;">
+                                <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;">$</span>
+                                <input type="number" class="form-input" id="overtimeRate" value="22.50" step="0.25" style="padding-left: 24px;" readonly>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="form-label">Holiday Rate (2x)</label>
+                            <div style="position: relative;">
+                                <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;">$</span>
+                                <input type="number" class="form-input" id="holidayRate" value="30.00" step="0.25" style="padding-left: 24px;" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                        <h4 style="color: #60a5fa; margin-bottom: 12px;">Professional Payment Features</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" style="margin-right: 8px;"> Automatic Time Tracking
+                            </label>
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" checked style="margin-right: 8px;"> Break Time Deduction
+                            </label>
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" style="margin-right: 8px;"> Tip Pool Distribution
+                            </label>
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" checked style="margin-right: 8px;"> Tax Withholding (1099)
+                            </label>
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" style="margin-right: 8px;"> Performance Bonuses
+                            </label>
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" style="margin-right: 8px;"> Commission Tracking
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="paymentPreview" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 16px;">
+                        <h4 style="color: #10b981; margin-bottom: 8px;">Payment Preview</h4>
+                        <p style="color: #e2e8f0; margin: 0;">8-hour shift at $15.00/hour = $120.00 (paid after each shift via Stripe)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Advanced Business Settings</h2>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 24px;">
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                        <div>
+                            <label class="form-label">Shift Coverage Requirements</label>
+                            <select class="form-select" id="coverageRequirements">
+                                <option value="mandatory">Mandatory Coverage (Find Replacement)</option>
+                                <option value="optional" selected>Optional Coverage (Manager Approval)</option>
+                                <option value="none">No Coverage Required</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Schedule Change Window</label>
+                            <select class="form-select" id="scheduleChangeWindow">
+                                <option value="24">24 Hours</option>
+                                <option value="48" selected>48 Hours</option>
+                                <option value="72">72 Hours</option>
+                                <option value="168">1 Week</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                        <div>
+                            <label class="form-label">Time Clock Method</label>
+                            <select class="form-select" id="timeClockMethod">
+                                <option value="app" selected>Mobile App Check-in</option>
+                                <option value="location">GPS Location-Based</option>
+                                <option value="qr">QR Code Scanning</option>
+                                <option value="manual">Manual Entry</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Payroll Integration</label>
+                            <select class="form-select" id="payrollIntegration">
+                                <option value="stripe" selected>Stripe Connect</option>
+                                <option value="quickbooks">QuickBooks</option>
+                                <option value="adp">ADP Workforce</option>
+                                <option value="gusto">Gusto</option>
+                                <option value="manual">Manual Processing</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 16px; margin-top: 24px;">
+                <button class="btn btn-primary" onclick="saveBusinessSettings()">Save All Settings</button>
+                <button class="btn" style="background: #6b7280; color: white;" onclick="resetToDefaults()">Reset to Defaults</button>
+                <button class="btn" style="background: #f59e0b; color: white;" onclick="exportSettings()">Export Settings</button>
             </div>
         </div>
     </div>
@@ -1634,6 +1850,164 @@
             }
         }
 
+        // Payment preview update function
+        function updatePaymentPreview() {
+            const schedule = document.getElementById('paymentSchedule').value;
+            const rate = parseFloat(document.getElementById('baseHourlyRate').value) || 15.00;
+            const method = document.getElementById('paymentMethod').value;
+            
+            // Update overtime and holiday rates
+            document.getElementById('overtimeRate').value = (rate * 1.5).toFixed(2);
+            document.getElementById('holidayRate').value = (rate * 2).toFixed(2);
+            
+            const previewElement = document.getElementById('paymentPreview');
+            const methodText = method.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+            
+            let scheduleText = '';
+            switch(schedule) {
+                case 'upfront':
+                    scheduleText = 'paid upfront before shift assignment';
+                    break;
+                case 'before-shift':
+                    scheduleText = 'paid before each shift starts';
+                    break;
+                case 'after-shift':
+                    scheduleText = 'paid after each shift completes';
+                    break;
+                case 'weekly':
+                    scheduleText = 'paid weekly on Fridays';
+                    break;
+                case 'bi-weekly':
+                    scheduleText = 'paid bi-weekly on Fridays';
+                    break;
+                case 'monthly':
+                    scheduleText = 'paid monthly on the 1st';
+                    break;
+                case 'custom':
+                    scheduleText = 'paid on custom schedule';
+                    break;
+            }
+            
+            const totalPay = (8 * rate).toFixed(2);
+            previewElement.innerHTML = `
+                <h4 style="color: #10b981; margin-bottom: 8px;">Payment Preview</h4>
+                <p style="color: #e2e8f0; margin: 0;">8-hour shift at $${rate}/hour = $${totalPay} (${scheduleText} via ${methodText})</p>
+            `;
+        }
+
+        // Settings management functions
+        async function saveBusinessSettings() {
+            const settings = {
+                notifications: {
+                    frequency: document.getElementById('notificationFrequency').value,
+                    daysBefore: document.getElementById('daysBeforeNotification').value,
+                    hoursBefore: document.getElementById('hoursBeforeNotification').value,
+                    methods: {
+                        sms: document.querySelector('#settings input[type="checkbox"]:nth-of-type(1)').checked,
+                        email: document.querySelector('#settings input[type="checkbox"]:nth-of-type(2)').checked,
+                        push: document.querySelector('#settings input[type="checkbox"]:nth-of-type(3)').checked
+                    },
+                    latePolicy: document.getElementById('lateArrivalPolicy').value
+                },
+                payments: {
+                    schedule: document.getElementById('paymentSchedule').value,
+                    method: document.getElementById('paymentMethod').value,
+                    baseRate: document.getElementById('baseHourlyRate').value,
+                    features: {
+                        timeTracking: document.querySelector('#settings input[type="checkbox"]:nth-of-type(4)').checked,
+                        breakDeduction: document.querySelector('#settings input[type="checkbox"]:nth-of-type(5)').checked,
+                        tipPool: document.querySelector('#settings input[type="checkbox"]:nth-of-type(6)').checked,
+                        taxWithholding: document.querySelector('#settings input[type="checkbox"]:nth-of-type(7)').checked,
+                        bonuses: document.querySelector('#settings input[type="checkbox"]:nth-of-type(8)').checked,
+                        commission: document.querySelector('#settings input[type="checkbox"]:nth-of-type(9)').checked
+                    }
+                },
+                advanced: {
+                    coverage: document.getElementById('coverageRequirements').value,
+                    changeWindow: document.getElementById('scheduleChangeWindow').value,
+                    timeClock: document.getElementById('timeClockMethod').value,
+                    payroll: document.getElementById('payrollIntegration').value
+                }
+            };
+
+            try {
+                const response = await fetch('/api/business-scheduling/save-settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(settings)
+                });
+
+                if (response.ok) {
+                    showNotification('All business settings saved successfully!', 'success');
+                } else {
+                    showNotification('Failed to save settings. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                showNotification('Error saving settings. Please check your connection.', 'error');
+            }
+        }
+
+        function resetToDefaults() {
+            if (confirm('Are you sure you want to reset all settings to defaults? This cannot be undone.')) {
+                // Reset notification settings
+                document.getElementById('notificationFrequency').value = '2';
+                document.getElementById('daysBeforeNotification').value = '1';
+                document.getElementById('hoursBeforeNotification').value = '2';
+                document.getElementById('lateArrivalPolicy').value = '10';
+                
+                // Reset payment settings
+                document.getElementById('paymentSchedule').value = 'after-shift';
+                document.getElementById('paymentMethod').value = 'instant-pay';
+                document.getElementById('baseHourlyRate').value = '15.00';
+                
+                // Reset advanced settings
+                document.getElementById('coverageRequirements').value = 'optional';
+                document.getElementById('scheduleChangeWindow').value = '48';
+                document.getElementById('timeClockMethod').value = 'app';
+                document.getElementById('payrollIntegration').value = 'stripe';
+                
+                updatePaymentPreview();
+                showNotification('Settings reset to defaults', 'success');
+            }
+        }
+
+        function exportSettings() {
+            const settings = {
+                notifications: {
+                    frequency: document.getElementById('notificationFrequency').value,
+                    daysBefore: document.getElementById('daysBeforeNotification').value,
+                    hoursBefore: document.getElementById('hoursBeforeNotification').value,
+                    latePolicy: document.getElementById('lateArrivalPolicy').value
+                },
+                payments: {
+                    schedule: document.getElementById('paymentSchedule').value,
+                    method: document.getElementById('paymentMethod').value,
+                    baseRate: document.getElementById('baseHourlyRate').value
+                },
+                advanced: {
+                    coverage: document.getElementById('coverageRequirements').value,
+                    changeWindow: document.getElementById('scheduleChangeWindow').value,
+                    timeClock: document.getElementById('timeClockMethod').value,
+                    payroll: document.getElementById('payrollIntegration').value
+                },
+                exportDate: new Date().toISOString()
+            };
+
+            const dataStr = JSON.stringify(settings, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'marketpace-business-settings.json';
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            showNotification('Settings exported successfully!', 'success');
+        }
+
         // Close modals when clicking outside
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('modal')) {
@@ -1647,6 +2021,13 @@
             loadTabData('dashboard');
             checkUrgentFillIns();
             generateInviteLink(); // Generate initial invite link
+            
+            // Initialize payment preview if settings tab elements exist
+            setTimeout(() => {
+                if (document.getElementById('paymentPreview')) {
+                    updatePaymentPreview();
+                }
+            }, 100);
         });
     </script>
 </body>
