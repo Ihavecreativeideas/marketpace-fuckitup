@@ -29,6 +29,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Enhanced authentication routes (signup, login, password reset)
   registerAuthRoutes(app);
+  
+  // Supabase integration API
+  app.post('/api/integrations/supabase/connect', async (req, res) => {
+    try {
+      const { url, anonKey, serviceKey } = req.body;
+      
+      if (!url || !anonKey) {
+        return res.status(400).json({
+          success: false,
+          error: 'Supabase URL and Anon Key are required'
+        });
+      }
+
+      // Test Supabase connection
+      const testResponse = await fetch(`${url}/rest/v1/`, {
+        headers: {
+          'apikey': anonKey,
+          'Authorization': `Bearer ${anonKey}`
+        }
+      });
+
+      if (!testResponse.ok) {
+        throw new Error('Failed to connect to Supabase');
+      }
+
+      // Store integration credentials (in real app, encrypt these)
+      const integrationData = {
+        platform: 'supabase',
+        url: url,
+        anonKey: anonKey,
+        serviceKey: serviceKey || null,
+        status: 'connected',
+        connectedAt: new Date().toISOString()
+      };
+
+      res.json({
+        success: true,
+        message: 'Successfully connected to Supabase',
+        integration: integrationData
+      });
+    } catch (error) {
+      console.error('Supabase connection error:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Failed to connect to Supabase'
+      });
+    }
+  });
 
   // RLS Context middleware - sets user context for database security policies
   app.use(async (req: any, res, next) => {

@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Integration - MarketPace Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 30%, #4c2885 60%, #6b46c1 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+            50% { transform: translateY(-100px) rotate(180deg); opacity: 0.5; }
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-top: 40px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #3ECF8E, #2DD4BF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .integration-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .integration-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .integration-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .integration-icon {
+            font-size: 32px;
+            margin-right: 16px;
+            background: linear-gradient(45deg, #3ECF8E, #2DD4BF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .integration-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #3ECF8E;
+        }
+
+        .integration-status {
+            margin-left: auto;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(62, 207, 142, 0.2);
+            color: #3ECF8E;
+            border: 1px solid rgba(62, 207, 142, 0.3);
+        }
+
+        .integration-description {
+            color: #e0e0e0;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .integration-features {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 16px;
+        }
+
+        .integration-features li {
+            padding: 4px 0;
+            color: #e0e0e0;
+            font-size: 13px;
+        }
+
+        .integration-features li:before {
+            content: "→";
+            color: #3ECF8E;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #3ECF8E, #2DD4BF);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(62, 207, 142, 0.4);
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .setup-form {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #3ECF8E;
+            margin-bottom: 6px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3ECF8E;
+            box-shadow: 0 0 0 2px rgba(62, 207, 142, 0.2);
+        }
+
+        .success-message {
+            background: rgba(62, 207, 142, 0.1);
+            border: 1px solid rgba(62, 207, 142, 0.3);
+            color: #3ECF8E;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .error-message {
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            color: #ff6b35;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .info-box {
+            background: rgba(45, 212, 191, 0.1);
+            border: 1px solid rgba(45, 212, 191, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .info-box h3 {
+            color: #2DD4BF;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .info-box p {
+            color: #e0e0e0;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-particles"></div>
+    
+    <button class="back-btn" onclick="window.history.back()">
+        ← Back
+    </button>
+
+    <div class="container">
+        <div class="header">
+            <h1>🗄️ Supabase Integration</h1>
+            <p>Use your Supabase database as a central hub for all platform integrations</p>
+        </div>
+
+        <div class="info-box">
+            <h3>🚀 Alternative Integration Solution</h3>
+            <p>Since many platforms aren't allowing direct integration yet, you can use Supabase as your central database to:</p>
+            <p>• Store and sync data from multiple platforms manually</p>
+            <p>• Create custom dashboards and analytics</p>
+            <p>• Build your own integration workflows</p>
+            <p>• Export data for use in other systems</p>
+        </div>
+
+        <div class="integration-card">
+            <div class="integration-header">
+                <div class="integration-icon">🗄️</div>
+                <div class="integration-title">Supabase Database</div>
+                <div class="integration-status">Ready</div>
+            </div>
+            <div class="integration-description">
+                Connect your Supabase project to serve as a central data hub for all your business platforms and integrations.
+            </div>
+            <ul class="integration-features">
+                <li>Centralized data storage for all platforms</li>
+                <li>Real-time synchronization capabilities</li>
+                <li>Custom API endpoints for integrations</li>
+                <li>Advanced analytics and reporting</li>
+                <li>Backup and export functionality</li>
+                <li>Custom integration workflows</li>
+            </ul>
+            <button class="btn" onclick="showSupabaseForm()">Setup Supabase Integration</button>
+            
+            <div class="setup-form" id="supabaseForm">
+                <div class="form-group">
+                    <label class="form-label">Supabase URL</label>
+                    <input type="url" class="form-input" id="supabaseUrl" placeholder="https://your-project.supabase.co">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Supabase Anon Key</label>
+                    <input type="text" class="form-input" id="supabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Service Role Key (Optional)</label>
+                    <input type="text" class="form-input" id="supabaseServiceKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+                </div>
+                <button class="btn" onclick="connectSupabase()">Connect Supabase</button>
+            </div>
+
+            <div class="success-message" id="successMessage"></div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div class="integration-card">
+            <div class="integration-header">
+                <div class="integration-icon">📊</div>
+                <div class="integration-title">Data Management Hub</div>
+                <div class="integration-status">Available</div>
+            </div>
+            <div class="integration-description">
+                Create custom tables and workflows to manage data from all your platforms in one place.
+            </div>
+            <ul class="integration-features">
+                <li>Custom data tables for each platform</li>
+                <li>Automated data import/export tools</li>
+                <li>Cross-platform analytics dashboard</li>
+                <li>Data synchronization monitoring</li>
+                <li>Backup and restore functionality</li>
+                <li>API endpoint generation</li>
+            </ul>
+            <button class="btn" onclick="setupDataHub()">Setup Data Hub</button>
+        </div>
+
+        <div class="integration-card">
+            <div class="integration-header">
+                <div class="integration-icon">🔄</div>
+                <div class="integration-title">Manual Sync Tools</div>
+                <div class="integration-status">Ready</div>
+            </div>
+            <div class="integration-description">
+                Tools to manually sync data from platforms that don't allow API access yet.
+            </div>
+            <ul class="integration-features">
+                <li>CSV import/export functionality</li>
+                <li>Bulk data upload tools</li>
+                <li>Data mapping and transformation</li>
+                <li>Scheduled sync workflows</li>
+                <li>Error handling and validation</li>
+                <li>Data deduplication tools</li>
+            </ul>
+            <button class="btn" onclick="setupSyncTools()">Setup Sync Tools</button>
+        </div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particleContainer = document.querySelector('.floating-particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 8 + 8) + 's';
+                particleContainer.appendChild(particle);
+            }
+        }
+
+        function showSupabaseForm() {
+            const form = document.getElementById('supabaseForm');
+            const isVisible = form.style.display === 'block';
+            form.style.display = isVisible ? 'none' : 'block';
+        }
+
+        async function connectSupabase() {
+            const url = document.getElementById('supabaseUrl').value;
+            const key = document.getElementById('supabaseKey').value;
+            const serviceKey = document.getElementById('supabaseServiceKey').value;
+            
+            if (!url || !key) {
+                showError('Please provide both Supabase URL and Anon Key');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/integrations/supabase/connect', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        url: url,
+                        anonKey: key,
+                        serviceKey: serviceKey
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccess('Supabase connected successfully! Tables created and ready for use.');
+                    document.getElementById('supabaseForm').style.display = 'none';
+                } else {
+                    showError(result.error || 'Failed to connect to Supabase');
+                }
+            } catch (error) {
+                showError('Connection failed: ' + error.message);
+            }
+        }
+
+        function setupDataHub() {
+            window.location.href = '/supabase-data-hub';
+        }
+
+        function setupSyncTools() {
+            window.location.href = '/supabase-sync-tools';
+        }
+
+        function showSuccess(message) {
+            const successEl = document.getElementById('successMessage');
+            const errorEl = document.getElementById('errorMessage');
+            successEl.textContent = message;
+            successEl.style.display = 'block';
+            errorEl.style.display = 'none';
+        }
+
+        function showError(message) {
+            const successEl = document.getElementById('successMessage');
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            successEl.style.display = 'none';
+        }
+
+        // Initialize particles when page loads
+        createParticles();
+
+        console.log('Supabase integration page loaded');
+    </script>
+</body>
+</html>
