@@ -73,8 +73,222 @@ export class BusinessSchedulingService {
 
   async updateEmployeeStatus(employeeId: string, status: 'pending' | 'active' | 'inactive') {
     const updated = await db.update(employees)
+      .set({ status })
+      .where(eq(employees.id, employeeId))
+      .returning();
+    return updated[0];
+  }
+
+  // Business Settings Management
+  async saveBusinessSettings(businessId: string, settings: any) {
+    const updated = await db.update(businesses)
       .set({ 
-        status,
+        settings: settings,
+        updatedAt: new Date()
+      })
+      .where(eq(businesses.id, businessId))
+      .returning();
+    return updated[0];
+  }
+
+  async getBusinessSettings(businessId: string) {
+    const business = await db.select()
+      .from(businesses)
+      .where(eq(businesses.id, businessId));
+    return business[0]?.settings || this.getDefaultSettings();
+  }
+
+  getDefaultSettings() {
+    return {
+      notifications: {
+        frequency: '2',
+        daysBefore: '1',
+        hoursBefore: '2',
+        methods: {
+          sms: true,
+          email: true,
+          push: false
+        },
+        latePolicy: '10'
+      },
+      payments: {
+        schedule: 'after-shift',
+        method: 'instant-pay',
+        baseRate: '15.00',
+        features: {
+          timeTracking: false,
+          breakDeduction: true,
+          tipPool: false,
+          taxWithholding: true,
+          bonuses: false,
+          commission: false
+        }
+      },
+      advanced: {
+        coverage: 'optional',
+        changeWindow: '48',
+        timeClock: 'app',
+        payroll: 'stripe'
+      }
+    };
+  }
+
+  // SMS Notification System
+  async sendShiftNotification(employeeId: string, shiftDetails: any, notificationSettings: any) {
+    const employee = await db.select({
+      employee: employees,
+      user: users
+    })
+    .from(employees)
+    .leftJoin(users, eq(employees.userId, users.id))
+    .where(eq(employees.id, employeeId));
+
+    if (!employee[0] || !employee[0].user?.phone) {
+      throw new Error('Employee or phone number not found');
+    }
+
+    const phoneNumber = employee[0].user.phone;
+    const businessName = shiftDetails.businessName || 'Your Business';
+    
+    const message = this.generateShiftNotificationMessage(
+      employee[0].employee.firstName || 'Team Member',
+      shiftDetails,
+      businessName,
+      notificationSettings
+    );
+
+    // Send SMS using Twilio integration
+    return await this.sendSMS(phoneNumber, message);
+  }
+
+  generateShiftNotificationMessage(employeeName: string, shiftDetails: any, businessName: string, settings: any) {
+    const { title, startTime, endTime, date } = shiftDetails;
+    const formattedDate = new Date(date).toLocaleDateString();
+    const formattedStartTime = new Date(startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    const formattedEndTime = new Date(endTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+    let urgencyText = '';
+    if (settings.hoursBefore <= 4) {
+      urgencyText = ' 🚨 URGENT REMINDER';
+    }
+
+    return `Hi ${employeeName}! ${urgencyText}
+
+📅 Upcoming Shift at ${businessName}
+• ${title}
+• ${formattedDate} from ${formattedStartTime} - ${formattedEndTime}
+
+Please confirm your availability. If you cannot make it, find a replacement or contact management immediately.
+
+Reply CONFIRM to acknowledge or HELP for assistance.
+
+- MarketPace Business Scheduling`;
+  }
+
+  async sendSMS(phoneNumber: string, message: string) {
+    const twilio = require('twilio');
+    const client = twilio(
+      process.env.TWILIO_ACCOUNT_SID,
+      process.env.TWILIO_AUTH_TOKEN
+    );
+
+    try {
+      const result = await client.messages.create({
+        body: message,
+        from: process.env.TWILIO_PHONE_NUMBER,
+        to: phoneNumber
+      });
+
+      console.log(`SMS sent successfully. SID: ${result.sid}`);
+      return { success: true, sid: result.sid };
+    } catch (error) {
+      console.error('Error sending SMS:', error);
+      throw new Error(`Failed to send SMS: ${error.message}`);
+    }
+  }
+
+  // Enhanced SMS Invitation System
+  async sendSMSInvitation(phoneNumber: string, inviteData: any) {
+    const { role, businessName, inviteLink } = inviteData;
+    
+    const message = `🎯 Team Invitation - ${businessName}
+
+You're invited to join our team as ${role}!
+
+${businessName} uses MarketPace Pro for professional scheduling and instant payments. Join thousands of team members earning money with flexible shifts.
+
+✅ Instant payments after each shift
+✅ Professional scheduling system  
+✅ SMS shift reminders
+✅ Easy shift swapping
+
+Join now: ${inviteLink}
+
+Questions? Reply to this message.
+
+- ${businessName} via MarketPace Pro`;
+
+    return await this.sendSMS(phoneNumber, message);
+  }
+
+  // Payment Processing Integration
+  async processEmployeePayment(employeeId: string, shiftId: string, paymentData: any) {
+    const { amount, paymentMethod, hoursWorked, hourlyRate } = paymentData;
+    
+    // Calculate payment based on settings
+    const totalAmount = this.calculateShiftPayment(hoursWorked, hourlyRate, paymentData);
+    
+    // Process payment through Stripe or selected method
+    const paymentResult = await this.processStripePayment(employeeId, totalAmount, paymentMethod);
+    
+    // Record payment in database
+    if (paymentResult.success) {
+      await this.recordPayment(employeeId, shiftId, totalAmount, paymentMethod, paymentResult.transactionId);
+    }
+    
+    return paymentResult;
+  }
+
+  calculateShiftPayment(hoursWorked: number, baseRate: number, paymentData: any) {
+    let totalAmount = hoursWorked * baseRate;
+    
+    // Apply overtime (1.5x after 8 hours)
+    if (hoursWorked > 8) {
+      const overtimeHours = hoursWorked - 8;
+      const regularPay = 8 * baseRate;
+      const overtimePay = overtimeHours * (baseRate * 1.5);
+      totalAmount = regularPay + overtimePay;
+    }
+    
+    // Apply holiday rate if applicable
+    if (paymentData.isHoliday) {
+      totalAmount = hoursWorked * (baseRate * 2);
+    }
+    
+    // Add performance bonuses if enabled
+    if (paymentData.performanceBonus) {
+      totalAmount += paymentData.performanceBonus;
+    }
+    
+    return Math.round(totalAmount * 100) / 100; // Round to 2 decimal places
+  }
+
+  async processStripePayment(employeeId: string, amount: number, paymentMethod: string) {
+    // Stripe payment integration would go here
+    // For demo purposes, returning success
+    return {
+      success: true,
+      transactionId: `txn_${Date.now()}`,
+      amount: amount,
+      method: paymentMethod
+    };
+  }
+
+  async recordPayment(employeeId: string, shiftId: string, amount: number, method: string, transactionId: string) {
+    // Record payment in payments table (would need to create this table)
+    console.log(`Recording payment: Employee ${employeeId}, Shift ${shiftId}, Amount $${amount}, Method ${method}, Transaction ${transactionId}`);
+    return true;
+  }
         joinedAt: status === 'active' ? new Date() : undefined
       })
       .where(eq(employees.id, employeeId))
