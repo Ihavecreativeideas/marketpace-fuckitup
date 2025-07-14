@@ -211,6 +211,17 @@ MarketPace is a React Native mobile application that prioritizes community empow
 
 ## Recent Changes
 
+✓ **COMPREHENSIVE BUSINESS SCHEDULING SYSTEM WITH ENHANCED CALENDAR & ROLE-BASED VISIBILITY** (January 14, 2025)
+✓ Enhanced scheduling form with separate date picker, start/end time selectors, and duration dropdown with automatic end time calculation
+✓ Implemented interactive weekly calendar view with color-coded shifts, clickable schedule items, and today highlighting
+✓ Added role-based calendar visibility: Pro members see full team schedule, employees see personal schedule + public announcements
+✓ Created "My Schedule" employee view showing only personal shifts and filtered public announcements for privacy
+✓ Enhanced SMS invitation system with Twilio integration for professional team recruitment messaging
+✓ Added comprehensive three-method invitation system (Email, Facebook Friends, SMS Text Link) with role assignment capabilities
+✓ Fixed tabs layout overflow issues and implemented urgent red highlighting for fill-in requests with real-time count badges
+✓ Built automatic end time calculation based on start time and duration selection for streamlined scheduling workflow
+✓ Created clickable calendar days showing shift details with status-based color coding (confirmed: green, pending: orange, declined: red)
+
 ✓ **RENTAL PAGE NAVIGATION COMPLETELY FIXED - ALL EDGE CASES RESOLVED** (January 14, 2025)
 ✓ **ALL ROOT CAUSES IDENTIFIED & FIXED**: Multiple duplicate `goToPage()` functions were conflicting, causing incorrect navigation to map instead of rental page
 ✓ **COMPLETELY FIXED**: Removed all duplicate navigation functions and fixed rental button behavior on rental page to refresh instead of redirect to map

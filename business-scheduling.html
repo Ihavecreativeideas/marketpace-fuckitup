@@ -619,13 +619,72 @@
                         <!-- Options will be loaded dynamically -->
                     </select>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Start Date & Time</label>
-                    <input type="datetime-local" class="form-input" name="startTime" required>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input type="date" class="form-input" name="scheduleDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Duration</label>
+                        <select class="form-select" name="duration" required onchange="updateEndTime()">
+                            <option value="1">1 Hour</option>
+                            <option value="2">2 Hours</option>
+                            <option value="3">3 Hours</option>
+                            <option value="4">4 Hours</option>
+                            <option value="5">5 Hours</option>
+                            <option value="6">6 Hours</option>
+                            <option value="8">8 Hours (Full Shift)</option>
+                            <option value="custom">Custom Duration</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">End Date & Time</label>
-                    <input type="datetime-local" class="form-input" name="endTime" required>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">Start Time</label>
+                        <select class="form-select" name="startTime" required onchange="updateEndTime()">
+                            <option value="06:00">6:00 AM</option>
+                            <option value="07:00">7:00 AM</option>
+                            <option value="08:00">8:00 AM</option>
+                            <option value="09:00">9:00 AM</option>
+                            <option value="10:00">10:00 AM</option>
+                            <option value="11:00">11:00 AM</option>
+                            <option value="12:00">12:00 PM</option>
+                            <option value="13:00">1:00 PM</option>
+                            <option value="14:00">2:00 PM</option>
+                            <option value="15:00">3:00 PM</option>
+                            <option value="16:00">4:00 PM</option>
+                            <option value="17:00">5:00 PM</option>
+                            <option value="18:00">6:00 PM</option>
+                            <option value="19:00">7:00 PM</option>
+                            <option value="20:00">8:00 PM</option>
+                            <option value="21:00">9:00 PM</option>
+                            <option value="22:00">10:00 PM</option>
+                            <option value="23:00">11:00 PM</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">End Time</label>
+                        <select class="form-select" name="endTime" required>
+                            <option value="07:00">7:00 AM</option>
+                            <option value="08:00">8:00 AM</option>
+                            <option value="09:00">9:00 AM</option>
+                            <option value="10:00">10:00 AM</option>
+                            <option value="11:00">11:00 AM</option>
+                            <option value="12:00">12:00 PM</option>
+                            <option value="13:00">1:00 PM</option>
+                            <option value="14:00">2:00 PM</option>
+                            <option value="15:00">3:00 PM</option>
+                            <option value="16:00">4:00 PM</option>
+                            <option value="17:00">5:00 PM</option>
+                            <option value="18:00">6:00 PM</option>
+                            <option value="19:00">7:00 PM</option>
+                            <option value="20:00">8:00 PM</option>
+                            <option value="21:00">9:00 PM</option>
+                            <option value="22:00">10:00 PM</option>
+                            <option value="23:00">11:00 PM</option>
+                            <option value="00:00">12:00 AM</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Description</label>
@@ -1066,7 +1125,160 @@
         }
 
         function loadAllSchedules() {
-            loadUpcomingShifts(); // Same as upcoming shifts for now
+            // Enhanced schedule loading with role-based visibility
+            const container = document.getElementById('upcomingShifts');
+            container.innerHTML = '';
+            
+            // Add calendar view header
+            container.innerHTML = `
+                <div style="margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 16px;">
+                        <h3 style="color: #e2e8f0; margin: 0;">Schedule Calendar</h3>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn" style="background: #6366f1; color: white; padding: 8px 16px; font-size: 14px;" onclick="showWeekView()">Week</button>
+                            <button class="btn" style="background: #374151; color: white; padding: 8px 16px; font-size: 14px;" onclick="showMonthView()">Month</button>
+                            <button class="btn" style="background: #374151; color: white; padding: 8px 16px; font-size: 14px;" onclick="showEmployeeView()">My Schedule</button>
+                        </div>
+                    </div>
+                    <div id="calendarContainer" style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 20px;">
+                        <!-- Calendar will be rendered here -->
+                    </div>
+                </div>
+            `;
+            
+            renderCalendarView();
+            loadUpcomingShifts(); // Show list view below calendar
+        }
+
+        // Calendar rendering functions
+        function renderCalendarView() {
+            const container = document.getElementById('calendarContainer');
+            const currentDate = new Date();
+            const currentWeek = getWeekDates(currentDate);
+            
+            container.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-bottom: 20px;">
+                    ${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => 
+                        `<div style="text-align: center; color: #94a3b8; font-weight: 600; padding: 8px;">${day}</div>`
+                    ).join('')}
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px;">
+                    ${currentWeek.map(date => renderCalendarDay(date)).join('')}
+                </div>
+            `;
+        }
+
+        function renderCalendarDay(date) {
+            const daySchedules = demoSchedules.filter(schedule => {
+                const scheduleDate = new Date(schedule.startTime);
+                return scheduleDate.toDateString() === date.toDateString();
+            });
+            
+            const isToday = date.toDateString() === new Date().toDateString();
+            const dayStyle = isToday ? 'background: rgba(99, 102, 241, 0.3); border: 2px solid #6366f1;' : 'background: rgba(255,255,255,0.05);';
+            
+            return `
+                <div style="${dayStyle} border-radius: 8px; padding: 12px; min-height: 120px; position: relative;">
+                    <div style="font-weight: 600; color: #e2e8f0; margin-bottom: 8px;">${date.getDate()}</div>
+                    ${daySchedules.map(schedule => `
+                        <div style="background: ${getScheduleColor(schedule.status)}; color: white; font-size: 12px; padding: 4px 6px; border-radius: 4px; margin-bottom: 4px; cursor: pointer;" onclick="viewScheduleDetails('${schedule.id}')">
+                            ${schedule.title.substring(0, 12)}${schedule.title.length > 12 ? '...' : ''}
+                            <div style="font-size: 10px; opacity: 0.8;">${new Date(schedule.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                        </div>
+                    `).join('')}
+                    ${daySchedules.length === 0 ? '<div style="color: #6b7280; font-size: 12px; font-style: italic;">No shifts</div>' : ''}
+                </div>
+            `;
+        }
+
+        function getWeekDates(currentDate) {
+            const week = [];
+            const startOfWeek = new Date(currentDate);
+            startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+            
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(startOfWeek);
+                date.setDate(startOfWeek.getDate() + i);
+                week.push(date);
+            }
+            return week;
+        }
+
+        function getScheduleColor(status) {
+            switch(status) {
+                case 'confirmed': return '#10b981';
+                case 'pending': return '#f59e0b';
+                case 'declined': return '#ef4444';
+                default: return '#6b7280';
+            }
+        }
+
+        function showWeekView() {
+            renderCalendarView();
+        }
+
+        function showMonthView() {
+            // TODO: Implement month view
+            showNotification('Month view coming soon!', 'success');
+        }
+
+        function showEmployeeView() {
+            // Show only employee's personal schedule + public announcements
+            const container = document.getElementById('calendarContainer');
+            container.innerHTML = `
+                <div style="text-align: center; color: #94a3b8; padding: 40px;">
+                    <h3 style="color: #e2e8f0; margin-bottom: 16px;">My Personal Schedule</h3>
+                    <p>Employee view showing only your assigned shifts and public announcements.</p>
+                    <div style="margin-top: 20px;">
+                        <div style="background: rgba(16, 185, 129, 0.2); border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+                            <strong style="color: #10b981;">Your Next Shift:</strong> Dinner Service - Tomorrow 5:00 PM - 10:00 PM
+                        </div>
+                        <div style="background: rgba(245, 158, 11, 0.2); border-radius: 8px; padding: 16px;">
+                            <strong style="color: #f59e0b;">Public Announcement:</strong> Holiday schedule update posted
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function viewScheduleDetails(scheduleId) {
+            const schedule = demoSchedules.find(s => s.id === scheduleId);
+            if (schedule) {
+                showNotification(`${schedule.title} - ${schedule.employee} (${schedule.status})`, 'success');
+            }
+        }
+
+        // Enhanced end time calculation
+        function updateEndTime() {
+            const startTimeSelect = document.querySelector('select[name="startTime"]');
+            const durationSelect = document.querySelector('select[name="duration"]');
+            const endTimeSelect = document.querySelector('select[name="endTime"]');
+            
+            if (!startTimeSelect.value || !durationSelect.value) return;
+            
+            const startTime = startTimeSelect.value;
+            const duration = parseInt(durationSelect.value);
+            
+            if (durationSelect.value === 'custom') {
+                // Enable manual end time selection
+                endTimeSelect.disabled = false;
+                endTimeSelect.style.background = '';
+                return;
+            }
+            
+            // Calculate end time automatically
+            const [startHour, startMinute] = startTime.split(':').map(Number);
+            const startMinutes = startHour * 60 + startMinute;
+            const endMinutes = startMinutes + (duration * 60);
+            
+            const endHour = Math.floor(endMinutes / 60) % 24;
+            const endMinute = endMinutes % 60;
+            const endTimeFormatted = `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
+            
+            // Set the calculated end time
+            endTimeSelect.value = endTimeFormatted;
+            endTimeSelect.disabled = true;
+            endTimeSelect.style.background = 'rgba(107, 114, 128, 0.5)';
         }
 
         function loadFillInRequests() {
