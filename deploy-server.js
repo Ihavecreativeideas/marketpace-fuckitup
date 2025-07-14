@@ -100,6 +100,10 @@ app.get('/rental-booking', (req, res) => {
   res.sendFile(path.join(__dirname, 'rental-booking.html'));
 });
 
+app.get('/rentals', (req, res) => {
+  res.sendFile(path.join(__dirname, 'rentals.html'));
+});
+
 app.get('/platform-integrations', (req, res) => {
   res.sendFile(path.join(__dirname, 'platform-integrations.html'));
 });
