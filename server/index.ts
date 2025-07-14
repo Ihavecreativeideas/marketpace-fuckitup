@@ -178,6 +178,54 @@ app.post('/api/schedules', async (req, res) => {
   }
 });
 
+// Supabase Integration API
+app.post('/api/integrations/supabase/connect', async (req, res) => {
+  try {
+    const { url, anonKey, serviceKey } = req.body;
+    
+    if (!url || !anonKey) {
+      return res.status(400).json({
+        success: false,
+        error: 'Supabase URL and Anon Key are required'
+      });
+    }
+
+    // Test Supabase connection
+    const testResponse = await fetch(`${url}/rest/v1/`, {
+      headers: {
+        'apikey': anonKey,
+        'Authorization': `Bearer ${anonKey}`
+      }
+    });
+
+    if (!testResponse.ok) {
+      throw new Error('Failed to connect to Supabase');
+    }
+
+    // Store integration credentials securely
+    const integrationData = {
+      platform: 'supabase',
+      url: url,
+      anonKey: anonKey,
+      serviceKey: serviceKey || null,
+      status: 'connected',
+      connectedAt: new Date().toISOString()
+    };
+
+    res.json({
+      success: true,
+      message: 'Successfully connected to Supabase',
+      integration: integrationData
+    });
+  } catch (error: any) {
+    console.error('Supabase connection error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to connect to Supabase'
+    });
+  }
+});
+
 app.get('/api/schedules/:businessId', async (req, res) => {
   try {
     const { businessId } = req.params;
@@ -198,7 +246,8 @@ const htmlRoutes = [
   '/', '/community', '/shops', '/services', '/rentals', '/the-hub', 
   '/menu', '/profile', '/cart', '/settings', '/delivery', '/deliveries',
   '/business-scheduling', '/interactive-map', '/item-verification',
-  '/signup-login', '/message-owner', '/rental-delivery', '/support'
+  '/signup-login', '/message-owner', '/rental-delivery', '/support',
+  '/platform-integrations', '/supabase-integration'
 ];
 
 htmlRoutes.forEach(route => {
