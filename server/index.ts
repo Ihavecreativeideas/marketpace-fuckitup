@@ -1,835 +1,238 @@
-import express from "express";
-import cors from "cors";
-import helmet from "helmet";
-import path from "path";
-import { config } from "dotenv";
-import { registerRoutes } from "./routes";
-import { registerAdminRoutes } from "./adminRoutes";
-import { registerSponsorshipRoutes } from "./sponsorshipRoutes";
-// Removed problematic imports that were causing routing errors
-// import integrationRoutes from "./integrations";
-// import securityRoutes from "./routes/security";
-// import advertisingRoutes from "./routes/advertising";
-import { 
-  securityHeaders, 
-  rateLimit, 
-  validateAndSanitize,
-  csrfProtection 
-} from "./security/validation";
-import { DataPrivacyMiddleware, enforceNeverSellDataPolicy, logUserDataAccess } from "./dataPrivacyMiddleware";
-import { 
-  validateEnvironment, 
-  SecurityMonitor,
-  SECURITY_CONFIG 
-} from "./security/environment";
-
-// Load environment variables
-config();
-
-// Validate environment on startup
-const envValidation = validateEnvironment();
-if (!envValidation.valid) {
-  console.error('Missing required environment variables:', envValidation.missing);
-  console.warn('Application starting with reduced functionality');
-}
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import { BusinessSchedulingService } from './business-scheduling';
 
 const app = express();
-
-// Security monitoring middleware
-app.use((req, res, next) => {
-  SecurityMonitor.logSecurityEvent('request', {
-    method: req.method,
-    url: req.url,
-    ip: req.ip,
-    userAgent: req.get('User-Agent')
-  });
-  next();
-});
-
-// Enhanced security headers with nonce support
-app.use(securityHeaders);
-
-// Helmet with stricter CSP
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-  contentSecurityPolicy: false, // Handled by securityHeaders middleware
-  crossOriginEmbedderPolicy: false,
-  hsts: {
-    maxAge: 31536000,
-    includeSubDomains: true,
-    preload: true
-  },
-  noSniff: true,
-  frameguard: { action: 'deny' },
-  xssFilter: true
-}));
-
-// Enhanced CORS with security validation
-app.use(cors({
-  origin: (origin, callback) => {
-    const allowedOrigins = [
-      'http://localhost:8083',
-      'https://localhost:8083',
-      'exp://localhost:8083',
-      'exp://172.31.128.31:8083'
-    ];
-    
-    const allowedPatterns = [
-      /^https:\/\/.*\.replit\.dev$/,
-      /^https:\/\/.*\.replit\.app$/,
-      /^exp:\/\/.*$/,
-      /^https:\/\/.*\.spock\.replit\.dev$/
-    ];
-    
-    // Allow requests with no origin (mobile apps, etc.)
-    if (!origin) return callback(null, true);
-    
-    // Check against allowed origins
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    
-    // Check against patterns
-    if (allowedPatterns.some(pattern => pattern.test(origin))) {
-      return callback(null, true);
-    }
-    
-    // Log potential CORS attack
-    SecurityMonitor.logSecurityEvent('cors_violation', { origin });
-    callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type', 
-    'Authorization', 
-    'X-Requested-With', 
-    'X-Privacy-Sandbox',
-    'X-CSRF-Token'
-  ],
-  maxAge: 86400 // 24 hours
-}));
-
-// Enhanced request parsing with security limits
-app.use(express.json({ 
-  limit: '10mb',
-  verify: (req, res, buf) => {
-    // Log large payloads for monitoring
-    if (buf.length > 1024 * 1024) { // 1MB threshold
-      SecurityMonitor.logSecurityEvent('large_payload', {
-        size: buf.length,
-        endpoint: req.url,
-        ip: req.ip
-      });
-    }
-  }
-}));
-
-app.use(express.urlencoded({ 
-  extended: true, 
-  limit: '10mb',
-  parameterLimit: 1000
-}));
-
-// Rate limiting for all requests
-app.use(rateLimit(SECURITY_CONFIG.RATE_LIMIT_WINDOW, SECURITY_CONFIG.RATE_LIMIT_MAX_REQUESTS));
-
-// CRITICAL: Data Privacy Protection Middleware
-app.use(enforceNeverSellDataPolicy);
-app.use(...DataPrivacyMiddleware.fullPrivacyProtection);
-app.use(logUserDataAccess);
-
-// Static file serving with security headers
-app.use(express.static("client/dist", {
-  setHeaders: (res, path) => {
-    if (path.endsWith('.js')) {
-      res.setHeader('Content-Type', 'application/javascript');
-    }
-    if (path.endsWith('.css')) {
-      res.setHeader('Content-Type', 'text/css');
-    }
-  }
-}));
-
-app.use(express.static(path.join(__dirname, '../'), {
-  setHeaders: (res, path) => {
-    // Add security headers to static files
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-  }
-}));
-
-// Main landing page route
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../pitch-page.html'));
-});
-
-// Password login page route (Facebook-style login flow)
-app.get('/login-password', (req, res) => {
-  res.sendFile(path.join(__dirname, '../login-password.html'));
-});
-
-// Facebook integration demo route
-app.get('/facebook-demo', (req, res) => {
-  res.sendFile(path.join(__dirname, '../facebook-integration-demo.html'));
-});
-
-// Policy and legal pages
-app.get('/privacy-policy', (req, res) => {
-  res.sendFile(path.join(__dirname, '../privacy-policy.html'));
-});
-
-app.get('/terms-of-service', (req, res) => {
-  res.sendFile(path.join(__dirname, '../terms-of-service.html'));
-});
-
-app.get('/data-deletion', (req, res) => {
-  res.sendFile(path.join(__dirname, '../data-deletion.html'));
-});
-
-// Community feed route
-app.get('/community', (req, res) => {
-  res.sendFile(path.join(__dirname, '../community.html'));
-});
-
-// Sign up/login route  
-app.get('/signup-login', (req, res) => {
-  res.sendFile(path.join(__dirname, '../signup-login.html'));
-});
-
-// Verification route
-app.get('/verification', (req, res) => {
-  res.sendFile(path.join(__dirname, '../verification.html'));
-});
-
-// Two-Factor Authentication route
-app.get('/two-factor-auth', (req, res) => {
-  res.sendFile(path.join(__dirname, '../two-factor-auth.html'));
-});
-
-// Device Security route
-app.get('/device-security', (req, res) => {
-  res.sendFile(path.join(__dirname, '../device-security.html'));
-});
-
-// The Hub route
-app.get('/the-hub', (req, res) => {
-  res.sendFile(path.join(__dirname, '../the-hub.html'));
-});
-
-// Shops route
-app.get('/shops', (req, res) => {
-  res.sendFile(path.join(__dirname, '../shops.html'));
-});
-
-// Delivery route
-app.get('/delivery', (req, res) => {
-  res.sendFile(path.join(__dirname, '../delivery.html'));
-});
-
-// Services route
-app.get('/services', (req, res) => {
-  res.sendFile(path.join(__dirname, '../services.html'));
-});
-
-// Profile route
-app.get('/profile', (req, res) => {
-  res.sendFile(path.join(__dirname, '../profile.html'));
-});
-
-// Platform integrations route
-app.get('/platform-integrations', (req, res) => {
-  res.sendFile(path.join(__dirname, '../platform-integrations.html'));
-});
-
-// TikTok integration demo route
-app.get('/tiktok-integration-demo', (req, res) => {
-  res.sendFile(path.join(__dirname, '../tiktok-integration-demo.html'));
-});
-
-// Member business profile route
-app.get('/member-business-profile', (req, res) => {
-  res.sendFile(path.join(__dirname, '../member-business-profile.html'));
-});
-
-// Ticket integration demo route
-app.get('/ticket-integration-demo', (req, res) => {
-  res.sendFile(path.join(__dirname, '../ticket-integration-demo.html'));
-});
-
-// Bandzoogle integration route
-app.get('/bandzoogle-integration', (req, res) => {
-  res.sendFile(path.join(__dirname, '../bandzoogle-integration.html'));
-});
-
-// Event booking routes for direct links
-app.get('/book-event/:eventId', (req, res) => {
-  const { eventId } = req.params;
-  const platform = req.query.platform;
-  
-  // This would typically redirect to a booking page or handle the booking
-  res.send(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Book Event - MarketPace</title>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body style="font-family: Arial, sans-serif; background: #0d0221; color: white; padding: 40px; text-align: center;">
-      <h1>🎟️ Event Booking</h1>
-      <p>Event ID: ${eventId}</p>
-      ${platform ? `<p>Platform: ${platform}</p>` : ''}
-      <p>This would redirect to the actual booking system or display event details.</p>
-      <a href="/" style="color: #00ffff;">← Back to MarketPace</a>
-    </body>
-    </html>
-  `);
-});
-
-app.get('/redirect-ticket/:eventId', (req, res) => {
-  const { eventId } = req.params;
-  const externalUrl = req.query.external;
-  
-  if (externalUrl) {
-    // Redirect to external ticket platform
-    res.redirect(decodeURIComponent(externalUrl as string));
-  } else {
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Ticket Redirect - MarketPace</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      </head>
-      <body style="font-family: Arial, sans-serif; background: #0d0221; color: white; padding: 40px; text-align: center;">
-        <h1>🎟️ Ticket Redirect</h1>
-        <p>Event ID: ${eventId}</p>
-        <p>No external URL provided for redirect.</p>
-        <a href="/" style="color: #00ffff;">← Back to MarketPace</a>
-      </body>
-      </html>
-    `);
-  }
-});
-
-// Food ordering page
-app.get('/food-ordering', (req, res) => {
-  res.sendFile(path.join(__dirname, '../food-ordering.html'));
-});
-
-// Uber Eats OAuth Demo page
-app.get('/uber-eats-oauth-demo', (req, res) => {
-  res.sendFile(path.join(__dirname, '../uber-eats-oauth-demo.html'));
-});
-
-// Button test page route
-app.get('/button-test', (req, res) => {
-  res.sendFile(path.join(__dirname, '../button-test.html'));
-});
-
-// Admin dashboard route
-app.get('/admin-dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, '../admin-dashboard.html'));
-});
-
-// Security dashboard route
-app.get('/security-dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, '../security-dashboard.html'));
-});
-
-// Admin login route
-app.get('/admin-login', (req, res) => {
-  res.sendFile(path.join(__dirname, '../admin-login.html'));
-});
-
-// Driver application route
-app.get('/driver-application', (req, res) => {
-  res.sendFile(path.join(__dirname, '../driver-application.html'));
-});
-
-// Simple button test route
-app.get('/simple-test', (req, res) => {
-  res.sendFile(path.join(__dirname, '../simple-button-test.html'));
-});
-
-// Debug button test route
-app.get('/debug-buttons', (req, res) => {
-  res.sendFile(path.join(__dirname, '../debug-buttons.html'));
-});
-
-// Cart route
-app.get('/cart', (req, res) => {
-  res.sendFile(path.join(__dirname, '../cart.html'));
-});
-
-// Checkout route
-app.get('/checkout', (req, res) => {
-  res.sendFile(path.join(__dirname, '../checkout.html'));
-});
-
-// Settings route
-app.get('/settings', (req, res) => {
-  res.sendFile(path.join(__dirname, '../settings.html'));
-});
-
-// Deliveries route
-app.get('/deliveries', (req, res) => {
-  res.sendFile(path.join(__dirname, '../deliveries.html'));
-});
-
-// Security route
-app.get('/security', (req, res) => {
-  res.sendFile(path.join(__dirname, '../security.html'));
-});
-
-// MarketPace Menu route
-app.get('/marketpace-menu', (req, res) => {
-  res.sendFile(path.join(__dirname, '../marketpace-menu.html'));
-});
-
-// Delivery route (alias for deliveries)
-app.get('/delivery', (req, res) => {
-  res.sendFile(path.join(__dirname, '../deliveries.html'));
-});
-
-// Seamless signup API endpoint
-app.post('/api/seamless-signup', async (req, res) => {
-  const { email, password, phone } = req.body;
-  
-  if (!email || !password || !phone) {
-    return res.status(400).json({ success: false, message: 'Email, password, and phone are required' });
-  }
-  
-  try {
-    // In a real app, you would:
-    // 1. Hash the password
-    // 2. Store user in database
-    // 3. Send verification SMS
-    
-    console.log(`New user signup: ${email}, ${phone}`);
-    
-    res.json({ 
-      success: true, 
-      message: 'Account created successfully',
-      user: { email, phone, loggedIn: true }
-    });
-  } catch (error) {
-    console.error('Signup error:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
-
-// Honor System Delivery Endpoints
-app.post('/api/delivery/size', async (req, res) => {
-  const { orderId, size, quantity } = req.body;
-  
-  if (!orderId || !size || !quantity) {
-    return res.status(400).json({ success: false, message: 'Order ID, size, and quantity are required' });
-  }
-  
-  try {
-    // Calculate delivery fee based on honor system rules
-    let deliveryFee = 0;
-    if (size === 'medium' || size === 'large' || size === 'bulk') {
-      deliveryFee = 25;
-    }
-    
-    // In a real app, save to database
-    console.log(`Delivery size update: Order ${orderId}, Size: ${size}, Quantity: ${quantity}, Fee: $${deliveryFee}`);
-    
-    res.json({ 
-      success: true, 
-      message: 'Delivery size updated successfully',
-      deliveryFee,
-      yourShare: deliveryFee / 2
-    });
-  } catch (error) {
-    console.error('Delivery size update error:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
-
-app.post('/api/delivery/honesty-rating', async (req, res) => {
-  const { raterId, ratedUserId, orderId, honestyScore, comment } = req.body;
-  
-  if (!raterId || !ratedUserId || !orderId || !honestyScore) {
-    return res.status(400).json({ success: false, message: 'Rater ID, rated user ID, order ID, and honesty score are required' });
-  }
-  
-  try {
-    // In a real app, save honesty rating to database
-    console.log(`Honesty rating: ${raterId} rated ${ratedUserId} ${honestyScore} stars for order ${orderId}`);
-    
-    res.json({ 
-      success: true, 
-      message: 'Honesty rating submitted successfully',
-      rating: { honestyScore, comment }
-    });
-  } catch (error) {
-    console.error('Honesty rating error:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
-
-app.get('/api/delivery/pricing-rules', (req, res) => {
-  res.json({
-    success: true,
-    rules: {
-      small: { fee: 0, description: "Fits in garbage bag - No extra fee" },
-      medium: { fee: 25, description: "Larger than garbage bag - +$25 oversized fee" },
-      large: { fee: 25, description: "Furniture, appliances - +$25 oversized fee" },
-      bulk: { fee: 25, description: "Large bulk delivery - +$25 oversized fee" }
-    },
-    splitPolicy: "50/50 between buyer and seller",
-    commission: "5% platform fee on oversized charges (excluding tips)"
-  });
-});
-
-// Seamless login API endpoint
-app.post('/api/seamless-login', async (req, res) => {
-  const { email, password } = req.body;
-  
-  if (!email || !password) {
-    return res.status(400).json({ success: false, message: 'Email and password are required' });
-  }
-  
-  try {
-    // In a real app, you would:
-    // 1. Verify password hash
-    // 2. Check user exists in database
-    
-    console.log(`User login: ${email}`);
-    
-    res.json({ 
-      success: true, 
-      message: 'Login successful',
-      user: { email, loggedIn: true }
-    });
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
-
-// Forgot password API endpoint
-app.post('/api/forgot-password', (req, res) => {
-  const { email } = req.body;
-  
-  if (!email) {
-    return res.status(400).json({ success: false, message: 'Email is required' });
-  }
-  
-  // In a real app, you would:
-  // 1. Check if email exists in database
-  // 2. Generate a secure reset token
-  // 3. Send email with reset link
-  
-  // For demo purposes, we'll just respond with success
-  console.log(`Password reset requested for: ${email}`);
-  
-  res.json({ 
-    success: true, 
-    message: 'Password reset email sent if account exists' 
-  });
-});
-
-// Facebook OAuth routes
-app.get('/api/auth/facebook', (req, res) => {
-  const facebookAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${process.env.FACEBOOK_APP_ID}&redirect_uri=${encodeURIComponent(process.env.FACEBOOK_REDIRECT_URI || 'http://localhost:5000/api/auth/facebook/callback')}&scope=email,public_profile&response_type=code`;
-  res.redirect(facebookAuthUrl);
-});
-
-app.get('/api/auth/facebook/callback', async (req, res) => {
-  const { code } = req.query;
-  
-  if (!code) {
-    return res.redirect('/signup-login?error=facebook_auth_failed');
-  }
-  
-  try {
-    // Exchange code for access token
-    const tokenResponse = await fetch(`https://graph.facebook.com/v18.0/oauth/access_token?client_id=${process.env.FACEBOOK_APP_ID}&client_secret=${process.env.FACEBOOK_APP_SECRET}&redirect_uri=${encodeURIComponent(process.env.FACEBOOK_REDIRECT_URI || 'http://localhost:5000/api/auth/facebook/callback')}&code=${code}`);
-    const tokenData = await tokenResponse.json();
-    
-    if (!tokenData.access_token) {
-      return res.redirect('/signup-login?error=facebook_token_failed');
-    }
-    
-    // Get user info
-    const userResponse = await fetch(`https://graph.facebook.com/me?fields=id,name,email&access_token=${tokenData.access_token}`);
-    const userData = await userResponse.json();
-    
-    // Store user session
-    const user = {
-      id: userData.id,
-      email: userData.email,
-      name: userData.name,
-      provider: 'facebook',
-      loggedIn: true,
-      loginTime: Date.now()
-    };
-    
-    // In a real app, you would store this in a secure session
-    // For demo purposes, we'll redirect with user data
-    res.redirect(`/community?user=${encodeURIComponent(JSON.stringify(user))}`);
-    
-  } catch (error) {
-    console.error('Facebook auth error:', error);
-    res.redirect('/signup-login?error=facebook_auth_error');
-  }
-});
-
-// Google OAuth routes
-app.get('/api/auth/google', (req, res) => {
-  const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5000/api/auth/google/callback')}&scope=openid email profile&response_type=code`;
-  res.redirect(googleAuthUrl);
-});
-
-app.get('/api/auth/google/callback', async (req, res) => {
-  const { code } = req.query;
-  
-  if (!code) {
-    return res.redirect('/signup-login?error=google_auth_failed');
-  }
-  
-  try {
-    // Exchange code for access token
-    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        client_id: process.env.GOOGLE_CLIENT_ID,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        code: code,
-        grant_type: 'authorization_code',
-        redirect_uri: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5000/api/auth/google/callback'
-      })
-    });
-    
-    const tokenData = await tokenResponse.json();
-    
-    if (!tokenData.access_token) {
-      return res.redirect('/signup-login?error=google_token_failed');
-    }
-    
-    // Get user info
-    const userResponse = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${tokenData.access_token}`);
-    const userData = await userResponse.json();
-    
-    // Store user session
-    const user = {
-      id: userData.id,
-      email: userData.email,
-      name: userData.name,
-      provider: 'google',
-      loggedIn: true,
-      loginTime: Date.now()
-    };
-    
-    // In a real app, you would store this in a secure session
-    // For demo purposes, we'll redirect with user data
-    res.redirect(`/community?user=${encodeURIComponent(JSON.stringify(user))}`);
-    
-  } catch (error) {
-    console.error('Google auth error:', error);
-    res.redirect('/signup-login?error=google_auth_error');
-  }
-});
-
-// Admin login page
-app.get('/admin-login', (req, res) => {
-  res.sendFile(path.join(__dirname, '../admin-login.html'));
-});
-
-// Admin dashboard (existing route for compatibility)
-app.get('/admin-dashboard.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '../admin-dashboard.html'));
-});
-
-// New Admin Dashboard Data API
-app.get('/api/admin/dashboard-data', (req, res) => {
-  // In a real app, this would fetch from database
-  const dashboardData = {
-    totalUsers: 2847,
-    totalBusinesses: 89,
-    totalDrivers: 342,
-    totalRevenue: 4250,
-    analytics: {
-      pageViews: 23487,
-      transactions: 156,
-      deliveries: 234,
-      conversionRate: 12.5
-    },
-    drivers: {
-      pending: 23,
-      active: 89,
-      completedRoutes: 156,
-      poolBalance: 562.50
-    },
-    funds: {
-      commission: 2140,
-      protection: 940,
-      damage: 562.50,
-      sustainability: 315
-    },
-    sponsors: {
-      bronze: 3,
-      silver: 5,
-      gold: 2,
-      platinum: 2
-    }
-  };
-  
-  res.json(dashboardData);
-});
-
 const port = process.env.PORT || 5000;
 
-// Register admin routes
-registerAdminRoutes(app);
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.static('.'));
 
-// Register sponsorship routes
-registerSponsorshipRoutes(app);
+// Initialize services
+const schedulingService = new BusinessSchedulingService();
 
-// Internal Ads Demo route
-app.get('/internal-ads-demo', (req, res) => {
-  res.sendFile(path.join(__dirname, '../internal-ads-demo.html'));
-});
-
-// Internal advertising API routes (Member-to-Member ads ONLY)
-app.post('/api/ads/campaigns', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Ad campaign created successfully for member-to-member targeting',
-    campaignId: 'ad_' + Math.random().toString(36).substr(2, 9),
-    privacy: 'All ad data stays within MarketPace - never shared externally'
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'healthy', 
+    port: port,
+    timestamp: new Date().toISOString(),
+    server: 'MarketPace Full Server with Volunteer Management'
   });
 });
 
-app.get('/api/ads/builder-config', (req, res) => {
-  res.json({
-    success: true,
-    config: {
-      adTypes: [
-        { id: 'marketplace_listing', name: 'Marketplace Listing', description: 'Promote your items for sale' },
-        { id: 'service_promotion', name: 'Service Promotion', description: 'Advertise your professional services' },
-        { id: 'event_announcement', name: 'Event Announcement', description: 'Promote local events and entertainment' },
-        { id: 'business_spotlight', name: 'Business Spotlight', description: 'Highlight your local business' }
-      ],
-      targetingOptions: {
-        geographic: ['city', 'radius', 'neighborhood'],
-        demographic: ['age_range', 'interests', 'member_type'],
-        behavioral: ['recent_buyers', 'frequent_browsers', 'service_seekers']
-      },
-      privacyNotice: 'All targeting uses only MarketPace member data. No external data sources.'
-    }
-  });
+// Volunteer Management API Routes
+app.post('/api/volunteers', async (req, res) => {
+  try {
+    const { businessId, ...volunteerData } = req.body;
+    const volunteer = await schedulingService.addVolunteer(businessId, volunteerData);
+    res.json(volunteer);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-app.get('/api/ads/personalized', (req, res) => {
-  res.json({
-    success: true,
-    ads: [
-      {
-        id: 'ad_demo1',
-        title: 'Local Coffee Shop Grand Opening',
-        description: 'Try our artisan coffee and fresh pastries! 20% off first order for MarketPace members.',
-        imageUrl: '/placeholder-coffee.jpg',
-        adType: 'business_spotlight',
-        advertiser: 'Orange Beach Coffee Co.',
-        targetReason: 'Based on your interest in local food and drinks'
+app.get('/api/volunteers/:businessId', async (req, res) => {
+  try {
+    const { businessId } = req.params;
+    const volunteers = await schedulingService.getBusinessVolunteers(businessId);
+    res.json(volunteers);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/volunteer-hours', async (req, res) => {
+  try {
+    const { businessId, ...hoursData } = req.body;
+    const hours = await schedulingService.logVolunteerHours(businessId, hoursData);
+    res.json(hours);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/volunteer-hours/:businessId', async (req, res) => {
+  try {
+    const { businessId } = req.params;
+    const { volunteerId, startDate, endDate } = req.query;
+    
+    const start = startDate ? new Date(startDate as string) : undefined;
+    const end = endDate ? new Date(endDate as string) : undefined;
+    
+    const hours = await schedulingService.getVolunteerHours(
+      businessId, 
+      volunteerId as string, 
+      start, 
+      end
+    );
+    res.json(hours);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/volunteer-schedules', async (req, res) => {
+  try {
+    const { businessId, ...scheduleData } = req.body;
+    const schedule = await schedulingService.scheduleVolunteer(businessId, scheduleData);
+    res.json(schedule);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/volunteer-schedules/:businessId', async (req, res) => {
+  try {
+    const { businessId } = req.params;
+    const { volunteerId, startDate, endDate } = req.query;
+    
+    const start = startDate ? new Date(startDate as string) : undefined;
+    const end = endDate ? new Date(endDate as string) : undefined;
+    
+    const schedules = await schedulingService.getVolunteerSchedules(
+      businessId, 
+      volunteerId as string, 
+      start, 
+      end
+    );
+    res.json(schedules);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/volunteer-hours/:hoursId/verify', async (req, res) => {
+  try {
+    const { hoursId } = req.params;
+    const { verifiedBy } = req.body;
+    const verifiedHours = await schedulingService.verifyVolunteerHours(hoursId, verifiedBy);
+    res.json(verifiedHours);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/volunteer-stats/:businessId', async (req, res) => {
+  try {
+    const { businessId } = req.params;
+    const stats = await schedulingService.getVolunteerStats(businessId);
+    res.json(stats);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Business Management API Routes
+app.post('/api/businesses', async (req, res) => {
+  try {
+    const { ownerId, ...businessData } = req.body;
+    const business = await schedulingService.createBusiness(ownerId, businessData);
+    res.json(business);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/businesses/:ownerId', async (req, res) => {
+  try {
+    const { ownerId } = req.params;
+    const businesses = await schedulingService.getUserBusinesses(ownerId);
+    res.json(businesses);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Employee Management API Routes
+app.post('/api/employees', async (req, res) => {
+  try {
+    const { businessId, ...employeeData } = req.body;
+    const employee = await schedulingService.inviteEmployee(businessId, employeeData);
+    res.json(employee);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/employees/:businessId', async (req, res) => {
+  try {
+    const { businessId } = req.params;
+    const employees = await schedulingService.getBusinessEmployees(businessId);
+    res.json(employees);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Schedule Management API Routes
+app.post('/api/schedules', async (req, res) => {
+  try {
+    const schedule = await schedulingService.createSchedule(req.body);
+    res.json(schedule);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/schedules/:businessId', async (req, res) => {
+  try {
+    const { businessId } = req.params;
+    const { startDate, endDate } = req.query;
+    
+    const start = startDate ? new Date(startDate as string) : undefined;
+    const end = endDate ? new Date(endDate as string) : undefined;
+    
+    const schedules = await schedulingService.getBusinessSchedules(businessId, start, end);
+    res.json(schedules);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Static file routes for all HTML pages
+const htmlRoutes = [
+  '/', '/community', '/shops', '/services', '/rentals', '/the-hub', 
+  '/menu', '/profile', '/cart', '/settings', '/delivery', '/deliveries',
+  '/business-scheduling', '/interactive-map', '/item-verification',
+  '/signup-login', '/message-owner', '/rental-delivery', '/support'
+];
+
+htmlRoutes.forEach(route => {
+  app.get(route, (req, res) => {
+    let fileName = route === '/' ? 'pitch-page.html' : route.slice(1) + '.html';
+    if (route === '/menu') fileName = 'marketpace-menu.html';
+    
+    res.sendFile(path.join(process.cwd(), fileName), (err) => {
+      if (err) {
+        res.redirect('/');
       }
-    ],
-    privacyNote: 'These ads are targeted using only your MarketPace activity and preferences'
+    });
   });
 });
 
-app.post('/api/ads/impressions', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Ad impression recorded - internal analytics only',
-    privacy: 'Impression data stays within MarketPace platform'
-  });
-});
-
-// Analytics route with campaign ID
-app.get('/api/ads/analytics/:campaignId', (req, res) => {
-  const { campaignId } = req.params;
-  res.json({
-    success: true,
-    campaignId,
-    analytics: {
-      impressions: 1250,
-      clicks: 87,
-      conversions: 12,
-      ctr: 6.96,
-      cpc: 0.75,
-      totalSpent: 65.25,
-      reachWithinMarketPace: 450
-    },
-    privacy: 'Analytics limited to MarketPace member interactions only'
-  });
-});
-
-// Analytics route without campaign ID (all campaigns)
-app.get('/api/ads/analytics', (req, res) => {
-  res.json({
-    success: true,
-    analytics: {
-      totalCampaigns: 5,
-      totalImpressions: 6250,
-      totalClicks: 435,
-      totalConversions: 60,
-      avgCtr: 6.96,
-      avgCpc: 0.75,
-      totalSpent: 326.25,
-      reachWithinMarketPace: 2250
-    },
-    privacy: 'Analytics limited to MarketPace member interactions only'
-  });
-});
-
-app.get('/api/ads/preferences', (req, res) => {
-  res.json({
-    success: true,
-    preferences: {
-      allowPersonalizedAds: true,
-      allowLocationBasedAds: true,
-      allowBehaviorBasedAds: true,
-      maxAdsPerDay: 5,
-      blockedAdvertisers: [],
-      preferredAdTypes: ['business_spotlight', 'event_announcement']
+// Catch-all for other HTML pages
+app.get('/:page', (req, res) => {
+  const pageName = req.params.page;
+  const filePath = path.join(process.cwd(), pageName + '.html');
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      res.redirect('/');
     }
   });
 });
 
-app.put('/api/ads/preferences', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Ad preferences updated successfully',
-    privacy: 'Preferences control internal MarketPace ad targeting only'
-  });
+app.listen(port, '0.0.0.0', () => {
+  console.log(`✅ MarketPace Full Server running on port ${port}`);
+  console.log(`🌐 Binding to 0.0.0.0:${port} for external access`);
+  console.log(`🔧 Volunteer Management API: /api/volunteers, /api/volunteer-hours, /api/volunteer-schedules`);
+  console.log(`📊 Business Scheduling API: /api/businesses, /api/employees, /api/schedules`);
+  console.log(`🚀 Ready for development and testing`);
+}).on('error', (err) => {
+  console.error(`❌ Failed to start on port ${port}:`, err.message);
 });
 
-app.post('/api/ads/targeting-suggestions', (req, res) => {
-  res.json({
-    success: true,
-    suggestions: {
-      estimatedReach: 342,
-      topInterests: ['local_shopping', 'food_dining', 'community_events'],
-      optimalBudget: 50,
-      recommendedBid: 0.65,
-      audienceInsights: 'Strong local engagement in Orange Beach area'
-    },
-    privacy: 'Targeting suggestions based on MarketPace member data only'
-  });
-});
-
-registerRoutes(app).then((server) => {
-  server.listen(port, "0.0.0.0", () => {
-    console.log(`Server running on port ${port}`);
-  });
-});
+export default app;

@@ -295,6 +295,11 @@ Questions? Reply to this message.
     console.log(`Recording payment: Employee ${employeeId}, Shift ${shiftId}, Amount $${amount}, Method ${method}, Transaction ${transactionId}`);
     return true;
   }
+
+  async updateEmployeeStatus(employeeId: string, status: 'pending' | 'active' | 'inactive') {
+    const updated = await db.update(employees)
+      .set({ 
+        status,
         joinedAt: status === 'active' ? new Date() : undefined
       })
       .where(eq(employees.id, employeeId))
