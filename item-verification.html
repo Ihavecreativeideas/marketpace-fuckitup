@@ -198,7 +198,9 @@
             background: rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(0, 255, 255, 0.3);
             border-radius: 8px;
-            padding: 20px;
+            padding: 15px;
+            max-width: 100%;
+            overflow: hidden;
         }
 
         .calendar-header {
@@ -235,16 +237,22 @@
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
+            gap: 3px;
+            max-width: 100%;
         }
 
         .calendar-day {
-            padding: 12px;
+            padding: 8px 4px;
             text-align: center;
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.3s ease;
             border: 1px solid transparent;
+            font-size: 14px;
+            min-height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .calendar-day.available {
@@ -270,11 +278,15 @@
         }
 
         .calendar-weekday {
-            padding: 8px;
+            padding: 6px 4px;
             text-align: center;
             color: #93c5fd;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
+            min-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .time-slots {
@@ -506,7 +518,7 @@
 
         @media (max-width: 768px) {
             .verification-container {
-                padding: 15px;
+                padding: 10px;
             }
             
             .item-header {
@@ -517,6 +529,8 @@
             .item-image {
                 margin-right: 0;
                 margin-bottom: 15px;
+                width: 100px;
+                height: 100px;
             }
             
             .condition-photos {
@@ -529,6 +543,33 @@
             
             .action-buttons {
                 flex-direction: column;
+            }
+            
+            .calendar-container {
+                padding: 10px;
+            }
+            
+            .calendar-day {
+                padding: 6px 2px;
+                font-size: 12px;
+                min-height: 30px;
+            }
+            
+            .calendar-weekday {
+                padding: 4px 2px;
+                font-size: 10px;
+                min-height: 25px;
+            }
+            
+            .custom-time-section > div {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .custom-time-section input[type="time"] {
+                min-width: 100%;
+                max-width: 200px;
             }
         }
     </style>
@@ -626,6 +667,21 @@
                                 <div class="label">Afternoon Pickup</div>
                             </div>
                         </div>
+                        
+                        <!-- Custom Time Selection -->
+                        <div class="custom-time-section" style="margin-top: 20px;">
+                            <h5 style="color: #93c5fd; margin-bottom: 10px;">Or Choose Custom Time</h5>
+                            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                                <label style="color: #e2e8f0; font-size: 14px;">Pickup Time:</label>
+                                <input type="time" id="customPickupTime" 
+                                       style="background: rgba(0,0,0,0.4); border: 1px solid rgba(0,255,255,0.3); color: #e2e8f0; padding: 8px; border-radius: 4px; min-width: 120px;"
+                                       onchange="selectCustomTime()">
+                                <label style="color: #e2e8f0; font-size: 14px;">Drop-off Time:</label>
+                                <input type="time" id="customDropoffTime" 
+                                       style="background: rgba(0,0,0,0.4); border: 1px solid rgba(0,255,255,0.3); color: #e2e8f0; padding: 8px; border-radius: 4px; min-width: 120px;"
+                                       onchange="selectCustomTime()">
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- Hourly Rental Options (for rentals only) -->
@@ -646,13 +702,6 @@
                                     <span class="option-price" id="dailyRate">$45/day</span>
                                 </div>
                             </label>
-                            <label class="duration-option">
-                                <input type="radio" name="duration" value="custom" onchange="updateRentalPricing()">
-                                <div class="option-content">
-                                    <span class="option-title">Custom Duration</span>
-                                    <input type="number" id="customHours" placeholder="Hours" min="1" style="width: 60px; margin-left: 10px;">
-                                </div>
-                            </label>
                         </div>
                     </div>
                 </div>
@@ -670,8 +719,8 @@
                 <div class="delivery-options">
                     <div class="option-card" onclick="selectDeliveryOption(this, 'marketplace')">
                         <div class="option-title">MarketPace Delivery</div>
-                        <div class="option-description">Professional delivery with tracking and insurance</div>
-                        <div class="option-price">$6.00 + $0.50/mile</div>
+                        <div class="option-description">Professional delivery with tracking and insurance (Pickup + Drop-off as 2 deliveries)</div>
+                        <div class="option-price">$4.00 pickup + $2.00 drop-off + $0.50/mile</div>
                     </div>
                     
                     <div class="option-card" onclick="selectDeliveryOption(this, 'pickup')">
@@ -713,9 +762,10 @@
     <script>
         let selectedDate = null;
         let selectedTimeSlot = null;
+        let customPickupTime = null;
+        let customDropoffTime = null;
         let selectedDeliveryOption = null;
         let selectedDuration = 'daily';
-        let customHours = 1;
         let itemData = null;
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
@@ -829,12 +879,43 @@
                 slot.classList.remove('selected');
             });
             
+            // Clear custom times when selecting preset slot
+            document.getElementById('customPickupTime').value = '';
+            document.getElementById('customDropoffTime').value = '';
+            customPickupTime = null;
+            customDropoffTime = null;
+            
             // Add selection to clicked element
             element.classList.add('selected');
             selectedTimeSlot = timeSlot;
             
             updateRequestButton();
+            updatePaymentSummary();
             showNotification(`Selected ${timeSlot} time slot`, 'info');
+        }
+
+        // Select custom time
+        function selectCustomTime() {
+            const pickupTime = document.getElementById('customPickupTime').value;
+            const dropoffTime = document.getElementById('customDropoffTime').value;
+            
+            if (pickupTime && dropoffTime) {
+                // Remove preset time slot selection
+                document.querySelectorAll('.time-slot').forEach(slot => {
+                    slot.classList.remove('selected');
+                });
+                
+                customPickupTime = pickupTime;
+                customDropoffTime = dropoffTime;
+                selectedTimeSlot = 'custom';
+                
+                updateRequestButton();
+                updatePaymentSummary();
+                showNotification(`Custom times: ${pickupTime} pickup, ${dropoffTime} drop-off`, 'info');
+            } else if (pickupTime || dropoffTime) {
+                selectedTimeSlot = null;
+                showNotification('Please select both pickup and drop-off times', 'error');
+            }
         }
 
         // Select delivery option
@@ -1027,11 +1108,6 @@
             const duration = document.querySelector('input[name="duration"]:checked').value;
             selectedDuration = duration;
             
-            if (duration === 'custom') {
-                const hours = document.getElementById('customHours').value || 1;
-                customHours = parseInt(hours);
-            }
-            
             updatePaymentSummary();
             showNotification(`Updated to ${duration} pricing`, 'info');
         }
@@ -1060,17 +1136,14 @@
                     case 'daily':
                         itemCost = dailyRate;
                         break;
-                    case 'custom':
-                        itemCost = hourlyRate * customHours;
-                        break;
                 }
             } else {
                 itemCost = itemData.price;
             }
             
-            // Calculate delivery cost
+            // Calculate delivery cost (pickup + dropoff as 2 deliveries)
             if (selectedDeliveryOption === 'marketplace') {
-                deliveryCost = 6.00; // Base delivery fee
+                deliveryCost = 6.00; // $4 pickup + $2 dropoff
             }
             
             const total = itemCost + deliveryCost;
@@ -1083,15 +1156,14 @@
                     breakdownHTML += `<div class="pricing-line"><span>Hourly Rate (1 hour)</span><span>$${itemCost.toFixed(2)}</span></div>`;
                 } else if (selectedDuration === 'daily') {
                     breakdownHTML += `<div class="pricing-line"><span>Daily Rate (1 day)</span><span>$${itemCost.toFixed(2)}</span></div>`;
-                } else {
-                    breakdownHTML += `<div class="pricing-line"><span>Custom Rate (${customHours} hours)</span><span>$${itemCost.toFixed(2)}</span></div>`;
                 }
             } else {
                 breakdownHTML += `<div class="pricing-line"><span>Item Price</span><span>$${itemCost.toFixed(2)}</span></div>`;
             }
             
             if (deliveryCost > 0) {
-                breakdownHTML += `<div class="pricing-line"><span>Delivery Fee</span><span>$${deliveryCost.toFixed(2)}</span></div>`;
+                breakdownHTML += `<div class="pricing-line"><span>Pickup Fee</span><span>$4.00</span></div>`;
+                breakdownHTML += `<div class="pricing-line"><span>Drop-off Fee</span><span>$2.00</span></div>`;
                 breakdownHTML += `<div class="pricing-line"><span>Mileage (est.)</span><span>$2.50</span></div>`;
             }
             
@@ -1142,8 +1214,6 @@
                 let itemCost = itemData.price;
                 if (itemData.category === 'rental' && selectedDuration === 'hourly') {
                     itemCost = Math.round(itemData.price / 3);
-                } else if (itemData.category === 'rental' && selectedDuration === 'custom') {
-                    itemCost = Math.round(itemData.price / 3) * customHours;
                 }
                 
                 const deliveryCost = selectedDeliveryOption === 'marketplace' ? 8.50 : 0;
@@ -1154,9 +1224,10 @@
                     item: itemData,
                     date: selectedDate,
                     timeSlot: selectedTimeSlot,
+                    customPickupTime: customPickupTime,
+                    customDropoffTime: customDropoffTime,
                     deliveryOption: selectedDeliveryOption,
                     duration: selectedDuration,
-                    customHours: customHours,
                     pricing: {
                         itemCost: itemCost,
                         deliveryCost: deliveryCost,
