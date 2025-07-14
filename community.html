@@ -1385,7 +1385,7 @@
                         <div class="commerce-actions">
                             <button class="commerce-btn primary" onclick="addToCart('Vintage Leather Jacket', 85.00, 'Sarah\'s Boutique', 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400')">Add to Cart</button>
                             <button class="commerce-btn" onclick="deliverNow('leather jacket')">Deliver Now</button>
-                            <button class="commerce-btn" onclick="verifyCondition('Vintage Leather Jacket', 'sales')" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                            <button class="commerce-btn" onclick="goToMemberProfile('Sarah\\'s Boutique', 'SB')" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
                                     <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 255, 255, 0.2)"/>
                                     <circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5"/>
@@ -1451,7 +1451,7 @@
                                 Message
                             </button>
                             <button class="commerce-btn" onclick="selfPickup('power washer')">Self Pickup</button>
-                            <button class="commerce-btn" onclick="verifyCondition('Power Washer', 'rentals')" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                            <button class="commerce-btn" onclick="goToMemberProfile('Tom\\'s Tool Rentals', 'TM')" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
                                     <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 255, 255, 0.2)"/>
                                     <circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5"/>
@@ -1561,7 +1561,7 @@
                                 Message
                             </button>
                             <button class="commerce-btn" onclick="selfPickup('beach chairs')">Self Pickup</button>
-                            <button class="commerce-btn" onclick="verifyCondition('Beach Chairs Set', 'rentals')" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 255, 255, 0.2)"/><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5"/><path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="1.5"/></svg>Verify Condition</button>
+                            <button class="commerce-btn" onclick="goToMemberProfile('Jessica Martinez', 'JM')" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 255, 255, 0.2)"/><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5"/><path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="1.5"/></svg>Verify Condition</button>
                         </div>
                     </div>
                 </div>
@@ -4009,22 +4009,43 @@
         }
         
         // Hide/show search bar on scroll
-        let lastScrollTop = 0;
         window.addEventListener('scroll', function() {
             const searchWrapper = document.querySelector('.search-wrapper');
             if (!searchWrapper) return;
             
             let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
             
-            if (scrollTop > lastScrollTop && scrollTop > 100) {
+            if (scrollTop > window.lastScrollTop && scrollTop > 100) {
                 // Scrolling down - hide search bar
                 searchWrapper.classList.add('hidden');
             } else {
                 // Scrolling up - show search bar
                 searchWrapper.classList.remove('hidden');
             }
-            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+            window.lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
         });
+
+        // Go to specific member profile page
+        function goToMemberProfile(memberName, initials) {
+            try {
+                console.log(`Navigating to ${memberName}'s profile...`);
+                
+                // Store member info for profile page
+                localStorage.setItem('selectedMember', JSON.stringify({
+                    name: memberName,
+                    initials: initials,
+                    verified: true
+                }));
+                
+                // Navigate to profile page
+                window.location.href = '/profile';
+                
+                showNotification(`Opening ${memberName}'s profile`, 'info');
+            } catch (error) {
+                console.error('Profile navigation error:', error);
+                showNotification('Profile navigation error', 'error');
+            }
+        }
 
         // Check login status when page loads
         document.addEventListener('DOMContentLoaded', function() {
