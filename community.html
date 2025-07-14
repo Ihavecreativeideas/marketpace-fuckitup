@@ -346,16 +346,29 @@
         .search-wrapper {
             display: flex;
             align-items: center;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 15px;
-            padding: 4px 10px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            height: 22px;
+            padding: 2px 8px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+            height: 18px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            opacity: 0.7;
+            transition: all 0.3s ease;
+            opacity: 0.4;
+            transform: scale(0.9);
+        }
+        
+        .search-wrapper:hover {
+            opacity: 0.8;
+            transform: scale(1);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .search-wrapper.hidden {
+            opacity: 0;
+            transform: scale(0.8) translateY(-10px);
+            pointer-events: none;
         }
 
         .search-input {
@@ -363,10 +376,10 @@
             background: none;
             border: none;
             color: white;
-            font-size: 10px;
+            font-size: 9px;
             outline: none;
             padding: 0;
-            height: 14px;
+            height: 12px;
             cursor: pointer;
         }
 
@@ -1371,7 +1384,6 @@
                         <div class="price-tag">$85.00</div>
                         <div class="commerce-actions">
                             <button class="commerce-btn primary" onclick="addToCart('Vintage Leather Jacket', 85.00, 'Sarah\'s Boutique', 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400')">Add to Cart</button>
-                            <button class="commerce-btn" onclick="makeOffer('leather jacket')">Make Offer</button>
                             <button class="commerce-btn" onclick="deliverNow('leather jacket')">Deliver Now</button>
                             <button class="commerce-btn" onclick="verifyCondition('Vintage Leather Jacket', 'sales')" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
@@ -3996,6 +4008,24 @@
             }, 3000);
         }
         
+        // Hide/show search bar on scroll
+        let lastScrollTop = 0;
+        window.addEventListener('scroll', function() {
+            const searchWrapper = document.querySelector('.search-wrapper');
+            if (!searchWrapper) return;
+            
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                // Scrolling down - hide search bar
+                searchWrapper.classList.add('hidden');
+            } else {
+                // Scrolling up - show search bar
+                searchWrapper.classList.remove('hidden');
+            }
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        });
+
         // Check login status when page loads
         document.addEventListener('DOMContentLoaded', function() {
             checkLoginStatus();
