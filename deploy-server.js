@@ -71,6 +71,11 @@ app.get('/menu', (req, res) => {
   res.sendFile(path.join(__dirname, 'marketpace-menu.html'));
 });
 
+// Business Scheduling route
+app.get('/business-scheduling', (req, res) => {
+  res.sendFile(path.join(__dirname, 'business-scheduling.html'));
+});
+
 app.get('/profile', (req, res) => {
   res.sendFile(path.join(__dirname, 'profile.html'));
 });
