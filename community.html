@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MarketPace Community</title>
+    <title>MarketPace Community Feed</title>
     <style>
         * {
             margin: 0;
@@ -12,224 +12,412 @@
         }
 
         body {
-            margin: 0;
-            padding: 0;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: 
-                radial-gradient(circle at 20% 30%, rgba(29, 11, 61, 0.9) 0%, transparent 60%),
-                radial-gradient(circle at 80% 70%, rgba(20, 184, 166, 0.4) 0%, transparent 50%),
-                linear-gradient(135deg, #1a0b3d 0%, #1e1b4b 25%, #1e3a8a 50%, #0f172a 75%, #134e4a 100%);
-            color: #ffffff;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0b3d 50%, #0d0221 100%);
             min-height: 100vh;
-            padding-top: 180px;
-            padding-bottom: 80px;
-            position: relative;
+            color: white;
             overflow-x: hidden;
         }
 
-        /* Moving Sonar Background Animation */
-        body::before {
-            content: '';
+        /* Floating Particles */
+        .particles {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            width: 200%;
-            height: 200%;
-            transform: translate(-50%, -50%);
-            background: 
-                radial-gradient(circle at center, 
-                    transparent 30%, 
-                    rgba(20, 184, 166, 0.15) 31%, 
-                    rgba(20, 184, 166, 0.15) 32%, 
-                    transparent 33%,
-                    transparent 50%,
-                    rgba(14, 165, 233, 0.1) 51%,
-                    rgba(14, 165, 233, 0.1) 52%,
-                    transparent 53%,
-                    transparent 70%,
-                    rgba(59, 130, 246, 0.08) 71%,
-                    rgba(59, 130, 246, 0.08) 72%,
-                    transparent 73%
-                );
-            animation: sonarPulse 4s ease-in-out infinite;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
             z-index: 1;
-            opacity: 0.9;
         }
-        
-        @keyframes sonarPulse {
-            0%, 100% { 
-                transform: translate(-50%, -50%) scale(0.8);
-                opacity: 0.7;
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(0, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        .particle:nth-child(odd) {
+            background: rgba(157, 78, 221, 0.6);
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
             }
-            50% { 
-                transform: translate(-50%, -50%) scale(1.3);
+            10% {
                 opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
             }
         }
 
         /* Header */
         .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(13, 2, 33, 0.9);
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(0, 168, 204, 0.3);
-            padding: 12px 8px;
-            z-index: 1000;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .header-content {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #1e40af, #3730a3);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3);
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            justify-content: center;
-            max-width: 500px;
-            margin: 0 auto;
-            gap: 15px;
-            padding: 0 10px;
+            gap: 6px;
+        }
+
+        .back-btn:hover {
+            transform: translateX(-2px) scale(1.05);
+        }
+
+        .logo-container {
+            text-align: center;
         }
 
         .logo {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .logo img {
             height: 80px;
             width: auto;
             border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .logo img:hover {
             box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
         }
 
-        .header-right {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            gap: 8px;
-        }
-
-        .top-section {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-        }
-
-        .search-section {
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .profile-main-button {
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(59, 130, 246, 0.8);
-            border-radius: 6px;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: #93c5fd;
-        }
-
-        .profile-main-button:hover {
-            background: rgba(59, 130, 246, 0.2);
-        }
-
-        .mp-map-button {
-            background: linear-gradient(135deg, #1e1b4b, #3730a3);
-            border: 1px solid rgba(59, 130, 246, 0.4);
-            border-radius: 8px;
-            padding: 8px 16px;
-            color: white;
-            font-size: 14px;
+        .menu-btn {
+            background: rgba(255, 255, 255, 0.9);
+            color: #0d0221;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
             transition: all 0.3s ease;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
-        .mp-map-button:hover {
-            background: linear-gradient(135deg, #3730a3, #1e40af);
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-        }
-
-        .search-input {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 25px;
-            padding: 12px 20px;
-            color: white;
-            font-size: 16px;
-        }
-
-        .search-input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+        .menu-btn:hover {
+            background: white;
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
         }
 
         /* Main Container */
         .main-container {
-            max-width: 600px;
+            max-width: 800px;
             margin: 0 auto;
             padding: 20px;
             position: relative;
             z-index: 10;
         }
 
+        /* Search Bar */
+        .search-container {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: rgba(0, 255, 255, 0.6);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+        }
+
+        /* Filter Buttons */
+        .filter-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .filter-btn {
+            background: rgba(157, 78, 221, 0.2);
+            border: 1px solid rgba(157, 78, 221, 0.4);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(157, 78, 221, 0.4);
+            border-color: rgba(157, 78, 221, 0.6);
+            transform: translateY(-1px);
+        }
+
+        /* Advanced Filters Dropdown */
+        .advanced-filters {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .advanced-filters.active {
+            display: block;
+        }
+
+        .filter-category {
+            margin-bottom: 15px;
+        }
+
+        .filter-category h4 {
+            color: #00ffff;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .filter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .filter-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-option:hover, .filter-option.active {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: rgba(0, 255, 255, 0.4);
+        }
+
+        /* Location Filter */
+        .location-filter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .radius-slider {
+            flex: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .town-search {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 6px 10px;
+            color: white;
+            font-size: 12px;
+            width: 150px;
+            position: relative;
+        }
+
+        .town-search:focus {
+            outline: none;
+            border-color: rgba(0, 255, 255, 0.6);
+        }
+
+        .town-search::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .town-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(13, 2, 33, 0.95);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 200;
+            display: none;
+        }
+
+        .town-dropdown.active {
+            display: block;
+        }
+
+        .town-option {
+            padding: 8px 12px;
+            color: white;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.2s ease;
+        }
+
+        .town-option:hover {
+            background: rgba(0, 255, 255, 0.2);
+        }
+
+        .town-option:last-child {
+            border-bottom: none;
+        }
+
         /* Post Composer */
         .post-composer {
             background: rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(59, 130, 246, 0.3);
+            border: 1px solid rgba(0, 255, 255, 0.2);
             border-radius: 15px;
             padding: 20px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
-        .post-input {
+        .composer-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .composer-input {
             width: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 25px;
-            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 12px 16px;
             color: white;
             font-size: 16px;
+            resize: vertical;
+            min-height: 80px;
             margin-bottom: 15px;
-            resize: none;
-            min-height: 50px;
         }
 
-        .post-input::placeholder {
+        .composer-input::placeholder {
             color: rgba(255, 255, 255, 0.6);
         }
 
-        .post-actions {
+        .composer-input:focus {
+            outline: none;
+            border-color: rgba(0, 255, 255, 0.6);
+        }
+
+        .post-type-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .post-type-btn {
+            background: rgba(255, 107, 53, 0.2);
+            border: 1px solid rgba(255, 107, 53, 0.4);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+        }
+
+        .post-type-btn:hover, .post-type-btn.active {
+            background: rgba(255, 107, 53, 0.4);
+            border-color: rgba(255, 107, 53, 0.6);
+        }
+
+        .composer-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .media-options {
             display: flex;
             gap: 10px;
-            justify-content: flex-end;
+        }
+
+        .media-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 12px;
+        }
+
+        .media-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .post-btn {
-            background: linear-gradient(135deg, #4f46e5, #3b82f6);
-            color: white;
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
             border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -237,66 +425,75 @@
 
         .post-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.4);
+            box-shadow: 0 6px 20px rgba(0, 255, 255, 0.3);
         }
 
-        /* Feed */
-        .feed {
-            display: flex;
-            flex-direction: column;
+        /* Feed Posts */
+        .feed-container {
+            display: grid;
             gap: 20px;
         }
 
-        .post {
-            background: rgba(0, 0, 0, 0.4);
+        .feed-post {
+            background: rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(59, 130, 246, 0.3);
+            border: 1px solid rgba(0, 255, 255, 0.2);
             border-radius: 15px;
             padding: 20px;
             transition: all 0.3s ease;
         }
 
-        .post:hover {
-            border-color: rgba(0, 212, 255, 0.5);
+        .feed-post:hover {
+            border-color: rgba(0, 255, 255, 0.4);
             transform: translateY(-2px);
         }
 
         .post-header {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
             margin-bottom: 15px;
         }
 
-        .post-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #3b82f6, #1e40af);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 18px;
-        }
-
-        .post-info h4 {
-            color: #00d4ff;
-            margin-bottom: 5px;
-        }
-
         .post-meta {
+            flex: 1;
+        }
+
+        .post-author {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 4px;
+        }
+
+        .post-time {
             color: rgba(255, 255, 255, 0.6);
             font-size: 12px;
         }
 
-        .post-content {
-            margin-bottom: 15px;
-            line-height: 1.6;
+        .post-category {
+            background: rgba(157, 78, 221, 0.3);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
         }
 
-        .post-buttons {
+        .post-content {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .post-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .post-actions {
             display: flex;
             gap: 15px;
             padding-top: 15px;
@@ -304,288 +501,1107 @@
         }
 
         .action-btn {
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 191, 255, 0.2);
-            border-radius: 12px;
-            padding: 14px 28px;
-            color: white;
-            font-size: 15px;
-            font-weight: 600;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
         }
 
         .action-btn:hover {
-            background: rgba(0, 0, 0, 0.6);
-            box-shadow: 0 8px 25px rgba(0, 191, 255, 0.3), 0 0 0 1px rgba(0, 191, 255, 0.4);
-            transform: translateY(-2px);
-        }
-
-        /* Bottom Navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(0, 212, 255, 0.3);
-            padding: 12px 8px;
-            display: flex;
-            justify-content: space-around;
-            z-index: 1000;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            padding: 8px 12px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            min-width: 60px;
-        }
-
-        .nav-item.active {
-            background: rgba(0, 212, 255, 0.2);
-        }
-
-        .nav-item:hover {
-            background: rgba(0, 212, 255, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .nav-icon {
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(0, 212, 255, 0.4);
-            border-radius: 6px;
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
-            padding: 4px;
-        }
-
-        .nav-icon svg {
-            width: 100%;
-            height: 100%;
-            fill: #93c5fd;
-            transition: all 0.3s ease;
-        }
-
-        .nav-item.active .nav-icon svg {
-            fill: #00d4ff;
-        }
-
-        .nav-label {
-            font-size: 10px;
-            font-weight: 500;
+            background: rgba(255, 255, 255, 0.1);
             color: white;
         }
 
-        /* Responsive */
+        /* Main Menu Modal */
+        .menu-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: none;
+        }
+
+        .menu-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-content {
+            background: rgba(13, 2, 33, 0.95);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            padding-bottom: 15px;
+        }
+
+        .menu-title {
+            color: #00ffff;
+            font-size: 24px;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: #ff6b35;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .menu-items {
+            display: grid;
+            gap: 15px;
+        }
+
+        .menu-item {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .menu-item:hover {
+            background: rgba(0, 255, 255, 0.2);
+        }
+
+        /* Events Calendar Modal */
+        .calendar-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: none;
+        }
+
+        .calendar-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .calendar-content {
+            background: rgba(13, 2, 33, 0.95);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-nav-btn {
+            background: rgba(0, 255, 255, 0.2);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            color: #00ffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-nav-btn:hover {
+            background: rgba(0, 255, 255, 0.3);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-day:hover {
+            background: rgba(0, 255, 255, 0.2);
+        }
+
+        .calendar-day.has-event {
+            background: rgba(157, 78, 221, 0.3);
+            border: 1px solid rgba(157, 78, 221, 0.5);
+        }
+
+        .calendar-day.today {
+            background: rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            font-weight: bold;
+        }
+
+        /* Responsive Design */
         @media (max-width: 768px) {
-            .header {
-                padding: 10px;
-            }
-
-            .header-content {
-                gap: 10px;
-            }
-
             .main-container {
                 padding: 15px;
             }
 
-            body {
-                padding-top: 120px;
+            .header-content {
+                grid-template-columns: auto 1fr;
+                gap: 15px;
+            }
+
+            .menu-btn {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+
+            .filter-section {
+                gap: 5px;
+            }
+
+            .filter-btn {
+                padding: 6px 12px;
+                font-size: 12px;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Floating particles -->
+    <div class="particles" id="particles"></div>
+
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <div class="logo">
-                <img src="/marketpace-hero-logo.jpeg" alt="MarketPace" onclick="toggleLogoDropdown()">
+            <button class="back-btn" onclick="window.history.back()">
+                <span>←</span> Back
+            </button>
+            
+            <div class="logo-container">
+                <img src="/marketpace-hero-logo.jpeg" alt="MarketPace" class="logo">
             </div>
             
-            <div class="header-right">
-                <div class="top-section">
-                    <button class="profile-main-button" onclick="goToProfile()">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <rect x="2" y="2" width="20" height="20" rx="3" stroke-width="1.5" fill="rgba(0, 212, 255, 0.2)"/>
-                            <circle cx="12" cy="8" r="3" stroke-width="1.5"/>
-                            <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" stroke-width="1.5"/>
-                        </svg>
-                    </button>
-                    
-                    <a href="/interactive-map" class="mp-map-button">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <rect x="2" y="2" width="20" height="20" rx="3" stroke-width="1.5" fill="rgba(0, 212, 255, 0.2)"/>
-                            <path d="M12 2L22 7l-10 5L2 7z" stroke-width="1.5"/>
-                            <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke-width="1.5"/>
-                        </svg>
-                        MP Map
-                    </a>
-                </div>
-                
-                <div class="search-section">
-                    <input type="text" class="search-input" placeholder="Search marketplace, services, events..." id="searchInput">
-                </div>
-            </div>
+            <button class="menu-btn" onclick="toggleMenu()">
+                Menu
+            </button>
         </div>
     </header>
 
     <!-- Main Container -->
     <div class="main-container">
-        <!-- Post Composer -->
-        <div class="post-composer">
-            <textarea class="post-input" placeholder="Share with your community..."></textarea>
-            <div class="post-actions">
-                <button class="post-btn" onclick="openPostModal()">Post</button>
+        <!-- Search and Filter Section -->
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Search community posts, shops, services..." id="searchInput">
+            
+            <div class="filter-section">
+                <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">All</button>
+                <button class="filter-btn" data-filter="shops" onclick="setFilter('shops')">Shops</button>
+                <button class="filter-btn" data-filter="services" onclick="setFilter('services')">Services</button>
+                <button class="filter-btn" data-filter="hub" onclick="setFilter('hub')">The Hub</button>
+                <button class="filter-btn" data-filter="buy-sell" onclick="setFilter('buy-sell')">Buy/Sell</button>
+                <button class="filter-btn" data-filter="rentals" onclick="setFilter('rentals')">Rentals</button>
+                <button class="filter-btn" data-filter="events" onclick="setFilter('events')">Events</button>
+                <button class="filter-btn" onclick="toggleAdvancedFilters()">More Filters ▼</button>
+            </div>
+
+            <div class="advanced-filters" id="advancedFilters">
+                <div class="filter-category">
+                    <h4>Clothing & Fashion</h4>
+                    <div class="filter-options">
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="clothing-men">Men's</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="clothing-women">Women's</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="clothing-boys">Boys</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="clothing-girls">Girls</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="clothing-baby">Baby</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="clothing-shoes">Shoes</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="clothing-hats">Hats</span>
+                    </div>
+                </div>
+
+                <div class="filter-category">
+                    <h4>Services</h4>
+                    <div class="filter-options">
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="service-babysitting">Babysitting</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="service-cleaning">House Cleaning</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="service-landscape">Landscaping</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="service-electric">Electrical</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="service-plumbing">Plumbing</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="service-hvac">HVAC</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="service-mechanical">Mechanical</span>
+                    </div>
+                </div>
+
+                <div class="filter-category">
+                    <h4>Entertainment (The Hub)</h4>
+                    <div class="filter-options">
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="entertainment-dj">DJs</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="entertainment-bands">Bands</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="entertainment-comedy">Comedy</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="entertainment-karaoke">Karaoke</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="entertainment-theater">Theater</span>
+                    </div>
+                </div>
+
+                <div class="filter-category">
+                    <h4>Items & Products</h4>
+                    <div class="filter-options">
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="items-tools">Tools</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="items-outdoor">Outdoor</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="items-vehicles">Vehicles</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="items-houses">Houses</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="items-baby">Baby Items</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="items-kids">Kids</span>
+                        <span class="filter-option" onclick="toggleFilter(this)" data-category="items-furniture">Furniture</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="location-filter">
+                <span style="color: #00ffff; font-size: 14px;">Radius:</span>
+                <input type="range" class="radius-slider" min="1" max="50" value="10" id="radiusSlider" onchange="updateRadius()">
+                <span id="radiusValue" style="color: white; font-size: 14px;">10 miles</span>
+                <div style="position: relative;">
+                    <input type="text" class="town-search" placeholder="Search specific town..." id="townSearch">
+                    <div class="town-dropdown" id="townDropdown">
+                        <!-- Town options will be populated here -->
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Community Feed -->
-        <div class="feed">
-            <div class="post">
-                <div class="post-header">
-                    <div class="post-avatar">MP</div>
-                    <div class="post-info">
-                        <h4>MarketPace Official</h4>
-                        <div class="post-meta">2 hours ago • Orange Beach, AL</div>
-                    </div>
-                </div>
-                <div class="post-content">
-                    Welcome to MarketPace Community! Connect with neighbors, discover local businesses, and build a stronger community together.
-                </div>
-                <div class="post-buttons">
-                    <button class="action-btn">Like</button>
-                    <button class="action-btn">Comment</button>
-                    <button class="action-btn">Share</button>
-                </div>
+        <!-- Post Composer -->
+        <div class="post-composer">
+            <div class="composer-header">
+                <div class="user-avatar" id="userAvatar">B</div>
+                <span style="color: white; font-weight: 500;" id="userName">Welcome back, Brooke</span>
             </div>
 
-            <div class="post">
-                <div class="post-header">
-                    <div class="post-avatar">SB</div>
-                    <div class="post-info">
-                        <h4>Sarah's Bakery</h4>
-                        <div class="post-meta">4 hours ago • Gulf Shores, AL</div>
-                    </div>
-                </div>
-                <div class="post-content">
-                    Fresh baked goods available for delivery! Homemade bread, pastries, and custom cakes. Supporting our local community one order at a time!
-                </div>
-                <div class="post-buttons">
-                    <button class="action-btn">Order Now</button>
-                    <button class="action-btn">Like</button>
-                    <button class="action-btn">Share</button>
-                </div>
+            <textarea class="composer-input" placeholder="What's happening in your community?" id="postInput"></textarea>
+
+            <div class="post-type-selector">
+                <button class="post-type-btn active" data-type="general" onclick="selectPostType('general')">General</button>
+                <button class="post-type-btn" data-type="service" onclick="selectPostType('service')">Service</button>
+                <button class="post-type-btn" data-type="rental" onclick="selectPostType('rental')">Rental</button>
+                <button class="post-type-btn" data-type="iso" onclick="selectPostType('iso')">ISO</button>
+                <button class="post-type-btn" data-type="entertainment" onclick="selectPostType('entertainment')">Entertainment</button>
+                <button class="post-type-btn" data-type="item-for-sale" onclick="selectPostType('item-for-sale')">Item for Sale</button>
+                <button class="post-type-btn" data-type="poll" onclick="selectPostType('poll')">Voting Poll</button>
+                <button class="post-type-btn" data-type="event" onclick="selectPostType('event')">Event</button>
+                <button class="post-type-btn" data-type="promotion" onclick="selectPostType('promotion')">Promotion</button>
             </div>
 
-            <div class="post">
-                <div class="post-header">
-                    <div class="post-avatar">JM</div>
-                    <div class="post-info">
-                        <h4>John's Lawn Care</h4>
-                        <div class="post-meta">6 hours ago • Foley, AL</div>
-                    </div>
+            <div class="composer-actions">
+                <div class="media-options">
+                    <button class="media-btn" onclick="attachImage()">📷 Photo</button>
+                    <button class="media-btn" onclick="shareShop()">🏪 Share Shop</button>
                 </div>
-                <div class="post-content">
-                    Professional lawn care services available! Mowing, trimming, and landscaping. Book through MarketPace for convenient scheduling and delivery coordination.
-                </div>
-                <div class="post-buttons">
-                    <button class="action-btn">Book Service</button>
-                    <button class="action-btn">Get Quote</button>
-                    <button class="action-btn">Contact</button>
-                </div>
+                <button class="post-btn" onclick="createPost()">Post</button>
+            </div>
+        </div>
+
+        <!-- Feed Container -->
+        <div class="feed-container" id="feedContainer">
+            <!-- Posts will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <!-- Main Menu Modal -->
+    <div class="menu-modal" id="menuModal">
+        <div class="menu-content">
+            <div class="menu-header">
+                <h3 class="menu-title">Main Menu</h3>
+                <button class="close-btn" onclick="toggleMenu()">✕</button>
+            </div>
+            
+            <div class="menu-items">
+                <button class="menu-item" onclick="showEvents()">
+                    <span style="font-size: 20px;">📅</span> Events
+                </button>
+                <button class="menu-item" onclick="window.location.href='/profile.html'">
+                    <span style="font-size: 20px;">👤</span> View Profile
+                </button>
+                <button class="menu-item" onclick="showFavorites()">
+                    <span style="font-size: 20px;">⭐</span> Favorites
+                </button>
+                <button class="menu-item" onclick="showDeliveries()">
+                    <span style="font-size: 20px;">🚚</span> Deliveries
+                </button>
+                <button class="menu-item" onclick="showIntegrations()">
+                    <span style="font-size: 20px;">🔗</span> Website Integrations
+                </button>
+                <button class="menu-item" onclick="showAnalytics()">
+                    <span style="font-size: 20px;">📊</span> Profile Analytics
+                </button>
+                <button class="menu-item" onclick="showSettings()">
+                    <span style="font-size: 20px;">⚙️</span> Account Settings
+                </button>
+                <button class="menu-item" onclick="showSecurityPolicies()">
+                    <span style="font-size: 20px;">🛡️</span> Security Policies
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Bottom Navigation -->
-    <div class="bottom-nav">
-        <div class="nav-item active" onclick="goToPage('community')">
-            <div class="nav-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 212, 255, 0.2)"/>
-                    <path d="M12 2L22 7l-10 5L2 7z" stroke="currentColor" stroke-width="1.5"/>
-                    <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="1.5"/>
-                </svg>
+    <!-- Events Calendar Modal -->
+    <div class="calendar-modal" id="calendarModal">
+        <div class="calendar-content">
+            <div class="calendar-header">
+                <button class="calendar-nav-btn" onclick="previousMonth()">‹</button>
+                <h2 id="calendarMonth" style="color: #00ffff;">January 2025</h2>
+                <button class="calendar-nav-btn" onclick="nextMonth()">›</button>
+                <button class="close-btn" onclick="closeCalendar()">✕</button>
             </div>
-            <div class="nav-label">Home</div>
-        </div>
-        <div class="nav-item" onclick="goToPage('shops')">
-            <div class="nav-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.2)"/>
-                    <path d="M2 7h20l-2 10H4L2 7zM2 7l-1-3h3" stroke="currentColor" stroke-width="1.5"/>
-                    <circle cx="9" cy="20" r="1" stroke="currentColor" stroke-width="1.5"/>
-                    <circle cx="20" cy="20" r="1" stroke="currentColor" stroke-width="1.5"/>
-                </svg>
+            
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Calendar will be generated here -->
             </div>
-            <div class="nav-label">Shop</div>
-        </div>
-        <div class="nav-item" onclick="goToPage('services')">
-            <div class="nav-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(139, 92, 246, 0.2)"/>
-                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="currentColor" stroke-width="1.5"/>
-                </svg>
+            
+            <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px;">
+                <h3 style="color: #00ffff; margin-bottom: 15px;">📅 Upcoming Events</h3>
+                <div id="upcomingEvents">
+                    <!-- Upcoming events will be listed here -->
+                </div>
             </div>
-            <div class="nav-label">Service</div>
-        </div>
-        <div class="nav-item" onclick="goToPage('marketpace-menu')">
-            <div class="nav-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(34, 197, 94, 0.2)"/>
-                    <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="1.5"/>
-                    <line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="1.5"/>
-                    <line x1="3" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="1.5"/>
-                </svg>
-            </div>
-            <div class="nav-label">Menu</div>
         </div>
     </div>
 
     <script>
-        function goToPage(page) {
-            if (page === 'community') {
-                window.location.href = '/community';
-            } else if (page === 'shops') {
-                window.location.href = '/shops';
-            } else if (page === 'services') {
-                window.location.href = '/services';
-            } else if (page === 'marketpace-menu') {
-                window.location.href = '/marketpace-menu';
+        // Global variables
+        let currentFilter = 'all';
+        let activeFilters = [];
+        let currentRadius = 10;
+        let currentTown = '';
+        let currentMonth = 0; // 0 = January
+        let currentYear = 2025;
+        let selectedPostType = 'general';
+
+        // MarketPace launched towns with states
+        const launchedTowns = [
+            { name: 'Orange Beach', state: 'Alabama', fullName: 'Orange Beach, AL' },
+            { name: 'Gulf Shores', state: 'Alabama', fullName: 'Gulf Shores, AL' },
+            { name: 'Foley', state: 'Alabama', fullName: 'Foley, AL' },
+            { name: 'Fairhope', state: 'Alabama', fullName: 'Fairhope, AL' },
+            { name: 'Daphne', state: 'Alabama', fullName: 'Daphne, AL' },
+            { name: 'Mobile', state: 'Alabama', fullName: 'Mobile, AL' },
+            { name: 'Pensacola', state: 'Florida', fullName: 'Pensacola, FL' },
+            { name: 'Destin', state: 'Florida', fullName: 'Destin, FL' },
+            { name: 'Fort Walton Beach', state: 'Florida', fullName: 'Fort Walton Beach, FL' },
+            { name: 'Navarre', state: 'Florida', fullName: 'Navarre, FL' },
+            { name: 'Perdido Key', state: 'Florida', fullName: 'Perdido Key, FL' },
+            { name: 'Crestview', state: 'Florida', fullName: 'Crestview, FL' }
+        ];
+
+        // Sample data
+        let posts = [
+            {
+                id: 1,
+                type: 'service',
+                category: 'services',
+                author: 'Mike\'s Handyman Services',
+                avatar: 'M',
+                time: '2 hours ago',
+                content: 'Professional handyman services available! Plumbing, electrical, drywall repair, and more. Licensed and insured. Same-day service available.',
+                likes: 12,
+                comments: 3,
+                shares: 1,
+                location: 'Orange Beach, AL',
+                subcategory: 'service-plumbing'
+            },
+            {
+                id: 2,
+                type: 'item-for-sale',
+                category: 'buy-sell',
+                author: 'Sarah\'s Closet',
+                avatar: 'S',
+                time: '4 hours ago',
+                content: 'Designer women\'s clothing sale! Brand new items with tags. Sizes S-XL available. See my shop for full collection.',
+                likes: 23,
+                comments: 8,
+                shares: 4,
+                location: 'Gulf Shores, AL',
+                subcategory: 'clothing-women',
+                image: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=400&h=300&fit=crop'
+            },
+            {
+                id: 3,
+                type: 'entertainment',
+                category: 'hub',
+                author: 'Beach Vibes DJ',
+                avatar: 'B',
+                time: '1 day ago',
+                content: '🎵 Professional DJ available for weddings, parties, and events! Full sound system and lighting included. Book now for summer events!',
+                likes: 15,
+                comments: 6,
+                shares: 3,
+                location: 'Orange Beach, AL',
+                subcategory: 'entertainment-dj'
+            },
+            {
+                id: 4,
+                type: 'event',
+                category: 'events',
+                author: 'Community Center',
+                avatar: 'C',
+                time: '2 days ago',
+                content: '🎪 Community Festival this Saturday! Live music, local vendors, food trucks, and kids activities. Free admission for all ages!',
+                likes: 45,
+                comments: 12,
+                shares: 18,
+                location: 'Orange Beach, AL',
+                eventDate: '2025-01-18',
+                eventTime: '10:00 AM - 6:00 PM'
+            },
+            {
+                id: 5,
+                type: 'rental',
+                category: 'rentals',
+                author: 'Beach Equipment Rentals',
+                avatar: 'B',
+                time: '3 days ago',
+                content: 'Beach chairs, umbrellas, and coolers available for rent! Perfect for your beach day. Delivery available within 5 miles.',
+                likes: 8,
+                comments: 2,
+                shares: 1,
+                location: 'Gulf Shores, AL',
+                subcategory: 'items-outdoor'
+            }
+        ];
+
+        let events = [
+            { date: 15, title: 'Community Festival', type: 'community', time: '10:00 AM' },
+            { date: 18, title: 'Live Jazz Night', type: 'entertainment', time: '8:00 PM' },
+            { date: 22, title: 'Farmers Market', type: 'market', time: '9:00 AM' },
+            { date: 25, title: 'Beach Cleanup', type: 'volunteer', time: '2:00 PM' },
+            { date: 28, title: 'Art Show Opening', type: 'cultural', time: '7:00 PM' }
+        ];
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            loadUserProfile();
+            renderPosts();
+            initializeSearch();
+            generateCalendar();
+        });
+
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+                particlesContainer.appendChild(particle);
             }
         }
 
-        function goToProfile() {
-            window.location.href = '/profile';
+        // Load user profile
+        function loadUserProfile() {
+            try {
+                const userData = localStorage.getItem('currentUser');
+                if (userData) {
+                    const user = JSON.parse(userData);
+                    document.getElementById('userName').textContent = `Welcome back, ${user.firstName || user.name || 'User'}`;
+                    document.getElementById('userAvatar').textContent = (user.firstName || user.name || 'U').charAt(0).toUpperCase();
+                } else {
+                    document.getElementById('userName').textContent = 'Welcome back, Brooke';
+                    document.getElementById('userAvatar').textContent = 'B';
+                }
+            } catch (error) {
+                console.log('Using default profile');
+                document.getElementById('userName').textContent = 'Welcome back, Brooke';
+                document.getElementById('userAvatar').textContent = 'B';
+            }
         }
 
-        function toggleLogoDropdown() {
-            alert('Profile settings will open here');
+        // Filter functions
+        function setFilter(filter) {
+            currentFilter = filter;
+            
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeBtn = document.querySelector(`[data-filter="${filter}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+            
+            renderPosts();
         }
 
-        function openPostModal() {
-            alert('Post composer will open here');
+        function toggleAdvancedFilters() {
+            const filters = document.getElementById('advancedFilters');
+            filters.classList.toggle('active');
         }
 
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Community page loaded successfully');
+        function toggleFilter(element) {
+            element.classList.toggle('active');
+            const category = element.dataset.category;
+            
+            if (activeFilters.includes(category)) {
+                activeFilters = activeFilters.filter(f => f !== category);
+            } else {
+                activeFilters.push(category);
+            }
+            
+            renderPosts();
+        }
+
+        function updateRadius() {
+            const slider = document.getElementById('radiusSlider');
+            currentRadius = slider.value;
+            document.getElementById('radiusValue').textContent = currentRadius + ' miles';
+            renderPosts();
+        }
+
+        // Search functionality
+        function initializeSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const townSearch = document.getElementById('townSearch');
+            const townDropdown = document.getElementById('townDropdown');
+            
+            searchInput.addEventListener('input', function() {
+                renderPosts();
+            });
+            
+            townSearch.addEventListener('input', function() {
+                const query = this.value.toLowerCase();
+                
+                if (query.length > 0) {
+                    const filteredTowns = launchedTowns.filter(town => 
+                        town.name.toLowerCase().includes(query) || 
+                        town.state.toLowerCase().includes(query)
+                    );
+                    
+                    showTownDropdown(filteredTowns);
+                } else {
+                    hideTownDropdown();
+                }
+            });
+            
+            townSearch.addEventListener('focus', function() {
+                if (this.value.length > 0) {
+                    const query = this.value.toLowerCase();
+                    const filteredTowns = launchedTowns.filter(town => 
+                        town.name.toLowerCase().includes(query) || 
+                        town.state.toLowerCase().includes(query)
+                    );
+                    showTownDropdown(filteredTowns);
+                }
+            });
+            
+            // Hide dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!townSearch.contains(event.target) && !townDropdown.contains(event.target)) {
+                    hideTownDropdown();
+                }
+            });
+        }
+
+        function showTownDropdown(towns) {
+            const dropdown = document.getElementById('townDropdown');
+            
+            if (towns.length === 0) {
+                dropdown.innerHTML = '<div class="town-option" style="color: rgba(255,255,255,0.6); cursor: default;">No launched towns found</div>';
+            } else {
+                dropdown.innerHTML = towns.map(town => 
+                    `<div class="town-option" onclick="selectTown('${town.fullName}')">${town.fullName}</div>`
+                ).join('');
+            }
+            
+            dropdown.classList.add('active');
+        }
+
+        function hideTownDropdown() {
+            const dropdown = document.getElementById('townDropdown');
+            dropdown.classList.remove('active');
+        }
+
+        function selectTown(townName) {
+            const townSearch = document.getElementById('townSearch');
+            townSearch.value = townName;
+            currentTown = townName;
+            hideTownDropdown();
+            renderPosts();
+        }
+
+        // Post creation
+        function selectPostType(type) {
+            selectedPostType = type;
+            
+            // Update active button
+            document.querySelectorAll('.post-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-type="${type}"]`).classList.add('active');
+            
+            // Update placeholder
+            const placeholders = {
+                general: 'What\'s happening in your community?',
+                service: 'Describe the service you\'re offering...',
+                rental: 'What do you have available for rent?',
+                iso: 'What are you looking for?',
+                entertainment: 'Promote your entertainment services...',
+                'item-for-sale': 'Describe the item you\'re selling...',
+                poll: 'What would you like to ask the community?',
+                event: 'Tell us about your event...',
+                promotion: 'Share your promotion or special offer...'
+            };
+            
+            document.getElementById('postInput').placeholder = placeholders[type] || placeholders.general;
+        }
+
+        function attachImage() {
+            alert('Image attachment feature will be available when MarketPace launches in your area!');
+        }
+
+        function shareShop() {
+            alert('Share your shop feature will be available when MarketPace launches in your area!');
+        }
+
+        function createPost() {
+            const content = document.getElementById('postInput').value.trim();
+            if (!content) {
+                alert('Please enter some content for your post.');
+                return;
+            }
+            
+            const userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const newPost = {
+                id: posts.length + 1,
+                type: selectedPostType,
+                category: getCategoryFromType(selectedPostType),
+                author: userData.firstName || userData.name || 'Community Member',
+                avatar: (userData.firstName || userData.name || 'C').charAt(0).toUpperCase(),
+                time: 'Just now',
+                content: content,
+                likes: 0,
+                comments: 0,
+                shares: 0,
+                location: 'Orange Beach, AL'
+            };
+            
+            posts.unshift(newPost);
+            document.getElementById('postInput').value = '';
+            renderPosts();
+            
+            alert('Post created successfully!');
+        }
+
+        function getCategoryFromType(type) {
+            const mapping = {
+                general: 'general',
+                service: 'services',
+                rental: 'rentals',
+                iso: 'general',
+                entertainment: 'hub',
+                'item-for-sale': 'buy-sell',
+                poll: 'general',
+                event: 'events',
+                promotion: 'general'
+            };
+            return mapping[type] || 'general';
+        }
+
+        // Render posts
+        function renderPosts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            let filteredPosts = posts;
+            
+            // Apply main filter
+            if (currentFilter !== 'all') {
+                filteredPosts = filteredPosts.filter(post => post.category === currentFilter);
+            }
+            
+            // Apply advanced filters
+            if (activeFilters.length > 0) {
+                filteredPosts = filteredPosts.filter(post => 
+                    activeFilters.includes(post.subcategory)
+                );
+            }
+            
+            // Apply search filter
+            if (searchTerm) {
+                filteredPosts = filteredPosts.filter(post => 
+                    post.content.toLowerCase().includes(searchTerm) ||
+                    post.author.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // Apply town filter
+            if (currentTown) {
+                filteredPosts = filteredPosts.filter(post => 
+                    post.location.toLowerCase().includes(currentTown.toLowerCase())
+                );
+            }
+            
+            const container = document.getElementById('feedContainer');
+            container.innerHTML = filteredPosts.map(post => createPostHTML(post)).join('');
+        }
+
+        function createPostHTML(post) {
+            return `
+                <div class="feed-post">
+                    <div class="post-header">
+                        <div class="user-avatar">${post.avatar}</div>
+                        <div class="post-meta">
+                            <div class="post-author">${post.author}</div>
+                            <div class="post-time">${post.time} • ${post.location}</div>
+                        </div>
+                        <div class="post-category">${post.category}</div>
+                    </div>
+                    
+                    <div class="post-content">${post.content}</div>
+                    
+                    ${post.image ? `<img src="${post.image}" alt="Post image" class="post-image">` : ''}
+                    
+                    ${post.eventDate ? `
+                        <div style="background: rgba(157, 78, 221, 0.2); padding: 10px; border-radius: 8px; margin: 10px 0;">
+                            <strong style="color: #9d4edd;">📅 Event Details:</strong><br>
+                            <span style="color: #00ffff;">Date:</span> ${formatDate(post.eventDate)}<br>
+                            <span style="color: #00ffff;">Time:</span> ${post.eventTime}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="post-actions">
+                        <button class="action-btn" onclick="likePost(${post.id})">
+                            👍 ${post.likes}
+                        </button>
+                        <button class="action-btn" onclick="commentPost(${post.id})">
+                            💬 ${post.comments}
+                        </button>
+                        <button class="action-btn" onclick="sharePost(${post.id})">
+                            📤 ${post.shares}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+
+        // Post interactions
+        function likePost(postId) {
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                post.likes++;
+                renderPosts();
+            }
+        }
+
+        function commentPost(postId) {
+            alert('Comment feature will be available when MarketPace launches in your area!');
+        }
+
+        function sharePost(postId) {
+            alert('Share feature will be available when MarketPace launches in your area!');
+        }
+
+        // Menu functions
+        function toggleMenu() {
+            const modal = document.getElementById('menuModal');
+            modal.classList.toggle('active');
+        }
+
+        function showEvents() {
+            toggleMenu();
+            document.getElementById('calendarModal').classList.add('active');
+        }
+
+        function closeCalendar() {
+            document.getElementById('calendarModal').classList.remove('active');
+        }
+
+        function showFavorites() {
+            alert('Favorites feature: View all your favorited posts and saved items. Available when MarketPace launches in your area!');
+            toggleMenu();
+        }
+
+        function showDeliveries() {
+            alert('Deliveries feature: Track your current and past deliveries. Available when MarketPace launches in your area!');
+            toggleMenu();
+        }
+
+        function showIntegrations() {
+            alert('Website Integrations: Connect your Shopify, Etsy, and other online stores. Available when MarketPace launches in your area!');
+            toggleMenu();
+        }
+
+        function showAnalytics() {
+            alert('Profile Analytics: View your engagement metrics and community reach. Available when MarketPace launches in your area!');
+            toggleMenu();
+        }
+
+        function showSettings() {
+            alert('Account Settings: Manage your profile, notifications, and preferences. Available when MarketPace launches in your area!');
+            toggleMenu();
+        }
+
+        function showSecurityPolicies() {
+            window.location.href = '/security-policies.html';
+            toggleMenu();
+        }
+
+        // Calendar functions
+        function generateCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            document.getElementById('calendarMonth').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+            
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const today = new Date().getDate();
+            const currentMonthCheck = new Date().getMonth() === currentMonth && new Date().getFullYear() === currentYear;
+            
+            let html = '';
+            
+            // Day headers
+            const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            dayHeaders.forEach(day => {
+                html += `<div style="font-weight: bold; color: #00ffff; text-align: center; padding: 5px;">${day}</div>`;
+            });
+            
+            // Empty cells for days before month starts
+            for (let i = 0; i < firstDay; i++) {
+                html += '<div class="calendar-day"></div>';
+            }
+            
+            // Days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const hasEvent = events.some(event => event.date === day);
+                const isToday = currentMonthCheck && day === today;
+                
+                let classes = 'calendar-day';
+                if (hasEvent) classes += ' has-event';
+                if (isToday) classes += ' today';
+                
+                html += `<div class="${classes}" onclick="showDayEvents(${day})">${day}</div>`;
+            }
+            
+            grid.innerHTML = html;
+            
+            // Update upcoming events
+            updateUpcomingEvents();
+        }
+
+        function updateUpcomingEvents() {
+            const container = document.getElementById('upcomingEvents');
+            let html = '';
+            
+            events.forEach(event => {
+                const eventColor = getEventColor(event.type);
+                html += `
+                    <div style="margin-bottom: 10px; padding: 10px; background: ${eventColor}; border-radius: 8px; border-left: 4px solid #9d4edd;">
+                        <div style="font-weight: bold; color: #9d4edd;">${getEventIcon(event.type)} ${event.title}</div>
+                        <div style="color: #00ffff; font-size: 14px;">Jan ${event.date} • ${event.time}</div>
+                        <div style="color: rgba(255,255,255,0.8); font-size: 12px;">${event.type} • Orange Beach, AL</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function getEventColor(type) {
+            const colors = {
+                community: 'rgba(0,255,255,0.1)',
+                entertainment: 'rgba(157,78,221,0.1)',
+                market: 'rgba(255,107,53,0.1)',
+                volunteer: 'rgba(34,197,94,0.1)',
+                cultural: 'rgba(255,105,180,0.1)'
+            };
+            return colors[type] || 'rgba(255,255,255,0.1)';
+        }
+
+        function getEventIcon(type) {
+            const icons = {
+                community: '🎪',
+                entertainment: '🎵',
+                market: '🛍️',
+                volunteer: '🤝',
+                cultural: '🎨'
+            };
+            return icons[type] || '📅';
+        }
+
+        function showDayEvents(day) {
+            const dayEvents = events.filter(event => event.date === day);
+            if (dayEvents.length === 0) {
+                alert(`No events scheduled for January ${day}, 2025`);
+                return;
+            }
+            
+            let message = `Events for January ${day}, 2025:\n\n`;
+            dayEvents.forEach(event => {
+                message += `• ${event.title}\n  Time: ${event.time}\n  Type: ${event.type}\n\n`;
+            });
+            
+            alert(message);
+        }
+
+        function previousMonth() {
+            if (currentMonth === 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else {
+                currentMonth--;
+            }
+            generateCalendar();
+        }
+
+        function nextMonth() {
+            if (currentMonth === 11) {
+                currentMonth = 0;
+                currentYear++;
+            } else {
+                currentMonth++;
+            }
+            generateCalendar();
+        }
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(event) {
+            const menuModal = document.getElementById('menuModal');
+            const calendarModal = document.getElementById('calendarModal');
+            
+            if (event.target === menuModal) {
+                toggleMenu();
+            }
+            
+            if (event.target === calendarModal) {
+                closeCalendar();
+            }
         });
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserProfile();
+            renderPosts();
+            initializeSearch();
+            generateCalendar();
+            initializePostTypes();
+            createParticles();
+            initializeButtons();
+            initializeBottomNavigation();
+        });
+
+        // Initialize button functionality
+        function initializeButtons() {
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const filter = this.getAttribute('data-filter');
+                    if (filter) {
+                        setFilter(filter);
+                    }
+                });
+            });
+
+            // Advanced filter buttons
+            document.querySelectorAll('.advanced-filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const filter = this.getAttribute('data-filter');
+                    if (filter) {
+                        toggleAdvancedFilter(filter);
+                    }
+                });
+            });
+
+            // Main menu buttons
+            const createPostBtn = document.querySelector('.create-post-btn');
+            if (createPostBtn) {
+                createPostBtn.addEventListener('click', function() {
+                    document.getElementById('postModal').style.display = 'block';
+                });
+            }
+
+            const eventsBtn = document.querySelector('.menu-btn[onclick="showEvents()"]');
+            if (eventsBtn) {
+                eventsBtn.addEventListener('click', function() {
+                    showEvents();
+                });
+            }
+
+            // Close modal functionality
+            document.querySelectorAll('.close').forEach(closeBtn => {
+                closeBtn.addEventListener('click', function() {
+                    this.closest('.modal').style.display = 'none';
+                });
+            });
+
+            // Close modals when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
+                }
+            });
+
+            // Form submission
+            const postForm = document.getElementById('postForm');
+            if (postForm) {
+                postForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    submitPost();
+                });
+            }
+        }
     </script>
 </body>
 </html>
