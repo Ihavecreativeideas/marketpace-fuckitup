@@ -42,6 +42,10 @@ app.get('/interactive-map', (req, res) => {
   res.sendFile(path.join(__dirname, 'interactive-map.html'));
 });
 
+app.get('/item-verification', (req, res) => {
+  res.sendFile(path.join(__dirname, 'item-verification.html'));
+});
+
 app.get('/signup-login', (req, res) => {
   res.sendFile(path.join(__dirname, 'signup-login.html'));
 });

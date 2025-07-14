@@ -1385,7 +1385,7 @@
                         <div class="commerce-actions">
                             <button class="commerce-btn primary" onclick="addToCart('Vintage Leather Jacket', 85.00, 'Sarah\'s Boutique', 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400')">Add to Cart</button>
                             <button class="commerce-btn" onclick="deliverNow('leather jacket')">Deliver Now</button>
-                            <button class="commerce-btn" onclick="goToMemberProfile('Sarah\\'s Boutique', 'SB')" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                            <button class="commerce-btn" onclick="openVerificationPage('Vintage Leather Jacket', 'Sarah\\'s Boutique', 'sales', 85.00)" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
                                     <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 255, 255, 0.2)"/>
                                     <circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5"/>
@@ -1451,7 +1451,7 @@
                                 Message
                             </button>
                             <button class="commerce-btn" onclick="selfPickup('power washer')">Self Pickup</button>
-                            <button class="commerce-btn" onclick="goToMemberProfile('Tom\\'s Tool Rentals', 'TM')" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                            <button class="commerce-btn" onclick="openVerificationPage('Power Washer', 'Tom\\'s Tool Rentals', 'rental', 45.00)" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
                                     <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 255, 255, 0.2)"/>
                                     <circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5"/>
@@ -1561,7 +1561,7 @@
                                 Message
                             </button>
                             <button class="commerce-btn" onclick="selfPickup('beach chairs')">Self Pickup</button>
-                            <button class="commerce-btn" onclick="goToMemberProfile('Jessica Martinez', 'JM')" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 255, 255, 0.2)"/><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5"/><path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="1.5"/></svg>Verify Condition</button>
+                            <button class="commerce-btn" onclick="openVerificationPage('Beach Chairs Set', 'Jessica Martinez', 'rental', 25.00)" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 255, 255, 0.2)"/><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5"/><path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="1.5"/></svg>Verify Condition</button>
                         </div>
                     </div>
                 </div>
@@ -4024,6 +4024,30 @@
             }
             window.lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
         });
+
+        // Open full verification page for item details and delivery scheduling
+        function openVerificationPage(itemName, memberName, category, price) {
+            try {
+                console.log(`Opening verification page for ${itemName} by ${memberName}...`);
+                
+                // Store item details for verification page
+                localStorage.setItem('verificationItem', JSON.stringify({
+                    name: itemName,
+                    owner: memberName,
+                    category: category,
+                    price: price,
+                    timestamp: Date.now()
+                }));
+                
+                // Navigate to dedicated verification page
+                window.location.href = '/item-verification';
+                
+                showNotification(`Opening verification for ${itemName}`, 'info');
+            } catch (error) {
+                console.error('Verification page error:', error);
+                showNotification('Verification page error', 'error');
+            }
+        }
 
         // Go to specific member profile page
         function goToMemberProfile(memberName, initials) {
