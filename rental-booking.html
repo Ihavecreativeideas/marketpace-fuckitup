@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rental Booking - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0233 50%, #2d1b69 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 80px 16px 90px;
+        }
+
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(0, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+            50% { transform: translateY(-40px) rotate(180deg); opacity: 0.8; }
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 12px 16px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00ffff;
+        }
+
+        .header-spacer {
+            width: 45px;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .booking-container {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .item-info {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .item-image {
+            width: 100px;
+            height: 100px;
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        .item-details h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: #00ffff;
+        }
+
+        .item-details p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 4px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #00ffff;
+        }
+
+        .calendar-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .month-nav {
+            background: none;
+            border: none;
+            color: #00ffff;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .month-nav:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .month-year {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .day-header {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+            padding: 8px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .calendar-day:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .calendar-day.available {
+            background: rgba(0, 255, 255, 0.2);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .calendar-day.selected {
+            background: #00ffff;
+            color: #000;
+            font-weight: 600;
+        }
+
+        .calendar-day.disabled {
+            color: rgba(255, 255, 255, 0.3);
+            cursor: not-allowed;
+        }
+
+        .time-slots {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .time-slot {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .time-slot:hover {
+            border-color: rgba(0, 255, 255, 0.5);
+        }
+
+        .time-slot.selected {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .time-slot-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .time-slot-time {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .duration-options {
+            margin-bottom: 24px;
+        }
+
+        .duration-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .duration-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .duration-option:hover {
+            border-color: rgba(0, 255, 255, 0.5);
+        }
+
+        .duration-option.selected {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .duration-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .duration-price {
+            font-size: 18px;
+            color: #00ffff;
+            font-weight: 600;
+        }
+
+        .custom-duration {
+            margin-top: 12px;
+            display: none;
+        }
+
+        .custom-duration.show {
+            display: block;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .payment-summary {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .summary-row.total {
+            font-weight: 600;
+            font-size: 18px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 12px;
+            margin-top: 12px;
+        }
+
+        .action-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #1e1b4b, #3730a3, #1e40af, #1d4ed8);
+            border: none;
+            border-radius: 50px;
+            padding: 14px 28px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), inset 0 0 20px rgba(59, 130, 246, 0.1);
+            text-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
+        }
+
+        .action-btn:hover {
+            background: rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="back-btn" onclick="history.back()" title="Go Back">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="stroke: #00ffff;">
+                    <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2"/>
+                </svg>
+            </div>
+            <div class="header-title">Book Rental</div>
+            <div class="header-spacer"></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="booking-container">
+            <!-- Item Information -->
+            <div class="item-info">
+                <div class="item-image">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" style="stroke: #00ffff;">
+                        <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(0, 255, 255, 0.2)"/>
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.1)"/>
+                    </svg>
+                </div>
+                <div class="item-details">
+                    <h3>Professional Power Washer</h3>
+                    <p><strong>Location:</strong> Orange Beach, AL (2.3 miles)</p>
+                    <p><strong>Owner:</strong> Mike's Tools</p>
+                    <p><strong>Rating:</strong> ★★★★★ (4.8/5)</p>
+                </div>
+            </div>
+
+            <!-- Date Selection -->
+            <div class="section-title">Select Date</div>
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <button class="month-nav" onclick="changeMonth(-1)">‹</button>
+                    <div class="month-year" id="monthYear">January 2025</div>
+                    <button class="month-nav" onclick="changeMonth(1)">›</button>
+                </div>
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Calendar will be generated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Time Selection -->
+            <div class="section-title">Select Time</div>
+            <div class="time-slots">
+                <div class="time-slot" onclick="selectTimeSlot('morning')">
+                    <div class="time-slot-title">Morning</div>
+                    <div class="time-slot-time">9:00 AM - 12:00 PM</div>
+                </div>
+                <div class="time-slot" onclick="selectTimeSlot('afternoon')">
+                    <div class="time-slot-title">Afternoon</div>
+                    <div class="time-slot-time">1:00 PM - 5:00 PM</div>
+                </div>
+            </div>
+
+            <!-- Duration Selection -->
+            <div class="section-title">Select Duration</div>
+            <div class="duration-options">
+                <div class="duration-grid">
+                    <div class="duration-option" onclick="selectDuration('hourly')">
+                        <div class="duration-title">Hourly Rate</div>
+                        <div class="duration-price">$15/hour</div>
+                    </div>
+                    <div class="duration-option" onclick="selectDuration('daily')">
+                        <div class="duration-title">Daily Rate</div>
+                        <div class="duration-price">$45/day</div>
+                    </div>
+                    <div class="duration-option" onclick="selectDuration('custom')">
+                        <div class="duration-title">Custom</div>
+                        <div class="duration-price">Specify</div>
+                    </div>
+                </div>
+                <div class="custom-duration" id="customDuration">
+                    <input type="number" class="form-input" id="customHours" placeholder="Number of hours" min="1" max="24">
+                </div>
+            </div>
+
+            <!-- Payment Summary -->
+            <div class="section-title">Payment Summary</div>
+            <div class="payment-summary">
+                <div class="summary-row">
+                    <span>Rental Cost:</span>
+                    <span id="rentalCost">$0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Delivery Fee:</span>
+                    <span id="deliveryFee">$6.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Mileage (2.3 mi):</span>
+                    <span id="mileageFee">$1.15</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total:</span>
+                    <span id="totalCost">$7.15</span>
+                </div>
+            </div>
+
+            <!-- Book Button -->
+            <button class="action-btn" onclick="proceedToPayment()" id="bookButton" disabled>
+                Select Date & Time to Continue
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let selectedDate = null;
+        let selectedTimeSlot = null;
+        let selectedDuration = null;
+        let customHours = 0;
+        let currentMonth = 0; // January 2025
+        let currentYear = 2025;
+
+        const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+
+        const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        // Initialize calendar
+        function initializeCalendar() {
+            generateCalendar();
+            createParticles();
+        }
+
+        // Generate calendar
+        function generateCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const monthYear = document.getElementById('monthYear');
+            
+            monthYear.textContent = `${months[currentMonth]} ${currentYear}`;
+            
+            // Clear grid
+            grid.innerHTML = '';
+            
+            // Add day headers
+            dayHeaders.forEach(day => {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'day-header';
+                dayElement.textContent = day;
+                grid.appendChild(dayElement);
+            });
+            
+            // Get first day of month and number of days
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const today = new Date();
+            
+            // Add empty cells for days before month starts
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day';
+                grid.appendChild(emptyDay);
+            }
+            
+            // Add days of month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayDate = new Date(currentYear, currentMonth, day);
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = day;
+                
+                // Check if date is available (future dates only)
+                if (dayDate >= today) {
+                    dayElement.classList.add('available');
+                    dayElement.onclick = () => selectDate(day);
+                } else {
+                    dayElement.classList.add('disabled');
+                }
+                
+                grid.appendChild(dayElement);
+            }
+        }
+
+        // Change month
+        function changeMonth(direction) {
+            currentMonth += direction;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            generateCalendar();
+        }
+
+        // Select date
+        function selectDate(day) {
+            // Remove previous selection
+            document.querySelectorAll('.calendar-day.selected').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            // Add selection to clicked day
+            event.target.classList.add('selected');
+            selectedDate = new Date(currentYear, currentMonth, day);
+            
+            updateBookButton();
+        }
+
+        // Select time slot
+        function selectTimeSlot(slot) {
+            // Remove previous selection
+            document.querySelectorAll('.time-slot.selected').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            // Add selection to clicked slot
+            event.target.classList.add('selected');
+            selectedTimeSlot = slot;
+            
+            updateBookButton();
+        }
+
+        // Select duration
+        function selectDuration(duration) {
+            // Remove previous selection
+            document.querySelectorAll('.duration-option.selected').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            // Add selection to clicked option
+            event.target.classList.add('selected');
+            selectedDuration = duration;
+            
+            // Show/hide custom duration input
+            const customDiv = document.getElementById('customDuration');
+            if (duration === 'custom') {
+                customDiv.classList.add('show');
+            } else {
+                customDiv.classList.remove('show');
+            }
+            
+            calculateCost();
+            updateBookButton();
+        }
+
+        // Calculate cost
+        function calculateCost() {
+            let rentalCost = 0;
+            
+            if (selectedDuration === 'hourly') {
+                rentalCost = 15;
+            } else if (selectedDuration === 'daily') {
+                rentalCost = 45;
+            } else if (selectedDuration === 'custom') {
+                const hours = parseInt(document.getElementById('customHours').value) || 0;
+                rentalCost = hours * 15;
+                customHours = hours;
+            }
+            
+            const deliveryFee = 6.00;
+            const mileageFee = 1.15;
+            const total = rentalCost + deliveryFee + mileageFee;
+            
+            document.getElementById('rentalCost').textContent = `$${rentalCost.toFixed(2)}`;
+            document.getElementById('totalCost').textContent = `$${total.toFixed(2)}`;
+        }
+
+        // Update book button
+        function updateBookButton() {
+            const button = document.getElementById('bookButton');
+            
+            if (selectedDate && selectedTimeSlot && selectedDuration) {
+                button.disabled = false;
+                button.textContent = 'Request Delivery & Pay Now';
+            } else {
+                button.disabled = true;
+                button.textContent = 'Select Date & Time to Continue';
+            }
+        }
+
+        // Proceed to payment
+        function proceedToPayment() {
+            if (!selectedDate || !selectedTimeSlot || !selectedDuration) {
+                alert('Please select date, time, and duration first.');
+                return;
+            }
+            
+            const dateStr = selectedDate.toLocaleDateString();
+            const timeStr = selectedTimeSlot === 'morning' ? '9:00 AM - 12:00 PM' : '1:00 PM - 5:00 PM';
+            let durationStr = '';
+            
+            if (selectedDuration === 'hourly') {
+                durationStr = '1 hour';
+            } else if (selectedDuration === 'daily') {
+                durationStr = 'Full day';
+            } else if (selectedDuration === 'custom') {
+                durationStr = `${customHours} hours`;
+            }
+            
+            const total = document.getElementById('totalCost').textContent;
+            
+            alert(`Booking Confirmed!\n\nItem: Professional Power Washer\nDate: ${dateStr}\nTime: ${timeStr}\nDuration: ${durationStr}\nTotal: ${total}\n\nPayment processed successfully!\nYou'll receive delivery confirmation within 30 minutes.`);
+        }
+
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.width = (Math.random() * 4 + 2) + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Listen for custom hours input
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCalendar();
+            
+            document.getElementById('customHours').addEventListener('input', function() {
+                if (selectedDuration === 'custom') {
+                    calculateCost();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
