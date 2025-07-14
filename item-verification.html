@@ -703,6 +703,22 @@
                                 </div>
                             </label>
                         </div>
+                        
+                        <!-- Customer Protection Fee (Optional) -->
+                        <div class="protection-fee-section" style="margin-top: 20px;">
+                            <label class="duration-option" style="border: 1px solid rgba(16, 185, 129, 0.5);">
+                                <input type="checkbox" id="protectionFee" onchange="updateRentalPricing()" style="accent-color: #10b981;">
+                                <div class="option-content">
+                                    <div>
+                                        <span class="option-title" style="color: #10b981;">Customer Protection Fee (Optional)</span>
+                                        <div style="font-size: 12px; color: #93c5fd; margin-top: 4px;">
+                                            Covers item damage up to $100. Without this fee, MarketPace provides no coverage.
+                                        </div>
+                                    </div>
+                                    <span class="option-price" style="color: #10b981;">$10.00</span>
+                                </div>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -766,6 +782,7 @@
         let customDropoffTime = null;
         let selectedDeliveryOption = null;
         let selectedDuration = 'daily';
+        let protectionFeeSelected = false;
         let itemData = null;
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
@@ -1108,8 +1125,17 @@
             const duration = document.querySelector('input[name="duration"]:checked').value;
             selectedDuration = duration;
             
+            // Check protection fee status
+            const protectionCheckbox = document.getElementById('protectionFee');
+            protectionFeeSelected = protectionCheckbox ? protectionCheckbox.checked : false;
+            
             updatePaymentSummary();
-            showNotification(`Updated to ${duration} pricing`, 'info');
+            
+            if (protectionFeeSelected && itemData.category === 'rental') {
+                showNotification(`${duration} pricing with $10 protection coverage`, 'info');
+            } else {
+                showNotification(`Updated to ${duration} pricing`, 'info');
+            }
         }
 
         // Update payment summary
@@ -1123,6 +1149,7 @@
             
             let itemCost = 0;
             let deliveryCost = 0;
+            let protectionCost = 0;
             
             // Calculate item cost based on type and duration
             if (itemData.category === 'rental') {
@@ -1137,6 +1164,11 @@
                         itemCost = dailyRate;
                         break;
                 }
+                
+                // Add protection fee if selected
+                if (protectionFeeSelected) {
+                    protectionCost = 10.00;
+                }
             } else {
                 itemCost = itemData.price;
             }
@@ -1146,7 +1178,7 @@
                 deliveryCost = 6.00; // $4 pickup + $2 dropoff
             }
             
-            const total = itemCost + deliveryCost;
+            const total = itemCost + deliveryCost + protectionCost;
             
             // Generate pricing breakdown
             let breakdownHTML = '';
@@ -1165,6 +1197,11 @@
                 breakdownHTML += `<div class="pricing-line"><span>Pickup Fee</span><span>$4.00</span></div>`;
                 breakdownHTML += `<div class="pricing-line"><span>Drop-off Fee</span><span>$2.00</span></div>`;
                 breakdownHTML += `<div class="pricing-line"><span>Mileage (est.)</span><span>$2.50</span></div>`;
+            }
+            
+            if (protectionCost > 0) {
+                breakdownHTML += `<div class="pricing-line" style="color: #10b981;"><span>Customer Protection Fee</span><span>$${protectionCost.toFixed(2)}</span></div>`;
+                breakdownHTML += `<div class="pricing-line" style="font-size: 11px; color: #93c5fd;"><span>• Covers damage up to $100</span><span></span></div>`;
             }
             
             breakdownHTML += `<div class="pricing-line total"><span>Total</span><span>$${(total + (deliveryCost > 0 ? 2.50 : 0)).toFixed(2)}</span></div>`;
@@ -1217,7 +1254,8 @@
                 }
                 
                 const deliveryCost = selectedDeliveryOption === 'marketplace' ? 8.50 : 0;
-                const total = itemCost + deliveryCost;
+                const protectionCost = (itemData.category === 'rental' && protectionFeeSelected) ? 10.00 : 0;
+                const total = itemCost + deliveryCost + protectionCost;
                 
                 // Store request data for owner approval
                 const requestData = {
@@ -1231,8 +1269,10 @@
                     pricing: {
                         itemCost: itemCost,
                         deliveryCost: deliveryCost,
+                        protectionCost: protectionCost,
                         total: total
                     },
+                    protectionFeeSelected: protectionFeeSelected,
                     status: 'pending_owner_approval',
                     timestamp: Date.now()
                 };
