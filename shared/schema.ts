@@ -123,6 +123,63 @@ export const announcements = pgTable("announcements", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Volunteers for nonprofit organizations
+export const volunteers = pgTable("volunteers", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  businessId: uuid("business_id").notNull().references(() => businesses.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").references(() => users.id), // null if not yet a MarketPace user
+  firstName: varchar("first_name").notNull(),
+  lastName: varchar("last_name").notNull(),
+  email: varchar("email").notNull(),
+  phone: varchar("phone"),
+  role: varchar("role").notNull(), // food-pantry, event-setup, community-outreach, etc.
+  availability: text("availability"),
+  skills: text("skills"),
+  emergencyContact: text("emergency_contact"),
+  status: varchar("status").default("active"), // active, inactive, on-leave
+  totalHours: integer("total_hours").default(0),
+  joinedAt: timestamp("joined_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Volunteer hour logs
+export const volunteerHours = pgTable("volunteer_hours", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  volunteerId: uuid("volunteer_id").notNull().references(() => volunteers.id, { onDelete: "cascade" }),
+  businessId: uuid("business_id").notNull().references(() => businesses.id, { onDelete: "cascade" }),
+  date: timestamp("date").notNull(),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  totalHours: integer("total_hours").notNull(), // hours * 100 for precision (e.g., 4.5 hours = 450)
+  task: varchar("task").notNull(),
+  description: text("description"),
+  supervisor: varchar("supervisor"),
+  verified: boolean("verified").default(false),
+  verifiedBy: varchar("verified_by"),
+  verifiedAt: timestamp("verified_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Volunteer schedules
+export const volunteerSchedules = pgTable("volunteer_schedules", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  volunteerId: uuid("volunteer_id").notNull().references(() => volunteers.id, { onDelete: "cascade" }),
+  businessId: uuid("business_id").notNull().references(() => businesses.id, { onDelete: "cascade" }),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  task: varchar("task").notNull(),
+  priority: varchar("priority").default("normal"), // normal, high, urgent
+  status: varchar("status").default("scheduled"), // scheduled, confirmed, completed, cancelled
+  notificationSent: boolean("notification_sent").default(false),
+  confirmedAt: timestamp("confirmed_at"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Notifications for employees
 export const notifications = pgTable("notifications", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -211,6 +268,14 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
 // Type exports
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+// Type exports for volunteer management
+export type Volunteer = typeof volunteers.$inferSelect;
+export type InsertVolunteer = typeof volunteers.$inferInsert;
+export type VolunteerHours = typeof volunteerHours.$inferSelect;
+export type InsertVolunteerHours = typeof volunteerHours.$inferInsert;
+export type VolunteerSchedule = typeof volunteerSchedules.$inferSelect;
+export type InsertVolunteerSchedule = typeof volunteerSchedules.$inferInsert;
 export type Business = typeof businesses.$inferSelect;
 export type InsertBusiness = typeof businesses.$inferInsert;
 export type Employee = typeof employees.$inferSelect;

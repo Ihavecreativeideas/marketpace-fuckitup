@@ -495,6 +495,7 @@
             <div class="tab" onclick="switchTab('employees')">Team Management</div>
             <div class="tab" onclick="switchTab('schedule')">Schedule</div>
             <div class="tab" onclick="switchTab('fill-ins')">Fill-ins</div>
+            <div class="tab" onclick="switchTab('volunteers')">Volunteers</div>
             <div class="tab" onclick="switchTab('announcements')">Announcements</div>
             <div class="tab" onclick="switchTab('settings')">Settings</div>
         </div>
@@ -583,6 +584,190 @@
                 </div>
                 <div id="fillInRequests">
                     <!-- Fill-in requests will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Volunteers Tab -->
+        <div id="volunteers" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Nonprofit Volunteer Management</h2>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-primary" onclick="openModal('addVolunteerModal')">Add Volunteer</button>
+                        <button class="btn" style="background: #16a34a; color: white;" onclick="openModal('volunteerHoursModal')">Log Hours</button>
+                        <button class="btn" style="background: #dc2626; color: white;" onclick="exportVolunteerHours()">Export Hours Report</button>
+                    </div>
+                </div>
+                
+                <!-- Volunteer Stats Overview -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 24px;">
+                    <div style="text-align: center; padding: 20px; background: rgba(16, 185, 129, 0.1); border-radius: 12px;">
+                        <div style="font-size: 32px; font-weight: 700; color: #10b981; margin-bottom: 8px;">24</div>
+                        <div style="color: #94a3b8;">Active Volunteers</div>
+                    </div>
+                    <div style="text-align: center; padding: 20px; background: rgba(59, 130, 246, 0.1); border-radius: 12px;">
+                        <div style="font-size: 32px; font-weight: 700; color: #3b82f6; margin-bottom: 8px;">485</div>
+                        <div style="color: #94a3b8;">Total Hours This Month</div>
+                    </div>
+                    <div style="text-align: center; padding: 20px; background: rgba(245, 158, 11, 0.1); border-radius: 12px;">
+                        <div style="font-size: 32px; font-weight: 700; color: #f59e0b; margin-bottom: 8px;">12</div>
+                        <div style="color: #94a3b8;">Upcoming Shifts</div>
+                    </div>
+                    <div style="text-align: center; padding: 20px; background: rgba(168, 85, 247, 0.1); border-radius: 12px;">
+                        <div style="font-size: 32px; font-weight: 700; color: #a855f7; margin-bottom: 8px;">8</div>
+                        <div style="color: #94a3b8;">Different Tasks</div>
+                    </div>
+                </div>
+
+                <!-- Active Volunteers List -->
+                <div id="volunteersList">
+                    <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                        <div style="display: grid; grid-template-columns: 1fr 2fr 1fr 1fr 1fr auto; gap: 16px; align-items: center;">
+                            <div>
+                                <div style="font-weight: 600; color: #e2e8f0;">Sarah Johnson</div>
+                                <div style="color: #94a3b8; font-size: 14px;">sarah.j@email.com</div>
+                            </div>
+                            <div>
+                                <div style="color: #10b981; font-weight: 500;">Food Pantry Coordinator</div>
+                                <div style="color: #94a3b8; font-size: 14px;">Saturdays 9am-1pm</div>
+                            </div>
+                            <div>
+                                <div style="color: #3b82f6; font-weight: 600;">42 Hours</div>
+                                <div style="color: #94a3b8; font-size: 14px;">This Month</div>
+                            </div>
+                            <div>
+                                <div style="color: #f59e0b; font-weight: 500;">156 Hours</div>
+                                <div style="color: #94a3b8; font-size: 14px;">Total</div>
+                            </div>
+                            <div>
+                                <span style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 4px 8px; border-radius: 6px; font-size: 12px;">Active</span>
+                            </div>
+                            <div>
+                                <button class="btn" style="background: #3b82f6; color: white; padding: 6px 12px; font-size: 12px;" onclick="viewVolunteerDetails('volunteer1')">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                        <div style="display: grid; grid-template-columns: 1fr 2fr 1fr 1fr 1fr auto; gap: 16px; align-items: center;">
+                            <div>
+                                <div style="font-weight: 600; color: #e2e8f0;">Mike Rodriguez</div>
+                                <div style="color: #94a3b8; font-size: 14px;">mike.r@email.com</div>
+                            </div>
+                            <div>
+                                <div style="color: #10b981; font-weight: 500;">Event Setup Assistant</div>
+                                <div style="color: #94a3b8; font-size: 14px;">Flexible Schedule</div>
+                            </div>
+                            <div>
+                                <div style="color: #3b82f6; font-weight: 600;">28 Hours</div>
+                                <div style="color: #94a3b8; font-size: 14px;">This Month</div>
+                            </div>
+                            <div>
+                                <div style="color: #f59e0b; font-weight: 500;">98 Hours</div>
+                                <div style="color: #94a3b8; font-size: 14px;">Total</div>
+                            </div>
+                            <div>
+                                <span style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 4px 8px; border-radius: 6px; font-size: 12px;">Active</span>
+                            </div>
+                            <div>
+                                <button class="btn" style="background: #3b82f6; color: white; padding: 6px 12px; font-size: 12px;" onclick="viewVolunteerDetails('volunteer2')">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                        <div style="display: grid; grid-template-columns: 1fr 2fr 1fr 1fr 1fr auto; gap: 16px; align-items: center;">
+                            <div>
+                                <div style="font-weight: 600; color: #e2e8f0;">Emma Chen</div>
+                                <div style="color: #94a3b8; font-size: 14px;">emma.c@email.com</div>
+                            </div>
+                            <div>
+                                <div style="color: #10b981; font-weight: 500;">Community Outreach</div>
+                                <div style="color: #94a3b8; font-size: 14px;">Weekdays 2pm-6pm</div>
+                            </div>
+                            <div>
+                                <div style="color: #3b82f6; font-weight: 600;">36 Hours</div>
+                                <div style="color: #94a3b8; font-size: 14px;">This Month</div>
+                            </div>
+                            <div>
+                                <div style="color: #f59e0b; font-weight: 500;">124 Hours</div>
+                                <div style="color: #94a3b8; font-size: 14px;">Total</div>
+                            </div>
+                            <div>
+                                <span style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 4px 8px; border-radius: 6px; font-size: 12px;">Active</span>
+                            </div>
+                            <div>
+                                <button class="btn" style="background: #3b82f6; color: white; padding: 6px 12px; font-size: 12px;" onclick="viewVolunteerDetails('volunteer3')">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly Volunteer Schedule -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">This Week's Volunteer Schedule</h2>
+                    <button class="btn btn-primary" onclick="openModal('scheduleVolunteerModal')">Schedule Volunteer</button>
+                </div>
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <button class="calendar-nav" onclick="previousWeek()">&lt;</button>
+                        <h3>Week of January 13-19, 2025</h3>
+                        <button class="calendar-nav" onclick="nextWeek()">&gt;</button>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="calendar-day-header">Monday</div>
+                        <div class="calendar-day-header">Tuesday</div>
+                        <div class="calendar-day-header">Wednesday</div>
+                        <div class="calendar-day-header">Thursday</div>
+                        <div class="calendar-day-header">Friday</div>
+                        <div class="calendar-day-header">Saturday</div>
+                        <div class="calendar-day-header">Sunday</div>
+                        
+                        <div class="calendar-day">
+                            <div class="day-number">13</div>
+                            <div class="volunteer-shift" style="background: rgba(16, 185, 129, 0.2); border-left: 3px solid #10b981;">
+                                <div style="font-size: 12px; font-weight: 600;">9am-1pm</div>
+                                <div style="font-size: 11px;">Sarah - Food Pantry</div>
+                            </div>
+                        </div>
+                        <div class="calendar-day">
+                            <div class="day-number">14</div>
+                            <div class="volunteer-shift" style="background: rgba(59, 130, 246, 0.2); border-left: 3px solid #3b82f6;">
+                                <div style="font-size: 12px; font-weight: 600;">2pm-6pm</div>
+                                <div style="font-size: 11px;">Emma - Outreach</div>
+                            </div>
+                        </div>
+                        <div class="calendar-day">
+                            <div class="day-number">15</div>
+                            <div class="volunteer-shift" style="background: rgba(168, 85, 247, 0.2); border-left: 3px solid #a855f7;">
+                                <div style="font-size: 12px; font-weight: 600;">10am-2pm</div>
+                                <div style="font-size: 11px;">Mike - Event Setup</div>
+                            </div>
+                        </div>
+                        <div class="calendar-day">
+                            <div class="day-number">16</div>
+                        </div>
+                        <div class="calendar-day">
+                            <div class="day-number">17</div>
+                            <div class="volunteer-shift" style="background: rgba(245, 158, 11, 0.2); border-left: 3px solid #f59e0b;">
+                                <div style="font-size: 12px; font-weight: 600;">5pm-8pm</div>
+                                <div style="font-size: 11px;">Team - Event Night</div>
+                            </div>
+                        </div>
+                        <div class="calendar-day">
+                            <div class="day-number">18</div>
+                            <div class="volunteer-shift" style="background: rgba(16, 185, 129, 0.2); border-left: 3px solid #10b981;">
+                                <div style="font-size: 12px; font-weight: 600;">9am-1pm</div>
+                                <div style="font-size: 11px;">Sarah - Food Pantry</div>
+                            </div>
+                        </div>
+                        <div class="calendar-day">
+                            <div class="day-number">19</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -813,6 +998,216 @@
                 <button class="btn" style="background: #6b7280; color: white;" onclick="resetToDefaults()">Reset to Defaults</button>
                 <button class="btn" style="background: #f59e0b; color: white;" onclick="exportSettings()">Export Settings</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Add Volunteer Modal -->
+    <div id="addVolunteerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Volunteer</h3>
+                <button class="close-btn" onclick="closeModal('addVolunteerModal')">&times;</button>
+            </div>
+            <form id="addVolunteerForm">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">First Name</label>
+                        <input type="text" class="form-input" name="firstName" placeholder="Sarah" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" class="form-input" name="lastName" placeholder="Johnson" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-input" name="email" placeholder="sarah.j@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" class="form-input" name="phone" placeholder="(555) 123-4567" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Volunteer Role/Task</label>
+                    <select class="form-select" name="volunteerRole" required>
+                        <option value="">Select a role...</option>
+                        <option value="food-pantry">Food Pantry Coordinator</option>
+                        <option value="event-setup">Event Setup Assistant</option>
+                        <option value="community-outreach">Community Outreach</option>
+                        <option value="administrative">Administrative Support</option>
+                        <option value="fundraising">Fundraising Assistant</option>
+                        <option value="education">Education Programs</option>
+                        <option value="maintenance">Facility Maintenance</option>
+                        <option value="transportation">Transportation Services</option>
+                        <option value="technology">Technology Support</option>
+                        <option value="other">Other (specify in notes)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Availability</label>
+                    <textarea class="form-input" name="availability" rows="3" placeholder="e.g., Weekends, Evenings, Flexible schedule"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Skills & Experience</label>
+                    <textarea class="form-input" name="skills" rows="3" placeholder="Relevant skills, previous volunteer experience, special training"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Emergency Contact</label>
+                    <input type="text" class="form-input" name="emergencyContact" placeholder="Name and phone number">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" onclick="closeModal('addVolunteerModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Volunteer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Log Volunteer Hours Modal -->
+    <div id="volunteerHoursModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Log Volunteer Hours</h3>
+                <button class="close-btn" onclick="closeModal('volunteerHoursModal')">&times;</button>
+            </div>
+            <form id="volunteerHoursForm">
+                <div class="form-group">
+                    <label class="form-label">Select Volunteer</label>
+                    <select class="form-select" name="volunteerId" required>
+                        <option value="">Choose volunteer...</option>
+                        <option value="volunteer1">Sarah Johnson</option>
+                        <option value="volunteer2">Mike Rodriguez</option>
+                        <option value="volunteer3">Emma Chen</option>
+                    </select>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input type="date" class="form-input" name="volunteerDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Task/Activity</label>
+                        <select class="form-select" name="task" required>
+                            <option value="">Select task...</option>
+                            <option value="food-pantry">Food Pantry Operations</option>
+                            <option value="event-setup">Event Setup/Breakdown</option>
+                            <option value="community-outreach">Community Outreach</option>
+                            <option value="administrative">Administrative Work</option>
+                            <option value="fundraising">Fundraising Activities</option>
+                            <option value="education">Education Programs</option>
+                            <option value="maintenance">Facility Maintenance</option>
+                            <option value="transportation">Transportation Services</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">Start Time</label>
+                        <input type="time" class="form-input" name="startTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">End Time</label>
+                        <input type="time" class="form-input" name="endTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Total Hours</label>
+                        <input type="number" class="form-input" name="totalHours" step="0.5" placeholder="4.0" readonly>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description of Work</label>
+                    <textarea class="form-input" name="description" rows="3" placeholder="Briefly describe what was accomplished during this volunteer session"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Supervisor/Coordinator</label>
+                    <input type="text" class="form-input" name="supervisor" placeholder="Name of supervising staff member">
+                </div>
+                <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                    <h4 style="color: #60a5fa; margin-bottom: 8px;">Volunteer Impact</h4>
+                    <p style="color: #e2e8f0; margin: 0; font-size: 14px;">This session will be automatically added to the volunteer's total hours and included in all reports for grant applications and tax documentation.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" onclick="closeModal('volunteerHoursModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Log Hours</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Schedule Volunteer Modal -->
+    <div id="scheduleVolunteerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Schedule Volunteer Shift</h3>
+                <button class="close-btn" onclick="closeModal('scheduleVolunteerModal')">&times;</button>
+            </div>
+            <form id="scheduleVolunteerForm">
+                <div class="form-group">
+                    <label class="form-label">Select Volunteer</label>
+                    <select class="form-select" name="volunteerId" required>
+                        <option value="">Choose volunteer...</option>
+                        <option value="volunteer1">Sarah Johnson - Food Pantry Coordinator</option>
+                        <option value="volunteer2">Mike Rodriguez - Event Setup Assistant</option>
+                        <option value="volunteer3">Emma Chen - Community Outreach</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Shift Title</label>
+                    <input type="text" class="form-input" name="shiftTitle" placeholder="e.g., Weekend Food Distribution, Community Event Setup" required>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input type="date" class="form-input" name="shiftDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Duration</label>
+                        <select class="form-select" name="duration" required onchange="updateVolunteerEndTime()">
+                            <option value="1">1 Hour</option>
+                            <option value="2">2 Hours</option>
+                            <option value="3">3 Hours</option>
+                            <option value="4" selected>4 Hours</option>
+                            <option value="5">5 Hours</option>
+                            <option value="6">6 Hours</option>
+                            <option value="8">8 Hours</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">Start Time</label>
+                        <input type="time" class="form-input" name="startTime" required onchange="updateVolunteerEndTime()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">End Time</label>
+                        <input type="time" class="form-input" name="endTime" readonly>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Task Description</label>
+                    <textarea class="form-input" name="taskDescription" rows="3" placeholder="Describe the specific tasks and responsibilities for this shift"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Priority Level</label>
+                    <select class="form-select" name="priority">
+                        <option value="normal" selected>Normal</option>
+                        <option value="high">High Priority</option>
+                        <option value="urgent">Urgent</option>
+                    </select>
+                </div>
+                <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                    <h4 style="color: #10b981; margin-bottom: 8px;">Volunteer Notification</h4>
+                    <label style="display: flex; align-items: center; color: #e2e8f0;">
+                        <input type="checkbox" name="sendNotification" checked style="margin-right: 8px;"> 
+                        Send SMS notification to volunteer about this scheduled shift
+                    </label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" onclick="closeModal('scheduleVolunteerModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Schedule Shift</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -2008,6 +2403,67 @@
             showNotification('Settings exported successfully!', 'success');
         }
 
+        // Volunteer Management Functions
+        function updateVolunteerEndTime() {
+            const startTimeInput = document.querySelector('#scheduleVolunteerModal input[name="startTime"]');
+            const durationSelect = document.querySelector('#scheduleVolunteerModal select[name="duration"]');
+            const endTimeInput = document.querySelector('#scheduleVolunteerModal input[name="endTime"]');
+            
+            if (startTimeInput.value && durationSelect.value) {
+                const startTime = new Date(`2000-01-01T${startTimeInput.value}:00`);
+                const duration = parseInt(durationSelect.value);
+                const endTime = new Date(startTime.getTime() + duration * 60 * 60 * 1000);
+                endTimeInput.value = endTime.toTimeString().slice(0, 5);
+            }
+        }
+
+        function viewVolunteerDetails(volunteerId) {
+            console.log('Viewing details for volunteer:', volunteerId);
+            showNotification('Opening volunteer details...', 'info');
+        }
+
+        function exportVolunteerHours() {
+            showNotification('Generating volunteer hours report...', 'info');
+            console.log('Exporting volunteer hours report');
+            
+            setTimeout(() => {
+                const csvContent = `Date,Volunteer,Task,Hours,Supervisor
+2025-01-13,Sarah Johnson,Food Pantry Operations,4.0,Manager Smith
+2025-01-14,Mike Rodriguez,Event Setup,3.5,Coordinator Jones
+2025-01-15,Emma Chen,Community Outreach,5.0,Director Wilson
+2025-01-16,Sarah Johnson,Administrative Work,2.5,Director Wilson
+2025-01-17,Emma Chen,Fundraising Event,6.0,Event Coordinator
+2025-01-18,Mike Rodriguez,Facility Maintenance,3.0,Maintenance Supervisor`;
+                
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `volunteer-hours-${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                
+                showNotification('Volunteer hours report downloaded!', 'success');
+            }, 1000);
+        }
+
+        function calculateVolunteerHours() {
+            const startTimeInput = document.querySelector('#volunteerHoursModal input[name="startTime"]');
+            const endTimeInput = document.querySelector('#volunteerHoursModal input[name="endTime"]');
+            const totalHoursInput = document.querySelector('#volunteerHoursModal input[name="totalHours"]');
+            
+            if (startTimeInput.value && endTimeInput.value) {
+                const startTime = new Date(`2000-01-01T${startTimeInput.value}:00`);
+                const endTime = new Date(`2000-01-01T${endTimeInput.value}:00`);
+                
+                if (endTime > startTime) {
+                    const diffMs = endTime - startTime;
+                    const diffHours = diffMs / (1000 * 60 * 60);
+                    totalHoursInput.value = diffHours.toFixed(1);
+                }
+            }
+        }
+
         // Close modals when clicking outside
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('modal')) {
@@ -2028,6 +2484,53 @@
                     updatePaymentPreview();
                 }
             }, 100);
+
+            // Add volunteer form submission handlers
+            document.getElementById('addVolunteerForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const volunteerData = Object.fromEntries(formData);
+                
+                console.log('Adding volunteer:', volunteerData);
+                showNotification('Volunteer added successfully!', 'success');
+                closeModal('addVolunteerModal');
+                this.reset();
+            });
+
+            document.getElementById('volunteerHoursForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const hoursData = Object.fromEntries(formData);
+                
+                console.log('Logging volunteer hours:', hoursData);
+                showNotification('Volunteer hours logged successfully!', 'success');
+                closeModal('volunteerHoursModal');
+                this.reset();
+            });
+
+            document.getElementById('scheduleVolunteerForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const scheduleData = Object.fromEntries(formData);
+                
+                console.log('Scheduling volunteer:', scheduleData);
+                showNotification('Volunteer shift scheduled successfully!', 'success');
+                closeModal('scheduleVolunteerModal');
+                this.reset();
+            });
+
+            // Add event listeners for volunteer hours calculation
+            setTimeout(() => {
+                const volunteerStartTime = document.querySelector('#volunteerHoursModal input[name="startTime"]');
+                const volunteerEndTime = document.querySelector('#volunteerHoursModal input[name="endTime"]');
+                
+                if (volunteerStartTime) {
+                    volunteerStartTime.addEventListener('change', calculateVolunteerHours);
+                }
+                if (volunteerEndTime) {
+                    volunteerEndTime.addEventListener('change', calculateVolunteerHours);
+                }
+            }, 200);
         });
     </script>
 </body>

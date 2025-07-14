@@ -7,12 +7,18 @@ import {
   announcements, 
   notifications,
   users,
+  volunteers,
+  volunteerHours,
+  volunteerSchedules,
   type InsertBusiness,
   type InsertEmployee,
   type InsertSchedule,
   type InsertFillInRequest,
   type InsertAnnouncement,
-  type InsertNotification
+  type InsertNotification,
+  type InsertVolunteer,
+  type InsertVolunteerHours,
+  type InsertVolunteerSchedule
 } from "../shared/schema";
 import { eq, and, desc, gte, lte } from "drizzle-orm";
 
@@ -669,5 +675,212 @@ Questions? Reply to this message.`;
     const linkId = Math.random().toString(36).substring(2, 15) + 
                    Math.random().toString(36).substring(2, 15);
     return `https://marketpace.shop/invite/${linkId}?business=${businessId}&role=${role}`;
+  }
+
+  // Volunteer Management Methods
+  async addVolunteer(businessId: string, volunteerData: Omit<InsertVolunteer, 'businessId'>) {
+    const volunteer = await db.insert(volunteers).values({
+      ...volunteerData,
+      businessId,
+      status: 'active'
+    }).returning();
+
+    return volunteer[0];
+  }
+
+  async getBusinessVolunteers(businessId: string) {
+    return await db.select()
+      .from(volunteers)
+      .where(eq(volunteers.businessId, businessId))
+      .orderBy(desc(volunteers.createdAt));
+  }
+
+  async getVolunteer(volunteerId: string, businessId: string) {
+    const volunteer = await db.select()
+      .from(volunteers)
+      .where(and(eq(volunteers.id, volunteerId), eq(volunteers.businessId, businessId)));
+    return volunteer[0];
+  }
+
+  async updateVolunteerStatus(volunteerId: string, status: 'active' | 'inactive' | 'on-leave') {
+    const updated = await db.update(volunteers)
+      .set({ 
+        status,
+        updatedAt: new Date()
+      })
+      .where(eq(volunteers.id, volunteerId))
+      .returning();
+    return updated[0];
+  }
+
+  async logVolunteerHours(businessId: string, hoursData: Omit<InsertVolunteerHours, 'businessId'>) {
+    const hours = await db.insert(volunteerHours).values({
+      ...hoursData,
+      businessId,
+      verified: false
+    }).returning();
+
+    // Update volunteer's total hours
+    const totalHoursWorked = hoursData.totalHours;
+    await db.update(volunteers)
+      .set({ 
+        totalHours: totalHoursWorked,
+        updatedAt: new Date()
+      })
+      .where(eq(volunteers.id, hoursData.volunteerId));
+
+    return hours[0];
+  }
+
+  async getVolunteerHours(businessId: string, volunteerId?: string, startDate?: Date, endDate?: Date) {
+    let query = db.select({
+      hours: volunteerHours,
+      volunteer: volunteers
+    })
+    .from(volunteerHours)
+    .leftJoin(volunteers, eq(volunteerHours.volunteerId, volunteers.id))
+    .where(eq(volunteerHours.businessId, businessId));
+
+    if (volunteerId) {
+      query = query.where(eq(volunteerHours.volunteerId, volunteerId));
+    }
+
+    if (startDate && endDate) {
+      query = query.where(and(
+        gte(volunteerHours.date, startDate),
+        lte(volunteerHours.date, endDate)
+      ));
+    }
+
+    return await query.orderBy(desc(volunteerHours.date));
+  }
+
+  async scheduleVolunteer(businessId: string, scheduleData: Omit<InsertVolunteerSchedule, 'businessId'>) {
+    const schedule = await db.insert(volunteerSchedules).values({
+      ...scheduleData,
+      businessId,
+      status: 'scheduled'
+    }).returning();
+
+    // Send SMS notification if requested
+    if (scheduleData.notificationSent) {
+      const volunteer = await this.getVolunteer(scheduleData.volunteerId, businessId);
+      if (volunteer && volunteer.phone) {
+        await this.sendVolunteerNotification(volunteer, schedule[0]);
+      }
+    }
+
+    return schedule[0];
+  }
+
+  async getVolunteerSchedules(businessId: string, volunteerId?: string, startDate?: Date, endDate?: Date) {
+    let query = db.select({
+      schedule: volunteerSchedules,
+      volunteer: volunteers
+    })
+    .from(volunteerSchedules)
+    .leftJoin(volunteers, eq(volunteerSchedules.volunteerId, volunteers.id))
+    .where(eq(volunteerSchedules.businessId, businessId));
+
+    if (volunteerId) {
+      query = query.where(eq(volunteerSchedules.volunteerId, volunteerId));
+    }
+
+    if (startDate && endDate) {
+      query = query.where(and(
+        gte(volunteerSchedules.startTime, startDate),
+        lte(volunteerSchedules.endTime, endDate)
+      ));
+    }
+
+    return await query.orderBy(volunteerSchedules.startTime);
+  }
+
+  async verifyVolunteerHours(hoursId: string, verifiedBy: string) {
+    const updated = await db.update(volunteerHours)
+      .set({
+        verified: true,
+        verifiedBy,
+        verifiedAt: new Date()
+      })
+      .where(eq(volunteerHours.id, hoursId))
+      .returning();
+    return updated[0];
+  }
+
+  async getVolunteerStats(businessId: string) {
+    const volunteers = await this.getBusinessVolunteers(businessId);
+    const thisMonth = new Date();
+    thisMonth.setDate(1);
+    thisMonth.setHours(0, 0, 0, 0);
+    
+    const monthlyHours = await this.getVolunteerHours(businessId, undefined, thisMonth);
+    
+    const upcomingSchedules = await db.select()
+      .from(volunteerSchedules)
+      .where(and(
+        eq(volunteerSchedules.businessId, businessId),
+        gte(volunteerSchedules.startTime, new Date())
+      ));
+
+    const tasks = await db.select({ task: volunteerHours.task })
+      .from(volunteerHours)
+      .where(eq(volunteerHours.businessId, businessId))
+      .groupBy(volunteerHours.task);
+
+    const totalMonthlyHours = monthlyHours.reduce((sum, record) => 
+      sum + (record.hours?.totalHours || 0), 0);
+
+    return {
+      activeVolunteers: volunteers.filter(v => v.status === 'active').length,
+      totalHoursThisMonth: Math.round(totalMonthlyHours / 100), // Convert from stored format
+      upcomingShifts: upcomingSchedules.length,
+      differentTasks: tasks.length
+    };
+  }
+
+  async sendVolunteerNotification(volunteer: any, schedule: any) {
+    if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN || !process.env.TWILIO_PHONE_NUMBER) {
+      throw new Error('Twilio credentials not configured');
+    }
+
+    const twilio = require('twilio');
+    const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+    const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
+    
+    const startTime = new Date(schedule.startTime).toLocaleString();
+    const message = `📅 Volunteer Shift Reminder
+    
+Hi ${volunteer.firstName}! You're scheduled for:
+
+${schedule.title}
+${startTime}
+
+Task: ${schedule.task}
+${schedule.description ? `Details: ${schedule.description}` : ''}
+
+Thanks for volunteering! Reply if you have questions.`;
+    
+    try {
+      const result = await client.messages.create({
+        body: message,
+        from: twilioPhone,
+        to: volunteer.phone
+      });
+      
+      // Mark notification as sent
+      await db.update(volunteerSchedules)
+        .set({ notificationSent: true })
+        .where(eq(volunteerSchedules.id, schedule.id));
+      
+      return {
+        success: true,
+        messageId: result.sid,
+        status: result.status
+      };
+    } catch (error: any) {
+      console.error('Twilio SMS error:', error);
+      throw new Error(`Failed to send volunteer notification: ${error.message}`);
+    }
   }
 }

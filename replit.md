@@ -211,6 +211,18 @@ MarketPace is a React Native mobile application that prioritizes community empow
 
 ## Recent Changes
 
+✓ **NONPROFIT VOLUNTEER HOUR LOGGING SYSTEM WITH COMPREHENSIVE TASK MANAGEMENT** (January 14, 2025)
+✓ Added dedicated Volunteers tab to business scheduling system for nonprofit organizations
+✓ Created volunteer management interface with stats overview showing active volunteers, monthly hours, upcoming shifts, and task variety
+✓ Built comprehensive volunteer registration system with role assignment, availability tracking, skills documentation, and emergency contacts
+✓ Implemented volunteer hour logging with precise time tracking, task categorization, supervisor verification, and automatic hour calculation
+✓ Added volunteer shift scheduling with duration selection, priority levels, task descriptions, and SMS notification integration
+✓ Created volunteer hours export functionality generating CSV reports for grant applications and tax documentation
+✓ Built interactive weekly calendar showing color-coded volunteer shifts with task-specific assignments
+✓ Enhanced database schema with volunteers, volunteerHours, and volunteerSchedules tables supporting complete volunteer lifecycle
+✓ Integrated Twilio SMS notifications for volunteer shift reminders with detailed shift information and contact options
+✓ Added volunteer statistics dashboard tracking monthly hours, shift completion, and task diversity for nonprofit reporting
+
 ✓ **COMPREHENSIVE BUSINESS SCHEDULING SYSTEM WITH ENHANCED CALENDAR & ROLE-BASED VISIBILITY** (January 14, 2025)
 ✓ Enhanced scheduling form with separate date picker, start/end time selectors, and duration dropdown with automatic end time calculation
 ✓ Implemented interactive weekly calendar view with color-coded shifts, clickable schedule items, and today highlighting
