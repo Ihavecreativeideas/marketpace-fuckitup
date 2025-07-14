@@ -63,7 +63,7 @@ app.get('/the-hub', (req, res) => {
   res.sendFile(path.join(__dirname, 'the-hub.html'));
 });
 
-app.get('/marketpace-menu', (req, res) => {
+app.get('/menu', (req, res) => {
   res.sendFile(path.join(__dirname, 'marketpace-menu.html'));
 });
 
@@ -94,22 +94,6 @@ app.get('/message-owner', (req, res) => {
 
 app.get('/rental-delivery', (req, res) => {
   res.sendFile(path.join(__dirname, 'rental-delivery.html'));
-});
-
-app.get('/rental-booking', (req, res) => {
-  res.sendFile(path.join(__dirname, 'rental-booking.html'));
-});
-
-app.get('/rentals', (req, res) => {
-  res.sendFile(path.join(__dirname, 'rentals.html'));
-});
-
-app.get('/platform-integrations', (req, res) => {
-  res.sendFile(path.join(__dirname, 'platform-integrations.html'));
-});
-
-app.get('/marketpace-menu', (req, res) => {
-  res.sendFile(path.join(__dirname, 'marketpace-menu.html'));
 });
 
 // Catch-all for other HTML pages
