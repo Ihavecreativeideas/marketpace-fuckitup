@@ -211,6 +211,15 @@ MarketPace is a React Native mobile application that prioritizes community empow
 
 ## Recent Changes
 
+✓ **RENTAL PAGE RESTORATION - ORIGINAL WORKING VERSION RESTORED** (January 14, 2025)
+✓ Successfully restored original working rentals.html from rentals-backup.html after it was corrupted during attempted fixes
+✓ Added CSS filtering rules to hide non-rental posts: `.post-sale, .post-service { display: none !important; }`
+✓ Confirmed rental page now shows only rental posts (Tom's Tool Rentals Power Washer, Jessica Martinez Beach Chairs)
+✓ Navigation working correctly: Community → Shops → Services → **Rentals** → The Hub
+✓ Map functionality accessible only through header map button (not default view)
+✓ Rental page structure: Header + Status Composer + Filtered Community Feed (rentals only)
+✓ Server verified serving correct content with proper CSS filtering applied
+
 ✓ **COMPLETE LAYOUT UNIFICATION WITH CSS FILTERING SYSTEM IMPLEMENTATION** (January 14, 2025)
 ✓ Successfully copied exact community.html structure to shops.html, services.html, and created rentals.html
 ✓ All pages now look identical with same header layout: Logo + Map button + Profile button
