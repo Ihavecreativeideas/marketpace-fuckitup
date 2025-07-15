@@ -91,8 +91,10 @@
 - **Setup Guide**: `/shopify-integration-setup` 
 - **Current Status**: 
   - Error: 401 Unauthorized - Invalid API key or access token
-  - Token Format: Unknown (should start with 'shpat_')
-  - Issue: Needs new private app with correct permissions
+  - **Root Cause Identified**: Using API Key instead of Access Token
+  - Current Credential: f6162c... (32 chars) - API Key ❌
+  - Required Credential: shpat_... (64+ chars) - Access Token ✅
+  - **Solution**: Copy "Admin API access token" not "API key" from private app
 
 ### 🍕 Food Delivery Integrations
 
