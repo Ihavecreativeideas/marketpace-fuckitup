@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MarketPace Driver Dashboard</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
         * {
             margin: 0;
@@ -224,6 +225,217 @@
             transform: scale(1.05);
         }
 
+        .map-container {
+            height: 400px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .route-tracking {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid #10b981;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .tracking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .gps-status {
+            background: rgba(16, 185, 129, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .gps-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .route-step {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #6b7280;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .route-step.active {
+            background: rgba(0, 255, 255, 0.1);
+            border-left-color: #00ffff;
+        }
+
+        .route-step.completed {
+            background: rgba(16, 185, 129, 0.1);
+            border-left-color: #10b981;
+        }
+
+        .step-status {
+            background: #6b7280;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .step-status.active {
+            background: #00ffff;
+            color: #000;
+        }
+
+        .step-status.completed {
+            background: #10b981;
+        }
+
+        .communication-section {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .message-thread {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .message {
+            background: rgba(147, 197, 253, 0.1);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .message.driver {
+            background: rgba(16, 185, 129, 0.1);
+            margin-left: 20px;
+        }
+
+        .message.customer {
+            background: rgba(0, 255, 255, 0.1);
+            margin-right: 20px;
+        }
+
+        .photo-capture {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .photo-capture:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #00ffff;
+        }
+
+        .photo-preview {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            display: inline-block;
+            margin: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .photo-preview:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .earnings-live {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(0, 255, 255, 0.2));
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .earnings-amount {
+            font-size: 32px;
+            font-weight: bold;
+            color: #10b981;
+            margin-bottom: 10px;
+        }
+
+        .notification-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 20px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            max-width: 300px;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .route-optimization {
+            background: rgba(138, 43, 226, 0.1);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .optimization-stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .demo-controls {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .demo-controls h4 {
+            color: #ffd93d;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
         .notification {
             position: fixed;
             top: 20px;
@@ -268,58 +480,62 @@
 
     <!-- Main Content -->
     <div class="main-content">
-        <div class="dashboard-grid">
-            <!-- Today's Stats -->
-            <div class="card">
-                <h3>📊 Today's Stats</h3>
-                <div class="stat-item">
-                    <span>Routes Completed</span>
-                    <span class="stat-value">3</span>
+        <!-- Demo Controls -->
+        <div class="demo-controls">
+            <h4>🎮 LIVE DEMO CONTROLS</h4>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                <button class="action-btn" onclick="startDemo()">▶️ Start Demo</button>
+                <button class="action-btn" onclick="acceptRoute()">✅ Accept Route</button>
+                <button class="action-btn" onclick="arriveAtLocation()">📍 Arrive at Location</button>
+                <button class="action-btn" onclick="takePhoto()">📸 Take Photo</button>
+                <button class="action-btn" onclick="sendMessage()">💬 Send Message</button>
+                <button class="action-btn" onclick="optimizeRoute()">🔄 Optimize Route</button>
+            </div>
+        </div>
+
+        <!-- Live Earnings Tracker -->
+        <div class="earnings-live">
+            <div class="earnings-amount" id="liveEarnings">$47.50</div>
+            <div>Current Route Earnings</div>
+            <div style="font-size: 14px; opacity: 0.8; margin-top: 5px;">
+                <span id="completedDeliveries">4</span>/6 deliveries completed • <span id="remainingPickups">2</span> pickups remaining
+            </div>
+        </div>
+
+        <!-- Route Tracking with Map -->
+        <div class="route-tracking">
+            <div class="tracking-header">
+                <h3>🗺️ Live Route Tracking & GPS Navigation</h3>
+                <div style="color: #00ffff; font-weight: bold;">ETA: <span id="routeETA">12 minutes</span></div>
+            </div>
+            
+            <!-- GPS Status -->
+            <div class="gps-status">
+                <div class="gps-indicator"></div>
+                <span>GPS Active • Real-time tracking enabled</span>
+                <span style="margin-left: auto; color: #00ffff;">Speed: 35 mph</span>
+            </div>
+
+            <!-- Route Optimization Stats -->
+            <div class="route-optimization">
+                <h4 style="color: #8a2be2; margin-bottom: 10px;">🚀 AI Route Optimization</h4>
+                <div class="optimization-stat">
+                    <span>Original Route:</span>
+                    <span>18.2 miles • 45 minutes</span>
                 </div>
-                <div class="stat-item">
-                    <span>Total Earnings</span>
-                    <span class="stat-value">$78.50</span>
+                <div class="optimization-stat">
+                    <span>Optimized Route:</span>
+                    <span style="color: #10b981;">15.8 miles • 38 minutes</span>
                 </div>
-                <div class="stat-item">
-                    <span>Tips Received</span>
-                    <span class="stat-value">$15.00</span>
-                </div>
-                <div class="stat-item">
-                    <span>Miles Driven</span>
-                    <span class="stat-value">45.2</span>
+                <div class="optimization-stat">
+                    <span>Savings:</span>
+                    <span style="color: #00ffff;">2.4 miles • 7 minutes</span>
                 </div>
             </div>
 
-            <!-- Weekly Performance -->
-            <div class="card">
-                <h3>📈 Weekly Performance</h3>
-                <div class="stat-item">
-                    <span>Total Routes</span>
-                    <span class="stat-value">18</span>
-                </div>
-                <div class="stat-item">
-                    <span>Week Earnings</span>
-                    <span class="stat-value">$432.25</span>
-                </div>
-                <div class="stat-item">
-                    <span>Average Rating</span>
-                    <span class="stat-value">4.9 ⭐</span>
-                </div>
-                <div class="stat-item">
-                    <span>On-Time Rate</span>
-                    <span class="stat-value">97%</span>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="card">
-                <h3>⚡ Quick Actions</h3>
-                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                    <button class="action-btn" onclick="viewAvailableRoutes()">🗺️ View Routes</button>
-                    <button class="action-btn" onclick="updateStatus()">📍 Update Status</button>
-                    <button class="action-btn" onclick="viewEarnings()">💰 View Earnings</button>
-                    <button class="action-btn" onclick="contactSupport()">📞 Support</button>
-                </div>
+            <!-- Interactive Map -->
+            <div class="map-container">
+                <div id="driverMap" style="height: 100%; width: 100%;"></div>
             </div>
         </div>
 
@@ -447,23 +663,223 @@
             showNotification('Opening route map...');
         }
 
-        function showNotification(message) {
+        function showNotification(title, message) {
             const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.textContent = message;
+            notification.className = 'notification-popup';
+            notification.innerHTML = `
+                <div style="font-weight: bold; color: #00ffff; margin-bottom: 10px;">${title}</div>
+                <div style="font-size: 14px;">${message || ''}</div>
+            `;
             document.body.appendChild(notification);
             
             setTimeout(() => {
                 if (notification.parentNode) {
                     document.body.removeChild(notification);
                 }
+            }, 4000);
+        }
+
+        // Demo functions
+        let map, driverMarker, routePolyline;
+        let currentStepIndex = 2; // Currently at step 3 (Maria's Boutique)
+
+        function initMap() {
+            map = L.map('driverMap').setView([30.2672, -87.5947], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Sample route points
+            const routePoints = [
+                [30.2672, -87.5947], // Current location
+                [30.2745, -87.5891], // Maria's Boutique
+                [30.2698, -87.5823], // Lisa's delivery
+                [30.2756, -87.5978], // Next pickup
+                [30.2634, -87.5945], // Next delivery
+                [30.2689, -87.5934]  // Final delivery
+            ];
+
+            const locations = [
+                { name: "Current Location", type: "driver", pos: routePoints[0] },
+                { name: "Maria's Boutique (Pickup)", type: "pickup", pos: routePoints[1] },
+                { name: "Lisa Chen (Delivery)", type: "delivery", pos: routePoints[2] },
+                { name: "Tom's Tools (Pickup)", type: "pickup", pos: routePoints[3] },
+                { name: "Mike Rodriguez (Delivery)", type: "delivery", pos: routePoints[4] },
+                { name: "Sarah Williams (Delivery)", type: "delivery", pos: routePoints[5] }
+            ];
+
+            // Add markers
+            locations.forEach(location => {
+                let marker = L.marker(location.pos).addTo(map);
+                marker.bindPopup(`<b>${location.name}</b><br>Type: ${location.type}`);
+                
+                if (location.type === 'driver') {
+                    driverMarker = marker;
+                }
+            });
+
+            // Add route polyline
+            routePolyline = L.polyline(routePoints, {
+                color: '#00ffff',
+                weight: 4,
+                opacity: 0.8,
+                dashArray: '10, 10'
+            }).addTo(map);
+        }
+
+        function startDemo() {
+            showNotification("Demo Started", "Driver dashboard is now in live demo mode!");
+            if (!map) {
+                setTimeout(initMap, 100);
+            }
+        }
+
+        function acceptRoute() {
+            showNotification("Route Accepted", "Route #MP-2025-002 accepted! Starting navigation...");
+            currentStepIndex = 2;
+            updateRouteProgress();
+        }
+
+        function arriveAtLocation() {
+            showNotification("Location Arrived", "Arrived at Maria's Boutique. Ready for pickup!");
+            
+            // Update active step
+            const activeStep = document.getElementById('activeStep');
+            if (activeStep) {
+                activeStep.classList.remove('active');
+                activeStep.classList.add('completed');
+                activeStep.querySelector('.step-status').textContent = 'ARRIVED';
+                activeStep.querySelector('.step-status').className = 'step-status completed';
+            }
+        }
+
+        function takePhoto() {
+            showNotification("Photo Captured", "Item photo sent to buyer and seller automatically.");
+            
+            // Update photo previews
+            const photos = document.querySelectorAll('.photo-preview');
+            photos[0].style.background = 'url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSJyZ2JhKDAsMjU1LDI1NSwwLjEpIi8+Cjx0ZXh0IHg9IjQwIiB5PSI0MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzAwZmZmZiIgZm9udC1zaXplPSIyNCI+8J+TuDwvdGV4dD4KPC9zdmc+)';
+            photos[0].style.backgroundSize = 'cover';
+        }
+
+        function sendMessage() {
+            const message = "I'm at the location and ready for pickup!";
+            addMessageToThread(message, true);
+            showNotification("Message Sent", `Message sent: "${message}"`);
+        }
+
+        function addMessageToThread(message, isDriver) {
+            const messageThread = document.getElementById('messageThread');
+            const newMessage = document.createElement('div');
+            newMessage.className = `message ${isDriver ? 'driver' : 'customer'}`;
+            newMessage.innerHTML = `
+                <strong>${isDriver ? 'Driver (You)' : 'Customer'}:</strong> ${message}
+                <div style="font-size: 12px; opacity: 0.7;">${new Date().toLocaleTimeString()}</div>
+            `;
+            messageThread.appendChild(newMessage);
+            messageThread.scrollTop = messageThread.scrollHeight;
+        }
+
+        function optimizeRoute() {
+            showNotification("Route Optimized", "AI recalculated route - saved 2.4 miles and 7 minutes!");
+            
+            // Update earnings
+            const earnings = document.getElementById('liveEarnings');
+            const current = parseFloat(earnings.textContent.replace('$', ''));
+            earnings.textContent = `$${(current + 3.50).toFixed(2)}`;
+        }
+
+        function sendPickupNotification() {
+            showNotification("Pickup Complete", "Automatic notifications sent to buyer and seller with item photo and delivery ETA.");
+            addMessageToThread("✅ Item picked up! Photo attached. ETA to delivery: 15 minutes.", true);
+        }
+
+        function sendCustomMessage() {
+            const message = prompt("Enter your message:");
+            if (message) {
+                addMessageToThread(message, true);
+                showNotification("Message Sent", `Custom message sent: "${message}"`);
+            }
+        }
+
+        function shareLocation() {
+            showNotification("Location Shared", "Real-time location shared with customer.");
+            addMessageToThread("📍 I've shared my live location with you. ETA: 5 minutes.", true);
+        }
+
+        function callCustomer() {
+            showNotification("Calling Customer", "Initiating call to Maria's Boutique...");
+        }
+
+        function skipLocation() {
+            showNotification("Location Skipped", "Location marked as inaccessible. Route updated.");
+        }
+
+        function reportIssue() {
+            showNotification("Issue Reported", "Support team notified. Assistance on the way.");
+        }
+
+        function sendSMS() {
+            showNotification("SMS Sent", "Text message sent: 'I'm 5 minutes away from pickup!'");
+        }
+
+        function sendEmail() {
+            showNotification("Email Sent", "Email notification sent to customer.");
+        }
+
+        function emergencyContact() {
+            showNotification("Emergency Contact", "Emergency support contacted immediately.");
+        }
+
+        function recordNote() {
+            showNotification("Note Recorded", "Voice note: 'Item in excellent condition, wrapped securely'");
+        }
+
+        function verifyItem() {
+            showNotification("Item Verified", "Condition verified and documented with photos.");
+        }
+
+        function reportDamage() {
+            showNotification("Damage Reported", "Damage report submitted with photos and details.");
+        }
+
+        function viewPhoto(type) {
+            showNotification("Photo Viewer", `Viewing ${type} verification photo`);
+        }
+
+        function updateRouteProgress() {
+            // Simulate real-time updates
+            setInterval(() => {
+                const earnings = document.getElementById('liveEarnings');
+                const current = parseFloat(earnings.textContent.replace('$', ''));
+                
+                // Small random earnings increases
+                if (Math.random() < 0.1) {
+                    earnings.textContent = `$${(current + (Math.random() * 2)).toFixed(2)}`;
+                }
+                
+                // Update ETA
+                const eta = document.getElementById('routeETA');
+                const currentMinutes = parseInt(eta.textContent.split(' ')[0]);
+                if (currentMinutes > 1 && Math.random() < 0.3) {
+                    eta.textContent = `${currentMinutes - 1} minutes`;
+                }
             }, 3000);
         }
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
-            showNotification('Welcome to MarketPace Driver Dashboard!');
+            showNotification('Welcome to MarketPace Driver Dashboard!', 'Click "Start Demo" to begin the live demonstration.');
+            
+            // Initialize map after a short delay
+            setTimeout(() => {
+                if (document.getElementById('driverMap')) {
+                    initMap();
+                }
+            }, 1000);
         });
     </script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 </body>
 </html>

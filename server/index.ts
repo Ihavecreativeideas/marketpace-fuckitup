@@ -499,7 +499,7 @@ const htmlRoutes = [
   '/menu', '/profile', '/cart', '/settings', '/delivery', '/deliveries',
   '/business-scheduling', '/interactive-map', '/item-verification',
   '/signup-login', '/message-owner', '/rental-delivery', '/support',
-  '/platform-integrations', '/supabase-integration'
+  '/platform-integrations', '/supabase-integration', '/driver-dashboard'
 ];
 
 htmlRoutes.forEach(route => {
