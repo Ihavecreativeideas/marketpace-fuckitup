@@ -115,8 +115,17 @@
             
             const authUrl = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(uri)}&scope=${encodeURIComponent(scope)}&response_type=code&state=${state}`;
             
-            alert(`Testing redirect URI: ${uri}\n\nOpening Facebook OAuth...`);
-            window.open(authUrl, '_blank');
+            console.log('Testing redirect URI:', uri);
+            console.log('OAuth URL:', authUrl);
+            
+            if (confirm(`Testing redirect URI: ${uri}\n\nThis will open Facebook OAuth. Click OK to proceed.`)) {
+                window.open(authUrl, '_blank');
+                
+                // Wait a moment then show instructions
+                setTimeout(() => {
+                    alert('Instructions:\n\n✅ If Facebook shows login page = This URI works!\n❌ If Facebook shows error = This URI needs to be added to Facebook App\n\nTry the next URI if this one failed.');
+                }, 1000);
+            }
         }
 
         // Load current configuration on page load
