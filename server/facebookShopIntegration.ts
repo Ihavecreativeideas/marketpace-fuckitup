@@ -407,8 +407,8 @@ export function registerFacebookShopRoutes(app: Express): void {
   app.post('/api/facebook-shop/connect', async (req: Request, res: Response) => {
     try {
       const { pageId, catalogId } = req.body;
-      const userId = req.session.userId || 'demo_user';
-      const accessToken = req.session.tempAccessToken;
+      const userId = req.session?.userId || 'demo_user';
+      const accessToken = req.session?.tempAccessToken;
       
       if (!accessToken) {
         return res.status(400).json({ error: 'No access token found. Please re-authenticate.' });
@@ -442,7 +442,7 @@ export function registerFacebookShopRoutes(app: Express): void {
   // Sync shop products
   app.post('/api/facebook-shop/sync', async (req: Request, res: Response) => {
     try {
-      const userId = req.session.userId || 'demo_user';
+      const userId = req.session?.userId || 'demo_user';
       const products = await FacebookShopManager.syncShopProducts(userId);
       
       res.json({
@@ -451,6 +451,7 @@ export function registerFacebookShopRoutes(app: Express): void {
         message: `Synced ${products.length} products from Facebook Shop`
       });
     } catch (error) {
+      console.error('Facebook Shop sync error:', error);
       res.status(500).json({ error: error.message });
     }
   });
@@ -458,7 +459,7 @@ export function registerFacebookShopRoutes(app: Express): void {
   // Get synced products
   app.get('/api/facebook-shop/products', (req: Request, res: Response) => {
     try {
-      const userId = req.session.userId || 'demo_user';
+      const userId = req.session?.userId || 'demo_user';
       const products = FacebookShopManager.getSyncedProducts(userId);
       
       res.json({
@@ -466,6 +467,7 @@ export function registerFacebookShopRoutes(app: Express): void {
         products
       });
     } catch (error) {
+      console.error('Facebook Shop products error:', error);
       res.status(500).json({ error: error.message });
     }
   });
@@ -473,7 +475,7 @@ export function registerFacebookShopRoutes(app: Express): void {
   // Get shop connection status
   app.get('/api/facebook-shop/status', (req: Request, res: Response) => {
     try {
-      const userId = req.session.userId || 'demo_user';
+      const userId = req.session?.userId || 'demo_user';
       const connection = FacebookShopManager.getShopConnection(userId);
       const analytics = FacebookShopManager.getShopAnalytics(userId);
       
@@ -489,6 +491,7 @@ export function registerFacebookShopRoutes(app: Express): void {
         }
       });
     } catch (error) {
+      console.error('Facebook Shop status error:', error);
       res.status(500).json({ error: error.message });
     }
   });
