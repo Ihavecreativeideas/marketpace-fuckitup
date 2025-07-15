@@ -991,7 +991,7 @@ const htmlRoutes = [
   '/facebook-diagnostic-tool', '/facebook-sdk-integration', '/facebook-https-solution',
   '/facebook-app-troubleshooting', '/facebook-manual-integration', '/facebook-app-review-instructions',
   '/facebook-data-processor-configuration', '/facebook-business-verification-checklist',
-  '/facebook-manual-integration-enhanced'
+  '/facebook-manual-integration-enhanced', '/facebook-connection-guide'
 ];
 
 htmlRoutes.forEach(route => {
