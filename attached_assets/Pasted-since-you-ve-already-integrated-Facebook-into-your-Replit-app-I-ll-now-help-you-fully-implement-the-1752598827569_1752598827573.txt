@@ -1,0 +1,140 @@
+since you've already integrated Facebook into your Replit app, I’ll now help you fully implement the OAuth flow, including:
+
+✅ OAuth login redirect route
+
+✅ Callback route to exchange the code for a token
+
+✅ A simple button to trigger Facebook login
+
+This will work with a Node + Express app (common for Replit) — if you’re using something else like Next.js, let me know.
+
+🔐 STEP 1: .env Setup (In Replit or Vercel)
+Add these environment variables:
+
+env
+Copy
+Edit
+FACEBOOK_APP_ID=your_facebook_app_id
+FACEBOOK_APP_SECRET=your_facebook_app_secret
+FACEBOOK_REDIRECT_URI=https://your-app-name.replit.app/auth/facebook/callback
+Replace your-app-name.replit.app with your actual Replit project URL.
+
+🧠 STEP 2: Install Dependencies (If Needed)
+In Replit shell or package.json, make sure these are installed:
+
+bash
+Copy
+Edit
+npm install express axios dotenv
+🛠 STEP 3: Express OAuth Routes
+📁 authRoutes.js
+js
+Copy
+Edit
+const express = require('express');
+const axios = require('axios');
+const router = express.Router();
+require('dotenv').config();
+
+const {
+  FACEBOOK_APP_ID,
+  FACEBOOK_APP_SECRET,
+  FACEBOOK_REDIRECT_URI,
+} = process.env;
+
+// Step 1: Redirect to Facebook OAuth
+router.get('/auth/facebook', (req, res) => {
+  const redirectUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${FACEBOOK_APP_ID}&redirect_uri=${FACEBOOK_REDIRECT_URI}&scope=pages_show_list,catalog_management,pages_read_engagement&response_type=code&state=randomstring123`;
+  res.redirect(redirectUrl);
+});
+
+// Step 2: Handle Facebook OAuth Callback
+router.get('/auth/facebook/callback', async (req, res) => {
+  const { code } = req.query;
+
+  if (!code) {
+    return res.status(400).send('Authorization code missing.');
+  }
+
+  try {
+    const tokenResponse = await axios.get(
+      `https://graph.facebook.com/v19.0/oauth/access_token`,
+      {
+        params: {
+          client_id: FACEBOOK_APP_ID,
+          client_secret: FACEBOOK_APP_SECRET,
+          redirect_uri: FACEBOOK_REDIRECT_URI,
+          code,
+        },
+      }
+    );
+
+    const { access_token } = tokenResponse.data;
+
+    // 🔐 OPTIONAL: Save access_token to your DB here per user
+
+    // ✅ Use token to fetch user’s Pages (example)
+    const pagesRes = await axios.get(
+      `https://graph.facebook.com/me/accounts?access_token=${access_token}`
+    );
+
+    const pages = pagesRes.data;
+
+    res.send({
+      message: 'Facebook connected!',
+      access_token,
+      pages,
+    });
+  } catch (error) {
+    console.error('OAuth error:', error.response?.data || error.message);
+    res.status(500).send('Facebook OAuth failed.');
+  }
+});
+
+module.exports = router;
+🧩 STEP 4: Plug Routes Into Your Server
+In your index.js or server.js:
+
+js
+Copy
+Edit
+const express = require('express');
+const authRoutes = require('./authRoutes');
+const app = express();
+
+app.use(express.json());
+app.use('/', authRoutes);
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
+🖱️ STEP 5: Add a “Connect Facebook” Button (Optional UI)
+In your frontend (HTML or React):
+
+html
+Copy
+Edit
+<a href="/auth/facebook">
+  <button>Connect Your Facebook Shop</button>
+</a>
+✅ Result
+Once you click "Connect Your Facebook Shop":
+
+User is redirected to Facebook login
+
+After approving, they're redirected to /auth/facebook/callback
+
+Your app gets an access token and a list of Pages (shops)
+
+📦 What You Can Do Next
+Save the access token in Supabase or MongoDB per user
+
+Fetch product catalogs with:
+
+bash
+Copy
+Edit
+GET https://graph.facebook.com/{page_id}/product_catalogs?access_token=...
+Sync Facebook products into MarketPace
+
