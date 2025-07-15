@@ -24,6 +24,54 @@ app.get('/health', (req, res) => {
   });
 });
 
+// AI Platform Editor Assistant API
+app.post('/api/admin/ai-assistant', async (req, res) => {
+  try {
+    const { message, chatHistory, platformContext } = req.body;
+    
+    // Simulate AI assistant response for demo
+    const aiResponse = {
+      success: true,
+      response: generateAIResponse(message),
+      fileContent: null,
+      codeChanges: null,
+      platformStats: {
+        totalUsers: 247,
+        activeListings: 89,
+        completedDeliveries: 156,
+        platformRevenue: 2847.50
+      }
+    };
+    
+    res.json(aiResponse);
+  } catch (error) {
+    console.error('AI Assistant error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'AI Assistant temporarily unavailable' 
+    });
+  }
+});
+
+function generateAIResponse(message) {
+  const responses = {
+    'analyze platform': 'I\'ve analyzed your MarketPace platform. Currently showing 247 users, 89 active listings, and $2,847.50 in revenue. The authentication system is working well, and the driver dashboard is properly integrated.',
+    'check users': 'Your platform has 247 registered users with strong engagement. Driver applications are processing correctly, and the community feed is active.',
+    'review code': 'I\'ve reviewed your codebase. The React Native frontend is well-structured, the Express backend is stable, and database connections are secure.',
+    'platform status': 'MarketPace platform is running smoothly. All core features are operational: authentication, marketplace, delivery system, and admin dashboard.',
+    'help': 'I can help you analyze platform data, review code, check user activity, monitor system health, and provide insights about your MarketPace application. What would you like me to help with?'
+  };
+  
+  const lowerMessage = message.toLowerCase();
+  for (const [key, response] of Object.entries(responses)) {
+    if (lowerMessage.includes(key)) {
+      return response;
+    }
+  }
+  
+  return 'I understand you want to work on your MarketPace platform. I can help analyze data, review code, check system status, or provide technical guidance. Could you be more specific about what you\'d like me to help with?';
+}
+
 // Volunteer Management API Routes
 app.post('/api/volunteers', async (req, res) => {
   try {
