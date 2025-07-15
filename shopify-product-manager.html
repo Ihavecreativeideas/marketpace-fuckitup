@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Manager - Shopify Integration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a0b3d, #6b46c1);
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            background: linear-gradient(45deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .filter-group label {
+            font-weight: 600;
+            color: #93c5fd;
+        }
+        
+        .filter-group select, .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #e2e8f0;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.5);
+        }
+        
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+        
+        .product-card {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 250px;
+            background: rgba(99, 102, 241, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .product-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            background: rgba(34, 197, 94, 0.8);
+            color: white;
+        }
+        
+        .status-inactive {
+            background: rgba(239, 68, 68, 0.8);
+            color: white;
+        }
+        
+        .product-content {
+            padding: 20px;
+        }
+        
+        .product-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #93c5fd;
+            line-height: 1.4;
+        }
+        
+        .product-prices {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .current-price {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #10b981;
+        }
+        
+        .original-price {
+            font-size: 1rem;
+            color: #94a3b8;
+            text-decoration: line-through;
+        }
+        
+        .price-breakdown {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            margin-bottom: 15px;
+        }
+        
+        .product-tags {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            background: rgba(99, 102, 241, 0.2);
+            color: #93c5fd;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        
+        .product-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .stat {
+            text-align: center;
+            padding: 8px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 8px;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: #60a5fa;
+        }
+        
+        .product-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            border-radius: 6px;
+            flex: 1;
+            min-width: 100px;
+        }
+        
+        .promotion-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+        
+        .modal-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .modal-header h3 {
+            color: #93c5fd;
+            margin-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #93c5fd;
+            font-weight: 600;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #e2e8f0;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .close-modal {
+            background: rgba(239, 68, 68, 0.8);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+        
+        .empty-state h3 {
+            color: #cbd5e1;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-group {
+                justify-content: space-between;
+            }
+            
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Product Manager</h1>
+            <p>Manage your synced Shopify products and MarketPace integrations</p>
+        </div>
+        
+        <div class="filters">
+            <div class="filter-group">
+                <label>Status:</label>
+                <select id="statusFilter">
+                    <option value="all">All Products</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label>Category:</label>
+                <select id="categoryFilter">
+                    <option value="all">All Categories</option>
+                    <option value="electronics">Electronics</option>
+                    <option value="clothing">Clothing</option>
+                    <option value="home">Home & Garden</option>
+                    <option value="sports">Sports</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label>Search:</label>
+                <input type="text" id="searchFilter" placeholder="Search products...">
+            </div>
+            
+            <button class="btn" onclick="syncAllProducts()">Sync from Shopify</button>
+            <button class="btn btn-secondary" onclick="bulkPromote()">Bulk Promote</button>
+        </div>
+        
+        <div class="product-grid" id="productGrid">
+            <!-- Products will be populated here -->
+        </div>
+        
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <h3>No products found</h3>
+            <p>Sync your Shopify store or adjust your filters to see products</p>
+            <button class="btn" onclick="syncAllProducts()">Sync Products</button>
+        </div>
+    </div>
+    
+    <!-- Promotion Modal -->
+    <div class="promotion-modal" id="promotionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Promote Product</h3>
+                <p>Boost your product visibility with targeted promotion</p>
+            </div>
+            
+            <form id="promotionForm">
+                <div class="form-group">
+                    <label>Promotion Type</label>
+                    <select id="promotionType">
+                        <option value="facebook">Facebook Promotion ($8-15)</option>
+                        <option value="local">Local Featured ($5-12)</option>
+                        <option value="premium">Premium Campaign ($15-25)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Budget</label>
+                    <input type="number" id="promotionBudget" placeholder="15.00" step="0.01" min="5" max="100">
+                </div>
+                
+                <div class="form-group">
+                    <label>Target Audience</label>
+                    <select id="targetAudience">
+                        <option value="local">Local Community (10 mile radius)</option>
+                        <option value="interest">Interest-based targeting</option>
+                        <option value="custom">Custom audience</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Campaign Message (Optional)</label>
+                    <textarea id="campaignMessage" placeholder="Special offer! Get this amazing product delivered locally..." rows="3"></textarea>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="submit" class="btn">Start Promotion</button>
+                    <button type="button" class="btn close-modal" onclick="closePromotionModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        let currentProducts = [];
+        let selectedProductId = null;
+        
+        // Mock product data (in real app, fetch from API)
+        const mockProducts = [
+            {
+                id: 'mp_12345',
+                shopifyProductId: '12345',
+                title: 'Premium Bluetooth Headphones',
+                description: 'High-quality wireless headphones with noise cancellation',
+                originalPrice: 79.99,
+                finalPrice: 89.99,
+                shippingFee: 5.00,
+                processingFee: 5.00,
+                images: ['/api/placeholder/350/250'],
+                isActive: true,
+                category: 'electronics',
+                tags: ['wireless', 'audio', 'premium'],
+                views: 245,
+                orders: 12,
+                promotionActive: false,
+                lastSynced: '2025-07-15T10:30:00Z'
+            },
+            {
+                id: 'mp_12346',
+                title: 'Organic Cotton T-Shirt',
+                description: 'Comfortable and sustainable everyday wear',
+                originalPrice: 24.99,
+                finalPrice: 29.99,
+                shippingFee: 5.00,
+                processingFee: 0.00,
+                images: ['/api/placeholder/350/250'],
+                isActive: true,
+                category: 'clothing',
+                tags: ['organic', 'cotton', 'sustainable'],
+                views: 89,
+                orders: 5,
+                promotionActive: true,
+                lastSynced: '2025-07-15T09:15:00Z'
+            },
+            {
+                id: 'mp_12347',
+                title: 'Smart Home Security Camera',
+                description: 'WiFi-enabled security camera with mobile app',
+                originalPrice: 149.99,
+                finalPrice: 164.99,
+                shippingFee: 5.00,
+                processingFee: 10.00,
+                images: ['/api/placeholder/350/250'],
+                isActive: false,
+                category: 'electronics',
+                tags: ['smart', 'security', 'wifi'],
+                views: 156,
+                orders: 8,
+                promotionActive: false,
+                lastSynced: '2025-07-14T16:45:00Z'
+            }
+        ];
+        
+        // Initialize page
+        function init() {
+            currentProducts = mockProducts;
+            renderProducts(currentProducts);
+            setupFilters();
+        }
+        
+        // Render products in grid
+        function renderProducts(products) {
+            const grid = document.getElementById('productGrid');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (products.length === 0) {
+                grid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            grid.style.display = 'grid';
+            emptyState.style.display = 'none';
+            
+            grid.innerHTML = products.map(product => `
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="${product.images[0]}" alt="${product.title}">
+                        <div class="product-status ${product.isActive ? 'status-active' : 'status-inactive'}">
+                            ${product.isActive ? 'Active' : 'Inactive'}
+                        </div>
+                    </div>
+                    
+                    <div class="product-content">
+                        <div class="product-title">${product.title}</div>
+                        
+                        <div class="product-prices">
+                            <div class="current-price">$${product.finalPrice.toFixed(2)}</div>
+                            ${product.originalPrice !== product.finalPrice ? 
+                                `<div class="original-price">$${product.originalPrice.toFixed(2)}</div>` : ''}
+                        </div>
+                        
+                        <div class="price-breakdown">
+                            Base: $${product.originalPrice.toFixed(2)} + 
+                            Processing: $${product.processingFee.toFixed(2)} + 
+                            Shipping: $${product.shippingFee.toFixed(2)}
+                        </div>
+                        
+                        <div class="product-tags">
+                            ${product.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                            ${product.promotionActive ? '<span class="tag" style="background: rgba(34, 197, 94, 0.3);">Promoted</span>' : ''}
+                        </div>
+                        
+                        <div class="product-stats">
+                            <div class="stat">
+                                <div class="stat-value">${product.views}</div>
+                                <div>Views</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">${product.orders}</div>
+                                <div>Orders</div>
+                            </div>
+                        </div>
+                        
+                        <div class="product-actions">
+                            <button class="btn btn-small" onclick="promoteProduct('${product.id}')">Promote</button>
+                            <button class="btn btn-small btn-secondary" onclick="shareToFacebook('${product.id}')">Share</button>
+                            <button class="btn btn-small btn-secondary" onclick="editProduct('${product.id}')">Edit</button>
+                            <button class="btn btn-small ${product.isActive ? 'close-modal' : ''}" onclick="toggleProductStatus('${product.id}')">
+                                ${product.isActive ? 'Deactivate' : 'Activate'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Setup filter functionality
+        function setupFilters() {
+            const statusFilter = document.getElementById('statusFilter');
+            const categoryFilter = document.getElementById('categoryFilter');
+            const searchFilter = document.getElementById('searchFilter');
+            
+            function applyFilters() {
+                let filtered = mockProducts;
+                
+                // Status filter
+                if (statusFilter.value !== 'all') {
+                    filtered = filtered.filter(p => 
+                        statusFilter.value === 'active' ? p.isActive : !p.isActive
+                    );
+                }
+                
+                // Category filter
+                if (categoryFilter.value !== 'all') {
+                    filtered = filtered.filter(p => p.category === categoryFilter.value);
+                }
+                
+                // Search filter
+                const searchTerm = searchFilter.value.toLowerCase();
+                if (searchTerm) {
+                    filtered = filtered.filter(p => 
+                        p.title.toLowerCase().includes(searchTerm) ||
+                        p.description.toLowerCase().includes(searchTerm) ||
+                        p.tags.some(tag => tag.toLowerCase().includes(searchTerm))
+                    );
+                }
+                
+                renderProducts(filtered);
+            }
+            
+            statusFilter.addEventListener('change', applyFilters);
+            categoryFilter.addEventListener('change', applyFilters);
+            searchFilter.addEventListener('input', applyFilters);
+        }
+        
+        // Product actions
+        function promoteProduct(productId) {
+            selectedProductId = productId;
+            const product = mockProducts.find(p => p.id === productId);
+            document.querySelector('#promotionModal h3').textContent = `Promote: ${product.title}`;
+            document.getElementById('promotionModal').style.display = 'flex';
+        }
+        
+        function shareToFacebook(productId) {
+            const product = mockProducts.find(p => p.id === productId);
+            alert(`Sharing "${product.title}" to Facebook with local delivery option!`);
+            // In real app, integrate with Facebook API
+        }
+        
+        function editProduct(productId) {
+            alert(`Opening product editor for: ${productId}`);
+            // In real app, open edit modal
+        }
+        
+        function toggleProductStatus(productId) {
+            const product = mockProducts.find(p => p.id === productId);
+            product.isActive = !product.isActive;
+            renderProducts(currentProducts);
+        }
+        
+        function syncAllProducts() {
+            alert('Syncing products from Shopify store...');
+            // In real app, call sync API
+        }
+        
+        function bulkPromote() {
+            alert('Opening bulk promotion tool...');
+            // In real app, open bulk actions modal
+        }
+        
+        // Promotion modal handling
+        function closePromotionModal() {
+            document.getElementById('promotionModal').style.display = 'none';
+            selectedProductId = null;
+        }
+        
+        document.getElementById('promotionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                productId: selectedProductId,
+                type: document.getElementById('promotionType').value,
+                budget: parseFloat(document.getElementById('promotionBudget').value),
+                audience: document.getElementById('targetAudience').value,
+                message: document.getElementById('campaignMessage').value
+            };
+            
+            alert(`Starting ${formData.type} promotion with $${formData.budget} budget!`);
+            
+            // Mark product as promoted
+            const product = mockProducts.find(p => p.id === selectedProductId);
+            product.promotionActive = true;
+            
+            closePromotionModal();
+            renderProducts(currentProducts);
+        });
+        
+        // Initialize on page load
+        init();
+    </script>
+</body>
+</html>
