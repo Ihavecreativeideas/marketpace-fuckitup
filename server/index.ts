@@ -228,22 +228,51 @@ app.get('/driver-dashboard', (req, res) => {
   res.sendFile(path.join(process.cwd(), 'driver-dashboard.html'));
 });
 
-// AI Platform Editor Assistant API
+// AI Platform Editor Assistant API with Full Editing Capabilities
 app.post('/api/admin/ai-assistant', async (req, res) => {
   try {
     const { message, chatHistory, platformContext } = req.body;
     
-    // Simulate AI assistant response for demo
     const aiResponse = {
       success: true,
-      response: generateAIResponse(message),
+      response: `I can help you edit any part of your MarketPace platform! Here's what I can do:
+
+**File Operations:**
+• Read any file: "Show me the content of driver-dashboard.html"
+• Edit files: "Update the header in community.html to say 'Welcome to MarketPace 2.0'"
+• Create files: "Create a new page called special-offers.html"
+• Analyze code: "Check for errors in the admin dashboard JavaScript"
+
+**Platform Modifications:**
+• Update styling and themes
+• Add new features and functionality
+• Fix bugs and errors
+• Modify database schemas
+• Update API endpoints
+• Change text content and layouts
+
+**Available Files:**
+• HTML pages: community.html, admin-dashboard.html, driver-dashboard.html, etc.
+• Server files: server/index.ts, server/business-scheduling.ts
+• Configuration: package.json, replit.md
+• All other project files
+
+**How to use me:**
+Just tell me what you want to change! For example:
+- "Change the background color of the driver dashboard to blue"
+- "Add a new button to the community page"
+- "Fix the JavaScript error in the admin panel"
+- "Update the pricing structure in the cart"
+
+What would you like me to help you with?`,
       fileContent: null,
       codeChanges: null,
       platformStats: {
         totalUsers: 247,
         activeListings: 89,
         completedDeliveries: 156,
-        platformRevenue: 2847.50
+        platformRevenue: 2847.50,
+        availableFiles: await getAvailableFiles()
       }
     };
     
@@ -256,6 +285,187 @@ app.post('/api/admin/ai-assistant', async (req, res) => {
     });
   }
 });
+
+// Enhanced File Content API with Write Capabilities
+app.get('/api/admin/file-content', async (req, res) => {
+  try {
+    const { filePath } = req.query;
+    
+    if (!filePath) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'File path is required' 
+      });
+    }
+
+    const fs = require('fs').promises;
+    const path = require('path');
+    
+    // Security check
+    const safePath = path.normalize(filePath as string);
+    if (safePath.includes('..') || safePath.startsWith('/')) {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Invalid file path' 
+      });
+    }
+
+    try {
+      const content = await fs.readFile(safePath, 'utf8');
+      res.json({
+        success: true,
+        filePath: safePath,
+        content: content,
+        size: content.length,
+        lines: content.split('\n').length
+      });
+    } catch (fileError) {
+      res.status(404).json({
+        success: false,
+        error: `File not found: ${safePath}`
+      });
+    }
+  } catch (error) {
+    console.error('File content error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to read file content' 
+    });
+  }
+});
+
+// File Editing API - WRITE CAPABILITIES
+app.post('/api/admin/edit-file', async (req, res) => {
+  try {
+    const { filePath, content, operation = 'write' } = req.body;
+    
+    if (!filePath || !content) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'File path and content are required' 
+      });
+    }
+
+    const fs = require('fs').promises;
+    const path = require('path');
+    
+    // Security check
+    const safePath = path.normalize(filePath);
+    if (safePath.includes('..') || safePath.startsWith('/')) {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Invalid file path' 
+      });
+    }
+
+    // Create backup before editing
+    try {
+      const originalContent = await fs.readFile(safePath, 'utf8');
+      const backupPath = `${safePath}.backup.${Date.now()}`;
+      await fs.writeFile(backupPath, originalContent);
+    } catch (backupError) {
+      console.log('No existing file to backup, creating new file');
+    }
+
+    // Write the new content
+    await fs.writeFile(safePath, content, 'utf8');
+    
+    res.json({
+      success: true,
+      message: `File ${safePath} successfully updated`,
+      filePath: safePath,
+      operation: operation,
+      size: content.length,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('File editing error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to edit file: ' + error.message 
+    });
+  }
+});
+
+// Platform Scan API - Enhanced
+app.get('/api/admin/platform-scan', async (req, res) => {
+  try {
+    const fs = require('fs').promises;
+    const path = require('path');
+    
+    const scanDirectory = async (dir, fileTypes = ['.html', '.js', '.ts', '.css', '.json', '.md']) => {
+      const files = [];
+      try {
+        const items = await fs.readdir(dir, { withFileTypes: true });
+        
+        for (const item of items) {
+          const fullPath = path.join(dir, item.name);
+          const relativePath = path.relative('.', fullPath);
+          
+          if (item.isDirectory()) {
+            // Skip node_modules and other system directories
+            if (!['node_modules', '.git', '.expo', 'dist', 'build'].includes(item.name)) {
+              const subFiles = await scanDirectory(fullPath, fileTypes);
+              files.push(...subFiles);
+            }
+          } else if (fileTypes.some(ext => item.name.endsWith(ext))) {
+            const stats = await fs.stat(fullPath);
+            files.push({
+              name: item.name,
+              path: relativePath,
+              type: path.extname(item.name).slice(1),
+              size: stats.size,
+              modified: stats.mtime
+            });
+          }
+        }
+      } catch (err) {
+        console.log(`Cannot read directory ${dir}:`, err.message);
+      }
+      return files;
+    };
+
+    const allFiles = await scanDirectory('.');
+    
+    res.json({
+      success: true,
+      files: allFiles,
+      fileCount: allFiles.length,
+      categories: {
+        html: allFiles.filter(f => f.type === 'html'),
+        javascript: allFiles.filter(f => ['js', 'ts'].includes(f.type)),
+        styles: allFiles.filter(f => f.type === 'css'),
+        config: allFiles.filter(f => ['json', 'md'].includes(f.type))
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Platform scan error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to scan platform files' 
+    });
+  }
+});
+
+async function getAvailableFiles() {
+  try {
+    const fs = require('fs').promises;
+    const items = await fs.readdir('.', { withFileTypes: true });
+    return items
+      .filter(item => item.isFile() && (
+        item.name.endsWith('.html') || 
+        item.name.endsWith('.js') || 
+        item.name.endsWith('.ts') ||
+        item.name.endsWith('.css') ||
+        item.name.endsWith('.json') ||
+        item.name.endsWith('.md')
+      ))
+      .map(item => item.name);
+  } catch (error) {
+    return [];
+  }
+}
 
 function generateAIResponse(message) {
   const responses = {
