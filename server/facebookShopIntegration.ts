@@ -339,6 +339,12 @@ export function registerFacebookShopRoutes(app: Express): void {
         return res.status(400).json({ error: 'Invalid authorization code or state' });
       }
 
+      // Check if Facebook credentials are configured
+      if (!process.env.FACEBOOK_APP_ID || !process.env.FACEBOOK_APP_SECRET) {
+        console.error('Facebook credentials not configured');
+        return res.redirect('/facebook-shop-setup?error=credentials_missing');
+      }
+
       const redirectUri = `${req.protocol}://${req.get('host')}/api/facebook-shop/callback`;
       const accessToken = await FacebookShopManager.exchangeCodeForToken(code as string, redirectUri);
       
@@ -468,12 +474,19 @@ export function registerFacebookShopRoutes(app: Express): void {
   app.get('/api/facebook-shop/status', (req: Request, res: Response) => {
     try {
       const userId = req.session.userId || 'demo_user';
+      const connection = FacebookShopManager.getShopConnection(userId);
       const analytics = FacebookShopManager.getShopAnalytics(userId);
       
       res.json({
         success: true,
-        connected: !!analytics,
-        analytics
+        connected: !!connection,
+        connection: connection || null,
+        analytics: analytics || {
+          totalProducts: 0,
+          activeProducts: 0,
+          deliveryEnabled: 0,
+          averageDeliveryFee: 0
+        }
       });
     } catch (error) {
       res.status(500).json({ error: error.message });
