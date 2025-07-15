@@ -1332,6 +1332,9 @@
                 } else {
                     refreshSponsors();
                 }
+            } else if (sectionId === 'ai-editor') {
+                // Initialize AI assistant when AI Platform Editor is opened
+                resetAIChat();
             }
         }
 
@@ -2043,39 +2046,7 @@
         }
 
         async function processAdvancedAICommand(message) {
-            const lowerMessage = message.toLowerCase();
-            
-            // File reading commands
-            if (lowerMessage.includes('show me') || lowerMessage.includes('read') || lowerMessage.includes('view') || lowerMessage.includes('display')) {
-                const fileMatch = message.match(/([a-zA-Z0-9\-_\.\/]+\.(html|js|ts|css|json|md))/);
-                if (fileMatch) {
-                    await readFileContent(fileMatch[1]);
-                    return;
-                }
-            }
-            
-            // File editing commands
-            if (lowerMessage.includes('edit') || lowerMessage.includes('update') || lowerMessage.includes('change') || lowerMessage.includes('modify') || lowerMessage.includes('fix')) {
-                const fileMatch = message.match(/([a-zA-Z0-9\-_\.\/]+\.(html|js|ts|css|json|md))/);
-                if (fileMatch) {
-                    await handleFileEdit(fileMatch[1], message);
-                    return;
-                }
-            }
-            
-            // Platform scan commands
-            if (lowerMessage.includes('scan') || lowerMessage.includes('analyze') || lowerMessage.includes('list files') || lowerMessage.includes('platform files')) {
-                await performPlatformScan();
-                return;
-            }
-            
-            // Create new file commands
-            if (lowerMessage.includes('create') && (lowerMessage.includes('file') || lowerMessage.includes('.html') || lowerMessage.includes('.js'))) {
-                await handleFileCreation(message);
-                return;
-            }
-            
-            // Default AI response with capabilities
+            // Simply call the server's AI assistant endpoint for all commands
             await getEnhancedAIResponse(message);
         }
 
@@ -2135,10 +2106,11 @@
 
         async function getEnhancedAIResponse(message) {
             try {
-                const response = await fetch('/api/admin/ai-assistant', {
+                const response = await fetch('/api/admin/ai-assistant?t=' + Date.now(), {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache'
                     },
                     body: JSON.stringify({
                         message: message,
@@ -2332,28 +2304,79 @@
             document.getElementById('sendAIMessage').disabled = false;
         }
 
-        function resetAIChat() {
+        async function resetAIChat() {
             aiChatHistory = [];
             const chatContainer = document.getElementById('aiChatMessages');
+            
+            // Show loading while getting welcome message from server
             chatContainer.innerHTML = `
                 <div class="ai-message">
                     <div class="message-avatar">
                         <i class="fas fa-robot"></i>
                     </div>
                     <div class="message-content">
-                        <p>Hello! I'm your AI Platform Editor Assistant. I can:</p>
-                        <ul>
-                            <li>🔍 Read and analyze your entire MarketPace codebase</li>
-                            <li>✏️ Make code edits across all files</li>
-                            <li>🧠 Understand the full context of your platform architecture</li>
-                            <li>💡 Suggest improvements and implement changes</li>
-                            <li>🔧 Debug issues and optimize performance</li>
-                            <li>📊 Analyze data flow and database relationships</li>
-                        </ul>
-                        <p>What would you like me to help you with today?</p>
+                        <p>Connecting to AI Platform Assistant...</p>
                     </div>
                 </div>
             `;
+            
+            // Get welcome message from server
+            try {
+                const response = await fetch('/api/admin/ai-assistant?t=' + Date.now(), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache'
+                    },
+                    body: JSON.stringify({
+                        message: 'hello',
+                        chatHistory: [],
+                        platformContext: {
+                            currentSection: 'ai-platform-editor',
+                            userRole: 'admin',
+                            timestamp: new Date().toISOString()
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    chatContainer.innerHTML = `
+                        <div class="ai-message">
+                            <div class="message-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="message-content">
+                                <div class="message-text">${data.response.replace(/\n/g, '<br>')}</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    chatContainer.innerHTML = `
+                        <div class="ai-message">
+                            <div class="message-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="message-content">
+                                <p>AI Platform Assistant ready! Ask me to read files, edit code, or analyze your platform.</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Failed to get AI welcome message:', error);
+                chatContainer.innerHTML = `
+                    <div class="ai-message">
+                        <div class="message-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="message-content">
+                            <p>AI Platform Assistant ready! Ask me to read files, edit code, or analyze your platform.</p>
+                        </div>
+                    </div>
+                `;
+            }
         }
 
         function handleChatKeyPress(event) {
