@@ -348,7 +348,7 @@
                 <li>Real-time product synchronization</li>
                 <li>Local delivery radius management</li>
             </ul>
-            <button class="btn" onclick="window.location.href='/facebook-shop-integration'">Setup Facebook Shop</button>
+            <button class="btn" onclick="connectFacebookShop()">Connect Facebook Shop</button>
         </div>
 
         <div class="category-header">
@@ -492,18 +492,27 @@
         createParticles();
 
         async function connectShopify() {
-            const confirmed = confirm('Connect your Shopify store to MarketPace?\n\nThis will sync your products and enable local delivery through our network.\n\nYou will need your Shopify API credentials.');
-            if (confirmed) {
-                try {
-                    const response = await fetch('/api/integrations/shopify/connect', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-                    const result = await response.json();
-                    alert(result.success ? '✅ Shopify store connected successfully!' : '❌ Connection failed. Please check your API credentials.');
-                } catch (error) {
-                    alert('❌ Connection failed. Please check your internet connection.');
+            const storeUrl = prompt('Enter your Shopify store URL:\n(e.g., https://your-store.myshopify.com)');
+            if (!storeUrl) return;
+            
+            const accessToken = prompt('Enter your Shopify Private App Access Token:\n\nTo create one:\n1. Go to your Shopify Admin\n2. Settings > Apps and sales channels\n3. Develop apps > Create app\n4. Configure > Admin API integration\n5. Generate access token');
+            if (!accessToken) return;
+            
+            try {
+                const response = await fetch('/api/integrations/shopify/connect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ storeUrl, accessToken })
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`✅ Shopify store connected successfully!\n\nStore: ${result.store.name}\nDomain: ${result.store.domain}\nPlan: ${result.store.planName}\n\nYour products are now available for local delivery through MarketPace!`);
+                } else {
+                    alert(`❌ Connection failed: ${result.error}\n\nPlease check your store URL and access token.`);
                 }
+            } catch (error) {
+                alert('❌ Connection failed. Please check your internet connection.');
             }
         }
 
@@ -543,12 +552,14 @@
             const confirmed = confirm('Connect your Facebook Shop to MarketPace?\n\nThis will add automatic "Deliver Now via MarketPace" buttons to your Facebook product listings.');
             if (confirmed) {
                 try {
-                    const response = await fetch('/api/integrations/facebook-shop/connect', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
+                    const response = await fetch('/api/facebook-shop/auth');
                     const result = await response.json();
-                    alert(result.success ? '✅ Facebook Shop connected successfully!' : '❌ Connection failed. Please try again.');
+                    
+                    if (result.success && result.authUrl) {
+                        window.location.href = result.authUrl;
+                    } else {
+                        alert('❌ Connection failed. Please try again.');
+                    }
                 } catch (error) {
                     alert('❌ Connection failed. Please check your internet connection.');
                 }
