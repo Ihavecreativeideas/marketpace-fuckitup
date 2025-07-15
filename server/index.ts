@@ -987,7 +987,7 @@ const htmlRoutes = [
   '/signup-login', '/message-owner', '/rental-delivery', '/support',
   '/platform-integrations', '/supabase-integration', '/driver-dashboard',
   '/facebook-shop-integration', '/facebook-shop-setup', '/facebook-delivery',
-  '/facebook-redirect-tester', '/facebook-app-configuration'
+  '/facebook-redirect-tester', '/facebook-app-configuration', '/facebook-oauth-success-test'
 ];
 
 htmlRoutes.forEach(route => {
