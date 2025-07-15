@@ -990,7 +990,8 @@ const htmlRoutes = [
   '/facebook-redirect-tester', '/facebook-app-configuration', '/facebook-oauth-success-test',
   '/facebook-diagnostic-tool', '/facebook-sdk-integration', '/facebook-https-solution',
   '/facebook-app-troubleshooting', '/facebook-manual-integration', '/facebook-app-review-instructions',
-  '/facebook-data-processor-configuration'
+  '/facebook-data-processor-configuration', '/facebook-business-verification-checklist',
+  '/facebook-manual-integration-enhanced'
 ];
 
 htmlRoutes.forEach(route => {
