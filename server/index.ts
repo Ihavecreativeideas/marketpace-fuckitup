@@ -988,7 +988,8 @@ const htmlRoutes = [
   '/platform-integrations', '/supabase-integration', '/driver-dashboard',
   '/facebook-shop-integration', '/facebook-shop-setup', '/facebook-delivery',
   '/facebook-redirect-tester', '/facebook-app-configuration', '/facebook-oauth-success-test',
-  '/facebook-diagnostic-tool', '/facebook-sdk-integration', '/facebook-https-solution'
+  '/facebook-diagnostic-tool', '/facebook-sdk-integration', '/facebook-https-solution',
+  '/facebook-app-troubleshooting', '/facebook-manual-integration'
 ];
 
 htmlRoutes.forEach(route => {

@@ -680,4 +680,65 @@ export function registerFacebookShopRoutes(app: Express): void {
       });
     }
   });
+
+  // Manual Facebook Shop Connection endpoint
+  app.post('/api/facebook-shop/manual-connect', async (req: Request, res: Response) => {
+    try {
+      const { pageName, pageUrl, businessId, shopType, deliveryRadius, productsDescription, contactInfo, connectionMethod } = req.body;
+      
+      if (!pageName || !pageUrl || !shopType || !deliveryRadius) {
+        return res.status(400).json({
+          success: false,
+          error: 'Required fields missing: pageName, pageUrl, shopType, deliveryRadius'
+        });
+      }
+
+      // Generate shop ID from page name
+      const shopId = pageName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const userId = req.session?.userId || 'demo_user';
+      
+      // Create manual connection record
+      const manualConnection: FacebookShopConnection = {
+        userId,
+        accessToken: '', // No access token for manual connection
+        pageId: shopId,
+        shopId: shopId,
+        catalogId: '',
+        pageName,
+        connectedAt: new Date()
+      };
+
+      // Store the manual connection
+      FacebookShopManager.connections.set(userId, manualConnection);
+      
+      // Store additional manual connection data
+      req.session.manualShopData = {
+        pageUrl,
+        businessId,
+        shopType,
+        deliveryRadius: parseInt(deliveryRadius),
+        productsDescription,
+        contactInfo,
+        connectionMethod
+      };
+
+      res.json({
+        success: true,
+        message: 'Facebook Shop connected manually',
+        shopId,
+        connectionType: 'manual',
+        deliveryRadius: parseInt(deliveryRadius),
+        nextSteps: [
+          'Add delivery links to Facebook posts',
+          'Configure product-specific delivery options',
+          'Test delivery workflow with customers'
+        ]
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        error: error.message
+      });
+    }
+  });
 }
