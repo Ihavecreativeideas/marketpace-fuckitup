@@ -741,4 +741,78 @@ export function registerFacebookShopRoutes(app: Express): void {
       });
     }
   });
+
+  // Generate delivery link for Facebook Shop products
+  app.post('/api/facebook-shop/delivery-link', async (req: Request, res: Response) => {
+    try {
+      const { productId, productName, price, imageUrl, shopId, deliveryAddress } = req.body;
+      
+      if (!productId || !productName || !price) {
+        return res.status(400).json({
+          success: false,
+          error: 'Required fields missing: productId, productName, price'
+        });
+      }
+
+      // Generate delivery link
+      const deliveryLink = `https://marketpace.shop/facebook-delivery?product=${encodeURIComponent(productId)}&shop=${encodeURIComponent(shopId || 'facebook-shop')}&name=${encodeURIComponent(productName)}&price=${price}`;
+      
+      // Create delivery tracking ID
+      const deliveryId = `fb_${productId}_${Date.now()}`;
+      
+      res.json({
+        success: true,
+        deliveryLink,
+        deliveryId,
+        instructions: [
+          'Copy the delivery link',
+          'Add to your Facebook post or comment',
+          'Customers click link to request delivery',
+          'Process orders through MarketPace dashboard'
+        ],
+        samplePost: `🚚 Get this delivered today!\n\n${productName} - $${price}\n\nClick for MarketPace delivery: ${deliveryLink}\n\n#LocalDelivery #MarketPace`
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        error: error.message
+      });
+    }
+  });
+
+  // Get manual connection status
+  app.get('/api/facebook-shop/connection-status', async (req: Request, res: Response) => {
+    try {
+      const userId = req.session?.userId || 'demo_user';
+      const connection = FacebookShopManager.connections.get(userId);
+      const manualData = req.session?.manualShopData;
+      
+      if (!connection) {
+        return res.json({
+          connected: false,
+          connectionType: 'none',
+          message: 'No Facebook Shop connection found'
+        });
+      }
+
+      res.json({
+        connected: true,
+        connectionType: connection.accessToken ? 'oauth' : 'manual',
+        shopId: connection.shopId,
+        pageName: connection.pageName,
+        connectedAt: connection.connectedAt,
+        manualData: manualData || null,
+        stats: {
+          totalProducts: 0, // Will be populated based on connection type
+          deliveryEnabled: true,
+          averageDeliveryFee: 8.50
+        }
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        error: error.message
+      });
+    }
+  });
 }
