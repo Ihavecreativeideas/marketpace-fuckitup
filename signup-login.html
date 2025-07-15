@@ -1265,16 +1265,33 @@
                 const username = document.getElementById('driverUsername').value;
                 const password = document.getElementById('driverPassword').value;
                 
-                // Check for demo admin credentials
-                if (username === 'admin' && password === 'admin') {
+                // Check for demo admin credentials - now accepts both credential sets
+                if ((username === 'admin' && password === 'admin') || 
+                    (username === 'marketpace_admin' && password === 'MP2025_Secure!')) {
+                    localStorage.setItem('userEmail', username);
+                    localStorage.setItem('isAuthenticated', 'true');
+                    localStorage.setItem('userRole', 'admin_driver');
                     alert('Driver login successful! Redirecting to driver dashboard...');
                     closeDriverModal();
-                    window.location.href = '/driver-dashboard';
+                    window.location.href = '/driver-dashboard.html';
                 } else if (username === 'driver' && password === 'driver') {
+                    localStorage.setItem('userEmail', username);
+                    localStorage.setItem('isAuthenticated', 'true');
+                    localStorage.setItem('userRole', 'driver');
                     alert('Driver login successful! Redirecting to driver dashboard...');
                     closeDriverModal();
-                    window.location.href = '/driver-dashboard';
+                    window.location.href = '/driver-dashboard.html';
                 } else {
+                    // Check for admin credentials that should access driver dashboard
+                    if ((email === 'marketpace_admin' && password === 'MP2025_Secure!') || 
+                        (email === 'admin' && password === 'admin')) {
+                        localStorage.setItem('userEmail', email);
+                        localStorage.setItem('isAuthenticated', 'true');
+                        localStorage.setItem('userRole', 'admin_driver');
+                        window.location.href = '/driver-dashboard.html';
+                        return;
+                    }
+                    
                     alert('Invalid credentials. Demo credentials: admin/admin or driver/driver');
                 }
             };
