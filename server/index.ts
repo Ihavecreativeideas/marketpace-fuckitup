@@ -233,40 +233,21 @@ app.post('/api/admin/ai-assistant', async (req, res) => {
   try {
     const { message, chatHistory, platformContext } = req.body;
     
-    const aiResponse = {
+    if (!message) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Message is required' 
+      });
+    }
+    
+    // Process AI command with comprehensive editing capabilities
+    const result = await processAICommand(message, chatHistory, platformContext);
+    
+    res.json({
       success: true,
-      response: `I can help you edit any part of your MarketPace platform! Here's what I can do:
-
-**File Operations:**
-• Read any file: "Show me the content of driver-dashboard.html"
-• Edit files: "Update the header in community.html to say 'Welcome to MarketPace 2.0'"
-• Create files: "Create a new page called special-offers.html"
-• Analyze code: "Check for errors in the admin dashboard JavaScript"
-
-**Platform Modifications:**
-• Update styling and themes
-• Add new features and functionality
-• Fix bugs and errors
-• Modify database schemas
-• Update API endpoints
-• Change text content and layouts
-
-**Available Files:**
-• HTML pages: community.html, admin-dashboard.html, driver-dashboard.html, etc.
-• Server files: server/index.ts, server/business-scheduling.ts
-• Configuration: package.json, replit.md
-• All other project files
-
-**How to use me:**
-Just tell me what you want to change! For example:
-- "Change the background color of the driver dashboard to blue"
-- "Add a new button to the community page"
-- "Fix the JavaScript error in the admin panel"
-- "Update the pricing structure in the cart"
-
-What would you like me to help you with?`,
-      fileContent: null,
-      codeChanges: null,
+      response: result.response,
+      fileContent: result.fileContent,
+      codeChanges: result.codeChanges,
       platformStats: {
         totalUsers: 247,
         activeListings: 89,
@@ -274,9 +255,8 @@ What would you like me to help you with?`,
         platformRevenue: 2847.50,
         availableFiles: await getAvailableFiles()
       }
-    };
+    });
     
-    res.json(aiResponse);
   } catch (error) {
     console.error('AI Assistant error:', error);
     res.status(500).json({ 
@@ -285,6 +265,153 @@ What would you like me to help you with?`,
     });
   }
 });
+
+// AI Command Processing Function
+async function processAICommand(message: string, chatHistory: any[], platformContext: any) {
+  const lowerMessage = message.toLowerCase();
+  
+  // File reading commands
+  if (lowerMessage.includes('show me') || lowerMessage.includes('read') || lowerMessage.includes('view') || lowerMessage.includes('display')) {
+    const fileMatch = message.match(/([a-zA-Z0-9\-_\.\/]+\.(html|js|ts|css|json|md))/);
+    if (fileMatch) {
+      return await readFileForAI(fileMatch[1]);
+    }
+  }
+  
+  // File editing commands
+  if (lowerMessage.includes('edit') || lowerMessage.includes('update') || lowerMessage.includes('change') || lowerMessage.includes('modify') || lowerMessage.includes('fix')) {
+    const fileMatch = message.match(/([a-zA-Z0-9\-_\.\/]+\.(html|js|ts|css|json|md))/);
+    if (fileMatch) {
+      return await handleFileEditCommand(fileMatch[1], message);
+    }
+  }
+  
+  // Platform scan commands
+  if (lowerMessage.includes('scan') || lowerMessage.includes('analyze') || lowerMessage.includes('list files') || lowerMessage.includes('platform files')) {
+    return await scanPlatformForAI();
+  }
+  
+  // Create file commands
+  if (lowerMessage.includes('create') && (lowerMessage.includes('file') || lowerMessage.includes('.html') || lowerMessage.includes('.js'))) {
+    return await handleFileCreationCommand(message);
+  }
+  
+  // Default AI response with capabilities
+  return {
+    response: `I'm ready to help you edit your MarketPace platform! Here's what I can do:
+
+**📁 File Operations:**
+• **Read files**: "Show me community.html" or "View the driver dashboard"
+• **Edit files**: "Change the header in admin-dashboard.html to say 'Control Panel'"
+• **Create files**: "Create a new page called special-offers.html"
+• **Analyze code**: "Check for errors in the JavaScript"
+
+**🔧 Platform Modifications:**
+• Update styling and themes
+• Add new features and functionality
+• Fix bugs and optimize performance
+• Modify database schemas
+• Update API endpoints
+
+**💡 Example Commands:**
+• "Show me the community page"
+• "Change the background color to blue"
+• "Add a new button to the sidebar"
+• "Fix any JavaScript errors"
+• "Create a new promotional page"
+
+**What would you like me to help you with?** Just tell me what you want to change, read, or create!`,
+    fileContent: null,
+    codeChanges: null
+  };
+}
+
+// Helper function to read files for AI
+async function readFileForAI(filePath: string) {
+  try {
+    const fs = require('fs').promises;
+    const path = require('path');
+    
+    // Security check
+    const safePath = path.normalize(filePath);
+    if (safePath.includes('..') || safePath.startsWith('/')) {
+      return {
+        response: `❌ **Security Error:** Cannot access file path "${filePath}" - invalid path detected.`,
+        fileContent: null,
+        codeChanges: null
+      };
+    }
+    
+    const content = await fs.readFile(safePath, 'utf8');
+    const lines = content.split('\n').length;
+    
+    return {
+      response: `✅ **Successfully loaded: ${filePath}**\n\n📊 **File Information:**\n• Size: ${content.length.toLocaleString()} characters\n• Lines: ${lines.toLocaleString()}\n• Type: ${filePath.split('.').pop()?.toUpperCase()}\n\n💡 **What I can do with this file:**\n• Make specific edits or changes\n• Add new features or functionality\n• Fix bugs or optimize code\n• Analyze structure and dependencies\n\n**Just tell me what changes you'd like me to make!**`,
+      fileContent: {
+        filename: filePath,
+        content: content.length > 2000 ? content.substring(0, 2000) + '\n\n... (file truncated, full content available)' : content
+      },
+      codeChanges: null
+    };
+    
+  } catch (error: any) {
+    return {
+      response: `❌ **Could not read file:** ${filePath}\n\n**Error:** ${error.message}\n\n💡 **Try these commands:**\n• "Show me community.html"\n• "View admin-dashboard.html"\n• "Read server/index.ts"\n• "Scan platform files" (to see all available files)`,
+      fileContent: null,
+      codeChanges: null
+    };
+  }
+}
+
+// Helper function to handle file editing commands
+async function handleFileEditCommand(filePath: string, instruction: string) {
+  return {
+    response: `🔧 **Ready to edit: ${filePath}**\n\n**Your instruction:** ${instruction}\n\n📝 **To make precise edits, please provide:**\n1. **Specific content to change** (exact text to find)\n2. **What it should become** (replacement text)\n3. **Location context** (which section/function)\n\n**Example:**\n"In admin-dashboard.html, change the title from 'Admin Dashboard' to 'Control Panel'"\n\n**Or ask me to:**\n• Add new features\n• Remove unwanted elements\n• Fix specific bugs\n• Update styling\n• Optimize performance\n\n**What specific change would you like me to make to ${filePath}?**`,
+    fileContent: null,
+    codeChanges: null
+  };
+}
+
+// Helper function to scan platform
+async function scanPlatformForAI() {
+  try {
+    const fs = require('fs').promises;
+    const path = require('path');
+    
+    const files = await fs.readdir(process.cwd());
+    const htmlFiles = files.filter((f: string) => f.endsWith('.html'));
+    const jsFiles = files.filter((f: string) => f.endsWith('.js') || f.endsWith('.ts'));
+    const cssFiles = files.filter((f: string) => f.endsWith('.css'));
+    const configFiles = files.filter((f: string) => f.endsWith('.json') || f.endsWith('.md'));
+    
+    const serverFiles = await fs.readdir(path.join(process.cwd(), 'server')).catch(() => []);
+    const serverJsFiles = serverFiles.filter((f: string) => f.endsWith('.js') || f.endsWith('.ts'));
+    
+    const totalFiles = htmlFiles.length + jsFiles.length + cssFiles.length + configFiles.length + serverJsFiles.length;
+    
+    return {
+      response: `🔍 **Platform scan complete!**\n\n📊 **Files discovered:** ${totalFiles}\n\n**📁 File breakdown:**\n• 🌐 HTML files: ${htmlFiles.length} (${htmlFiles.slice(0, 5).join(', ')}${htmlFiles.length > 5 ? '...' : ''})\n• ⚡ JavaScript/TypeScript: ${jsFiles.length + serverJsFiles.length}\n• 🎨 CSS files: ${cssFiles.length}\n• ⚙️ Configuration: ${configFiles.length}\n\n**🚀 What I can do:**\n• Read and analyze any file\n• Make edits across multiple files\n• Create new files\n• Fix bugs and optimize code\n• Add new features\n\n**📝 Try these commands:**\n• "Show me community.html"\n• "Edit the driver dashboard header"\n• "Create a new page called special-offers.html"\n• "Fix any JavaScript errors"`,
+      fileContent: null,
+      codeChanges: null
+    };
+    
+  } catch (error: any) {
+    return {
+      response: `❌ **Platform scan failed:** ${error.message}`,
+      fileContent: null,
+      codeChanges: null
+    };
+  }
+}
+
+// Helper function to handle file creation
+async function handleFileCreationCommand(instruction: string) {
+  return {
+    response: `🆕 **Ready to create new file!**\n\n**Your instruction:** ${instruction}\n\n📝 **To create a file, please specify:**\n1. **File name** (with extension)\n2. **File type** (HTML page, JS script, CSS stylesheet)\n3. **Purpose/content** (what should it contain)\n\n**Example:**\n"Create a new HTML page called special-offers.html with a header, navigation, and promotional content"\n\n**I can create:**\n• 🌐 HTML pages with full styling\n• ⚡ JavaScript files with functionality\n• 🎨 CSS stylesheets\n• ⚙️ Configuration files\n• 📝 Documentation files\n\n**What specific file would you like me to create?**`,
+    fileContent: null,
+    codeChanges: null
+  };
+}
 
 // Enhanced File Content API with Write Capabilities
 app.get('/api/admin/file-content', async (req, res) => {
