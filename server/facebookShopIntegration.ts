@@ -66,6 +66,45 @@ class FacebookShopManager {
   }
 
   /**
+   * Handle Facebook SDK connection (alternative to OAuth flow)
+   */
+  static async handleSDKConnection(userId: string, userData: any, accessToken: string): Promise<{ success: boolean; message: string; connectionId?: string }> {
+    try {
+      // Validate the access token with Facebook
+      const tokenValidation = await axios.get(`${FACEBOOK_GRAPH_URL}/me?access_token=${accessToken}&fields=id,name,email`);
+      
+      if (tokenValidation.data.id !== userData.id) {
+        return { success: false, message: 'Access token validation failed' };
+      }
+
+      // Store the SDK connection
+      const connection: FacebookShopConnection = {
+        userId,
+        accessToken,
+        pageId: '', // Will be populated when user selects pages
+        shopId: '',
+        catalogId: '',
+        pageName: userData.name,
+        connectedAt: new Date()
+      };
+
+      this.connections.set(userId, connection);
+      
+      return {
+        success: true,
+        message: 'Facebook SDK connection established successfully',
+        connectionId: userId
+      };
+    } catch (error) {
+      console.error('Facebook SDK connection error:', error);
+      return {
+        success: false,
+        message: 'Failed to establish SDK connection: ' + (error as Error).message
+      };
+    }
+  }
+
+  /**
    * Exchange authorization code for access token
    */
   static async exchangeCodeForToken(code: string, redirectUri: string): Promise<string> {
@@ -606,6 +645,39 @@ export function registerFacebookShopRoutes(app: Express): void {
       });
     } catch (error) {
       res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Facebook SDK Connection endpoint (alternative to OAuth flow)
+  app.post('/api/facebook-shop/sdk-connect', async (req: Request, res: Response) => {
+    try {
+      const { user, accessToken, connectionMethod } = req.body;
+      
+      if (!user || !accessToken) {
+        return res.status(400).json({
+          success: false,
+          error: 'User data and access token required'
+        });
+      }
+
+      // Use user email as userId for demo purposes
+      const userId = user.email || user.id || 'demo_user';
+      
+      const result = await FacebookShopManager.handleSDKConnection(userId, user, accessToken);
+      
+      // Store SDK connection info in session
+      if (result.success) {
+        req.session.userId = userId;
+        req.session.tempAccessToken = accessToken;
+        req.session.facebookUser = user;
+      }
+      
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        error: error.message
+      });
     }
   });
 }
