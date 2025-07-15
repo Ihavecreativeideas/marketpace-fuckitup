@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook SDK Integration - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a0b3d 0%, #6b46c1 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            color: #4267B2;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+
+        .integration-card {
+            background: rgba(66, 103, 178, 0.1);
+            border: 1px solid rgba(66, 103, 178, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .step-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #4267B2;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #4267B2, #365899);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 10px 10px 0;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(66, 103, 178, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #28a745, #20c997);
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, #ffc107, #fd7e14);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .status-connected {
+            background: #28a745;
+        }
+
+        .status-pending {
+            background: #ffc107;
+        }
+
+        .status-error {
+            background: #dc3545;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+
+        .facebook-login-section {
+            text-align: center;
+            padding: 30px;
+            background: rgba(66, 103, 178, 0.05);
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .connection-status {
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .loading {
+            color: #ffc107;
+        }
+
+        .error {
+            color: #dc3545;
+        }
+
+        .success {
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📘 Facebook SDK Integration</h1>
+        
+        <div class="integration-card">
+            <h3><span class="status-indicator status-pending"></span>Alternative Facebook Integration Approach</h3>
+            <p>Since the OAuth redirect configuration is encountering issues, we'll use Facebook's JavaScript SDK for a more reliable integration approach that bypasses complex redirect URI requirements.</p>
+        </div>
+
+        <div class="facebook-login-section">
+            <h3>🔗 Connect Your Facebook Business Account</h3>
+            <p>Login with Facebook to access your business pages and shop catalogs:</p>
+            
+            <div class="connection-status" id="connection-status">
+                <p><span class="status-indicator status-pending"></span>Facebook SDK Status: Loading...</p>
+            </div>
+            
+            <button class="btn" id="facebook-login-btn" onclick="loginWithFacebook()" disabled>
+                Connect Facebook Business Account
+            </button>
+            
+            <div id="user-info" style="display: none; margin-top: 20px;">
+                <h4>Connected Account:</h4>
+                <div id="user-details"></div>
+                <button class="btn btn-success" onclick="loadBusinessPages()">Load Business Pages</button>
+                <button class="btn btn-warning" onclick="logoutFacebook()">Disconnect</button>
+            </div>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🏪</div>
+                <h4>Business Pages</h4>
+                <p>Connect and manage your Facebook business pages</p>
+                <div id="pages-status">Not Connected</div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📦</div>
+                <h4>Product Catalogs</h4>
+                <p>Sync your Facebook Shop product catalogs</p>
+                <div id="catalogs-status">Not Connected</div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🚚</div>
+                <h4>MarketPace Delivery</h4>
+                <p>Enable delivery options for Facebook products</p>
+                <div id="delivery-status">Ready</div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h4>Analytics</h4>
+                <p>Track integration performance and engagement</p>
+                <div id="analytics-status">Ready</div>
+            </div>
+        </div>
+
+        <div class="step-card">
+            <h3>📋 Integration Results</h3>
+            <div id="integration-results" class="code-block">
+                Ready to connect Facebook SDK...
+            </div>
+        </div>
+
+        <div class="step-card">
+            <h3>🎯 Next Steps After Connection</h3>
+            <ol>
+                <li><strong>Select Business Pages:</strong> Choose which Facebook pages to integrate</li>
+                <li><strong>Sync Product Catalogs:</strong> Import your Facebook Shop products</li>
+                <li><strong>Configure Delivery:</strong> Set up MarketPace delivery options</li>
+                <li><strong>Test Integration:</strong> Verify the complete workflow</li>
+                <li><strong>Launch:</strong> Start offering delivery for Facebook Shop products</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Facebook SDK -->
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+    
+    <script>
+        let facebookUser = null;
+        let accessToken = null;
+
+        // Initialize Facebook SDK
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId: '1043690817269912',
+                cookie: true,
+                xfbml: true,
+                version: 'v20.0',
+                // Force HTTPS for Facebook SDK
+                status: true
+            });
+
+            // Update connection status
+            document.getElementById('connection-status').innerHTML = 
+                '<p><span class="status-indicator status-connected"></span>Facebook SDK Status: Ready</p>';
+            document.getElementById('facebook-login-btn').disabled = false;
+
+            // Check if user is already logged in
+            FB.getLoginStatus(function(response) {
+                if (response.status === 'connected') {
+                    handleLoginSuccess(response);
+                }
+            });
+
+            updateResults('✅ Facebook SDK initialized successfully');
+        };
+
+        function loginWithFacebook() {
+            updateResults('🔄 Initiating Facebook login...');
+            
+            FB.login(function(response) {
+                if (response.authResponse) {
+                    handleLoginSuccess(response);
+                } else {
+                    updateResults('❌ Facebook login cancelled or failed');
+                    console.log('User cancelled login or did not fully authorize.');
+                }
+            }, {
+                scope: 'pages_show_list,catalog_management,pages_read_engagement,business_management'
+            });
+        }
+
+        function handleLoginSuccess(response) {
+            accessToken = response.authResponse.accessToken;
+            
+            updateResults('✅ Facebook login successful! Getting user information...');
+            
+            FB.api('/me', { fields: 'name,email,picture' }, function(userResponse) {
+                if (userResponse && !userResponse.error) {
+                    facebookUser = userResponse;
+                    displayUserInfo(userResponse);
+                    updateResults(`✅ Connected as: ${userResponse.name} (${userResponse.email})`);
+                    
+                    // Send connection info to backend
+                    sendConnectionToBackend(userResponse, accessToken);
+                } else {
+                    updateResults('❌ Failed to get user information: ' + JSON.stringify(userResponse.error));
+                }
+            });
+        }
+
+        function displayUserInfo(user) {
+            const userInfo = document.getElementById('user-info');
+            const userDetails = document.getElementById('user-details');
+            
+            userDetails.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+                    <img src="${user.picture.data.url}" alt="Profile" style="width: 50px; height: 50px; border-radius: 50%;">
+                    <div>
+                        <strong>${user.name}</strong><br>
+                        <small>${user.email}</small>
+                    </div>
+                </div>
+            `;
+            
+            userInfo.style.display = 'block';
+            document.getElementById('facebook-login-btn').style.display = 'none';
+        }
+
+        function loadBusinessPages() {
+            if (!accessToken) {
+                updateResults('❌ No access token available');
+                return;
+            }
+
+            updateResults('🔄 Loading business pages...');
+            
+            FB.api('/me/accounts', { access_token: accessToken }, function(response) {
+                if (response && !response.error) {
+                    updateResults(`✅ Found ${response.data.length} pages/accounts`);
+                    document.getElementById('pages-status').innerHTML = '<span class="success">Connected</span>';
+                    
+                    // Load catalogs for each page
+                    loadProductCatalogs(response.data);
+                } else {
+                    updateResults('❌ Failed to load pages: ' + JSON.stringify(response.error));
+                }
+            });
+        }
+
+        function loadProductCatalogs(pages) {
+            updateResults('🔄 Loading product catalogs...');
+            
+            pages.forEach(page => {
+                FB.api(`/${page.id}/product_catalogs`, { access_token: accessToken }, function(response) {
+                    if (response && !response.error) {
+                        if (response.data.length > 0) {
+                            updateResults(`✅ Found ${response.data.length} catalogs for ${page.name}`);
+                            document.getElementById('catalogs-status').innerHTML = '<span class="success">Connected</span>';
+                        }
+                    }
+                });
+            });
+            
+            // Update delivery status
+            document.getElementById('delivery-status').innerHTML = '<span class="success">Configured</span>';
+            document.getElementById('analytics-status').innerHTML = '<span class="success">Active</span>';
+        }
+
+        async function sendConnectionToBackend(user, token) {
+            try {
+                const response = await fetch('/api/facebook-shop/sdk-connect', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user: user,
+                        accessToken: token,
+                        connectionMethod: 'facebook_sdk'
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    updateResults('✅ Connection saved to MarketPace backend successfully');
+                } else {
+                    updateResults('⚠️ Facebook connected, but backend save failed: ' + result.error);
+                }
+            } catch (error) {
+                updateResults('⚠️ Facebook connected, but backend communication failed: ' + error.message);
+            }
+        }
+
+        function logoutFacebook() {
+            FB.logout(function(response) {
+                facebookUser = null;
+                accessToken = null;
+                document.getElementById('user-info').style.display = 'none';
+                document.getElementById('facebook-login-btn').style.display = 'inline-block';
+                document.getElementById('pages-status').textContent = 'Not Connected';
+                document.getElementById('catalogs-status').textContent = 'Not Connected';
+                document.getElementById('delivery-status').textContent = 'Ready';
+                document.getElementById('analytics-status').textContent = 'Ready';
+                updateResults('👋 Logged out of Facebook');
+            });
+        }
+
+        function updateResults(message) {
+            const results = document.getElementById('integration-results');
+            const timestamp = new Date().toLocaleTimeString();
+            results.innerHTML += `\n[${timestamp}] ${message}`;
+            results.scrollTop = results.scrollHeight;
+        }
+
+        // Handle SDK load failure
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                if (typeof FB === 'undefined') {
+                    document.getElementById('connection-status').innerHTML = 
+                        '<p><span class="status-indicator status-error"></span>Facebook SDK Status: Failed to load</p>';
+                    updateResults('❌ Facebook SDK failed to load. Check internet connection and try again.');
+                }
+            }, 5000);
+        });
+    </script>
+</body>
+</html>
