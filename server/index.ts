@@ -278,11 +278,21 @@ async function processAICommand(message: string, chatHistory: any[], platformCon
     }
   }
   
-  // File editing commands
+  // Community button fix command
+  if (lowerMessage.includes('community') && lowerMessage.includes('button') && (lowerMessage.includes('fix') || lowerMessage.includes('navigate'))) {
+    return await fixCommunityButtonNavigation();
+  }
+  
+  // File editing commands - more flexible matching
   if (lowerMessage.includes('edit') || lowerMessage.includes('update') || lowerMessage.includes('change') || lowerMessage.includes('modify') || lowerMessage.includes('fix')) {
     const fileMatch = message.match(/([a-zA-Z0-9\-_\.\/]+\.(html|js|ts|css|json|md))/);
     if (fileMatch) {
       return await handleFileEditCommand(fileMatch[1], message);
+    }
+    
+    // Handle general fix commands without specific file
+    if (lowerMessage.includes('fix') && (lowerMessage.includes('button') || lowerMessage.includes('navigation') || lowerMessage.includes('link'))) {
+      return await handleGeneralFixCommand(message);
     }
   }
   
@@ -408,6 +418,71 @@ async function scanPlatformForAI() {
 async function handleFileCreationCommand(instruction: string) {
   return {
     response: `🆕 **Ready to create new file!**\n\n**Your instruction:** ${instruction}\n\n📝 **To create a file, please specify:**\n1. **File name** (with extension)\n2. **File type** (HTML page, JS script, CSS stylesheet)\n3. **Purpose/content** (what should it contain)\n\n**Example:**\n"Create a new HTML page called special-offers.html with a header, navigation, and promotional content"\n\n**I can create:**\n• 🌐 HTML pages with full styling\n• ⚡ JavaScript files with functionality\n• 🎨 CSS stylesheets\n• ⚙️ Configuration files\n• 📝 Documentation files\n\n**What specific file would you like me to create?**`,
+    fileContent: null,
+    codeChanges: null
+  };
+}
+
+// Helper function to fix community button navigation
+async function fixCommunityButtonNavigation() {
+  try {
+    const fs = require('fs').promises;
+    
+    // Read the admin dashboard file
+    const adminContent = await fs.readFile('admin-dashboard.html', 'utf8');
+    
+    // Look for the community button and check its href
+    const communityButtonMatch = adminContent.match(/<a[^>]*href="([^"]*)"[^>]*community[^>]*>/i);
+    
+    if (communityButtonMatch) {
+      const currentHref = communityButtonMatch[1];
+      
+      // Check if it's pointing to the wrong page
+      if (currentHref === '/' || currentHref === 'pitch-page.html' || currentHref.includes('pitch')) {
+        // Fix the href to point to community.html
+        const fixedContent = adminContent.replace(
+          /(<a[^>]*href=")[^"]*("[^>]*community[^>]*>)/i,
+          '$1/community$2'
+        );
+        
+        await fs.writeFile('admin-dashboard.html', fixedContent, 'utf8');
+        
+        return {
+          response: `✅ **Community Button Fixed!**\n\n**Problem Found:** The community button was pointing to "${currentHref}" instead of the community page.\n\n**Fix Applied:** Updated the href to "/community" which will correctly navigate to community.html\n\n**Changes made to:** admin-dashboard.html\n\n**What was changed:**\n\`\`\`html\n<!-- Before -->\nhref="${currentHref}"\n\n<!-- After -->\nhref="/community"\n\`\`\`\n\n**The community button should now navigate correctly to the community page!**`,
+          fileContent: null,
+          codeChanges: [{
+            file: 'admin-dashboard.html',
+            change: `Updated community button href from "${currentHref}" to "/community"`
+          }]
+        };
+      } else {
+        return {
+          response: `🔍 **Community Button Analysis**\n\n**Current Status:** The community button appears to be correctly configured.\n\n**Current href:** "${currentHref}"\n\n**This should navigate to the community page correctly.**\n\n**If you're still experiencing issues, please try:**\n1. Hard refresh the page (Ctrl+F5)\n2. Clear browser cache\n3. Check if there are any JavaScript errors in the console\n\n**Would you like me to show you the exact button code for further inspection?**`,
+          fileContent: null,
+          codeChanges: null
+        };
+      }
+    } else {
+      return {
+        response: `❌ **Community Button Not Found**\n\nI couldn't locate the community button in admin-dashboard.html.\n\n**Let me help you:**\n1. First, let me scan the file structure\n2. Check for alternative button implementations\n3. Show you the current navigation setup\n\n**Would you like me to show you the admin dashboard content so we can locate the community button together?**`,
+        fileContent: null,
+        codeChanges: null
+      };
+    }
+    
+  } catch (error: any) {
+    return {
+      response: `❌ **Error fixing community button:** ${error.message}\n\n**Let me try a different approach:**\n1. Show me the admin dashboard file first\n2. Identify the exact button location\n3. Apply the correct fix\n\n**Please ask me to "Show me admin-dashboard.html" so I can analyze the current navigation setup.**`,
+      fileContent: null,
+      codeChanges: null
+    };
+  }
+}
+
+// Helper function to handle general fix commands
+async function handleGeneralFixCommand(instruction: string) {
+  return {
+    response: `🔧 **Ready to help with your fix!**\n\n**Your request:** ${instruction}\n\n**To provide the best solution, I need more specific information:**\n\n**For button/navigation fixes:**\n• Which specific button needs fixing?\n• What page is it on?\n• What should it do vs. what it's currently doing?\n\n**For example:**\n• "Fix the community button in admin-dashboard.html to navigate to /community"\n• "Fix the login button that redirects to the wrong page"\n• "Fix the navigation menu in the header"\n\n**I can also:**\n• Show you the current file content to analyze the issue\n• Scan for common navigation problems\n• Fix specific links or buttons\n\n**What specific element would you like me to fix?**`,
     fileContent: null,
     codeChanges: null
   };
