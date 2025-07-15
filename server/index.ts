@@ -3,6 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import { BusinessSchedulingService } from './business-scheduling';
 import { setupRealIntegrationRoutes } from './realIntegrationTester';
+import { setupShopifyBusinessRoutes } from './shopifyBusinessIntegration';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -996,6 +997,9 @@ app.get('/:page', (req, res) => {
 
 // Setup real integration testing routes
 setupRealIntegrationRoutes(app);
+
+// Setup Shopify business integration routes
+setupShopifyBusinessRoutes(app);
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`✅ MarketPace Full Server running on port ${port}`);

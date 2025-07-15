@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopify Business Integration - MarketPace Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a0b3d, #6b46c1);
+            color: #e2e8f0;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(99, 102, 241, 0.6);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            color: #cbd5e1;
+        }
+        
+        .integration-steps {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .step-card {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: linear-gradient(45deg, #6366f1, #8b5cf6);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .step-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #93c5fd;
+        }
+        
+        .integration-form {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            margin-bottom: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #93c5fd;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #e2e8f0;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 15px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.5);
+        }
+        
+        .sync-status {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            margin-bottom: 30px;
+            display: none;
+        }
+        
+        .sync-status.active {
+            display: block;
+        }
+        
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .product-card {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 200px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .product-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #93c5fd;
+        }
+        
+        .product-price {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #10b981;
+            margin-bottom: 15px;
+        }
+        
+        .product-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            border-radius: 8px;
+        }
+        
+        .delivery-settings {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+        
+        .success-message {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            color: #22c55e;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .error-message {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #ef4444;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .integration-steps {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>Shopify Business Integration</h1>
+            <p>Sync your Shopify store products directly to your MarketPace Pro business profile</p>
+        </div>
+        
+        <div class="integration-steps">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-title">Connect Your Store</div>
+                <p>Enter your Shopify store credentials to establish a secure connection between your Shopify store and MarketPace business profile.</p>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-title">Configure Settings</div>
+                <p>Set up delivery options, shipping fees, and choose which products to sync to your MarketPace shop.</p>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-title">Sync Products</div>
+                <p>Import your Shopify products with same prices and descriptions, plus add MarketPace local delivery options.</p>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-title">Promote & Share</div>
+                <p>Promote individual products and share them to Facebook to drive more sales through your MarketPace profile.</p>
+            </div>
+        </div>
+        
+        <div class="integration-form">
+            <h2 style="margin-bottom: 25px; color: #93c5fd;">Store Connection</h2>
+            
+            <div class="success-message" id="successMessage">
+                ✅ Successfully connected to your Shopify store! Products are ready to sync.
+            </div>
+            
+            <div class="error-message" id="errorMessage">
+                ❌ Failed to connect to your Shopify store. Please check your credentials.
+            </div>
+            
+            <form id="shopifyForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="shopDomain">Shop Domain</label>
+                        <input type="text" id="shopDomain" placeholder="your-shop.myshopify.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="accessToken">Admin API Access Token</label>
+                        <input type="password" id="accessToken" placeholder="shpat_..." required>
+                    </div>
+                </div>
+                
+                <h3 style="margin: 30px 0 20px 0; color: #93c5fd;">Delivery & Pricing Settings</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="shippingFee">Your Shipping & Handling Fee</label>
+                        <input type="number" id="shippingFee" placeholder="0.00" step="0.01" min="0">
+                        <small style="color: #94a3b8;">Added to MarketPace delivery cost ($4 pickup + $2 dropoff + $0.50/mile)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="processingFee">Processing Fee (%)</label>
+                        <input type="number" id="processingFee" placeholder="0" step="0.1" min="0" max="10">
+                        <small style="color: #94a3b8;">Additional percentage fee on product price</small>
+                    </div>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="enableLocalDelivery" checked>
+                    <label for="enableLocalDelivery">Enable MarketPace Local Delivery</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="allowRedirectToShopify">
+                    <label for="allowRedirectToShopify">Allow customers to visit your Shopify store directly</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="autoSync">
+                    <label for="autoSync">Automatically sync new products from Shopify</label>
+                </div>
+                
+                <button type="submit" class="btn">Connect & Test Store</button>
+                <button type="button" class="btn btn-secondary" onclick="syncProducts()">Sync Products</button>
+            </form>
+        </div>
+        
+        <div class="sync-status" id="syncStatus">
+            <h3 style="margin-bottom: 20px; color: #93c5fd;">Sync Status</h3>
+            <div id="syncProgress">
+                <p>Syncing products from your Shopify store...</p>
+            </div>
+        </div>
+        
+        <div class="delivery-settings">
+            <h3 style="margin-bottom: 20px; color: #93c5fd;">MarketPace Delivery Integration</h3>
+            
+            <div style="background: rgba(99, 102, 241, 0.1); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <h4 style="color: #93c5fd; margin-bottom: 10px;">Delivery Cost Structure</h4>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 8px;">• <strong>Pickup Fee:</strong> $4.00 (charged to shop)</li>
+                    <li style="margin-bottom: 8px;">• <strong>Dropoff Fee:</strong> $2.00 (charged to shop)</li>
+                    <li style="margin-bottom: 8px;">• <strong>Mileage:</strong> $0.50 per mile</li>
+                    <li style="margin-bottom: 8px;">• <strong>Your Shipping Fee:</strong> $<span id="displayShippingFee">0.00</span> (added to customer total)</li>
+                </ul>
+            </div>
+            
+            <p style="color: #cbd5e1; margin-bottom: 20px;">
+                Your customers will see the total delivery cost including your shipping fee. You control your additional charges while MarketPace handles the local delivery logistics.
+            </p>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="deliveryRadius">Delivery Radius (miles)</label>
+                    <select id="deliveryRadius">
+                        <option value="5">5 miles</option>
+                        <option value="10" selected>10 miles</option>
+                        <option value="15">15 miles</option>
+                        <option value="25">25 miles</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="deliveryDays">Available Delivery Days</label>
+                    <select id="deliveryDays" multiple>
+                        <option value="monday" selected>Monday</option>
+                        <option value="tuesday" selected>Tuesday</option>
+                        <option value="wednesday" selected>Wednesday</option>
+                        <option value="thursday" selected>Thursday</option>
+                        <option value="friday" selected>Friday</option>
+                        <option value="saturday" selected>Saturday</option>
+                        <option value="sunday">Sunday</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div id="productsContainer" style="margin-top: 40px; display: none;">
+            <h3 style="margin-bottom: 25px; color: #93c5fd;">Synced Products</h3>
+            <div class="product-grid" id="productGrid">
+                <!-- Products will be populated here -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Update shipping fee display
+        function updateShippingFeeDisplay() {
+            const shippingFee = document.getElementById('shippingFee').value || '0.00';
+            document.getElementById('displayShippingFee').textContent = parseFloat(shippingFee).toFixed(2);
+        }
+        
+        // Handle form submission
+        document.getElementById('shopifyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                shopDomain: document.getElementById('shopDomain').value,
+                accessToken: document.getElementById('accessToken').value,
+                shippingFee: parseFloat(document.getElementById('shippingFee').value) || 0,
+                processingFee: parseFloat(document.getElementById('processingFee').value) || 0,
+                enableLocalDelivery: document.getElementById('enableLocalDelivery').checked,
+                allowRedirectToShopify: document.getElementById('allowRedirectToShopify').checked,
+                autoSync: document.getElementById('autoSync').checked,
+                deliveryRadius: parseInt(document.getElementById('deliveryRadius').value),
+                deliveryDays: Array.from(document.getElementById('deliveryDays').selectedOptions).map(option => option.value)
+            };
+            
+            try {
+                const response = await fetch('/api/shopify/business-integration/connect', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('successMessage').style.display = 'block';
+                    document.getElementById('errorMessage').style.display = 'none';
+                } else {
+                    document.getElementById('errorMessage').style.display = 'block';
+                    document.getElementById('successMessage').style.display = 'none';
+                    document.getElementById('errorMessage').textContent = result.error || 'Failed to connect to your Shopify store.';
+                }
+            } catch (error) {
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('successMessage').style.display = 'none';
+                document.getElementById('errorMessage').textContent = 'Connection error. Please try again.';
+            }
+        });
+        
+        // Sync products function
+        async function syncProducts() {
+            const syncStatus = document.getElementById('syncStatus');
+            const syncProgress = document.getElementById('syncProgress');
+            
+            syncStatus.classList.add('active');
+            syncProgress.innerHTML = '<p>🔄 Syncing products from your Shopify store...</p>';
+            
+            try {
+                const response = await fetch('/api/shopify/business-integration/sync', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    syncProgress.innerHTML = `<p>✅ Successfully synced ${result.productCount} products!</p>`;
+                    displayProducts(result.products);
+                } else {
+                    syncProgress.innerHTML = `<p>❌ Sync failed: ${result.error}</p>`;
+                }
+            } catch (error) {
+                syncProgress.innerHTML = '<p>❌ Sync failed: Connection error</p>';
+            }
+        }
+        
+        // Display synced products
+        function displayProducts(products) {
+            const productsContainer = document.getElementById('productsContainer');
+            const productGrid = document.getElementById('productGrid');
+            
+            productGrid.innerHTML = '';
+            
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                productCard.innerHTML = `
+                    <div class="product-image">
+                        <img src="${product.image || '/api/placeholder/200/200'}" alt="${product.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
+                    </div>
+                    <div class="product-title">${product.title}</div>
+                    <div class="product-price">$${product.price}</div>
+                    <div class="product-actions">
+                        <button class="btn btn-small" onclick="promoteProduct('${product.id}')">Promote</button>
+                        <button class="btn btn-small btn-secondary" onclick="shareToFacebook('${product.id}')">Share to Facebook</button>
+                        <button class="btn btn-small btn-secondary" onclick="editProduct('${product.id}')">Edit</button>
+                    </div>
+                `;
+                productGrid.appendChild(productCard);
+            });
+            
+            productsContainer.style.display = 'block';
+        }
+        
+        // Product action functions
+        function promoteProduct(productId) {
+            alert('Opening promotion manager for product: ' + productId);
+            // Will integrate with existing promotion system
+        }
+        
+        function shareToFacebook(productId) {
+            alert('Sharing product to Facebook: ' + productId);
+            // Will integrate with Facebook sharing system
+        }
+        
+        function editProduct(productId) {
+            alert('Opening product editor for: ' + productId);
+            // Will open product editing modal
+        }
+        
+        // Update shipping fee display when input changes
+        document.getElementById('shippingFee').addEventListener('input', updateShippingFeeDisplay);
+        
+        // Initialize
+        createParticles();
+        updateShippingFeeDisplay();
+    </script>
+</body>
+</html>
