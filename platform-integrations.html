@@ -126,6 +126,12 @@
             border: 1px solid rgba(0, 255, 136, 0.3);
         }
 
+        .status-working {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
         .status-coming-soon {
             background: rgba(255, 193, 7, 0.2);
             color: #ffc107;
@@ -270,6 +276,25 @@
         <div class="category-header">
             <div class="category-title">E-Commerce Platforms</div>
             <div class="category-description">Connect your online stores and marketplaces</div>
+        </div>
+
+        <div class="integration-card">
+            <div class="integration-header">
+                <div class="integration-icon">🛒</div>
+                <div class="integration-title">Shopify Store</div>
+                <div class="integration-status status-working">Working</div>
+            </div>
+            <div class="integration-description">
+                Connect your Shopify store to sync products and enable local delivery through MarketPace.
+            </div>
+            <ul class="integration-features">
+                <li>Automatic product sync from Shopify catalog</li>
+                <li>Local delivery integration with MarketPace</li>
+                <li>Cross-platform inventory management</li>
+                <li>Custom shipping and processing fees</li>
+                <li>Product promotion system with Facebook sharing</li>
+            </ul>
+            <button class="btn" onclick="connectShopify()">Connect Shopify Store</button>
         </div>
 
         <div class="integration-card">
@@ -465,6 +490,22 @@
         }
 
         createParticles();
+
+        async function connectShopify() {
+            const confirmed = confirm('Connect your Shopify store to MarketPace?\n\nThis will sync your products and enable local delivery through our network.\n\nYou will need your Shopify API credentials.');
+            if (confirmed) {
+                try {
+                    const response = await fetch('/api/integrations/shopify/connect', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const result = await response.json();
+                    alert(result.success ? '✅ Shopify store connected successfully!' : '❌ Connection failed. Please check your API credentials.');
+                } catch (error) {
+                    alert('❌ Connection failed. Please check your internet connection.');
+                }
+            }
+        }
 
         async function connectEtsy() {
             const confirmed = confirm('Connect your Etsy shop to MarketPace?\n\nThis will allow you to promote your handmade items to local customers who prefer pickup or local delivery.');
