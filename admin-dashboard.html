@@ -2033,32 +2033,131 @@
             showAIThinking();
             
             try {
+                // Process AI command with full editing capabilities
+                await processAdvancedAICommand(message);
+            } catch (error) {
+                console.error('AI Assistant Error:', error);
+                hideAIThinking();
+                addAIMessage('Sorry, I encountered an error. Please try again.', null, null);
+            }
+        }
+
+        async function processAdvancedAICommand(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            // File reading commands
+            if (lowerMessage.includes('show me') || lowerMessage.includes('read') || lowerMessage.includes('view') || lowerMessage.includes('display')) {
+                const fileMatch = message.match(/([a-zA-Z0-9\-_\.\/]+\.(html|js|ts|css|json|md))/);
+                if (fileMatch) {
+                    await readFileContent(fileMatch[1]);
+                    return;
+                }
+            }
+            
+            // File editing commands
+            if (lowerMessage.includes('edit') || lowerMessage.includes('update') || lowerMessage.includes('change') || lowerMessage.includes('modify') || lowerMessage.includes('fix')) {
+                const fileMatch = message.match(/([a-zA-Z0-9\-_\.\/]+\.(html|js|ts|css|json|md))/);
+                if (fileMatch) {
+                    await handleFileEdit(fileMatch[1], message);
+                    return;
+                }
+            }
+            
+            // Platform scan commands
+            if (lowerMessage.includes('scan') || lowerMessage.includes('analyze') || lowerMessage.includes('list files') || lowerMessage.includes('platform files')) {
+                await performPlatformScan();
+                return;
+            }
+            
+            // Create new file commands
+            if (lowerMessage.includes('create') && (lowerMessage.includes('file') || lowerMessage.includes('.html') || lowerMessage.includes('.js'))) {
+                await handleFileCreation(message);
+                return;
+            }
+            
+            // Default AI response with capabilities
+            await getEnhancedAIResponse(message);
+        }
+
+        async function readFileContent(filePath) {
+            try {
+                const response = await fetch(`/api/admin/file-content?filePath=${encodeURIComponent(filePath)}`);
+                const data = await response.json();
+                
+                hideAIThinking();
+                
+                if (data.success) {
+                    addAIMessage(`✅ **File loaded successfully: ${filePath}**\n\n📊 **File Information:**\n• Size: ${data.size.toLocaleString()} characters\n• Lines: ${data.lines.toLocaleString()}\n• Type: ${filePath.split('.').pop().toUpperCase()}\n\n💡 **What I can do with this file:**\n• Make specific edits or changes\n• Add new features or functionality\n• Fix bugs or issues\n• Optimize code or styling\n• Analyze structure and dependencies\n\nJust tell me what changes you'd like me to make!`, 
+                        { filename: filePath, content: data.content.substring(0, 1000) + (data.content.length > 1000 ? '\n... (truncated)' : '') }, 
+                        null);
+                } else {
+                    addAIMessage(`❌ **Could not read file:** ${filePath}\n\n**Error:** ${data.error}\n\n💡 **Available files I can read:**\n• HTML pages: community.html, admin-dashboard.html, driver-dashboard.html\n• Server files: server/index.ts, server/business-scheduling.ts\n• Configuration: package.json, replit.md\n\nTry asking me to "scan platform files" to see all available files.`, null, null);
+                }
+            } catch (error) {
+                hideAIThinking();
+                addAIMessage(`❌ **Error reading file:** ${error.message}`, null, null);
+            }
+        }
+
+        async function handleFileEdit(filePath, editInstruction) {
+            hideAIThinking();
+            addAIMessage(`🔧 **Ready to edit: ${filePath}**\n\n**Edit Instruction:** ${editInstruction}\n\n📝 **To make precise edits, please provide:**\n\n1. **Specific content to change** (exact text)\n2. **What it should become** (new text)\n3. **Location context** (which section/function)\n\n**Example commands:**\n• "Change the title from 'Admin Dashboard' to 'Control Panel' in admin-dashboard.html"\n• "Add a new button called 'Export Data' to the sidebar"\n• "Fix the JavaScript error in the sendAIMessage function"\n• "Update the background color to blue in the CSS"\n\n**Or I can:**\n• Add new features\n• Remove unwanted elements\n• Optimize performance\n• Fix bugs and errors\n\nWhat specific change would you like me to make to **${filePath}**?`, null, null);
+        }
+
+        async function performPlatformScan() {
+            try {
+                const response = await fetch('/api/admin/platform-scan');
+                const data = await response.json();
+                
+                hideAIThinking();
+                
+                if (data.success) {
+                    // Update file selector
+                    updateFileDropdown(data.categories);
+                    
+                    // Update stats
+                    document.getElementById('totalFiles').textContent = data.fileCount;
+                    
+                    addAIMessage(`🔍 **Platform scan complete!**\n\n📊 **Files discovered:** ${data.fileCount}\n\n**📁 File breakdown:**\n• 🌐 HTML files: ${data.categories.html.length}\n• ⚡ JavaScript/TypeScript: ${data.categories.javascript.length}\n• 🎨 CSS files: ${data.categories.styles.length}\n• ⚙️ Configuration: ${data.categories.config.length}\n\n**🚀 What I can do:**\n• Read and analyze any file\n• Make edits across multiple files\n• Create new files\n• Fix bugs and optimize code\n• Add new features\n\n**📝 Example commands:**\n• "Show me community.html"\n• "Edit the driver dashboard header"\n• "Create a new page called special-offers.html"\n• "Fix any JavaScript errors"`, null, null);
+                } else {
+                    addAIMessage(`❌ **Platform scan failed:** ${data.error}`, null, null);
+                }
+            } catch (error) {
+                hideAIThinking();
+                addAIMessage(`❌ **Error scanning platform:** ${error.message}`, null, null);
+            }
+        }
+
+        async function handleFileCreation(instruction) {
+            hideAIThinking();
+            addAIMessage(`🆕 **Ready to create new file!**\n\n**Instruction:** ${instruction}\n\n📝 **To create a file, please specify:**\n\n1. **File name** (with extension)\n2. **File type** (HTML page, JS script, CSS stylesheet)\n3. **Purpose/content** (what should it contain)\n\n**Example:**\n"Create a new HTML page called special-offers.html with a header, navigation, and promotional content"\n\n**I can create:**\n• 🌐 HTML pages with full styling\n• ⚡ JavaScript files with functionality\n• 🎨 CSS stylesheets\n• ⚙️ Configuration files\n• 📝 Documentation files\n\nWhat specific file would you like me to create?`, null, null);
+        }
+
+        async function getEnhancedAIResponse(message) {
+            try {
                 const response = await fetch('/api/admin/ai-assistant', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'admin_token_2025'
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         message: message,
                         chatHistory: aiChatHistory,
                         platformContext: {
                             currentSection: getCurrentSection(),
-                            userRole: 'admin'
+                            userRole: 'admin',
+                            timestamp: new Date().toISOString()
                         }
                     })
                 });
                 
                 const data = await response.json();
                 
-                // Remove thinking indicator
                 hideAIThinking();
                 
                 if (data.success) {
-                    // Add AI response to chat
                     addAIMessage(data.response, data.fileContent, data.codeChanges);
                     
-                    // Update file stats if provided
                     if (data.platformStats) {
                         updatePlatformStats(data.platformStats);
                     }
@@ -2067,10 +2166,56 @@
                 }
                 
             } catch (error) {
-                console.error('AI Assistant Error:', error);
                 hideAIThinking();
                 addAIMessage('Sorry, I\'m having trouble connecting right now. Please try again.', null, null);
             }
+        }
+
+        function updateFileDropdown(categories) {
+            const selector = document.getElementById('fileSelector');
+            let optionsHTML = '<option value="">Select a file to view...</option>';
+            
+            if (categories.html && categories.html.length > 0) {
+                optionsHTML += '<optgroup label="🌐 HTML Files">';
+                categories.html.forEach(file => {
+                    optionsHTML += `<option value="${file.path}">${file.name}</option>`;
+                });
+                optionsHTML += '</optgroup>';
+            }
+            
+            if (categories.javascript && categories.javascript.length > 0) {
+                optionsHTML += '<optgroup label="⚡ JavaScript/TypeScript">';
+                categories.javascript.forEach(file => {
+                    optionsHTML += `<option value="${file.path}">${file.name}</option>`;
+                });
+                optionsHTML += '</optgroup>';
+            }
+            
+            if (categories.styles && categories.styles.length > 0) {
+                optionsHTML += '<optgroup label="🎨 CSS Files">';
+                categories.styles.forEach(file => {
+                    optionsHTML += `<option value="${file.path}">${file.name}</option>`;
+                });
+                optionsHTML += '</optgroup>';
+            }
+            
+            if (categories.config && categories.config.length > 0) {
+                optionsHTML += '<optgroup label="⚙️ Configuration">';
+                categories.config.forEach(file => {
+                    optionsHTML += `<option value="${file.path}">${file.name}</option>`;
+                });
+                optionsHTML += '</optgroup>';
+            }
+            
+            selector.innerHTML = optionsHTML;
+        }
+
+        async function loadFileContent(filePath) {
+            if (!filePath) return;
+            
+            showAIThinking();
+            addUserMessage(`Show me ${filePath}`);
+            await readFileContent(filePath);
         }
 
         function addUserMessage(message) {
