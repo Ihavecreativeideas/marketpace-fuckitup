@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Redirect URI Tester - MarketPace</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .btn {
+            background: #1877f2;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover {
+            background: #166fe5;
+        }
+        .uri-code {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Facebook Redirect URI Tester</h1>
+    
+    <div class="test-card">
+        <h3>Current Configuration</h3>
+        <p>Testing redirect URI: <code id="current-uri">Loading...</code></p>
+        <button class="btn" onclick="testCurrentConfig()">Test Current Setup</button>
+    </div>
+
+    <div class="test-card">
+        <h3>Alternative Redirect URIs to Test</h3>
+        <p>Try these common Facebook OAuth redirect patterns:</p>
+        
+        <div class="uri-code">https://marketpace.shop/auth/facebook/callback</div>
+        <button class="btn" onclick="testRedirectUri('https://marketpace.shop/auth/facebook/callback')">Test This URI</button>
+        
+        <div class="uri-code">https://www.marketpace.shop/auth/facebook/callback</div>
+        <button class="btn" onclick="testRedirectUri('https://www.marketpace.shop/auth/facebook/callback')">Test This URI</button>
+        
+        <div class="uri-code">https://marketpace.shop/api/auth/facebook/callback</div>
+        <button class="btn" onclick="testRedirectUri('https://marketpace.shop/api/auth/facebook/callback')">Test This URI</button>
+        
+        <div class="uri-code">https://faf26e36-4adc-420b-9f18-2050868598c7-00-16nyruavjog3u.spock.replit.dev/auth/facebook/callback</div>
+        <button class="btn" onclick="testRedirectUri('https://faf26e36-4adc-420b-9f18-2050868598c7-00-16nyruavjog3u.spock.replit.dev/auth/facebook/callback')">Test Replit URI</button>
+    </div>
+
+    <div class="test-card">
+        <h3>Instructions</h3>
+        <ol>
+            <li>Click "Test Current Setup" first to see if it works</li>
+            <li>If it fails, try the alternative URIs above</li>
+            <li>When you find one that works, we'll use that configuration</li>
+            <li>If none work, we'll need to add the URI to Facebook App settings</li>
+        </ol>
+    </div>
+
+    <script>
+        async function loadCurrentConfig() {
+            try {
+                const response = await fetch('/api/facebook-shop/auth');
+                const data = await response.json();
+                document.getElementById('current-uri').textContent = data.redirectUri || 'Not found';
+            } catch (error) {
+                document.getElementById('current-uri').textContent = 'Error loading: ' + error.message;
+            }
+        }
+
+        async function testCurrentConfig() {
+            try {
+                const response = await fetch('/api/facebook-shop/auth');
+                const data = await response.json();
+                
+                if (data.success && data.authUrl) {
+                    alert('✅ OAuth URL generated successfully! Opening Facebook login...');
+                    window.open(data.authUrl, '_blank');
+                } else {
+                    alert('❌ Failed to generate OAuth URL: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        function testRedirectUri(uri) {
+            // Manually construct the Facebook OAuth URL with the specified redirect URI
+            const clientId = '1043690817269912';
+            const scope = 'pages_show_list,catalog_management,pages_read_engagement,business_management,commerce_account_read_orders,commerce_account_read_settings';
+            const state = 'facebook_shop_integration';
+            
+            const authUrl = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(uri)}&scope=${encodeURIComponent(scope)}&response_type=code&state=${state}`;
+            
+            alert(`Testing redirect URI: ${uri}\n\nOpening Facebook OAuth...`);
+            window.open(authUrl, '_blank');
+        }
+
+        // Load current configuration on page load
+        loadCurrentConfig();
+    </script>
+</body>
+</html>
