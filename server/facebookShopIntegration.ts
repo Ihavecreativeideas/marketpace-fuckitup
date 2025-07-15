@@ -320,12 +320,28 @@ class FacebookShopManager {
 export function registerFacebookShopRoutes(app: Express): void {
   // Initiate Facebook Shop OAuth
   app.get('/api/facebook-shop/auth', (req: Request, res: Response) => {
-    const redirectUri = `${req.protocol}://${req.get('host')}/api/facebook-shop/callback`;
+    // Determine the proper external URL for Facebook OAuth
+    const host = req.get('host');
+    let redirectUri;
+    
+    // Use environment variable for external domain or detect from host
+    const externalDomain = process.env.REPLIT_DOMAINS || host;
+    
+    if (externalDomain && externalDomain.includes('replit.dev')) {
+      redirectUri = `https://${externalDomain}/api/facebook-shop/callback`;
+    } else if (externalDomain && externalDomain.includes('marketpace.shop')) {
+      redirectUri = `https://${externalDomain}/api/facebook-shop/callback`;
+    } else {
+      // Development fallback - use localhost with HTTP
+      redirectUri = `http://${host}/api/facebook-shop/callback`;
+    }
+    
     const authUrl = FacebookShopManager.getFacebookShopAuthUrl(redirectUri);
     
     res.json({
       success: true,
       authUrl,
+      redirectUri, // Include redirect URI in response for debugging
       message: 'Redirect user to this URL to connect Facebook Shop'
     });
   });
@@ -345,7 +361,19 @@ export function registerFacebookShopRoutes(app: Express): void {
         return res.redirect('/facebook-shop-setup?error=credentials_missing');
       }
 
-      const redirectUri = `${req.protocol}://${req.get('host')}/api/facebook-shop/callback`;
+      // Use the same redirect URI logic as the auth endpoint
+      const host = req.get('host');
+      let redirectUri;
+      
+      const externalDomain = process.env.REPLIT_DOMAINS || host;
+      
+      if (externalDomain && externalDomain.includes('replit.dev')) {
+        redirectUri = `https://${externalDomain}/api/facebook-shop/callback`;
+      } else if (externalDomain && externalDomain.includes('marketpace.shop')) {
+        redirectUri = `https://${externalDomain}/api/facebook-shop/callback`;
+      } else {
+        redirectUri = `http://${host}/api/facebook-shop/callback`;
+      }
       const accessToken = await FacebookShopManager.exchangeCodeForToken(code as string, redirectUri);
       
       // Get user pages
