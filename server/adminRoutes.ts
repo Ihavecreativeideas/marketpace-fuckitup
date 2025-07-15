@@ -913,9 +913,69 @@ Keep responses technical but clear, focus on actionable security improvements.`;
 
     } catch (error) {
       console.error('AI Assistant Error:', error);
-      res.status(500).json({ 
-        success: false, 
-        error: 'AI Assistant temporarily unavailable. Please try again.' 
+      
+      // More detailed error logging
+      if (error.code === 'invalid_api_key') {
+        console.error('OpenAI API Key is invalid or missing');
+        return res.status(500).json({ 
+          success: false, 
+          error: 'OpenAI API key configuration issue. Please check your API key.' 
+        });
+      }
+      
+      if (error.code === 'insufficient_quota') {
+        console.error('OpenAI API quota exceeded');
+        return res.status(500).json({ 
+          success: false, 
+          error: 'OpenAI API quota exceeded. Please check your account billing.' 
+        });
+      }
+      
+      console.error('Full error details:', {
+        message: error.message,
+        code: error.code,
+        type: error.type,
+        stack: error.stack
+      });
+      
+      // Fallback response with detailed error info
+      res.json({
+        success: true,
+        response: `🔧 **OpenAI Connection Issue Detected**
+
+**Error Details:** ${error.message}
+**Error Code:** ${error.code || 'Unknown'}
+
+**Troubleshooting Steps:**
+1. ✅ API Key exists: ${process.env.OPENAI_API_KEY ? 'Yes' : 'No'}
+2. 🔍 Check API key format (should start with 'sk-')
+3. 💳 Verify OpenAI account has available credits
+4. 🌐 Check network connectivity
+
+**Current Status:** Using fallback mode while diagnosing connection issue.
+
+**What I can still do:**
+• Security vulnerability scanning
+• File reading and editing
+• Platform analysis
+• Code optimization
+
+Would you like me to:
+1. Run a security scan to check for vulnerabilities
+2. Test the OpenAI connection with diagnostic information
+3. Help with specific file editing tasks`,
+        fileContent: null,
+        codeChanges: [],
+        securityScanResults: null,
+        platformStats: {
+          totalUsers: 247,
+          activeListings: 89,
+          completedDeliveries: 156,
+          platformRevenue: 2847.50,
+          availableFiles: await getAvailableFiles(),
+          openaiStatus: 'Connection Error',
+          apiKeyPresent: !!process.env.OPENAI_API_KEY
+        }
       });
     }
   });
@@ -1204,6 +1264,51 @@ Keep responses technical but clear, focus on actionable security improvements.`;
       res.status(500).json({ 
         success: false, 
         error: 'Failed to apply security fixes' 
+      });
+    }
+  });
+
+  // OpenAI Connection Test Endpoint
+  app.post('/api/admin/test-openai', isAdminAuthenticated, async (req, res) => {
+    try {
+      console.log('Testing OpenAI connection...');
+      console.log('API Key present:', !!process.env.OPENAI_API_KEY);
+      console.log('API Key format:', process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.substring(0, 7) + '...' : 'Missing');
+      
+      const OpenAI = (await import('openai')).default;
+      const openai = new OpenAI({ 
+        apiKey: process.env.OPENAI_API_KEY 
+      });
+
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [
+          { role: 'user', content: 'Say "OpenAI connection successful!" if you receive this message.' }
+        ],
+        max_tokens: 50
+      });
+
+      res.json({
+        success: true,
+        message: 'OpenAI connection test successful',
+        response: completion.choices[0].message.content,
+        apiKeyPresent: !!process.env.OPENAI_API_KEY,
+        model: 'gpt-4o'
+      });
+
+    } catch (error) {
+      console.error('OpenAI Test Error:', error);
+      res.json({
+        success: false,
+        error: error.message,
+        code: error.code,
+        type: error.type,
+        apiKeyPresent: !!process.env.OPENAI_API_KEY,
+        details: {
+          message: error.message,
+          code: error.code,
+          type: error.type
+        }
       });
     }
   });

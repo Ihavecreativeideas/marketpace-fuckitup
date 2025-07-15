@@ -6,6 +6,7 @@ import { BusinessSchedulingService } from './business-scheduling';
 import { setupRealIntegrationRoutes } from './realIntegrationTester';
 import { setupShopifyBusinessRoutes } from './shopifyBusinessIntegration';
 import { registerFacebookShopRoutes } from './facebookShopIntegration';
+import { registerAdminRoutes } from './adminRoutes';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -1026,6 +1027,9 @@ setupShopifyBusinessRoutes(app);
 
 // Setup Facebook Shop integration routes
 registerFacebookShopRoutes(app);
+
+// Setup Admin Routes with Enhanced Security Scanning
+registerAdminRoutes(app);
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`✅ MarketPace Full Server running on port ${port}`);
