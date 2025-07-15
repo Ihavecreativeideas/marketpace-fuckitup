@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { BusinessSchedulingService } from './business-scheduling';
+import { setupRealIntegrationRoutes } from './realIntegrationTester';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -993,11 +994,15 @@ app.get('/:page', (req, res) => {
   });
 });
 
+// Setup real integration testing routes
+setupRealIntegrationRoutes(app);
+
 app.listen(port, '0.0.0.0', () => {
   console.log(`✅ MarketPace Full Server running on port ${port}`);
   console.log(`🌐 Binding to 0.0.0.0:${port} for external access`);
   console.log(`🔧 Volunteer Management API: /api/volunteers, /api/volunteer-hours, /api/volunteer-schedules`);
   console.log(`📊 Business Scheduling API: /api/businesses, /api/employees, /api/schedules`);
+  console.log(`🔌 Real API Integration Testing: /api/integrations/test-real`);
   console.log(`🚀 Ready for development and testing`);
 }).on('error', (err) => {
   console.error(`❌ Failed to start on port ${port}:`, err.message);

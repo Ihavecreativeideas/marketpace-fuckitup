@@ -169,8 +169,36 @@ class WebsiteIntegrationManager {
   }
 
   private static async testEtsyConnection(websiteUrl: string) {
-    // Etsy API simulation
-    return { success: true, productCount: 45 };
+    try {
+      const etsyApiKey = process.env.ETSY_API_KEY;
+      if (!etsyApiKey) {
+        return { success: false, error: 'Etsy API key not configured' };
+      }
+
+      // Test Etsy API connection using real credentials
+      const response = await fetch('https://openapi.etsy.com/v3/application/shops', {
+        headers: {
+          'x-api-key': etsyApiKey,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        return { success: false, error: `Etsy API error: ${response.status} ${response.statusText}` };
+      }
+
+      const data = await response.json();
+      const shopCount = data.count || 0;
+      
+      return { 
+        success: true, 
+        productCount: shopCount,
+        store: `Connected to Etsy API`,
+        plan: 'Etsy Integration Active'
+      };
+    } catch (error: any) {
+      return { success: false, error: `Etsy connection failed: ${error.message}` };
+    }
   }
 
   private static async testCustomWebsiteConnection(websiteUrl: string) {
