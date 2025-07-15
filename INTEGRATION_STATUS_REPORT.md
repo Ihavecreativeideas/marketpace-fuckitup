@@ -78,6 +78,22 @@
   - Business listing integration
 - **Test Status**: ✅ OAUTH CREDENTIALS VERIFIED
 
+#### ⚠️ Shopify Integration - NEEDS CONFIGURATION
+**Status: Access Token Issue**
+- **Admin API**: Configured but unauthorized
+- **Store Domain**: myshop-marketpace-com.myshopify.com ✅
+- **Access Token**: ❌ Invalid or insufficient permissions
+- **Required Scopes**: read_products, write_products, read_orders
+- **API Endpoints**:
+  - `/api/integrations/shopify/connect`
+  - `/api/integrations/shopify/products`
+  - `/api/integrations/shopify/sync`
+- **Setup Guide**: `/shopify-integration-setup` 
+- **Current Status**: 
+  - Error: 401 Unauthorized - Invalid API key or access token
+  - Token Format: Unknown (should start with 'shpat_')
+  - Issue: Needs new private app with correct permissions
+
 ### 🍕 Food Delivery Integrations
 
 #### ✅ Uber Eats Integration - FULLY IMPLEMENTED
