@@ -4,6 +4,7 @@ import path from 'path';
 import { BusinessSchedulingService } from './business-scheduling';
 import { setupRealIntegrationRoutes } from './realIntegrationTester';
 import { setupShopifyBusinessRoutes } from './shopifyBusinessIntegration';
+import { registerFacebookShopRoutes } from './facebookShopIntegration';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -968,7 +969,8 @@ const htmlRoutes = [
   '/menu', '/profile', '/cart', '/settings', '/delivery', '/deliveries',
   '/business-scheduling', '/interactive-map', '/item-verification',
   '/signup-login', '/message-owner', '/rental-delivery', '/support',
-  '/platform-integrations', '/supabase-integration', '/driver-dashboard'
+  '/platform-integrations', '/supabase-integration', '/driver-dashboard',
+  '/facebook-shop-integration', '/facebook-shop-setup', '/facebook-delivery'
 ];
 
 htmlRoutes.forEach(route => {
@@ -1000,6 +1002,9 @@ setupRealIntegrationRoutes(app);
 
 // Setup Shopify business integration routes
 setupShopifyBusinessRoutes(app);
+
+// Setup Facebook Shop integration routes
+registerFacebookShopRoutes(app);
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`✅ MarketPace Full Server running on port ${port}`);

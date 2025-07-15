@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Shop Setup - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .setup-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #4ade80;
+        }
+
+        .error-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #f87171;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #fff, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #1877f2, #00d4ff);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(24, 119, 242, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <div id="loadingState" class="loading">
+            <div class="spinner"></div>
+            <p>Setting up your Facebook Shop connection...</p>
+        </div>
+
+        <div id="successState" style="display: none;">
+            <div class="success-icon">✅</div>
+            <h1>Facebook Connected!</h1>
+            <p>Your Facebook account has been successfully connected. You can now select your business page and product catalog to complete the setup.</p>
+            <a href="/facebook-shop-integration" class="btn">Complete Setup</a>
+        </div>
+
+        <div id="errorState" style="display: none;">
+            <div class="error-icon">❌</div>
+            <h1>Connection Failed</h1>
+            <p>There was an error connecting your Facebook account. Please try again or contact support if the problem persists.</p>
+            <a href="/facebook-shop-integration" class="btn btn-secondary">Try Again</a>
+            <a href="/support" class="btn btn-secondary">Contact Support</a>
+        </div>
+    </div>
+
+    <script>
+        // Check URL parameters for success/error status
+        const urlParams = new URLSearchParams(window.location.search);
+        const success = urlParams.get('success');
+        const error = urlParams.get('error');
+
+        if (success === 'true') {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('successState').style.display = 'block';
+            
+            // Automatically redirect to integration page after 3 seconds
+            setTimeout(() => {
+                window.location.href = '/facebook-shop-integration';
+            }, 3000);
+        } else if (error) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+        } else {
+            // Show loading state for 2 seconds then redirect
+            setTimeout(() => {
+                window.location.href = '/facebook-shop-integration';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
