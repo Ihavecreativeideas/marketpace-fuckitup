@@ -70,7 +70,7 @@ That's it! The technical complexity is already handled by your platform.
 
 **Your Etsy App Details:**
 - App Name: MarketPace Integration
-- API Key: gs0g3b8g922virg3y0taupnc (pending approval)
+- API Key: [Configured via environment variable ETSY_API_KEY]
 - Status: Under review by Etsy
 
 Once Etsy approves your API key, your integration will be fully functional!
