@@ -228,6 +228,61 @@ app.get('/driver-dashboard', (req, res) => {
   res.sendFile(path.join(process.cwd(), 'driver-dashboard.html'));
 });
 
+// Simple AI Assistant Route
+app.get('/simple-ai-assistant', (req, res) => {
+  res.sendFile(path.join(process.cwd(), 'simple-ai-assistant.html'));
+});
+
+// Simple AI assistant endpoints for direct fixes
+app.post('/api/admin/fix-community-button', (req, res) => {
+  const fs = require('fs');
+  try {
+    const adminContent = fs.readFileSync('admin-dashboard.html', 'utf8');
+    if (adminContent.includes('href="/community"')) {
+      res.json({ success: true, message: 'Community button is correctly configured with href="/community"' });
+    } else {
+      const fixedContent = adminContent.replace(
+        /href="[^"]*"([^>]*class="[^"]*community[^"]*")/g,
+        'href="/community"$1'
+      );
+      fs.writeFileSync('admin-dashboard.html', fixedContent);
+      res.json({ success: true, message: 'Community button href fixed to /community' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/admin/fix-driver-dashboard', (req, res) => {
+  res.json({ success: true, message: 'Driver dashboard positioning can be adjusted in the admin dashboard CSS' });
+});
+
+app.post('/api/admin/read-file', (req, res) => {
+  const { filename } = req.body;
+  const fs = require('fs');
+  try {
+    const content = fs.readFileSync(filename, 'utf8');
+    res.json({ success: true, content: content.substring(0, 1000) + '...' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/admin/scan-platform', (req, res) => {
+  const fs = require('fs');
+  try {
+    const files = fs.readdirSync('.');
+    const htmlFiles = files.filter(f => f.endsWith('.html'));
+    const jsFiles = files.filter(f => f.endsWith('.js'));
+    res.json({ 
+      success: true, 
+      files: { html: htmlFiles, js: jsFiles, total: files.length }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // AI Platform Editor Assistant API with Full Editing Capabilities
 app.post('/api/admin/ai-assistant', async (req, res) => {
   try {
