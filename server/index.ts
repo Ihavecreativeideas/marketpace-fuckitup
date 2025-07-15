@@ -24,6 +24,54 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Admin Dashboard Data API
+app.get('/api/admin/dashboard-data', async (req, res) => {
+  try {
+    const dashboardData = {
+      overview: {
+        totalUsers: 247,
+        activeListings: 89,
+        completedDeliveries: 156,
+        platformRevenue: 2847.50,
+        activeDrivers: 23,
+        pendingOrders: 12
+      },
+      analytics: {
+        dailySignups: [5, 8, 12, 6, 9, 15, 11],
+        weeklyRevenue: [450, 675, 892, 723, 945, 1234, 890],
+        topCategories: [
+          { name: 'Electronics', count: 34 },
+          { name: 'Furniture', count: 28 },
+          { name: 'Clothing', count: 22 },
+          { name: 'Tools', count: 15 }
+        ]
+      },
+      drivers: {
+        total: 23,
+        active: 18,
+        averageRating: 4.6,
+        totalDeliveries: 1456
+      },
+      funds: {
+        protectionFund: 15450.75,
+        driverPayouts: 8923.40,
+        platformCommission: 2847.50
+      }
+    };
+    
+    res.json({
+      success: true,
+      data: dashboardData
+    });
+  } catch (error) {
+    console.error('Dashboard data error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to load dashboard data' 
+    });
+  }
+});
+
 // AI Platform Editor Assistant API
 app.post('/api/admin/ai-assistant', async (req, res) => {
   try {
