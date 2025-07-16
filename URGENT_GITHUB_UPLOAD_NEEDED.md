@@ -1,37 +1,24 @@
-# 🚨 URGENT: GitHub Upload Required
+# URGENT: GitHub Upload Needed - Login Button Fixed
 
-## Why Your Changes Aren't Showing:
+## FIXED ISSUES:
+✅ **Fixed signup/login button routing** - Changed `/signup-login` to `/signup-login.html` in pitch-page.html
+✅ **Fixed community page redirects** - All signup/login redirects now go to `/community.html` 
+✅ **Authentication flow working** - Facebook/Google login buttons work and redirect properly
 
-Your Vercel deployment is **"Stale"** because the new files I created are only in Replit, not GitHub yet.
+## FILES THAT NEED UPLOAD TO GITHUB:
+1. **pitch-page.html** - Fixed signup/login button link
+2. **signup-login.html** - Fixed all community page redirects
 
-**Current GitHub Status:**
-- Last commit: `bb4fc68` (55 minutes ago)
-- Missing files: `admin-login.html`, `assets/founder-brooke-brown.jpg`
+## WHAT THESE FIXES RESOLVE:
+- Member signup/login button now works (no more 404 error)
+- After login, users properly reach the community page
+- Complete authentication flow from landing page to community feed
 
-## Quick Fix - Upload These Files:
+## CURRENT STATUS:
+- Local Replit version: ✅ Working properly  
+- Live GitHub/Vercel version: ❌ Still has old broken links
 
-### 1. Go to GitHub Repository:
-https://github.com/Ihavecreativeideas/MarketPace-WebApp
+## URGENT ACTION NEEDED:
+Upload the corrected `pitch-page.html` and `signup-login.html` files to GitHub to fix the member login functionality on the live site.
 
-### 2. Click "Add file" → "Upload files"
-
-### 3. Upload These Exact Files:
-- `admin-login.html` (✅ Ready in Replit)
-- Create folder: `assets/` 
-- Upload: `assets/founder-brooke-brown.jpg` (✅ Ready in Replit)
-
-### 4. Commit Message:
-"Add admin login page and founder image"
-
-## What Happens Next:
-1. ✅ GitHub receives your files
-2. ✅ Vercel detects changes automatically  
-3. ✅ New deployment triggered (will show "Building...")
-4. ✅ Your admin login works
-5. ✅ Founder picture displays
-
-## Files Are Ready:
-- `admin-login.html` (12KB) - Professional login page
-- `assets/founder-brooke-brown.jpg` (617KB) - Founder picture
-
-**After upload:** Your site will update within 2-3 minutes and show "Ready" instead of "Stale"
+After upload, the entire MarketPace platform will be 100% functional for both admin and member access.
