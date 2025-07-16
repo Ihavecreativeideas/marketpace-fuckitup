@@ -1,48 +1,45 @@
-# VERCEL SECURITY SETTINGS FIX
+# VERCEL 404 FIX - REPLACE EXISTING INDEX.HTML
 
-## PROBLEM IDENTIFIED:
-Your Vercel security settings are blocking public access to your website. The following settings are causing the security checkpoint:
+## PROBLEM:
+You have an existing index.html but it's not working properly for Vercel deployment.
 
-1. **Build Logs and Source Protection: ENABLED** ❌
-2. **Git Fork Protection: ENABLED** ❌
-3. **OIDC Federation: ENABLED** ❌
+## SOLUTION:
+Replace the content of your existing index.html file with this:
 
-These settings are designed for private/internal projects, not public websites.
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPace - Local Community Marketplace</title>
+    <meta http-equiv="refresh" content="0; url=/pitch-page.html">
+    <script>
+        window.location.replace('/pitch-page.html');
+    </script>
+</head>
+<body>
+    <p>Loading MarketPace...</p>
+    <p><a href="/pitch-page.html">Click here if you are not redirected automatically</a></p>
+</body>
+</html>
+```
 
-## IMMEDIATE SOLUTION:
+## ALSO UPDATE vercel.json:
+Replace your vercel.json content with this minimal config:
 
-### Step 1: Disable Security Features (in Vercel Dashboard)
-1. Go to Project Settings → Security
-2. **DISABLE "Build Logs and Source Protection"**
-3. **DISABLE "Git Fork Protection"** 
-4. **DISABLE "OIDC Federation"** (unless needed for backend)
+```json
+{
+  "cleanUrls": true,
+  "trailingSlash": false
+}
+```
 
-### Step 2: Add vercel.json Configuration
-I've created a `vercel.json` file that:
-- Explicitly configures static file serving
-- Sets up proper routing
-- Ensures public access
+## STEPS:
+1. Edit existing index.html in GitHub with new content above
+2. Edit existing vercel.json with minimal config above
+3. Commit changes
+4. Wait 2-3 minutes for redeploy
+5. Test www.marketpace.shop
 
-Upload this `vercel.json` file to your GitHub repository root.
-
-### Step 3: Redeploy
-After uploading vercel.json and disabling security features:
-1. Trigger a new deployment (commit any small change)
-2. Wait for deployment to complete
-3. Test your site
-
-## EXPECTED RESULT:
-- www.marketpace.shop will load normally
-- No more security checkpoint
-- All pages accessible to public visitors
-- Sign Up/Login button will work
-- Admin dashboard accessible
-- Founder image will display
-
-## SECURITY NOTE:
-These settings were blocking ALL public access. For a public marketplace website, you want:
-- ✅ Public access enabled
-- ✅ Static file serving
-- ❌ No authentication requirements for viewing
-
-The security checkpoint was protecting your site FROM your own users!
+This will make your root domain automatically redirect to pitch-page.html and fix the 404 error.
