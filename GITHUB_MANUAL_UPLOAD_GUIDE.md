@@ -1,46 +1,44 @@
-# Final GitHub Upload - Missing Files Fix
+# GitHub Manual Upload Guide - MarketPace
 
-## Upload These Files to Complete Your Deployment:
+## CONFIRMED STATUS:
+✅ **Vercel Deployment**: Ready (commit c357bed)  
+✅ **Files Created**: All ready in Replit workspace  
+✅ **Image Paths**: Updated in pitch-page.html to use `/assets/founder-brooke-brown.jpg`  
+❌ **Missing in GitHub**: The new files haven't been uploaded yet  
 
-### 1. Fixed Admin Login
-- `admin-login.html` (CREATED - working login page)
+## ISSUE ANALYSIS:
+Your live site shows the correct image path but returns 404 because:
+- `admin-login.html` - Created in Replit, not uploaded to GitHub
+- `assets/founder-brooke-brown.jpg` - Created in Replit, not uploaded to GitHub
 
-### 2. Essential Assets Folder
-Create `assets/` folder and upload:
-- `assets/founder-brooke-brown.jpg` (founder picture - 617KB)
+## SOLUTION - Manual Upload Required:
 
-### 3. Updated Documentation
-- `DEPLOYMENT_READY.md` (status report)
-- `GITHUB_MANUAL_UPLOAD_GUIDE.md` (this file)
+### Step 1: Access GitHub Repository
+Visit: https://github.com/Ihavecreativeideas/MarketPace-WebApp
 
-## Upload Process:
+### Step 2: Upload Files
+1. Click **"Add file"** → **"Upload files"**
+2. Drag and drop these files from your computer:
+   - `admin-login.html` (7.2KB)
+   - Create new folder called `assets`
+   - Upload `assets/founder-brooke-brown.jpg` (616KB)
 
-1. **Go to**: https://github.com/Ihavecreativeideas/MarketPace-WebApp
-2. **Click**: "Add file" → "Upload files"
-3. **Upload**:
-   - `admin-login.html`
-   - Create folder: `assets/`
-   - Upload `assets/founder-brooke-brown.jpg`
-   - Upload documentation files
+### Step 3: Commit Changes
+- Commit message: **"Add admin login page and founder image"**
+- Click **"Commit changes"**
 
-4. **Commit**: "Fix admin login and add founder image"
+### Step 4: Verify Deployment
+- Watch Vercel trigger new deployment automatically
+- Status will change from "Stale" to "Building" to "Ready"
+- Takes 2-3 minutes
 
-## Test After Upload:
+## AFTER UPLOAD:
+✅ Admin login will work: www.marketpace.shop/admin-login  
+✅ Founder image will display properly  
+✅ All broken links fixed  
 
-### Admin Login Test:
-- Visit: https://www.marketpace.shop/admin-login
-- Login with: `admin` / `admin` or `marketpace_admin` / `MP2025_Secure!`
-- Should redirect to admin dashboard
+## FILES READY IN REPLIT:
+- `admin-login.html` - Professional login with credentials: admin/admin
+- `assets/founder-brooke-brown.jpg` - Optimized founder image (603KB)
 
-### Founder Image Test:
-- Visit: https://www.marketpace.shop
-- Scroll to "Founder's Story" section
-- Should see Brooke Brown's photo properly displayed
-
-## Current Status:
-✅ Domain working: www.marketpace.shop  
-✅ Platform deployed: All HTML/JS files  
-⚠️ Need: Admin login page + founder image  
-⚠️ Optional: Backend server for advanced features
-
-After these uploads, your MarketPace platform will be 100% functional!
+**Everything is ready - just needs manual GitHub upload to complete deployment.**
