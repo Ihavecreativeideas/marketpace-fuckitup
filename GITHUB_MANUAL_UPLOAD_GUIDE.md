@@ -1,44 +1,105 @@
-# GitHub Manual Upload Guide - MarketPace
+# MANUAL GITHUB UPLOAD GUIDE
 
-## CONFIRMED STATUS:
-✅ **Vercel Deployment**: Ready (commit c357bed)  
-✅ **Files Created**: All ready in Replit workspace  
-✅ **Image Paths**: Updated in pitch-page.html to use `/assets/founder-brooke-brown.jpg`  
-❌ **Missing in GitHub**: The new files haven't been uploaded yet  
+## FILES TO UPLOAD:
+Upload these 2 files to your GitHub repository root:
 
-## ISSUE ANALYSIS:
-Your live site shows the correct image path but returns 404 because:
-- `admin-login.html` - Created in Replit, not uploaded to GitHub
-- `assets/founder-brooke-brown.jpg` - Created in Replit, not uploaded to GitHub
+### 1. vercel.json
+```json
+{
+  "version": 2,
+  "public": true,
+  "builds": [
+    {
+      "src": "**/*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "**/*.js",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "**/*.css",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "**/*.jpg",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "**/*.png",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "**/*.svg",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/pitch-page.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ]
+}
+```
 
-## SOLUTION - Manual Upload Required:
+### 2. .vercelignore
+```
+attached_assets/
+*.db
+*.log
+node_modules/
+.env
+.git/
+server/
+client/
+shared/
+src/
+*.ts
+*.tsx
+drizzle.config.json
+*.md
+!README.md
+```
 
-### Step 1: Access GitHub Repository
-Visit: https://github.com/Ihavecreativeideas/MarketPace-WebApp
+## UPLOAD STEPS:
+1. Go to your GitHub repository: https://github.com/Ihavecreativeideas/MarketPace-WebApp
+2. Click "Add file" → "Create new file"
+3. Create `vercel.json` with the content above
+4. Commit the file
+5. Create `.vercelignore` with the content above
+6. Commit the file
+7. Wait 2-3 minutes for Vercel to redeploy
+8. Test www.marketpace.shop
 
-### Step 2: Upload Files
-1. Click **"Add file"** → **"Upload files"**
-2. Drag and drop these files from your computer:
-   - `admin-login.html` (7.2KB)
-   - Create new folder called `assets`
-   - Upload `assets/founder-brooke-brown.jpg` (616KB)
+## EXPECTED RESULT:
+After uploading these files and changing OIDC to global:
+- Security checkpoint should disappear
+- Site should load normally
+- All authentication should work
+- Founder image should display
 
-### Step 3: Commit Changes
-- Commit message: **"Add admin login page and founder image"**
-- Click **"Commit changes"**
-
-### Step 4: Verify Deployment
-- Watch Vercel trigger new deployment automatically
-- Status will change from "Stale" to "Building" to "Ready"
-- Takes 2-3 minutes
-
-## AFTER UPLOAD:
-✅ Admin login will work: www.marketpace.shop/admin-login  
-✅ Founder image will display properly  
-✅ All broken links fixed  
-
-## FILES READY IN REPLIT:
-- `admin-login.html` - Professional login with credentials: admin/admin
-- `assets/founder-brooke-brown.jpg` - Optimized founder image (603KB)
-
-**Everything is ready - just needs manual GitHub upload to complete deployment.**
+This forces Vercel to treat your site as a static HTML site with proper routing.
