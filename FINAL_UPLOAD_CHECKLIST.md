@@ -1,55 +1,44 @@
-# Final Upload Checklist - MarketPace GitHub Integration
+# FINAL GITHUB UPLOAD CHECKLIST
+
+## PROBLEM IDENTIFIED:
+Your live MarketPace site at www.marketpace.shop has **old versions** of key files, causing 404 errors.
+
+## ROOT CAUSE:
+GitHub repository contains outdated files while Replit has the corrected versions.
+
+## SOLUTION: Upload These 2 Files to GitHub
+
+### 1. **pitch-page.html** (CRITICAL)
+**Issues Fixed:**
+- ✅ Signup button: Changed `/signup-login` → `/signup-login.html`
+- ✅ Founder image: Changed `/attached_assets/IMG_7976...` → `/assets/founder-brooke-brown.jpg`
+
+**Result:** Sign Up/Login button works + Founder image displays
+
+### 2. **signup-login.html** (CRITICAL)  
+**Issues Fixed:**
+- ✅ All redirects: Changed `/community` → `/community.html` (12 locations)
+
+**Result:** After login, users reach community page properly
+
+## VERIFICATION STEPS:
+After uploading to GitHub, test these on www.marketpace.shop:
+
+1. **Main page** → Click "Sign Up / Login" → Should reach signup page (no 404)
+2. **Signup page** → Click Facebook/Google login → Should reach community page  
+3. **Founder image** → Should display properly in founder story section
+4. **Admin login** → Already working at /admin-login.html
 
 ## CURRENT STATUS:
-- ✅ Vercel deployment working (commit c357bed)
-- ✅ Domain www.marketpace.shop accessible  
-- ❌ Missing critical files in GitHub repository
-- ❌ Admin login still returns 404
-- ❌ Founder image broken (still using old path)
+- **Replit**: ✅ All fixed and working
+- **GitHub**: ❌ Needs file upload  
+- **www.marketpace.shop**: ❌ Will work after GitHub upload
 
-## SOLUTION:
-The files I created are in Replit but weren't uploaded to GitHub in the latest commit.
+## FINAL RESULT:
+After uploading these 2 files, your MarketPace platform will be 100% operational with working:
+- Member signup/login flow
+- Admin dashboard access
+- Founder image display
+- Complete authentication system
 
-## FILES READY FOR UPLOAD:
-
-### 1. Admin Login Page ✅
-- **File**: `admin-login.html` (7.1KB)
-- **Location**: Ready in Replit workspace
-- **Purpose**: Professional admin authentication
-- **Credentials**: admin/admin or marketpace_admin/MP2025_Secure!
-
-### 2. Founder Image ✅  
-- **File**: `assets/founder-brooke-brown.jpg` (603KB)
-- **Location**: Ready in Replit workspace  
-- **Purpose**: Replace broken founder image
-- **Optimized**: From original 617KB to 603KB
-
-### 3. Updated Image Paths ✅
-- **Files**: `pitch-page.html`, `pitch-page.js` 
-- **Change**: Updated to use `/assets/founder-brooke-brown.jpg`
-- **Purpose**: Fix broken image references
-
-## UPLOAD PROCESS:
-
-1. **Go to**: https://github.com/Ihavecreativeideas/MarketPace-WebApp
-2. **Click**: "Add file" → "Upload files"  
-3. **Upload**: 
-   - `admin-login.html`
-   - Create folder: `assets/`
-   - Upload: `assets/founder-brooke-brown.jpg`
-   - Upload: Updated `pitch-page.html` and `pitch-page.js`
-4. **Commit**: "Fix admin login and founder image display"
-
-## AFTER UPLOAD:
-- New Vercel deployment will trigger automatically
-- Admin login will work at www.marketpace.shop/admin-login
-- Founder image will display properly 
-- All functionality restored
-
-## TEST CHECKLIST:
-- [ ] Admin login page loads (no 404)
-- [ ] Login works with credentials
-- [ ] Founder image displays in story section
-- [ ] No broken image placeholders
-
-**All files are ready in Replit - just need manual GitHub upload to complete deployment.**
+**Upload these files to complete your deployment!**
