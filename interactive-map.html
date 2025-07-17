@@ -122,7 +122,8 @@
             backdrop-filter: blur(20px);
             border: 1px solid rgba(0, 255, 255, 0.4);
             border-radius: 10px;
-            padding: 8px 15px;
+            padding: 6px 12px;
+            height: 60px;
             z-index: 900;
             box-shadow: 0 4px 20px rgba(0, 255, 255, 0.2);
             display: flex;
@@ -442,6 +443,18 @@
             box-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
         }
 
+        .item-marker.hiring {
+            background: radial-gradient(circle, #00ffff 30%, rgba(0, 255, 255, 0.3) 100%);
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+        }
+
+        .category-indicator.hiring {
+            color: #00ffff;
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+        }
+
         @keyframes markerPulse {
             0%, 100% { transform: scale(1); opacity: 0.8; }
             50% { transform: scale(1.2); opacity: 1; }
@@ -720,6 +733,14 @@
                         </svg>
                         Events
                     </button>
+                    <button class="filter-btn" onclick="toggleFilter('hiring')" data-filter="hiring">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="margin-right: 4px;">
+                            <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(0, 255, 255, 0.2)"/>
+                            <rect x="4" y="6" width="16" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                        Hiring
+                    </button>
                 </div>
             </div>
 
@@ -898,6 +919,51 @@
                 area: 'Mobile Area',
                 condition: '4.6/5 stars'
             },
+            // Job/Hiring Opportunities
+            {
+                id: 9,
+                type: 'hiring',
+                title: 'Restaurant Server - Part Time',
+                description: 'Beachfront restaurant seeking friendly servers for summer season.',
+                price: '$15/hour + tips',
+                distance: 2.1,
+                area: 'Orange Beach Area',
+                condition: 'Immediate Start',
+                company: 'Gulf Coast Grille'
+            },
+            {
+                id: 10,
+                type: 'hiring',
+                title: 'Delivery Driver Needed',
+                description: 'Join our growing MarketPace delivery team. Flexible hours.',
+                price: '$18-25/hour',
+                distance: 1.5,
+                area: 'Gulf Shores Area',
+                condition: 'Benefits Available',
+                company: 'MarketPace Delivery'
+            },
+            {
+                id: 11,
+                type: 'hiring',
+                title: 'Retail Sales Associate',
+                description: 'Beach shop needs energetic sales team member for tourist season.',
+                price: '$12-16/hour',
+                distance: 4.8,
+                area: 'Foley Area',
+                condition: 'Full/Part Time',
+                company: 'Coastal Treasures'
+            },
+            {
+                id: 12,
+                type: 'hiring',
+                title: 'Construction Helper',
+                description: 'Growing construction company needs reliable team members.',
+                price: '$16-22/hour',
+                distance: 7.2,
+                area: 'Mobile Area',
+                condition: 'No Experience OK',
+                company: 'Southern Build Co'
+            },
             // Shops
             {
                 id: 4,
@@ -939,6 +1005,37 @@
                 distance: 1.5,
                 area: 'Gulf Shores Area',
                 condition: 'Saturday 2:00 PM'
+            },
+            // Hiring Opportunities
+            {
+                id: 12,
+                type: 'hiring',
+                title: 'Delivery Driver - MarketPace',
+                description: 'Earn $4 pickup + $2 dropoff + $0.50/mile. Flexible hours.',
+                price: '$18-25/hour',
+                distance: 0.8,
+                area: 'Orange Beach Area',
+                urgency: 'URGENT'
+            },
+            {
+                id: 13,
+                type: 'hiring',
+                title: 'Server - Beach Restaurant',
+                description: 'Full-time position at busy beachfront restaurant.',
+                price: '$15/hour + tips',
+                distance: 3.2,
+                area: 'Gulf Shores Area',
+                urgency: 'HIRING NOW'
+            },
+            {
+                id: 14,
+                type: 'hiring',
+                title: 'Community Manager - Remote',
+                description: 'Part-time remote position helping grow local community.',
+                price: '$20/hour',
+                distance: 1.5,
+                area: 'Mobile Area',
+                urgency: 'REMOTE OK'
             }
         ];
 
@@ -1002,7 +1099,7 @@
             
             // Group items by category and calculate average distance
             const categoryData = {};
-            const categories = ['rental', 'sale', 'service', 'shop', 'events'];
+            const categories = ['rental', 'sale', 'service', 'shop', 'events', 'hiring'];
             
             categories.forEach(category => {
                 const categoryItems = mapItems.filter(item => item.type === category);
@@ -1063,7 +1160,8 @@
                 'sale': '#10b981',
                 'service': '#8b5cf6',
                 'shop': '#f59e0b',
-                'events': '#ef4444'
+                'events': '#ef4444',
+                'hiring': '#06b6d4'
             };
             
             modal.innerHTML = `
@@ -1273,6 +1371,111 @@
             setTimeout(() => {
                 showNotification('Delivery request sent! You\'ll receive cost estimate within 5 minutes.', 'success');
             }, 2000);
+        }
+
+        // Job application from map
+        function applyForJobFromMap(jobTitle, company) {
+            const applicationModal = document.createElement('div');
+            applicationModal.className = 'item-modal';
+            applicationModal.innerHTML = `
+                <div class="modal-content" style="max-width: 600px;">
+                    <button class="modal-close" onclick="closeModal(this)">×</button>
+                    <h3 style="color: #06b6d4; margin-bottom: 20px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 8px; vertical-align: middle;">
+                            <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(6, 182, 212, 0.2)"/>
+                            <rect x="4" y="6" width="16" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                        Apply for ${jobTitle}
+                    </h3>
+                    
+                    <div style="background: rgba(6, 182, 212, 0.1); padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(6, 182, 212, 0.3);">
+                        <h4 style="color: #06b6d4; margin-bottom: 15px;">Quick Application</h4>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; color: #e2e8f0; margin-bottom: 5px;">Your Name</label>
+                            <input type="text" id="mapApplicantName" style="width: 100%; padding: 10px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; border-radius: 5px;" placeholder="Enter your full name">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; color: #e2e8f0; margin-bottom: 5px;">Email Address</label>
+                            <input type="email" id="mapApplicantEmail" style="width: 100%; padding: 10px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; border-radius: 5px;" placeholder="your.email@example.com">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; color: #e2e8f0; margin-bottom: 5px;">Phone Number</label>
+                            <input type="tel" id="mapApplicantPhone" style="width: 100%; padding: 10px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; border-radius: 5px;" placeholder="(555) 123-4567">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; color: #e2e8f0; margin-bottom: 5px;">Why are you interested in this position?</label>
+                            <textarea id="mapApplicationMessage" style="width: 100%; padding: 10px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; border-radius: 5px; height: 80px; resize: vertical;" placeholder="Tell us about your experience and interest..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button onclick="closeModal(this.closest('.item-modal'))" style="background: rgba(107, 114, 128, 0.6); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Cancel</button>
+                        <button onclick="submitMapJobApplication('${jobTitle}', '${company}')" style="background: linear-gradient(135deg, #06b6d4, #0891b2); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Submit Application</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(applicationModal);
+        }
+
+        function shareJobFromMap(jobTitle) {
+            const shareModal = document.createElement('div');
+            shareModal.className = 'item-modal';
+            shareModal.innerHTML = `
+                <div class="modal-content" style="max-width: 500px;">
+                    <button class="modal-close" onclick="closeModal(this)">×</button>
+                    <h3 style="color: #06b6d4; margin-bottom: 20px;">Share Job Opportunity</h3>
+                    
+                    <div style="background: rgba(6, 182, 212, 0.1); padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(6, 182, 212, 0.3);">
+                        <p style="margin: 0; color: #e2e8f0;">Share this ${jobTitle} opportunity with friends and family:</p>
+                    </div>
+                    
+                    <div style="display: grid; gap: 10px; margin-bottom: 20px;">
+                        <button onclick="shareJobOnFacebookFromMap('${jobTitle}')" style="background: linear-gradient(135deg, #1877f2, #42a5f5); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer;">Share on Facebook</button>
+                        <button onclick="shareJobViaTextFromMap('${jobTitle}')" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer;">Share via Text</button>
+                        <button onclick="copyJobLinkFromMap('${jobTitle}')" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer;">Copy Link</button>
+                    </div>
+                    
+                    <button onclick="closeModal(this.closest('.item-modal'))" style="background: rgba(107, 114, 128, 0.6); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; width: 100%;">Close</button>
+                </div>
+            `;
+            document.body.appendChild(shareModal);
+        }
+
+        function submitMapJobApplication(jobTitle, company) {
+            const name = document.getElementById('mapApplicantName').value;
+            const email = document.getElementById('mapApplicantEmail').value;
+            const phone = document.getElementById('mapApplicantPhone').value;
+            const message = document.getElementById('mapApplicationMessage').value;
+            
+            if (!name || !email || !phone) {
+                showNotification('Please fill in all required fields (name, email, phone).', 'error');
+                return;
+            }
+            
+            // Close application modal
+            const modal = document.querySelector('.item-modal');
+            if (modal) {
+                document.body.removeChild(modal);
+            }
+            
+            // Show success notification
+            showNotification(`Application for ${jobTitle} submitted successfully! ${company} will contact you directly.`, 'success');
+        }
+
+        function shareJobOnFacebookFromMap(jobTitle) {
+            closeModal(document.querySelector('.item-modal'));
+            showNotification(`Sharing ${jobTitle} on Facebook... Feature coming soon!`);
+        }
+
+        function shareJobViaTextFromMap(jobTitle) {
+            closeModal(document.querySelector('.item-modal'));
+            showNotification(`Sharing ${jobTitle} via text message... Feature coming soon!`);
+        }
+
+        function copyJobLinkFromMap(jobTitle) {
+            closeModal(document.querySelector('.item-modal'));
+            showNotification(`Job link for ${jobTitle} copied to clipboard!`, 'success');
         }
 
         // Show notification
