@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Notification Center - MarketPace</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0b3d 50%, #2d1b69 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            color: #00FFFF;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .notification-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        .notification-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+        }
+        .card-title {
+            color: #00FFFF;
+            font-size: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #87ceeb;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+        }
+        input::placeholder, textarea::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .btn {
+            background: linear-gradient(45deg, #4169E1, #87ceeb);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(65, 105, 225, 0.3);
+        }
+        .btn-danger {
+            background: linear-gradient(45deg, #dc3545, #ff6b6b);
+        }
+        .btn-success {
+            background: linear-gradient(45deg, #28a745, #4caf50);
+        }
+        .stats-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00FFFF;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            display: none;
+        }
+        .success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+        .error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+        .checkbox-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📢 Admin Notification Center</h1>
+            <p style="opacity: 0.9;">Send real-time notifications to MarketPace members</p>
+        </div>
+
+        <!-- Notification Statistics -->
+        <div class="stats-section">
+            <h3 style="color: #00FFFF; margin-bottom: 20px;">📊 Notification Statistics</h3>
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalSent">-</div>
+                    <div>Total Sent</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="successRate">-</div>
+                    <div>Success Rate</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="sellerNotifs">-</div>
+                    <div>Seller Alerts</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="memberNotifs">-</div>
+                    <div>Member Alerts</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="notification-grid">
+            <!-- Community Announcement -->
+            <div class="notification-card">
+                <div class="card-title">
+                    📢 Community Announcement
+                </div>
+                <form id="announcementForm">
+                    <div class="form-group">
+                        <label for="announceTitle">Title</label>
+                        <input type="text" id="announceTitle" placeholder="App Update Available!" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="announceMessage">Message</label>
+                        <textarea id="announceMessage" rows="3" placeholder="New features and improvements are now available..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="announceAudience">Target Audience</label>
+                        <select id="announceAudience">
+                            <option value="all">All Members</option>
+                            <option value="sellers">Sellers Only</option>
+                            <option value="buyers">Buyers Only</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="announcePriority">Priority</label>
+                        <select id="announcePriority">
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Channels</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="announceEmail" checked>
+                                <label for="announceEmail">Email</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="announceSMS">
+                                <label for="announceSMS">SMS</label>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">Send Announcement</button>
+                    <div id="announceResult" class="result"></div>
+                </form>
+            </div>
+
+            <!-- Delivery Available Alert -->
+            <div class="notification-card">
+                <div class="card-title">
+                    🚚 Delivery Available Alert
+                </div>
+                <form id="deliveryForm">
+                    <div class="form-group">
+                        <label for="cityName">City Name</label>
+                        <input type="text" id="cityName" placeholder="Orange Beach, AL" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="deliveryMessage">Custom Message (optional)</label>
+                        <textarea id="deliveryMessage" rows="3" placeholder="Great news! MarketPace delivery is now available in your area..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">Notify Delivery Available</button>
+                    <div id="deliveryResult" class="result"></div>
+                </form>
+            </div>
+
+            <!-- Favorite Member Activity -->
+            <div class="notification-card">
+                <div class="card-title">
+                    💝 Favorite Member Activity
+                </div>
+                <form id="favoriteForm">
+                    <div class="form-group">
+                        <label for="favoriteMemberName">Member Name</label>
+                        <input type="text" id="favoriteMemberName" placeholder="John Smith" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="activityType">Activity Type</label>
+                        <select id="activityType">
+                            <option value="new_item">New Item Posted</option>
+                            <option value="price_drop">Price Drop</option>
+                            <option value="back_in_stock">Back in Stock</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="itemName">Item Name</label>
+                        <input type="text" id="itemName" placeholder="iPhone 13 Pro" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="memberIds">Member IDs (comma separated)</label>
+                        <input type="text" id="memberIds" placeholder="user1, user2, user3" required>
+                    </div>
+                    <button type="submit" class="btn">Send Favorite Alert</button>
+                    <div id="favoriteResult" class="result"></div>
+                </form>
+            </div>
+
+            <!-- Interest Match Recommendation -->
+            <div class="notification-card">
+                <div class="card-title">
+                    🎯 Interest Match Alert
+                </div>
+                <form id="interestForm">
+                    <div class="form-group">
+                        <label for="interestItemName">Item Name</label>
+                        <input type="text" id="interestItemName" placeholder="Gaming Laptop" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sellerName">Seller Name</label>
+                        <input type="text" id="sellerName" placeholder="TechStore" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Price</label>
+                        <input type="number" id="price" placeholder="599.99" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select id="category">
+                            <option value="Electronics">Electronics</option>
+                            <option value="Clothing">Clothing</option>
+                            <option value="Home & Garden">Home & Garden</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Books">Books</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="interestMemberIds">Member IDs (comma separated)</label>
+                        <input type="text" id="interestMemberIds" placeholder="user1, user2, user3" required>
+                    </div>
+                    <button type="submit" class="btn">Send Interest Match</button>
+                    <div id="interestResult" class="result"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_TOKEN = 'admin_token_2025';
+
+        // Load notification statistics on page load
+        window.addEventListener('DOMContentLoaded', loadStats);
+
+        async function loadStats() {
+            try {
+                const response = await fetch(`/api/admin/notification-stats?adminToken=${ADMIN_TOKEN}`);
+                const stats = await response.json();
+                
+                document.getElementById('totalSent').textContent = stats.totalSent.toLocaleString();
+                document.getElementById('successRate').textContent = stats.successRate + '%';
+                document.getElementById('sellerNotifs').textContent = stats.lastWeek.sellerNotifications;
+                document.getElementById('memberNotifs').textContent = stats.lastWeek.memberNotifications;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Community Announcement Form
+        document.getElementById('announcementForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const channels = [];
+            if (document.getElementById('announceEmail').checked) channels.push('email');
+            if (document.getElementById('announceSMS').checked) channels.push('sms');
+            
+            const data = {
+                title: document.getElementById('announceTitle').value,
+                message: document.getElementById('announceMessage').value,
+                targetAudience: document.getElementById('announceAudience').value,
+                priority: document.getElementById('announcePriority').value,
+                channels: channels,
+                adminToken: ADMIN_TOKEN
+            };
+            
+            await sendNotification('/api/admin/send-announcement', data, 'announceResult');
+        });
+
+        // Delivery Available Form
+        document.getElementById('deliveryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                cityName: document.getElementById('cityName').value,
+                customMessage: document.getElementById('deliveryMessage').value,
+                adminToken: ADMIN_TOKEN
+            };
+            
+            await sendNotification('/api/admin/notify-delivery-available', data, 'deliveryResult');
+        });
+
+        // Favorite Member Activity Form
+        document.getElementById('favoriteForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const memberIds = document.getElementById('memberIds').value.split(',').map(id => id.trim());
+            
+            const data = {
+                memberIds: memberIds,
+                favoriteMemberName: document.getElementById('favoriteMemberName').value,
+                activityType: document.getElementById('activityType').value,
+                itemName: document.getElementById('itemName').value,
+                actionUrl: 'https://marketpace.shop/community.html',
+                adminToken: ADMIN_TOKEN
+            };
+            
+            await sendNotification('/api/admin/notify-favorite-activity', data, 'favoriteResult');
+        });
+
+        // Interest Match Form
+        document.getElementById('interestForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const memberIds = document.getElementById('interestMemberIds').value.split(',').map(id => id.trim());
+            
+            const data = {
+                memberIds: memberIds,
+                itemName: document.getElementById('interestItemName').value,
+                sellerName: document.getElementById('sellerName').value,
+                price: document.getElementById('price').value,
+                category: document.getElementById('category').value,
+                actionUrl: 'https://marketpace.shop/shops.html',
+                adminToken: ADMIN_TOKEN
+            };
+            
+            await sendNotification('/api/admin/notify-interest-match', data, 'interestResult');
+        });
+
+        // Generic notification sender
+        async function sendNotification(endpoint, data, resultElementId) {
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Sending...';
+            submitBtn.disabled = true;
+            
+            const resultDiv = document.getElementById(resultElementId);
+            resultDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <strong>✅ Success!</strong><br>
+                        ${result.message}<br>
+                        Sent to ${result.sentCount} members
+                    `;
+                    
+                    // Reset form
+                    event.target.reset();
+                    
+                    // Reload stats
+                    loadStats();
+                } else {
+                    throw new Error(result.error || 'Unknown error');
+                }
+                
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <strong>❌ Error</strong><br>
+                    ${error.message}
+                `;
+            }
+            
+            resultDiv.style.display = 'block';
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        }
+    </script>
+</body>
+</html>

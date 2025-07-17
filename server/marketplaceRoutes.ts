@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { notificationService, PurchaseNotificationData } from "./notificationService";
+import { notificationCenter, SellerNotificationData } from "./notificationCenter";
 
 export function registerMarketplaceRoutes(app: Express) {
   
@@ -40,16 +41,20 @@ export function registerMarketplaceRoutes(app: Express) {
       
       await notificationService.sendPurchaseNotifications(customerNotificationData);
       
-      // Send seller notification if seller email provided
-      if (sellerEmail) {
-        await notificationService.sendSellerNotification({
-          sellerEmail,
+      // Send real-time seller notification
+      if (req.body.sellerId || sellerEmail) {
+        const sellerNotificationData: SellerNotificationData = {
+          sellerId: req.body.sellerId || 'unknown',
+          sellerEmail: sellerEmail,
           customerName: customerName || 'A customer',
           itemName: itemName || 'Your item',
           amount: parseFloat(amount),
-          orderNumber,
-          deliveryAddress: deliveryAddress || 'Address provided'
-        });
+          orderNumber: orderNumber,
+          deliveryAddress: deliveryAddress || 'Address provided',
+          itemId: req.body.itemId
+        };
+        
+        await notificationCenter.notifySellerOfPurchase(sellerNotificationData);
       }
 
       res.json({ 

@@ -10,6 +10,7 @@ import { registerFacebookShopRoutes } from './facebookShopIntegration';
 import { registerAdminRoutes } from './adminRoutes';
 import { registerSponsorshipRoutes } from './sponsorshipRoutes';
 import { registerMarketplaceRoutes } from './marketplaceRoutes';
+import { registerAdminNotificationRoutes } from './adminNotificationRoutes';
 import { notificationService, PurchaseNotificationData } from './notificationService';
 
 const app = express();
@@ -1137,6 +1138,9 @@ registerSponsorshipRoutes(app);
 
 // Setup Marketplace Routes with Notifications
 registerMarketplaceRoutes(app);
+
+// Setup Admin Notification Routes
+registerAdminNotificationRoutes(app);
 
 // Test notification endpoint
 app.post('/api/test-notifications', async (req, res) => {

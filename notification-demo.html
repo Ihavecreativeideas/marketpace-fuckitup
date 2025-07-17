@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPace Notification System Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0b3d 50%, #2d1b69 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            color: #00FFFF;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+        }
+        .feature-title {
+            color: #00FFFF;
+            font-size: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .feature-desc {
+            opacity: 0.9;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .test-btn {
+            background: linear-gradient(45deg, #4169E1, #87ceeb);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(65, 105, 225, 0.4);
+        }
+        .demo-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        .quick-test {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 15px;
+            align-items: end;
+        }
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        input {
+            padding: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+        .success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+        .error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+        .link-section {
+            text-align: center;
+            margin-top: 40px;
+        }
+        .admin-link {
+            background: linear-gradient(45deg, #8A2BE2, #4B0082);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            display: inline-block;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        .admin-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(138, 43, 226, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📱 MarketPace Notification System</h1>
+            <p style="opacity: 0.9; font-size: 18px;">Real-time SMS and email notifications for sellers, buyers, and community updates</p>
+        </div>
+
+        <!-- Features Overview -->
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-title">
+                    🎯 Seller Purchase Alerts
+                </div>
+                <div class="feature-desc">
+                    Instant SMS and email notifications when someone purchases your items. Includes customer details, order number, and delivery information.
+                </div>
+                <button class="test-btn" onclick="testSellerNotification()">Test Seller Alert</button>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-title">
+                    💝 Favorite Member Updates
+                </div>
+                <div class="feature-desc">
+                    Get notified when your favorite community members post new items, drop prices, or have activity you're interested in.
+                </div>
+                <button class="test-btn" onclick="testFavoriteNotification()">Test Favorite Alert</button>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-title">
+                    🚚 Delivery Announcements
+                </div>
+                <div class="feature-desc">
+                    Community-wide alerts when delivery becomes available in new areas, plus app updates and important announcements.
+                </div>
+                <button class="test-btn" onclick="testDeliveryNotification()">Test Delivery Alert</button>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-title">
+                    🎯 Interest Match Recommendations
+                </div>
+                <div class="feature-desc">
+                    Smart notifications about new items that match your interests based on your browsing and purchase history.
+                </div>
+                <button class="test-btn" onclick="testInterestNotification()">Test Interest Match</button>
+            </div>
+        </div>
+
+        <!-- Quick Test Section -->
+        <div class="demo-section">
+            <h3 style="color: #00FFFF; margin-bottom: 20px;">🧪 Quick Purchase Notification Test</h3>
+            <p style="opacity: 0.9; margin-bottom: 20px;">
+                Test the notification system with your own contact information:
+            </p>
+            <div class="quick-test">
+                <div class="input-group">
+                    <input type="email" id="testEmail" placeholder="Your email address" value="test@marketpace.shop">
+                    <input type="tel" id="testPhone" placeholder="Your phone (+1234567890)" value="+1234567890">
+                </div>
+                <button class="test-btn" onclick="testPersonalNotification()" style="white-space: nowrap;">Send Test Alert</button>
+            </div>
+            <div id="testStatus" class="status"></div>
+        </div>
+
+        <!-- Admin Links -->
+        <div class="link-section">
+            <h3 style="color: #00FFFF; margin-bottom: 20px;">📊 Administration & Testing</h3>
+            <a href="/admin-notifications.html" class="admin-link">
+                📢 Admin Notification Center
+            </a>
+            <a href="/test-notification.html" class="admin-link">
+                🧪 Detailed Testing Interface
+            </a>
+            <a href="/admin-dashboard.html" class="admin-link">
+                ⚙️ Main Admin Dashboard
+            </a>
+        </div>
+
+        <!-- Implementation Status -->
+        <div class="demo-section">
+            <h3 style="color: #00FFFF; margin-bottom: 20px;">✅ Implementation Status</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <div style="opacity: 0.9;">
+                    ✅ <strong>Seller Notifications:</strong> Real-time SMS + Email alerts for purchases
+                </div>
+                <div style="opacity: 0.9;">
+                    ✅ <strong>Customer Notifications:</strong> Purchase confirmations with order tracking
+                </div>
+                <div style="opacity: 0.9;">
+                    ✅ <strong>Admin Broadcasting:</strong> Community announcements and delivery alerts
+                </div>
+                <div style="opacity: 0.9;">
+                    ✅ <strong>Interest Matching:</strong> Personalized item recommendations
+                </div>
+                <div style="opacity: 0.9;">
+                    ✅ <strong>Favorite Tracking:</strong> Updates for favorite member activity
+                </div>
+                <div style="opacity: 0.9;">
+                    ⚠️ <strong>SMS Service:</strong> Needs valid phone numbers (+1 format) and SendGrid for email
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function testSellerNotification() {
+            const response = await fetch('/api/marketplace/purchase', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    customerName: 'Demo Customer',
+                    customerEmail: 'customer@example.com',
+                    customerPhone: '+1234567890',
+                    sellerId: 'demo_seller',
+                    sellerEmail: 'seller@example.com',
+                    itemName: 'Demo Product Sale',
+                    amount: 29.99,
+                    deliveryAddress: '123 Demo St, Demo City, DC 12345'
+                })
+            });
+            
+            const result = await response.json();
+            showStatus('success', `Seller notification sent! Order: ${result.orderNumber}`);
+        }
+
+        async function testFavoriteNotification() {
+            const response = await fetch('/api/admin/notify-favorite-activity', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    memberIds: ['demo_user_1', 'demo_user_2'],
+                    favoriteMemberName: 'Sarah\'s Boutique',
+                    activityType: 'new_item',
+                    itemName: 'Vintage Leather Jacket',
+                    actionUrl: 'https://marketpace.shop/community.html',
+                    adminToken: 'admin_token_2025'
+                })
+            });
+            
+            const result = await response.json();
+            showStatus('success', `Favorite member notification sent to ${result.sentCount} members!`);
+        }
+
+        async function testDeliveryNotification() {
+            const response = await fetch('/api/admin/notify-delivery-available', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    cityName: 'Demo City, ST',
+                    customMessage: 'Great news! MarketPace delivery is now available in Demo City. Start ordering with same-day delivery!',
+                    adminToken: 'admin_token_2025'
+                })
+            });
+            
+            const result = await response.json();
+            showStatus('success', `Delivery announcement sent to ${result.sentCount} members!`);
+        }
+
+        async function testInterestNotification() {
+            const response = await fetch('/api/admin/notify-interest-match', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    memberIds: ['demo_user_1', 'demo_user_2'],
+                    itemName: 'Gaming Laptop RTX 4070',
+                    sellerName: 'TechHub Store',
+                    price: 1299.99,
+                    category: 'Electronics',
+                    actionUrl: 'https://marketpace.shop/shops.html',
+                    adminToken: 'admin_token_2025'
+                })
+            });
+            
+            const result = await response.json();
+            showStatus('success', `Interest match notification sent to ${result.sentCount} members!`);
+        }
+
+        async function testPersonalNotification() {
+            const email = document.getElementById('testEmail').value;
+            const phone = document.getElementById('testPhone').value;
+            
+            if (!email && !phone) {
+                showStatus('error', 'Please enter either email or phone number');
+                return;
+            }
+
+            const response = await fetch('/api/test-notifications', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    customerName: 'Test User',
+                    customerEmail: email,
+                    customerPhone: phone,
+                    itemName: 'Personal Test Notification',
+                    amount: 19.99
+                })
+            });
+            
+            const result = await response.json();
+            if (response.ok) {
+                showStatus('success', `Test notification sent! Check your ${email ? 'email' : ''} ${email && phone ? 'and ' : ''} ${phone ? 'phone' : ''} for the alert.`);
+            } else {
+                showStatus('error', result.error || 'Failed to send notification');
+            }
+        }
+
+        function showStatus(type, message) {
+            const statusDiv = document.getElementById('testStatus');
+            statusDiv.className = `status ${type}`;
+            statusDiv.innerHTML = message;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
