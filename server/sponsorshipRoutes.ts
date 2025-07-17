@@ -3,6 +3,7 @@ import express from "express";
 import Stripe from 'stripe';
 import { db } from "./db";
 import { sponsors, sponsorBenefits, aiAssistantTasks } from "../shared/sponsorSchema";
+import { notificationService, PurchaseNotificationData } from "./notificationService";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2024-06-20',
@@ -176,6 +177,19 @@ async function createSponsorRecord(session: Stripe.Checkout.Session) {
 
     // Create monthly benefits for 12 months
     await createSponsorBenefits(newSponsor.id!, tier);
+    
+    // Send purchase notifications (SMS + Email)
+    const notificationData: PurchaseNotificationData = {
+      customerName: customerName || 'Valued Sponsor',
+      customerEmail: customerEmail || '',
+      customerPhone: session.customer_details?.phone || '',
+      purchaseType: 'sponsorship',
+      itemName: tierName || 'MarketPace Sponsorship',
+      amount: parseFloat(amount),
+      transactionId: session.id,
+    };
+    
+    await notificationService.sendPurchaseNotifications(notificationData);
     
     console.log(`Sponsor created: ${customerName} - ${tierName} - $${amount}`);
     

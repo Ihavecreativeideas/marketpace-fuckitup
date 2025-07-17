@@ -9,6 +9,8 @@ import { setupShopifyBusinessRoutes } from './shopifyBusinessIntegration';
 import { registerFacebookShopRoutes } from './facebookShopIntegration';
 import { registerAdminRoutes } from './adminRoutes';
 import { registerSponsorshipRoutes } from './sponsorshipRoutes';
+import { registerMarketplaceRoutes } from './marketplaceRoutes';
+import { notificationService, PurchaseNotificationData } from './notificationService';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -969,6 +971,22 @@ app.post('/api/stripe/create-payment-intent', async (req, res) => {
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id
     });
+    
+    // Send purchase notifications for marketplace items
+    if (req.body.customerEmail || req.body.customerPhone) {
+      const notificationData: PurchaseNotificationData = {
+        customerName: req.body.customerName || 'MarketPace Customer',
+        customerEmail: req.body.customerEmail || '',
+        customerPhone: req.body.customerPhone || '',
+        purchaseType: 'marketplace',
+        itemName: req.body.itemName || 'MarketPace Item',
+        amount: amount,
+        orderNumber: `MP-${Date.now()}`,
+        transactionId: paymentIntent.id,
+      };
+      
+      await notificationService.sendPurchaseNotifications(notificationData);
+    }
   } catch (error) {
     console.error('Error creating payment intent:', error);
     res.status(500).json({ error: 'Failed to create payment intent' });
@@ -1116,6 +1134,42 @@ registerAdminRoutes(app);
 
 // Setup Sponsorship Routes with Stripe Integration
 registerSponsorshipRoutes(app);
+
+// Setup Marketplace Routes with Notifications
+registerMarketplaceRoutes(app);
+
+// Test notification endpoint
+app.post('/api/test-notifications', async (req, res) => {
+  try {
+    const { customerName, customerEmail, customerPhone, itemName, amount } = req.body;
+    
+    if (!customerEmail && !customerPhone) {
+      return res.status(400).json({ error: 'Email or phone number required' });
+    }
+
+    const testData: PurchaseNotificationData = {
+      customerName: customerName || 'Test Customer',
+      customerEmail: customerEmail || '',
+      customerPhone: customerPhone || '',
+      purchaseType: 'marketplace',
+      itemName: itemName || 'Test Item',
+      amount: parseFloat(amount) || 25.00,
+      orderNumber: `TEST-${Date.now()}`,
+      transactionId: `test_${Date.now()}`,
+    };
+
+    await notificationService.sendPurchaseNotifications(testData);
+
+    res.json({ 
+      success: true, 
+      message: 'Test notifications sent successfully',
+      orderNumber: testData.orderNumber 
+    });
+  } catch (error) {
+    console.error('Error sending test notifications:', error);
+    res.status(500).json({ error: 'Failed to send test notifications' });
+  }
+});
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`✅ MarketPace Full Server running on port ${port}`);

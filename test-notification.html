@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Purchase Notifications - MarketPace</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0b3d 50%, #2d1b69 100%);
+            color: white;
+            padding: 40px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+        h1 {
+            color: #00FFFF;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #87ceeb;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+        }
+        input::placeholder, textarea::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .btn {
+            background: linear-gradient(45deg, #4169E1, #87ceeb);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(65, 105, 225, 0.3);
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        .success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+        .error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Purchase Notifications</h1>
+        <p style="text-align: center; margin-bottom: 30px; opacity: 0.9;">
+            Test SMS and email notifications for MarketPace purchases
+        </p>
+
+        <form id="testForm">
+            <div class="form-group">
+                <label for="customerName">Customer Name</label>
+                <input type="text" id="customerName" name="customerName" placeholder="John Doe" required>
+            </div>
+
+            <div class="form-group">
+                <label for="customerEmail">Customer Email</label>
+                <input type="email" id="customerEmail" name="customerEmail" placeholder="customer@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="customerPhone">Customer Phone (include +1 for US)</label>
+                <input type="tel" id="customerPhone" name="customerPhone" placeholder="+1234567890" required>
+            </div>
+
+            <div class="form-group">
+                <label for="purchaseType">Purchase Type</label>
+                <select id="purchaseType" name="purchaseType" required>
+                    <option value="marketplace">Marketplace Item</option>
+                    <option value="service">Service Booking</option>
+                    <option value="rental">Rental Booking</option>
+                    <option value="sponsorship">Sponsorship</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="itemName">Item/Service Name</label>
+                <input type="text" id="itemName" name="itemName" placeholder="iPhone 13 Pro" required>
+            </div>
+
+            <div class="form-group">
+                <label for="amount">Amount ($)</label>
+                <input type="number" id="amount" name="amount" placeholder="25.00" step="0.01" min="0.01" required>
+            </div>
+
+            <div class="form-group">
+                <label for="sellerEmail">Seller Email (optional - for marketplace orders)</label>
+                <input type="email" id="sellerEmail" name="sellerEmail" placeholder="seller@example.com">
+            </div>
+
+            <button type="submit" class="btn">Send Test Notifications</button>
+        </form>
+
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Sending...';
+            submitBtn.disabled = true;
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/test-notifications', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        ...data,
+                        amount: parseFloat(data.amount),
+                        deliveryAddress: '123 Test Street, Test City, TS 12345'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <strong>✅ Notifications Sent Successfully!</strong><br>
+                        Order Number: ${result.orderNumber}<br>
+                        Message: ${result.message}<br><br>
+                        Check your phone for SMS and email for confirmation!
+                    `;
+                } else {
+                    throw new Error(result.error || 'Unknown error');
+                }
+                
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <strong>❌ Error Sending Notifications</strong><br>
+                    ${error.message}<br><br>
+                    Please check your phone number format and try again.
+                `;
+            }
+            
+            resultDiv.style.display = 'block';
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        });
+    </script>
+</body>
+</html>
