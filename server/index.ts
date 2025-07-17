@@ -11,7 +11,10 @@ import { registerAdminRoutes } from './adminRoutes';
 import { registerSponsorshipRoutes } from './sponsorshipRoutes';
 import { registerMarketplaceRoutes } from './marketplaceRoutes';
 import { registerAdminNotificationRoutes } from './adminNotificationRoutes';
+import { registerDriverRoutes } from './driverRoutes';
+import { registerDriverApplicationRoutes } from './driverApplicationRoutes';
 import { notificationService, PurchaseNotificationData } from './notificationService';
+import { driverNotificationService } from './driverNotificationService';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -1141,6 +1144,12 @@ registerMarketplaceRoutes(app);
 
 // Setup Admin Notification Routes
 registerAdminNotificationRoutes(app);
+
+// Setup Driver Notification Routes
+registerDriverRoutes(app);
+
+// Setup Driver Application Routes
+registerDriverApplicationRoutes(app);
 
 // Test notification endpoint
 app.post('/api/test-notifications', async (req, res) => {

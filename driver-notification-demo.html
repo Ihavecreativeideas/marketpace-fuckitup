@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Notification System Demo - MarketPace</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0b3d 50%, #2d1b69 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            color: #00FFFF;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        .demo-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+        }
+        .card-title {
+            color: #00FFFF;
+            font-size: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .test-form {
+            display: grid;
+            gap: 15px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #87ceeb;
+            font-size: 14px;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+        }
+        input::placeholder, textarea::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .btn {
+            background: linear-gradient(45deg, #4169E1, #87ceeb);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(65, 105, 225, 0.3);
+        }
+        .btn-success {
+            background: linear-gradient(45deg, #28a745, #4caf50);
+        }
+        .btn-warning {
+            background: linear-gradient(45deg, #ffc107, #ff9800);
+        }
+        .btn-danger {
+            background: linear-gradient(45deg, #dc3545, #ff6b6b);
+        }
+        .status {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            display: none;
+        }
+        .success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+        .error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+        .warning {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid #ffc107;
+            color: #ffc107;
+        }
+        .route-status {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .time-slot {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .slot-open {
+            border-color: #28a745;
+            background: rgba(40, 167, 69, 0.1);
+        }
+        .slot-closing {
+            border-color: #ffc107;
+            background: rgba(255, 193, 7, 0.1);
+        }
+        .slot-closed {
+            border-color: #dc3545;
+            background: rgba(220, 53, 69, 0.1);
+        }
+        .countdown {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚚 Driver Notification System Demo</h1>
+            <p style="opacity: 0.9; font-size: 18px;">Real-time alerts for new deliveries, route assignments, and completions with 20-minute closure rule</p>
+        </div>
+
+        <!-- Route Status Display -->
+        <div class="route-status">
+            <h3 style="color: #00FFFF; margin-bottom: 15px;">📅 Today's Delivery Windows</h3>
+            <p style="opacity: 0.9; margin-bottom: 15px;">Routes automatically close 20 minutes before start time</p>
+            <div class="time-slots" id="timeSlots">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <div class="demo-grid">
+            <!-- New Delivery Test -->
+            <div class="demo-card">
+                <div class="card-title">
+                    🆕 Test New Delivery Alert
+                </div>
+                <form class="test-form" id="newDeliveryForm">
+                    <div class="form-row">
+                        <div>
+                            <label for="itemName">Item Name</label>
+                            <input type="text" id="itemName" placeholder="iPhone 15 Pro" value="Gaming Laptop">
+                        </div>
+                        <div>
+                            <label for="amount">Amount</label>
+                            <input type="number" id="amount" placeholder="899.99" value="1299.99" step="0.01">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div>
+                            <label for="pickupAddress">Pickup Address</label>
+                            <input type="text" id="pickupAddress" placeholder="123 Tech Store Blvd" value="456 Electronics Ave">
+                        </div>
+                        <div>
+                            <label for="deliveryAddress">Delivery Address</label>
+                            <input type="text" id="deliveryAddress" placeholder="789 Customer St" value="123 Home Street">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div>
+                            <label for="requestedSlot">Requested Time Slot</label>
+                            <select id="requestedSlot">
+                                <option value="9am-12pm">9am-12pm</option>
+                                <option value="12pm-3pm" selected>12pm-3pm</option>
+                                <option value="3pm-6pm">3pm-6pm</option>
+                                <option value="6pm-9pm">6pm-9pm</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="customerPhone">Customer Phone</label>
+                            <input type="tel" id="customerPhone" placeholder="+1234567890" value="+1234567890">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">Alert All Drivers</button>
+                    <div id="newDeliveryStatus" class="status"></div>
+                </form>
+            </div>
+
+            <!-- Route Acceptance Test -->
+            <div class="demo-card">
+                <div class="card-title">
+                    ✅ Test Route Acceptance
+                </div>
+                <form class="test-form" id="acceptRouteForm">
+                    <div>
+                        <label for="driverId">Driver ID</label>
+                        <input type="text" id="driverId" placeholder="driver_123" value="driver_mike_johnson">
+                    </div>
+                    <div>
+                        <label for="routeId">Route ID</label>
+                        <input type="text" id="routeId" placeholder="route_12pm-3pm_today" value="route_12pm-3pm_Fri Jan 17 2025">
+                    </div>
+                    <button type="submit" class="btn btn-success">Accept Route</button>
+                    <div id="acceptRouteStatus" class="status"></div>
+                </form>
+            </div>
+
+            <!-- Route Completion Test -->
+            <div class="demo-card">
+                <div class="card-title">
+                    🎉 Test Route Completion
+                </div>
+                <form class="test-form" id="completeRouteForm">
+                    <div class="form-row">
+                        <div>
+                            <label for="completeDriverId">Driver ID</label>
+                            <input type="text" id="completeDriverId" placeholder="driver_123" value="driver_mike_johnson">
+                        </div>
+                        <div>
+                            <label for="completeRouteId">Route ID</label>
+                            <input type="text" id="completeRouteId" placeholder="route_12pm-3pm_today" value="route_completed_demo">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success">Complete Route</button>
+                    <div id="completeRouteStatus" class="status"></div>
+                </form>
+            </div>
+
+            <!-- Delivery Window Check -->
+            <div class="demo-card">
+                <div class="card-title">
+                    ⏰ Check Delivery Window
+                </div>
+                <form class="test-form" id="checkWindowForm">
+                    <div>
+                        <label for="checkTimeSlot">Time Slot</label>
+                        <select id="checkTimeSlot">
+                            <option value="9am-12pm">9am-12pm</option>
+                            <option value="12pm-3pm">12pm-3pm</option>
+                            <option value="3pm-6pm" selected>3pm-6pm</option>
+                            <option value="6pm-9pm">6pm-9pm</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-warning">Check Availability</button>
+                    <div id="checkWindowStatus" class="status"></div>
+                </form>
+            </div>
+
+            <!-- Available Routes -->
+            <div class="demo-card">
+                <div class="card-title">
+                    📋 Available Routes
+                </div>
+                <form class="test-form" id="availableRoutesForm">
+                    <div>
+                        <label for="availableDriverId">Driver ID</label>
+                        <input type="text" id="availableDriverId" placeholder="driver_123" value="driver_mike_johnson">
+                    </div>
+                    <button type="submit" class="btn">Get Available Routes</button>
+                    <div id="availableRoutesStatus" class="status"></div>
+                </form>
+            </div>
+
+            <!-- Route Closure Job -->
+            <div class="demo-card">
+                <div class="card-title">
+                    🔒 Force Route Closure Job
+                </div>
+                <div class="test-form">
+                    <p style="opacity: 0.8; font-size: 14px; margin-bottom: 15px;">
+                        Manually trigger the automatic job that closes routes 20 minutes before start time
+                    </p>
+                    <button type="button" class="btn btn-danger" onclick="triggerRouteClosure()">Run Closure Job</button>
+                    <div id="closureJobStatus" class="status"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Implementation Status -->
+        <div class="route-status">
+            <h3 style="color: #00FFFF; margin-bottom: 15px;">✅ Driver Notification Features</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+                <div style="opacity: 0.9;">
+                    ✅ <strong>New Delivery Alerts:</strong> Real-time SMS/email when deliveries become available
+                </div>
+                <div style="opacity: 0.9;">
+                    ✅ <strong>Route Acceptance:</strong> Confirmation notifications when drivers accept routes
+                </div>
+                <div style="opacity: 0.9;">
+                    ✅ <strong>Completion Rewards:</strong> Earnings breakdown and payment notifications
+                </div>
+                <div style="opacity: 0.9;">
+                    ✅ <strong>20-Minute Rule:</strong> Automatic route closure prevents late bookings
+                </div>
+                <div style="opacity: 0.9;">
+                    ✅ <strong>Customer Redirects:</strong> SMS alerts when windows close with next available options
+                </div>
+                <div style="opacity: 0.9;">
+                    ✅ <strong>Route Management:</strong> Real-time status updates and earnings tracking
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update time slots status
+        function updateTimeSlots() {
+            const slotsContainer = document.getElementById('timeSlots');
+            const slots = ['9am-12pm', '12pm-3pm', '3pm-6pm', '6pm-9pm'];
+            const now = new Date();
+            
+            slotsContainer.innerHTML = '';
+            
+            slots.forEach(slot => {
+                const slotDiv = document.createElement('div');
+                slotDiv.className = 'time-slot';
+                
+                // Calculate start time for this slot
+                const [startTime] = slot.split('-');
+                const hour = startTime === '9am' ? 9 : startTime === '12pm' ? 12 : startTime === '3pm' ? 15 : 18;
+                
+                const slotStart = new Date();
+                slotStart.setHours(hour, 0, 0, 0);
+                
+                const twentyMinutesBefore = new Date(slotStart.getTime() - 20 * 60 * 1000);
+                const minutesUntilClosure = Math.floor((twentyMinutesBefore.getTime() - now.getTime()) / 60000);
+                
+                let status, statusClass, countdown;
+                
+                if (now >= slotStart) {
+                    status = 'In Progress / Completed';
+                    statusClass = 'slot-closed';
+                    countdown = 'Started';
+                } else if (now >= twentyMinutesBefore) {
+                    status = 'CLOSED';
+                    statusClass = 'slot-closed';
+                    countdown = 'No new orders';
+                } else if (minutesUntilClosure <= 30) {
+                    status = 'Closing Soon';
+                    statusClass = 'slot-closing';
+                    countdown = `Closes in ${minutesUntilClosure} min`;
+                } else {
+                    status = 'OPEN';
+                    statusClass = 'slot-open';
+                    countdown = `Closes in ${minutesUntilClosure} min`;
+                }
+                
+                slotDiv.className += ` ${statusClass}`;
+                slotDiv.innerHTML = `
+                    <div style="font-weight: bold;">${slot}</div>
+                    <div style="font-size: 14px; margin: 5px 0;">${status}</div>
+                    <div class="countdown">${countdown}</div>
+                `;
+                
+                slotsContainer.appendChild(slotDiv);
+            });
+        }
+
+        // Form handlers
+        document.getElementById('newDeliveryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                itemName: document.getElementById('itemName').value,
+                amount: document.getElementById('amount').value,
+                pickupAddress: document.getElementById('pickupAddress').value,
+                deliveryAddress: document.getElementById('deliveryAddress').value,
+                requestedTimeSlot: document.getElementById('requestedSlot').value,
+                customerPhone: document.getElementById('customerPhone').value,
+                sellerId: 'demo_seller',
+                buyerId: 'demo_buyer'
+            };
+            
+            await sendRequest('/api/driver/new-delivery', data, 'newDeliveryStatus');
+        });
+
+        document.getElementById('acceptRouteForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                routeId: document.getElementById('routeId').value,
+                driverId: document.getElementById('driverId').value
+            };
+            
+            await sendRequest('/api/driver/accept-route', data, 'acceptRouteStatus');
+        });
+
+        document.getElementById('completeRouteForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                routeId: document.getElementById('completeRouteId').value,
+                driverId: document.getElementById('completeDriverId').value
+            };
+            
+            await sendRequest('/api/driver/complete-route', data, 'completeRouteStatus');
+        });
+
+        document.getElementById('checkWindowForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const timeSlot = document.getElementById('checkTimeSlot').value;
+            
+            await sendGetRequest(`/api/driver/check-delivery-window?timeSlot=${timeSlot}`, 'checkWindowStatus');
+        });
+
+        document.getElementById('availableRoutesForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const driverId = document.getElementById('availableDriverId').value;
+            
+            await sendGetRequest(`/api/driver/available-routes?driverId=${driverId}`, 'availableRoutesStatus');
+        });
+
+        async function triggerRouteClosure() {
+            await sendRequest('/api/driver/close-routes-job', {}, 'closureJobStatus');
+        }
+
+        async function sendRequest(endpoint, data, statusElementId) {
+            const statusDiv = document.getElementById(statusElementId);
+            statusDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = `<strong>✅ Success!</strong><br>${result.message}`;
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = `<strong>❌ Error</strong><br>${result.error || result.message}`;
+                }
+                
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `<strong>❌ Error</strong><br>${error.message}`;
+            }
+            
+            statusDiv.style.display = 'block';
+        }
+
+        async function sendGetRequest(endpoint, statusElementId) {
+            const statusDiv = document.getElementById(statusElementId);
+            statusDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch(endpoint);
+                const result = await response.json();
+                
+                if (response.ok) {
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = `<strong>✅ Success!</strong><br><pre>${JSON.stringify(result, null, 2)}</pre>`;
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = `<strong>❌ Error</strong><br>${result.error}`;
+                }
+                
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `<strong>❌ Error</strong><br>${error.message}`;
+            }
+            
+            statusDiv.style.display = 'block';
+        }
+
+        // Update time slots every minute
+        updateTimeSlots();
+        setInterval(updateTimeSlots, 60000);
+    </script>
+</body>
+</html>

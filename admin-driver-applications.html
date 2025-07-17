@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Applications - MarketPace Admin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0b3d 50%, #2d1b69 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            color: #00FFFF;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 20px;
+            margin-bottom: 30px;
+            align-items: center;
+        }
+        .search-bar {
+            padding: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+        .btn {
+            background: linear-gradient(45deg, #4169E1, #87ceeb);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(65, 105, 225, 0.3);
+        }
+        .btn-success { background: linear-gradient(45deg, #28a745, #4caf50); }
+        .btn-danger { background: linear-gradient(45deg, #dc3545, #ff6b6b); }
+        .btn-warning { background: linear-gradient(45deg, #ffc107, #ff9800); }
+        
+        .applications-grid {
+            display: grid;
+            gap: 25px;
+        }
+        .application-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        .application-card:hover {
+            border-color: rgba(0, 255, 255, 0.6);
+            transform: translateY(-2px);
+        }
+        .card-header {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .applicant-info h3 {
+            color: #00FFFF;
+            margin: 0 0 5px 0;
+            font-size: 24px;
+        }
+        .application-id {
+            opacity: 0.7;
+            font-size: 14px;
+        }
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status-submitted {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid #ffc107;
+        }
+        .status-under_review {
+            background: rgba(0, 123, 255, 0.2);
+            color: #007bff;
+            border: 1px solid #007bff;
+        }
+        .status-approved {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border: 1px solid #28a745;
+        }
+        .status-rejected {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border: 1px solid #dc3545;
+        }
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .detail-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .detail-title {
+            color: #87ceeb;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .detail-item {
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+        }
+        .modal-content {
+            position: relative;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0b3d 50%, #2d1b69 100%);
+            margin: 5% auto;
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #87ceeb;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #87ceeb;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #00FFFF;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            opacity: 0.8;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚚 Driver Applications</h1>
+            <p style="opacity: 0.9; font-size: 18px;">Review and manage driver applications with professional hiring workflow</p>
+        </div>
+
+        <!-- Statistics Summary -->
+        <div class="stats-summary">
+            <div class="stat-card">
+                <div class="stat-number" id="totalApplications">0</div>
+                <div class="stat-label">Total Applications</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pendingReview">0</div>
+                <div class="stat-label">Pending Review</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="approvedDrivers">0</div>
+                <div class="stat-label">Approved Drivers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="activeDrivers">0</div>
+                <div class="stat-label">Active Drivers</div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <input type="text" class="search-bar" placeholder="Search applications by name, email, or application ID..." id="searchInput">
+            <button class="btn" onclick="refreshApplications()">🔄 Refresh</button>
+            <button class="btn btn-warning" onclick="showTestApplication()">➕ Test Application</button>
+        </div>
+
+        <!-- Applications Grid -->
+        <div class="applications-grid" id="applicationsGrid">
+            <!-- Will be populated by JavaScript -->
+        </div>
+
+        <!-- Sample Applications for Demo -->
+        <div id="sampleApplications" style="display: none;">
+            <!-- Sample data will be here -->
+        </div>
+    </div>
+
+    <!-- Review Modal -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 style="color: #00FFFF; margin-bottom: 20px;">Review Driver Application</h2>
+            
+            <div class="form-group">
+                <label for="reviewDecision">Decision:</label>
+                <select id="reviewDecision" onchange="toggleRejectionReason()">
+                    <option value="">Select Decision</option>
+                    <option value="approved">Approve Application</option>
+                    <option value="rejected">Reject Application</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="rejectionReasonGroup" style="display: none;">
+                <label for="rejectionReason">Rejection Reason:</label>
+                <textarea id="rejectionReason" placeholder="Provide detailed reason for rejection..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="reviewerId">Reviewer:</label>
+                <input type="text" id="reviewerId" value="admin_user" readonly>
+            </div>
+            
+            <div class="actions">
+                <button class="btn btn-success" onclick="submitReview()">Submit Review</button>
+                <button class="btn" onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentApplicationId = null;
+        
+        // Sample applications for demo
+        const sampleApplications = [
+            {
+                id: 'APP-1752789001',
+                firstName: 'Mike',
+                lastName: 'Johnson',
+                email: 'mike.johnson@example.com',
+                phone: '+1234567890',
+                dateOfBirth: '1988-03-15',
+                address: {
+                    street: '456 Driver Lane',
+                    city: 'Orange Beach',
+                    state: 'AL',
+                    zipCode: '36561'
+                },
+                driversLicense: {
+                    number: 'AL987654321',
+                    state: 'AL',
+                    expirationDate: '2026-03-15'
+                },
+                vehicle: {
+                    make: 'Toyota',
+                    model: 'Camry',
+                    year: 2019,
+                    licensePlate: 'MP123',
+                    insurance: {
+                        company: 'Geico',
+                        policyNumber: 'GE789012',
+                        expirationDate: '2025-12-31'
+                    }
+                },
+                experience: {
+                    hasDeliveryExperience: true,
+                    previousJobs: 'Uber Eats driver for 1 year, DoorDash for 6 months'
+                },
+                availability: {
+                    preferredSlots: ['9am-12pm', '12pm-3pm'],
+                    maxHoursPerWeek: 25,
+                    startDate: '2025-01-20'
+                },
+                backgroundCheck: {
+                    consentGiven: true,
+                    status: 'cleared'
+                },
+                applicationStatus: 'under_review',
+                submittedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+            },
+            {
+                id: 'APP-1752789002',
+                firstName: 'Sarah',
+                lastName: 'Williams',
+                email: 'sarah.williams@example.com',
+                phone: '+1987654321',
+                dateOfBirth: '1992-08-22',
+                address: {
+                    street: '789 Delivery Ave',
+                    city: 'Gulf Shores',
+                    state: 'AL',
+                    zipCode: '36542'
+                },
+                driversLicense: {
+                    number: 'AL456789123',
+                    state: 'AL',
+                    expirationDate: '2027-08-22'
+                },
+                vehicle: {
+                    make: 'Honda',
+                    model: 'Civic',
+                    year: 2021,
+                    licensePlate: 'SW789',
+                    insurance: {
+                        company: 'State Farm',
+                        policyNumber: 'SF456789',
+                        expirationDate: '2025-12-31'
+                    }
+                },
+                experience: {
+                    hasDeliveryExperience: false,
+                    previousJobs: 'Customer service representative for 3 years'
+                },
+                availability: {
+                    preferredSlots: ['3pm-6pm', '6pm-9pm'],
+                    maxHoursPerWeek: 20,
+                    startDate: '2025-01-25'
+                },
+                backgroundCheck: {
+                    consentGiven: true,
+                    status: 'pending'
+                },
+                applicationStatus: 'submitted',
+                submittedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
+            }
+        ];
+
+        function displayApplications(applications = sampleApplications) {
+            const grid = document.getElementById('applicationsGrid');
+            grid.innerHTML = '';
+            
+            applications.forEach(app => {
+                const card = document.createElement('div');
+                card.className = 'application-card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="applicant-info">
+                            <h3>${app.firstName} ${app.lastName}</h3>
+                            <div class="application-id">ID: ${app.id}</div>
+                        </div>
+                        <div class="status-badge status-${app.applicationStatus}">
+                            ${app.applicationStatus.replace('_', ' ')}
+                        </div>
+                    </div>
+                    
+                    <div class="details-grid">
+                        <div class="detail-section">
+                            <div class="detail-title">Contact Information</div>
+                            <div class="detail-item">📧 ${app.email}</div>
+                            <div class="detail-item">📱 ${app.phone}</div>
+                            <div class="detail-item">📍 ${app.address.city}, ${app.address.state}</div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <div class="detail-title">Vehicle Information</div>
+                            <div class="detail-item">🚗 ${app.vehicle.year} ${app.vehicle.make} ${app.vehicle.model}</div>
+                            <div class="detail-item">🏷️ ${app.vehicle.licensePlate}</div>
+                            <div class="detail-item">🛡️ ${app.vehicle.insurance.company}</div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <div class="detail-title">Experience & Availability</div>
+                            <div class="detail-item">📋 ${app.experience.hasDeliveryExperience ? 'Has delivery experience' : 'No delivery experience'}</div>
+                            <div class="detail-item">⏰ ${app.availability.maxHoursPerWeek} hrs/week</div>
+                            <div class="detail-item">📅 Start: ${new Date(app.availability.startDate).toLocaleDateString()}</div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <div class="detail-title">Background Check</div>
+                            <div class="detail-item">✅ Consent: ${app.backgroundCheck.consentGiven ? 'Given' : 'Not given'}</div>
+                            <div class="detail-item">🔍 Status: ${app.backgroundCheck.status}</div>
+                            <div class="detail-item">📅 Submitted: ${app.submittedAt.toLocaleDateString()}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="actions">
+                        ${app.applicationStatus === 'submitted' || app.applicationStatus === 'under_review' ? `
+                            <button class="btn btn-success" onclick="reviewApplication('${app.id}')">📝 Review</button>
+                            <button class="btn btn-warning" onclick="viewDetails('${app.id}')">👁️ View Details</button>
+                            <button class="btn" onclick="contactApplicant('${app.email}', '${app.phone}')">📞 Contact</button>
+                        ` : app.applicationStatus === 'approved' ? `
+                            <button class="btn btn-success" onclick="viewDriverProfile('${app.id}')">👤 View Profile</button>
+                            <button class="btn" onclick="resendCredentials('${app.id}')">🔑 Resend Login</button>
+                        ` : `
+                            <button class="btn" onclick="viewDetails('${app.id}')">👁️ View Details</button>
+                            <button class="btn btn-warning" onclick="reconsiderApplication('${app.id}')">🔄 Reconsider</button>
+                        `}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            
+            updateStats(applications);
+        }
+
+        function updateStats(applications) {
+            document.getElementById('totalApplications').textContent = applications.length;
+            document.getElementById('pendingReview').textContent = applications.filter(app => 
+                app.applicationStatus === 'submitted' || app.applicationStatus === 'under_review'
+            ).length;
+            document.getElementById('approvedDrivers').textContent = applications.filter(app => 
+                app.applicationStatus === 'approved'
+            ).length;
+            document.getElementById('activeDrivers').textContent = applications.filter(app => 
+                app.applicationStatus === 'approved'
+            ).length; // Same as approved for demo
+        }
+
+        function reviewApplication(applicationId) {
+            currentApplicationId = applicationId;
+            document.getElementById('reviewModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('reviewModal').style.display = 'none';
+            currentApplicationId = null;
+            document.getElementById('reviewDecision').value = '';
+            document.getElementById('rejectionReason').value = '';
+            document.getElementById('rejectionReasonGroup').style.display = 'none';
+        }
+
+        function toggleRejectionReason() {
+            const decision = document.getElementById('reviewDecision').value;
+            const reasonGroup = document.getElementById('rejectionReasonGroup');
+            reasonGroup.style.display = decision === 'rejected' ? 'block' : 'none';
+        }
+
+        async function submitReview() {
+            const decision = document.getElementById('reviewDecision').value;
+            const rejectionReason = document.getElementById('rejectionReason').value;
+            const reviewerId = document.getElementById('reviewerId').value;
+            
+            if (!decision) {
+                alert('Please select a decision');
+                return;
+            }
+            
+            if (decision === 'rejected' && !rejectionReason.trim()) {
+                alert('Please provide a rejection reason');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/admin/driver/review', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        applicationId: currentApplicationId,
+                        decision: decision,
+                        reviewerId: reviewerId,
+                        rejectionReason: rejectionReason || undefined,
+                        adminToken: 'admin_token_2025'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert(`Application ${decision} successfully! Driver will be notified via SMS and email.`);
+                    closeModal();
+                    refreshApplications();
+                } else {
+                    alert(`Error: ${result.error}`);
+                }
+                
+            } catch (error) {
+                alert(`Error submitting review: ${error.message}`);
+            }
+        }
+
+        function viewDetails(applicationId) {
+            const app = sampleApplications.find(a => a.id === applicationId);
+            if (app) {
+                alert(`Full application details for ${app.firstName} ${app.lastName}\n\nPrevious Jobs: ${app.experience.previousJobs}\nPreferred Slots: ${app.availability.preferredSlots.join(', ')}\nLicense: ${app.driversLicense.number}\nInsurance: ${app.vehicle.insurance.policyNumber}`);
+            }
+        }
+
+        function contactApplicant(email, phone) {
+            const action = confirm(`Contact ${email}?\n\nOK = Send Email\nCancel = Call ${phone}`);
+            if (action) {
+                window.location.href = `mailto:${email}?subject=MarketPace Driver Application Follow-up`;
+            } else {
+                window.location.href = `tel:${phone}`;
+            }
+        }
+
+        function viewDriverProfile(applicationId) {
+            alert('Opening driver profile dashboard... (Feature coming soon)');
+        }
+
+        function resendCredentials(applicationId) {
+            alert('Resending login credentials to driver via SMS and email...');
+        }
+
+        function reconsiderApplication(applicationId) {
+            if (confirm('Reconsider this rejected application for review?')) {
+                alert('Application moved back to review status.');
+                refreshApplications();
+            }
+        }
+
+        function refreshApplications() {
+            // In real app, this would fetch from API
+            displayApplications();
+            console.log('Applications refreshed');
+        }
+
+        async function showTestApplication() {
+            try {
+                const response = await fetch('/api/driver/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        firstName: 'Alex',
+                        lastName: 'Rodriguez',
+                        email: 'alex.rodriguez@example.com',
+                        phone: '+1555123456',
+                        dateOfBirth: '1985-12-10',
+                        address: {
+                            street: '321 Test Drive',
+                            city: 'Mobile',
+                            state: 'AL',
+                            zipCode: '36602'
+                        },
+                        driversLicense: {
+                            number: 'AL321654987',
+                            state: 'AL',
+                            expirationDate: '2028-12-10'
+                        },
+                        vehicle: {
+                            make: 'Ford',
+                            model: 'Fusion',
+                            year: 2020,
+                            licensePlate: 'TEST123',
+                            insurance: {
+                                company: 'Progressive',
+                                policyNumber: 'PR987654',
+                                expirationDate: '2025-12-31'
+                            }
+                        },
+                        experience: {
+                            hasDeliveryExperience: true,
+                            previousJobs: 'Postmates driver for 6 months'
+                        },
+                        availability: {
+                            preferredSlots: ['12pm-3pm', '3pm-6pm'],
+                            maxHoursPerWeek: 30,
+                            startDate: '2025-01-22'
+                        },
+                        backgroundCheck: {
+                            consentGiven: true,
+                            status: 'pending'
+                        }
+                    })
+                });
+                
+                const result = await response.json();
+                if (response.ok) {
+                    alert(`Test application submitted successfully!\nApplication ID: ${result.applicationId}`);
+                    setTimeout(refreshApplications, 1000);
+                } else {
+                    alert(`Error: ${result.error}`);
+                }
+                
+            } catch (error) {
+                alert(`Error creating test application: ${error.message}`);
+            }
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = sampleApplications.filter(app => 
+                app.firstName.toLowerCase().includes(searchTerm) ||
+                app.lastName.toLowerCase().includes(searchTerm) ||
+                app.email.toLowerCase().includes(searchTerm) ||
+                app.id.toLowerCase().includes(searchTerm) ||
+                app.address.city.toLowerCase().includes(searchTerm)
+            );
+            displayApplications(filtered);
+        });
+
+        // Initialize
+        displayApplications();
+    </script>
+</body>
+</html>
