@@ -3755,50 +3755,7 @@
         });
 
         // Category button click handlers
-        document.addEventListener('DOMContentLoaded', function() {
-            // Load saved profile picture
-            const savedProfilePic = localStorage.getItem('userProfilePic');
-            if (savedProfilePic) {
-                const profileButton = document.querySelector('.profile-button');
-                profileButton.innerHTML = `<img src="${savedProfilePic}" class="profile-avatar">`;
-            }
-
-            // Add category button click handlers
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const category = this.getAttribute('data-category');
-                    selectCategory(category);
-                });
-            });
-
-            // Form submission
-            document.getElementById('advancedPostForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const formData = {
-                    category: document.querySelector('.category-btn.selected')?.getAttribute('data-category') || 'general',
-                    title: document.getElementById('postTitle').value,
-                    description: document.getElementById('postDescription').value,
-                    price: document.getElementById('postPrice').value,
-                    link: document.getElementById('postLink').value,
-                    actions: {
-                        deliverNow: document.getElementById('deliverNow').checked,
-                        bookNow: document.getElementById('bookNow').checked,
-                        counterOffer: document.getElementById('counterOffer').checked,
-                        contactSeller: document.getElementById('contactSeller').checked
-                    }
-                };
-
-                // Add poll options if poll category
-                if (formData.category === 'poll') {
-                    formData.pollOptions = Array.from(document.querySelectorAll('#pollOptionsList input')).map(input => input.value).filter(value => value.trim());
-                }
-
-                console.log('Creating post:', formData);
-                showNotification('Post created successfully!', 'success');
-                closePostModal();
-            });
-        });
+        // Profile loading moved to main DOMContentLoaded
 
         // New function for main menu toggle
         function toggleMainMenu() {
@@ -3849,44 +3806,60 @@
             }
         }
 
+        // MAIN INITIALIZATION - Single consolidated DOMContentLoaded
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Community page loaded, testing button functionality...');
+            console.log('MarketPace Community loading...');
             
-            // Test essential functions on page load
             try {
-                // Create floating particles
+                // Initialize all functions
                 createParticles();
-                
-                // Create logo particles
                 createLogoParticles();
-                
-                // Test cart badge update
                 updateCartBadge();
-                
-                // Test login status
                 checkLoginStatus();
-                
-                // Initialize post types
                 initializePostTypes();
                 
-                // Check if user just logged in with Facebook and should see invite prompt
-                if (localStorage.getItem('showFacebookInvite') === 'true') {
-                    localStorage.removeItem('showFacebookInvite');
-                    setTimeout(() => {
-                        showFacebookWelcomeInvite();
-                    }, 1500); // Show after page loads
+                // Add post modal functionality
+                const categoryButtons = document.querySelectorAll('.category-btn');
+                categoryButtons.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const category = this.getAttribute('data-category');
+                        selectCategory(category);
+                    });
+                });
+
+                // Post form submission
+                const postForm = document.getElementById('advancedPostForm');
+                if (postForm) {
+                    postForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        showNotification('Post created successfully!', 'success');
+                        closePostModal();
+                    });
                 }
                 
-                console.log('✅ All community functions initialized successfully');
+                // Load saved profile picture
+                const savedProfilePic = localStorage.getItem('userProfilePic');
+                if (savedProfilePic) {
+                    const profileButton = document.querySelector('.profile-button');
+                    if (profileButton) {
+                        profileButton.innerHTML = `<img src="${savedProfilePic}" class="profile-avatar">`;
+                    }
+                }
                 
-                // Show a subtle notification that buttons are working
+                // Facebook invite check
+                if (localStorage.getItem('showFacebookInvite') === 'true') {
+                    localStorage.removeItem('showFacebookInvite');
+                    setTimeout(() => showFacebookWelcomeInvite(), 1500);
+                }
+                
+                console.log('✅ Community page loaded successfully');
                 setTimeout(() => {
-                    showNotification('Community feed loaded successfully! All buttons active.', 'success');
-                }, 500);
+                    showNotification('Navigation ready - all buttons active!', 'success');
+                }, 1000);
                 
             } catch (error) {
-                console.error('❌ Error initializing community functions:', error);
-                showNotification('Some features may not work properly. Please refresh the page.', 'error');
+                console.error('❌ Initialization error:', error);
+                showNotification('Some features may not work. Please refresh.', 'error');
             }
         });
         
@@ -3987,11 +3960,7 @@
             }
         }
 
-        // Check login status when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            checkLoginStatus();
-            createParticles();
-        });
+        // Removed duplicate DOMContentLoaded listener - consolidated below
         
         // Initialize cart badge on page load
         updateCartBadge();
