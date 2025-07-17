@@ -1,38 +1,37 @@
-# Simple GitHub Fix for Cyan Theme Deployment
+# Simple GitHub Upload Instructions
 
-## The Issue
-Your cyan theme isn't deploying because the GitHub repository connection is broken.
+## Quick Fix for www.marketpace.shop
 
-## Quick Fix Options
+Your three files are ready to upload. Here's the fastest way:
 
-### Option 1: Direct GitHub Upload
-1. Go to: https://github.com/Ihavecreativeideas/MarketPace-WebApp
-2. If repository exists, click "Upload files"
-3. Drag your `CYAN_THEME_PITCH_PAGE.html` file from this workspace
-4. Rename it to `pitch-page.html` during upload
-5. Commit changes
+### Step 1: Go to GitHub Repository
+Visit: https://github.com/Ihavecreativeideas/MarketPace-WebApp
 
-### Option 2: Create New Repository
-If repository doesn't exist:
-1. Create new GitHub repository: "MarketPace-WebApp"
-2. Upload all your MarketPace files
-3. Connect to Vercel
-4. Deploy with cyan theme
+### Step 2: Upload Files (Choose One Method)
 
-### Option 3: Direct Vercel Upload
-Bypass GitHub entirely:
-1. Go to Vercel dashboard
-2. Create new project
-3. Upload files directly to Vercel
-4. Deploy immediately
+**Method A: Individual File Edit**
+1. Click on `pitch-page.html`
+2. Click the pencil icon "Edit this file"
+3. Select all content (Ctrl+A) and delete
+4. Copy entire content from your workspace `pitch-page.html`
+5. Paste and commit with message: "Fix logo display"
+6. Repeat for `admin-login.html` and `community.html`
 
-## Files Ready for Upload
-- `CYAN_THEME_PITCH_PAGE.html` (contains your complete cyan theme)
-- All other MarketPace files in this workspace
+**Method B: Bulk Upload**
+1. Click "Upload files" button
+2. Drag these 3 files from workspace:
+   - `pitch-page.html`
+   - `admin-login.html` 
+   - `community.html`
+3. Commit with message: "Fix logo, admin login, and navigation"
 
-## Expected Result
-Site will show beautiful cyan futuristic theme with:
-- Cyan color scheme (#00FFFF)
-- Arial font family
-- Enhanced founder story
-- Professional business integration styling
+### Step 3: Wait for Deployment
+Vercel will automatically deploy changes in 2-3 minutes.
+
+### Step 4: Test Results
+Visit www.marketpace.shop and verify:
+- Logo displays on homepage ✅
+- Admin login works at /admin-login ✅  
+- Community buttons work properly ✅
+
+**All fixes are ready - upload whenever convenient!**
