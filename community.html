@@ -2341,6 +2341,133 @@
             }, 4000);
         }
 
+        // Category filtering functionality
+        function filterByCategory(category) {
+            console.log('Filtering by category:', category);
+            
+            const feedPosts = document.querySelectorAll('.feed-post');
+            const feed = document.querySelector('.feed');
+            let visibleCount = 0;
+            
+            // Define category mappings
+            const categoryMappings = {
+                'vehicles': ['car', 'truck', 'vehicle', 'auto', 'motorcycle', 'bike'],
+                'electronics': ['phone', 'computer', 'laptop', 'tv', 'electronics', 'tech'],
+                'home-garden': ['home', 'garden', 'furniture', 'decor'],
+                'furniture': ['chair', 'table', 'couch', 'furniture', 'bed'],
+                'fashion': ['clothing', 'shoes', 'fashion', 'jacket', 'shirt'],
+                'sports': ['sports', 'exercise', 'fitness', 'outdoors'],
+                'baby-kids': ['baby', 'kids', 'children', 'toy'],
+                'pets': ['pet', 'dog', 'cat', 'animal'],
+                'books-media': ['book', 'media', 'dvd', 'cd'],
+                'health-beauty': ['health', 'beauty', 'cosmetic'],
+                'toys-games': ['toy', 'game', 'puzzle'],
+                'tools': ['tool', 'equipment', 'washer', 'drill'],
+                'music': ['music', 'instrument', 'guitar'],
+                'art-crafts': ['art', 'craft', 'paint'],
+                'appliances': ['appliance', 'microwave', 'refrigerator'],
+                'food-beverage': ['food', 'beverage', 'restaurant']
+            };
+            
+            const keywords = categoryMappings[category] || [category];
+            
+            feedPosts.forEach(post => {
+                const postText = post.textContent.toLowerCase();
+                const matchesCategory = keywords.some(keyword => postText.includes(keyword));
+                
+                if (matchesCategory) {
+                    post.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    post.style.display = 'none';
+                }
+            });
+            
+            // Remove existing no-items message
+            const existingMessage = feed.querySelector('.no-items-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            
+            // Show "none available" message if no items found
+            if (visibleCount === 0) {
+                const noItemsMessage = document.createElement('div');
+                noItemsMessage.className = 'no-items-message';
+                noItemsMessage.style.cssText = `
+                    background: rgba(0, 0, 0, 0.4); 
+                    backdrop-filter: blur(20px); 
+                    border: 1px solid rgba(255, 255, 255, 0.2); 
+                    border-radius: 12px; 
+                    padding: 40px 20px; 
+                    text-align: center; 
+                    margin: 20px 0;
+                `;
+                noItemsMessage.innerHTML = `
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" style="margin-bottom: 16px; opacity: 0.6;">
+                        <rect x="2" y="2" width="20" height="20" rx="3" stroke="#00ffff" stroke-width="1.5" fill="rgba(0, 255, 255, 0.1)"/>
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" stroke="#00ffff" stroke-width="1.5"/>
+                        <circle cx="7" cy="7" r="1" fill="#00ffff"/>
+                    </svg>
+                    <h3 style="color: #00ffff; margin-bottom: 12px; font-size: 20px;">None Available at This Time</h3>
+                    <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 20px;">No ${category.replace('-', ' & ')} items found in your area. Be the first to post!</p>
+                    <button class="commerce-btn primary" onclick="openAdvancedPostModal('sale')" style="background: linear-gradient(135deg, #00ffff, #8b5cf6); margin-top: 10px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                            <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        Post in This Category
+                    </button>
+                `;
+                feed.appendChild(noItemsMessage);
+            }
+            
+            // Show notification
+            showNotification(`Filtered to ${category.replace('-', ' & ')} category - ${visibleCount} items found`, visibleCount > 0 ? '#10b981' : '#f59e0b');
+        }
+        
+        function showNotification(message, color = '#10b981') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 120px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: ${color};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                z-index: 1000;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                font-size: 14px;
+                font-weight: 500;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    document.body.removeChild(notification);
+                }
+            }, 3000);
+        }
+        
+        function clearCategoryFilter() {
+            const feedPosts = document.querySelectorAll('.feed-post');
+            const feed = document.querySelector('.feed');
+            
+            // Show all posts
+            feedPosts.forEach(post => {
+                post.style.display = 'block';
+            });
+            
+            // Remove no-items message if it exists
+            const existingMessage = feed.querySelector('.no-items-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            
+            showNotification('Category filter cleared - showing all posts', '#3b82f6');
+        }
+
         // Main rental filtering function called by the rental button
         function filterRentals() {
             console.log('Filtering to show rental items only...');
@@ -4511,6 +4638,47 @@
             window.location.href = '/security';
             document.getElementById('menuDropdown').classList.remove('show');
         }
+        
+        // Notification preferences
+        let notificationPreferences = JSON.parse(localStorage.getItem('notificationPreferences') || '{}');
+        
+        function toggleNotificationPreference(category) {
+            notificationPreferences[category] = !notificationPreferences[category];
+            localStorage.setItem('notificationPreferences', JSON.stringify(notificationPreferences));
+            
+            // Update UI indicator in menu
+            if (window.parent && window.parent.updateNotificationIndicator) {
+                window.parent.updateNotificationIndicator(category, notificationPreferences[category]);
+            }
+            
+            showNotification(
+                `${notificationPreferences[category] ? 'Enabled' : 'Disabled'} notifications for ${category.replace('-', ' & ')}`,
+                notificationPreferences[category] ? '#10b981' : '#f59e0b'
+            );
+        }
+        
+        // Initialize page - check for category filter from URL parameters
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Community page initialized');
+            
+            // Check for category parameter in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const categoryParam = urlParams.get('category');
+            
+            if (categoryParam) {
+                console.log('Filtering by category from URL:', categoryParam);
+                setTimeout(() => {
+                    filterByCategory(categoryParam);
+                }, 500); // Small delay to ensure posts are loaded
+            }
+            
+            // Setup notification listeners
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'filterCategory') {
+                    filterByCategory(event.data.category);
+                }
+            });
+        });
     </script>
 
 
