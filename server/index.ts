@@ -13,9 +13,15 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia',
-});
+let stripe: Stripe | null = null;
+if (process.env.STRIPE_SECRET_KEY) {
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2024-12-18.acacia',
+  });
+  console.log('✅ Stripe initialized successfully');
+} else {
+  console.warn('⚠️ STRIPE_SECRET_KEY not found - payment endpoints will return errors');
+}
 
 // Middleware
 app.use(cors({
@@ -923,6 +929,76 @@ app.post('/api/schedules', async (req, res) => {
   }
 });
 
+// *** STRIPE PAYMENT ENDPOINTS ***
+
+// Get Stripe publishable key
+app.get('/api/stripe/config', (req, res) => {
+  res.json({
+    publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY
+  });
+});
+
+// Create payment intent for checkout
+app.post('/api/stripe/create-payment-intent', async (req, res) => {
+  try {
+    const { amount, orderId, metadata = {} } = req.body;
+
+    if (!amount || amount < 50) {
+      return res.status(400).json({ error: 'Amount must be at least $0.50' });
+    }
+
+    if (!stripe) {
+      return res.status(500).json({ error: 'Stripe not configured' });
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount), // Stripe expects cents
+      currency: 'usd',
+      automatic_payment_methods: {
+        enabled: true,
+      },
+      metadata: {
+        orderId: orderId || 'unknown',
+        platform: 'MarketPace',
+        ...metadata
+      }
+    });
+
+    res.json({
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id
+    });
+  } catch (error) {
+    console.error('Error creating payment intent:', error);
+    res.status(500).json({ error: 'Failed to create payment intent' });
+  }
+});
+
+// Create customer for new users
+app.post('/api/stripe/create-customer', async (req, res) => {
+  try {
+    const { email, name, metadata = {} } = req.body;
+
+    if (!stripe) {
+      return res.status(500).json({ error: 'Stripe not configured' });
+    }
+
+    const customer = await stripe.customers.create({
+      email,
+      name,
+      metadata: {
+        platform: 'MarketPace',
+        ...metadata
+      }
+    });
+
+    res.json({ customerId: customer.id });
+  } catch (error) {
+    console.error('Error creating customer:', error);
+    res.status(500).json({ error: 'Failed to create customer' });
+  }
+});
+
 // Supabase Integration API
 app.post('/api/integrations/supabase/connect', async (req, res) => {
   try {
@@ -1040,6 +1116,7 @@ registerAdminRoutes(app);
 app.listen(port, '0.0.0.0', () => {
   console.log(`✅ MarketPace Full Server running on port ${port}`);
   console.log(`🌐 Binding to 0.0.0.0:${port} for external access`);
+  console.log(`💳 Stripe Payment API: /api/stripe/* endpoints`);
   console.log(`🔧 Volunteer Management API: /api/volunteers, /api/volunteer-hours, /api/volunteer-schedules`);
   console.log(`📊 Business Scheduling API: /api/businesses, /api/employees, /api/schedules`);
   console.log(`🔌 Real API Integration Testing: /api/integrations/test-real`);

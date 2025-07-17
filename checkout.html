@@ -457,8 +457,8 @@
     </div>
 
     <script>
-        // Initialize Stripe with environment variable
-        const stripe = Stripe(window.VITE_STRIPE_PUBLIC_KEY || 'pk_test_51QNwDnKNd6v2PWjQOKGEQGE4dQGhxNMkpEgKlZpnlhRzLiJb4K9YhxF8FDlMYiZrJEDCEKxNVyJ4u4zPnWwW5Dx300ZqnI8Vj9');
+        // Initialize Stripe with your publishable key
+        const stripe = Stripe('pk_test_51RWIgaP3SiNvxf9FaVhQzEBMKTcTIy7SkCpOPyLuS12JMEykSGD31RA2BbbirGNgXhRLiAqlDqDweQNk06f9aEGK00WRSmHeKL');
         const elements = stripe.elements();
 
         // Create card element
@@ -567,14 +567,14 @@
 
             try {
                 // Create payment intent
-                const response = await fetch('/api/create-payment-intent', {
+                const response = await fetch('/api/stripe/create-payment-intent', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        amount: getTotalAmount(),
-                        currency: 'usd',
+                        amount: Math.round(getTotalAmount() * 100), // Convert to cents
+                        orderId: `MP-${Date.now()}`,
                         metadata: {
                             orderItems: JSON.stringify(checkoutData.items.map(item => ({
                                 name: item.name,
