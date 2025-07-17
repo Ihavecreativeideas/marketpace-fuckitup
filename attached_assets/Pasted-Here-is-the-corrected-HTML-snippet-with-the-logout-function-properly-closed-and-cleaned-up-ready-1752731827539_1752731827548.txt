@@ -1,0 +1,123 @@
+Here is the corrected HTML snippet with the logout() function properly closed and cleaned up — ready to paste into your community.html:
+
+✅ Corrected HTML + Script Section
+html
+Copy
+Edit
+<!-- Invite Buttons -->
+<div style="margin: 20px 0;">
+    <button onclick="copyInviteLink()" style="
+        background: #00ffff; color: #1a0b3d; border: none; 
+        padding: 12px 24px; border-radius: 25px; margin: 5px;
+        cursor: pointer; font-weight: bold;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+            <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.2)"/>
+            <rect x="8" y="2" width="8" height="4" rx="1" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.1)"/>
+            <path d="M6 10h12M6 14h12M6 18h8" stroke="currentColor" stroke-width="1.5"/>
+        </svg> 
+        Copy Link
+    </button>
+
+    <button onclick="shareInvite()" style="
+        background: #9d4edd; color: white; border: none; 
+        padding: 12px 24px; border-radius: 25px; margin: 5px;
+        cursor: pointer; font-weight: bold;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+            <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.2)"/>
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13" stroke="currentColor" stroke-width="1.5"/>
+        </svg> 
+        Share
+    </button>
+</div>
+
+<!-- Close Button -->
+<button onclick="this.parentElement.parentElement.remove()" style="
+    background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); 
+    padding: 8px 20px; border-radius: 15px; cursor: pointer;">
+    Close
+</button>
+
+<script>
+    function copyInviteLink() {
+        const inviteText = window.location.origin;
+        navigator.clipboard.writeText(inviteText).then(() => {
+            alert('MarketPace link copied to clipboard!');
+        });
+    }
+
+    function shareInvite() {
+        if (navigator.share) {
+            navigator.share({
+                title: 'Join MarketPace Community',
+                text: 'Join me on MarketPace - the local community marketplace!',
+                url: window.location.origin
+            });
+        } else {
+            copyInviteLink();
+        }
+    }
+
+    function goToCart() {
+        window.location.href = '/cart';
+        const dropdown = document.getElementById('menuDropdown');
+        if (dropdown) dropdown.classList.remove('show');
+    }
+
+    async function logout() {
+        try {
+            // Call server logout endpoint
+            const response = await fetch('/api/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            // Optional: handle server response
+            const result = await response.json();
+
+            // Clear all local/session storage
+            localStorage.removeItem('marketpaceUser');
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userProfile');
+            localStorage.removeItem('sessionData');
+            localStorage.removeItem('marketplaceCart');
+            localStorage.removeItem('userFavorites');
+            sessionStorage.clear();
+
+            alert('Successfully logged out.');
+
+            // Redirect to login
+            window.location.href = '/signup-login';
+        } catch (error) {
+            console.error('Logout error:', error);
+
+            // Still clear local/session data just in case
+            localStorage.clear();
+            sessionStorage.clear();
+            alert('You have been logged out (offline).');
+            window.location.href = '/signup-login';
+        }
+    }
+</script>
+🛠 Also Fix This Image Error
+You're getting this error:
+
+pgsql
+Copy
+Edit
+marketpace-logo-1.jpeg:1 Failed to load resource: 404
+That means the image marketpace-logo-1.jpeg is missing or not found in your deployed site.
+
+Fix:
+
+Confirm the image exists in your GitHub repo (/public folder or wherever you're linking from).
+
+Check that the filename is spelled exactly right (case-sensitive!).
+
+If it's in /images, make sure the path in HTML is like:
+
+html
+Copy
+Edit
+<img src="/images/marketpace-logo-1.jpeg" alt="MarketPace Logo">
