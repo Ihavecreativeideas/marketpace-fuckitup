@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
 const helmet = require('helmet');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
 
@@ -142,6 +143,115 @@ app.get('/sponsorship/success', (req, res) => {
   } catch (error) {
     console.error('Error serving sponsorship success page:', error);
     res.redirect('/');
+  }
+});
+
+// Stripe Payment Endpoints
+app.post('/api/create-payment-intent', async (req, res) => {
+  try {
+    const { amount, currency = 'usd', metadata = {} } = req.body;
+    
+    if (!stripe) {
+      return res.status(500).json({ error: 'Stripe not configured' });
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount * 100), // Convert to cents
+      currency,
+      metadata,
+      automatic_payment_methods: {
+        enabled: true,
+      },
+    });
+
+    res.json({
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id
+    });
+  } catch (error) {
+    console.error('Payment intent creation error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/create-customer', async (req, res) => {
+  try {
+    const { email, name, metadata = {} } = req.body;
+    
+    if (!stripe) {
+      return res.status(500).json({ error: 'Stripe not configured' });
+    }
+
+    const customer = await stripe.customers.create({
+      email,
+      name,
+      metadata
+    });
+
+    res.json({ customer });
+  } catch (error) {
+    console.error('Customer creation error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/create-subscription', async (req, res) => {
+  try {
+    const { customerId, priceId, metadata = {} } = req.body;
+    
+    if (!stripe) {
+      return res.status(500).json({ error: 'Stripe not configured' });
+    }
+
+    const subscription = await stripe.subscriptions.create({
+      customer: customerId,
+      items: [{ price: priceId }],
+      metadata,
+      payment_behavior: 'default_incomplete',
+      payment_settings: { save_default_payment_method: 'on_subscription' },
+      expand: ['latest_invoice.payment_intent'],
+    });
+
+    res.json({
+      subscriptionId: subscription.id,
+      clientSecret: subscription.latest_invoice.payment_intent.client_secret,
+    });
+  } catch (error) {
+    console.error('Subscription creation error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/process-payment', async (req, res) => {
+  try {
+    const { paymentMethodId, amount, currency = 'usd', customerId, metadata = {} } = req.body;
+    
+    if (!stripe) {
+      return res.status(500).json({ error: 'Stripe not configured' });
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount * 100),
+      currency,
+      customer: customerId,
+      payment_method: paymentMethodId,
+      confirmation_method: 'manual',
+      confirm: true,
+      metadata,
+      return_url: 'https://www.marketpace.shop/checkout'
+    });
+
+    res.json({ 
+      success: true, 
+      paymentIntent: {
+        id: paymentIntent.id,
+        status: paymentIntent.status,
+        client_secret: paymentIntent.client_secret
+      }
+    });
+  } catch (error) {
+    console.error('Payment processing error:', error);
+    res.status(400).json({ error: error.message });
   }
 });
 
