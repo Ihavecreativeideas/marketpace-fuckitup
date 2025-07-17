@@ -1,38 +1,19 @@
 #!/bin/bash
+# FINAL FIX FOR LOGO 404 ERRORS
+# Run these exact commands to fix your logo display
 
-# Git commands to upload missing image files via replit-agent branch
+echo "Clearing git lock..."
+rm -f .git/index.lock
 
-echo "🚀 Uploading missing image files to GitHub..."
-echo "==================================="
+echo "Adding optimized files..."
+git add marketpace-logo-optimized.jpeg
+git add pitch-page.html
+git add community.html
 
-# Step 1: Switch to replit-agent branch
-echo "📍 Switching to replit-agent branch..."
-git checkout replit-agent
+echo "Committing changes..."
+git commit -m "Fix logo 404: Add optimized 35KB logo and updated HTML files"
 
-# Step 2: Add the missing image files
-echo "📁 Adding image files..."
-git add marketpace-logo-1.jpeg
-git add marketpace-hero-logo.jpeg
-git add assets/founder-brooke-brown.jpg
+echo "Pushing to GitHub..."
+git push origin main
 
-# Step 3: Commit the files
-echo "💾 Committing image files..."
-git commit -m "Add missing image files for logo and founder
-
-- marketpace-logo-1.jpeg (10.4MB) - Main logo
-- marketpace-hero-logo.jpeg (10.4MB) - Hero logo  
-- assets/founder-brooke-brown.jpg (616KB) - Founder image
-
-Fixes: Broken logo and founder image display on live site"
-
-# Step 4: Push to GitHub
-echo "🌐 Pushing to GitHub..."
-git push origin replit-agent
-
-echo "✅ Files uploaded to replit-agent branch!"
-echo "📝 Next steps:"
-echo "1. Go to https://github.com/Ihavecreativeideas/MarketPace-WebApp"
-echo "2. Click 'New Pull Request'"
-echo "3. Select replit-agent → main"
-echo "4. Review and merge"
-echo "5. Wait 2-3 minutes for Vercel deployment"
+echo "Done! Logo should display correctly on www.marketpace.shop within 2 minutes"
