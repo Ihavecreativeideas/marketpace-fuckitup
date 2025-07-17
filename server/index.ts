@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import session from 'express-session';
+import Stripe from 'stripe';
 import { BusinessSchedulingService } from './business-scheduling';
 import { setupRealIntegrationRoutes } from './realIntegrationTester';
 import { setupShopifyBusinessRoutes } from './shopifyBusinessIntegration';
@@ -10,6 +11,11 @@ import { registerAdminRoutes } from './adminRoutes';
 
 const app = express();
 const port = process.env.PORT || 5000;
+
+// Initialize Stripe
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2024-12-18.acacia',
+});
 
 // Middleware
 app.use(cors({
