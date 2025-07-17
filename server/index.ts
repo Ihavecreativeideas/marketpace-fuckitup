@@ -8,6 +8,7 @@ import { setupRealIntegrationRoutes } from './realIntegrationTester';
 import { setupShopifyBusinessRoutes } from './shopifyBusinessIntegration';
 import { registerFacebookShopRoutes } from './facebookShopIntegration';
 import { registerAdminRoutes } from './adminRoutes';
+import { registerSponsorshipRoutes } from './sponsorshipRoutes';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -1112,6 +1113,9 @@ registerFacebookShopRoutes(app);
 
 // Setup Admin Routes with Enhanced Security Scanning
 registerAdminRoutes(app);
+
+// Setup Sponsorship Routes with Stripe Integration
+registerSponsorshipRoutes(app);
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`✅ MarketPace Full Server running on port ${port}`);
