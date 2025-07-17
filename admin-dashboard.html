@@ -199,6 +199,89 @@
             color: #333;
         }
 
+        .driver-launch-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .launch-ready-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .city-launch-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .launch-status {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-ready { background: #10B981; }
+        .status-pending { background: #F59E0B; }
+        .status-waiting { background: #EF4444; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .driver-progress {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            height: 8px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .driver-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #10B981, #34D399);
+            transition: width 0.3s ease;
+        }
+
+        .launch-action-btn {
+            background: #10B981;
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .launch-action-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .launch-action-btn:disabled {
+            background: rgba(255, 255, 255, 0.2);
+            cursor: not-allowed;
+            transform: none;
+        }
+
         @media (max-width: 768px) {
             .admin-container {
                 flex-direction: column;
@@ -252,6 +335,10 @@
             <div class="nav-item" onclick="showSection('drivers')">
                 <i class="fas fa-car"></i>
                 <span>Driver Management</span>
+            </div>
+            <div class="nav-item" onclick="showSection('launch')">
+                <i class="fas fa-rocket"></i>
+                <span>City Launch Status</span>
             </div>
             <div class="nav-item" onclick="showSection('protection')">
                 <i class="fas fa-shield-alt"></i>
@@ -387,6 +474,119 @@
                 </div>
             </div>
 
+            <!-- City Launch Status Section -->
+            <div id="launch" class="content-section">
+                <h2 class="section-title">City Launch Status</h2>
+                <div class="driver-launch-section">
+                    <h3 style="margin-bottom: 1rem;">🚀 Driver Launch Readiness by City</h3>
+                    <p style="margin-bottom: 2rem; opacity: 0.9;">Track driver availability and launch readiness across target cities. Launch requires minimum 5 drivers per city.</p>
+                    
+                    <div class="launch-ready-grid">
+                        <!-- Orange Beach, AL - Ready -->
+                        <div class="city-launch-card">
+                            <div class="launch-status">
+                                <div class="status-indicator status-ready"></div>
+                                <h4>Orange Beach, AL</h4>
+                                <span style="margin-left: auto; background: rgba(16, 185, 129, 0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px;">READY TO LAUNCH</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Drivers: 7/5</span>
+                                <span>Members: 89</span>
+                            </div>
+                            <div class="driver-progress">
+                                <div class="driver-progress-bar" style="width: 100%;"></div>
+                            </div>
+                            <button class="launch-action-btn" onclick="launchCity('Orange Beach')">Launch Delivery Service</button>
+                        </div>
+
+                        <!-- Gulf Shores, AL - Ready -->
+                        <div class="city-launch-card">
+                            <div class="launch-status">
+                                <div class="status-indicator status-ready"></div>
+                                <h4>Gulf Shores, AL</h4>
+                                <span style="margin-left: auto; background: rgba(16, 185, 129, 0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px;">READY TO LAUNCH</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Drivers: 6/5</span>
+                                <span>Members: 72</span>
+                            </div>
+                            <div class="driver-progress">
+                                <div class="driver-progress-bar" style="width: 100%;"></div>
+                            </div>
+                            <button class="launch-action-btn" onclick="launchCity('Gulf Shores')">Launch Delivery Service</button>
+                        </div>
+
+                        <!-- Mobile, AL - Almost Ready -->
+                        <div class="city-launch-card">
+                            <div class="launch-status">
+                                <div class="status-indicator status-pending"></div>
+                                <h4>Mobile, AL</h4>
+                                <span style="margin-left: auto; background: rgba(245, 158, 11, 0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px;">ALMOST READY</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Drivers: 4/5</span>
+                                <span>Members: 156</span>
+                            </div>
+                            <div class="driver-progress">
+                                <div class="driver-progress-bar" style="width: 80%;"></div>
+                            </div>
+                            <button class="launch-action-btn" disabled>Need 1 More Driver</button>
+                        </div>
+
+                        <!-- Pensacola, FL - Waiting -->
+                        <div class="city-launch-card">
+                            <div class="launch-status">
+                                <div class="status-indicator status-waiting"></div>
+                                <h4>Pensacola, FL</h4>
+                                <span style="margin-left: auto; background: rgba(239, 68, 68, 0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px;">RECRUITING</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Drivers: 2/5</span>
+                                <span>Members: 93</span>
+                            </div>
+                            <div class="driver-progress">
+                                <div class="driver-progress-bar" style="width: 40%;"></div>
+                            </div>
+                            <button class="launch-action-btn" disabled>Need 3 More Drivers</button>
+                        </div>
+
+                        <!-- Destin, FL - Waiting -->
+                        <div class="city-launch-card">
+                            <div class="launch-status">
+                                <div class="status-indicator status-waiting"></div>
+                                <h4>Destin, FL</h4>
+                                <span style="margin-left: auto; background: rgba(239, 68, 68, 0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px;">RECRUITING</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Drivers: 1/5</span>
+                                <span>Members: 67</span>
+                            </div>
+                            <div class="driver-progress">
+                                <div class="driver-progress-bar" style="width: 20%;"></div>
+                            </div>
+                            <button class="launch-action-btn" disabled>Need 4 More Drivers</button>
+                        </div>
+
+                        <!-- Tallahassee, FL - Waiting -->
+                        <div class="city-launch-card">
+                            <div class="launch-status">
+                                <div class="status-indicator status-waiting"></div>
+                                <h4>Tallahassee, FL</h4>
+                                <span style="margin-left: auto; background: rgba(239, 68, 68, 0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px;">RECRUITING</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Drivers: 0/5</span>
+                                <span>Members: 134</span>
+                            </div>
+                            <div class="driver-progress">
+                                <div class="driver-progress-bar" style="width: 0%;"></div>
+                            </div>
+                            <button class="launch-action-btn" disabled>Need 5 Drivers</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Campaign Tracker Section -->
             <div id="campaigns" class="content-section">
                 <h2 class="section-title">Campaign Tracker</h2>
@@ -487,6 +687,13 @@
 
         function exportCampaignData() {
             alert('Exporting campaign data...');
+        }
+
+        function launchCity(cityName) {
+            if (confirm(`Launch delivery service in ${cityName}? This will enable MarketPace delivery for all members in this area.`)) {
+                alert(`🚀 Delivery service launched in ${cityName}! Drivers can now accept routes and members can access MarketPace delivery.`);
+                // Here you would update the database to mark this city as having active delivery service
+            }
         }
 
         async function logout() {

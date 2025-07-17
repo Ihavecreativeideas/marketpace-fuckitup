@@ -211,6 +211,16 @@ MarketPace is a React Native mobile application that prioritizes community empow
 
 ## Recent Changes
 
+✓ **ADMIN DASHBOARD CITY LAUNCH STATUS & EXPANDED MENU COMPLETED** (July 17, 2025)
+✓ **CITY LAUNCH TRACKING**: Added comprehensive City Launch Status section to admin dashboard tracking driver readiness by area
+✓ **DRIVER RECRUITMENT MONITORING**: Real-time progress tracking for Orange Beach (Ready), Gulf Shores (Ready), Mobile (4/5 drivers), Pensacola (2/5), Destin (1/5), Tallahassee (0/5)
+✓ **MARKETPLACE CATEGORIES EXPANDED**: Added 16 OfferUp-style categories in menu (Vehicles, Electronics, Home & Garden, Furniture, Fashion, Sports, Baby & Kids, etc.)
+✓ **HIRING NOW SECTION**: Integrated driver recruitment directly into app menu with URGENT badges and apply buttons
+✓ **APPLE APP STORE READINESS**: Enhanced menu and admin systems for phased rollout strategy (Phase 1: Self-pickup, Phase 2: Full delivery)
+✓ **DRIVER AVAILABILITY CHECKING**: System ready to show "Drivers Coming Soon" when no drivers available in user's area
+✓ **GITHUB DEPLOYMENT STRUCTURE**: Confirmed web-server.js as main GitHub server file vs server/index.ts for Replit
+✓ App designed to function fully without drivers using self-pickup and custom delivery methods
+
 ✓ **ALL THREE CRITICAL ISSUES COMPLETELY RESOLVED** (July 17, 2025)
 ✓ **LOGO DISPLAYING**: Fixed Vercel deployment issue - logo now visible on all pages
 ✓ **LOGO SIZE FIXED**: Increased logo from 40px to 80px height for proper visibility on community page
