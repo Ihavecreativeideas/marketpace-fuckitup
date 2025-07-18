@@ -612,9 +612,187 @@
             event.target.classList.add('active');
         }
 
-        // Professional post creation
+        // Professional post creation - Facebook-style modal
         function createProfessionalPost() {
-            window.location.href = '/business-post-creator.html';
+            showCreatePostModal();
+        }
+
+        function showCreatePostModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(255, 215, 0, 0.3);">
+                        <h3 style="color: #ffd700; margin: 0;">Create Professional Post</h3>
+                        <button onclick="closeCreatePostModal()" style="background: none; border: none; color: rgba(255, 255, 255, 0.7); font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px;">&times;</button>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; color: #ffd700; margin-bottom: 8px; font-weight: bold;">Post Type</label>
+                        <select id="postType" style="width: 100%; padding: 12px; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: white; font-size: 16px;">
+                            <option value="sale">For Sale</option>
+                            <option value="service">Service Offered</option>
+                            <option value="event">Event</option>
+                            <option value="announcement">Business Announcement</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; color: #ffd700; margin-bottom: 8px; font-weight: bold;">Title</label>
+                        <input type="text" id="postTitle" placeholder="What are you offering?" style="width: 100%; padding: 12px; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: white; font-size: 16px;" />
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; color: #ffd700; margin-bottom: 8px; font-weight: bold;">Description</label>
+                        <textarea id="postDescription" placeholder="Describe your offering in detail..." style="width: 100%; padding: 12px; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: white; font-size: 16px; min-height: 100px; resize: vertical;"></textarea>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; color: #ffd700; margin-bottom: 8px; font-weight: bold;">Price (if applicable)</label>
+                        <input type="number" id="postPrice" placeholder="0.00" style="width: 100%; padding: 12px; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: white; font-size: 16px;" />
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; color: #ffd700; margin-bottom: 8px; font-weight: bold;">Website/Link (optional)</label>
+                        <input type="url" id="postLink" placeholder="https://..." style="width: 100%; padding: 12px; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: white; font-size: 16px;" />
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; color: #ffd700; margin-bottom: 8px; font-weight: bold;">Images</label>
+                        <div style="border: 2px dashed rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 30px; text-align: center; cursor: pointer; transition: all 0.3s ease;" onclick="document.getElementById('imageUpload').click()">
+                            <input type="file" id="imageUpload" multiple accept="image/*" style="display: none;" onchange="handleImageUpload(event)" />
+                            <div style="color: rgba(255, 255, 255, 0.7); margin-bottom: 10px;">📸</div>
+                            <div style="color: rgba(255, 255, 255, 0.7);">Click to add photos</div>
+                        </div>
+                        <div id="imagePreview" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 15px;"></div>
+                    </div>
+
+                    <div style="margin-bottom: 30px;">
+                        <label style="display: flex; align-items: center; color: #ffd700; cursor: pointer;">
+                            <input type="checkbox" id="enablePromotion" style="margin-right: 10px; transform: scale(1.2);" onchange="togglePromotionOptions()" />
+                            <span style="font-weight: bold;">Promote this post</span>
+                        </label>
+                        
+                        <div id="promotionOptions" style="display: none; margin-top: 15px; padding: 15px; background: rgba(255, 215, 0, 0.1); border-radius: 8px; border: 1px solid rgba(255, 215, 0, 0.3);">
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; color: #ffd700; margin-bottom: 8px;">Budget</label>
+                                <select id="promotionBudget" style="width: 100%; padding: 8px; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: white;">
+                                    <option value="25">$25 - Local boost</option>
+                                    <option value="50">$50 - Regional reach</option>
+                                    <option value="100">$100 - Wide exposure</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; color: #ffd700; margin-bottom: 8px;">Platforms</label>
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                                    <label style="display: flex; align-items: center; color: white;">
+                                        <input type="checkbox" checked style="margin-right: 8px;" />
+                                        MarketPace
+                                    </label>
+                                    <label style="display: flex; align-items: center; color: white;">
+                                        <input type="checkbox" style="margin-right: 8px;" />
+                                        Facebook
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 15px; justify-content: center;">
+                        <button onclick="closeCreatePostModal()" style="background: rgba(107, 114, 128, 0.6); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px;">Cancel</button>
+                        <button onclick="submitProfessionalPost()" style="background: linear-gradient(135deg, #ffd700, #ffed4a); color: #000; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px;">Post</button>
+                    </div>
+                </div>
+            `;
+            
+            // Add modal styles
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                backdrop-filter: blur(10px);
+                z-index: 10000;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+            `;
+            
+            modal.querySelector('.modal-content').style.cssText += `
+                background: linear-gradient(135deg, #0d0221 0%, #1a0233 50%, #2d1b69 100%);
+                border: 1px solid rgba(255, 215, 0, 0.3);
+                border-radius: 15px;
+                padding: 30px;
+                width: 100%;
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        function closeCreatePostModal() {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+                document.body.removeChild(modal);
+            }
+        }
+
+        function handleImageUpload(event) {
+            const files = event.target.files;
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('div');
+                    img.style.cssText = `
+                        width: 80px;
+                        height: 80px;
+                        background-image: url(${e.target.result});
+                        background-size: cover;
+                        background-position: center;
+                        border-radius: 8px;
+                        border: 2px solid rgba(255, 215, 0, 0.3);
+                    `;
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function togglePromotionOptions() {
+            const checkbox = document.getElementById('enablePromotion');
+            const options = document.getElementById('promotionOptions');
+            options.style.display = checkbox.checked ? 'block' : 'none';
+        }
+
+        function submitProfessionalPost() {
+            const postData = {
+                type: document.getElementById('postType').value,
+                title: document.getElementById('postTitle').value,
+                description: document.getElementById('postDescription').value,
+                price: document.getElementById('postPrice').value,
+                link: document.getElementById('postLink').value,
+                promotion: document.getElementById('enablePromotion').checked
+            };
+            
+            if (postData.promotion) {
+                postData.budget = document.getElementById('promotionBudget').value;
+            }
+            
+            // Here you would normally send to server
+            console.log('Professional post data:', postData);
+            
+            // Show success message
+            alert('Professional post created successfully!');
+            closeCreatePostModal();
+            
+            // Refresh the page to show new post
+            location.reload();
         }
 
         // Action functions
@@ -623,12 +801,11 @@
         }
 
         function manageEmployees() {
-            window.location.href = '/business-scheduling.html#employees';
+            window.location.href = '/business-scheduling.html';
         }
 
         function createEvent() {
-            // Create event modal or navigate to event creation
-            alert('Event creation feature coming soon!');
+            window.location.href = '/the-hub.html';
         }
 
         function manageBookings() {
@@ -645,15 +822,15 @@
         }
 
         function viewAnalytics() {
-            window.location.href = '/business-analytics.html';
+            window.location.href = '/business-dashboard.html';
         }
 
         function viewOrders() {
-            window.location.href = '/order-management.html';
+            window.location.href = '/business-dashboard.html';
         }
 
         function inventoryManager() {
-            window.location.href = '/inventory-manager.html';
+            window.location.href = '/business-dashboard.html';
         }
 
         // Initialize
