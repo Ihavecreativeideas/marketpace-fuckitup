@@ -5946,17 +5946,25 @@ function startSelfPickupFlow(itemName, basePrice) {
                     <span id="displayRentalCost">$${basePrice.toFixed(2)}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <span>Sustainability Fee (5%):</span>
-                    <span id="displaySustainabilityFee">$${(basePrice * 0.05).toFixed(2)}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                     <span>Delivery:</span>
                     <span style="color: #10b981;">FREE (Self-Pickup)</span>
                 </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span>Platform Sustainability Fee (5%):</span>
+                    <span id="displaySustainabilityFee">$${(basePrice * 0.05).toFixed(2)}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span>Stripe Processing Fee:</span>
+                    <span id="displayStripeFee">$${((basePrice * 1.05) * 0.029 + 0.30).toFixed(2)}</span>
+                </div>
                 <hr style="border: none; border-top: 1px solid rgba(255, 255, 255, 0.2); margin: 10px 0;">
                 <div style="display: flex; justify-content: space-between; font-weight: bold; color: #00ffff;">
-                    <span>Total:</span>
-                    <span id="displayTotal">$${(basePrice * 1.05).toFixed(2)}</span>
+                    <span>Total You Pay:</span>
+                    <span id="displayTotal">$${(basePrice * 1.05 + (basePrice * 1.05) * 0.029 + 0.30).toFixed(2)}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(0,255,255,0.3); color: #10b981;">
+                    <span><strong>Owner Receives:</strong></span>
+                    <span id="displayOwnerNet"><strong>$${(basePrice * 0.95).toFixed(2)}</strong></span>
                 </div>
             </div>
             
@@ -5985,11 +5993,16 @@ function updateSelfPickupPricing(basePrice) {
     else if (hours === 72) rentalCost = basePrice * 2.5;
     
     const sustainabilityFee = rentalCost * 0.05;
-    const total = rentalCost + sustainabilityFee;
+    const subtotal = rentalCost + sustainabilityFee;
+    const stripeFee = (subtotal * 0.029) + 0.30;
+    const total = subtotal + stripeFee;
+    const ownerNet = rentalCost - sustainabilityFee;
     
     document.getElementById('displayRentalCost').textContent = `$${rentalCost.toFixed(2)}`;
     document.getElementById('displaySustainabilityFee').textContent = `$${sustainabilityFee.toFixed(2)}`;
+    document.getElementById('displayStripeFee').textContent = `$${stripeFee.toFixed(2)}`;
     document.getElementById('displayTotal').textContent = `$${total.toFixed(2)}`;
+    document.getElementById('displayOwnerNet').textContent = `$${ownerNet.toFixed(2)}`;
 }
 
 function proceedToSelfPickupCheckout(itemName, basePrice) {
@@ -6002,7 +6015,10 @@ function proceedToSelfPickupCheckout(itemName, basePrice) {
     else if (hours === 72) rentalCost = basePrice * 2.5;
     
     const sustainabilityFee = rentalCost * 0.05;
-    const totalCost = rentalCost + sustainabilityFee;
+    const subtotal = rentalCost + sustainabilityFee;
+    const stripeFee = (subtotal * 0.029) + 0.30;
+    const totalCost = subtotal + stripeFee;
+    const ownerNet = rentalCost - sustainabilityFee;
     
     // Store checkout data
     localStorage.setItem('selfPickupCheckout', JSON.stringify({
@@ -6010,7 +6026,9 @@ function proceedToSelfPickupCheckout(itemName, basePrice) {
         basePrice: rentalCost,
         hours: hours,
         sustainabilityFee: sustainabilityFee,
+        stripeFee: stripeFee,
         totalCost: totalCost,
+        ownerNet: ownerNet,
         checkoutType: 'self-pickup'
     }));
     

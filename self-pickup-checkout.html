@@ -181,18 +181,28 @@
             </div>
             
             <div class="price-line">
+                <span>Delivery Cost:</span>
+                <span style="color: #10b981;">FREE (Self-Pickup)</span>
+            </div>
+            
+            <div class="price-line">
                 <span>Platform Sustainability Fee (5%):</span>
                 <span id="sustainabilityFee">$0.00</span>
             </div>
             
             <div class="price-line">
-                <span>Delivery Cost:</span>
-                <span style="color: #10b981;">FREE (Self-Pickup)</span>
+                <span>Stripe Processing Fee (2.9% + $0.30):</span>
+                <span id="stripeFee">$0.00</span>
             </div>
             
             <div class="price-line price-total">
-                <span>Total:</span>
+                <span>Total You Pay:</span>
                 <span id="totalCost">$0.00</span>
+            </div>
+            
+            <div class="price-line" style="border-top: 1px solid rgba(0,255,255,0.3); padding-top: 10px; margin-top: 10px; color: #10b981;">
+                <span><strong>Owner Receives (After Platform Fee):</strong></span>
+                <span id="ownerNet"><strong>$0.00</strong></span>
             </div>
         </div>
 
@@ -204,10 +214,14 @@
                 </svg>
                 About Our Sustainability Fee
             </h4>
-            <p style="margin: 0; font-size: 14px;">
+            <p style="margin: 0 0 10px 0; font-size: 14px;">
                 The 5% sustainability fee helps MarketPace maintain our platform, support local communities, 
                 and invest in eco-friendly initiatives. By choosing self-pickup, you're reducing carbon 
                 emissions and supporting sustainable commerce practices!
+            </p>
+            <p style="margin: 0; font-size: 13px; color: #a0a0a0;">
+                <strong>Fee Structure:</strong> Platform sustainability fee (5%) is deducted from the total rental cost. 
+                Stripe processing fees are passed directly to members. Owner receives the net rental income after platform fee.
             </p>
         </div>
 
@@ -273,10 +287,19 @@
                 </div>
             `;
 
+            // Use stored checkout data calculations
+            const rentalCost = checkoutData.basePrice;
+            const sustainabilityFee = checkoutData.sustainabilityFee;
+            const stripeFee = checkoutData.stripeFee;
+            const totalCost = checkoutData.totalCost;
+            const ownerNet = checkoutData.ownerNet;
+            
             // Populate pricing
-            document.getElementById('rentalCost').textContent = `$${checkoutData.basePrice.toFixed(2)}`;
-            document.getElementById('sustainabilityFee').textContent = `$${checkoutData.sustainabilityFee.toFixed(2)}`;
-            document.getElementById('totalCost').textContent = `$${checkoutData.totalCost.toFixed(2)}`;
+            document.getElementById('rentalCost').textContent = `$${rentalCost.toFixed(2)}`;
+            document.getElementById('sustainabilityFee').textContent = `$${sustainabilityFee.toFixed(2)}`;
+            document.getElementById('stripeFee').textContent = `$${stripeFee.toFixed(2)}`;
+            document.getElementById('totalCost').textContent = `$${totalCost.toFixed(2)}`;
+            document.getElementById('ownerNet').textContent = `$${ownerNet.toFixed(2)}`;
 
             // Populate pickup info
             document.getElementById('pickupInfo').innerHTML = `
