@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Sales - Entertainment Pro | MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0233 50%, #2d1b69 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 107, 107, 0.6);
+            border-radius: 50%;
+            animation: float 6s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 107, 107, 0.3);
+            padding: 12px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 107, 107, 0.3);
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .pro-badge {
+            background: linear-gradient(135deg, #ffd700, #ffed4a);
+            color: #000;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px 16px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .content-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            color: #ffd700;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 16px;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Platform Selection */
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .platform-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 107, 107, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .platform-card:hover {
+            border-color: rgba(255, 107, 107, 0.5);
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .platform-card.selected {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .platform-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: rgba(255, 107, 107, 0.7);
+        }
+
+        .platform-name {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #ffd700;
+        }
+
+        .platform-description {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.4;
+        }
+
+        /* Platform Details */
+        .platform-details {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .platform-details.active {
+            display: block;
+        }
+
+        /* Event Information */
+        .event-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .date-time-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* Pricing Tiers */
+        .pricing-section {
+            margin-top: 30px;
+        }
+
+        .tier-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .tier-item {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .tier-info {
+            flex: 1;
+            margin-right: 15px;
+        }
+
+        .tier-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ffd700;
+        }
+
+        .tier-description {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .tier-price {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffd700;
+            margin-right: 15px;
+        }
+
+        .tier-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .tier-btn {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            color: #000;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .secondary-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 12px 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* Add Tier Button */
+        .add-tier-btn {
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px dashed rgba(255, 215, 0, 0.3);
+            color: #ffd700;
+            padding: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .add-tier-btn:hover {
+            background: rgba(255, 215, 0, 0.3);
+            border-color: rgba(255, 215, 0, 0.5);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .platform-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .date-time-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <a href="/business-profile-hub.html" class="back-btn">← Back</a>
+            <div class="page-title">Ticket Sales</div>
+            <div class="pro-badge">PRO</div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Platform Selection -->
+        <div class="content-card">
+            <div class="card-title">Choose Ticket Platform</div>
+            <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 20px; text-align: center;">
+                Select your preferred ticket selling platform or link to your existing platform
+            </p>
+            
+            <div class="platform-grid">
+                <div class="platform-card" onclick="selectPlatform('eventbrite')">
+                    <div class="platform-icon">🎫</div>
+                    <div class="platform-name">Eventbrite</div>
+                    <div class="platform-description">Popular platform with built-in promotion and easy setup</div>
+                </div>
+                
+                <div class="platform-card" onclick="selectPlatform('ticketmaster')">
+                    <div class="platform-icon">🎭</div>
+                    <div class="platform-name">Ticketmaster</div>
+                    <div class="platform-description">Professional platform for larger venues and events</div>
+                </div>
+                
+                <div class="platform-card" onclick="selectPlatform('brown-paper')">
+                    <div class="platform-icon">📝</div>
+                    <div class="platform-name">Brown Paper Tickets</div>
+                    <div class="platform-description">Affordable option with no upfront fees</div>
+                </div>
+                
+                <div class="platform-card" onclick="selectPlatform('facebook')">
+                    <div class="platform-icon">📘</div>
+                    <div class="platform-name">Facebook Events</div>
+                    <div class="platform-description">Free event creation with social media integration</div>
+                </div>
+                
+                <div class="platform-card" onclick="selectPlatform('custom')">
+                    <div class="platform-icon">🔗</div>
+                    <div class="platform-name">Custom Platform</div>
+                    <div class="platform-description">Link to your own ticket selling website or platform</div>
+                </div>
+            </div>
+
+            <!-- Platform-specific details -->
+            <div id="eventbrite-details" class="platform-details">
+                <h4 style="color: #ffd700; margin-bottom: 15px;">Eventbrite Integration</h4>
+                <div class="form-group">
+                    <label class="form-label">Eventbrite Event URL</label>
+                    <input type="url" class="form-input" placeholder="https://www.eventbrite.com/e/your-event-..." />
+                </div>
+                <p style="color: rgba(255, 255, 255, 0.7); font-size: 14px;">
+                    Create your event on Eventbrite first, then paste the event URL here to link directly to ticket sales.
+                </p>
+            </div>
+
+            <div id="ticketmaster-details" class="platform-details">
+                <h4 style="color: #ffd700; margin-bottom: 15px;">Ticketmaster Integration</h4>
+                <div class="form-group">
+                    <label class="form-label">Ticketmaster Event URL</label>
+                    <input type="url" class="form-input" placeholder="https://www.ticketmaster.com/event/..." />
+                </div>
+                <p style="color: rgba(255, 255, 255, 0.7); font-size: 14px;">
+                    Link to your existing Ticketmaster event page for professional ticket sales.
+                </p>
+            </div>
+
+            <div id="brown-paper-details" class="platform-details">
+                <h4 style="color: #ffd700; margin-bottom: 15px;">Brown Paper Tickets Integration</h4>
+                <div class="form-group">
+                    <label class="form-label">Brown Paper Tickets Event URL</label>
+                    <input type="url" class="form-input" placeholder="https://www.brownpapertickets.com/event/..." />
+                </div>
+                <p style="color: rgba(255, 255, 255, 0.7); font-size: 14px;">
+                    Affordable ticketing with no upfront costs - perfect for independent artists.
+                </p>
+            </div>
+
+            <div id="facebook-details" class="platform-details">
+                <h4 style="color: #ffd700; margin-bottom: 15px;">Facebook Events Integration</h4>
+                <div class="form-group">
+                    <label class="form-label">Facebook Event URL</label>
+                    <input type="url" class="form-input" placeholder="https://www.facebook.com/events/..." />
+                </div>
+                <p style="color: rgba(255, 255, 255, 0.7); font-size: 14px;">
+                    Free event creation with built-in social media promotion to reach your audience.
+                </p>
+            </div>
+
+            <div id="custom-details" class="platform-details">
+                <h4 style="color: #ffd700; margin-bottom: 15px;">Custom Platform Integration</h4>
+                <div class="form-group">
+                    <label class="form-label">Your Ticket Sales URL</label>
+                    <input type="url" class="form-input" placeholder="https://your-website.com/tickets" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Platform Name</label>
+                    <input type="text" class="form-input" placeholder="Your Website, Bandcamp, etc." />
+                </div>
+                <p style="color: rgba(255, 255, 255, 0.7); font-size: 14px;">
+                    Link to any custom ticket selling platform, your own website, or alternative services.
+                </p>
+            </div>
+        </div>
+
+        <!-- Event Information -->
+        <div class="content-card">
+            <div class="card-title">Event Information</div>
+            
+            <div class="event-grid">
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">Event Name</label>
+                        <input type="text" class="form-input" id="eventName" placeholder="Concert, show, or event name..." />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Venue</label>
+                        <input type="text" class="form-input" id="eventVenue" placeholder="Venue name and address..." />
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">Event Type</label>
+                        <select class="form-input" id="eventType">
+                            <option value="">Select event type...</option>
+                            <option value="concert">Concert</option>
+                            <option value="acoustic-show">Acoustic Show</option>
+                            <option value="open-mic">Open Mic Night</option>
+                            <option value="private-event">Private Event</option>
+                            <option value="festival">Festival</option>
+                            <option value="workshop">Workshop</option>
+                            <option value="listening-party">Listening Party</option>
+                        </select>
+                    </div>
+                    
+                    <div class="date-time-group">
+                        <div class="form-group">
+                            <label class="form-label">Event Date</label>
+                            <input type="date" class="form-input" id="eventDate" />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Event Time</label>
+                            <input type="time" class="form-input" id="eventTime" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Event Description</label>
+                <textarea class="form-input form-textarea" id="eventDescription" placeholder="Describe your event, special guests, setlist highlights..."></textarea>
+            </div>
+        </div>
+
+        <!-- Ticket Pricing -->
+        <div class="content-card">
+            <div class="card-title">Ticket Pricing</div>
+            
+            <div class="pricing-section">
+                <div class="tier-list" id="tierList">
+                    <!-- Sample pricing tiers -->
+                    <div class="tier-item">
+                        <div class="tier-info">
+                            <div class="tier-name">General Admission</div>
+                            <div class="tier-description">Standard entry to the venue</div>
+                        </div>
+                        <div class="tier-price">$25.00</div>
+                        <div class="tier-actions">
+                            <button class="tier-btn" onclick="editTier('general')">Edit</button>
+                            <button class="tier-btn" onclick="removeTier('general')">Remove</button>
+                        </div>
+                    </div>
+                    
+                    <div class="tier-item">
+                        <div class="tier-info">
+                            <div class="tier-name">VIP Package</div>
+                            <div class="tier-description">Meet & greet + signed merchandise</div>
+                        </div>
+                        <div class="tier-price">$50.00</div>
+                        <div class="tier-actions">
+                            <button class="tier-btn" onclick="editTier('vip')">Edit</button>
+                            <button class="tier-btn" onclick="removeTier('vip')">Remove</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="add-tier-btn" onclick="addPricingTier()">
+                    + Add Pricing Tier
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="secondary-btn" onclick="saveEventDraft()">Save as Draft</button>
+            <button class="primary-btn" onclick="publishEvent()">Publish Event</button>
+        </div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particles = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particles.appendChild(particle);
+            }
+        }
+
+        let selectedPlatform = null;
+
+        function selectPlatform(platform) {
+            // Remove previous selection
+            document.querySelectorAll('.platform-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Hide all platform details
+            document.querySelectorAll('.platform-details').forEach(detail => {
+                detail.classList.remove('active');
+            });
+            
+            // Select new platform
+            event.target.closest('.platform-card').classList.add('selected');
+            selectedPlatform = platform;
+            
+            // Show platform-specific details
+            const details = document.getElementById(platform + '-details');
+            if (details) {
+                details.classList.add('active');
+            }
+        }
+
+        function addPricingTier() {
+            const tierName = prompt('Enter tier name (e.g., "Early Bird", "Student Discount"):');
+            if (!tierName) return;
+            
+            const tierPrice = prompt('Enter ticket price (numbers only):');
+            if (!tierPrice || isNaN(tierPrice)) return;
+            
+            const tierDescription = prompt('Enter tier description (optional):') || '';
+            
+            const tierList = document.getElementById('tierList');
+            const tierId = Date.now();
+            
+            const tierItem = document.createElement('div');
+            tierItem.className = 'tier-item';
+            tierItem.innerHTML = `
+                <div class="tier-info">
+                    <div class="tier-name">${tierName}</div>
+                    <div class="tier-description">${tierDescription}</div>
+                </div>
+                <div class="tier-price">$${parseFloat(tierPrice).toFixed(2)}</div>
+                <div class="tier-actions">
+                    <button class="tier-btn" onclick="editTier(${tierId})">Edit</button>
+                    <button class="tier-btn" onclick="removeTier(${tierId})">Remove</button>
+                </div>
+            `;
+            
+            tierList.appendChild(tierItem);
+        }
+
+        function editTier(tierId) {
+            alert(`Edit Tier: ${tierId}\n\nOpen tier editing interface to modify name, price, and description.`);
+        }
+
+        function removeTier(tierId) {
+            if (confirm('Are you sure you want to remove this pricing tier?')) {
+                // In real app, would remove the tier element
+                alert(`Pricing tier removed.`);
+            }
+        }
+
+        function saveEventDraft() {
+            const eventData = collectEventData();
+            eventData.status = 'draft';
+            
+            console.log('Saving event as draft:', eventData);
+            alert('Event saved as draft! You can continue editing later.');
+        }
+
+        function publishEvent() {
+            if (!selectedPlatform) {
+                alert('Please select a ticket platform first.');
+                return;
+            }
+            
+            const eventName = document.getElementById('eventName').value;
+            const eventDate = document.getElementById('eventDate').value;
+            const eventVenue = document.getElementById('eventVenue').value;
+            
+            if (!eventName || !eventDate || !eventVenue) {
+                alert('Please fill in event name, date, and venue.');
+                return;
+            }
+            
+            const eventData = collectEventData();
+            eventData.status = 'published';
+            
+            console.log('Publishing event:', eventData);
+            alert(`Event published successfully!\n\nFans can now purchase tickets through ${selectedPlatform}. The event will appear on your public Pro page and can be shared on social media.`);
+        }
+
+        function collectEventData() {
+            return {
+                platform: selectedPlatform,
+                name: document.getElementById('eventName').value,
+                venue: document.getElementById('eventVenue').value,
+                type: document.getElementById('eventType').value,
+                date: document.getElementById('eventDate').value,
+                time: document.getElementById('eventTime').value,
+                description: document.getElementById('eventDescription').value,
+                createdAt: new Date().toISOString()
+            };
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            createParticles();
+        });
+    </script>
+</body>
+</html>

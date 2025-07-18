@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Playlist - Entertainment Pro | MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0233 50%, #2d1b69 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 107, 107, 0.6);
+            border-radius: 50%;
+            animation: float 6s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 107, 107, 0.3);
+            padding: 12px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 107, 107, 0.3);
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .pro-badge {
+            background: linear-gradient(135deg, #ffd700, #ffed4a);
+            color: #000;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px 16px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .content-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            color: #ffd700;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 16px;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Upload Areas */
+        .upload-area {
+            border: 2px dashed rgba(255, 107, 107, 0.3);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 107, 107, 0.05);
+        }
+
+        .upload-area:hover {
+            border-color: rgba(255, 107, 107, 0.5);
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: rgba(255, 107, 107, 0.7);
+        }
+
+        .upload-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .upload-subtext {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+
+        /* Track List */
+        .track-list {
+            margin-top: 20px;
+        }
+
+        .track-item {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .track-info {
+            flex: 1;
+            margin-left: 15px;
+        }
+
+        .track-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .track-details {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .track-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .track-btn {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* Music Links */
+        .music-links {
+            display: grid;
+            gap: 15px;
+        }
+
+        .link-input-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .link-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 107, 107, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            color: #000;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .secondary-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 12px 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .link-input-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <a href="/business-profile-hub.html" class="back-btn">← Back</a>
+            <div class="page-title">Create Playlist</div>
+            <div class="pro-badge">PRO</div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Playlist Details -->
+        <div class="content-card">
+            <div class="card-title">Playlist Information</div>
+            
+            <div class="form-group">
+                <label class="form-label">Playlist Name</label>
+                <input type="text" class="form-input" id="playlistName" placeholder="Enter playlist name..." />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea class="form-input form-textarea" id="playlistDescription" placeholder="Describe your playlist..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Genre/Category</label>
+                <select class="form-input" id="playlistGenre">
+                    <option value="">Select genre...</option>
+                    <option value="acoustic">Acoustic</option>
+                    <option value="folk">Folk</option>
+                    <option value="rock">Rock</option>
+                    <option value="pop">Pop</option>
+                    <option value="country">Country</option>
+                    <option value="blues">Blues</option>
+                    <option value="jazz">Jazz</option>
+                    <option value="classical">Classical</option>
+                    <option value="original">Original Compositions</option>
+                    <option value="covers">Cover Songs</option>
+                    <option value="live">Live Performances</option>
+                    <option value="studio">Studio Recordings</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- MP3 Upload -->
+        <div class="content-card">
+            <div class="card-title">Upload MP3 Files</div>
+            
+            <div class="upload-area" onclick="document.getElementById('mp3Upload').click()">
+                <input type="file" id="mp3Upload" multiple accept=".mp3,.wav,.m4a" style="display: none;" onchange="handleMP3Upload(event)" />
+                <div class="upload-icon">♪</div>
+                <div class="upload-text">Click to upload MP3 files</div>
+                <div class="upload-subtext">Support for MP3, WAV, M4A formats</div>
+            </div>
+
+            <div class="track-list" id="trackList">
+                <!-- Uploaded tracks will appear here -->
+            </div>
+        </div>
+
+        <!-- Music Streaming Links -->
+        <div class="content-card">
+            <div class="card-title">Music Streaming Links</div>
+            <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 20px; text-align: center;">
+                Share links to your music on streaming platforms
+            </p>
+            
+            <div class="music-links">
+                <div class="link-input-group">
+                    <div class="link-icon">🎵</div>
+                    <div style="flex: 1;">
+                        <label class="form-label">Spotify Link</label>
+                        <input type="url" class="form-input" id="spotifyLink" placeholder="https://open.spotify.com/artist/..." />
+                    </div>
+                </div>
+
+                <div class="link-input-group">
+                    <div class="link-icon">🎧</div>
+                    <div style="flex: 1;">
+                        <label class="form-label">Apple Music Link</label>
+                        <input type="url" class="form-input" id="appleMusicLink" placeholder="https://music.apple.com/artist/..." />
+                    </div>
+                </div>
+
+                <div class="link-input-group">
+                    <div class="link-icon">☁️</div>
+                    <div style="flex: 1;">
+                        <label class="form-label">SoundCloud Link</label>
+                        <input type="url" class="form-input" id="soundcloudLink" placeholder="https://soundcloud.com/..." />
+                    </div>
+                </div>
+
+                <div class="link-input-group">
+                    <div class="link-icon">▶️</div>
+                    <div style="flex: 1;">
+                        <label class="form-label">YouTube Music Link</label>
+                        <input type="url" class="form-input" id="youtubeMusicLink" placeholder="https://music.youtube.com/..." />
+                    </div>
+                </div>
+
+                <div class="link-input-group">
+                    <div class="link-icon">🌊</div>
+                    <div style="flex: 1;">
+                        <label class="form-label">Bandcamp Link</label>
+                        <input type="url" class="form-input" id="bandcampLink" placeholder="https://yourbandname.bandcamp.com/..." />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="secondary-btn" onclick="saveAsDraft()">Save as Draft</button>
+            <button class="primary-btn" onclick="publishPlaylist()">Publish Playlist</button>
+        </div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particles = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particles.appendChild(particle);
+            }
+        }
+
+        let uploadedTracks = [];
+
+        function handleMP3Upload(event) {
+            const files = event.target.files;
+            const trackList = document.getElementById('trackList');
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const trackId = Date.now() + i;
+                
+                // Add to uploaded tracks array
+                uploadedTracks.push({
+                    id: trackId,
+                    file: file,
+                    name: file.name,
+                    size: file.size
+                });
+
+                // Create track item in UI
+                const trackItem = document.createElement('div');
+                trackItem.className = 'track-item';
+                trackItem.innerHTML = `
+                    <div style="font-size: 24px; color: rgba(255, 107, 107, 0.7);">♪</div>
+                    <div class="track-info">
+                        <div class="track-name">${file.name}</div>
+                        <div class="track-details">Size: ${(file.size / 1024 / 1024).toFixed(2)} MB</div>
+                    </div>
+                    <div class="track-actions">
+                        <button class="track-btn" onclick="previewTrack(${trackId})">Preview</button>
+                        <button class="track-btn" onclick="removeTrack(${trackId})">Remove</button>
+                    </div>
+                `;
+                trackList.appendChild(trackItem);
+            }
+        }
+
+        function previewTrack(trackId) {
+            const track = uploadedTracks.find(t => t.id === trackId);
+            if (track) {
+                alert(`Preview: ${track.name}\n\nAudio preview would play here in the full app.`);
+            }
+        }
+
+        function removeTrack(trackId) {
+            // Remove from array
+            uploadedTracks = uploadedTracks.filter(t => t.id !== trackId);
+            
+            // Remove from UI
+            const trackList = document.getElementById('trackList');
+            const trackItems = trackList.children;
+            for (let i = 0; i < trackItems.length; i++) {
+                const removeBtn = trackItems[i].querySelector(`button[onclick="removeTrack(${trackId})"]`);
+                if (removeBtn) {
+                    trackList.removeChild(trackItems[i]);
+                    break;
+                }
+            }
+        }
+
+        function saveAsDraft() {
+            const playlistData = collectPlaylistData();
+            playlistData.status = 'draft';
+            
+            console.log('Saving playlist as draft:', playlistData);
+            alert('Playlist saved as draft! You can continue editing later.');
+        }
+
+        function publishPlaylist() {
+            const playlistData = collectPlaylistData();
+            
+            if (!playlistData.name) {
+                alert('Please enter a playlist name.');
+                return;
+            }
+
+            if (uploadedTracks.length === 0 && !hasAnyStreamingLinks(playlistData)) {
+                alert('Please upload at least one MP3 file or add streaming platform links.');
+                return;
+            }
+
+            playlistData.status = 'published';
+            
+            console.log('Publishing playlist:', playlistData);
+            alert('Playlist published successfully! Your fans can now listen to your music.');
+            
+            // In real app, would redirect back to business profile
+            // window.location.href = '/business-profile-hub.html';
+        }
+
+        function collectPlaylistData() {
+            return {
+                name: document.getElementById('playlistName').value,
+                description: document.getElementById('playlistDescription').value,
+                genre: document.getElementById('playlistGenre').value,
+                tracks: uploadedTracks,
+                streamingLinks: {
+                    spotify: document.getElementById('spotifyLink').value,
+                    appleMusic: document.getElementById('appleMusicLink').value,
+                    soundcloud: document.getElementById('soundcloudLink').value,
+                    youtubeMusic: document.getElementById('youtubeMusicLink').value,
+                    bandcamp: document.getElementById('bandcampLink').value
+                },
+                createdAt: new Date().toISOString()
+            };
+        }
+
+        function hasAnyStreamingLinks(data) {
+            const links = data.streamingLinks;
+            return links.spotify || links.appleMusic || links.soundcloud || 
+                   links.youtubeMusic || links.bandcamp;
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            createParticles();
+        });
+    </script>
+</body>
+</html>
