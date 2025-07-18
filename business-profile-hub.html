@@ -421,8 +421,8 @@
         <!-- Tab Navigation (Hub Style) -->
         <div class="tab-navigation">
             <button class="tab-btn active" onclick="showTab('posts')">Posts</button>
+            <button class="tab-btn" onclick="showTab('features')">Features</button>
             <button class="tab-btn" onclick="showTab('schedule')">Schedule</button>
-            <button class="tab-btn" onclick="showTab('events')">Events</button>
             <button class="tab-btn" onclick="showTab('promotion')">Promotion</button>
             <button class="tab-btn" onclick="showTab('analysis')">Analysis</button>
             <button class="tab-btn" onclick="showTab('orders')">Orders</button>
@@ -434,6 +434,108 @@
                 <div class="content-header">Recent Posts</div>
                 <div style="text-align: center; padding: 40px; color: rgba(255, 255, 255, 0.5);">
                     No posts yet. Create your first professional post!
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Category-Specific Features -->
+        <div id="features-content" class="tab-content">
+            <!-- Shop Features -->
+            <div id="shop-features" class="category-features">
+                <div class="content-card">
+                    <div class="content-header">Shop Management</div>
+                    <div class="action-grid">
+                        <div class="action-card" onclick="createShop()">
+                            <div class="action-title">Create Shop</div>
+                            <div class="action-desc">Build complete online store</div>
+                        </div>
+                        <div class="action-card" onclick="manageProducts()">
+                            <div class="action-title">Manage Products</div>
+                            <div class="action-desc">Add/edit shop items</div>
+                        </div>
+                        <div class="action-card" onclick="setDeliveryOptions()">
+                            <div class="action-title">Delivery Options</div>
+                            <div class="action-desc">Configure shipping & delivery</div>
+                        </div>
+                        <div class="action-card" onclick="setPricing()">
+                            <div class="action-title">Pricing & Fees</div>
+                            <div class="action-desc">Set S&H fees and pricing</div>
+                        </div>
+                        <div class="action-card" onclick="shopifyIntegration()">
+                            <div class="action-title">Shopify Sync</div>
+                            <div class="action-desc">Import existing products</div>
+                        </div>
+                        <div class="action-card" onclick="shopSettings()">
+                            <div class="action-title">Shop Settings</div>
+                            <div class="action-desc">Store policies & info</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Features -->
+            <div id="service-features" class="category-features" style="display: none;">
+                <div class="content-card">
+                    <div class="content-header">Service Business Tools</div>
+                    <div class="action-grid">
+                        <div class="action-card" onclick="createServiceQuote()">
+                            <div class="action-title">Create Quote</div>
+                            <div class="action-desc">Generate job quotes</div>
+                        </div>
+                        <div class="action-card" onclick="setBusinessHours()">
+                            <div class="action-title">Business Hours</div>
+                            <div class="action-desc">Set open/close times</div>
+                        </div>
+                        <div class="action-card" onclick="serviceBooking()">
+                            <div class="action-title">Booking Calendar</div>
+                            <div class="action-desc">Appointment scheduling</div>
+                        </div>
+                        <div class="action-card" onclick="serviceAreas()">
+                            <div class="action-title">Service Areas</div>
+                            <div class="action-desc">Define coverage zones</div>
+                        </div>
+                        <div class="action-card" onclick="rateCalculator()">
+                            <div class="action-title">Rate Calculator</div>
+                            <div class="action-desc">Hourly/project rates</div>
+                        </div>
+                        <div class="action-card" onclick="servicePortfolio()">
+                            <div class="action-title">Portfolio</div>
+                            <div class="action-desc">Showcase past work</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Entertainment Features -->
+            <div id="entertainment-features" class="category-features" style="display: none;">
+                <div class="content-card">
+                    <div class="content-header">Entertainment Platform</div>
+                    <div class="action-grid">
+                        <div class="action-card" onclick="createPlaylist()">
+                            <div class="action-title">Create Playlist</div>
+                            <div class="action-desc">Curate music collections</div>
+                        </div>
+                        <div class="action-card" onclick="addMusicVideo()">
+                            <div class="action-title">Music Videos</div>
+                            <div class="action-desc">Upload performance videos</div>
+                        </div>
+                        <div class="action-card" onclick="createMerchStore()">
+                            <div class="action-title">Merch Store</div>
+                            <div class="action-desc">Sell merchandise & gear</div>
+                        </div>
+                        <div class="action-card" onclick="ticketSales()">
+                            <div class="action-title">Ticket Sales</div>
+                            <div class="action-desc">Sell event tickets</div>
+                        </div>
+                        <div class="action-card" onclick="performanceCalendar()">
+                            <div class="action-title">Performance Calendar</div>
+                            <div class="action-desc">Schedule live shows</div>
+                        </div>
+                        <div class="action-card" onclick="fanEngagement()">
+                            <div class="action-title">Fan Engagement</div>
+                            <div class="action-desc">Connect with audience</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1024,9 +1126,140 @@
             window.location.href = '/business-dashboard.html';
         }
 
+        // Category-specific feature detection and display
+        function detectBusinessCategory() {
+            // In real app, this would come from user profile data
+            // For demo, we'll detect based on business type in header
+            const businessType = document.querySelector('.business-type').textContent;
+            
+            if (businessType.toLowerCase().includes('shop') || businessType.toLowerCase().includes('store') || businessType.toLowerCase().includes('retail')) {
+                return 'shop';
+            } else if (businessType.toLowerCase().includes('service') || businessType.toLowerCase().includes('cleaning') || businessType.toLowerCase().includes('repair')) {
+                return 'service';  
+            } else if (businessType.toLowerCase().includes('music') || businessType.toLowerCase().includes('singer') || businessType.toLowerCase().includes('dj') || businessType.toLowerCase().includes('entertainment')) {
+                return 'entertainment';
+            }
+            return 'entertainment'; // Default for demo
+        }
+
+        function showCategoryFeatures() {
+            const category = detectBusinessCategory();
+            
+            // Hide all category feature sections
+            document.querySelectorAll('.category-features').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show the appropriate category features
+            const targetSection = document.getElementById(category + '-features');
+            if (targetSection) {
+                targetSection.style.display = 'block';
+            }
+        }
+
+        // Shop-specific functions
+        function createShop() {
+            alert('Create Shop: Build your complete online store with products, pricing, and delivery options.');
+        }
+        
+        function manageProducts() {
+            alert('Manage Products: Add, edit, or remove items from your shop inventory.');
+        }
+        
+        function setDeliveryOptions() {
+            alert('Delivery Options: Configure MarketPace delivery, self-pickup, or custom delivery methods.');
+        }
+        
+        function setPricing() {
+            alert('Pricing & Fees: Set shipping & handling fees, processing fees, and product pricing.');
+        }
+        
+        function shopifyIntegration() {
+            window.location.href = '/shopify-business-integration.html';
+        }
+        
+        function shopSettings() {
+            alert('Shop Settings: Configure store policies, return policy, and business information.');
+        }
+
+        // Service-specific functions
+        function createServiceQuote() {
+            alert('Create Quote: Generate professional quotes for potential customers.');
+        }
+        
+        function setBusinessHours() {
+            alert('Business Hours: Set your availability and operating hours for customer bookings.');
+        }
+        
+        function serviceBooking() {
+            window.location.href = '/business-scheduling.html';
+        }
+        
+        function serviceAreas() {
+            alert('Service Areas: Define the geographical areas where you provide services.');
+        }
+        
+        function rateCalculator() {
+            alert('Rate Calculator: Set hourly rates, flat project fees, and service pricing.');
+        }
+        
+        function servicePortfolio() {
+            alert('Portfolio: Showcase your past work and customer testimonials.');
+        }
+
+        // Entertainment-specific functions
+        function createPlaylist() {
+            alert('Create Playlist: Curate music collections to showcase your style and repertoire.');
+        }
+        
+        function addMusicVideo() {
+            alert('Music Videos: Upload performance videos, live sessions, and promotional content.');
+        }
+        
+        function createMerchStore() {
+            alert('Merch Store: Sell merchandise, band gear, and promotional items to fans.');
+        }
+        
+        function ticketSales() {
+            alert('Ticket Sales: Sell tickets for your live performances and events.');
+        }
+        
+        function performanceCalendar() {
+            alert('Performance Calendar: Schedule and promote your upcoming live shows.');
+        }
+        
+        function fanEngagement() {
+            alert('Fan Engagement: Connect with your audience through exclusive content and interactions.');
+        }
+
+        // Override tab switching to show category features when Features tab is selected
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-content').classList.add('active');
+            
+            // Add active class to clicked tab button
+            event.target.classList.add('active');
+            
+            // If Features tab is selected, show category-specific features
+            if (tabName === 'features') {
+                showCategoryFeatures();
+            }
+        }
+
         // Initialize
         window.addEventListener('load', () => {
             createParticles();
+            showCategoryFeatures();
         });
     </script>
 </body>
