@@ -1,50 +1,51 @@
 # Shopify Integration Status Report
 
-## Current Status: ❌ AUTHENTICATION ERROR
+## Current Status: ⚠️ MERCHANT APPROVAL REQUIRED
 
 ### Connection Test Results
 - **Store Domain**: myshop-marketpace-com.myshopify.com ✅
-- **API Endpoints**: All endpoints accessible ✅
-- **Access Token**: Invalid or expired ❌
+- **Access Token**: Valid and working ✅
+- **Shop API**: Accessible (store info retrieved) ✅
+- **Product API**: Requires merchant approval ❌
+- **Location API**: Requires merchant approval ❌
 
 ### Error Details
 ```
-HTTP 401: [API] Invalid API key or access token (unrecognized login or wrong password)
+[API] This action requires merchant approval for read_products scope.
+[API] This action requires merchant approval for read_locations scope.
 ```
 
 ### What's Working
 ✅ Shopify integration routes are registered and functional
 ✅ Store domain is correctly configured
-✅ API endpoints are reachable (no network issues)
+✅ Access token is valid (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)
+✅ Basic shop information accessible
 ✅ Business integration interface exists at `/shopify-business-integration`
 ✅ All integration logic is implemented and ready
 
 ### What Needs To Be Fixed
-❌ **Access Token Issue**: Your current Shopify access token has expired or is invalid
-❌ **API Authentication**: Need to regenerate private app access token
+❌ **Merchant Approval**: Your private app needs merchant approval for API scopes
+❌ **API Permissions**: Missing approval for `read_products` and `read_locations` scopes
 
 ## How to Fix Your Shopify Integration
 
-### Step 1: Generate New Access Token
+### Step 1: Approve Your Private App
 1. Go to your Shopify Admin: https://myshop-marketpace-com.myshopify.com/admin
 2. Navigate to **Settings > Apps and sales channels**
 3. Click **Develop apps**
-4. Find your MarketPace app or create a new one
-5. Go to **API credentials** tab
-6. Generate a new **Admin API access token**
+4. Find your MarketPace app
+5. Click **Review and approve** or **Approve app**
+6. Grant permissions for required scopes
 
-### Step 2: Required API Permissions
-Ensure your private app has these scopes:
+### Step 2: Required API Permissions (Grant These)
 - `read_products` (to sync products)
 - `write_products` (to update products)
 - `read_orders` (to track orders)
 - `read_locations` (for store info)
 - `read_inventory` (for stock levels)
 
-### Step 3: Update Environment Variables
-Once you have the new token, update:
-- `SHOPIFY_ACCESS_TOKEN` = your new token (starts with `shpat_`)
-- `SHOPIFY_STORE_URL` = myshop-marketpace-com.myshopify.com
+### Step 3: Verify App Status
+After approval, your app should show as "Approved" in the Shopify Admin
 
 ## Available Features (Once Fixed)
 - ✅ **Product Sync**: Import all Shopify products to MarketPace

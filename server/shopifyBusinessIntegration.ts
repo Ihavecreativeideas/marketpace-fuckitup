@@ -58,9 +58,13 @@ export class ShopifyBusinessIntegration {
   
   static async testConnection(req: Request, res: Response) {
     try {
-      // Use environment variables for testing
-      const shopDomain = process.env.SHOPIFY_STORE_URL || req.body.shopDomain;
-      const accessToken = process.env.SHOPIFY_ACCESS_TOKEN || req.body.accessToken;
+      // Use provided token or environment variables
+      const shopDomain = req.body.shopDomain || process.env.SHOPIFY_STORE_URL || 'myshop-marketpace-com.myshopify.com';
+      const accessToken = req.body.accessToken || process.env.SHOPIFY_ACCESS_TOKEN || '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';
+      
+      console.log('🔍 Shopify Test - Connection Check:');
+      console.log('- Shop Domain:', shopDomain);
+      console.log('- Access Token Format:', accessToken ? `${accessToken.substring(0, 10)}...` : 'None');
       
       if (!shopDomain || !accessToken) {
         return res.json({
