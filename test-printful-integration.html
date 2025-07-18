@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Printful Integration Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a0b3d 0%, #6b46c1 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .test-button {
+            background: linear-gradient(45deg, #ffd700, #ffed4a);
+            color: #1a0b3d;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+        }
+        .result-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #ffd700;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success {
+            border-left-color: #10b981;
+            color: #10b981;
+        }
+        .error {
+            border-left-color: #ef4444;
+            color: #ef4444;
+        }
+        .info-box {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #00ffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Printful Integration Test Suite</h1>
+        
+        <div class="info-box">
+            <h3>Integration Details</h3>
+            <p><strong>Client ID:</strong> app-5364248</p>
+            <p><strong>API Key:</strong> Connected and authenticated</p>
+            <p><strong>Scopes:</strong> Products, Orders, Files management</p>
+        </div>
+        
+        <div class="test-section">
+            <h3>Store Connection Test</h3>
+            <button class="test-button" onclick="testConnection()">Test Printful Connection</button>
+            <div id="connectionResult" class="result-box"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Product Catalog Test</h3>
+            <button class="test-button" onclick="testProducts()">Test Product Catalog</button>
+            <div id="productsResult" class="result-box"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Store Products Test</h3>
+            <button class="test-button" onclick="testStoreProducts()">Test Store Products</button>
+            <div id="storeProductsResult" class="result-box"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Orders Test</h3>
+            <button class="test-button" onclick="testOrders()">Test Orders API</button>
+            <div id="ordersResult" class="result-box"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Files Test</h3>
+            <button class="test-button" onclick="testFiles()">Test Files API</button>
+            <div id="filesResult" class="result-box"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Business Integration Test</h3>
+            <button class="test-button" onclick="testBusinessIntegration()">Test Business Integration</button>
+            <div id="businessResult" class="result-box"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Complete Integration Test</h3>
+            <button class="test-button" onclick="runFullTest()">Run All Tests</button>
+            <div id="fullTestResult" class="result-box"></div>
+        </div>
+    </div>
+
+    <script>
+        async function testConnection() {
+            const resultDiv = document.getElementById('connectionResult');
+            resultDiv.innerHTML = 'Testing Printful connection...';
+            
+            try {
+                const response = await fetch('/api/printful/test-connection', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultDiv.className = 'result-box success';
+                    resultDiv.innerHTML = `✅ Printful Connection Successful!\n\nStore ID: ${result.store?.id || 'N/A'}\nStore Name: ${result.store?.name || 'N/A'}\nAPI Key: ${result.apiKey}\n\nFull Response:\n${JSON.stringify(result, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result-box error';
+                    resultDiv.innerHTML = `❌ Connection Failed!\n\nError: ${result.error || 'Unknown error'}\n\nDetails:\n${JSON.stringify(result, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result-box error';
+                resultDiv.innerHTML = `❌ Connection Test Failed!\n\nError: ${error.message}`;
+            }
+        }
+
+        async function testProducts() {
+            const resultDiv = document.getElementById('productsResult');
+            resultDiv.innerHTML = 'Testing Printful product catalog...';
+            
+            try {
+                const response = await fetch('/api/printful/products');
+                const result = await response.json();
+                
+                if (result.code === 200) {
+                    resultDiv.className = 'result-box success';
+                    resultDiv.innerHTML = `✅ Product Catalog Retrieved!\n\nFound ${result.result.length} products:\n\n${result.result.slice(0, 5).map(product => `• ${product.title} (ID: ${product.id})`).join('\n')}\n\n${result.result.length > 5 ? '... and more' : ''}\n\nFirst Product Details:\n${JSON.stringify(result.result[0], null, 2)}`;
+                } else {
+                    resultDiv.className = 'result-box error';
+                    resultDiv.innerHTML = `❌ Failed to retrieve products!\n\nResponse:\n${JSON.stringify(result, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result-box error';
+                resultDiv.innerHTML = `❌ Product Test Failed!\n\nError: ${error.message}`;
+            }
+        }
+
+        async function testStoreProducts() {
+            const resultDiv = document.getElementById('storeProductsResult');
+            resultDiv.innerHTML = 'Testing store products...';
+            
+            try {
+                const response = await fetch('/api/printful/store/products');
+                const result = await response.json();
+                
+                if (result.code === 200) {
+                    resultDiv.className = 'result-box success';
+                    resultDiv.innerHTML = `✅ Store Products Retrieved!\n\nFound ${result.result.length} synced products\n\n${result.result.length === 0 ? 'No products synced yet - this is normal for new stores.' : result.result.map(product => `• ${product.name} - $${product.retail_price}`).join('\n')}\n\nFull Response:\n${JSON.stringify(result, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result-box error';
+                    resultDiv.innerHTML = `❌ Failed to retrieve store products!\n\nResponse:\n${JSON.stringify(result, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result-box error';
+                resultDiv.innerHTML = `❌ Store Products Test Failed!\n\nError: ${error.message}`;
+            }
+        }
+
+        async function testOrders() {
+            const resultDiv = document.getElementById('ordersResult');
+            resultDiv.innerHTML = 'Testing orders API...';
+            
+            try {
+                const response = await fetch('/api/printful/orders');
+                const result = await response.json();
+                
+                if (result.code === 200) {
+                    resultDiv.className = 'result-box success';
+                    resultDiv.innerHTML = `✅ Orders API Working!\n\nFound ${result.result.length} orders\n\n${result.result.length === 0 ? 'No orders yet - this is normal for new stores.' : result.result.map(order => `• Order #${order.external_id}: ${order.status}`).join('\n')}\n\nFull Response:\n${JSON.stringify(result, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result-box error';
+                    resultDiv.innerHTML = `❌ Failed to retrieve orders!\n\nResponse:\n${JSON.stringify(result, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result-box error';
+                resultDiv.innerHTML = `❌ Orders Test Failed!\n\nError: ${error.message}`;
+            }
+        }
+
+        async function testFiles() {
+            const resultDiv = document.getElementById('filesResult');
+            resultDiv.innerHTML = 'Testing files API...';
+            
+            try {
+                const response = await fetch('/api/printful/files');
+                const result = await response.json();
+                
+                if (result.code === 200) {
+                    resultDiv.className = 'result-box success';
+                    resultDiv.innerHTML = `✅ Files API Working!\n\nFound ${result.result.length} files\n\n${result.result.length === 0 ? 'No files uploaded yet - this is normal for new stores.' : result.result.map(file => `• ${file.filename} (${file.size} bytes)`).join('\n')}\n\nFull Response:\n${JSON.stringify(result, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result-box error';
+                    resultDiv.innerHTML = `❌ Failed to retrieve files!\n\nResponse:\n${JSON.stringify(result, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result-box error';
+                resultDiv.innerHTML = `❌ Files Test Failed!\n\nError: ${error.message}`;
+            }
+        }
+
+        async function testBusinessIntegration() {
+            const resultDiv = document.getElementById('businessResult');
+            resultDiv.innerHTML = 'Testing business integration...';
+            
+            try {
+                const response = await fetch('/api/printful/business-integration/connect', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        businessId: 'test-business-123',
+                        printfulStoreId: 'test-store'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultDiv.className = 'result-box success';
+                    resultDiv.innerHTML = `✅ Business Integration Successful!\n\nBusiness ID: ${result.settings.businessId}\nStore ID: ${result.settings.printfulStoreId}\nConnected: ${result.settings.connected}\n\nStore Details:\n${JSON.stringify(result.store, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result-box error';
+                    resultDiv.innerHTML = `❌ Business Integration Failed!\n\nError: ${result.error || 'Unknown error'}\n\nDetails:\n${JSON.stringify(result, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result-box error';
+                resultDiv.innerHTML = `❌ Business Integration Test Failed!\n\nError: ${error.message}`;
+            }
+        }
+
+        async function runFullTest() {
+            const resultDiv = document.getElementById('fullTestResult');
+            resultDiv.innerHTML = 'Running complete Printful integration test...\n\n';
+            
+            const tests = [
+                { name: 'Connection', func: testConnection, target: 'connectionResult' },
+                { name: 'Products', func: testProducts, target: 'productsResult' },
+                { name: 'Store Products', func: testStoreProducts, target: 'storeProductsResult' },
+                { name: 'Orders', func: testOrders, target: 'ordersResult' },
+                { name: 'Files', func: testFiles, target: 'filesResult' },
+                { name: 'Business Integration', func: testBusinessIntegration, target: 'businessResult' }
+            ];
+            
+            let results = [];
+            
+            for (const test of tests) {
+                resultDiv.innerHTML += `Testing ${test.name}...\n`;
+                
+                try {
+                    await test.func();
+                    const testResult = document.getElementById(test.target);
+                    const success = testResult.className.includes('success');
+                    results.push(`${test.name}: ${success ? '✅ PASS' : '❌ FAIL'}`);
+                    resultDiv.innerHTML += `${test.name}: ${success ? '✅ PASS' : '❌ FAIL'}\n`;
+                } catch (error) {
+                    results.push(`${test.name}: ❌ ERROR - ${error.message}`);
+                    resultDiv.innerHTML += `${test.name}: ❌ ERROR - ${error.message}\n`;
+                }
+                
+                // Brief pause between tests
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            const passCount = results.filter(r => r.includes('✅ PASS')).length;
+            const totalCount = results.length;
+            
+            resultDiv.innerHTML += `\n=== PRINTFUL INTEGRATION TEST SUMMARY ===\n`;
+            resultDiv.innerHTML += `Passed: ${passCount}/${totalCount} tests\n`;
+            resultDiv.innerHTML += `Status: ${passCount === totalCount ? '✅ ALL TESTS PASSED' : '⚠️ SOME TESTS FAILED'}\n\n`;
+            resultDiv.innerHTML += results.join('\n');
+            
+            if (passCount === totalCount) {
+                resultDiv.className = 'result-box success';
+                resultDiv.innerHTML += `\n\n🎉 Your Printful integration is fully functional!`;
+            } else {
+                resultDiv.className = 'result-box error';
+                resultDiv.innerHTML += `\n\n⚠️ Some tests failed. Check individual test results above.`;
+            }
+        }
+    </script>
+</body>
+</html>

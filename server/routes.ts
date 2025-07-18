@@ -478,6 +478,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile('test-shopify-integration.html', { root: '.' });
   });
 
+  // Serve the Printful integration test page
+  app.get('/test-printful-integration', (req, res) => {
+    res.sendFile('test-printful-integration.html', { root: '.' });
+  });
+
+  // Printful integration routes
+  const printfulRouter = await import('./printfulIntegration');
+  app.use('/api/printful', printfulRouter.default);
+
   app.get('/api/driver-active-routes', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
