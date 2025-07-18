@@ -113,6 +113,128 @@
             text-align: center;
         }
 
+        .badge {
+            background: #ff4757;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: auto;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        .application-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .application-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .application-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .application-content {
+            padding: 1.5rem;
+        }
+
+        .application-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .detail-value {
+            color: #333;
+            margin-top: 0.25rem;
+        }
+
+        .application-actions {
+            display: flex;
+            gap: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .approve-btn {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .approve-btn:hover {
+            background: #27ae60;
+            transform: translateY(-1px);
+        }
+
+        .reject-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .reject-btn:hover {
+            background: #c0392b;
+            transform: translateY(-1px);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #f39c12;
+            color: white;
+        }
+
+        .status-approved {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .status-rejected {
+            background: #e74c3c;
+            color: white;
+        }
+
         .main-content {
             flex: 1;
             padding: 2rem;
@@ -332,6 +454,11 @@
                 <i class="fas fa-chart-bar"></i>
                 <span>Analytics</span>
             </div>
+            <div class="nav-item" onclick="showSection('driver-applications')">
+                <i class="fas fa-user-plus"></i>
+                <span>Driver Applications</span>
+                <span class="badge" id="pending-count">0</span>
+            </div>
             <div class="nav-item" onclick="showSection('drivers')">
                 <i class="fas fa-car"></i>
                 <span>Driver Management</span>
@@ -351,6 +478,140 @@
         </div>
 
         <div class="main-content">
+            <!-- Driver Applications Section -->
+            <div id="driver-applications" class="content-section">
+                <h2 class="section-title">Driver Application Management</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <i class="fas fa-user-clock"></i>
+                        <div class="stat-number" id="pending-applications">0</div>
+                        <div class="stat-label">Pending Applications</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-user-check"></i>
+                        <div class="stat-number" id="approved-applications">0</div>
+                        <div class="stat-label">Approved This Month</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-user-times"></i>
+                        <div class="stat-number" id="rejected-applications">0</div>
+                        <div class="stat-label">Rejected Applications</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-percentage"></i>
+                        <div class="stat-number" id="approval-rate">0%</div>
+                        <div class="stat-label">Approval Rate</div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="refreshApplications()">
+                        <i class="fas fa-refresh"></i> Refresh Applications
+                    </button>
+                    <button class="action-btn" onclick="exportApplications()">
+                        <i class="fas fa-download"></i> Export Data
+                    </button>
+                    <button class="action-btn" onclick="bulkApprove()">
+                        <i class="fas fa-check-double"></i> Bulk Approve
+                    </button>
+                </div>
+
+                <div id="applications-container">
+                    <div class="application-card">
+                        <div class="application-header">
+                            <div>
+                                <h3>John Smith</h3>
+                                <p>johnsmith@email.com • (555) 123-4567</p>
+                            </div>
+                            <span class="status-badge status-pending">Pending Review</span>
+                        </div>
+                        <div class="application-content">
+                            <div class="application-details">
+                                <div class="detail-item">
+                                    <div class="detail-label">Date Applied</div>
+                                    <div class="detail-value">January 15, 2025</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Vehicle</div>
+                                    <div class="detail-value">2018 Honda Civic</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">License State</div>
+                                    <div class="detail-value">Alabama</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Insurance</div>
+                                    <div class="detail-value">State Farm - Valid</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Experience</div>
+                                    <div class="detail-value">2 years delivery</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Availability</div>
+                                    <div class="detail-value">Weekends, 20 hrs/week</div>
+                                </div>
+                            </div>
+                            <div class="application-actions">
+                                <button class="approve-btn" onclick="approveApplication('app-001')">
+                                    <i class="fas fa-check"></i> Approve & Send Credentials
+                                </button>
+                                <button class="reject-btn" onclick="rejectApplication('app-001')">
+                                    <i class="fas fa-times"></i> Reject Application
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="application-card">
+                        <div class="application-header">
+                            <div>
+                                <h3>Maria Rodriguez</h3>
+                                <p>maria.rodriguez@email.com • (555) 987-6543</p>
+                            </div>
+                            <span class="status-badge status-pending">Pending Review</span>
+                        </div>
+                        <div class="application-content">
+                            <div class="application-details">
+                                <div class="detail-item">
+                                    <div class="detail-label">Date Applied</div>
+                                    <div class="detail-value">January 16, 2025</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Vehicle</div>
+                                    <div class="detail-value">2020 Ford Explorer</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">License State</div>
+                                    <div class="detail-value">Florida</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Insurance</div>
+                                    <div class="detail-value">Progressive - Valid</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Experience</div>
+                                    <div class="detail-value">5 years rideshare</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Availability</div>
+                                    <div class="detail-value">Full-time, 40 hrs/week</div>
+                                </div>
+                            </div>
+                            <div class="application-actions">
+                                <button class="approve-btn" onclick="approveApplication('app-002')">
+                                    <i class="fas fa-check"></i> Approve & Send Credentials
+                                </button>
+                                <button class="reject-btn" onclick="rejectApplication('app-002')">
+                                    <i class="fas fa-times"></i> Reject Application
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Platform Overview Section -->
             <div id="overview" class="content-section active">
                 <h2 class="section-title">Platform Overview</h2>
@@ -696,6 +957,127 @@
             }
         }
 
+        // Driver Application Management Functions
+        async function approveApplication(applicationId) {
+            try {
+                const response = await fetch('/api/admin/approve-driver-application', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ applicationId })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert(`Application approved! Driver credentials sent to ${result.email}\n\nUsername: ${result.username}\nPassword: ${result.password}\nEmployee ID: ${result.employeeNumber}`);
+                    
+                    // Update UI to show approved status
+                    updateApplicationStatus(applicationId, 'approved');
+                    updatePendingCount();
+                } else {
+                    alert(`Error: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Error approving application:', error);
+                alert('Failed to approve application. Please try again.');
+            }
+        }
+
+        async function rejectApplication(applicationId) {
+            const reason = prompt('Please provide a reason for rejection:');
+            if (!reason) return;
+
+            try {
+                const response = await fetch('/api/admin/reject-driver-application', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ applicationId, reason })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert(`Application rejected. Notification sent to ${result.email}`);
+                    
+                    // Update UI to show rejected status
+                    updateApplicationStatus(applicationId, 'rejected');
+                    updatePendingCount();
+                } else {
+                    alert(`Error: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Error rejecting application:', error);
+                alert('Failed to reject application. Please try again.');
+            }
+        }
+
+        function updateApplicationStatus(applicationId, status) {
+            const applicationCard = document.querySelector(`[onclick*="${applicationId}"]`).closest('.application-card');
+            const statusBadge = applicationCard.querySelector('.status-badge');
+            const actionButtons = applicationCard.querySelector('.application-actions');
+            
+            statusBadge.className = `status-badge status-${status}`;
+            statusBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            
+            if (status === 'approved' || status === 'rejected') {
+                actionButtons.innerHTML = `<p style="color: #666; font-style: italic;">Application ${status}</p>`;
+            }
+        }
+
+        function updatePendingCount() {
+            const pendingCards = document.querySelectorAll('.status-pending').length;
+            document.getElementById('pending-count').textContent = pendingCards;
+            document.getElementById('pending-applications').textContent = pendingCards;
+        }
+
+        async function refreshApplications() {
+            try {
+                const response = await fetch('/api/admin/driver-applications');
+                const applications = await response.json();
+                
+                if (response.ok) {
+                    renderApplications(applications);
+                    updateApplicationStats(applications);
+                } else {
+                    console.log('Using demo data - server endpoint not available');
+                    // For demo purposes, show sample data
+                    updatePendingCount();
+                }
+            } catch (error) {
+                console.error('Error refreshing applications:', error);
+                // For demo purposes, show sample data
+                updatePendingCount();
+            }
+        }
+
+        async function bulkApprove() {
+            const pendingApplications = document.querySelectorAll('.status-pending');
+            if (pendingApplications.length === 0) {
+                alert('No pending applications to approve');
+                return;
+            }
+            
+            const confirm = window.confirm(`Are you sure you want to approve all ${pendingApplications.length} pending applications?`);
+            if (!confirm) return;
+            
+            for (const element of pendingApplications) {
+                const applicationCard = element.closest('.application-card');
+                const approveBtn = applicationCard.querySelector('.approve-btn');
+                if (approveBtn) {
+                    const applicationId = approveBtn.getAttribute('onclick').match(/'([^']+)'/)[1];
+                    await approveApplication(applicationId);
+                }
+            }
+        }
+
+        function exportApplications() {
+            alert('Exporting driver applications data...');
+        }
+
         async function logout() {
             try {
                 // Call server logout endpoint
@@ -735,6 +1117,12 @@
                 window.location.href = '/signup-login';
             }
         }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updatePendingCount();
+            refreshApplications();
+        });
     </script>
 </body>
 </html>

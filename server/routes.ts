@@ -2578,6 +2578,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Driver application routes
   registerDriverRoutes(app);
 
+  // Import driverApplicationService
+  const { driverApplicationService } = require("./driverApplicationService");
+
+  // Driver Application Management Routes
+  app.get('/api/admin/driver-applications', async (req, res) => {
+    try {
+      const applications = driverApplicationService.getAllApplications();
+      res.json(applications);
+    } catch (error) {
+      console.error('Error fetching driver applications:', error);
+      res.status(500).json({ error: 'Failed to fetch applications' });
+    }
+  });
+
+  app.post('/api/admin/approve-driver-application', async (req, res) => {
+    try {
+      const { applicationId } = req.body;
+      
+      if (!applicationId) {
+        return res.status(400).json({ error: 'Application ID is required' });
+      }
+
+      const result = await driverApplicationService.approveApplication(applicationId);
+      
+      if (result.success) {
+        res.json(result);
+      } else {
+        res.status(400).json({ error: result.error });
+      }
+    } catch (error) {
+      console.error('Error approving driver application:', error);
+      res.status(500).json({ error: 'Failed to approve application' });
+    }
+  });
+
+  app.post('/api/admin/reject-driver-application', async (req, res) => {
+    try {
+      const { applicationId, reason } = req.body;
+      
+      if (!applicationId || !reason) {
+        return res.status(400).json({ error: 'Application ID and reason are required' });
+      }
+
+      const result = await driverApplicationService.rejectApplication(applicationId, reason);
+      
+      if (result.success) {
+        res.json(result);
+      } else {
+        res.status(400).json({ error: result.error });
+      }
+    } catch (error) {
+      console.error('Error rejecting driver application:', error);
+      res.status(500).json({ error: 'Failed to reject application' });
+    }
+  });
+
   // Password recovery routes
   registerPasswordRecoveryRoutes(app);
 
