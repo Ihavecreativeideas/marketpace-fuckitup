@@ -259,6 +259,15 @@ All features are designed to strengthen local communities by keeping commerce lo
 
 ## Recent Changes
 
+✓ **SELLER-CONTROLLED COUNTER OFFER & POSTING SYSTEM IMPLEMENTED** (July 18, 2025)
+✓ **SELLER POSTING OPTIONS**: Created comprehensive posting modal where sellers configure counter offers and delivery methods before posting
+✓ **COUNTER OFFER CONTROL**: Sellers choose whether to enable counter offers when creating posts (not buyer-initiated)
+✓ **DELIVERY METHOD SELECTION**: Sellers select self-pickup (FREE), MarketPace delivery (split cost), or their own delivery with custom fee
+✓ **PRE-CALCULATED DISCOUNTS**: 15%, 25%, 35%, 40%, 50% off options shown to sellers during posting with price preview
+✓ **SELLER WORKFLOW**: Sellers post → buyers see counter offer button only if enabled → seller receives pop-up to Accept/Decline/Counter Back
+✓ **INTEGRATED POSTING SYSTEM**: Updated community and shops pages to use new seller posting modal for all sale, rental, and service posts
+✓ **STREAMLINED USER EXPERIENCE**: Counter offers and delivery options configured once during posting instead of during each transaction
+
 ✓ **COMPREHENSIVE RENTAL SYSTEM FIXES WITH CORRECTED COMMISSION STRUCTURE** (July 18, 2025)
 ✓ **CRITICAL MATH CORRECTIONS**: Fixed hourly rate multiplication - now correctly calculates hours × $15/hour instead of just $15
 ✓ **COMMISSION STRUCTURE SIMPLIFIED**: 5% platform sustainability fee automatically deducted from rental price - renters pay full price, owners receive amount minus fee
