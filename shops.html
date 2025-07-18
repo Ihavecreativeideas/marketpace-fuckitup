@@ -1404,7 +1404,7 @@
                                 </svg>
                                 Add to Cart
                             </button>
-                            <button class="commerce-btn" onclick="counterOffer('Summer Dresses')">Counter Offer</button>
+                            <button class="commerce-btn" onclick="counterOffer('Summer Dresses', '35')">Counter Offer</button>
                             <button class="commerce-btn" onclick="messageOwner('Sarah')">Message</button>
                         </div>
                     </div>
@@ -1478,7 +1478,7 @@
                                 </svg>
                                 Add to Cart
                             </button>
-                            <button class="commerce-btn" onclick="counterOffer('iPhone 15 Pro Max')">Counter Offer</button>
+                            <button class="commerce-btn" onclick="counterOffer('iPhone 15 Pro Max', '899')">Counter Offer</button>
                             <button class="commerce-btn" onclick="messageOwner('TechGadgets')">Message</button>
                         </div>
                     </div>
@@ -1594,6 +1594,7 @@
         </div>
     </div>
 
+    <script src="counter-offer-system.js"></script>
     <script>
         // Navigation functions
         function goToPage(page) {
@@ -1622,15 +1623,23 @@
 
         // Commerce functions
         function deliverNow(item) {
-            alert(`Arranging delivery for "${item}"`);
+            // Calculate delivery fee for standard delivery
+            const deliveryFee = calculateDeliveryFee('standard', 3); // 3 mile default
+            showPopupNotification(`Arranging delivery for "${item}" - Delivery fee: $${deliveryFee.toFixed(2)}`, 'info', 4000);
         }
 
         function addToCart(item) {
-            alert(`Adding "${item}" to cart`);
+            // Check if it's self-pickup to avoid delivery fees
+            const deliveryMethod = 'self-pickup'; // Default to self-pickup
+            const deliveryFee = calculateDeliveryFee(deliveryMethod);
+            
+            showPopupNotification(`"${item}" added to cart! Delivery fee: $${deliveryFee.toFixed(2)}`, 'success', 3000);
         }
 
-        function counterOffer(item) {
-            alert(`Making counter offer for "${item}"`);
+        function counterOffer(item, price) {
+            // Use the new counter offer system
+            window.originalPrice = parseFloat(price);
+            showCounterOfferModal(item, parseFloat(price), `item_${Date.now()}`, 'seller_123');
         }
 
         function messageOwner(owner) {
@@ -1695,9 +1704,19 @@
             alert(`Opening post modal for: ${type || 'general'}`);
         }
 
+        // Update cart counter
+        function updateCartCounter() {
+            const cart = JSON.parse(localStorage.getItem('marketpace_cart') || '[]');
+            const badge = document.getElementById('cartBadge');
+            if (badge) {
+                badge.textContent = cart.length;
+            }
+        }
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Shops page loaded');
+            updateCartCounter();
             
             // Generate floating particles
             const particlesContainer = document.querySelector('.particles');
