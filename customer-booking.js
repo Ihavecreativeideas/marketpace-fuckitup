@@ -6,6 +6,17 @@ function bookService(providerId, providerName, serviceType) {
     modal.className = 'modal-overlay';
     modal.innerHTML = `
         <div class="modal-content" style="max-width: 600px;">
+            <div style="background: linear-gradient(135deg, #ffd700, #f59e0b); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 2px solid #ffd700;">
+                <h4 style="color: #1a0b3d; margin: 0 0 8px 0; font-weight: bold;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-right: 6px; vertical-align: middle;">
+                        <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(26, 11, 61, 0.2)"/>
+                        <path d="M12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2Z" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    MarketPace Pro Feature - FREE Until Jan 1, 2026!
+                </h4>
+                <p style="color: #1a0b3d; margin: 0; font-size: 13px;">Service booking is a Pro feature. During our launch period, ALL Pro features are completely free!</p>
+            </div>
+            
             <h3 style="color: #00ffff; margin-bottom: 20px;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-right: 8px;">
                     <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/>
@@ -164,6 +175,17 @@ function bookRental(itemId, itemName, ownerName, dailyRate) {
     modal.className = 'modal-overlay';
     modal.innerHTML = `
         <div class="modal-content" style="max-width: 600px;">
+            <div style="background: linear-gradient(135deg, #ffd700, #f59e0b); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 2px solid #ffd700;">
+                <h4 style="color: #1a0b3d; margin: 0 0 8px 0; font-weight: bold;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-right: 6px; vertical-align: middle;">
+                        <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(26, 11, 61, 0.2)"/>
+                        <path d="M12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2Z" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    MarketPace Pro Feature - FREE Until Jan 1, 2026!
+                </h4>
+                <p style="color: #1a0b3d; margin: 0; font-size: 13px;">Advanced rental booking is a Pro feature. All Pro features are free during our launch campaign!</p>
+            </div>
+            
             <h3 style="color: #00ffff; margin-bottom: 20px;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-right: 8px;">
                     <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/>
