@@ -473,6 +473,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Serve the Shopify integration test page
+  app.get('/test-shopify-integration', (req, res) => {
+    res.sendFile('test-shopify-integration.html', { root: '.' });
+  });
+
   app.get('/api/driver-active-routes', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;

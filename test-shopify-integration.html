@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopify Integration Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a0b3d 0%, #6b46c1 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .test-button {
+            background: linear-gradient(45deg, #ffd700, #ffed4a);
+            color: #1a0b3d;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+        }
+        .result-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #ffd700;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success {
+            border-left-color: #10b981;
+            color: #10b981;
+        }
+        .error {
+            border-left-color: #ef4444;
+            color: #ef4444;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status.success {
+            background: #10b981;
+            color: white;
+        }
+        .status.error {
+            background: #ef4444;
+            color: white;
+        }
+        .status.pending {
+            background: #f59e0b;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛍️ Shopify Integration Test Suite</h1>
+        
+        <div class="test-section">
+            <h3>Store Connection Test</h3>
+            <button class="test-button" onclick="testConnection()">Test Store Connection</button>
+            <div id="connectionResult" class="result-box"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Product Sync Test</h3>
+            <button class="test-button" onclick="testProductSync()">Test Product Sync</button>
+            <div id="productSyncResult" class="result-box"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Location Access Test</h3>
+            <button class="test-button" onclick="testLocations()">Test Store Locations</button>
+            <div id="locationsResult" class="result-box"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Order API Test</h3>
+            <button class="test-button" onclick="testOrders()">Test Order Access</button>
+            <div id="ordersResult" class="result-box"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Full Integration Test</h3>
+            <button class="test-button" onclick="runFullTest()">Run Complete Integration Test</button>
+            <div id="fullTestResult" class="result-box"></div>
+        </div>
+    </div>
+
+    <script>
+        async function testConnection() {
+            const resultDiv = document.getElementById('connectionResult');
+            resultDiv.innerHTML = 'Testing connection...';
+            
+            try {
+                const response = await fetch('/api/shopify/test-connection', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        shopDomain: 'myshop-marketpace-com.myshopify.com',
+                        accessToken: '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'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultDiv.className = 'result-box success';
+                    resultDiv.innerHTML = `✅ Connection Successful!\n\nStore: ${result.shopDomain}\nAccess Token: ${result.accessToken}\n\nTest Results:\n${JSON.stringify(result.testResults, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result-box error';
+                    resultDiv.innerHTML = `❌ Connection Failed!\n\nError: ${result.error || 'Unknown error'}\n\nDetails:\n${JSON.stringify(result, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result-box error';
+                resultDiv.innerHTML = `❌ Test Failed!\n\nError: ${error.message}`;
+            }
+        }
+
+        async function testProductSync() {
+            const resultDiv = document.getElementById('productSyncResult');
+            resultDiv.innerHTML = 'Testing product sync...';
+            
+            try {
+                const response = await fetch('/api/shopify/business-integration/sync', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        businessId: 'test-business-123',
+                        shopDomain: 'myshop-marketpace-com.myshopify.com',
+                        accessToken: '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'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultDiv.className = 'result-box success';
+                    resultDiv.innerHTML = `✅ Product Sync Successful!\n\nProducts Found: ${result.productsFound || 0}\nProducts Synced: ${result.productsSynced || 0}\n\nDetails:\n${JSON.stringify(result, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result-box error';
+                    resultDiv.innerHTML = `❌ Product Sync Failed!\n\nError: ${result.error || 'Unknown error'}\n\nDetails:\n${JSON.stringify(result, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result-box error';
+                resultDiv.innerHTML = `❌ Product Sync Test Failed!\n\nError: ${error.message}`;
+            }
+        }
+
+        async function testLocations() {
+            const resultDiv = document.getElementById('locationsResult');
+            resultDiv.innerHTML = 'Testing store locations...';
+            
+            try {
+                const response = await fetch('https://myshop-marketpace-com.myshopify.com/admin/api/2024-01/locations.json', {
+                    method: 'GET',
+                    headers: {
+                        'X-Shopify-Access-Token': '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',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.locations) {
+                    resultDiv.className = 'result-box success';
+                    resultDiv.innerHTML = `✅ Locations Retrieved!\n\nFound ${result.locations.length} locations:\n\n${result.locations.map(loc => `• ${loc.name} (${loc.city || 'No city'}, ${loc.country})`).join('\n')}\n\nFull Data:\n${JSON.stringify(result, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result-box error';
+                    resultDiv.innerHTML = `❌ Failed to retrieve locations!\n\nResponse:\n${JSON.stringify(result, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result-box error';
+                resultDiv.innerHTML = `❌ Location Test Failed!\n\nError: ${error.message}`;
+            }
+        }
+
+        async function testOrders() {
+            const resultDiv = document.getElementById('ordersResult');
+            resultDiv.innerHTML = 'Testing order access...';
+            
+            try {
+                const response = await fetch('https://myshop-marketpace-com.myshopify.com/admin/api/2024-01/orders.json?limit=10', {
+                    method: 'GET',
+                    headers: {
+                        'X-Shopify-Access-Token': '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',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.orders !== undefined) {
+                    resultDiv.className = 'result-box success';
+                    resultDiv.innerHTML = `✅ Orders API Access Successful!\n\nFound ${result.orders.length} orders\n\n${result.orders.length === 0 ? 'No orders in store yet - this is normal for new stores.' : result.orders.map(order => `• Order #${order.order_number}: $${order.total_price}`).join('\n')}\n\nFull Response:\n${JSON.stringify(result, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result-box error';
+                    resultDiv.innerHTML = `❌ Failed to access orders!\n\nResponse:\n${JSON.stringify(result, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result-box error';
+                resultDiv.innerHTML = `❌ Order Test Failed!\n\nError: ${error.message}`;
+            }
+        }
+
+        async function runFullTest() {
+            const resultDiv = document.getElementById('fullTestResult');
+            resultDiv.innerHTML = 'Running complete integration test...\n\n';
+            
+            const tests = [
+                { name: 'Store Connection', func: testConnection, target: 'connectionResult' },
+                { name: 'Product Sync', func: testProductSync, target: 'productSyncResult' },
+                { name: 'Locations', func: testLocations, target: 'locationsResult' },
+                { name: 'Orders', func: testOrders, target: 'ordersResult' }
+            ];
+            
+            let results = [];
+            
+            for (const test of tests) {
+                resultDiv.innerHTML += `Testing ${test.name}...\n`;
+                
+                try {
+                    await test.func();
+                    const testResult = document.getElementById(test.target);
+                    const success = testResult.className.includes('success');
+                    results.push(`${test.name}: ${success ? '✅ PASS' : '❌ FAIL'}`);
+                    resultDiv.innerHTML += `${test.name}: ${success ? '✅ PASS' : '❌ FAIL'}\n`;
+                } catch (error) {
+                    results.push(`${test.name}: ❌ ERROR - ${error.message}`);
+                    resultDiv.innerHTML += `${test.name}: ❌ ERROR - ${error.message}\n`;
+                }
+                
+                // Brief pause between tests
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            const passCount = results.filter(r => r.includes('✅ PASS')).length;
+            const totalCount = results.length;
+            
+            resultDiv.innerHTML += `\n=== INTEGRATION TEST SUMMARY ===\n`;
+            resultDiv.innerHTML += `Passed: ${passCount}/${totalCount} tests\n`;
+            resultDiv.innerHTML += `Status: ${passCount === totalCount ? '✅ ALL TESTS PASSED' : '⚠️ SOME TESTS FAILED'}\n\n`;
+            resultDiv.innerHTML += results.join('\n');
+            
+            if (passCount === totalCount) {
+                resultDiv.className = 'result-box success';
+                resultDiv.innerHTML += `\n\n🎉 Your Shopify integration is fully functional!`;
+            } else {
+                resultDiv.className = 'result-box error';
+                resultDiv.innerHTML += `\n\n⚠️ Some tests failed. Check individual test results above.`;
+            }
+        }
+    </script>
+</body>
+</html>
