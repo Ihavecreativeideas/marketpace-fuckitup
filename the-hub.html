@@ -890,187 +890,317 @@
             window.location.href = '/profile';
         }
 
-        // Hub-specific functions
-        function createHubPost(type) {
-            switch(type) {
-                case 'media':
-                    openMediaUploadModal();
-                    break;
-                case 'gear':
-                    openGearListingModal();
-                    break;
-                case 'tickets':
-                    openTicketSharingModal();
-                    break;
-                case 'release':
-                    const today = new Date();
-                    const releaseDate = prompt('Schedule content release date (YYYY-MM-DD):');
-                    if (releaseDate) {
-                        alert(`Content release scheduled for ${releaseDate}!`);
-                    }
-                    break;
-                case 'event':
-                    openEventCreationModal();
-                    break;
-                case 'profile':
-                    openProfileEditorModal();
-                    break;
+        // Hub-specific Facebook Marketplace-style posting modal
+        function createHubPost(type = 'media') {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+            `;
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: linear-gradient(135deg, #1a0b3d, #2d1b69);
+                border: 2px solid #ff6b6b;
+                border-radius: 15px;
+                padding: 30px;
+                width: 90%;
+                max-width: 600px;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 0 30px rgba(255, 107, 107, 0.3);
+            `;
+            
+            modalContent.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="color: #ff6b6b; margin: 0;">Create ${getHubCategoryName(type)} Post</h2>
+                    <button onclick="this.closest('.hub-posting-modal').remove()" style="background: none; border: none; color: #ff6b6b; font-size: 24px; cursor: pointer;">&times;</button>
+                </div>
+                
+                <form id="hubPostForm" style="color: #e2e8f0;">
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; color: #ff6b6b;">Entertainment Category:</label>
+                        <select id="hubCategory" style="width: 100%; padding: 10px; border: 1px solid #ff6b6b; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                            <option value="media">Photo/Video/Audio Share</option>
+                            <option value="gear">Music Gear & Equipment</option>
+                            <option value="tickets">Event Tickets</option>
+                            <option value="release">Music/Content Release</option>
+                            <option value="event">Live Performance/Event</option>
+                            <option value="profile">Artist/Professional Profile</option>
+                            <option value="collaboration">Looking for Collaborators</option>
+                            <option value="gig">Gig Opportunity</option>
+                            <option value="lesson">Music/Performance Lessons</option>
+                        </select>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; color: #ff6b6b;">Title:</label>
+                        <input type="text" id="hubTitle" placeholder="What are you sharing with the entertainment community?" style="width: 100%; padding: 10px; border: 1px solid #ff6b6b; border-radius: 5px; background: #2d1b69; color: #e2e8f0;" required>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; color: #ff6b6b;">Description:</label>
+                        <textarea id="hubDescription" placeholder="Tell us more about your post..." style="width: 100%; padding: 10px; border: 1px solid #ff6b6b; border-radius: 5px; background: #2d1b69; color: #e2e8f0; min-height: 100px;" required></textarea>
+                    </div>
+                    
+                    <!-- Price Field for Gear, Tickets, Lessons -->
+                    <div id="hubPriceField" style="margin-bottom: 20px; display: none;">
+                        <label style="display: block; margin-bottom: 5px; color: #ff6b6b;">Price:</label>
+                        <input type="text" id="hubPrice" placeholder="$0.00 (or Free)" style="width: 100%; padding: 10px; border: 1px solid #ff6b6b; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                    </div>
+                    
+                    <!-- Event-specific fields -->
+                    <div id="hubEventFields" style="display: none;">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 5px; color: #ff6b6b;">Event Date:</label>
+                            <input type="date" id="hubEventDate" style="width: 100%; padding: 10px; border: 1px solid #ff6b6b; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 5px; color: #ff6b6b;">Event Time:</label>
+                            <input type="time" id="hubEventTime" style="width: 100%; padding: 10px; border: 1px solid #ff6b6b; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 5px; color: #ff6b6b;">Venue/Location:</label>
+                            <input type="text" id="hubEventLocation" placeholder="Venue name or location" style="width: 100%; padding: 10px; border: 1px solid #ff6b6b; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                        </div>
+                    </div>
+                    
+                    <!-- Gear-specific fields -->
+                    <div id="hubGearFields" style="display: none;">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 5px; color: #ff6b6b;">Condition:</label>
+                            <select id="hubGearCondition" style="width: 100%; padding: 10px; border: 1px solid #ff6b6b; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                                <option value="">Select condition...</option>
+                                <option value="New">New</option>
+                                <option value="Like New">Like New</option>
+                                <option value="Excellent">Excellent</option>
+                                <option value="Good">Good</option>
+                                <option value="Fair">Fair</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 5px; color: #ff6b6b;">Brand/Model:</label>
+                            <input type="text" id="hubGearBrand" placeholder="e.g., Fender Stratocaster, Shure SM58" style="width: 100%; padding: 10px; border: 1px solid #ff6b6b; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                        </div>
+                    </div>
+                    
+                    <!-- Release-specific fields -->
+                    <div id="hubReleaseFields" style="display: none;">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 5px; color: #ff6b6b;">Release Date:</label>
+                            <input type="date" id="hubReleaseDate" style="width: 100%; padding: 10px; border: 1px solid #ff6b6b; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 5px; color: #ff6b6b;">Platform Links:</label>
+                            <input type="text" id="hubStreamingLinks" placeholder="Spotify, Apple Music, YouTube, etc." style="width: 100%; padding: 10px; border: 1px solid #ff6b6b; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                        </div>
+                    </div>
+                    
+                    <!-- Profile-specific fields -->
+                    <div id="hubProfileFields" style="display: none;">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 5px; color: #ff6b6b;">Your Role:</label>
+                            <select id="hubProfileRole" style="width: 100%; padding: 10px; border: 1px solid #ff6b6b; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                                <option value="">Select your role...</option>
+                                <option value="Musician">Musician</option>
+                                <option value="DJ">DJ</option>
+                                <option value="Comedian">Comedian</option>
+                                <option value="Sound Engineer">Sound Engineer</option>
+                                <option value="Producer">Producer</option>
+                                <option value="Theater Actor">Theater Actor</option>
+                                <option value="Event Coordinator">Event Coordinator</option>
+                                <option value="Music Teacher">Music Teacher</option>
+                                <option value="Venue Owner">Venue Owner</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 5px; color: #ff6b6b;">Experience Level:</label>
+                            <select id="hubExperience" style="width: 100%; padding: 10px; border: 1px solid #ff6b6b; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                                <option value="">Select experience...</option>
+                                <option value="Beginner">Beginner (0-2 years)</option>
+                                <option value="Intermediate">Intermediate (2-5 years)</option>
+                                <option value="Advanced">Advanced (5-10 years)</option>
+                                <option value="Professional">Professional (10+ years)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; color: #ff6b6b;">Media/Images:</label>
+                        <input type="file" id="hubImages" multiple accept="image/*,video/*,audio/*" style="width: 100%; padding: 10px; border: 1px solid #ff6b6b; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 10px; color: #ff6b6b;">Action Options:</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" id="hubBookNow" style="margin-right: 5px;"> Book Now
+                            </label>
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" id="hubContactArtist" style="margin-right: 5px;"> Contact Artist
+                            </label>
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" id="hubBuyTickets" style="margin-right: 5px;"> Buy Tickets
+                            </label>
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" id="hubStreamNow" style="margin-right: 5px;"> Stream Now
+                            </label>
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" id="hubCollaborate" style="margin-right: 5px;"> Collaborate
+                            </label>
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" id="hubHireMe" style="margin-right: 5px;"> Hire Me
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button type="button" onclick="this.closest('.hub-posting-modal').remove()" style="padding: 10px 20px; background: #666; color: white; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
+                        <button type="submit" style="padding: 10px 20px; background: linear-gradient(135deg, #ff6b6b, #ffd93d); color: #000; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Post to Hub</button>
+                    </div>
+                </form>
+            `;
+            
+            modal.className = 'hub-posting-modal';
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Set initial category
+            document.getElementById('hubCategory').value = type;
+            updateHubFormFields();
+            
+            // Add event listeners
+            document.getElementById('hubCategory').addEventListener('change', updateHubFormFields);
+            document.getElementById('hubPostForm').addEventListener('submit', handleHubPostSubmit);
+            
+            function updateHubFormFields() {
+                const category = document.getElementById('hubCategory').value;
+                const priceField = document.getElementById('hubPriceField');
+                const eventFields = document.getElementById('hubEventFields');
+                const gearFields = document.getElementById('hubGearFields');
+                const releaseFields = document.getElementById('hubReleaseFields');
+                const profileFields = document.getElementById('hubProfileFields');
+                
+                // Hide all conditional fields
+                priceField.style.display = 'none';
+                eventFields.style.display = 'none';
+                gearFields.style.display = 'none';
+                releaseFields.style.display = 'none';
+                profileFields.style.display = 'none';
+                
+                // Show relevant fields based on category
+                if (category === 'gear' || category === 'tickets' || category === 'lesson') {
+                    priceField.style.display = 'block';
+                }
+                
+                if (category === 'event') {
+                    eventFields.style.display = 'block';
+                }
+                
+                if (category === 'gear') {
+                    gearFields.style.display = 'block';
+                }
+                
+                if (category === 'release') {
+                    releaseFields.style.display = 'block';
+                }
+                
+                if (category === 'profile') {
+                    profileFields.style.display = 'block';
+                }
+            }
+            
+            function handleHubPostSubmit(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    category: document.getElementById('hubCategory').value,
+                    title: document.getElementById('hubTitle').value,
+                    description: document.getElementById('hubDescription').value,
+                    price: document.getElementById('hubPrice').value,
+                    eventDate: document.getElementById('hubEventDate').value,
+                    eventTime: document.getElementById('hubEventTime').value,
+                    eventLocation: document.getElementById('hubEventLocation').value,
+                    gearCondition: document.getElementById('hubGearCondition').value,
+                    gearBrand: document.getElementById('hubGearBrand').value,
+                    releaseDate: document.getElementById('hubReleaseDate').value,
+                    streamingLinks: document.getElementById('hubStreamingLinks').value,
+                    profileRole: document.getElementById('hubProfileRole').value,
+                    experience: document.getElementById('hubExperience').value,
+                    actionButtons: {
+                        bookNow: document.getElementById('hubBookNow').checked,
+                        contactArtist: document.getElementById('hubContactArtist').checked,
+                        buyTickets: document.getElementById('hubBuyTickets').checked,
+                        streamNow: document.getElementById('hubStreamNow').checked,
+                        collaborate: document.getElementById('hubCollaborate').checked,
+                        hireMe: document.getElementById('hubHireMe').checked
+                    },
+                    created: new Date().toISOString(),
+                    author: 'Hub Artist'
+                };
+                
+                // Save to localStorage
+                const existingPosts = JSON.parse(localStorage.getItem('hubPosts') || '[]');
+                existingPosts.unshift(formData);
+                localStorage.setItem('hubPosts', JSON.stringify(existingPosts));
+                
+                // Close modal
+                modal.remove();
+                
+                // Show success message
+                showHubNotification(`✅ ${getHubCategoryName(formData.category)} "${formData.title}" posted to The Hub successfully!`, 'success');
+                
+                // Refresh page to show new post
+                setTimeout(() => location.reload(), 1000);
             }
         }
-
-        // Media upload modal function
-        function openMediaUploadModal() {
-            const mediaType = prompt('What type of media?\n1. Photo\n2. Video\n3. Audio\n\nEnter number:');
-            if (!mediaType) return;
-            
-            const mediaTitle = prompt('Media Title:');
-            if (!mediaTitle) return;
-            
-            const mediaDescription = prompt('Media Description:');
-            if (!mediaDescription) return;
-            
-            const mediaPost = {
-                type: 'media',
-                title: mediaTitle,
-                description: mediaDescription,
-                mediaType: mediaType === '1' ? 'Photo' : mediaType === '2' ? 'Video' : 'Audio',
-                created: new Date().toISOString()
+        
+        function getHubCategoryName(category) {
+            const categoryNames = {
+                'media': 'Media',
+                'gear': 'Gear',
+                'tickets': 'Tickets',
+                'release': 'Release',
+                'event': 'Event',
+                'profile': 'Profile',
+                'collaboration': 'Collaboration',
+                'gig': 'Gig',
+                'lesson': 'Lesson'
             };
+            return categoryNames[category] || 'Hub';
+        }
+        
+        function showHubNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'linear-gradient(135deg, #00ff88, #00cc6a)' : '#ff4444'};
+                color: ${type === 'success' ? '#000' : '#fff'};
+                padding: 15px 20px;
+                border-radius: 8px;
+                font-weight: bold;
+                z-index: 10001;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
             
-            const existingMedia = JSON.parse(localStorage.getItem('hubMedia') || '[]');
-            existingMedia.push(mediaPost);
-            localStorage.setItem('hubMedia', JSON.stringify(existingMedia));
-            
-            alert(`✅ ${mediaPost.mediaType} "${mediaTitle}" uploaded successfully!`);
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
         }
 
-        // Gear listing modal function
-        function openGearListingModal() {
-            const gearName = prompt('Gear Name:');
-            if (!gearName) return;
-            
-            const gearPrice = prompt('Price (or "Free" for free items):');
-            if (!gearPrice) return;
-            
-            const gearCondition = prompt('Condition (New, Like New, Good, Fair):');
-            if (!gearCondition) return;
-            
-            const gearDescription = prompt('Description:');
-            if (!gearDescription) return;
-            
-            const gearPost = {
-                type: 'gear',
-                name: gearName,
-                price: gearPrice,
-                condition: gearCondition,
-                description: gearDescription,
-                created: new Date().toISOString()
-            };
-            
-            const existingGear = JSON.parse(localStorage.getItem('hubGear') || '[]');
-            existingGear.push(gearPost);
-            localStorage.setItem('hubGear', JSON.stringify(existingGear));
-            
-            alert(`✅ Gear "${gearName}" listed successfully at ${gearPrice}!`);
-        }
 
-        // Ticket sharing modal function
-        function openTicketSharingModal() {
-            const eventName = prompt('Event Name:');
-            if (!eventName) return;
-            
-            const ticketPrice = prompt('Ticket Price:');
-            if (!ticketPrice) return;
-            
-            const eventDate = prompt('Event Date (YYYY-MM-DD):');
-            if (!eventDate) return;
-            
-            const eventVenue = prompt('Venue:');
-            if (!eventVenue) return;
-            
-            const ticketPost = {
-                type: 'ticket',
-                eventName: eventName,
-                price: ticketPrice,
-                date: eventDate,
-                venue: eventVenue,
-                created: new Date().toISOString()
-            };
-            
-            const existingTickets = JSON.parse(localStorage.getItem('hubTickets') || '[]');
-            existingTickets.push(ticketPost);
-            localStorage.setItem('hubTickets', JSON.stringify(existingTickets));
-            
-            alert(`✅ Ticket for "${eventName}" shared successfully!`);
-        }
-
-        // Profile editor modal function
-        function openProfileEditorModal() {
-            const profileName = prompt('Professional Name:');
-            if (!profileName) return;
-            
-            const profileTitle = prompt('Professional Title (e.g., DJ, Musician, Comedian):');
-            if (!profileTitle) return;
-            
-            const profileBio = prompt('Professional Bio:');
-            if (!profileBio) return;
-            
-            const profileServices = prompt('Services Offered:');
-            if (!profileServices) return;
-            
-            const profilePost = {
-                type: 'profile',
-                name: profileName,
-                title: profileTitle,
-                bio: profileBio,
-                services: profileServices,
-                created: new Date().toISOString()
-            };
-            
-            const existingProfiles = JSON.parse(localStorage.getItem('hubProfiles') || '[]');
-            existingProfiles.push(profilePost);
-            localStorage.setItem('hubProfiles', JSON.stringify(existingProfiles));
-            
-            alert(`✅ Professional profile for "${profileName}" created successfully!`);
-        }
-
-        // Event creation modal function
-        function openEventCreationModal() {
-            const eventTitle = prompt('Event Title:');
-            if (!eventTitle) return;
-            
-            const eventDate = prompt('Event Date (YYYY-MM-DD):');
-            if (!eventDate) return;
-            
-            const eventTime = prompt('Event Time (e.g., 8:00 PM):');
-            if (!eventTime) return;
-            
-            const eventLocation = prompt('Event Location:');
-            if (!eventLocation) return;
-            
-            const eventDescription = prompt('Event Description:');
-            if (!eventDescription) return;
-            
-            // Create new event post
-            const eventPost = {
-                title: eventTitle,
-                date: eventDate,
-                time: eventTime,
-                location: eventLocation,
-                description: eventDescription,
-                created: new Date().toISOString()
-            };
-            
-            // Save to localStorage
-            const existingEvents = JSON.parse(localStorage.getItem('hubEvents') || '[]');
-            existingEvents.push(eventPost);
-            localStorage.setItem('hubEvents', JSON.stringify(existingEvents));
-            
-            alert(`✅ Event "${eventTitle}" created successfully!\n\nDate: ${eventDate}\nTime: ${eventTime}\nLocation: ${eventLocation}`);
-            
-            // Reload page to show new event
-            location.reload();
-        }
 
         // Professional profile functions
         function openWebsite(type) {
