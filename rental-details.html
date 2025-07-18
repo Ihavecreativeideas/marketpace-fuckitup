@@ -584,25 +584,24 @@
                 rentalCost = days * 45; // $45 per day for multi-day rentals
             }
             
-            // Calculate 5% marketplace commission (deducted from rental cost)
-            const marketplaceCommission = rentalCost * 0.05;
-            const discountedRentalCost = rentalCost - marketplaceCommission;
-            const ownerPayout = rentalCost; // Owner gets full rental amount
+            // Calculate 5% platform sustainability fee (automatically deducted from rental price)
+            const platformFee = rentalCost * 0.05;
+            const ownerPayout = rentalCost - platformFee; // Owner receives rental amount minus platform fee
+            const renterPayment = rentalCost; // Renter pays full rental price
             
             let deliveryCost = 0;
             if (deliveryOption === 'delivery') {
                 deliveryCost = 61; // Base delivery ($4x2) + truck fee ($50) + mileage ($3)
             }
             
-            const totalCost = discountedRentalCost + deliveryCost + selectedTip;
+            const totalCost = renterPayment + deliveryCost + selectedTip;
             
             // Show confirmation with detailed cost breakdown
             const confirmMessage = `
 🛒 Rental Summary:
 📅 Duration: ${durationHours} hours
-💰 Base Rental Cost: $${rentalCost.toFixed(2)}
-🎁 MarketPace Discount (5%): -$${marketplaceCommission.toFixed(2)}
-💰 Your Rental Cost: $${discountedRentalCost.toFixed(2)}
+💰 Rental Cost: $${rentalCost.toFixed(2)}
+🏪 Platform Fee (5%): $${platformFee.toFixed(2)} (auto-deducted)
 👤 Owner Receives: $${ownerPayout.toFixed(2)}
 🚚 Delivery: ${deliveryOption === 'delivery' ? '$' + deliveryCost.toFixed(2) : 'Self Pickup (FREE)'}
 💵 Driver Tip: $${selectedTip.toFixed(2)}
