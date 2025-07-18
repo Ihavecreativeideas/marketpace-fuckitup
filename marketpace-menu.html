@@ -553,6 +553,20 @@
             </div>
         </div>
 
+        <!-- Social & Community Section -->
+        <div class="menu-section">
+            <div class="section-title">Social & Community</div>
+            <div class="menu-item" onclick="showFacebookInviteModal()">
+                <div class="menu-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(24, 119, 242, 0.2)"/><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" stroke="currentColor" stroke-width="1.5"/></svg></div>
+                <div class="menu-content">
+                    <div class="menu-title">Invite Facebook Friends</div>
+                    <div class="menu-description">Share MarketPace with your Facebook community</div>
+                </div>
+                <div class="pro-badge" style="background: #1877f2; color: white;">NEW</div>
+                <div class="menu-arrow">›</div>
+            </div>
+        </div>
+
         <div class="menu-section">
             <div class="section-title">MarketPace Features</div>
             <div class="menu-item" onclick="goToPage('/community')">
@@ -1163,6 +1177,162 @@
                 alert('Community Manager Position\n\nWe\'re looking for local champions to help grow MarketPace in your area!\n\n📍 Local area focus\n💻 Remote work options\n⏰ Part-time flexible hours\n💰 Base pay + bonuses\n\nInterested? Email: MarketPace.contact@gmail.com');
             } else if (position === 'partner') {
                 alert('Business Partnership Program\n\nConnect your business with MarketPace!\n\n🏪 Local shop integration\n🤝 Revenue sharing\n📈 Customer growth\n🚚 Delivery options\n\nLearn more: MarketPace.contact@gmail.com');
+            }
+        }
+
+        // ==================== FACEBOOK FRIEND INVITE SYSTEM ====================
+        
+        function showFacebookInviteModal() {
+            // Create modal overlay
+            const modalOverlay = document.createElement('div');
+            modalOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                z-index: 2000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(10px);
+            `;
+            
+            modalOverlay.innerHTML = `
+                <div style="
+                    background: linear-gradient(135deg, #1a0b3d, #6b46c1);
+                    border: 2px solid rgba(0, 255, 255, 0.3);
+                    border-radius: 20px;
+                    padding: 30px;
+                    max-width: 450px;
+                    width: 90%;
+                    text-align: center;
+                    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+                ">
+                    <h2 style="color: #1877f2; margin-bottom: 20px; font-size: 28px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 8px; vertical-align: middle;">
+                            <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(24, 119, 242, 0.2)"/>
+                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                        Invite Facebook Friends
+                    </h2>
+                    <p style="margin-bottom: 25px; line-height: 1.6; font-size: 16px; color: rgba(255,255,255,0.9);">
+                        Help MarketPace grow in your community! Share with your Facebook friends to build a stronger local marketplace.
+                    </p>
+                    <div style="margin: 25px 0; display: flex; gap: 15px; flex-direction: column;">
+                        <button onclick="shareFacebookPost(); closeModal(this);" style="
+                            background: #1877f2; color: white; border: none; 
+                            padding: 15px 25px; border-radius: 25px;
+                            cursor: pointer; font-weight: bold; font-size: 16px; width: 100%;
+                            transition: all 0.3s ease;
+                        ">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 8px; vertical-align: middle;">
+                                <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 255, 255, 0.2)"/>
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="1.5"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            Share on Facebook Feed
+                        </button>
+                        <button onclick="sendFacebookMessage(); closeModal(this);" style="
+                            background: #42a5f5; color: white; border: none; 
+                            padding: 15px 25px; border-radius: 25px;
+                            cursor: pointer; font-weight: bold; font-size: 16px; width: 100%;
+                            transition: all 0.3s ease;
+                        ">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 8px; vertical-align: middle;">
+                                <rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 255, 255, 0.2)"/>
+                                <path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            Send Facebook Messages
+                        </button>
+                        <button onclick="shareGeneric(); closeModal(this);" style="
+                            background: linear-gradient(135deg, #00ffff, #9d4edd); color: white; border: none; 
+                            padding: 15px 25px; border-radius: 25px;
+                            cursor: pointer; font-weight: bold; font-size: 16px; width: 100%;
+                            transition: all 0.3s ease;
+                        ">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 8px; vertical-align: middle;">
+                                <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/>
+                                <path d="M22 2 15 22l-4-9-9-4 22-7Z" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            Other Apps (Text, WhatsApp, etc.)
+                        </button>
+                    </div>
+                    <button onclick="closeModal(this)" style="
+                        background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); 
+                        padding: 12px 25px; border-radius: 15px; cursor: pointer; margin-top: 15px;
+                        transition: all 0.3s ease;
+                    ">Close</button>
+                </div>
+            `;
+            
+            document.body.appendChild(modalOverlay);
+        }
+        
+        function closeModal(buttonElement) {
+            const modal = buttonElement.closest('div[style*="position: fixed"]');
+            if (modal && modal.parentNode) {
+                modal.parentNode.removeChild(modal);
+            }
+        }
+        
+        // Facebook friend invite functions
+        function shareFacebookPost() {
+            const message = `🏘️ Hey friends! I just joined MarketPace - a new community marketplace for our neighborhood! 
+
+✨ Buy, sell, rent items locally
+🚚 Get delivery from neighbors  
+🤝 Support local businesses
+🌟 Build stronger community connections
+
+Join me at: https://www.marketpace.shop
+
+Let's keep our money circulating locally and support each other! 💪
+
+#MarketPace #LocalCommunity #NeighborToNeighbor`;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Join me on MarketPace!',
+                    text: message,
+                    url: 'https://www.marketpace.shop'
+                });
+            } else {
+                // Facebook sharing fallback
+                const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://www.marketpace.shop')}&quote=${encodeURIComponent(message)}`;
+                window.open(facebookUrl, '_blank', 'width=600,height=400');
+            }
+            
+            showNotification('✅ Shared to Facebook successfully!', '#1877f2');
+        }
+
+        function sendFacebookMessage() {
+            const message = `Hey! I just joined MarketPace - a community marketplace for our neighborhood. You can buy, sell, and rent items locally with delivery! Check it out: https://www.marketpace.shop`;
+            
+            // Open Facebook Messenger
+            const messengerUrl = `https://m.me/?text=${encodeURIComponent(message)}`;
+            window.open(messengerUrl, '_blank');
+            
+            showNotification('✅ Opening Facebook Messenger...', '#42a5f5');
+        }
+        
+        function shareGeneric() {
+            const message = `Hey! I just joined MarketPace - a community marketplace for our neighborhood. You can buy, sell, and rent items locally with delivery! Check it out: https://www.marketpace.shop`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Join me on MarketPace!',
+                    text: message,
+                    url: 'https://www.marketpace.shop'
+                });
+            } else {
+                // Copy to clipboard fallback
+                navigator.clipboard.writeText(message).then(() => {
+                    showNotification('✅ Message copied to clipboard!', '#00ffff');
+                }).catch(() => {
+                    alert('Share MarketPace:\n\n' + message);
+                });
             }
         }
 

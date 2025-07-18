@@ -4164,8 +4164,13 @@
             // Add item to cart first
             addToCart(item, price, seller, image);
             
-            // Navigate to cart page
-            window.location.href = '/cart';
+            // Show success message
+            showNotification(`✅ ${item} added to cart! Redirecting to checkout...`, 'success');
+            
+            // Navigate to cart page after brief delay
+            setTimeout(() => {
+                window.location.href = '/cart';
+            }, 1500);
         }
 
         function rentNow(item) {
@@ -4197,11 +4202,47 @@
             }
         }
 
-        function commentPost() {
-            const comment = prompt('Write your comment:');
-            if (comment) {
-                alert(`Comment posted: "${comment}"`);
+        function commentPost(postElement) {
+            // Get the post element if not provided
+            if (!postElement) {
+                postElement = event.target.closest('.feed-post');
             }
+            
+            // Check if comment section already exists
+            let commentSection = postElement.querySelector('.comments-section');
+            if (!commentSection) {
+                // Create comment section
+                commentSection = document.createElement('div');
+                commentSection.className = 'comments-section';
+                commentSection.innerHTML = `
+                    <div class="comment-input-section">
+                        <input type="text" class="comment-input" placeholder="Write a comment..." style="
+                            width: 100%; 
+                            padding: 10px; 
+                            background: rgba(255,255,255,0.1); 
+                            border: 1px solid rgba(255,255,255,0.2); 
+                            border-radius: 20px; 
+                            color: white; 
+                            margin: 10px 0;
+                        ">
+                        <button onclick="postComment(this)" style="
+                            background: linear-gradient(135deg, #00ffff, #9d4edd);
+                            border: none;
+                            color: white;
+                            padding: 8px 16px;
+                            border-radius: 15px;
+                            cursor: pointer;
+                            margin-left: 10px;
+                        ">Post</button>
+                    </div>
+                    <div class="comments-list"></div>
+                `;
+                postElement.appendChild(commentSection);
+            }
+            
+            // Focus on comment input
+            const commentInput = commentSection.querySelector('.comment-input');
+            commentInput.focus();
         }
 
         function sharePost() {
@@ -5226,6 +5267,426 @@
                     filterByCategory(event.data.category);
                 }
             });
+        });
+
+        // ==================== COMPREHENSIVE FACEBOOK-STYLE COMMENT SYSTEM ====================
+        
+        // Update all comment buttons to use new system
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update all comment buttons with new functionality
+            document.querySelectorAll('.interaction-btn').forEach(btn => {
+                if (btn.textContent.includes('Comment')) {
+                    btn.setAttribute('onclick', 'commentPost(this.closest(\'.feed-post\'))');
+                }
+            });
+        });
+
+        // Post comment function
+        function postComment(buttonElement) {
+            const commentSection = buttonElement.closest('.comment-input-section');
+            const commentInput = commentSection.querySelector('.comment-input');
+            const commentText = commentInput.value.trim();
+            
+            if (!commentText) return;
+            
+            const commentsList = commentSection.nextElementSibling;
+            const currentUser = JSON.parse(localStorage.getItem('marketpaceUser')) || { name: 'Community Member', id: 'user_' + Date.now() };
+            
+            const commentElement = document.createElement('div');
+            commentElement.className = 'comment-item';
+            commentElement.style.cssText = `
+                background: rgba(255,255,255,0.05);
+                border-radius: 10px;
+                padding: 10px;
+                margin: 8px 0;
+                border: 1px solid rgba(255,255,255,0.1);
+            `;
+            
+            commentElement.innerHTML = `
+                <div class="comment-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #00ffff, #9d4edd); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 8px; font-size: 12px; font-weight: bold;">
+                            ${currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                        </div>
+                        <span style="font-weight: 600; font-size: 14px;">${currentUser.name}</span>
+                        <span style="color: rgba(255,255,255,0.6); font-size: 12px; margin-left: 8px;">just now</span>
+                    </div>
+                    <button onclick="deleteComment(this)" style="background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; padding: 2px 6px;">×</button>
+                </div>
+                <div class="comment-text" style="font-size: 14px; line-height: 1.4; margin-bottom: 8px;">${commentText}</div>
+                <div class="comment-actions" style="display: flex; gap: 15px; font-size: 12px;">
+                    <button onclick="likeComment(this)" style="background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer;">👍 Like</button>
+                    <button onclick="replyToComment(this)" style="background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer;">💬 Reply</button>
+                </div>
+                <div class="replies-section" style="margin-left: 20px; margin-top: 10px;"></div>
+            `;
+            
+            commentsList.appendChild(commentElement);
+            commentInput.value = '';
+            
+            showNotification('✅ Comment posted successfully!', 'success');
+        }
+
+        // Delete comment function (only authors can delete their comments)
+        function deleteComment(buttonElement) {
+            if (confirm('Delete this comment?')) {
+                buttonElement.closest('.comment-item').remove();
+                showNotification('Comment deleted', 'info');
+            }
+        }
+
+        // Like comment function
+        function likeComment(buttonElement) {
+            const isLiked = buttonElement.style.color === 'rgb(0, 255, 255)';
+            if (isLiked) {
+                buttonElement.style.color = 'rgba(255,255,255,0.7)';
+                buttonElement.textContent = '👍 Like';
+            } else {
+                buttonElement.style.color = '#00ffff';
+                buttonElement.textContent = '👍 Liked';
+            }
+        }
+
+        // Reply to comment function
+        function replyToComment(buttonElement) {
+            const repliesSection = buttonElement.closest('.comment-item').querySelector('.replies-section');
+            
+            if (!repliesSection.querySelector('.reply-input')) {
+                const replyInput = document.createElement('div');
+                replyInput.className = 'reply-input';
+                replyInput.innerHTML = `
+                    <input type="text" placeholder="Write a reply..." style="
+                        width: 100%; 
+                        padding: 8px; 
+                        background: rgba(255,255,255,0.1); 
+                        border: 1px solid rgba(255,255,255,0.2); 
+                        border-radius: 15px; 
+                        color: white; 
+                        margin: 5px 0;
+                        font-size: 12px;
+                    ">
+                    <button onclick="postReply(this)" style="
+                        background: linear-gradient(135deg, #00ffff, #9d4edd);
+                        border: none;
+                        color: white;
+                        padding: 6px 12px;
+                        border-radius: 12px;
+                        cursor: pointer;
+                        margin-left: 8px;
+                        font-size: 12px;
+                    ">Reply</button>
+                `;
+                repliesSection.appendChild(replyInput);
+                replyInput.querySelector('input').focus();
+            }
+        }
+
+        // Post reply function
+        function postReply(buttonElement) {
+            const replyInput = buttonElement.previousElementSibling;
+            const replyText = replyInput.value.trim();
+            
+            if (!replyText) return;
+            
+            const currentUser = JSON.parse(localStorage.getItem('marketpaceUser')) || { name: 'Community Member' };
+            const repliesSection = buttonElement.closest('.replies-section');
+            
+            const replyElement = document.createElement('div');
+            replyElement.className = 'reply-item';
+            replyElement.style.cssText = `
+                background: rgba(255,255,255,0.03);
+                border-radius: 8px;
+                padding: 8px;
+                margin: 5px 0;
+                border-left: 2px solid #00ffff;
+            `;
+            
+            replyElement.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #00ffff, #9d4edd); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 6px; font-size: 10px; font-weight: bold;">
+                            ${currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                        </div>
+                        <span style="font-weight: 600; font-size: 12px;">${currentUser.name}</span>
+                        <span style="color: rgba(255,255,255,0.6); font-size: 10px; margin-left: 6px;">just now</span>
+                    </div>
+                    <button onclick="deleteComment(this)" style="background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; padding: 2px 4px; font-size: 10px;">×</button>
+                </div>
+                <div style="font-size: 12px; line-height: 1.3;">${replyText}</div>
+            `;
+            
+            repliesSection.insertBefore(replyElement, repliesSection.querySelector('.reply-input'));
+            buttonElement.closest('.reply-input').remove();
+            
+            showNotification('✅ Reply posted!', 'success');
+        }
+
+        // ==================== FACEBOOK FRIEND INVITE SYSTEM ====================
+        
+        // Facebook friend invite functions
+        function shareFacebookPost() {
+            const message = `🏘️ Hey friends! I just joined MarketPace - a new community marketplace for our neighborhood! 
+
+✨ Buy, sell, rent items locally
+🚚 Get delivery from neighbors  
+🤝 Support local businesses
+🌟 Build stronger community connections
+
+Join me at: https://www.marketpace.shop
+
+Let's keep our money circulating locally and support each other! 💪
+
+#MarketPace #LocalCommunity #NeighborToNeighbor`;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Join me on MarketPace!',
+                    text: message,
+                    url: 'https://www.marketpace.shop'
+                });
+            } else {
+                // Facebook sharing fallback
+                const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://www.marketpace.shop')}&quote=${encodeURIComponent(message)}`;
+                window.open(facebookUrl, '_blank', 'width=600,height=400');
+            }
+            
+            showNotification('✅ Shared to Facebook successfully!', 'success');
+        }
+
+        function sendFacebookMessage() {
+            const message = `Hey! I just joined MarketPace - a community marketplace for our neighborhood. You can buy, sell, and rent items locally with delivery! Check it out: https://www.marketpace.shop`;
+            
+            // Open Facebook Messenger
+            const messengerUrl = `https://m.me/?text=${encodeURIComponent(message)}`;
+            window.open(messengerUrl, '_blank');
+            
+            showNotification('✅ Opening Facebook Messenger...', 'success');
+        }
+
+        // ==================== ENHANCED CART FUNCTIONALITY ====================
+        
+        // Enhanced addToCart function with better success messaging
+        function addToCartEnhanced(itemName, price, seller, imageUrl) {
+            // Get or create cart data
+            let cartData = JSON.parse(localStorage.getItem('marketplaceCart')) || { items: [] };
+            
+            // Check if item already exists in cart
+            const existingItem = cartData.items.find(item => item.name === itemName && item.seller === seller);
+            
+            if (existingItem) {
+                showNotification(`${itemName} is already in your cart!`, 'info');
+                return;
+            }
+            
+            // Generate item data
+            const newItem = {
+                id: Date.now(),
+                name: itemName,
+                seller: seller || "Local Seller",
+                price: price || 25.00,
+                image: imageUrl || "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400",
+                addedAt: new Date().toISOString()
+            };
+            
+            cartData.items.push(newItem);
+            localStorage.setItem('marketplaceCart', JSON.stringify(cartData));
+            
+            // Show success notification with cart count
+            const cartCount = cartData.items.length;
+            showNotification(`✅ ${itemName} added to cart! (${cartCount} item${cartCount > 1 ? 's' : ''})`, 'success');
+            
+            // Update cart badge if exists
+            updateCartBadge(cartCount);
+        }
+
+        // Update cart badge display
+        function updateCartBadge(count) {
+            const cartBadges = document.querySelectorAll('.cart-badge, .notification-badge');
+            cartBadges.forEach(badge => {
+                if (count > 0) {
+                    badge.textContent = count;
+                    badge.style.display = 'block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            });
+        }
+
+        // Initialize cart badge on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const cartData = JSON.parse(localStorage.getItem('marketplaceCart')) || { items: [] };
+            updateCartBadge(cartData.items.length);
+        });
+
+        // ==================== SELLER PAYMENT FLOW WITH COMMISSION HANDLING ====================
+        
+        // Process seller payment with MarketPace commission
+        function processSellerPayment(orderId, totalAmount, sellerId) {
+            const commission = totalAmount * 0.05; // 5% MarketPace commission
+            const sellerPayout = totalAmount - commission;
+            const deliveryFeeSplit = 3.00; // $4 pickup + $2 drop, seller pays half
+            const protectionFee = 0.50;
+            
+            // Calculate final seller amount
+            const finalSellerAmount = sellerPayout - deliveryFeeSplit - protectionFee;
+            
+            console.log('Payment Processing:', {
+                orderId,
+                totalAmount: totalAmount.toFixed(2),
+                commission: commission.toFixed(2),
+                deliveryFeeSplit: deliveryFeeSplit.toFixed(2),
+                protectionFee: protectionFee.toFixed(2),
+                finalSellerAmount: finalSellerAmount.toFixed(2)
+            });
+            
+            // Hold payment until buyer accepts item
+            const paymentHold = {
+                orderId,
+                sellerId,
+                amount: finalSellerAmount,
+                status: 'held', // held, released, disputed
+                holdReason: 'awaiting_buyer_acceptance',
+                createdAt: new Date().toISOString()
+            };
+            
+            // Store in localStorage (in production, this would be server-side)
+            let heldPayments = JSON.parse(localStorage.getItem('heldPayments')) || [];
+            heldPayments.push(paymentHold);
+            localStorage.setItem('heldPayments', JSON.stringify(heldPayments));
+            
+            return paymentHold;
+        }
+
+        // Release payment when buyer accepts item
+        function releaseBuyerAcceptedPayment(orderId) {
+            let heldPayments = JSON.parse(localStorage.getItem('heldPayments')) || [];
+            const paymentIndex = heldPayments.findIndex(p => p.orderId === orderId);
+            
+            if (paymentIndex !== -1) {
+                heldPayments[paymentIndex].status = 'released';
+                heldPayments[paymentIndex].releasedAt = new Date().toISOString();
+                localStorage.setItem('heldPayments', JSON.stringify(heldPayments));
+                
+                showNotification(`💰 Payment of $${heldPayments[paymentIndex].amount.toFixed(2)} released to seller!`, 'success');
+                
+                // Send notification to seller (in production, this would trigger SMS/email)
+                console.log('Seller notification: Payment released for order', orderId);
+                
+                return true;
+            }
+            
+            return false;
+        }
+
+        // Handle return scenarios with $2 drop fee + mileage
+        function processReturnPayment(orderId, mileage) {
+            const dropFee = 2.00;
+            const mileageFee = mileage * 0.50;
+            const returnFee = dropFee + mileageFee;
+            
+            let heldPayments = JSON.parse(localStorage.getItem('heldPayments')) || [];
+            const paymentIndex = heldPayments.findIndex(p => p.orderId === orderId);
+            
+            if (paymentIndex !== -1) {
+                const originalAmount = heldPayments[paymentIndex].amount;
+                const refundToSeller = originalAmount - returnFee;
+                
+                heldPayments[paymentIndex].status = 'returned';
+                heldPayments[paymentIndex].returnFee = returnFee;
+                heldPayments[paymentIndex].sellerRefund = refundToSeller;
+                heldPayments[paymentIndex].returnedAt = new Date().toISOString();
+                
+                localStorage.setItem('heldPayments', JSON.stringify(heldPayments));
+                
+                console.log('Return processed:', {
+                    orderId,
+                    originalAmount: originalAmount.toFixed(2),
+                    returnFee: returnFee.toFixed(2),
+                    sellerRefund: refundToSeller.toFixed(2)
+                });
+                
+                return { returnFee, sellerRefund };
+            }
+            
+            return null;
+        }
+
+        // ==================== TIP SYSTEM FOR DRIVERS ====================
+        
+        // Enhanced tip system
+        function addDriverTip(amount, driverId, orderId) {
+            const tip = {
+                id: Date.now(),
+                driverId,
+                orderId,
+                amount: parseFloat(amount),
+                createdAt: new Date().toISOString(),
+                status: 'pending' // pending, processed
+            };
+            
+            let driverTips = JSON.parse(localStorage.getItem('driverTips')) || [];
+            driverTips.push(tip);
+            localStorage.setItem('driverTips', JSON.stringify(driverTips));
+            
+            showNotification(`💝 $${amount} tip added for driver! 100% goes directly to them.`, 'success');
+            
+            return tip;
+        }
+
+        // Process all tips for a driver
+        function processDriverTips(driverId) {
+            let driverTips = JSON.parse(localStorage.getItem('driverTips')) || [];
+            const pendingTips = driverTips.filter(tip => tip.driverId === driverId && tip.status === 'pending');
+            
+            const totalTips = pendingTips.reduce((sum, tip) => sum + tip.amount, 0);
+            
+            // Mark tips as processed
+            driverTips = driverTips.map(tip => {
+                if (tip.driverId === driverId && tip.status === 'pending') {
+                    tip.status = 'processed';
+                    tip.processedAt = new Date().toISOString();
+                }
+                return tip;
+            });
+            
+            localStorage.setItem('driverTips', JSON.stringify(driverTips));
+            
+            return { totalTips, processedCount: pendingTips.length };
+        }
+
+        // ==================== ENHANCED NOTIFICATION SYSTEM ====================
+        
+        // Send notification to seller when item purchased
+        function notifySellerPurchase(itemName, buyerName, orderId, deliveryMethod) {
+            const notification = {
+                id: Date.now(),
+                type: 'purchase',
+                sellerId: 'current_seller', // In production, get from item data
+                title: '🛒 New Purchase!',
+                message: `${buyerName} just bought your "${itemName}"! Order #${orderId}`,
+                deliveryInfo: deliveryMethod,
+                createdAt: new Date().toISOString(),
+                read: false
+            };
+            
+            // Store notification
+            let sellerNotifications = JSON.parse(localStorage.getItem('sellerNotifications')) || [];
+            sellerNotifications.unshift(notification);
+            localStorage.setItem('sellerNotifications', JSON.stringify(sellerNotifications));
+            
+            // Show success message
+            showNotification('✅ Seller has been notified of your purchase!', 'success');
+            
+            // In production, this would trigger SMS/email to seller
+            console.log('Seller notification sent:', notification);
+        }
+
+        // Load cart count on page initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            const cartData = JSON.parse(localStorage.getItem('marketplaceCart')) || { items: [] };
+            updateCartBadge(cartData.items.length);
+        });
+
         });
     </script>
 
