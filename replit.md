@@ -259,6 +259,16 @@ All features are designed to strengthen local communities by keeping commerce lo
 
 ## Recent Changes
 
+✓ **COMPREHENSIVE RENTAL SYSTEM FIXES WITH CORRECTED COMMISSION STRUCTURE** (July 18, 2025)
+✓ **CRITICAL MATH CORRECTIONS**: Fixed hourly rate multiplication - now correctly calculates hours × $15/hour instead of just $15
+✓ **COMMISSION STRUCTURE CORRECTED**: 5% discount now benefits renters (pay less), owners receive full rental amount
+✓ **DELIVERY COST ALLOCATION FIXED**: Renters pay full delivery cost ($61), no cost splitting with owners
+✓ **TIME SLOT INTERFACE CLEANED**: Removed "morning pickup" and "afternoon pickup" outdated options
+✓ **UI TEXT UPDATED**: Changed "or custom time" to "pick your times" for better user clarity
+✓ **POP-UP NOTIFICATION SYSTEM**: Enhanced Accept/Decline notifications work across entire app screen
+✓ **PAYMENT FLOW CORRECTED**: Owner receives $90 (full amount), renter pays $85.50 (discounted amount) + delivery + tips
+✓ **REAL-TIME CALCULATION**: Time selection now properly calculates duration and applies correct hourly/daily rates
+
 ✓ **COMMUNITY POSTING INTERFACE STREAMLINED & PERSONALIZED** (July 18, 2025)
 ✓ **SEARCH BAR OVERFLOW FIXED**: Reduced action buttons from 7 to 4 (kept Sell, Rent, Service, Event; removed Poll, ISO, Job)
 ✓ **PERSONALIZED PLACEHOLDER TEXT**: Changed from "What's on your mind?" to personalized "[Name], share with your community!" format

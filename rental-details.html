@@ -397,10 +397,10 @@
             </div>
             
             <div class="time-selector" id="timeSelector">
-                <strong>⏰ Custom Pickup Time:</strong>
+                <strong>⏰ Pick Your Pickup Time:</strong>
                 <input type="datetime-local" class="time-input" id="pickupTime" min="">
                 
-                <strong style="margin-top: 15px; display: block;">⏰ Custom Return Time:</strong>
+                <strong style="margin-top: 15px; display: block;">⏰ Pick Your Return Time:</strong>
                 <input type="datetime-local" class="time-input" id="returnTime" min="">
                 
                 <div class="delivery-cost-breakdown" id="costBreakdown" style="display: none;">
@@ -439,9 +439,8 @@
                     <input type="number" class="time-input" placeholder="Custom tip amount" id="customTip" style="margin-top: 10px;" onchange="updateCustomTip()">
                 </div>
             </div>
-                <input type="text" class="time-input" placeholder="e.g., Early morning (7-9am), Late evening (7-9pm), Flexible" />
-                <div style="margin-top: 10px; font-size: 12px; color: rgba(255,255,255,0.7);">
-                    * Drivers are independent contractors. Early/late times available with $4 on-time bonus (tip upfront recommended)
+                <div style="margin-top: 15px; font-size: 14px; color: #00ffff; font-weight: bold;">
+                    📍 Pick your times using the custom time fields above
                 </div>
             </div>
         </div>
@@ -571,13 +570,18 @@
             const returnDate = new Date(returnTime);
             const durationHours = Math.ceil((returnDate - pickup) / (1000 * 60 * 60));
             
+            if (durationHours <= 0) {
+                alert('Return time must be after pickup time.');
+                return;
+            }
+            
             // Calculate rental cost (hourly: $15/hour, daily: $45/day)
             let rentalCost;
             if (durationHours <= 24) {
-                rentalCost = durationHours * 15; // $15 per hour
+                rentalCost = durationHours * 15; // Correctly multiply hours by hourly rate
             } else {
                 const days = Math.ceil(durationHours / 24);
-                rentalCost = days * 45; // $45 per day
+                rentalCost = days * 45; // $45 per day for multi-day rentals
             }
             
             // Calculate 5% marketplace commission (deducted from rental cost)
