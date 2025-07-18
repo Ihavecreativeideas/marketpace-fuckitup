@@ -195,21 +195,21 @@
             </div>
             
             <div class="feature-card">
-                <div class="feature-icon">📦</div>
+                <div class="feature-icon"></div>
                 <h4>Product Catalogs</h4>
                 <p>Sync your Facebook Shop product catalogs</p>
                 <div id="catalogs-status">Not Connected</div>
             </div>
             
             <div class="feature-card">
-                <div class="feature-icon">🚚</div>
+                <div class="feature-icon"></div>
                 <h4>MarketPace Delivery</h4>
                 <p>Enable delivery options for Facebook products</p>
                 <div id="delivery-status">Ready</div>
             </div>
             
             <div class="feature-card">
-                <div class="feature-icon">📊</div>
+                <div class="feature-icon"></div>
                 <h4>Analytics</h4>
                 <p>Track integration performance and engagement</p>
                 <div id="analytics-status">Ready</div>
@@ -217,14 +217,14 @@
         </div>
 
         <div class="step-card">
-            <h3>📋 Integration Results</h3>
+            <h3>Integration Results</h3>
             <div id="integration-results" class="code-block">
                 Ready to connect Facebook SDK...
             </div>
         </div>
 
         <div class="step-card">
-            <h3>🎯 Next Steps After Connection</h3>
+            <h3>Next Steps After Connection</h3>
             <ol>
                 <li><strong>Select Business Pages:</strong> Choose which Facebook pages to integrate</li>
                 <li><strong>Sync Product Catalogs:</strong> Import your Facebook Shop products</li>
@@ -265,7 +265,7 @@
                 }
             });
 
-            updateResults('✅ Facebook SDK initialized successfully');
+            updateResults('Facebook SDK initialized successfully');
         };
 
         function loginWithFacebook() {
@@ -286,13 +286,13 @@
         function handleLoginSuccess(response) {
             accessToken = response.authResponse.accessToken;
             
-            updateResults('✅ Facebook login successful! Getting user information...');
+            updateResults('Facebook login successful! Getting user information...');
             
             FB.api('/me', { fields: 'name,email,picture' }, function(userResponse) {
                 if (userResponse && !userResponse.error) {
                     facebookUser = userResponse;
                     displayUserInfo(userResponse);
-                    updateResults(`✅ Connected as: ${userResponse.name} (${userResponse.email})`);
+                    updateResults(`Connected as: ${userResponse.name} (${userResponse.email})`);
                     
                     // Send connection info to backend
                     sendConnectionToBackend(userResponse, accessToken);
@@ -330,7 +330,7 @@
             
             FB.api('/me/accounts', { access_token: accessToken }, function(response) {
                 if (response && !response.error) {
-                    updateResults(`✅ Found ${response.data.length} pages/accounts`);
+                    updateResults(`Found ${response.data.length} pages/accounts`);
                     document.getElementById('pages-status').innerHTML = '<span class="success">Connected</span>';
                     
                     // Load catalogs for each page
@@ -348,7 +348,7 @@
                 FB.api(`/${page.id}/product_catalogs`, { access_token: accessToken }, function(response) {
                     if (response && !response.error) {
                         if (response.data.length > 0) {
-                            updateResults(`✅ Found ${response.data.length} catalogs for ${page.name}`);
+                            updateResults(`Found ${response.data.length} catalogs for ${page.name}`);
                             document.getElementById('catalogs-status').innerHTML = '<span class="success">Connected</span>';
                         }
                     }
@@ -376,7 +376,7 @@
 
                 const result = await response.json();
                 if (result.success) {
-                    updateResults('✅ Connection saved to MarketPace backend successfully');
+                    updateResults('Connection saved to MarketPace backend successfully');
                 } else {
                     updateResults('⚠️ Facebook connected, but backend save failed: ' + result.error);
                 }
