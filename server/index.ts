@@ -1085,6 +1085,276 @@ app.get('/api/schedules/:businessId', async (req, res) => {
   }
 });
 
+// Booking and Escrow API Endpoints
+
+// Create service provider calendar
+app.post('/api/booking/create-calendar', async (req, res) => {
+  try {
+    const { 
+      providerId, 
+      serviceType, 
+      hourlyRate, 
+      minDuration, 
+      bookingFee, 
+      hasBookingFee, 
+      escrowEnabled, 
+      availability 
+    } = req.body;
+
+    // In real implementation, save to database
+    const calendar = {
+      id: `calendar_${Date.now()}`,
+      providerId,
+      serviceType,
+      hourlyRate: Math.round(hourlyRate * 100), // convert to cents
+      minDuration,
+      bookingFee: Math.round((bookingFee || 0) * 100), // convert to cents
+      hasBookingFee: hasBookingFee || false,
+      escrowEnabled: escrowEnabled !== false,
+      availability,
+      isActive: true,
+      createdAt: new Date().toISOString()
+    };
+
+    // Store in memory for demo (use database in production)
+    if (!global.serviceCalendars) global.serviceCalendars = {};
+    global.serviceCalendars[calendar.id] = calendar;
+
+    res.json({
+      success: true,
+      calendar,
+      message: 'Service calendar created successfully'
+    });
+
+  } catch (error: any) {
+    console.error('Calendar creation error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get provider calendar
+app.get('/api/booking/calendar/:providerId', async (req, res) => {
+  try {
+    const { providerId } = req.params;
+
+    // In real implementation, query database
+    const calendars = global.serviceCalendars || {};
+    const providerCalendar = Object.values(calendars).find(
+      (cal: any) => cal.providerId === providerId && cal.isActive
+    );
+
+    if (!providerCalendar) {
+      return res.status(404).json({
+        success: false,
+        error: 'Calendar not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      calendar: providerCalendar
+    });
+
+  } catch (error: any) {
+    console.error('Calendar fetch error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Create escrow payment intent
+app.post('/api/create-escrow-payment-intent', async (req, res) => {
+  try {
+    const { booking, customer } = req.body;
+
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return res.status(500).json({
+        success: false,
+        error: 'Stripe not configured'
+      });
+    }
+
+    const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+    // Create payment intent with application fee for MarketPace
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(booking.total * 100), // convert to cents
+      currency: 'usd',
+      metadata: {
+        bookingId: booking.id || `booking_${Date.now()}`,
+        providerId: booking.providerId,
+        customerId: customer.email,
+        escrowProtected: 'true'
+      },
+      description: `MarketPace Booking: ${booking.providerName} - ${booking.date}`,
+      receipt_email: customer.email
+    });
+
+    // Store booking in memory for demo (use database in production)
+    if (!global.bookings) global.bookings = {};
+    const bookingId = booking.id || `booking_${Date.now()}`;
+    global.bookings[bookingId] = {
+      ...booking,
+      id: bookingId,
+      customer,
+      stripePaymentIntentId: paymentIntent.id,
+      status: 'pending_payment',
+      escrowStatus: 'holding',
+      createdAt: new Date().toISOString()
+    };
+
+    res.json({
+      success: true,
+      clientSecret: paymentIntent.client_secret,
+      bookingId
+    });
+
+  } catch (error: any) {
+    console.error('Payment intent creation error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Confirm service provider showed up (releases escrow payment)
+app.post('/api/booking/confirm-show-up', async (req, res) => {
+  try {
+    const { bookingId, customerId } = req.body;
+
+    // In real implementation, verify customer owns this booking
+    const bookings = global.bookings || {};
+    const booking = bookings[bookingId];
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        error: 'Booking not found'
+      });
+    }
+
+    if (booking.showUpConfirmed) {
+      return res.status(400).json({
+        success: false,
+        error: 'Show up already confirmed'
+      });
+    }
+
+    // Update booking status
+    booking.showUpConfirmed = true;
+    booking.showUpConfirmedAt = new Date().toISOString();
+    booking.escrowStatus = 'released';
+    booking.paymentReleasedAt = new Date().toISOString();
+    booking.status = 'completed';
+
+    // In real implementation:
+    // 1. Transfer funds from escrow to provider's Stripe account
+    // 2. Deduct 5% platform fee
+    // 3. Send notifications to both parties
+    // 4. Update database
+
+    res.json({
+      success: true,
+      message: 'Payment released to service provider',
+      booking: {
+        id: booking.id,
+        status: booking.status,
+        escrowStatus: booking.escrowStatus,
+        paymentReleasedAt: booking.paymentReleasedAt
+      }
+    });
+
+  } catch (error: any) {
+    console.error('Show up confirmation error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get booking details
+app.get('/api/booking/:bookingId', async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+
+    const bookings = global.bookings || {};
+    const booking = bookings[bookingId];
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        error: 'Booking not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      booking
+    });
+
+  } catch (error: any) {
+    console.error('Booking fetch error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Submit service review
+app.post('/api/booking/submit-review', async (req, res) => {
+  try {
+    const { 
+      bookingId, 
+      customerId, 
+      providerId, 
+      rating, 
+      reviewText, 
+      showUpRating, 
+      qualityRating, 
+      wouldRecommend 
+    } = req.body;
+
+    const review = {
+      id: `review_${Date.now()}`,
+      bookingId,
+      customerId,
+      providerId,
+      rating,
+      reviewText,
+      showUpRating,
+      qualityRating,
+      wouldRecommend: wouldRecommend !== false,
+      isPublic: true,
+      createdAt: new Date().toISOString()
+    };
+
+    // Store in memory for demo (use database in production)
+    if (!global.reviews) global.reviews = {};
+    global.reviews[review.id] = review;
+
+    res.json({
+      success: true,
+      review,
+      message: 'Review submitted successfully'
+    });
+
+  } catch (error: any) {
+    console.error('Review submission error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Static file routes for all HTML pages
 const htmlRoutes = [
   '/', '/community', '/shops', '/services', '/rentals', '/the-hub', 
@@ -1097,7 +1367,9 @@ const htmlRoutes = [
   '/facebook-diagnostic-tool', '/facebook-sdk-integration', '/facebook-https-solution',
   '/facebook-app-troubleshooting', '/facebook-manual-integration', '/facebook-app-review-instructions',
   '/facebook-data-processor-configuration', '/facebook-business-verification-checklist',
-  '/facebook-manual-integration-enhanced', '/facebook-connection-guide'
+  '/facebook-manual-integration-enhanced', '/facebook-connection-guide',
+  '/provider-booking-calendar', '/customer-booking-calendar', '/escrow-payment', 
+  '/booking-confirmation', '/navigation-test'
 ];
 
 htmlRoutes.forEach(route => {

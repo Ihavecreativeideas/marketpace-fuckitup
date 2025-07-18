@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmed - MarketPace Pro</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a0b3d, #6b46c1);
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .success-icon {
+            font-size: 80px;
+            color: #10b981;
+            margin-bottom: 20px;
+        }
+
+        .confirmation-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        .booking-details {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            padding: 10px 0;
+        }
+
+        .detail-row.highlight {
+            background: rgba(16, 185, 129, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .escrow-status {
+            background: linear-gradient(135deg, #10b981, #059669);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .action-btn {
+            padding: 15px 25px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .secondary-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .contact-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .show-up-section {
+            background: linear-gradient(135deg, #ffd700, #f59e0b);
+            color: #1a0b3d;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .countdown {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ffff;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .instructions {
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .payment-protected {
+            background: rgba(16, 185, 129, 0.2);
+            border: 2px solid #10b981;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="success-icon">✅</div>
+        <h1 style="color: #10b981; margin: 0;">Booking Confirmed!</h1>
+        <p style="color: #e2e8f0; margin: 10px 0;">Your payment is secured with escrow protection</p>
+    </div>
+
+    <div class="confirmation-card">
+        <h2 style="color: #00ffff; margin-top: 0;">Booking ID: <span id="bookingId">BK-2024-001</span></h2>
+        <p style="font-size: 18px; margin: 15px 0;">Your service has been successfully booked and payment is held securely by MarketPace</p>
+        
+        <div class="payment-protected">
+            <strong>🛡️ Payment Protected</strong><br>
+            Your $<span id="totalPaid">340.00</span> is held in escrow until service delivery
+        </div>
+    </div>
+
+    <div class="booking-details">
+        <h3 style="color: #ffd700; margin-top: 0;">Booking Details</h3>
+        
+        <div class="detail-row">
+            <span><strong>Service Provider:</strong></span>
+            <span id="providerName">DJ Mike Entertainment</span>
+        </div>
+        
+        <div class="detail-row">
+            <span><strong>Service Type:</strong></span>
+            <span id="serviceType">Professional DJ Services</span>
+        </div>
+        
+        <div class="detail-row highlight">
+            <div>
+                <strong style="color: #00ffff;">Service Date & Time</strong><br>
+                <span id="serviceDateTime" style="font-size: 18px;">Saturday, December 15, 2024 at 7:00 PM</span>
+            </div>
+        </div>
+        
+        <div class="detail-row">
+            <span><strong>Duration:</strong></span>
+            <span id="serviceDuration">4 hours</span>
+        </div>
+        
+        <div class="detail-row">
+            <span><strong>Service Rate:</strong></span>
+            <span id="serviceRate">$300.00</span>
+        </div>
+        
+        <div class="detail-row" id="bookingFeeRow" style="display: none;">
+            <span><strong>Booking Fee:</strong></span>
+            <span id="bookingFee">$25.00</span>
+        </div>
+        
+        <div class="detail-row">
+            <span><strong>Platform Fee:</strong></span>
+            <span id="platformFee">$15.00</span>
+        </div>
+        
+        <div class="detail-row" style="border-top: 2px solid #00ffff; font-size: 18px; font-weight: bold; color: #00ffff;">
+            <span>Total Paid:</span>
+            <span id="totalAmount">$340.00</span>
+        </div>
+    </div>
+
+    <div class="countdown" id="countdown">
+        Time until service: Loading...
+    </div>
+
+    <div class="show-up-section" id="showUpSection" style="display: none;">
+        <h3 style="margin: 0 0 15px 0;">📅 Service Day Instructions</h3>
+        <p style="margin: 0 0 15px 0; font-size: 16px;">When your service provider arrives:</p>
+        <ol style="margin: 0; padding-left: 20px;">
+            <li>Confirm they showed up on time</li>
+            <li>Click "Confirm Provider Arrived" below</li>
+            <li>Payment will be released immediately</li>
+            <li>Rate and review after service completion</li>
+        </ol>
+        
+        <button class="action-btn primary-btn" onclick="confirmShowUp()" style="width: 100%; margin-top: 20px;">
+            ✅ Confirm Provider Arrived - Release Payment
+        </button>
+    </div>
+
+    <div class="escrow-status">
+        <h3 style="margin: 0 0 15px 0;">🛡️ Escrow Status: <span id="escrowStatus">Holding Payment</span></h3>
+        <p style="margin: 0; font-size: 14px;" id="escrowDescription">
+            Your payment is safely held by MarketPace. It will be released to the service provider 
+            when you confirm they showed up on the scheduled date.
+        </p>
+    </div>
+
+    <div class="contact-info">
+        <h3 style="color: #ffd700; margin-top: 0;">Provider Contact Information</h3>
+        <div class="detail-row">
+            <span><strong>Phone:</strong></span>
+            <span id="providerPhone">(555) 123-4567</span>
+        </div>
+        <div class="detail-row">
+            <span><strong>Email:</strong></span>
+            <span id="providerEmail">mike@djmikeent.com</span>
+        </div>
+        <p style="color: #9ca3af; font-size: 14px; margin: 15px 0 0 0;">
+            Contact your provider directly for any service-related questions or changes.
+        </p>
+    </div>
+
+    <div class="action-buttons">
+        <button class="action-btn secondary-btn" onclick="window.location.href='/services'">
+            📅 View All Bookings
+        </button>
+        <button class="action-btn secondary-btn" onclick="messageProvider()">
+            💬 Message Provider
+        </button>
+        <button class="action-btn secondary-btn" onclick="modifyBooking()">
+            ✏️ Modify Booking
+        </button>
+        <button class="action-btn primary-btn" onclick="window.location.href='/community'">
+            🏠 Back to Community
+        </button>
+    </div>
+
+    <div class="instructions">
+        <h3 style="color: #00ffff; margin-top: 0;">Important Information</h3>
+        <ul style="margin: 0; padding-left: 20px;">
+            <li><strong>Payment Schedule:</strong> You pay for the provider showing up, not job quality</li>
+            <li><strong>Quality Issues:</strong> Use our rating system and communicate directly with provider</li>
+            <li><strong>No Returns:</strong> Payment is released when provider arrives as scheduled</li>
+            <li><strong>Cancellation:</strong> Contact provider directly for any cancellations</li>
+            <li><strong>Support:</strong> MarketPace support available 24/7 for escrow-related issues</li>
+        </ul>
+    </div>
+
+    <script>
+        let bookingData = {};
+
+        function loadBookingData() {
+            // Get booking ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookingId = urlParams.get('id');
+            
+            if (bookingId) {
+                // In real app, fetch from API
+                const storedBooking = localStorage.getItem('confirmedBooking');
+                if (storedBooking) {
+                    bookingData = JSON.parse(storedBooking);
+                    displayBookingData();
+                }
+            } else {
+                // Demo data
+                bookingData = {
+                    id: 'BK-2024-001',
+                    providerName: 'DJ Mike Entertainment',
+                    serviceType: 'Professional DJ Services',
+                    date: '2024-12-15',
+                    time: '7:00 PM',
+                    duration: 4,
+                    serviceCost: 300,
+                    bookingFee: 25,
+                    platformFee: 15,
+                    total: 340,
+                    providerPhone: '(555) 123-4567',
+                    providerEmail: 'mike@djmikeent.com',
+                    escrowStatus: 'holding',
+                    showUpConfirmed: false
+                };
+                displayBookingData();
+            }
+        }
+
+        function displayBookingData() {
+            document.getElementById('bookingId').textContent = bookingData.id;
+            document.getElementById('totalPaid').textContent = bookingData.total.toFixed(2);
+            document.getElementById('providerName').textContent = bookingData.providerName;
+            document.getElementById('serviceType').textContent = bookingData.serviceType;
+            
+            const serviceDate = new Date(bookingData.date);
+            document.getElementById('serviceDateTime').textContent = 
+                serviceDate.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                }) + ' at ' + bookingData.time;
+                
+            document.getElementById('serviceDuration').textContent = `${bookingData.duration} hours`;
+            document.getElementById('serviceRate').textContent = `$${bookingData.serviceCost.toFixed(2)}`;
+            document.getElementById('platformFee').textContent = `$${bookingData.platformFee.toFixed(2)}`;
+            document.getElementById('totalAmount').textContent = `$${bookingData.total.toFixed(2)}`;
+            
+            if (bookingData.bookingFee > 0) {
+                document.getElementById('bookingFeeRow').style.display = 'flex';
+                document.getElementById('bookingFee').textContent = `$${bookingData.bookingFee.toFixed(2)}`;
+            }
+            
+            if (bookingData.providerPhone) {
+                document.getElementById('providerPhone').textContent = bookingData.providerPhone;
+            }
+            if (bookingData.providerEmail) {
+                document.getElementById('providerEmail').textContent = bookingData.providerEmail;
+            }
+
+            updateCountdown();
+            updateEscrowStatus();
+        }
+
+        function updateCountdown() {
+            const serviceDate = new Date(bookingData.date + ' ' + bookingData.time);
+            const now = new Date();
+            const timeDiff = serviceDate.getTime() - now.getTime();
+
+            if (timeDiff > 0) {
+                const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+
+                document.getElementById('countdown').textContent = 
+                    `Time until service: ${days}d ${hours}h ${minutes}m`;
+
+                // Show confirm button on service day
+                if (days === 0 && hours <= 2) {
+                    document.getElementById('showUpSection').style.display = 'block';
+                }
+            } else if (timeDiff > -3600000) { // Within 1 hour after scheduled time
+                document.getElementById('countdown').textContent = 'Service time has arrived!';
+                document.getElementById('showUpSection').style.display = 'block';
+            } else {
+                document.getElementById('countdown').textContent = 'Service time has passed';
+            }
+        }
+
+        function updateEscrowStatus() {
+            const statusEl = document.getElementById('escrowStatus');
+            const descEl = document.getElementById('escrowDescription');
+
+            if (bookingData.showUpConfirmed) {
+                statusEl.textContent = 'Payment Released';
+                statusEl.style.color = '#10b981';
+                descEl.textContent = 'Payment has been released to the service provider. Please rate your experience.';
+            } else {
+                statusEl.textContent = 'Holding Payment';
+                statusEl.style.color = '#ffd700';
+                descEl.textContent = 'Your payment is safely held by MarketPace until you confirm the provider showed up.';
+            }
+        }
+
+        async function confirmShowUp() {
+            try {
+                const response = await fetch('/api/booking/confirm-show-up', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        bookingId: bookingData.id,
+                        customerId: 'current_user_id'
+                    }),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    bookingData.showUpConfirmed = true;
+                    bookingData.escrowStatus = 'released';
+                    
+                    showNotification('✅ Payment released to service provider!');
+                    updateEscrowStatus();
+                    
+                    setTimeout(() => {
+                        window.location.href = '/service-review.html?booking=' + bookingData.id;
+                    }, 2000);
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Confirm show up error:', error);
+                alert('Network error. Please try again.');
+            }
+        }
+
+        function messageProvider() {
+            showNotification('Opening message thread with provider...');
+            setTimeout(() => {
+                window.location.href = '/messages?contact=' + bookingData.providerName;
+            }, 1000);
+        }
+
+        function modifyBooking() {
+            showNotification('Contact provider directly for booking modifications');
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                z-index: 1000;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Initialize
+        loadBookingData();
+        setInterval(updateCountdown, 60000); // Update every minute
+    </script>
+</body>
+</html>

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Your Booking Calendar - MarketPace Pro</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a0b3d, #6b46c1);
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .pro-badge {
+            background: linear-gradient(135deg, #ffd700, #f59e0b);
+            color: #1a0b3d;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .calendar-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .month-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .nav-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .day-header {
+            text-align: center;
+            font-weight: bold;
+            color: #00ffff;
+            padding: 10px 5px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .calendar-day.available {
+            background: rgba(16, 185, 129, 0.3);
+            border-color: #10b981;
+        }
+
+        .calendar-day.booked {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: #ef4444;
+            cursor: not-allowed;
+        }
+
+        .day-number {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .day-status {
+            font-size: 10px;
+            margin-top: 2px;
+        }
+
+        .time-slots {
+            margin-top: 20px;
+        }
+
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .time-slot {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .time-slot:hover {
+            border-color: #00ffff;
+        }
+
+        .time-slot.selected {
+            background: rgba(16, 185, 129, 0.3);
+            border-color: #10b981;
+        }
+
+        .booking-settings {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #00ffff;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #00ffff;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .escrow-info {
+            background: linear-gradient(135deg, #ffd700, #f59e0b);
+            color: #1a0b3d;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="window.location.href='/services'">← Back to Services</button>
+
+    <div class="header">
+        <div class="pro-badge">⭐ PRO FEATURE - FREE Until Jan 1, 2026</div>
+        <h1 style="color: #00ffff; margin: 0;">Set Your Booking Calendar</h1>
+        <p style="color: #e2e8f0; margin: 10px 0;">Configure your availability and booking preferences</p>
+    </div>
+
+    <div class="escrow-info">
+        <h3 style="margin: 0 0 10px 0;">🛡️ MarketPace Escrow Protection</h3>
+        <p style="margin: 0; font-size: 14px;">
+            When customers book through MarketPace, we hold their payment securely until you show up for the service. 
+            Payment is released when they confirm you arrived - you get paid for showing up, not job quality. 
+            Quality disputes are handled through our rating system.
+        </p>
+    </div>
+
+    <div class="booking-settings">
+        <h3 style="color: #ffd700; margin-top: 0;">Booking Settings</h3>
+        
+        <div class="form-group">
+            <label>Service Type</label>
+            <select class="form-control" id="serviceType">
+                <option value="entertainment">Entertainment (DJ, Musician, Comedian)</option>
+                <option value="photography">Photography/Videography</option>
+                <option value="personal">Personal Services (Tutoring, Coaching)</option>
+                <option value="home">Home Services (Cleaning, Repair)</option>
+                <option value="event">Event Services (Catering, Planning)</option>
+                <option value="other">Other Professional Service</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Booking Fee (Optional)</label>
+            <input type="number" class="form-control" id="bookingFee" placeholder="0.00" min="0" step="0.01">
+            <small style="color: #9ca3af; font-size: 12px;">
+                Optional fee charged to secure booking. This is separate from your service rate.
+            </small>
+        </div>
+
+        <div class="form-group">
+            <label>Service Rate per Hour</label>
+            <input type="number" class="form-control" id="hourlyRate" placeholder="50.00" min="0" step="0.01" required>
+        </div>
+
+        <div class="form-group">
+            <label>Minimum Booking Duration (Hours)</label>
+            <select class="form-control" id="minDuration">
+                <option value="1">1 Hour</option>
+                <option value="2">2 Hours</option>
+                <option value="3">3 Hours</option>
+                <option value="4">4 Hours</option>
+                <option value="6">6 Hours</option>
+                <option value="8">8 Hours (Full Day)</option>
+            </select>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="escrowEnabled" checked>
+            <label for="escrowEnabled">Enable MarketPace Escrow Protection (Recommended)</label>
+        </div>
+    </div>
+
+    <div class="calendar-container">
+        <h3 style="color: #ffd700; margin-top: 0;">Set Available Dates & Times</h3>
+        
+        <div class="month-navigation">
+            <button class="nav-btn" onclick="changeMonth(-1)">← Previous</button>
+            <h3 id="currentMonth" style="color: #00ffff; margin: 0;"></h3>
+            <button class="nav-btn" onclick="changeMonth(1)">Next →</button>
+        </div>
+
+        <div class="calendar-grid" id="calendarGrid">
+            <!-- Calendar will be generated by JavaScript -->
+        </div>
+
+        <div class="time-slots" id="timeSlots" style="display: none;">
+            <h4 style="color: #00ffff;">Available Times for <span id="selectedDate"></span></h4>
+            <div class="time-grid" id="timeGrid">
+                <!-- Time slots will be populated here -->
+            </div>
+            <button class="save-btn" onclick="saveTimeSlots()">Save Times for This Date</button>
+        </div>
+    </div>
+
+    <button class="save-btn" onclick="saveCalendarSettings()">Save Calendar & Go Live</button>
+
+    <script>
+        let currentDate = new Date();
+        let selectedDay = null;
+        let availabilityData = {};
+
+        const timeSlots = [
+            '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
+            '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM',
+            '5:00 PM', '6:00 PM', '7:00 PM', '8:00 PM',
+            '9:00 PM', '10:00 PM'
+        ];
+
+        function generateCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const monthDisplay = document.getElementById('currentMonth');
+            
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            monthDisplay.textContent = currentDate.toLocaleDateString('en-US', { 
+                month: 'long', 
+                year: 'numeric' 
+            });
+
+            // Clear existing calendar
+            grid.innerHTML = '';
+
+            // Add day headers
+            const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            dayHeaders.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'day-header';
+                header.textContent = day;
+                grid.appendChild(header);
+            });
+
+            // Get first day of month and number of days
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+
+            // Add empty cells for days before month starts
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                grid.appendChild(emptyDay);
+            }
+
+            // Add days of month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'day-number';
+                dayNumber.textContent = day;
+                
+                const dayStatus = document.createElement('div');
+                dayStatus.className = 'day-status';
+                
+                const dateKey = `${year}-${month + 1}-${day}`;
+                
+                // Check if day has availability set
+                if (availabilityData[dateKey]) {
+                    dayElement.classList.add('available');
+                    dayStatus.textContent = `${availabilityData[dateKey].length} slots`;
+                } else {
+                    dayStatus.textContent = 'Set times';
+                }
+
+                // Disable past dates
+                const currentDay = new Date(year, month, day);
+                if (currentDay < today) {
+                    dayElement.style.opacity = '0.3';
+                    dayElement.style.cursor = 'not-allowed';
+                } else {
+                    dayElement.onclick = () => selectDay(day, dateKey);
+                }
+
+                dayElement.appendChild(dayNumber);
+                dayElement.appendChild(dayStatus);
+                grid.appendChild(dayElement);
+            }
+        }
+
+        function selectDay(day, dateKey) {
+            selectedDay = dateKey;
+            document.getElementById('selectedDate').textContent = 
+                new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
+                    .toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+            
+            // Show time slots
+            document.getElementById('timeSlots').style.display = 'block';
+            generateTimeSlots(dateKey);
+        }
+
+        function generateTimeSlots(dateKey) {
+            const timeGrid = document.getElementById('timeGrid');
+            timeGrid.innerHTML = '';
+
+            const existingSlots = availabilityData[dateKey] || [];
+
+            timeSlots.forEach(time => {
+                const slot = document.createElement('div');
+                slot.className = 'time-slot';
+                slot.textContent = time;
+                
+                if (existingSlots.includes(time)) {
+                    slot.classList.add('selected');
+                }
+
+                slot.onclick = () => {
+                    slot.classList.toggle('selected');
+                };
+
+                timeGrid.appendChild(slot);
+            });
+        }
+
+        function saveTimeSlots() {
+            if (!selectedDay) return;
+
+            const selectedSlots = Array.from(document.querySelectorAll('.time-slot.selected'))
+                .map(slot => slot.textContent);
+
+            if (selectedSlots.length > 0) {
+                availabilityData[selectedDay] = selectedSlots;
+                showNotification('Times saved for selected date!');
+                generateCalendar(); // Refresh calendar to show updated availability
+            } else {
+                delete availabilityData[selectedDay];
+                showNotification('Availability removed for selected date');
+                generateCalendar();
+            }
+        }
+
+        function changeMonth(direction) {
+            currentDate.setMonth(currentDate.getMonth() + direction);
+            generateCalendar();
+        }
+
+        function saveCalendarSettings() {
+            const serviceType = document.getElementById('serviceType').value;
+            const bookingFee = document.getElementById('bookingFee').value;
+            const hourlyRate = document.getElementById('hourlyRate').value;
+            const minDuration = document.getElementById('minDuration').value;
+            const escrowEnabled = document.getElementById('escrowEnabled').checked;
+
+            if (!hourlyRate) {
+                alert('Please set your hourly rate');
+                return;
+            }
+
+            const calendarData = {
+                serviceType,
+                bookingFee: parseFloat(bookingFee) || 0,
+                hourlyRate: parseFloat(hourlyRate),
+                minDuration: parseInt(minDuration),
+                escrowEnabled,
+                availability: availabilityData
+            };
+
+            // Save to localStorage for demo
+            localStorage.setItem('providerCalendar', JSON.stringify(calendarData));
+
+            showNotification('Calendar saved successfully! Your booking page is now live.');
+            
+            setTimeout(() => {
+                window.location.href = '/services';
+            }, 2000);
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                z-index: 1000;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Initialize calendar
+        generateCalendar();
+    </script>
+</body>
+</html>

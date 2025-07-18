@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Escrow Payment - MarketPace Pro</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a0b3d, #6b46c1);
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .pro-badge {
+            background: linear-gradient(135deg, #ffd700, #f59e0b);
+            color: #1a0b3d;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .escrow-protection {
+            background: linear-gradient(135deg, #10b981, #059669);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .booking-summary {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            padding: 10px 0;
+        }
+
+        .summary-row.total {
+            border-top: 2px solid #00ffff;
+            font-weight: bold;
+            font-size: 20px;
+            color: #00ffff;
+        }
+
+        .payment-form {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #00ffff;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #00ffff;
+        }
+
+        .stripe-elements {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .payment-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .payment-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .payment-btn:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .security-badges {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .security-badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .back-btn {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #00ffff;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid #ef4444;
+            color: #fecaca;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .success-message {
+            background: rgba(16, 185, 129, 0.2);
+            border: 2px solid #10b981;
+            color: #6ee7b7;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="window.history.back()">← Back to Booking</button>
+
+    <div class="header">
+        <div class="pro-badge">⭐ PRO FEATURE - FREE Until Jan 1, 2026</div>
+        <h1 style="color: #00ffff; margin: 0;">Secure Escrow Payment</h1>
+        <p style="color: #e2e8f0; margin: 10px 0;">Your payment is protected until service delivery</p>
+    </div>
+
+    <div class="escrow-protection">
+        <h3 style="margin: 0 0 15px 0;">🛡️ How MarketPace Escrow Works</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; text-align: left;">
+            <div>
+                <h4 style="margin: 0 0 8px 0; color: #1a0b3d;">1. Pay Securely</h4>
+                <p style="margin: 0; font-size: 14px;">Your payment is held safely by MarketPace</p>
+            </div>
+            <div>
+                <h4 style="margin: 0 0 8px 0; color: #1a0b3d;">2. Service Day</h4>
+                <p style="margin: 0; font-size: 14px;">Confirm when provider shows up</p>
+            </div>
+            <div>
+                <h4 style="margin: 0 0 8px 0; color: #1a0b3d;">3. Payment Released</h4>
+                <p style="margin: 0; font-size: 14px;">Provider gets paid for showing up</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="booking-summary">
+        <h3 style="color: #ffd700; margin-top: 0;">Booking Summary</h3>
+        <div class="summary-row">
+            <span><strong>Service Provider:</strong></span>
+            <span id="providerName">DJ Mike Entertainment</span>
+        </div>
+        <div class="summary-row">
+            <span><strong>Service Date:</strong></span>
+            <span id="serviceDate">December 15, 2024</span>
+        </div>
+        <div class="summary-row">
+            <span><strong>Service Time:</strong></span>
+            <span id="serviceTime">7:00 PM - 11:00 PM</span>
+        </div>
+        <div class="summary-row">
+            <span><strong>Duration:</strong></span>
+            <span id="serviceDuration">4 hours</span>
+        </div>
+        <div class="summary-row">
+            <span>Service Rate:</span>
+            <span id="serviceRate">$300.00</span>
+        </div>
+        <div class="summary-row" id="bookingFeeRow" style="display: none;">
+            <span>Booking Fee:</span>
+            <span id="bookingFeeAmount">$25.00</span>
+        </div>
+        <div class="summary-row">
+            <span>Platform Fee (5%):</span>
+            <span id="platformFee">$15.00</span>
+        </div>
+        <div class="summary-row total">
+            <span>Total Amount:</span>
+            <span id="totalAmount">$340.00</span>
+        </div>
+    </div>
+
+    <div class="payment-form">
+        <h3 style="color: #ffd700; margin-top: 0;">Payment Information</h3>
+        
+        <div class="form-group">
+            <label>Customer Name</label>
+            <input type="text" class="form-control" id="customerName" placeholder="Enter your full name" required>
+        </div>
+
+        <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" class="form-control" id="customerEmail" placeholder="Enter your email" required>
+        </div>
+
+        <div class="form-group">
+            <label>Payment Method</label>
+            <div id="card-element" class="stripe-elements">
+                <!-- Stripe Elements will be inserted here -->
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Processing your secure payment...</p>
+        </div>
+
+        <button class="payment-btn" id="paymentBtn" onclick="processPayment()">
+            Pay $<span id="payAmount">340.00</span> with Escrow Protection
+        </button>
+    </div>
+
+    <div class="security-badges">
+        <div class="security-badge">
+            <strong>🔒 SSL Encrypted</strong><br>
+            Bank-level security
+        </div>
+        <div class="security-badge">
+            <strong>💳 Stripe Secure</strong><br>
+            PCI DSS compliant
+        </div>
+        <div class="security-badge">
+            <strong>🛡️ Escrow Protected</strong><br>
+            Money back guarantee
+        </div>
+        <div class="security-badge">
+            <strong>⭐ Pro Feature</strong><br>
+            Free until Jan 1, 2026
+        </div>
+    </div>
+
+    <script>
+        // Initialize Stripe (using test key for demo)
+        const stripe = Stripe('pk_test_51234567890_test_key'); // Replace with actual publishable key
+        const elements = stripe.elements();
+        
+        // Create card element
+        const card = elements.create('card', {
+            style: {
+                base: {
+                    color: '#ffffff',
+                    fontFamily: 'Arial, sans-serif',
+                    fontSmoothing: 'antialiased',
+                    fontSize: '16px',
+                    '::placeholder': {
+                        color: '#9ca3af'
+                    }
+                },
+                invalid: {
+                    color: '#ef4444',
+                    iconColor: '#ef4444'
+                }
+            }
+        });
+        
+        card.mount('#card-element');
+
+        // Get booking data from URL parameters
+        function getBookingData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookingParam = urlParams.get('booking');
+            
+            if (bookingParam) {
+                try {
+                    return JSON.parse(atob(bookingParam));
+                } catch (e) {
+                    console.error('Error parsing booking data:', e);
+                }
+            }
+            
+            // Demo data if no URL parameter
+            return {
+                providerId: 'dj-mike-001',
+                providerName: 'DJ Mike Entertainment',
+                date: '2024-12-15',
+                time: '7:00 PM',
+                duration: 4,
+                serviceCost: 300,
+                bookingFee: 25,
+                platformFee: 15,
+                total: 340
+            };
+        }
+
+        // Display booking information
+        function displayBookingInfo() {
+            const booking = getBookingData();
+            
+            document.getElementById('providerName').textContent = booking.providerName || 'DJ Mike Entertainment';
+            document.getElementById('serviceDate').textContent = new Date(booking.date).toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            document.getElementById('serviceTime').textContent = `${booking.time} - ${calculateEndTime(booking.time, booking.duration)}`;
+            document.getElementById('serviceDuration').textContent = `${booking.duration} hours`;
+            document.getElementById('serviceRate').textContent = `$${booking.serviceCost.toFixed(2)}`;
+            document.getElementById('platformFee').textContent = `$${booking.platformFee.toFixed(2)}`;
+            document.getElementById('totalAmount').textContent = `$${booking.total.toFixed(2)}`;
+            document.getElementById('payAmount').textContent = booking.total.toFixed(2);
+
+            if (booking.bookingFee > 0) {
+                document.getElementById('bookingFeeRow').style.display = 'flex';
+                document.getElementById('bookingFeeAmount').textContent = `$${booking.bookingFee.toFixed(2)}`;
+            }
+        }
+
+        function calculateEndTime(startTime, durationHours) {
+            // Simple time calculation for demo
+            const [time, period] = startTime.split(' ');
+            let [hours, minutes] = time.split(':').map(Number);
+            
+            if (period === 'PM' && hours !== 12) hours += 12;
+            if (period === 'AM' && hours === 12) hours = 0;
+            
+            hours += durationHours;
+            
+            if (hours >= 24) hours -= 24;
+            if (hours > 12) {
+                return `${hours - 12}:${minutes.toString().padStart(2, '0')} AM`;
+            } else if (hours === 0) {
+                return `12:${minutes.toString().padStart(2, '0')} AM`;
+            } else if (hours === 12) {
+                return `12:${minutes.toString().padStart(2, '0')} PM`;
+            } else {
+                return `${hours}:${minutes.toString().padStart(2, '0')} ${hours < 12 ? 'AM' : 'PM'}`;
+            }
+        }
+
+        async function processPayment() {
+            const booking = getBookingData();
+            const customerName = document.getElementById('customerName').value;
+            const customerEmail = document.getElementById('customerEmail').value;
+
+            if (!customerName || !customerEmail) {
+                showError('Please fill in all required fields');
+                return;
+            }
+
+            setLoading(true);
+            hideMessages();
+
+            try {
+                // Create payment intent on server
+                const response = await fetch('/api/create-escrow-payment-intent', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        booking: booking,
+                        customer: {
+                            name: customerName,
+                            email: customerEmail
+                        }
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to create payment intent');
+                }
+
+                const { clientSecret } = await response.json();
+
+                // Confirm payment with Stripe
+                const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+                    payment_method: {
+                        card: card,
+                        billing_details: {
+                            name: customerName,
+                            email: customerEmail,
+                        },
+                    }
+                });
+
+                if (error) {
+                    throw new Error(error.message);
+                }
+
+                if (paymentIntent.status === 'succeeded') {
+                    showSuccess('Payment successful! Your booking is confirmed with escrow protection.');
+                    
+                    // Save booking to localStorage for demo
+                    const confirmedBooking = {
+                        ...booking,
+                        id: 'booking_' + Date.now(),
+                        customerName,
+                        customerEmail,
+                        paymentIntentId: paymentIntent.id,
+                        status: 'confirmed',
+                        escrowStatus: 'holding'
+                    };
+                    
+                    localStorage.setItem('confirmedBooking', JSON.stringify(confirmedBooking));
+                    
+                    setTimeout(() => {
+                        window.location.href = '/booking-confirmation.html?id=' + confirmedBooking.id;
+                    }, 2000);
+                }
+
+            } catch (error) {
+                console.error('Payment error:', error);
+                showError(error.message || 'Payment failed. Please try again.');
+            }
+
+            setLoading(false);
+        }
+
+        function setLoading(loading) {
+            document.getElementById('loading').style.display = loading ? 'block' : 'none';
+            document.getElementById('paymentBtn').disabled = loading;
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+
+        function showSuccess(message) {
+            const successEl = document.getElementById('successMessage');
+            successEl.textContent = message;
+            successEl.style.display = 'block';
+        }
+
+        function hideMessages() {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        // Handle form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            displayBookingInfo();
+            
+            // Add form validation
+            const form = document.querySelector('.payment-form');
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                processPayment();
+            });
+        });
+    </script>
+</body>
+</html>

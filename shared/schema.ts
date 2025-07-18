@@ -143,6 +143,82 @@ export const volunteers = pgTable("volunteers", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Service Provider Calendars for Pro booking features
+export const serviceCalendars = pgTable("service_calendars", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  providerId: varchar("provider_id").notNull().references(() => users.id),
+  serviceType: varchar("service_type").notNull(), // entertainment, photography, tutoring, etc.
+  hourlyRate: integer("hourly_rate").notNull(), // rate in cents
+  minDuration: integer("min_duration").default(1), // minimum hours
+  bookingFee: integer("booking_fee").default(0), // optional booking fee in cents
+  hasBookingFee: boolean("has_booking_fee").default(false),
+  escrowEnabled: boolean("escrow_enabled").default(true),
+  availability: jsonb("availability"), // JSON object with dates and time slots
+  settings: jsonb("settings"), // additional provider settings
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Customer Bookings with Escrow Support
+export const bookings = pgTable("bookings", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  customerId: varchar("customer_id").notNull().references(() => users.id),
+  providerId: varchar("provider_id").notNull().references(() => users.id),
+  calendarId: uuid("calendar_id").notNull().references(() => serviceCalendars.id),
+  bookingDate: timestamp("booking_date").notNull(),
+  startTime: varchar("start_time").notNull(), // e.g., "7:00 PM"
+  duration: integer("duration").notNull(), // hours
+  serviceCost: integer("service_cost").notNull(), // in cents
+  bookingFee: integer("booking_fee").default(0), // in cents
+  platformFee: integer("platform_fee").notNull(), // 5% platform fee in cents
+  totalAmount: integer("total_amount").notNull(), // total charged to customer
+  status: varchar("status").default("pending_payment"), // pending_payment, paid, confirmed, completed, cancelled, disputed
+  escrowStatus: varchar("escrow_status").default("holding"), // holding, released, refunded
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  customerNotes: text("customer_notes"),
+  providerNotes: text("provider_notes"),
+  showUpConfirmed: boolean("show_up_confirmed").default(false),
+  showUpConfirmedAt: timestamp("show_up_confirmed_at"),
+  paymentReleasedAt: timestamp("payment_released_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Escrow Transactions for secure payments
+export const escrowTransactions = pgTable("escrow_transactions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  bookingId: uuid("booking_id").notNull().references(() => bookings.id),
+  customerId: varchar("customer_id").notNull().references(() => users.id),
+  providerId: varchar("provider_id").notNull().references(() => users.id),
+  amount: integer("amount").notNull(), // amount held in escrow (cents)
+  platformFee: integer("platform_fee").notNull(), // MarketPace's 5% fee (cents)
+  status: varchar("status").default("holding"), // holding, released, refunded, disputed
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  stripeTransferId: varchar("stripe_transfer_id"), // when released to provider
+  releasedAt: timestamp("released_at"),
+  refundedAt: timestamp("refunded_at"),
+  disputeReason: text("dispute_reason"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Reviews and Ratings for service quality tracking
+export const serviceReviews = pgTable("service_reviews", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  bookingId: uuid("booking_id").notNull().references(() => bookings.id),
+  customerId: varchar("customer_id").notNull().references(() => users.id),
+  providerId: varchar("provider_id").notNull().references(() => users.id),
+  rating: integer("rating").notNull(), // 1-5 stars
+  reviewText: text("review_text"),
+  showUpRating: integer("show_up_rating").notNull(), // separate rating for showing up
+  qualityRating: integer("quality_rating").notNull(), // separate rating for service quality
+  wouldRecommend: boolean("would_recommend").default(true),
+  isPublic: boolean("is_public").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Volunteer hour logs
 export const volunteerHours = pgTable("volunteer_hours", {
   id: uuid("id").primaryKey().defaultRandom(),
