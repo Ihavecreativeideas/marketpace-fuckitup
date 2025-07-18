@@ -1450,7 +1450,7 @@
                         </div>
                         <div class="commerce-actions">
                             <button class="commerce-btn primary" onclick="rentItem('power washer', 45.00)">Rent Now</button>
-                            <button class="commerce-btn" onclick="messageOwner('power washer rental')">
+                            <button class="commerce-btn" onclick="messageOwner('Power Washer', 'Tom\'s Tool Rentals', 45.00, 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400')">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
                                     <rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/>
                                     <path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7" stroke="currentColor" stroke-width="1.5"/>
@@ -3143,6 +3143,32 @@
         function contactSeller(itemName) {
             alert(`Contact request sent for ${itemName}. Seller will be notified.`);
             closeItemDetails();
+        }
+
+        // Message Owner Function
+        function messageOwner(itemName, sellerName, itemPrice, imageUrl) {
+            // Create a conversation and navigate to messages
+            const conversationId = 'conv_' + Date.now();
+            const conversation = {
+                id: conversationId,
+                participants: ['You', sellerName || 'Seller'],
+                lastMessage: `Hi! I'm interested in ${itemName}`,
+                timestamp: new Date().toISOString(),
+                itemContext: {
+                    name: itemName,
+                    price: itemPrice,
+                    image: imageUrl,
+                    seller: sellerName
+                }
+            };
+            
+            // Save conversation to localStorage
+            const conversations = JSON.parse(localStorage.getItem('marketpace_conversations') || '[]');
+            conversations.unshift(conversation);
+            localStorage.setItem('marketpace_conversations', JSON.stringify(conversations));
+            
+            // Navigate to messages page
+            window.location.href = '/messages';
         }
 
         // Profile Settings and Navigation Functions
