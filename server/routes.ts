@@ -12,6 +12,7 @@ import { registerFacebookRoutes } from "./facebookIntegration";
 import { setupFacebookAuth } from "./facebookAuth";
 import { facebookAPI } from "./facebookGraphAPI";
 import { registerAuthRoutes } from "./authRoutes";
+import { setupShopifyBusinessRoutes } from "./shopifyBusinessIntegration";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -2471,6 +2472,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Temporarily disabled problematic integrations causing routing errors
   // registerIntegrationRoutes(app);
+  
+  // Setup Shopify Business Integration Routes
+  setupShopifyBusinessRoutes(app);
   // registerScammerProtectionRoutes(app);
 
   // Facebook API integration routes

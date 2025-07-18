@@ -56,6 +56,75 @@ interface MarketPaceProduct {
 
 export class ShopifyBusinessIntegration {
   
+  static async testConnection(req: Request, res: Response) {
+    try {
+      // Use environment variables for testing
+      const shopDomain = process.env.SHOPIFY_STORE_URL || req.body.shopDomain;
+      const accessToken = process.env.SHOPIFY_ACCESS_TOKEN || req.body.accessToken;
+      
+      if (!shopDomain || !accessToken) {
+        return res.json({
+          success: false,
+          error: 'Missing Shopify credentials. Please provide SHOPIFY_STORE_URL and SHOPIFY_ACCESS_TOKEN.'
+        });
+      }
+
+      // Clean up domain format
+      const cleanDomain = shopDomain.replace(/^https?:\/\//, '').replace(/\/$/, '');
+      
+      // Test multiple API endpoints for thorough validation
+      const testEndpoints = [
+        `https://${cleanDomain}/admin/api/2024-01/shop.json`,
+        `https://${cleanDomain}/admin/api/2024-01/products.json?limit=1`,
+        `https://${cleanDomain}/admin/api/2024-01/locations.json`
+      ];
+      
+      const results = [];
+      
+      for (const endpoint of testEndpoints) {
+        try {
+          const response = await fetch(endpoint, {
+            headers: {
+              'X-Shopify-Access-Token': accessToken,
+              'Accept': 'application/json'
+            }
+          });
+          
+          results.push({
+            endpoint: endpoint.split('/').pop(),
+            status: response.status,
+            success: response.ok,
+            data: response.ok ? await response.json() : await response.text()
+          });
+        } catch (error) {
+          results.push({
+            endpoint: endpoint.split('/').pop(),
+            status: 'error',
+            success: false,
+            error: error.message
+          });
+        }
+      }
+      
+      const allSuccessful = results.every(r => r.success);
+      
+      res.json({
+        success: allSuccessful,
+        shopDomain: cleanDomain,
+        accessToken: accessToken.substring(0, 10) + '...',
+        testResults: results,
+        message: allSuccessful ? 'All Shopify API endpoints working!' : 'Some API endpoints failed'
+      });
+
+    } catch (error) {
+      console.error('Shopify connection test error:', error);
+      res.json({
+        success: false,
+        error: 'Connection test failed: ' + error.message
+      });
+    }
+  }
+  
   static async connectStore(req: Request, res: Response) {
     try {
       const {
@@ -460,6 +529,9 @@ export function setupShopifyBusinessRoutes(app: Express) {
   
   // Delivery calculation route
   app.post('/api/shopify/business-integration/calculate-delivery', ShopifyBusinessIntegration.calculateDeliveryFee);
+  
+  // Test endpoint for Shopify credentials
+  app.post('/api/shopify/test-connection', ShopifyBusinessIntegration.testConnection);
   
   // Serve the integration page
   app.get('/shopify-business-integration', (req, res) => {
