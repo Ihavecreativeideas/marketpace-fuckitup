@@ -910,12 +910,50 @@
                     }
                     break;
                 case 'event':
-                    alert('Event creation feature coming soon!');
+                    openEventCreationModal();
                     break;
                 case 'profile':
                     alert('Professional profile editor coming soon!');
                     break;
             }
+        }
+
+        // Event creation modal function
+        function openEventCreationModal() {
+            const eventTitle = prompt('Event Title:');
+            if (!eventTitle) return;
+            
+            const eventDate = prompt('Event Date (YYYY-MM-DD):');
+            if (!eventDate) return;
+            
+            const eventTime = prompt('Event Time (e.g., 8:00 PM):');
+            if (!eventTime) return;
+            
+            const eventLocation = prompt('Event Location:');
+            if (!eventLocation) return;
+            
+            const eventDescription = prompt('Event Description:');
+            if (!eventDescription) return;
+            
+            // Create new event post
+            const eventPost = {
+                title: eventTitle,
+                date: eventDate,
+                time: eventTime,
+                location: eventLocation,
+                description: eventDescription,
+                created: new Date().toISOString()
+            };
+            
+            // Save to localStorage
+            const existingEvents = JSON.parse(localStorage.getItem('hubEvents') || '[]');
+            existingEvents.push(eventPost);
+            localStorage.setItem('hubEvents', JSON.stringify(existingEvents));
+            
+            alert(`✅ Event "${eventTitle}" created successfully!\n\nDate: ${eventDate}\nTime: ${eventTime}\nLocation: ${eventLocation}`);
+            
+            // Reload page to show new event
+            location.reload();
         }
 
         // Professional profile functions
@@ -1072,6 +1110,50 @@
 
         // Initialize particles when page loads
         createParticles();
+
+        // Load user-created events on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserEvents();
+        });
+
+        function loadUserEvents() {
+            const userEvents = JSON.parse(localStorage.getItem('hubEvents') || '[]');
+            const eventsTab = document.getElementById('events');
+            
+            if (userEvents.length > 0) {
+                // Add user events to the events section
+                userEvents.forEach(event => {
+                    const eventHTML = `
+                        <div class="feed-post">
+                            <div class="post-header">
+                                <div class="profile-pic">🎭</div>
+                                <div class="post-info">
+                                    <h4>Your Event</h4>
+                                    <span>${event.date} • ${event.time}</span>
+                                </div>
+                            </div>
+                            <div class="post-content">
+                                <h4>🎪 ${event.title}</h4>
+                                <p><strong>When:</strong> ${event.date}, ${event.time}</p>
+                                <p><strong>Where:</strong> ${event.location}</p>
+                                <p><strong>What:</strong> ${event.description}</p>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="action-btn" onclick="attendEvent()">✅ Attend</button>
+                                <button class="action-btn" onclick="shareEvent()">📤 Share</button>
+                                <button class="action-btn" onclick="getDirections()">📍 Directions</button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Insert at the beginning of events section
+                    if (eventsTab) {
+                        const existingContent = eventsTab.innerHTML;
+                        eventsTab.innerHTML = eventHTML + existingContent;
+                    }
+                });
+            }
+        }
 
         // Add missing navigation function
         function filterToRentals() {
