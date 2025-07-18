@@ -673,26 +673,108 @@
                             <span style="font-weight: bold;">Promote this post</span>
                         </label>
                         
-                        <div id="promotionOptions" style="display: none; margin-top: 15px; padding: 15px; background: rgba(255, 215, 0, 0.1); border-radius: 8px; border: 1px solid rgba(255, 215, 0, 0.3);">
-                            <div style="margin-bottom: 15px;">
-                                <label style="display: block; color: #ffd700; margin-bottom: 8px;">Budget</label>
-                                <select id="promotionBudget" style="width: 100%; padding: 8px; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: white;">
-                                    <option value="25">$25 - Local boost</option>
-                                    <option value="50">$50 - Regional reach</option>
-                                    <option value="100">$100 - Wide exposure</option>
+                        <div id="promotionOptions" style="display: none; margin-top: 15px; padding: 20px; background: rgba(255, 215, 0, 0.1); border-radius: 8px; border: 1px solid rgba(255, 215, 0, 0.3);">
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; color: #ffd700; margin-bottom: 8px; font-weight: bold;">Daily Budget</label>
+                                <div style="position: relative;">
+                                    <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #ffd700; font-size: 16px;">$</span>
+                                    <input type="number" id="promotionBudget" placeholder="0.00" min="1" step="0.01" style="width: 100%; padding: 12px 12px 12px 32px; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: white; font-size: 16px;" />
+                                </div>
+                                <div style="color: rgba(255, 255, 255, 0.6); font-size: 12px; margin-top: 5px;">Minimum $1.00 per day</div>
+                            </div>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; color: #ffd700; margin-bottom: 8px; font-weight: bold;">Duration</label>
+                                <select id="promotionDuration" style="width: 100%; padding: 12px; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: white; font-size: 16px;">
+                                    <option value="1">1 Day</option>
+                                    <option value="3">3 Days</option>
+                                    <option value="7" selected>1 Week</option>
+                                    <option value="14">2 Weeks</option>
+                                    <option value="30">1 Month</option>
+                                    <option value="custom">Custom Duration</option>
                                 </select>
                             </div>
-                            <div style="margin-bottom: 15px;">
-                                <label style="display: block; color: #ffd700; margin-bottom: 8px;">Platforms</label>
-                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-                                    <label style="display: flex; align-items: center; color: white;">
-                                        <input type="checkbox" checked style="margin-right: 8px;" />
-                                        MarketPace
+
+                            <div id="customDurationSection" style="display: none; margin-bottom: 20px;">
+                                <label style="display: block; color: #ffd700; margin-bottom: 8px; font-weight: bold;">Custom Duration (Days)</label>
+                                <input type="number" id="customDuration" placeholder="Enter number of days" min="1" max="365" style="width: 100%; padding: 12px; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: white; font-size: 16px;" />
+                            </div>
+
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; color: #ffd700; margin-bottom: 8px; font-weight: bold;">Target Audience</label>
+                                <select id="targetAudience" style="width: 100%; padding: 12px; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: white; font-size: 16px;">
+                                    <option value="local">Local Area (5 mile radius)</option>
+                                    <option value="city">City Wide (25 mile radius)</option>
+                                    <option value="regional">Regional (50 mile radius)</option>
+                                    <option value="custom">Custom Location</option>
+                                </select>
+                            </div>
+
+                            <div id="customLocationSection" style="display: none; margin-bottom: 20px;">
+                                <label style="display: block; color: #ffd700; margin-bottom: 8px; font-weight: bold;">Custom Location</label>
+                                <input type="text" id="customLocation" placeholder="Enter city, state or zip code" style="width: 100%; padding: 12px; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: white; font-size: 16px; margin-bottom: 10px;" />
+                                <input type="number" id="customRadius" placeholder="Radius in miles" min="1" max="100" style="width: 100%; padding: 12px; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: white; font-size: 16px;" />
+                            </div>
+
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; color: #ffd700; margin-bottom: 8px; font-weight: bold;">Age Range</label>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                    <div>
+                                        <input type="number" id="minAge" placeholder="Min age" min="18" max="65" value="18" style="width: 100%; padding: 12px; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: white; font-size: 16px;" />
+                                    </div>
+                                    <div>
+                                        <input type="number" id="maxAge" placeholder="Max age" min="18" max="65" value="65" style="width: 100%; padding: 12px; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: white; font-size: 16px;" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; color: #ffd700; margin-bottom: 8px; font-weight: bold;">Interests (Optional)</label>
+                                <textarea id="interests" placeholder="Enter relevant interests or keywords separated by commas..." style="width: 100%; padding: 12px; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: white; font-size: 16px; min-height: 60px; resize: vertical;"></textarea>
+                                <div style="color: rgba(255, 255, 255, 0.6); font-size: 12px; margin-top: 5px;">e.g., music, art, local businesses, home improvement</div>
+                            </div>
+
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; color: #ffd700; margin-bottom: 8px; font-weight: bold;">Promotion Platforms</label>
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                                    <label style="display: flex; align-items: center; color: white; padding: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="platformMarketPace" checked style="margin-right: 12px; transform: scale(1.2);" />
+                                        <div>
+                                            <div style="font-weight: bold;">MarketPace</div>
+                                            <div style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">Local community</div>
+                                        </div>
                                     </label>
-                                    <label style="display: flex; align-items: center; color: white;">
-                                        <input type="checkbox" style="margin-right: 8px;" />
-                                        Facebook
+                                    <label style="display: flex; align-items: center; color: white; padding: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="platformFacebook" style="margin-right: 12px; transform: scale(1.2);" />
+                                        <div>
+                                            <div style="font-weight: bold;">Facebook</div>
+                                            <div style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">Social network</div>
+                                        </div>
                                     </label>
+                                    <label style="display: flex; align-items: center; color: white; padding: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="platformInstagram" style="margin-right: 12px; transform: scale(1.2);" />
+                                        <div>
+                                            <div style="font-weight: bold;">Instagram</div>
+                                            <div style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">Visual content</div>
+                                        </div>
+                                    </label>
+                                    <label style="display: flex; align-items: center; color: white; padding: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="platformGoogle" style="margin-right: 12px; transform: scale(1.2);" />
+                                        <div>
+                                            <div style="font-weight: bold;">Google Ads</div>
+                                            <div style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">Search results</div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255, 215, 0, 0.2);">
+                                <div style="color: #ffd700; font-weight: bold; margin-bottom: 10px;">Promotion Summary</div>
+                                <div id="promotionSummary" style="color: rgba(255, 255, 255, 0.8); font-size: 14px; line-height: 1.4;">
+                                    <div>Daily Budget: $<span id="summaryBudget">0.00</span></div>
+                                    <div>Duration: <span id="summaryDuration">1 Week</span></div>
+                                    <div>Total Cost: $<span id="summaryTotal">0.00</span></div>
+                                    <div>Estimated Reach: <span id="summaryReach">0</span> people</div>
                                 </div>
                             </div>
                         </div>
@@ -768,6 +850,76 @@
             const checkbox = document.getElementById('enablePromotion');
             const options = document.getElementById('promotionOptions');
             options.style.display = checkbox.checked ? 'block' : 'none';
+            
+            if (checkbox.checked) {
+                // Set up event listeners for dynamic updates
+                setupPromotionListeners();
+                updatePromotionSummary();
+            }
+        }
+
+        function setupPromotionListeners() {
+            // Budget input listener
+            document.getElementById('promotionBudget').addEventListener('input', updatePromotionSummary);
+            
+            // Duration selector listener
+            document.getElementById('promotionDuration').addEventListener('change', function() {
+                const customSection = document.getElementById('customDurationSection');
+                customSection.style.display = this.value === 'custom' ? 'block' : 'none';
+                updatePromotionSummary();
+            });
+            
+            // Custom duration listener
+            document.getElementById('customDuration').addEventListener('input', updatePromotionSummary);
+            
+            // Target audience listener
+            document.getElementById('targetAudience').addEventListener('change', function() {
+                const customSection = document.getElementById('customLocationSection');
+                customSection.style.display = this.value === 'custom' ? 'block' : 'none';
+                updatePromotionSummary();
+            });
+            
+            // Custom location listeners
+            document.getElementById('customLocation').addEventListener('input', updatePromotionSummary);
+            document.getElementById('customRadius').addEventListener('input', updatePromotionSummary);
+            
+            // Age range listeners
+            document.getElementById('minAge').addEventListener('input', updatePromotionSummary);
+            document.getElementById('maxAge').addEventListener('input', updatePromotionSummary);
+        }
+
+        function updatePromotionSummary() {
+            const budget = parseFloat(document.getElementById('promotionBudget').value) || 0;
+            const durationSelect = document.getElementById('promotionDuration');
+            let duration = parseInt(durationSelect.value);
+            
+            if (durationSelect.value === 'custom') {
+                duration = parseInt(document.getElementById('customDuration').value) || 1;
+            }
+            
+            const totalCost = budget * duration;
+            const estimatedReach = Math.floor(budget * duration * 50); // Rough estimate: $1 = ~50 people reach
+            
+            // Update summary display
+            document.getElementById('summaryBudget').textContent = budget.toFixed(2);
+            document.getElementById('summaryDuration').textContent = getDurationText(duration, durationSelect.value);
+            document.getElementById('summaryTotal').textContent = totalCost.toFixed(2);
+            document.getElementById('summaryReach').textContent = estimatedReach.toLocaleString();
+        }
+
+        function getDurationText(duration, originalValue) {
+            if (originalValue === 'custom') {
+                return duration === 1 ? '1 Day' : `${duration} Days`;
+            }
+            
+            switch (originalValue) {
+                case '1': return '1 Day';
+                case '3': return '3 Days';
+                case '7': return '1 Week';
+                case '14': return '2 Weeks';
+                case '30': return '1 Month';
+                default: return `${duration} Days`;
+            }
         }
 
         function submitProfessionalPost() {
@@ -781,14 +933,47 @@
             };
             
             if (postData.promotion) {
-                postData.budget = document.getElementById('promotionBudget').value;
+                const durationSelect = document.getElementById('promotionDuration');
+                let duration = parseInt(durationSelect.value);
+                if (durationSelect.value === 'custom') {
+                    duration = parseInt(document.getElementById('customDuration').value) || 1;
+                }
+                
+                postData.promotionDetails = {
+                    dailyBudget: parseFloat(document.getElementById('promotionBudget').value) || 0,
+                    duration: duration,
+                    targetAudience: document.getElementById('targetAudience').value,
+                    ageRange: {
+                        min: parseInt(document.getElementById('minAge').value) || 18,
+                        max: parseInt(document.getElementById('maxAge').value) || 65
+                    },
+                    interests: document.getElementById('interests').value,
+                    platforms: {
+                        marketpace: document.getElementById('platformMarketPace').checked,
+                        facebook: document.getElementById('platformFacebook').checked,
+                        instagram: document.getElementById('platformInstagram').checked,
+                        google: document.getElementById('platformGoogle').checked
+                    }
+                };
+                
+                if (postData.promotionDetails.targetAudience === 'custom') {
+                    postData.promotionDetails.customLocation = {
+                        location: document.getElementById('customLocation').value,
+                        radius: parseInt(document.getElementById('customRadius').value) || 5
+                    };
+                }
+                
+                postData.promotionDetails.totalCost = postData.promotionDetails.dailyBudget * duration;
             }
             
             // Here you would normally send to server
             console.log('Professional post data:', postData);
             
             // Show success message
-            alert('Professional post created successfully!');
+            const message = postData.promotion ? 
+                `Professional post created and promotion started! Total promotion cost: $${postData.promotionDetails.totalCost.toFixed(2)}` :
+                'Professional post created successfully!';
+            alert(message);
             closeCreatePostModal();
             
             // Refresh the page to show new post
