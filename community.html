@@ -5872,6 +5872,163 @@ function showNotification(message, type = 'info') {
         setTimeout(() => document.body.removeChild(notification), 300);
     }, 3000);
 }
+
+// Self-pickup checkout functionality for rental items
+function addSelfPickupToRentals() {
+    const rentalPosts = document.querySelectorAll('.post-rental');
+    
+    rentalPosts.forEach(post => {
+        const commerceActions = post.querySelector('.commerce-actions');
+        if (commerceActions && !commerceActions.querySelector('.self-pickup-btn')) {
+            const selfPickupBtn = document.createElement('button');
+            selfPickupBtn.className = 'commerce-btn self-pickup-btn';
+            selfPickupBtn.style.cssText = `
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+                border: none;
+                padding: 8px 15px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 12px;
+                margin-left: 5px;
+            `;
+            selfPickupBtn.innerHTML = `
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 4px; vertical-align: middle;">
+                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 255, 255, 0.2)"/>
+                    <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                Self-Pickup
+            `;
+            
+            const itemName = post.querySelector('.post-text').textContent.split(' -')[0].trim();
+            const priceElement = post.querySelector('.price-tag');
+            const basePrice = priceElement ? parseFloat(priceElement.textContent.replace(/[^0-9.]/g, '')) : 25.00;
+            
+            selfPickupBtn.onclick = () => startSelfPickupFlow(itemName, basePrice);
+            commerceActions.appendChild(selfPickupBtn);
+        }
+    });
+}
+
+function startSelfPickupFlow(itemName, basePrice) {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px;">
+            <h3 style="color: #10b981; margin-bottom: 20px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 8px; vertical-align: middle;">
+                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(16, 185, 129, 0.2)"/>
+                    <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                Self-Pickup Rental: ${itemName}
+            </h3>
+            
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(16, 185, 129, 0.3);">
+                <h4 style="color: #10b981; margin-bottom: 10px;">Eco-Friendly Choice!</h4>
+                <p style="margin: 0; font-size: 14px;">By choosing self-pickup, you're reducing carbon emissions and supporting sustainable commerce.</p>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="color: #00ffff; display: block; margin-bottom: 10px;">Rental Duration:</label>
+                <select id="rentalHours" style="background: rgba(0, 0, 0, 0.3); color: white; border: 1px solid rgba(0, 255, 255, 0.3); padding: 10px; border-radius: 5px; width: 100%;">
+                    <option value="4">4 hours - $${(basePrice * 0.5).toFixed(2)}</option>
+                    <option value="8">8 hours - $${(basePrice * 0.75).toFixed(2)}</option>
+                    <option value="24" selected>Full day (24h) - $${basePrice.toFixed(2)}</option>
+                    <option value="48">2 days - $${(basePrice * 1.8).toFixed(2)}</option>
+                    <option value="72">3 days - $${(basePrice * 2.5).toFixed(2)}</option>
+                </select>
+            </div>
+            
+            <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                <h4 style="color: #00ffff; margin-bottom: 10px;">Pricing Breakdown:</h4>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span>Rental Cost:</span>
+                    <span id="displayRentalCost">$${basePrice.toFixed(2)}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span>Sustainability Fee (5%):</span>
+                    <span id="displaySustainabilityFee">$${(basePrice * 0.05).toFixed(2)}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span>Delivery:</span>
+                    <span style="color: #10b981;">FREE (Self-Pickup)</span>
+                </div>
+                <hr style="border: none; border-top: 1px solid rgba(255, 255, 255, 0.2); margin: 10px 0;">
+                <div style="display: flex; justify-content: space-between; font-weight: bold; color: #00ffff;">
+                    <span>Total:</span>
+                    <span id="displayTotal">$${(basePrice * 1.05).toFixed(2)}</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button onclick="closeSelfPickupModal()" style="background: rgba(107, 114, 128, 0.6); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer;">Cancel</button>
+                <button onclick="proceedToSelfPickupCheckout('${itemName}', ${basePrice})" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer;">Proceed to Checkout</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Update pricing when duration changes
+    document.getElementById('rentalHours').addEventListener('change', function() {
+        updateSelfPickupPricing(basePrice);
+    });
+}
+
+function updateSelfPickupPricing(basePrice) {
+    const hours = parseInt(document.getElementById('rentalHours').value);
+    let rentalCost = basePrice;
+    
+    if (hours === 4) rentalCost = basePrice * 0.5;
+    else if (hours === 8) rentalCost = basePrice * 0.75;
+    else if (hours === 48) rentalCost = basePrice * 1.8;
+    else if (hours === 72) rentalCost = basePrice * 2.5;
+    
+    const sustainabilityFee = rentalCost * 0.05;
+    const total = rentalCost + sustainabilityFee;
+    
+    document.getElementById('displayRentalCost').textContent = `$${rentalCost.toFixed(2)}`;
+    document.getElementById('displaySustainabilityFee').textContent = `$${sustainabilityFee.toFixed(2)}`;
+    document.getElementById('displayTotal').textContent = `$${total.toFixed(2)}`;
+}
+
+function proceedToSelfPickupCheckout(itemName, basePrice) {
+    const hours = parseInt(document.getElementById('rentalHours').value);
+    let rentalCost = basePrice;
+    
+    if (hours === 4) rentalCost = basePrice * 0.5;
+    else if (hours === 8) rentalCost = basePrice * 0.75;
+    else if (hours === 48) rentalCost = basePrice * 1.8;
+    else if (hours === 72) rentalCost = basePrice * 2.5;
+    
+    const sustainabilityFee = rentalCost * 0.05;
+    const totalCost = rentalCost + sustainabilityFee;
+    
+    // Store checkout data
+    localStorage.setItem('selfPickupCheckout', JSON.stringify({
+        itemName: itemName,
+        basePrice: rentalCost,
+        hours: hours,
+        sustainabilityFee: sustainabilityFee,
+        totalCost: totalCost,
+        checkoutType: 'self-pickup'
+    }));
+    
+    // Navigate to checkout page
+    window.location.href = '/self-pickup-checkout.html';
+}
+
+function closeSelfPickupModal() {
+    const modal = document.querySelector('.modal-overlay');
+    if (modal) {
+        document.body.removeChild(modal);
+    }
+}
+
+// Initialize self-pickup functionality when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(addSelfPickupToRentals, 1000); // Add self-pickup buttons after page loads
+});
 </script>
 
 <style>

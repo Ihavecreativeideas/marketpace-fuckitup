@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Self-Pickup Checkout - MarketPace</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a0b3d, #6b46c1);
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+        }
+
+        .checkout-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .sustainability-badge {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .item-summary {
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .price-breakdown {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .price-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 5px 0;
+        }
+
+        .price-total {
+            border-top: 2px solid #00ffff;
+            padding-top: 15px;
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #00ffff;
+        }
+
+        .sustainability-info {
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .pickup-details {
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .checkout-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00ffff, #10b981);
+            color: #1a0b3d;
+        }
+
+        .btn-secondary {
+            background: rgba(107, 114, 128, 0.6);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .icon {
+            display: inline-block;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .contact-info {
+            text-align: center;
+            margin-top: 20px;
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="marketpace-logo-1.jpeg" alt="MarketPace" style="width: 100%; height: 100%; object-fit: contain;">
+        </div>
+        <h1>Self-Pickup Checkout</h1>
+        <div class="sustainability-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="icon">
+                <path d="M12 2L13.09 8.26L22 9L16 14.74L17.18 22L12 19L6.82 22L8 14.74L2 9L10.91 8.26L12 2Z" stroke="currentColor" stroke-width="1.5" fill="currentColor"/>
+            </svg>
+            Eco-Friendly Self-Pickup
+        </div>
+    </div>
+
+    <div class="checkout-container">
+        <div class="item-summary">
+            <h3 style="color: #00ffff; margin-bottom: 15px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="icon">
+                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/>
+                    <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                Rental Summary
+            </h3>
+            <div id="itemDetails">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+
+        <div class="price-breakdown">
+            <h3 style="color: #00ffff; margin-bottom: 15px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="icon">
+                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 215, 0, 0.2)"/>
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                Price Breakdown
+            </h3>
+            
+            <div class="price-line">
+                <span>Rental Cost:</span>
+                <span id="rentalCost">$0.00</span>
+            </div>
+            
+            <div class="price-line">
+                <span>Platform Sustainability Fee (5%):</span>
+                <span id="sustainabilityFee">$0.00</span>
+            </div>
+            
+            <div class="price-line">
+                <span>Delivery Cost:</span>
+                <span style="color: #10b981;">FREE (Self-Pickup)</span>
+            </div>
+            
+            <div class="price-line price-total">
+                <span>Total:</span>
+                <span id="totalCost">$0.00</span>
+            </div>
+        </div>
+
+        <div class="sustainability-info">
+            <h4 style="color: #10b981; margin-bottom: 10px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="icon">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" fill="rgba(16, 185, 129, 0.2)"/>
+                    <path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                About Our Sustainability Fee
+            </h4>
+            <p style="margin: 0; font-size: 14px;">
+                The 5% sustainability fee helps MarketPace maintain our platform, support local communities, 
+                and invest in eco-friendly initiatives. By choosing self-pickup, you're reducing carbon 
+                emissions and supporting sustainable commerce practices!
+            </p>
+        </div>
+
+        <div class="pickup-details">
+            <h4 style="color: #8b5cf6; margin-bottom: 15px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="icon">
+                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(139, 92, 246, 0.2)"/>
+                    <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                Pickup Information
+            </h4>
+            <div id="pickupInfo">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+
+        <div class="checkout-actions">
+            <button class="btn btn-secondary" onclick="goBack()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="icon">
+                    <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                Back
+            </button>
+            
+            <button class="btn btn-primary" onclick="completeCheckout()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="icon">
+                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                Complete Self-Pickup Rental
+            </button>
+        </div>
+
+        <div class="contact-info">
+            <p>Questions? Contact the owner directly or reach out to MarketPace support</p>
+            <p>Email: MarketPace.contact@gmail.com</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCheckoutData();
+        });
+
+        function loadCheckoutData() {
+            const checkoutData = JSON.parse(localStorage.getItem('selfPickupCheckout') || '{}');
+            
+            if (!checkoutData.itemName) {
+                showError('No checkout data found. Please start the rental process again.');
+                return;
+            }
+
+            // Populate item details
+            document.getElementById('itemDetails').innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h4 style="margin: 0; color: white;">${checkoutData.itemName}</h4>
+                        <p style="margin: 5px 0 0 0; color: #a0a0a0;">Duration: ${checkoutData.hours} hours</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 18px; font-weight: bold; color: #00ffff;">$${checkoutData.basePrice.toFixed(2)}</div>
+                    </div>
+                </div>
+            `;
+
+            // Populate pricing
+            document.getElementById('rentalCost').textContent = `$${checkoutData.basePrice.toFixed(2)}`;
+            document.getElementById('sustainabilityFee').textContent = `$${checkoutData.sustainabilityFee.toFixed(2)}`;
+            document.getElementById('totalCost').textContent = `$${checkoutData.totalCost.toFixed(2)}`;
+
+            // Populate pickup info
+            document.getElementById('pickupInfo').innerHTML = `
+                <div style="margin-bottom: 10px;">
+                    <strong>Pickup Time:</strong> ${checkoutData.pickupTime || 'To be arranged with owner'}
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <strong>Return Time:</strong> ${checkoutData.dropoffTime || 'To be arranged with owner'}
+                </div>
+                <div style="background: rgba(255, 215, 0, 0.1); padding: 10px; border-radius: 5px; border: 1px solid rgba(255, 215, 0, 0.3);">
+                    <strong style="color: #ffd700;">Important:</strong> You'll receive owner contact information after payment 
+                    to coordinate pickup details and location.
+                </div>
+            `;
+        }
+
+        function completeCheckout() {
+            const checkoutData = JSON.parse(localStorage.getItem('selfPickupCheckout') || '{}');
+            
+            // Show processing notification
+            showNotification('Processing your rental payment...', 'info');
+            
+            // Simulate payment processing
+            setTimeout(() => {
+                // Store rental confirmation
+                const rentalConfirmation = {
+                    ...checkoutData,
+                    confirmationNumber: 'SP' + Date.now(),
+                    status: 'confirmed',
+                    paymentMethod: 'self-pickup-checkout',
+                    timestamp: new Date().toISOString()
+                };
+                
+                localStorage.setItem('rentalConfirmation', JSON.stringify(rentalConfirmation));
+                localStorage.removeItem('selfPickupCheckout');
+                
+                // Show success and redirect
+                showNotification('Self-pickup rental confirmed! Redirecting to confirmation page...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = '/rental-confirmation.html';
+                }, 2000);
+                
+            }, 1500);
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.style.cssText = `
+                background: linear-gradient(135deg, #ef4444, #dc2626);
+                color: white;
+                padding: 20px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+                text-align: center;
+            `;
+            errorDiv.innerHTML = `
+                <h3>Error</h3>
+                <p>${message}</p>
+                <button onclick="window.location.href='/community'" style="background: white; color: #ef4444; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                    Return to Community
+                </button>
+            `;
+            
+            document.querySelector('.checkout-container').innerHTML = errorDiv.outerHTML;
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'linear-gradient(135deg, #10b981, #059669)' : 
+                            type === 'error' ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 
+                            'linear-gradient(135deg, #3b82f6, #2563eb)'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                z-index: 1000;
+                font-size: 14px;
+                max-width: 300px;
+                animation: slideIn 0.3s ease-out;
+            `;
+            notification.innerHTML = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+    </script>
+
+    <style>
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    </style>
+</body>
+</html>

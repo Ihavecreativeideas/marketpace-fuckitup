@@ -1468,4 +1468,5 @@ app.listen(port, '0.0.0.0', () => {
   console.error(`❌ Failed to start on port ${port}:`, err.message);
 });
 
-export default app;
+export default app;app.get("/self-pickup-checkout.html", (req, res) => { res.sendFile(path.join(__dirname, "..", "self-pickup-checkout.html")); });
+app.get("/rental-confirmation.html", (req, res) => { res.sendFile(path.join(__dirname, "..", "rental-confirmation.html")); });
