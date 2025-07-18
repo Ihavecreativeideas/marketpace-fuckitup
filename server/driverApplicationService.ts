@@ -252,7 +252,7 @@ export class DriverApplicationService {
       customerEmail: '',
       customerPhone: application.phone,
       purchaseType: 'driver_application',
-      itemName: `🚚 DRIVER APPLICATION RECEIVED\n\nThank you ${application.firstName}! We received your MarketPace driver application (${application.id}).\n\nYou'll hear from us within 2-3 business days.\n\nQuestions? Contact drivers@marketpace.shop`,
+      itemName: `🚚 DRIVER APPLICATION RECEIVED\n\nThank you ${application.firstName}! We received your MarketPace driver application (${application.id}).\n\nYou'll hear from us within 2-3 business days.\n\nQuestions? Contact MarketPace.contact@gmail.com`,
       amount: 0,
       transactionId: application.id
     });
@@ -397,7 +397,7 @@ export class DriverApplicationService {
               </ul>
             </div>
             
-            <p>Questions? Contact us at <strong>drivers@marketpace.shop</strong></p>
+            <p>Questions? Contact us at <strong>MarketPace.contact@gmail.com</strong></p>
             
             <p>Thank you for your interest in joining the MarketPace driver community!</p>
           </div>
@@ -462,7 +462,7 @@ export class DriverApplicationService {
               <li>Weekly bonuses for high ratings</li>
             </ul>
             
-            <p>Questions? Contact driver support at <strong>drivers@marketpace.shop</strong> or call (555) 123-DRIVE.</p>
+            <p>Questions? Contact driver support at <strong>MarketPace.contact@gmail.com</strong> or call (555) 123-DRIVE.</p>
             
             <p>Welcome to MarketPace - let's deliver opportunities together!</p>
           </div>

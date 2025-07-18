@@ -87,7 +87,7 @@ export class NotificationService {
       const emailContent = this.formatEmailMessage(data);
       
       await emailTransporter.sendMail({
-        from: 'noreply@marketpace.shop',
+        from: 'MarketPace.contact@gmail.com',
         to: data.customerEmail,
         subject: `Purchase Confirmation - ${data.itemName}`,
         html: emailContent
@@ -202,7 +202,7 @@ export class NotificationService {
           
           <div class="footer">
             <p><strong>MarketPace</strong> - Building stronger communities through local commerce</p>
-            <p>Questions? Contact us at support@marketpace.shop</p>
+            <p>Questions? Contact us at MarketPace.contact@gmail.com</p>
             <p style="font-size: 12px;">This is an automated message. Please do not reply to this email.</p>
           </div>
         </div>
@@ -365,7 +365,7 @@ export class NotificationService {
       `;
       
       await emailTransporter.sendMail({
-        from: 'orders@marketpace.shop',
+        from: 'MarketPace.contact@gmail.com',
         to: data.sellerEmail,
         subject: `New Order Received - ${data.itemName} ($${data.amount})`,
         html: emailContent

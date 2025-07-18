@@ -950,7 +950,7 @@ export function registerIntegrationRoutes(app: Express): void {
         webhookUrl: webhookUrl,
         embedCode: embedCode,
         nextSteps: integrationData.setupInstructions,
-        supportEmail: 'integrations@marketpace.shop'
+        supportEmail: 'MarketPace.contact@gmail.com'
       });
     } catch (error) {
       SecurityMonitor.logSecurityEvent('bandzoogle_integration_error', {

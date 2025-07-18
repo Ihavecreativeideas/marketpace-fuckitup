@@ -314,7 +314,7 @@ export class NotificationCenter {
           
           <div class="footer">
             <p><strong>MarketPace</strong> - Building stronger communities through local commerce</p>
-            <p>Questions? Contact us at support@marketpace.shop</p>
+            <p>Questions? Contact us at MarketPace.contact@gmail.com</p>
           </div>
         </div>
       </body>
