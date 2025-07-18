@@ -5271,15 +5271,49 @@
 
         // ==================== COMPREHENSIVE FACEBOOK-STYLE COMMENT SYSTEM ====================
         
-        // Update all comment buttons to use new system
-        document.addEventListener('DOMContentLoaded', function() {
-            // Update all comment buttons with new functionality
-            document.querySelectorAll('.interaction-btn').forEach(btn => {
-                if (btn.textContent.includes('Comment')) {
-                    btn.setAttribute('onclick', 'commentPost(this.closest(\'.feed-post\'))');
-                }
-            });
-        });
+        // Main comment function that creates comment interface
+        function commentPost(postElement) {
+            // Get the post element if not provided
+            if (!postElement) {
+                postElement = event.target.closest('.feed-post');
+            }
+            
+            // Check if comment section already exists
+            let commentSection = postElement.querySelector('.comments-section');
+            if (!commentSection) {
+                // Create comment section
+                commentSection = document.createElement('div');
+                commentSection.className = 'comments-section';
+                commentSection.innerHTML = `
+                    <div class="comment-input-section">
+                        <input type="text" class="comment-input" placeholder="Write a comment..." style="
+                            width: 100%; 
+                            padding: 10px; 
+                            background: rgba(255,255,255,0.1); 
+                            border: 1px solid rgba(255,255,255,0.2); 
+                            border-radius: 20px; 
+                            color: white; 
+                            margin: 10px 0;
+                        ">
+                        <button onclick="postComment(this)" style="
+                            background: linear-gradient(135deg, #00ffff, #9d4edd);
+                            border: none;
+                            color: white;
+                            padding: 8px 16px;
+                            border-radius: 15px;
+                            cursor: pointer;
+                            margin-left: 10px;
+                        ">Post</button>
+                    </div>
+                    <div class="comments-list"></div>
+                `;
+                postElement.appendChild(commentSection);
+            }
+            
+            // Focus on comment input
+            const commentInput = commentSection.querySelector('.comment-input');
+            commentInput.focus();
+        }
 
         // Post comment function
         function postComment(buttonElement) {
@@ -5681,12 +5715,19 @@ Let's keep our money circulating locally and support each other! 💪
             console.log('Seller notification sent:', notification);
         }
 
-        // Load cart count on page initialization
+
+
+        // Load cart count on page initialization and update comment buttons
         document.addEventListener('DOMContentLoaded', function() {
             const cartData = JSON.parse(localStorage.getItem('marketplaceCart')) || { items: [] };
             updateCartBadge(cartData.items.length);
-        });
-
+            
+            // Update all comment buttons with new functionality
+            document.querySelectorAll('.interaction-btn').forEach(btn => {
+                if (btn.textContent.includes('Comment')) {
+                    btn.setAttribute('onclick', 'commentPost(this.closest(\'.feed-post\'))');
+                }
+            });
         });
     </script>
 
