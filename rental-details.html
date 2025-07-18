@@ -199,6 +199,58 @@
             margin-top: 10px;
         }
 
+        .delivery-cost-breakdown {
+            background: rgba(255, 193, 7, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cost-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 16px;
+            color: #00ffff;
+        }
+
+        .tip-section {
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .tip-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .tip-btn {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.5);
+            border-radius: 5px;
+            color: white;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tip-btn:hover, .tip-btn.selected {
+            background: rgba(34, 197, 94, 0.4);
+            transform: scale(1.05);
+        }
+
         .terms-section {
             background: rgba(255, 193, 7, 0.1);
             border-radius: 15px;
@@ -329,23 +381,64 @@
             <h3 class="delivery-title">🚚 Delivery & Pickup Options</h3>
             <div class="delivery-options">
                 <label class="delivery-option">
-                    <input type="radio" name="delivery" value="self-pickup" checked>
+                    <input type="radio" name="delivery" value="self-pickup" checked onchange="updateDeliveryInfo()">
                     <div>
                         <strong>Self Pickup & Return</strong> - FREE<br>
                         <small>Pick up and return at owner's location</small>
                     </div>
                 </label>
                 <label class="delivery-option">
-                    <input type="radio" name="delivery" value="delivery">
+                    <input type="radio" name="delivery" value="delivery" onchange="updateDeliveryInfo()">
                     <div>
-                        <strong>MarketPace Delivery</strong> - $4 total<br>
-                        <small>Delivery + pickup service (both ways included)</small>
+                        <strong>MarketPace Delivery</strong> - Round Trip Service<br>
+                        <small>Delivery + pickup service (double delivery cost + truck fee)</small>
                     </div>
                 </label>
             </div>
             
             <div class="time-selector" id="timeSelector">
-                <strong>⏰ Preferred Time:</strong>
+                <strong>⏰ Custom Pickup Time:</strong>
+                <input type="datetime-local" class="time-input" id="pickupTime" min="">
+                
+                <strong style="margin-top: 15px; display: block;">⏰ Custom Return Time:</strong>
+                <input type="datetime-local" class="time-input" id="returnTime" min="">
+                
+                <div class="delivery-cost-breakdown" id="costBreakdown" style="display: none;">
+                    <h4 style="color: #ffc107; margin-bottom: 10px;">💰 Delivery Cost Breakdown</h4>
+                    <div class="cost-item">
+                        <span>Base Delivery (Pickup):</span>
+                        <span>$4.00</span>
+                    </div>
+                    <div class="cost-item">
+                        <span>Return Delivery (Round Trip):</span>
+                        <span>$4.00</span>
+                    </div>
+                    <div class="cost-item">
+                        <span>Large Item Truck Fee (x2):</span>
+                        <span>$50.00</span>
+                    </div>
+                    <div class="cost-item">
+                        <span>Mileage (estimated 3 miles x2):</span>
+                        <span>$3.00</span>
+                    </div>
+                    <div class="cost-item">
+                        <span><strong>Total Delivery Cost:</strong></span>
+                        <span><strong>$61.00</strong></span>
+                    </div>
+                </div>
+                
+                <div class="tip-section" id="tipSection" style="display: none;">
+                    <h4 style="color: #22c55e; margin-bottom: 10px;">💡 Driver Tip (Optional)</h4>
+                    <p style="font-size: 14px; margin-bottom: 10px;">Support your local driver! 100% goes directly to them.</p>
+                    <div class="tip-buttons">
+                        <button class="tip-btn" onclick="selectTip(this, 5)">$5</button>
+                        <button class="tip-btn" onclick="selectTip(this, 10)">$10</button>
+                        <button class="tip-btn" onclick="selectTip(this, 15)">$15</button>
+                        <button class="tip-btn" onclick="selectTip(this, 20)">$20</button>
+                    </div>
+                    <input type="number" class="time-input" placeholder="Custom tip amount" id="customTip" style="margin-top: 10px;" onchange="updateCustomTip()">
+                </div>
+            </div>
                 <input type="text" class="time-input" placeholder="e.g., Early morning (7-9am), Late evening (7-9pm), Flexible" />
                 <div style="margin-top: 10px; font-size: 12px; color: rgba(255,255,255,0.7);">
                     * Drivers are independent contractors. Early/late times available with $4 on-time bonus (tip upfront recommended)
@@ -415,16 +508,77 @@
             showNotification(`Selected: ${date.toLocaleDateString()}`, 'success');
         }
 
+        let selectedTip = 0;
+
+        function updateDeliveryInfo() {
+            const deliveryOption = document.querySelector('input[name="delivery"]:checked').value;
+            const costBreakdown = document.getElementById('costBreakdown');
+            const tipSection = document.getElementById('tipSection');
+            
+            if (deliveryOption === 'delivery') {
+                costBreakdown.style.display = 'block';
+                tipSection.style.display = 'block';
+            } else {
+                costBreakdown.style.display = 'none';
+                tipSection.style.display = 'none';
+            }
+        }
+
+        function selectTip(button, amount) {
+            // Remove previous selection
+            document.querySelectorAll('.tip-btn').forEach(btn => btn.classList.remove('selected'));
+            
+            // Select current button
+            button.classList.add('selected');
+            selectedTip = amount;
+            
+            // Clear custom tip
+            document.getElementById('customTip').value = '';
+            
+            showNotification(`Tip selected: $${amount}`, 'success');
+        }
+
+        function updateCustomTip() {
+            const customAmount = document.getElementById('customTip').value;
+            if (customAmount && customAmount > 0) {
+                selectedTip = parseFloat(customAmount);
+                
+                // Remove button selections
+                document.querySelectorAll('.tip-btn').forEach(btn => btn.classList.remove('selected'));
+                
+                showNotification(`Custom tip set: $${selectedTip}`, 'success');
+            }
+        }
+
         function proceedToRental() {
             const selectedDate = document.querySelector('.calendar-day.selected');
             const deliveryOption = document.querySelector('input[name="delivery"]:checked').value;
+            const pickupTime = document.getElementById('pickupTime').value;
+            const returnTime = document.getElementById('returnTime').value;
             
             if (!selectedDate) {
                 alert('Please select an available date first.');
                 return;
             }
             
-            const message = `Rental request submitted!\n\nItem: Power Washer\nDate: ${selectedDate.textContent}\nDelivery: ${deliveryOption}\n\nOwner will be notified and you'll receive confirmation within 2 hours.`;
+            if (!pickupTime || !returnTime) {
+                alert('Please select both pickup and return times.');
+                return;
+            }
+            
+            let totalCost = 45; // Base rental cost
+            let deliveryCost = 0;
+            
+            if (deliveryOption === 'delivery') {
+                deliveryCost = 61; // Base delivery ($4x2) + truck fee ($50) + mileage ($3)
+                totalCost += deliveryCost;
+            }
+            
+            if (selectedTip > 0) {
+                totalCost += selectedTip;
+            }
+            
+            const message = `Rental request submitted!\n\nItem: Power Washer\nRental: $45.00\nDelivery: $${deliveryCost.toFixed(2)}\nTip: $${selectedTip.toFixed(2)}\nTotal: $${totalCost.toFixed(2)}\n\nPickup: ${new Date(pickupTime).toLocaleString()}\nReturn: ${new Date(returnTime).toLocaleString()}\n\nOwner will be notified and you'll receive confirmation within 2 hours.`;
             alert(message);
             
             // In real app, this would submit to backend
@@ -472,6 +626,15 @@
         // Initialize calendar on page load
         document.addEventListener('DOMContentLoaded', function() {
             generateCalendar();
+            
+            // Set minimum date/time for custom time inputs
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setDate(now.getDate() + 1);
+            
+            const minDateTime = tomorrow.toISOString().slice(0, 16);
+            document.getElementById('pickupTime').min = minDateTime;
+            document.getElementById('returnTime').min = minDateTime;
         });
     </script>
 </body>
