@@ -566,23 +566,68 @@
                 return;
             }
             
-            let totalCost = 45; // Base rental cost
-            let deliveryCost = 0;
+            // Calculate rental duration in hours
+            const pickup = new Date(pickupTime);
+            const returnDate = new Date(returnTime);
+            const durationHours = Math.ceil((returnDate - pickup) / (1000 * 60 * 60));
             
+            // Calculate rental cost (hourly: $15/hour, daily: $45/day)
+            let rentalCost;
+            if (durationHours <= 24) {
+                rentalCost = durationHours * 15; // $15 per hour
+            } else {
+                const days = Math.ceil(durationHours / 24);
+                rentalCost = days * 45; // $45 per day
+            }
+            
+            // Calculate 5% marketplace commission (deducted from rental cost)
+            const marketplaceCommission = rentalCost * 0.05;
+            const discountedRentalCost = rentalCost - marketplaceCommission;
+            const ownerPayout = rentalCost; // Owner gets full rental amount
+            
+            let deliveryCost = 0;
             if (deliveryOption === 'delivery') {
                 deliveryCost = 61; // Base delivery ($4x2) + truck fee ($50) + mileage ($3)
-                totalCost += deliveryCost;
             }
             
-            if (selectedTip > 0) {
-                totalCost += selectedTip;
+            const totalCost = discountedRentalCost + deliveryCost + selectedTip;
+            
+            // Show confirmation with detailed cost breakdown
+            const confirmMessage = `
+🛒 Rental Summary:
+📅 Duration: ${durationHours} hours
+💰 Base Rental Cost: $${rentalCost.toFixed(2)}
+🎁 MarketPace Discount (5%): -$${marketplaceCommission.toFixed(2)}
+💰 Your Rental Cost: $${discountedRentalCost.toFixed(2)}
+👤 Owner Receives: $${ownerPayout.toFixed(2)}
+🚚 Delivery: ${deliveryOption === 'delivery' ? '$' + deliveryCost.toFixed(2) : 'Self Pickup (FREE)'}
+💵 Driver Tip: $${selectedTip.toFixed(2)}
+
+💳 Your Total: $${totalCost.toFixed(2)}
+
+Proceed with rental request?`;
+            
+            if (confirm(confirmMessage)) {
+                showNotification('Rental request sent! Owner will be notified.', 'success');
+                
+                // Simulate payment flow with commission handling
+                setTimeout(() => {
+                    showPopupNotification('🎉 Rental approved! Processing payment...', 'success', 3000);
+                    
+                    // Simulate payment processing and owner payout
+                    setTimeout(() => {
+                        showPopupNotification(`💳 Payment processed! $${ownerPayout.toFixed(2)} will be transferred to owner upon delivery acceptance.`, 'success', 4000);
+                        
+                        // Navigate to delivery tracking and simulate item acceptance
+                        setTimeout(() => {
+                            simulateItemAcceptance();
+                            window.location.href = '/delivery-tracking';
+                        }, 2000);
+                    }, 2000);
+                }, 3000);
             }
             
-            const message = `Rental request submitted!\n\nItem: Power Washer\nRental: $45.00\nDelivery: $${deliveryCost.toFixed(2)}\nTip: $${selectedTip.toFixed(2)}\nTotal: $${totalCost.toFixed(2)}\n\nPickup: ${new Date(pickupTime).toLocaleString()}\nReturn: ${new Date(returnTime).toLocaleString()}\n\nOwner will be notified and you'll receive confirmation within 2 hours.`;
-            alert(message);
-            
-            // In real app, this would submit to backend
-            showNotification('Rental request sent to owner!', 'success');
+
         }
 
         function showNotification(message, type = 'info') {
@@ -621,6 +666,146 @@
                     notification.parentNode.removeChild(notification);
                 }
             }, 3000);
+        }
+
+        // Enhanced pop-up notification system for Accept/Decline actions
+        function showPopupNotification(message, type = 'info', duration = 3000) {
+            const popup = document.createElement('div');
+            popup.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                padding: 25px 30px;
+                border-radius: 15px;
+                color: white;
+                font-weight: 600;
+                font-size: 16px;
+                z-index: 20000;
+                min-width: 350px;
+                text-align: center;
+                backdrop-filter: blur(30px);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+                animation: popIn 0.3s ease-out;
+            `;
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes popIn {
+                    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+                    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            switch(type) {
+                case 'success':
+                    popup.style.background = 'linear-gradient(135deg, rgba(34, 197, 94, 0.95), rgba(16, 185, 129, 0.95))';
+                    break;
+                case 'error':
+                    popup.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.95))';
+                    break;
+                default:
+                    popup.style.background = 'linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(37, 99, 235, 0.95))';
+            }
+            
+            popup.innerHTML = message;
+            document.body.appendChild(popup);
+            
+            setTimeout(() => {
+                if (popup.parentNode) {
+                    popup.style.animation = 'popOut 0.3s ease-in';
+                    setTimeout(() => {
+                        if (popup.parentNode) {
+                            popup.parentNode.removeChild(popup);
+                        }
+                    }, 300);
+                }
+            }, duration);
+        }
+
+        // Function to simulate item acceptance/decline notifications
+        function simulateItemAcceptance() {
+            setTimeout(() => {
+                showItemActionPopup('Power Washer rental delivered!', 'accept', function(action) {
+                    if (action === 'accept') {
+                        showPopupNotification(`✅ Item accepted! Payment of $${ownerPayout.toFixed(2)} transferred to owner.`, 'success', 4000);
+                    } else {
+                        showPopupNotification('❌ Item declined. Refund processed and driver notified.', 'error', 4000);
+                    }
+                });
+            }, 8000);
+        }
+
+        // Enhanced Accept/Decline popup for item delivery
+        function showItemActionPopup(message, type, callback) {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                z-index: 25000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            const popup = document.createElement('div');
+            popup.style.cssText = `
+                background: linear-gradient(135deg, #1e1b4b, #312e81);
+                border-radius: 20px;
+                padding: 30px;
+                color: white;
+                text-align: center;
+                border: 2px solid rgba(0, 255, 255, 0.5);
+                box-shadow: 0 0 50px rgba(0, 255, 255, 0.3);
+                min-width: 350px;
+            `;
+            
+            popup.innerHTML = `
+                <h3 style="color: #00ffff; margin-bottom: 20px; font-size: 20px;">📦 Delivery Confirmation</h3>
+                <p style="margin-bottom: 25px; font-size: 16px;">${message}</p>
+                <p style="color: #ffd700; margin-bottom: 25px; font-size: 14px;">Did you receive the item in good condition?</p>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button id="acceptBtn" style="
+                        background: linear-gradient(135deg, #10b981, #059669);
+                        border: none;
+                        border-radius: 10px;
+                        color: white;
+                        padding: 12px 25px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        font-size: 16px;
+                    ">✅ Accept Item</button>
+                    <button id="declineBtn" style="
+                        background: linear-gradient(135deg, #ef4444, #dc2626);
+                        border: none;
+                        border-radius: 10px;
+                        color: white;
+                        padding: 12px 25px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        font-size: 16px;
+                    ">❌ Decline Item</button>
+                </div>
+            `;
+            
+            overlay.appendChild(popup);
+            document.body.appendChild(overlay);
+            
+            document.getElementById('acceptBtn').onclick = () => {
+                document.body.removeChild(overlay);
+                callback('accept');
+            };
+            
+            document.getElementById('declineBtn').onclick = () => {
+                document.body.removeChild(overlay);
+                callback('decline');
+            };
         }
 
         // Initialize calendar on page load
