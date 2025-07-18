@@ -363,7 +363,31 @@ function calculateDeliveryFee(deliveryMethod, distance = 0) {
     return baseFee + mileageFee;
 }
 
+// Pop-up notification system
+function showPopupNotification(message, type = 'info', duration = 3000) {
+    const notification = document.createElement('div');
+    notification.className = `popup-notification ${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span class="notification-message">${message}</span>
+            <button class="notification-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after duration
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, duration);
+    
+    return notification;
+}
+
 // Export functions for global use
+window.showPopupNotification = showPopupNotification;
 window.showCounterOfferModal = showCounterOfferModal;
 window.selectCounterOffer = selectCounterOffer;
 window.sendCounterOffer = sendCounterOffer;
@@ -376,8 +400,10 @@ window.closeCustomCounterModal = closeCustomCounterModal;
 window.calculateDeliveryFee = calculateDeliveryFee;
 
 // CSS Styles for counter offer system
-const style = document.createElement('style');
-style.textContent = `
+if (!document.getElementById('counter-offer-styles')) {
+    const counterOfferStyle = document.createElement('style');
+    counterOfferStyle.id = 'counter-offer-styles';
+counterOfferStyle.textContent = `
 .counter-offer-modal, .seller-notification-modal, .custom-counter-modal, .buyer-final-modal {
     position: fixed;
     top: 0;
@@ -551,6 +577,73 @@ style.textContent = `
     color: #e2e8f0;
     line-height: 1.6;
 }
+/* Pop-up Notification Styles */
+.popup-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 15000;
+    min-width: 300px;
+    max-width: 500px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    animation: slideInRight 0.3s ease-out;
+}
+
+.popup-notification.success {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    border: 2px solid #22c55e;
+}
+
+.popup-notification.error {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    border: 2px solid #ef4444;
+}
+
+.popup-notification.info {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border: 2px solid #3b82f6;
+}
+
+.notification-content {
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+.notification-message {
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 15px;
+    opacity: 0.8;
+}
+
+.notification-close:hover {
+    opacity: 1;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
 `;
 
-document.head.appendChild(style);
+    document.head.appendChild(counterOfferStyle);
+}

@@ -37,6 +37,11 @@ function showSellerPostingModal(postType = 'sale') {
                             <span class="slider"></span>
                             Allow counter offers on this item
                         </label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="allowMessages" checked>
+                            <span class="slider"></span>
+                            Allow messages from buyers
+                        </label>
                     </div>
                     
                     <div class="counter-offer-options" id="counterOfferOptions" style="display: none;">
@@ -176,6 +181,7 @@ function publishPost(postType) {
         description: document.getElementById('itemDescription').value,
         price: parseFloat(document.getElementById('itemPrice').value),
         allowCounterOffers: document.getElementById('allowCounterOffers').checked,
+        allowMessages: document.getElementById('allowMessages').checked,
         deliveryMethods: Array.from(document.querySelectorAll('input[name="deliveryMethods"]:checked')).map(cb => cb.value),
         sellerDeliveryFee: document.getElementById('sellerDeliveryFee')?.value || null,
         photos: document.getElementById('itemPhotos').files.length,
@@ -203,10 +209,11 @@ function publishPost(postType) {
     
     // Show success message
     const counterOfferText = postData.allowCounterOffers ? ' (Counter offers enabled)' : '';
+    const messageText = postData.allowMessages ? ' (Messages enabled)' : '';
     const deliveryText = postData.deliveryMethods.includes('self-pickup') ? ' Self-pickup available.' : '';
     
     showPopupNotification(
-        `✅ ${postData.name} posted successfully!${counterOfferText}${deliveryText}`, 
+        `✅ ${postData.name} posted successfully!${counterOfferText}${messageText}${deliveryText}`, 
         'success', 
         4000
     );

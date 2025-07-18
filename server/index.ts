@@ -1088,7 +1088,7 @@ app.get('/api/schedules/:businessId', async (req, res) => {
 // Static file routes for all HTML pages
 const htmlRoutes = [
   '/', '/community', '/shops', '/services', '/rentals', '/the-hub', 
-  '/menu', '/profile', '/cart', '/settings', '/delivery', '/deliveries',
+  '/menu', '/profile', '/cart', '/settings', '/delivery', '/deliveries', '/messages',
   '/business-scheduling', '/interactive-map', '/item-verification',
   '/signup-login', '/message-owner', '/rental-delivery', '/support',
   '/platform-integrations', '/supabase-integration', '/driver-dashboard',
