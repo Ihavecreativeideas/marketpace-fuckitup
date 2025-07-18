@@ -1467,11 +1467,231 @@
         }
 
         function startProUpgrade() {
-            // Store Pro status in localStorage
+            // Close the Pro upgrade modal first
+            const modal = document.querySelector('div[style*="position: fixed"]');
+            if (modal) {
+                document.body.removeChild(modal);
+            }
+            
+            // Show business account setup modal
+            showBusinessAccountSetup();
+        }
+
+        function showBusinessAccountSetup() {
+            // Create business setup modal
+            const modalOverlay = document.createElement('div');
+            modalOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.85);
+                z-index: 2000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(10px);
+            `;
+            
+            modalOverlay.innerHTML = `
+                <div style="
+                    background: linear-gradient(135deg, #1a0b3d, #6b46c1);
+                    border: 2px solid rgba(255, 215, 0, 0.5);
+                    border-radius: 20px;
+                    padding: 30px;
+                    max-width: 600px;
+                    width: 90%;
+                    max-height: 80vh;
+                    overflow-y: auto;
+                    text-align: center;
+                    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+                ">
+                    <h2 style="color: #ffd700; margin-bottom: 20px; font-size: 24px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="color: #ffd700;">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 215, 0, 0.6)"/>
+                        </svg>
+                        Create Your Business Account
+                    </h2>
+                    <p style="margin-bottom: 25px; line-height: 1.6; font-size: 16px; color: rgba(255,255,255,0.9);">
+                        Set up your professional MarketPace business profile
+                    </p>
+                    
+                    <form id="businessSetupForm" style="text-align: left;">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; color: #ffd700; font-weight: bold;">Business Name *</label>
+                            <input type="text" id="businessName" required style="
+                                width: 100%; padding: 12px; border: 2px solid rgba(255, 215, 0, 0.3); 
+                                border-radius: 8px; background: rgba(255, 255, 255, 0.1); 
+                                color: white; font-size: 16px;
+                            " placeholder="Enter your business name">
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; color: #ffd700; font-weight: bold;">Business Type *</label>
+                            <select id="businessType" required style="
+                                width: 100%; padding: 12px; border: 2px solid rgba(255, 215, 0, 0.3); 
+                                border-radius: 8px; background: rgba(255, 255, 255, 0.1); 
+                                color: white; font-size: 16px;
+                            ">
+                                <option value="">Select business type...</option>
+                                <option value="shop">Shop (Retail Products)</option>
+                                <option value="service">Service Provider</option>
+                                <option value="entertainment">Entertainment (The Hub)</option>
+                                <option value="food">Food & Beverage</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; color: #ffd700; font-weight: bold;">Business Description *</label>
+                            <textarea id="businessDescription" required style="
+                                width: 100%; padding: 12px; border: 2px solid rgba(255, 215, 0, 0.3); 
+                                border-radius: 8px; background: rgba(255, 255, 255, 0.1); 
+                                color: white; font-size: 16px; height: 80px; resize: vertical;
+                            " placeholder="Describe your business and what you offer..."></textarea>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; color: #ffd700; font-weight: bold;">Business Logo</label>
+                            <input type="file" id="businessLogo" accept="image/*" style="
+                                width: 100%; padding: 12px; border: 2px solid rgba(255, 215, 0, 0.3); 
+                                border-radius: 8px; background: rgba(255, 255, 255, 0.1); 
+                                color: white; font-size: 16px;
+                            ">
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; color: #ffd700; font-weight: bold;">Business Website/Social Media</label>
+                            <input type="url" id="businessLink" style="
+                                width: 100%; padding: 12px; border: 2px solid rgba(255, 215, 0, 0.3); 
+                                border-radius: 8px; background: rgba(255, 255, 255, 0.1); 
+                                color: white; font-size: 16px;
+                            " placeholder="https://your-business-website.com">
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; color: #ffd700; font-weight: bold;">Business Phone</label>
+                            <input type="tel" id="businessPhone" style="
+                                width: 100%; padding: 12px; border: 2px solid rgba(255, 215, 0, 0.3); 
+                                border-radius: 8px; background: rgba(255, 255, 255, 0.1); 
+                                color: white; font-size: 16px;
+                            " placeholder="(555) 123-4567">
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; color: #ffd700; font-weight: bold;">Categories (Select all that apply)</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                                <label style="display: flex; align-items: center; color: rgba(255,255,255,0.9);">
+                                    <input type="checkbox" value="retail" style="margin-right: 8px;"> Retail Products
+                                </label>
+                                <label style="display: flex; align-items: center; color: rgba(255,255,255,0.9);">
+                                    <input type="checkbox" value="food" style="margin-right: 8px;"> Food & Beverage
+                                </label>
+                                <label style="display: flex; align-items: center; color: rgba(255,255,255,0.9);">
+                                    <input type="checkbox" value="services" style="margin-right: 8px;"> Professional Services
+                                </label>
+                                <label style="display: flex; align-items: center; color: rgba(255,255,255,0.9);">
+                                    <input type="checkbox" value="entertainment" style="margin-right: 8px;"> Entertainment
+                                </label>
+                                <label style="display: flex; align-items: center; color: rgba(255,255,255,0.9);">
+                                    <input type="checkbox" value="home" style="margin-right: 8px;"> Home & Garden
+                                </label>
+                                <label style="display: flex; align-items: center; color: rgba(255,255,255,0.9);">
+                                    <input type="checkbox" value="automotive" style="margin-right: 8px;"> Automotive
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.1)); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 12px; padding: 15px; margin: 20px 0;">
+                            <div style="color: #ffd700; font-weight: bold; margin-bottom: 8px;">🎉 Launch Special</div>
+                            <div style="color: rgba(255,255,255,0.9); font-size: 14px;">Your business account will have all Pro features FREE until January 1, 2026</div>
+                        </div>
+                        
+                        <div style="margin: 25px 0; display: flex; gap: 15px;">
+                            <button type="button" onclick="closeModal(this);" style="
+                                background: transparent; color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.3); 
+                                padding: 12px 20px; border-radius: 20px; cursor: pointer; font-size: 14px; flex: 1;
+                            ">
+                                Cancel
+                            </button>
+                            <button type="submit" style="
+                                background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; border: none; 
+                                padding: 15px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; 
+                                font-size: 16px; flex: 2;
+                            ">
+                                Create Business Account
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            // Add form submission handler
+            modalOverlay.querySelector('#businessSetupForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                createBusinessAccount();
+            });
+            
+            // Add close functionality
+            modalOverlay.onclick = function(e) {
+                if (e.target === modalOverlay) {
+                    document.body.removeChild(modalOverlay);
+                }
+            };
+            
+            document.body.appendChild(modalOverlay);
+        }
+
+        function createBusinessAccount() {
+            const form = document.getElementById('businessSetupForm');
+            const formData = new FormData(form);
+            
+            // Collect form data
+            const businessData = {
+                name: document.getElementById('businessName').value,
+                type: document.getElementById('businessType').value,
+                description: document.getElementById('businessDescription').value,
+                link: document.getElementById('businessLink').value,
+                phone: document.getElementById('businessPhone').value,
+                categories: Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value),
+                logo: document.getElementById('businessLogo').files[0]?.name || null,
+                created: new Date().toISOString(),
+                proStatus: true,
+                freeUntil: '2026-01-01'
+            };
+            
+            // Validate required fields
+            if (!businessData.name || !businessData.type || !businessData.description) {
+                alert('Please fill in all required fields (Business Name, Type, and Description)');
+                return;
+            }
+            
+            // Store business account data
+            const personalUser = JSON.parse(localStorage.getItem('marketpaceUser') || '{}');
+            const businessAccounts = JSON.parse(localStorage.getItem('marketpaceBusinessAccounts') || '[]');
+            
+            // Add owner info to business data
+            businessData.ownerId = personalUser.id || Date.now();
+            businessData.ownerName = personalUser.name || 'Business Owner';
+            businessData.id = Date.now();
+            
+            // Save business account
+            businessAccounts.push(businessData);
+            localStorage.setItem('marketpaceBusinessAccounts', JSON.stringify(businessAccounts));
+            
+            // Set current business account as active
+            localStorage.setItem('activeBusinessAccount', JSON.stringify(businessData));
             localStorage.setItem('marketpaceProStatus', 'true');
             
+            // Close modal
+            const modal = document.querySelector('div[style*="position: fixed"]');
+            if (modal) {
+                document.body.removeChild(modal);
+            }
+            
             // Show success message
-            alert('🎉 Welcome to MarketPace Pro!\n\nYou now have access to:\n• Dual account system\n• Professional features\n• Free access until January 1, 2026\n\nCheck your profile menu for new Pro features!');
+            alert(`🎉 ${businessData.name} business account created successfully!\n\n✅ Personal Account: ${personalUser.name || 'Your Name'}\n✅ Business Account: ${businessData.name}\n\nYou can now switch between accounts using the account switcher in your profile menu.`);
             
             // Update UI to show Pro status
             updateProStatus();
