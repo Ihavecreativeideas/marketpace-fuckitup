@@ -8,6 +8,11 @@ MarketPace is a React Native mobile application that prioritizes community empow
 
 **Core Concept:** Community + Marketplace + Delivery platform designed to uplift neighborhoods
 
+## Current Integration Status (July 18, 2025)
+- **Shopify**: ✅ Fully operational and tested
+- **Etsy**: ⏳ Personal approval pending (commercial access needed for members)
+- **Printful**: 🔄 Setting up scopes (orders, products, files management)
+
 **Production Domain:** www.marketpace.shop
 **Development Domain:** workspace.ihavecreativeid.repl.co (for testing)
 
