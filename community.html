@@ -21,6 +21,170 @@
             position: relative;
             overflow-x: hidden;
         }
+        
+        /* Account Switcher Styles */
+        .account-switcher-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+            color: #1a1a2e;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .account-switcher-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        }
+        
+        .account-switcher-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(10px);
+        }
+        
+        .account-switcher-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            color: white;
+            position: relative;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .switcher-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .switcher-header h3 {
+            color: #ffd700;
+            margin: 0;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+        
+        .close-btn:hover {
+            opacity: 1;
+        }
+        
+        .account-option {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+            border: 2px solid transparent;
+        }
+        
+        .account-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #ffd700;
+        }
+        
+        .account-option.active {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #ffd700;
+        }
+        
+        .account-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .account-option h4 {
+            margin: 0;
+            font-size: 16px;
+            color: white;
+        }
+        
+        .account-option p {
+            margin: 2px 0 0 0;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+        
+        .pro-badge {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+            color: #1a1a2e;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        
+        .create-business-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #00ffff 0%, #0099cc 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .create-business-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+        }
+        
+        /* Business Mode Styles */
+        .business-mode .status-composer {
+            border: 2px solid #ffd700;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 237, 74, 0.1) 100%);
+            position: relative;
+        }
+        
+        .business-mode .status-composer::before {
+            content: '🏢 POSTING AS BUSINESS - MARKETPACE PRO';
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+            color: #1a1a2e;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 10;
+        }
 
         /* Floating Particles */
         .particles {
@@ -1344,6 +1508,41 @@
     <!-- Main Content -->
     <!-- Floating Particles -->
     <div class="particles"></div>
+    
+    <!-- Account Switcher Button -->
+    <button class="account-switcher-btn" onclick="toggleAccountSwitcher()" id="accountSwitcherBtn">
+        👤
+    </button>
+    
+    <!-- Account Switcher Modal -->
+    <div id="accountSwitcherModal" class="account-switcher-modal" style="display: none;">
+        <div class="account-switcher-content">
+            <div class="switcher-header">
+                <h3>Switch Account</h3>
+                <button onclick="closeAccountSwitcher()" class="close-btn">&times;</button>
+            </div>
+            
+            <div class="account-option active" onclick="switchToPersonal()" id="personalAccount">
+                <img src="marketpace-logo-1.jpeg" alt="Personal Avatar" class="account-avatar">
+                <div>
+                    <h4>Personal Account</h4>
+                    <p>Individual profile</p>
+                </div>
+            </div>
+            
+            <div class="account-option" onclick="switchToBusiness()" id="businessAccount" style="display: none;">
+                <img src="marketpace-logo-1.jpeg" alt="Business Avatar" class="account-avatar">
+                <div>
+                    <h4 id="businessAccountName">Business Account</h4>
+                    <p>Professional profile <span class="pro-badge">PRO</span></p>
+                </div>
+            </div>
+            
+            <button class="create-business-btn" onclick="createBusinessAccount()" id="createBusinessBtn">
+                🏢 Create Business Account
+            </button>
+        </div>
+    </div>
 
     <div class="main-content" style="position: relative; z-index: 2;">
 
@@ -6046,7 +6245,111 @@ function closeSelfPickupModal() {
 // Initialize self-pickup functionality when page loads
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(addSelfPickupToRentals, 1000); // Add self-pickup buttons after page loads
+    
+    // Initialize account switcher
+    initializeAccountSwitcher();
 });
+
+// Account Switcher Functions
+let currentAccount = localStorage.getItem('currentAccount') || 'personal';
+let userAccounts = JSON.parse(localStorage.getItem('userAccounts') || '{"personal": {"name": "Personal Account", "type": "individual"}, "business": null}');
+
+function initializeAccountSwitcher() {
+    updateAccountSwitcher();
+    updatePageMode();
+}
+
+function toggleAccountSwitcher() {
+    const modal = document.getElementById('accountSwitcherModal');
+    if (modal.style.display === 'none') {
+        modal.style.display = 'flex';
+        updateAccountSwitcher();
+    } else {
+        modal.style.display = 'none';
+    }
+}
+
+function closeAccountSwitcher() {
+    document.getElementById('accountSwitcherModal').style.display = 'none';
+}
+
+function updateAccountSwitcher() {
+    const businessAccount = document.getElementById('businessAccount');
+    const createBusinessBtn = document.getElementById('createBusinessBtn');
+    const accountSwitcherBtn = document.getElementById('accountSwitcherBtn');
+    
+    if (userAccounts.business) {
+        businessAccount.style.display = 'flex';
+        createBusinessBtn.style.display = 'none';
+        document.getElementById('businessAccountName').textContent = userAccounts.business.name;
+    } else {
+        businessAccount.style.display = 'none';
+        createBusinessBtn.style.display = 'block';
+    }
+    
+    // Update active state
+    document.querySelectorAll('.account-option').forEach(option => {
+        option.classList.remove('active');
+    });
+    
+    if (currentAccount === 'personal') {
+        document.getElementById('personalAccount').classList.add('active');
+        accountSwitcherBtn.textContent = '👤';
+    } else if (currentAccount === 'business') {
+        document.getElementById('businessAccount').classList.add('active');
+        accountSwitcherBtn.textContent = '🏢';
+    }
+}
+
+function updatePageMode() {
+    document.body.classList.remove('personal-mode', 'business-mode');
+    
+    if (currentAccount === 'business') {
+        document.body.classList.add('business-mode');
+    } else {
+        document.body.classList.add('personal-mode');
+    }
+}
+
+function switchToPersonal() {
+    currentAccount = 'personal';
+    localStorage.setItem('currentAccount', 'personal');
+    updateAccountSwitcher();
+    updatePageMode();
+    closeAccountSwitcher();
+    
+    alert('👤 Switched to Personal Account\n\nYou are now using your individual profile for personal posts and purchases.');
+}
+
+function switchToBusiness() {
+    if (!userAccounts.business) {
+        alert('No business account found. Please create one first.');
+        return;
+    }
+    
+    currentAccount = 'business';
+    localStorage.setItem('currentAccount', 'business');
+    updateAccountSwitcher();
+    updatePageMode();
+    closeAccountSwitcher();
+    
+    alert('🏢 Switched to Business Account - MarketPace Pro features activated!\n\nYou now have access to employee scheduling, integrations, and business tools.');
+}
+
+function createBusinessAccount() {
+    window.location.href = '/pro-account-manager.html';
+}
+
+// Override posting functions for business mode  
+function createNewPost() {
+    if (currentAccount === 'business') {
+        alert('🏢 Creating business post...\n\nRedirecting to MarketPace Pro posting interface with advanced features!');
+        window.location.href = '/business-dashboard.html';
+    } else {
+        // Show normal posting interface
+        openAdvancedPostModal();
+    }
+}
 </script>
 
 <style>

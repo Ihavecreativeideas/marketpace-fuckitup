@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPace Pro - Business Post Creator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .post-creator-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .back-button {
+            background: linear-gradient(135deg, #00ffff 0%, #0099cc 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+        }
+        
+        .post-creator-header {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            color: #1a1a2e;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .post-creator-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shine 4s ease-in-out infinite;
+        }
+        
+        @keyframes shine {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(180deg); }
+        }
+        
+        .post-creator-header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .post-creator-header p {
+            opacity: 0.8;
+            font-size: 16px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .post-type-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .post-type-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .post-type-card:hover {
+            border-color: #ffd700;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+        }
+        
+        .post-type-card.active {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+        }
+        
+        .post-type-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .post-type-title {
+            color: #ffd700;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .post-type-description {
+            opacity: 0.8;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .post-form {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #ffd700;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            min-height: 120px;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+        
+        .form-textarea:focus {
+            outline: none;
+            border-color: #ffd700;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox-input {
+            width: 20px;
+            height: 20px;
+            accent-color: #ffd700;
+        }
+        
+        .checkbox-label {
+            color: white;
+            font-size: 14px;
+        }
+        
+        .pro-features {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid #ffd700;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .pro-features h3 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .pro-features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .pro-feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .pro-feature-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .pro-feature-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        
+        .image-upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .image-upload-area:hover {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+        }
+        
+        .image-upload-area.dragover {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.2);
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.7;
+        }
+        
+        .upload-text {
+            color: white;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .upload-subtext {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+        
+        .image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .image-preview-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .image-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(239, 68, 68, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .action-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+        
+        .action-btn.primary {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+            color: #1a1a2e;
+        }
+        
+        .action-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+        
+        .action-btn.secondary {
+            background: linear-gradient(135deg, #00ffff 0%, #0099cc 100%);
+            color: white;
+        }
+        
+        .action-btn.secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+        }
+        
+        .action-btn.draft {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .action-btn.draft:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .post-type-selector {
+                grid-template-columns: 1fr;
+            }
+            
+            .pro-features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="post-creator-container">
+        <button class="back-button" onclick="goBack()">← Back to Dashboard</button>
+        
+        <div class="post-creator-header">
+            <h1>🏢 Business Post Creator</h1>
+            <p>MarketPace Pro - Advanced business posting with professional features</p>
+        </div>
+        
+        <div class="post-type-selector">
+            <div class="post-type-card active" onclick="selectPostType('product')" id="productCard">
+                <div class="post-type-icon">🛍️</div>
+                <div class="post-type-title">Product/Service</div>
+                <div class="post-type-description">Sell products or offer services to local customers</div>
+            </div>
+            
+            <div class="post-type-card" onclick="selectPostType('event')" id="eventCard">
+                <div class="post-type-icon">🎭</div>
+                <div class="post-type-title">Business Event</div>
+                <div class="post-type-description">Promote workshops, sales, or special events</div>
+            </div>
+            
+            <div class="post-type-card" onclick="selectPostType('hiring')" id="hiringCard">
+                <div class="post-type-icon">👥</div>
+                <div class="post-type-title">Now Hiring</div>
+                <div class="post-type-description">Post job openings and recruit employees</div>
+            </div>
+            
+            <div class="post-type-card" onclick="selectPostType('announcement')" id="announcementCard">
+                <div class="post-type-icon">📢</div>
+                <div class="post-type-title">Announcement</div>
+                <div class="post-type-description">Share business updates and news</div>
+            </div>
+        </div>
+        
+        <div class="pro-features">
+            <h3>⭐ MarketPace Pro Features Available</h3>
+            <div class="pro-features-grid">
+                <div class="pro-feature">
+                    <div class="pro-feature-icon">🎯</div>
+                    <div class="pro-feature-name">Post Promotion</div>
+                </div>
+                <div class="pro-feature">
+                    <div class="pro-feature-icon">📌</div>
+                    <div class="pro-feature-name">Pin Posts</div>
+                </div>
+                <div class="pro-feature">
+                    <div class="pro-feature-icon">🔄</div>
+                    <div class="pro-feature-name">Repost Feature</div>
+                </div>
+                <div class="pro-feature">
+                    <div class="pro-feature-icon">📊</div>
+                    <div class="pro-feature-name">Analytics</div>
+                </div>
+                <div class="pro-feature">
+                    <div class="pro-feature-icon">📅</div>
+                    <div class="pro-feature-name">Schedule Posts</div>
+                </div>
+                <div class="pro-feature">
+                    <div class="pro-feature-icon">🎵</div>
+                    <div class="pro-feature-name">Music Upload</div>
+                </div>
+            </div>
+        </div>
+        
+        <form class="post-form" id="businessPostForm">
+            <div class="form-group">
+                <label class="form-label">Post Title</label>
+                <input type="text" class="form-input" placeholder="Enter your post title..." required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea class="form-textarea" placeholder="Describe your product, service, or announcement..." required></textarea>
+            </div>
+            
+            <div class="form-group" id="priceGroup">
+                <label class="form-label">Price</label>
+                <input type="number" class="form-input" placeholder="Enter price..." step="0.01" min="0">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Images</label>
+                <div class="image-upload-area" onclick="document.getElementById('imageInput').click()">
+                    <div class="upload-icon">📷</div>
+                    <div class="upload-text">Click to upload images</div>
+                    <div class="upload-subtext">or drag and drop files here</div>
+                </div>
+                <input type="file" id="imageInput" multiple accept="image/*" style="display: none;">
+                <div class="image-preview" id="imagePreview"></div>
+            </div>
+            
+            <div class="form-group">
+                <div class="form-checkbox">
+                    <input type="checkbox" class="checkbox-input" id="enablePromotion">
+                    <label class="checkbox-label" for="enablePromotion">🎯 Enable post promotion (reach more customers)</label>
+                </div>
+                
+                <div class="form-checkbox">
+                    <input type="checkbox" class="checkbox-input" id="pinPost">
+                    <label class="checkbox-label" for="pinPost">📌 Pin to top of your business profile</label>
+                </div>
+                
+                <div class="form-checkbox">
+                    <input type="checkbox" class="checkbox-input" id="shareToFacebook">
+                    <label class="checkbox-label" for="shareToFacebook">📘 Share to Facebook Business Page</label>
+                </div>
+                
+                <div class="form-checkbox">
+                    <input type="checkbox" class="checkbox-input" id="enableBooking">
+                    <label class="checkbox-label" for="enableBooking">📅 Enable customer booking</label>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button type="button" class="action-btn draft" onclick="saveDraft()">💾 Save Draft</button>
+                <button type="button" class="action-btn secondary" onclick="previewPost()">👁️ Preview</button>
+                <button type="submit" class="action-btn primary">🚀 Publish Post</button>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+        let selectedPostType = 'product';
+        let uploadedImages = [];
+        
+        function goBack() {
+            window.location.href = '/business-dashboard.html';
+        }
+        
+        function selectPostType(type) {
+            selectedPostType = type;
+            
+            // Update active card
+            document.querySelectorAll('.post-type-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.getElementById(type + 'Card').classList.add('active');
+            
+            // Update form based on type
+            const priceGroup = document.getElementById('priceGroup');
+            if (type === 'product') {
+                priceGroup.style.display = 'block';
+            } else {
+                priceGroup.style.display = 'none';
+            }
+        }
+        
+        // Image upload handling
+        document.getElementById('imageInput').addEventListener('change', handleImageUpload);
+        
+        function handleImageUpload(event) {
+            const files = event.target.files;
+            
+            for (let file of files) {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const imageData = {
+                            id: Date.now() + Math.random(),
+                            src: e.target.result,
+                            file: file
+                        };
+                        uploadedImages.push(imageData);
+                        updateImagePreview();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
+        
+        function updateImagePreview() {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+            
+            uploadedImages.forEach(image => {
+                const imageItem = document.createElement('div');
+                imageItem.className = 'image-preview-item';
+                imageItem.innerHTML = `
+                    <img src="${image.src}" alt="Preview">
+                    <button class="image-remove" onclick="removeImage('${image.id}')">&times;</button>
+                `;
+                preview.appendChild(imageItem);
+            });
+        }
+        
+        function removeImage(imageId) {
+            uploadedImages = uploadedImages.filter(image => image.id !== imageId);
+            updateImagePreview();
+        }
+        
+        // Drag and drop functionality
+        const uploadArea = document.querySelector('.image-upload-area');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            handleImageUpload({ target: { files } });
+        });
+        
+        // Form submission
+        document.getElementById('businessPostForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const postData = {
+                type: selectedPostType,
+                title: formData.get('title') || this.querySelector('input[type="text"]').value,
+                description: formData.get('description') || this.querySelector('textarea').value,
+                price: formData.get('price') || this.querySelector('input[type="number"]').value,
+                images: uploadedImages,
+                options: {
+                    promotion: document.getElementById('enablePromotion').checked,
+                    pinned: document.getElementById('pinPost').checked,
+                    shareToFacebook: document.getElementById('shareToFacebook').checked,
+                    enableBooking: document.getElementById('enableBooking').checked
+                }
+            };
+            
+            publishPost(postData);
+        });
+        
+        function publishPost(postData) {
+            alert(`🚀 Publishing ${selectedPostType} post...\n\nTitle: ${postData.title}\nType: ${selectedPostType}\nImages: ${postData.images.length}\n\nMarketPace Pro features:\n${postData.options.promotion ? '✓ Promotion enabled' : '✗ Promotion disabled'}\n${postData.options.pinned ? '✓ Pinned to profile' : '✗ Not pinned'}\n${postData.options.shareToFacebook ? '✓ Share to Facebook' : '✗ Facebook sharing disabled'}\n${postData.options.enableBooking ? '✓ Booking enabled' : '✗ Booking disabled'}`);
+            
+            // Here you would normally send the data to your server
+            setTimeout(() => {
+                alert('✅ Post published successfully!\n\nYour business post is now live on MarketPace with Pro features activated!');
+                window.location.href = '/business-dashboard.html';
+            }, 1000);
+        }
+        
+        function saveDraft() {
+            const draftData = {
+                type: selectedPostType,
+                title: document.querySelector('input[type="text"]').value,
+                description: document.querySelector('textarea').value,
+                price: document.querySelector('input[type="number"]').value,
+                images: uploadedImages,
+                timestamp: new Date().toISOString()
+            };
+            
+            localStorage.setItem('businessPostDraft', JSON.stringify(draftData));
+            alert('💾 Draft saved!\n\nYour post has been saved and you can continue editing later.');
+        }
+        
+        function previewPost() {
+            const title = document.querySelector('input[type="text"]').value;
+            const description = document.querySelector('textarea').value;
+            
+            if (!title || !description) {
+                alert('Please fill in title and description to preview your post.');
+                return;
+            }
+            
+            alert(`👁️ Post Preview\n\nType: ${selectedPostType}\nTitle: ${title}\nDescription: ${description}\nImages: ${uploadedImages.length}\n\nThis is how your post will appear to customers on MarketPace.`);
+        }
+        
+        // Load draft on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedDraft = localStorage.getItem('businessPostDraft');
+            if (savedDraft) {
+                const draft = JSON.parse(savedDraft);
+                
+                if (confirm('Load saved draft?\n\nYou have an unfinished post. Would you like to continue editing it?')) {
+                    document.querySelector('input[type="text"]').value = draft.title || '';
+                    document.querySelector('textarea').value = draft.description || '';
+                    document.querySelector('input[type="number"]').value = draft.price || '';
+                    
+                    if (draft.images) {
+                        uploadedImages = draft.images;
+                        updateImagePreview();
+                    }
+                    
+                    if (draft.type) {
+                        selectPostType(draft.type);
+                    }
+                }
+            }
+            
+            // Welcome message
+            setTimeout(() => {
+                alert('🎉 Welcome to MarketPace Pro Business Post Creator!\n\nCreate professional business posts with advanced features:\n\n🎯 Post promotion\n📌 Pin posts\n📅 Customer booking\n📊 Analytics tracking\n🔄 Repost functionality\n\nAll Pro features are FREE until January 1, 2026!');
+            }, 500);
+        });
+    </script>
+</body>
+</html>
