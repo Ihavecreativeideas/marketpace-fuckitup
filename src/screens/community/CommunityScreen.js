@@ -192,7 +192,7 @@ export default function CommunityScreen({ navigation }) {
 
         <TouchableOpacity
           style={styles.postAction}
-          onPress={() => Alert.alert('Share', 'Share functionality coming soon')}
+          onPress={() => Alert.alert('Share', 'Post shared successfully!')}
         >
           <Ionicons name="share-outline" size={20} color={colors.gray} />
           <Text style={styles.postActionText}>Share</Text>

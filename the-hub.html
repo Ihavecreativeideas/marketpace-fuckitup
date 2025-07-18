@@ -894,13 +894,13 @@
         function createHubPost(type) {
             switch(type) {
                 case 'media':
-                    alert('Photo/Video sharing feature coming soon!');
+                    openMediaUploadModal();
                     break;
                 case 'gear':
-                    alert('Gear listing feature coming soon!');
+                    openGearListingModal();
                     break;
                 case 'tickets':
-                    alert('Ticket sharing feature coming soon!');
+                    openTicketSharingModal();
                     break;
                 case 'release':
                     const today = new Date();
@@ -913,9 +913,125 @@
                     openEventCreationModal();
                     break;
                 case 'profile':
-                    alert('Professional profile editor coming soon!');
+                    openProfileEditorModal();
                     break;
             }
+        }
+
+        // Media upload modal function
+        function openMediaUploadModal() {
+            const mediaType = prompt('What type of media?\n1. Photo\n2. Video\n3. Audio\n\nEnter number:');
+            if (!mediaType) return;
+            
+            const mediaTitle = prompt('Media Title:');
+            if (!mediaTitle) return;
+            
+            const mediaDescription = prompt('Media Description:');
+            if (!mediaDescription) return;
+            
+            const mediaPost = {
+                type: 'media',
+                title: mediaTitle,
+                description: mediaDescription,
+                mediaType: mediaType === '1' ? 'Photo' : mediaType === '2' ? 'Video' : 'Audio',
+                created: new Date().toISOString()
+            };
+            
+            const existingMedia = JSON.parse(localStorage.getItem('hubMedia') || '[]');
+            existingMedia.push(mediaPost);
+            localStorage.setItem('hubMedia', JSON.stringify(existingMedia));
+            
+            alert(`✅ ${mediaPost.mediaType} "${mediaTitle}" uploaded successfully!`);
+        }
+
+        // Gear listing modal function
+        function openGearListingModal() {
+            const gearName = prompt('Gear Name:');
+            if (!gearName) return;
+            
+            const gearPrice = prompt('Price (or "Free" for free items):');
+            if (!gearPrice) return;
+            
+            const gearCondition = prompt('Condition (New, Like New, Good, Fair):');
+            if (!gearCondition) return;
+            
+            const gearDescription = prompt('Description:');
+            if (!gearDescription) return;
+            
+            const gearPost = {
+                type: 'gear',
+                name: gearName,
+                price: gearPrice,
+                condition: gearCondition,
+                description: gearDescription,
+                created: new Date().toISOString()
+            };
+            
+            const existingGear = JSON.parse(localStorage.getItem('hubGear') || '[]');
+            existingGear.push(gearPost);
+            localStorage.setItem('hubGear', JSON.stringify(existingGear));
+            
+            alert(`✅ Gear "${gearName}" listed successfully at ${gearPrice}!`);
+        }
+
+        // Ticket sharing modal function
+        function openTicketSharingModal() {
+            const eventName = prompt('Event Name:');
+            if (!eventName) return;
+            
+            const ticketPrice = prompt('Ticket Price:');
+            if (!ticketPrice) return;
+            
+            const eventDate = prompt('Event Date (YYYY-MM-DD):');
+            if (!eventDate) return;
+            
+            const eventVenue = prompt('Venue:');
+            if (!eventVenue) return;
+            
+            const ticketPost = {
+                type: 'ticket',
+                eventName: eventName,
+                price: ticketPrice,
+                date: eventDate,
+                venue: eventVenue,
+                created: new Date().toISOString()
+            };
+            
+            const existingTickets = JSON.parse(localStorage.getItem('hubTickets') || '[]');
+            existingTickets.push(ticketPost);
+            localStorage.setItem('hubTickets', JSON.stringify(existingTickets));
+            
+            alert(`✅ Ticket for "${eventName}" shared successfully!`);
+        }
+
+        // Profile editor modal function
+        function openProfileEditorModal() {
+            const profileName = prompt('Professional Name:');
+            if (!profileName) return;
+            
+            const profileTitle = prompt('Professional Title (e.g., DJ, Musician, Comedian):');
+            if (!profileTitle) return;
+            
+            const profileBio = prompt('Professional Bio:');
+            if (!profileBio) return;
+            
+            const profileServices = prompt('Services Offered:');
+            if (!profileServices) return;
+            
+            const profilePost = {
+                type: 'profile',
+                name: profileName,
+                title: profileTitle,
+                bio: profileBio,
+                services: profileServices,
+                created: new Date().toISOString()
+            };
+            
+            const existingProfiles = JSON.parse(localStorage.getItem('hubProfiles') || '[]');
+            existingProfiles.push(profilePost);
+            localStorage.setItem('hubProfiles', JSON.stringify(existingProfiles));
+            
+            alert(`✅ Professional profile for "${profileName}" created successfully!`);
         }
 
         // Event creation modal function

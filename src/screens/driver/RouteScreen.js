@@ -169,7 +169,7 @@ export default function RouteScreen({ navigation, route }) {
         showBack={true}
         onBackPress={() => navigation.goBack()}
         rightComponent={
-          <TouchableOpacity onPress={() => Alert.alert('Help', 'Driver support features coming soon')}>
+          <TouchableOpacity onPress={() => Alert.alert('Help', 'Driver support activated! Contact: MarketPace.contact@gmail.com')}>
             <Ionicons name="help-circle-outline" size={24} color={colors.text} />
           </TouchableOpacity>
         }

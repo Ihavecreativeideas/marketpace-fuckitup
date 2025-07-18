@@ -3866,9 +3866,57 @@
         // End of navigation functions
         }
 
+        // Advanced post modal function
+        function openAdvancedPostModal(type) {
+            const postTitle = prompt(`${type.charAt(0).toUpperCase() + type.slice(1)} Post Title:`);
+            if (!postTitle) return;
+            
+            const postContent = prompt('Post Content:');
+            if (!postContent) return;
+            
+            let postData = {
+                type: type,
+                title: postTitle,
+                content: postContent,
+                created: new Date().toISOString(),
+                author: 'Community Member'
+            };
+            
+            // Add type-specific fields
+            if (type === 'sale' || type === 'service') {
+                const price = prompt('Price:');
+                if (price) postData.price = price;
+            }
+            
+            if (type === 'event') {
+                const eventDate = prompt('Event Date (YYYY-MM-DD):');
+                const eventTime = prompt('Event Time:');
+                if (eventDate) postData.date = eventDate;
+                if (eventTime) postData.time = eventTime;
+            }
+            
+            if (type === 'poll') {
+                const option1 = prompt('Poll Option 1:');
+                const option2 = prompt('Poll Option 2:');
+                if (option1 && option2) {
+                    postData.options = [option1, option2];
+                }
+            }
+            
+            // Save to localStorage
+            const existingPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+            existingPosts.unshift(postData);
+            localStorage.setItem('communityPosts', JSON.stringify(existingPosts));
+            
+            alert(`✅ ${type.charAt(0).toUpperCase() + type.slice(1)} post "${postTitle}" created successfully!`);
+            
+            // Refresh the page to show new post
+            location.reload();
+        }
+
         // Post creation
         function createPost(type = 'general') {
-            alert(`Create ${type} post - Feature coming soon!`);
+            openAdvancedPostModal(type);
         }
 
         // Commerce functions
