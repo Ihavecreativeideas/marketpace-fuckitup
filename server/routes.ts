@@ -484,8 +484,172 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Printful integration routes
-  const printfulRouter = await import('./printfulIntegration');
-  app.use('/api/printful', printfulRouter.default);
+  app.post('/api/printful/test-connection', async (req, res) => {
+    try {
+      const PRINTFUL_API_KEY = '8ix90dXLKcFM8s5CgODZz6TS5MUd38KSgfI2e3leHzbdMSOSgrXwU5G00kmtxpf3';
+      
+      console.log('Testing Printful connection...');
+      const response = await fetch('https://api.printful.com/store', {
+        headers: {
+          'Authorization': `Bearer ${PRINTFUL_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const result = await response.json();
+      
+      if (result.code === 200) {
+        res.json({
+          success: true,
+          message: 'Printful connection successful',
+          store: result.result,
+          apiKey: PRINTFUL_API_KEY.substring(0, 10) + '...'
+        });
+      } else {
+        res.json({
+          success: false,
+          error: 'OAuth 2.0 token required',
+          details: result,
+          solution: 'Visit https://developers.printful.com/ to get OAuth 2.0 token',
+          migration: 'Legacy API keys are no longer supported'
+        });
+      }
+    } catch (error: any) {
+      console.error('Printful connection error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Connection test failed',
+        message: error.message
+      });
+    }
+  });
+
+  // Printful products endpoint
+  app.get('/api/printful/products', async (req, res) => {
+    try {
+      const PRINTFUL_API_KEY = '8ix90dXLKcFM8s5CgODZz6TS5MUd38KSgfI2e3leHzbdMSOSgrXwU5G00kmtxpf3';
+      
+      const response = await fetch('https://api.printful.com/products', {
+        headers: {
+          'Authorization': `Bearer ${PRINTFUL_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const result = await response.json();
+      res.json(result);
+    } catch (error: any) {
+      console.error('Error fetching Printful products:', error);
+      res.status(500).json({ error: 'Failed to fetch products' });
+    }
+  });
+
+  // Printful store products endpoint
+  app.get('/api/printful/store/products', async (req, res) => {
+    try {
+      const PRINTFUL_API_KEY = '8ix90dXLKcFM8s5CgODZz6TS5MUd38KSgfI2e3leHzbdMSOSgrXwU5G00kmtxpf3';
+      
+      const response = await fetch('https://api.printful.com/store/products', {
+        headers: {
+          'Authorization': `Bearer ${PRINTFUL_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const result = await response.json();
+      res.json(result);
+    } catch (error: any) {
+      console.error('Error fetching store products:', error);
+      res.status(500).json({ error: 'Failed to fetch store products' });
+    }
+  });
+
+  // Printful orders endpoint
+  app.get('/api/printful/orders', async (req, res) => {
+    try {
+      const PRINTFUL_API_KEY = '8ix90dXLKcFM8s5CgODZz6TS5MUd38KSgfI2e3leHzbdMSOSgrXwU5G00kmtxpf3';
+      
+      const response = await fetch('https://api.printful.com/orders', {
+        headers: {
+          'Authorization': `Bearer ${PRINTFUL_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const result = await response.json();
+      res.json(result);
+    } catch (error: any) {
+      console.error('Error fetching orders:', error);
+      res.status(500).json({ error: 'Failed to fetch orders' });
+    }
+  });
+
+  // Printful files endpoint
+  app.get('/api/printful/files', async (req, res) => {
+    try {
+      const PRINTFUL_API_KEY = '8ix90dXLKcFM8s5CgODZz6TS5MUd38KSgfI2e3leHzbdMSOSgrXwU5G00kmtxpf3';
+      
+      const response = await fetch('https://api.printful.com/files', {
+        headers: {
+          'Authorization': `Bearer ${PRINTFUL_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const result = await response.json();
+      res.json(result);
+    } catch (error: any) {
+      console.error('Error fetching files:', error);
+      res.status(500).json({ error: 'Failed to fetch files' });
+    }
+  });
+
+  // Printful business integration
+  app.post('/api/printful/business-integration/connect', async (req, res) => {
+    try {
+      const PRINTFUL_API_KEY = '8ix90dXLKcFM8s5CgODZz6TS5MUd38KSgfI2e3leHzbdMSOSgrXwU5G00kmtxpf3';
+      const { businessId, printfulStoreId } = req.body;
+      
+      const response = await fetch('https://api.printful.com/store', {
+        headers: {
+          'Authorization': `Bearer ${PRINTFUL_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const result = await response.json();
+      
+      if (result.code === 200) {
+        const integrationSettings = {
+          businessId,
+          printfulStoreId: printfulStoreId || result.result.id,
+          apiKey: PRINTFUL_API_KEY,
+          connected: true,
+          connectedAt: new Date().toISOString()
+        };
+        
+        res.json({
+          success: true,
+          message: 'Successfully connected to Printful store',
+          store: result.result,
+          settings: integrationSettings
+        });
+      } else {
+        res.json({
+          success: false,
+          error: 'Failed to connect to Printful store',
+          details: result
+        });
+      }
+    } catch (error: any) {
+      console.error('Printful business integration error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to connect Printful store',
+        message: error.message
+      });
+    }
+  });
 
   app.get('/api/driver-active-routes', isAuthenticated, async (req: any, res) => {
     try {

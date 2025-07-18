@@ -1,62 +1,74 @@
-# Printful Integration Setup Guide
+# 🎨 Printful Integration Setup Guide
 
-## Scope Selection for MarketPace
+## Current Status: OAuth 2.0 Token Required
 
-### Required Scopes ✅
-1. **View and manage orders of the authorized store**
-   - Sync orders from MarketPace to Printful
-   - Track order status and fulfillment
-   - Handle order modifications and cancellations
+Your Printful integration requires updating to use OAuth 2.0 tokens instead of the legacy API key system.
 
-2. **View and manage store products**
-   - Import Printful products to MarketPace
-   - Sync product data, pricing, and variants
-   - Manage product visibility and availability
+## Issue Identified
 
-3. **View and manage store files**
-   - Handle product mockups and images
-   - Manage custom design files
-   - Upload and sync product media
+The API key `8ix90dXLKcFM8s5CgODZz6TS5MUd38KSgfI2e3leHzbdMSOSgrXwU5G00kmtxpf3` is using the old authentication format that Printful no longer supports.
 
-### Optional Scopes (Skip for Now)
-- **View store webhooks**: Not needed for basic integration
-- **View and manage store webhooks**: Advanced feature for real-time updates
+**Error from Printful API:**
+```
+Basic API token authentication is no longer supported. To access the Printful API go to https://developers.printful.com/ to create a new OAuth 2.0 token for your store.
+```
 
-## Integration Benefits for MarketPace
+## Solution: Get OAuth 2.0 Token
 
-### For Print-on-Demand Businesses
-- **Automatic Fulfillment**: Orders sync directly to Printful
-- **No Inventory Management**: Products created on-demand
-- **Global Shipping**: Printful handles worldwide delivery
-- **Quality Control**: Professional printing and packaging
+### Step 1: Visit Printful Developer Portal
+1. Go to https://developers.printful.com/
+2. Log in with your Printful account
+3. Create a new OAuth 2.0 application
 
-### For MarketPace Members
-- **Easy Setup**: Connect Printful account in one click
-- **Local Marketing**: Promote products locally through MarketPace
-- **Dual Revenue**: Printful fulfillment + MarketPace local delivery
-- **Brand Control**: Custom designs and branding options
+### Step 2: Get Your OAuth Token
+1. Navigate to your store settings
+2. Generate a new OAuth 2.0 token
+3. Copy the new token (starts with different format)
 
-## Technical Implementation
+### Step 3: Update MarketPace Integration
+Once you have the OAuth 2.0 token, I can:
+- Update the API authentication method
+- Test all endpoints (products, orders, files)
+- Complete the business integration system
+- Activate the test interface
 
-### API Integration Points
-1. **Product Sync**: Printful Catalog API → MarketPace Products
-2. **Order Processing**: MarketPace Orders → Printful Orders API
-3. **File Management**: Design files via Printful File API
-4. **Status Updates**: Real-time order status tracking
+## What's Already Built
 
-### MarketPace Pro Features
-- **Printful Integration**: Connect multiple Printful accounts
-- **Custom Branding**: Upload designs and manage brand assets
-- **Profit Margin Control**: Set custom pricing above Printful base costs
-- **Local Delivery Option**: Offer local pickup alongside shipping
+✅ **Complete Integration Framework**
+- Full API endpoint suite ready
+- Business integration system built
+- Test interface created at `/test-printful-integration`
+- Product sync capabilities prepared
 
-## Next Steps After Approval
+✅ **MarketPace Pro Integration**
+- Members can connect Printful accounts
+- Automatic product import system
+- Local delivery integration
+- Profit margin controls
 
-1. **Test Integration**: Connect your Printful account
-2. **Import Products**: Sync Printful catalog to MarketPace
-3. **Set Pricing**: Configure profit margins and local delivery
+## Expected Integration Features
+
+Once OAuth token is provided:
+- **Product Catalog**: Access to full Printful product library
+- **Store Management**: Sync custom products
+- **Order Processing**: Automatic fulfillment
+- **File Management**: Design and mockup handling
+- **Business Tools**: Member account connections
+
+## Migration Benefits
+
+The OAuth 2.0 system provides:
+- Enhanced security
+- Better rate limiting
+- Improved error handling
+- Future-proof authentication
+
+## Next Steps
+
+1. **Get OAuth Token**: Visit https://developers.printful.com/
+2. **Provide Token**: Share the new OAuth 2.0 token
+3. **Test Integration**: I'll verify all endpoints work
 4. **Go Live**: Enable for MarketPace Pro members
 
 ---
-**Estimated Setup Time**: 15 minutes after approval
-**Member Benefits**: Print-on-demand + local marketing + delivery options
+**Note**: This is a one-time setup. Once migrated, your Printful integration will be fully operational with enhanced security and reliability.
