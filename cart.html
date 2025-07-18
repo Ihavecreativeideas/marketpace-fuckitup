@@ -271,6 +271,83 @@
             box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
         }
 
+        .delivery-method-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .delivery-method {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .delivery-method:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .delivery-method.selected {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .method-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #00ffff;
+        }
+
+        .method-description {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 5px;
+        }
+
+        .method-price {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .tip-section {
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .tip-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .tip-option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .tip-option:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .tip-option.selected {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
         .urgent-delivery {
             background: rgba(255, 107, 107, 0.1);
             border: 2px solid rgba(255, 107, 107, 0.3);
@@ -469,8 +546,31 @@
                 </div>
             </div>
 
-            <!-- Delivery Window Selection -->
+            <!-- Delivery Options Selection -->
             <div class="delivery-window">
+                <h3 class="delivery-title">🚚 Select Delivery Method</h3>
+                <div class="delivery-method-options">
+                    <div class="delivery-method" data-method="marketpace" onclick="selectDeliveryMethod(this)">
+                        <div class="method-title">📦 MarketPace Delivery</div>
+                        <div class="method-description">Professional drivers, tracked delivery</div>
+                        <div class="method-price">$4 pickup + $2 drop + $0.50/mile</div>
+                    </div>
+                    <div class="delivery-method" data-method="custom" onclick="selectDeliveryMethod(this)" style="display: none;" id="customDeliveryOption">
+                        <div class="method-title">🎯 Your Own Delivery Service</div>
+                        <div class="method-description">Use your preferred delivery service</div>
+                        <input type="text" id="customDeliveryService" placeholder="Enter service name (UberEats, DoorDash, etc.)" style="width: 100%; margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 5px; color: white;">
+                        <input type="number" id="customShippingFee" placeholder="Your S&H fee ($)" step="0.01" style="width: 100%; margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 5px; color: white;">
+                    </div>
+                    <div class="delivery-method" data-method="pickup" onclick="selectDeliveryMethod(this)">
+                        <div class="method-title">🏪 Self Pickup</div>
+                        <div class="method-description">Arrange pickup with seller directly</div>
+                        <div class="method-price">No delivery fees</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Time Window Selection (only for MarketPace delivery) -->
+            <div class="delivery-window" id="timeWindowSection" style="display: none;">
                 <h3 class="delivery-title">🕐 Select Delivery Window</h3>
                 <div class="window-options">
                     <div class="window-option" data-window="9-12" onclick="selectWindow(this)">
@@ -498,6 +598,21 @@
                 </div>
             </div>
 
+            <!-- Driver Tip Section -->
+            <div class="tip-section" id="tipSection" style="display: none;">
+                <h3 class="delivery-title">💰 Tip Your Driver</h3>
+                <div class="tip-options">
+                    <button class="tip-option" onclick="selectTip(2)">$2</button>
+                    <button class="tip-option" onclick="selectTip(5)">$5</button>
+                    <button class="tip-option" onclick="selectTip(10)">$10</button>
+                    <button class="tip-option" onclick="selectTip('custom')">Custom</button>
+                </div>
+                <input type="number" id="customTipAmount" placeholder="Enter custom tip amount" step="0.01" style="width: 100%; margin: 10px 0; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 5px; color: white; display: none;">
+                <div style="font-size: 12px; color: rgba(255,255,255,0.7); text-align: center; margin-top: 8px;">
+                    💝 100% of tips go directly to your driver
+                </div>
+            </div>
+
             <!-- Cost Breakdown -->
             <div class="cost-breakdown">
                 <div class="cost-row">
@@ -509,23 +624,23 @@
                     <span class="cost-value" id="platformFee">$0.00</span>
                 </div>
                 <div class="cost-row">
-                    <span class="cost-label">Marketplace Protection Fee™:</span>
+                    <span class="cost-label">Protection Fee:</span>
                     <span class="cost-value" id="protectionFee">$0.50</span>
                 </div>
                 <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-left: 20px; margin-top: -5px; margin-bottom: 10px;">
                     🛡️ Damage protection up to $100 per item
                 </div>
-                <div class="cost-row">
+                <div class="cost-row" id="deliveryFeeRow">
                     <span class="cost-label">Delivery Fee:</span>
                     <span class="cost-value" id="deliveryFee">$0.00</span>
                 </div>
-                <div class="cost-row">
-                    <span class="cost-label">Large Item Fee:</span>
-                    <span class="cost-value" id="largeItemFee">$0.00</span>
+                <div class="cost-row" id="customShippingRow" style="display: none;">
+                    <span class="cost-label">Custom S&H Fee:</span>
+                    <span class="cost-value" id="customShippingDisplay">$0.00</span>
                 </div>
-                <div class="cost-row">
-                    <span class="cost-label">Mileage Fee:</span>
-                    <span class="cost-value" id="mileageFee">$0.00</span>
+                <div class="cost-row" id="tipRow" style="display: none;">
+                    <span class="cost-label">Driver Tip:</span>
+                    <span class="cost-value" id="tipAmount">$0.00</span>
                 </div>
                 <div id="mileageBreakdown" style="font-size: 12px; color: rgba(255, 255, 255, 0.6); margin-left: 20px; margin-top: -5px; margin-bottom: 10px;">
                     8.5 miles × $0.50 = $4.25
@@ -574,8 +689,15 @@
             selectedWindow: null,
             urgentDelivery: false,
             deliveryDistance: 8.5,
-            deliveryRoute: null
+            deliveryRoute: null,
+            deliveryMethod: 'marketpace',
+            customDeliveryService: '',
+            customShippingFee: 0,
+            tipAmount: 0
         };
+
+        // Check if user is Pro member (for custom delivery options)
+        let isProMember = localStorage.getItem('userProMembership') === 'true' || false;
 
         // Sample addresses for route optimization demo
         const sampleAddresses = {
@@ -675,6 +797,94 @@
             showNotification('Item removed from cart', 'info');
         }
 
+        // Select delivery method
+        function selectDeliveryMethod(element) {
+            // Remove selection from all methods
+            document.querySelectorAll('.delivery-method').forEach(method => {
+                method.classList.remove('selected');
+            });
+            
+            // Select clicked method
+            element.classList.add('selected');
+            cartData.deliveryMethod = element.dataset.method;
+            
+            // Show/hide relevant sections
+            const timeWindowSection = document.getElementById('timeWindowSection');
+            const tipSection = document.getElementById('tipSection');
+            const deliveryFeeRow = document.getElementById('deliveryFeeRow');
+            const customShippingRow = document.getElementById('customShippingRow');
+            
+            if (cartData.deliveryMethod === 'marketpace') {
+                timeWindowSection.style.display = 'block';
+                tipSection.style.display = 'block';
+                deliveryFeeRow.style.display = 'flex';
+                customShippingRow.style.display = 'none';
+            } else if (cartData.deliveryMethod === 'custom') {
+                timeWindowSection.style.display = 'none';
+                tipSection.style.display = 'none';
+                deliveryFeeRow.style.display = 'none';
+                customShippingRow.style.display = 'flex';
+            } else if (cartData.deliveryMethod === 'pickup') {
+                timeWindowSection.style.display = 'none';
+                tipSection.style.display = 'none';
+                deliveryFeeRow.style.display = 'none';
+                customShippingRow.style.display = 'none';
+            }
+            
+            updateCosts();
+            localStorage.setItem('marketplaceCart', JSON.stringify(cartData));
+        }
+
+        // Select tip amount
+        function selectTip(amount) {
+            // Remove selection from all tip options
+            document.querySelectorAll('.tip-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            const customTipInput = document.getElementById('customTipAmount');
+            
+            if (amount === 'custom') {
+                customTipInput.style.display = 'block';
+                customTipInput.focus();
+                cartData.tipAmount = parseFloat(customTipInput.value) || 0;
+            } else {
+                customTipInput.style.display = 'none';
+                cartData.tipAmount = amount;
+                // Select the clicked option
+                event.target.classList.add('selected');
+            }
+            
+            updateCosts();
+            localStorage.setItem('marketplaceCart', JSON.stringify(cartData));
+        }
+
+        // Handle custom tip input
+        document.addEventListener('DOMContentLoaded', function() {
+            const customTipInput = document.getElementById('customTipAmount');
+            if (customTipInput) {
+                customTipInput.addEventListener('input', function() {
+                    cartData.tipAmount = parseFloat(this.value) || 0;
+                    updateCosts();
+                    localStorage.setItem('marketplaceCart', JSON.stringify(cartData));
+                });
+            }
+
+            const customShippingInput = document.getElementById('customShippingFee');
+            if (customShippingInput) {
+                customShippingInput.addEventListener('input', function() {
+                    cartData.customShippingFee = parseFloat(this.value) || 0;
+                    updateCosts();
+                    localStorage.setItem('marketplaceCart', JSON.stringify(cartData));
+                });
+            }
+
+            // Show custom delivery option for Pro members
+            if (isProMember) {
+                document.getElementById('customDeliveryOption').style.display = 'block';
+            }
+        });
+
         // Select delivery window
         function selectWindow(element) {
             // Remove selection from all windows
@@ -694,21 +904,37 @@
         function updateCosts() {
             const subtotal = cartData.items.reduce((sum, item) => sum + item.price, 0);
             const platformFee = calculatePlatformFee(subtotal);
-            const marketplaceProtectionFee = 0.50; // Marketplace Protection Fee™
-            const deliveryFee = calculateDeliveryFee();
-            const largeItemFee = calculateLargeItemFee();
-            const mileageFee = calculateMileageFee();
+            const marketplaceProtectionFee = 0.50; // Protection up to $100 per item
+            
+            let deliveryFee = 0;
+            let customShippingFee = 0;
+            
+            if (cartData.deliveryMethod === 'marketpace') {
+                deliveryFee = calculateDeliveryFee();
+            } else if (cartData.deliveryMethod === 'custom') {
+                customShippingFee = cartData.customShippingFee || 0;
+            }
+            
+            const tipAmount = cartData.tipAmount || 0;
             const urgentFee = cartData.urgentDelivery ? 10.00 : 0;
             
-            const total = subtotal + platformFee + marketplaceProtectionFee + deliveryFee + largeItemFee + mileageFee + urgentFee;
+            const total = subtotal + platformFee + marketplaceProtectionFee + deliveryFee + customShippingFee + tipAmount + urgentFee;
 
             document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
             document.getElementById('platformFee').textContent = `$${platformFee.toFixed(2)}`;
             document.getElementById('protectionFee').textContent = `$${marketplaceProtectionFee.toFixed(2)}`;
             document.getElementById('deliveryFee').textContent = `$${deliveryFee.toFixed(2)}`;
-            document.getElementById('largeItemFee').textContent = `$${largeItemFee.toFixed(2)}`;
-            document.getElementById('mileageFee').textContent = `$${mileageFee.toFixed(2)}`;
+            document.getElementById('customShippingDisplay').textContent = `$${customShippingFee.toFixed(2)}`;
+            document.getElementById('tipAmount').textContent = `$${tipAmount.toFixed(2)}`;
             document.getElementById('totalCost').textContent = `$${total.toFixed(2)}`;
+            
+            // Show/hide tip row
+            const tipRow = document.getElementById('tipRow');
+            if (tipAmount > 0) {
+                tipRow.style.display = 'flex';
+            } else {
+                tipRow.style.display = 'none';
+            }
             
             // Update mileage breakdown display
             updateMileageBreakdown();
