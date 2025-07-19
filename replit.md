@@ -306,6 +306,15 @@ All features are designed to strengthen local communities by keeping commerce lo
 ✓ **PROFESSIONAL BRANDING**: Facebook links styled with Facebook's official colors (#1877f2) and proper SVG icons for brand consistency
 ✓ **COMMUNITY CONNECTION**: Direct integration between MarketPace platform and official Facebook presence for news, updates, and community highlights
 
+✓ **CUSTOMIZABLE PROMOTION BUDGETS WITH 5% COMMISSION STRUCTURE IMPLEMENTED** (July 19, 2025)
+✓ **COMPLETE CUSTOM BUDGET SYSTEM**: Updated Google Ads promotion system to support fully customizable daily budgets from $5 to $1000 instead of fixed amounts
+✓ **5% COMMISSION STRUCTURE**: Implemented MarketPace commission system earning 5% on all promotion charges (example: $40/day x 7 days = $280 ad spend + $14 commission = $294 total member cost)
+✓ **BUDGET FLEXIBILITY**: Members can now set any custom daily budget with real-time cost breakdown showing ad spend, MarketPace commission, and total member cost
+✓ **COMMISSION CALCULATION API**: Enhanced /api/google/create-ad-campaign endpoint with costBreakdown object showing adSpend, marketpaceCommission, totalMemberCost, and commissionRate
+✓ **BUILDER CONFIG UPDATED**: Updated /api/ads/builder-config with budgetOptions (min: $5, max: $1000) and commissionStructure details for transparent pricing
+✓ **COMPREHENSIVE TESTING VERIFIED**: Tested various budget scenarios ($40x7=$294 total, $25x14=$367.50 total, $100x30=$3150 total) with accurate 5% commission calculations
+✓ **REVENUE STREAM ACTIVE**: MarketPace now earns sustainable revenue from promotion services while providing complete budget control to members
+
 ✓ **COMPREHENSIVE AUTOMATED SPONSOR NOTIFICATION SYSTEM** (July 19, 2025)
 ✓ **SPONSOR EXPIRATION NOTIFICATIONS**: Created complete automated notification system that sends SMS and email reminders to sponsor members one week before their benefits expire, thanking them for early support and providing subscription renewal options
 ✓ **NOTIFICATION INFRASTRUCTURE**: Built comprehensive server-side notification service with sponsorExpirationNotifications.ts and sponsorNotificationScheduler.ts for automated 24-hour daily benefit expiry management

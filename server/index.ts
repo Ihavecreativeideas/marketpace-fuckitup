@@ -1468,16 +1468,22 @@ app.post('/api/facebook/post-to-marketplace', async (req, res) => {
   }
 });
 
-// Google Ads Integration API
+// Google Ads Integration API with Custom Budgets and Commission
 app.post('/api/google/create-ad-campaign', async (req, res) => {
   try {
-    const { title, description, price, budget, duration, targetAudience, keywords, landingUrl } = req.body;
+    const { title, description, price, budget, duration, targetAudience, keywords, landingUrl, memberId } = req.body;
+    
+    // Calculate MarketPace commission (5% of total promotion spend)
+    const dailyBudget = parseFloat(budget);
+    const totalCampaignCost = dailyBudget * parseInt(duration);
+    const marketpaceCommission = totalCampaignCost * 0.05;
+    const memberCost = totalCampaignCost + marketpaceCommission;
     
     // Google Ads API campaign creation
     const googleAdCampaign = {
       name: `MarketPace - ${title}`,
       description: description,
-      budget: budget,
+      budget: dailyBudget,
       duration: duration,
       keywords: keywords,
       targetAudience: targetAudience,
@@ -1494,18 +1500,28 @@ app.post('/api/google/create-ad-campaign', async (req, res) => {
     console.log('✅ Google Ads Integration Active');
     console.log('📈 Creating Google Ads campaign:', {
       campaign: googleAdCampaign.name,
-      budget: `$${budget}/day`,
+      budget: `$${dailyBudget}/day`,
       duration: `${duration} days`,
+      totalCost: `$${totalCampaignCost}`,
+      marketpaceCommission: `$${marketpaceCommission.toFixed(2)}`,
+      memberTotal: `$${memberCost.toFixed(2)}`,
       targeting: targetAudience?.location || 'Local area'
     });
     
     res.json({
       success: true,
-      message: 'Google Ads campaign created successfully',
+      message: 'Google Ads campaign created successfully with custom budget',
       campaignId: `GA_${Date.now()}`,
       campaignName: googleAdCampaign.name,
-      dailyBudget: budget,
-      estimatedReach: budget * 350, // Estimated reach based on budget
+      dailyBudget: dailyBudget,
+      campaignDuration: duration,
+      costBreakdown: {
+        adSpend: parseFloat(totalCampaignCost.toFixed(2)),
+        marketpaceCommission: parseFloat(marketpaceCommission.toFixed(2)),
+        totalMemberCost: parseFloat(memberCost.toFixed(2)),
+        commissionRate: '5%'
+      },
+      estimatedReach: dailyBudget * 350,
       adPreview: {
         headline: title,
         description: description.substring(0, 90) + '...',
@@ -1604,11 +1620,24 @@ app.get('/api/ads/builder-config', (req, res) => {
           description: 'Target based on MarketPace activity patterns'
         }
       },
-      budgetRecommendations: {
-        'marketplace_listing': { min: 10, recommended: 25, max: 100 },
-        'service_promotion': { min: 15, recommended: 35, max: 150 },
-        'event_announcement': { min: 20, recommended: 50, max: 200 },
-        'business_spotlight': { min: 25, recommended: 60, max: 300 }
+      budgetOptions: {
+        customBudget: {
+          enabled: true,
+          min: 5,
+          max: 1000,
+          description: "Set your own daily budget amount"
+        },
+        suggestedRanges: {
+          'marketplace_listing': { low: 10, medium: 25, high: 75 },
+          'service_promotion': { low: 15, medium: 35, high: 100 },
+          'event_announcement': { low: 20, medium: 50, high: 150 },
+          'business_spotlight': { low: 25, medium: 60, high: 200 }
+        }
+      },
+      commissionStructure: {
+        marketpaceCommission: 5.0,
+        description: "5% commission on all promotion charges",
+        example: "For a $50/day budget, MarketPace earns $2.50/day"
       }
     },
     privacyNotice: 'All targeting uses only MarketPace member data. No external data sources.'
