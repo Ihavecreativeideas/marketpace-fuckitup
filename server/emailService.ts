@@ -11,7 +11,7 @@ class EmailService {
       port: 587,
       secure: false,
       auth: {
-        user: 'ihavecreativeideas@gmail.com', // Your Gmail account with App Password
+        user: 'bb.music93@gmail.com', // Your Gmail account with App Password
         pass: 'xqgijzurfbzuvzhf', // Gmail App Password (spaces removed)
       },
     });
@@ -20,7 +20,7 @@ class EmailService {
   async sendWelcomeEmail(email: string, firstName: string): Promise<boolean> {
     try {
       const mailOptions = {
-        from: `"MarketPace" <ihavecreativeideas@gmail.com>`,
+        from: `"MarketPace" <bb.music93@gmail.com>`,
         to: email,
         subject: 'Welcome to MarketPace! 🎉',
         html: `
@@ -210,7 +210,7 @@ export const emailService = new EmailService();
 export const sendEmail = async (options: { to: string; subject: string; html: string }): Promise<boolean> => {
   try {
     const mailOptions = {
-      from: `"MarketPace" <ihavecreativeideas@gmail.com>`,
+      from: `"MarketPace" <bb.music93@gmail.com>`,
       to: options.to,
       subject: options.subject,
       html: options.html,
