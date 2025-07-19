@@ -18,6 +18,7 @@ import { driverNotificationService } from './driverNotificationService';
 import { socialMediaRoutes } from './socialMediaRoutes';
 import { sendSMS } from './smsService';
 import { qrCodeService } from './qrCodeService';
+import { tipRoutes } from './tipRoutes';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -1885,6 +1886,9 @@ registerAdminRoutes(app);
 
 // Setup Sponsorship Routes with Stripe Integration
 registerSponsorshipRoutes(app);
+
+// Setup Tip Routes with Stripe Integration
+app.use('/', tipRoutes);
 
 // Setup Marketplace Routes with Notifications
 registerMarketplaceRoutes(app);

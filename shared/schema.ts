@@ -117,6 +117,38 @@ export const schedules = pgTable("schedules", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Tips and payments table
+export const tips = pgTable("tips", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  fromUserId: varchar("from_user_id").references(() => users.id), // who gave the tip
+  toUserId: varchar("to_user_id").references(() => users.id), // who received the tip (business owner or employee)
+  businessId: uuid("business_id").references(() => businesses.id), // which business the tip is for
+  employeeId: uuid("employee_id").references(() => employees.id), // specific employee if applicable
+  amount: integer("amount").notNull(), // amount in cents
+  message: text("message"), // optional tip message
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  stripeTransferId: varchar("stripe_transfer_id"), // for paying out to recipient
+  status: varchar("status").default("pending"), // pending, completed, failed, refunded
+  paidOut: boolean("paid_out").default(false), // whether the recipient has been paid
+  paidOutAt: timestamp("paid_out_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Pro member payment settings
+export const proMemberPayments = pgTable("pro_member_payments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  businessId: uuid("business_id").references(() => businesses.id),
+  stripeAccountId: varchar("stripe_account_id"), // Stripe Connect account for receiving payments
+  stripeOnboardingComplete: boolean("stripe_onboarding_complete").default(false),
+  tipsEnabled: boolean("tips_enabled").default(false),
+  defaultTipAmounts: jsonb("default_tip_amounts"), // [5, 10, 20, 50] or custom amounts
+  tipButtonText: varchar("tip_button_text").default("Tip Us!"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Fill-in requests for urgent needs
 export const fillInRequests = pgTable("fill_in_requests", {
   id: uuid("id").primaryKey().defaultRandom(),

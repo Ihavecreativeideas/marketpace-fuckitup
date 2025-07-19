@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tip Modal</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        .tip-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .tip-modal {
+            background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 50%, #4c2885 100%);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .tip-modal h2 {
+            color: #FFD700;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #FFD700;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
+            transform: rotate(90deg);
+        }
+
+        .business-info {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .business-name {
+            color: #FFD700;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .business-type {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        .tip-amounts {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .tip-amount-btn {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 12px;
+            color: #FFD700;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .tip-amount-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #FFD700;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .tip-amount-btn.selected {
+            background: rgba(255, 215, 0, 0.3);
+            border-color: #FFD700;
+            color: #1a0b3d;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .custom-amount {
+            margin-bottom: 20px;
+        }
+
+        .custom-amount input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 12px;
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .custom-amount input:focus {
+            outline: none;
+            border-color: #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .tip-message {
+            margin-bottom: 20px;
+        }
+
+        .tip-message textarea {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .tip-message textarea:focus {
+            outline: none;
+            border-color: #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .tip-total {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .tip-total-amount {
+            color: #FFD700;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .tip-total-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        .pay-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border: none;
+            border-radius: 12px;
+            color: #1a0b3d;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .pay-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.4);
+        }
+
+        .pay-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .payment-element {
+            margin-bottom: 20px;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            color: #FFD700;
+            margin: 20px 0;
+        }
+
+        .loading-spinner.show {
+            display: block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 50%;
+            border-top-color: #FFD700;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- This modal will be injected into pages as needed -->
+    <script>
+        // Tip Modal Component
+        class TipModal {
+            constructor() {
+                this.stripe = null;
+                this.elements = null;
+                this.paymentElement = null;
+                this.selectedAmount = 0;
+                this.businessData = {};
+                this.initStripe();
+            }
+
+            async initStripe() {
+                if (!window.Stripe) {
+                    console.error('Stripe.js not loaded');
+                    return;
+                }
+                this.stripe = Stripe(window.STRIPE_PUBLISHABLE_KEY || 'pk_test_...');
+            }
+
+            show(businessData) {
+                this.businessData = businessData;
+                this.createModal();
+                this.bindEvents();
+            }
+
+            createModal() {
+                const modalHTML = `
+                    <div class="tip-modal-overlay" id="tipModalOverlay">
+                        <div class="tip-modal">
+                            <button class="close-btn" id="closeTipModal">&times;</button>
+                            
+                            <h2>Send a Tip</h2>
+                            
+                            <div class="business-info">
+                                <div class="business-name">${this.businessData.name || 'Business'}</div>
+                                <div class="business-type">${this.businessData.type || 'Pro Member'}</div>
+                            </div>
+
+                            <div class="tip-amounts" id="tipAmounts">
+                                <button class="tip-amount-btn" data-amount="5">$5</button>
+                                <button class="tip-amount-btn" data-amount="10">$10</button>
+                                <button class="tip-amount-btn" data-amount="20">$20</button>
+                                <button class="tip-amount-btn" data-amount="50">$50</button>
+                            </div>
+
+                            <div class="custom-amount">
+                                <input type="number" id="customAmount" placeholder="Custom amount ($)" min="1" max="500">
+                            </div>
+
+                            <div class="tip-message">
+                                <textarea id="tipMessage" placeholder="Add a message (optional)"></textarea>
+                            </div>
+
+                            <div class="tip-total">
+                                <div class="tip-total-amount" id="tipTotalAmount">$0</div>
+                                <div class="tip-total-text">Total tip amount</div>
+                            </div>
+
+                            <div id="payment-element" class="payment-element"></div>
+                            
+                            <div class="loading-spinner" id="loadingSpinner">
+                                <div class="spinner"></div>
+                                Processing payment...
+                            </div>
+
+                            <div class="success-message" id="successMessage">
+                                <h3>Thank you for your tip!</h3>
+                                <p>Your tip has been sent successfully.</p>
+                            </div>
+
+                            <button class="pay-btn" id="payTipBtn" disabled>Select an amount to continue</button>
+                        </div>
+                    </div>
+                `;
+
+                // Remove existing modal if any
+                const existingModal = document.getElementById('tipModalOverlay');
+                if (existingModal) {
+                    existingModal.remove();
+                }
+
+                // Add modal to body
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+            }
+
+            bindEvents() {
+                // Close modal
+                document.getElementById('closeTipModal').addEventListener('click', () => {
+                    this.close();
+                });
+
+                document.getElementById('tipModalOverlay').addEventListener('click', (e) => {
+                    if (e.target.id === 'tipModalOverlay') {
+                        this.close();
+                    }
+                });
+
+                // Tip amount selection
+                document.querySelectorAll('.tip-amount-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const amount = parseInt(e.target.dataset.amount);
+                        this.selectAmount(amount);
+                    });
+                });
+
+                // Custom amount input
+                document.getElementById('customAmount').addEventListener('input', (e) => {
+                    const amount = parseFloat(e.target.value) || 0;
+                    this.selectAmount(amount);
+                });
+
+                // Pay button
+                document.getElementById('payTipBtn').addEventListener('click', () => {
+                    this.processPayment();
+                });
+            }
+
+            selectAmount(amount) {
+                this.selectedAmount = amount;
+                
+                // Update UI
+                document.querySelectorAll('.tip-amount-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+
+                if (amount === 5 || amount === 10 || amount === 20 || amount === 50) {
+                    document.querySelector(`[data-amount="${amount}"]`).classList.add('selected');
+                    document.getElementById('customAmount').value = '';
+                } else {
+                    document.getElementById('customAmount').value = amount;
+                }
+
+                document.getElementById('tipTotalAmount').textContent = `$${amount}`;
+                
+                const payBtn = document.getElementById('payTipBtn');
+                if (amount > 0) {
+                    payBtn.disabled = false;
+                    payBtn.textContent = `Send Tip - $${amount}`;
+                    this.createPaymentIntent();
+                } else {
+                    payBtn.disabled = true;
+                    payBtn.textContent = 'Select an amount to continue';
+                }
+            }
+
+            async createPaymentIntent() {
+                try {
+                    const response = await fetch('/api/tips/create-payment-intent', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            amount: this.selectedAmount,
+                            businessId: this.businessData.id,
+                            toUserId: this.businessData.ownerId,
+                            message: document.getElementById('tipMessage').value
+                        })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.clientSecret) {
+                        this.setupPaymentElement(data.clientSecret);
+                    } else {
+                        throw new Error(data.error || 'Failed to create payment intent');
+                    }
+
+                } catch (error) {
+                    console.error('Error creating payment intent:', error);
+                    alert('Error setting up payment. Please try again.');
+                }
+            }
+
+            setupPaymentElement(clientSecret) {
+                if (!this.stripe) {
+                    console.error('Stripe not initialized');
+                    return;
+                }
+
+                const options = {
+                    clientSecret: clientSecret,
+                    appearance: {
+                        theme: 'night',
+                        variables: {
+                            colorPrimary: '#FFD700',
+                            colorBackground: 'rgba(255, 255, 255, 0.1)',
+                            colorText: '#ffffff',
+                            colorDanger: '#ff6b6b',
+                            borderRadius: '12px'
+                        }
+                    }
+                };
+
+                this.elements = this.stripe.elements(options);
+                this.paymentElement = this.elements.create('payment');
+                this.paymentElement.mount('#payment-element');
+            }
+
+            async processPayment() {
+                if (!this.stripe || !this.elements) {
+                    alert('Payment system not ready. Please try again.');
+                    return;
+                }
+
+                const loadingSpinner = document.getElementById('loadingSpinner');
+                const payBtn = document.getElementById('payTipBtn');
+                
+                loadingSpinner.classList.add('show');
+                payBtn.disabled = true;
+
+                try {
+                    const { error } = await this.stripe.confirmPayment({
+                        elements: this.elements,
+                        confirmParams: {
+                            return_url: window.location.href,
+                        },
+                    });
+
+                    if (error) {
+                        throw error;
+                    } else {
+                        // Payment succeeded
+                        this.showSuccess();
+                    }
+
+                } catch (error) {
+                    console.error('Payment error:', error);
+                    alert(`Payment failed: ${error.message}`);
+                    loadingSpinner.classList.remove('show');
+                    payBtn.disabled = false;
+                }
+            }
+
+            showSuccess() {
+                document.getElementById('loadingSpinner').classList.remove('show');
+                document.getElementById('successMessage').classList.add('show');
+                document.getElementById('payTipBtn').style.display = 'none';
+                
+                setTimeout(() => {
+                    this.close();
+                }, 3000);
+            }
+
+            close() {
+                const modal = document.getElementById('tipModalOverlay');
+                if (modal) {
+                    modal.remove();
+                }
+            }
+        }
+
+        // Global tip modal instance
+        window.tipModal = new TipModal();
+
+        // Global function to show tip modal
+        window.showTipModal = function(businessData) {
+            window.tipModal.show(businessData);
+        };
+    </script>
+</body>
+</html>

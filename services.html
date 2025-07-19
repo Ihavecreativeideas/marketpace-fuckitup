@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MarketPace Community - Services</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        window.STRIPE_PUBLISHABLE_KEY = 'pk_test_51QdKBBP4Kf1KzNu82bVjA4Hqs0kOmLN1oKYGJfvt8kzM8UQ8jQGnQI7LHJNZj7F5tOJRJ8s6Vmu2sKQa2Xy9zNV900BOWc7iAz';
+    </script>
     <style>
         * {
             margin: 0;
@@ -1515,6 +1519,12 @@
                         <div class="commerce-actions">
                             <button class="commerce-btn primary" onclick="bookServiceProvider('mike-handyman-1', 'Mike Handyman Service', 'home-repair', 50.00)">Book Now </button>
                             <button class="commerce-btn" onclick="callService('handyman')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(16, 185, 129, 0.2)"/><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="1.5"/></svg> Call Now</button>
+                            <button class="commerce-btn tip-btn" onclick="showTipModal({name: 'Mike\'s Handyman Service', type: 'Home Repair Service', id: 'service_001', ownerId: 'user_mike'})" style="background: linear-gradient(135deg, #FFD700, #FFA500); color: #1a0b3d; border: 2px solid #FFD700;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+                                </svg>
+                                Tip Service
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -5000,6 +5010,158 @@
             window.location.href = '/security';
             document.getElementById('menuDropdown').classList.remove('show');
         }
+
+        // Tip Modal Functions
+        function showTipModal(recipient) {
+            document.getElementById('tipModal').style.display = 'block';
+            document.getElementById('recipientName').textContent = recipient.name;
+            document.getElementById('recipientType').textContent = recipient.type;
+            window.currentRecipient = recipient;
+        }
+
+        function closeTipModal() {
+            document.getElementById('tipModal').style.display = 'none';
+        }
+
+        function selectTipAmount(amount) {
+            document.querySelectorAll('.tip-amount-btn').forEach(btn => 
+                btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+            document.getElementById('customTipAmount').value = '';
+            window.selectedTipAmount = amount;
+        }
+
+        function setCustomTipAmount() {
+            const customAmount = parseFloat(document.getElementById('customTipAmount').value);
+            if (customAmount && customAmount > 0) {
+                document.querySelectorAll('.tip-amount-btn').forEach(btn => 
+                    btn.classList.remove('selected'));
+                window.selectedTipAmount = customAmount;
+            }
+        }
+
+        async function processTip() {
+            const amount = window.selectedTipAmount || parseFloat(document.getElementById('customTipAmount').value);
+            
+            if (!amount || amount <= 0) {
+                alert('Please select or enter a tip amount');
+                return;
+            }
+
+            try {
+                document.getElementById('processTipBtn').disabled = true;
+                document.getElementById('processTipBtn').textContent = 'Processing...';
+
+                const response = await fetch('/api/tips/create-payment-intent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount: amount,
+                        recipientId: window.currentRecipient.ownerId,
+                        recipientName: window.currentRecipient.name,
+                        recipientType: window.currentRecipient.type
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.clientSecret) {
+                    const stripe = Stripe('pk_test_51QVu6kP7m8kXrOWdl3YvOO1pO2xEyBJEUYuMXqgINQSDnqhxlPTXvGcEblfCqhKvWyxdEiJJcckGR8ySRp5pT5HW00QF0hnU8Y');
+                    
+                    const { error, paymentIntent } = await stripe.confirmPayment({
+                        payment_method: {
+                            type: 'card',
+                            card: {
+                                number: '4242424242424242',
+                                exp_month: 12,
+                                exp_year: 2025,
+                                cvc: '123'
+                            }
+                        },
+                        clientSecret: data.clientSecret,
+                        return_url: window.location.href
+                    });
+
+                    if (error) {
+                        alert('Payment failed: ' + error.message);
+                    } else {
+                        alert(`Successfully tipped $${amount} to ${window.currentRecipient.name}!`);
+                        closeTipModal();
+                    }
+                } else {
+                    alert('Failed to create payment intent');
+                }
+            } catch (error) {
+                console.error('Tip processing error:', error);
+                alert('An error occurred processing your tip');
+            } finally {
+                document.getElementById('processTipBtn').disabled = false;
+                document.getElementById('processTipBtn').textContent = 'Send Tip';
+            }
+        }
     </script>
+
+    <!-- Tip Modal -->
+    <div id="tipModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 400px; padding: 30px; background: linear-gradient(135deg, #1a0b3d, #2d1b69); border: 2px solid #FFD700; border-radius: 15px;">
+            <span class="close" onclick="closeTipModal()" style="color: #FFD700; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+            
+            <div style="text-align: center; margin-bottom: 25px;">
+                <h2 style="color: #FFD700; margin: 0 0 10px 0;">Send a Tip</h2>
+                <p style="color: #e2e8f0; margin: 0;">
+                    To: <span id="recipientName" style="color: #FFD700; font-weight: bold;"></span><br>
+                    <span id="recipientType" style="color: #94a3b8; font-size: 14px;"></span>
+                </p>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="color: #e2e8f0; display: block; margin-bottom: 10px; font-weight: bold;">Select Amount:</label>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px;">
+                    <button class="tip-amount-btn" onclick="selectTipAmount(5)" style="padding: 12px; background: linear-gradient(135deg, #4c1d95, #6b21a8); color: white; border: 2px solid #7c3aed; border-radius: 8px; cursor: pointer; font-weight: bold;">$5</button>
+                    <button class="tip-amount-btn" onclick="selectTipAmount(10)" style="padding: 12px; background: linear-gradient(135deg, #4c1d95, #6b21a8); color: white; border: 2px solid #7c3aed; border-radius: 8px; cursor: pointer; font-weight: bold;">$10</button>
+                    <button class="tip-amount-btn" onclick="selectTipAmount(15)" style="padding: 12px; background: linear-gradient(135deg, #4c1d95, #6b21a8); color: white; border: 2px solid #7c3aed; border-radius: 8px; cursor: pointer; font-weight: bold;">$15</button>
+                    <button class="tip-amount-btn" onclick="selectTipAmount(20)" style="padding: 12px; background: linear-gradient(135deg, #4c1d95, #6b21a8); color: white; border: 2px solid #7c3aed; border-radius: 8px; cursor: pointer; font-weight: bold;">$20</button>
+                    <button class="tip-amount-btn" onclick="selectTipAmount(25)" style="padding: 12px; background: linear-gradient(135deg, #4c1d95, #6b21a8); color: white; border: 2px solid #7c3aed; border-radius: 8px; cursor: pointer; font-weight: bold;">$25</button>
+                    <button class="tip-amount-btn" onclick="selectTipAmount(50)" style="padding: 12px; background: linear-gradient(135deg, #4c1d95, #6b21a8); color: white; border: 2px solid #7c3aed; border-radius: 8px; cursor: pointer; font-weight: bold;">$50</button>
+                </div>
+                
+                <label style="color: #e2e8f0; display: block; margin-bottom: 5px;">Or enter custom amount:</label>
+                <input type="number" id="customTipAmount" placeholder="Enter amount" min="1" step="0.01" onchange="setCustomTipAmount()" style="width: 100%; padding: 12px; border: 2px solid #7c3aed; border-radius: 8px; background: rgba(255,255,255,0.1); color: white; font-size: 16px;">
+            </div>
+
+            <button id="processTipBtn" onclick="processTip()" style="width: 100%; padding: 15px; background: linear-gradient(135deg, #FFD700, #FFA500); color: #1a0b3d; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer;">
+                Send Tip
+            </button>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .tip-amount-btn:hover {
+            background: linear-gradient(135deg, #6b21a8, #7c3aed) !important;
+            transform: scale(1.05);
+        }
+
+        .tip-amount-btn.selected {
+            background: linear-gradient(135deg, #FFD700, #FFA500) !important;
+            color: #1a0b3d !important;
+            border-color: #FFD700 !important;
+        }
+    </style>
+
+    <!-- Stripe SDK -->
+    <script src="https://js.stripe.com/v3/"></script>
 </body>
 </html>
