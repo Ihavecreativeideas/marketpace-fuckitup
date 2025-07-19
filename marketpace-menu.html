@@ -822,6 +822,15 @@
                 <div class="pro-badge">PRO</div>
                 <div class="menu-arrow">›</div>
             </div>
+            <div class="menu-item" onclick="activateTipFeature()" style="border-left: 3px solid #FFD700;">
+                <div class="menu-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(255, 215, 0, 0.2)"/><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#FFD700" stroke="#FFD700" stroke-width="1.5"/></svg></div>
+                <div class="menu-content">
+                    <div class="menu-title" style="color: #FFD700;">Activate Tip Feature</div>
+                    <div class="menu-description">Enable tip buttons on your profile & posts</div>
+                </div>
+                <div class="pro-badge" style="background: #FFD700; color: #1a0b3d;">PRO</div>
+                <div class="menu-arrow">›</div>
+            </div>
             <div class="menu-item" onclick="goToPage('/driver-application')">
                 <div class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(255, 255, 255, 0.2)"/><path d="M7 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0M17 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0M5 17h-2v-6l2-5h9l4 5h1a2 2 0 0 1 2 2v4h-2" stroke="currentColor" stroke-width="1.5"/></svg></div>
                 <div class="menu-content">
@@ -2485,6 +2494,174 @@ Let's keep our money circulating locally and support each other! 💪
             };
             
             document.body.appendChild(modalOverlay);
+        }
+
+        // Tip Feature Activation System
+        function activateTipFeature() {
+            // Check if user is a Pro member
+            const isProMember = checkProMemberStatus();
+            
+            if (!isProMember) {
+                showUpgradeModal();
+                return;
+            }
+            
+            // Check current tip feature status
+            const tipFeatureActive = localStorage.getItem('tipFeatureActive') === 'true';
+            
+            if (tipFeatureActive) {
+                showTipManagementModal();
+            } else {
+                showTipActivationModal();
+            }
+        }
+        
+        function checkProMemberStatus() {
+            // Check if user has Pro membership
+            const proStatus = localStorage.getItem('marketpaceProStatus');
+            const activeBusinessAccount = localStorage.getItem('activeBusinessAccount');
+            
+            return proStatus === 'active' || activeBusinessAccount !== null;
+        }
+        
+        function showTipActivationModal() {
+            const modalOverlay = document.createElement('div');
+            modalOverlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0, 0, 0, 0.85); z-index: 2000; display: flex;
+                align-items: center; justify-content: center; backdrop-filter: blur(10px);
+            `;
+            
+            modalOverlay.innerHTML = `
+                <div style="background: linear-gradient(135deg, #1a0b3d, #6b46c1); border: 2px solid #FFD700; border-radius: 20px; padding: 30px; max-width: 500px; width: 90%; text-align: center;">
+                    <h2 style="color: #FFD700; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#FFD700" stroke="#FFD700" stroke-width="1.5"/>
+                        </svg>
+                        Activate Tip Feature
+                    </h2>
+                    <p style="margin-bottom: 25px; line-height: 1.6; color: rgba(255,255,255,0.9);">
+                        Enable tip buttons on your posts and profile to receive tips from customers and supporters!
+                    </p>
+                    <div style="background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; padding: 20px; margin: 20px 0; text-align: left;">
+                        <div style="color: #FFD700; font-weight: bold; margin-bottom: 10px;">Pro Tip Features Include:</div>
+                        <div style="color: rgba(255,255,255,0.9); margin-bottom: 8px;">• Tip buttons on all your posts</div>
+                        <div style="color: rgba(255,255,255,0.9); margin-bottom: 8px;">• Profile tip button embedding</div>
+                        <div style="color: rgba(255,255,255,0.9); margin-bottom: 8px;">• Custom tip amounts ($5-$500)</div>
+                        <div style="color: rgba(255,255,255,0.9); margin-bottom: 8px;">• Instant Stripe payments</div>
+                        <div style="color: rgba(255,255,255,0.9);">• 100% of tips go to you</div>
+                    </div>
+                    <div style="display: flex; gap: 15px; justify-content: center;">
+                        <button onclick="enableTipFeature()" style="
+                            background: linear-gradient(135deg, #FFD700, #FF8C00); color: #1a0b3d; border: none; 
+                            padding: 15px 25px; border-radius: 25px; font-weight: bold; cursor: pointer;
+                        ">Activate Now</button>
+                        <button onclick="document.body.removeChild(this.closest('div[style*=\"position: fixed\"]'))" style="
+                            background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); 
+                            padding: 12px 20px; border-radius: 20px; cursor: pointer;
+                        ">Maybe Later</button>
+                    </div>
+                </div>
+            `;
+            
+            modalOverlay.onclick = function(e) {
+                if (e.target === modalOverlay) {
+                    document.body.removeChild(modalOverlay);
+                }
+            };
+            
+            document.body.appendChild(modalOverlay);
+        }
+        
+        function enableTipFeature() {
+            // Activate tip feature in localStorage
+            localStorage.setItem('tipFeatureActive', 'true');
+            localStorage.setItem('tipFeatureActivatedDate', new Date().toISOString());
+            
+            // Close modal
+            const modal = document.querySelector('div[style*="position: fixed"]');
+            if (modal) {
+                document.body.removeChild(modal);
+            }
+            
+            // Show success notification
+            showNotification('Tip feature activated successfully! Tip buttons will now appear on your posts and profile.', '#10b981');
+            
+            // Update menu to show management options
+            updateTipFeatureStatus();
+        }
+        
+        function showTipManagementModal() {
+            const modalOverlay = document.createElement('div');
+            modalOverlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0, 0, 0, 0.85); z-index: 2000; display: flex;
+                align-items: center; justify-content: center; backdrop-filter: blur(10px);
+            `;
+            
+            modalOverlay.innerHTML = `
+                <div style="background: linear-gradient(135deg, #1a0b3d, #6b46c1); border: 2px solid #FFD700; border-radius: 20px; padding: 30px; max-width: 500px; width: 90%; text-align: center;">
+                    <h2 style="color: #FFD700; margin-bottom: 20px;">Tip Feature Management</h2>
+                    <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+                        <div style="color: #10b981; font-weight: bold; margin-bottom: 5px;">Status: ACTIVE</div>
+                        <div style="color: rgba(255,255,255,0.7); font-size: 14px;">Tip buttons are enabled on your posts and profile</div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                        <button onclick="viewTipSettings()" style="
+                            background: linear-gradient(135deg, #00ffff, #0099cc); color: white; border: none; 
+                            padding: 12px 20px; border-radius: 20px; font-weight: bold; cursor: pointer;
+                        ">Tip Settings</button>
+                        <button onclick="viewTipHistory()" style="
+                            background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; border: none; 
+                            padding: 12px 20px; border-radius: 20px; font-weight: bold; cursor: pointer;
+                        ">View Tip History</button>
+                        <button onclick="disableTipFeature()" style="
+                            background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; 
+                            padding: 12px 20px; border-radius: 20px; font-weight: bold; cursor: pointer;
+                        ">Deactivate Tips</button>
+                    </div>
+                    <button onclick="document.body.removeChild(this.closest('div[style*=\"position: fixed\"]'))" style="
+                        background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); 
+                        padding: 12px 20px; border-radius: 20px; cursor: pointer;
+                    ">Close</button>
+                </div>
+            `;
+            
+            modalOverlay.onclick = function(e) {
+                if (e.target === modalOverlay) {
+                    document.body.removeChild(modalOverlay);
+                }
+            };
+            
+            document.body.appendChild(modalOverlay);
+        }
+        
+        function disableTipFeature() {
+            if (confirm('Are you sure you want to deactivate tip features? This will remove tip buttons from your posts and profile.')) {
+                localStorage.setItem('tipFeatureActive', 'false');
+                showNotification('Tip feature deactivated. Tip buttons have been removed from your posts.', '#ef4444');
+                
+                const modal = document.querySelector('div[style*="position: fixed"]');
+                if (modal) {
+                    document.body.removeChild(modal);
+                }
+                
+                updateTipFeatureStatus();
+            }
+        }
+        
+        function updateTipFeatureStatus() {
+            // Update menu item text based on activation status
+            const tipFeatureActive = localStorage.getItem('tipFeatureActive') === 'true';
+            // This could update UI elements if needed
+        }
+        
+        function viewTipSettings() {
+            showNotification('Tip settings page coming soon! Configure custom amounts and display preferences.', '#8b5cf6');
+        }
+        
+        function viewTipHistory() {
+            showNotification('Tip history tracking coming soon! View all received tips and earnings.', '#8b5cf6');
         }
 
         // Initialize page

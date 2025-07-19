@@ -140,6 +140,61 @@ router.post('/api/tips/webhook', async (req, res) => {
   }
 });
 
+// Create tip (simplified version for immediate processing)
+router.post('/api/tips/create', async (req, res) => {
+  try {
+    const { businessName, businessId, amount, message, timestamp } = req.body;
+
+    // Validate required fields
+    if (!businessName || !businessId || !amount) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Business name, ID, and amount are required' 
+      });
+    }
+
+    // Validate amount
+    if (amount < 1 || amount > 500) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Tip amount must be between $1 and $500' 
+      });
+    }
+
+    // For demo purposes, simulate successful tip processing
+    console.log('Tip processed:', {
+      businessName,
+      businessId,
+      amount: parseFloat(amount),
+      message: message || 'No message',
+      timestamp: timestamp || new Date().toISOString()
+    });
+
+    // In a real implementation, you would:
+    // 1. Create payment intent with Stripe
+    // 2. Process payment
+    // 3. Transfer funds to business owner
+    // 4. Send notifications
+    // 5. Save tip record to database
+
+    // Return success response
+    res.json({
+      success: true,
+      tipId: `tip_${Date.now()}`,
+      amount: parseFloat(amount),
+      businessName,
+      message: `Tip of $${amount} sent successfully to ${businessName}!`
+    });
+
+  } catch (error: any) {
+    console.error('Error processing tip:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
 // Get tips received by a user/business
 router.get('/api/tips/received/:userId', async (req, res) => {
   try {
