@@ -12,7 +12,7 @@ class EmailService {
       secure: false,
       auth: {
         user: 'bb.music93@gmail.com', // Your Gmail account with App Password
-        pass: 'xqgijzurfbzuvzhf', // Gmail App Password (spaces removed)
+        pass: 'xqgi jzur fbzu vzhf', // Gmail App Password with spaces
       },
     });
   }
