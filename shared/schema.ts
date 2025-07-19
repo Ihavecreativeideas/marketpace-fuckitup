@@ -8,6 +8,7 @@ import {
   boolean,
   integer,
   uuid,
+  real,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -456,6 +457,44 @@ export const facebookAutoResponses = pgTable("facebook_auto_responses", {
   sentAt: timestamp("sent_at").defaultNow(),
 });
 
+// QR Codes table - stores QR codes and their metadata
+export const qrCodes = pgTable("qr_codes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  purpose: varchar("purpose").notNull(), // pickup, rental_driver_return_owner, service_checkin, business_booking, etc.
+  relatedId: varchar("related_id").notNull(), // linked to order, rental, booking, or entertainment event
+  status: varchar("status").notNull().default("active"), // active, used, expired
+  createdAt: timestamp("created_at").defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
+// QR Scans table - logs every scan event
+export const qrScans = pgTable("qr_scans", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  qrCodeId: uuid("qr_code_id").notNull().references(() => qrCodes.id),
+  scannedBy: varchar("scanned_by").notNull().references(() => users.id),
+  timestamp: timestamp("timestamp").defaultNow(),
+  geoLat: real("geo_lat"), // optional latitude
+  geoLng: real("geo_lng"), // optional longitude
+});
+
+// Rentals table - tracks rental transactions with escrow
+export const rentals = pgTable("rentals", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  renterId: varchar("renter_id").notNull().references(() => users.id),
+  ownerId: varchar("owner_id").notNull().references(() => users.id),
+  itemId: uuid("item_id").notNull(), // rental item reference
+  deliveryType: varchar("delivery_type").notNull(), // "self_pickup" or "driver"
+  status: varchar("status").notNull().default("pending"), // pending, picked_up, returned, complete, issue_reported
+  escrowStatus: varchar("escrow_status").notNull().default("held"), // held, released, refunded, under_review
+  paidAmount: real("paid_amount").notNull(),
+  escrowId: varchar("escrow_id"), // link to escrow/payment system
+  pickupConfirmedAt: timestamp("pickup_confirmed_at"),
+  returnConfirmedAt: timestamp("return_confirmed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 
 
 export type UpsertUser = typeof users.$inferInsert;
@@ -485,3 +524,9 @@ export type DiscountCode = typeof discountCodes.$inferSelect;
 export type InsertDiscountCode = typeof discountCodes.$inferInsert;
 export type DiscountCodeUsage = typeof discountCodeUsage.$inferSelect;
 export type InsertDiscountCodeUsage = typeof discountCodeUsage.$inferInsert;
+export type QRCode = typeof qrCodes.$inferSelect;
+export type InsertQRCode = typeof qrCodes.$inferInsert;
+export type QRScan = typeof qrScans.$inferSelect;
+export type InsertQRScan = typeof qrScans.$inferInsert;
+export type Rental = typeof rentals.$inferSelect;
+export type InsertRental = typeof rentals.$inferInsert;

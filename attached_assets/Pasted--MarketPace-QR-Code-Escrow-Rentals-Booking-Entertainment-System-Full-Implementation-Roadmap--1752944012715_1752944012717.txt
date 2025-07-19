@@ -1,0 +1,223 @@
+ MarketPace QR Code + Escrow + Rentals + Booking + Entertainment System
+Full Implementation Roadmap for Replit Dev Team
+1. Setup & Dependencies
+Install necessary packages:
+
+bash
+Copy
+Edit
+npm install express qrcode @supabase/supabase-js nodemailer
+Setup environment variables securely (.env):
+
+SUPABASE_URL
+
+SUPABASE_KEY
+
+EMAIL_USER (for SMTP)
+
+EMAIL_PASS
+
+2. Database Schema (Supabase)
+Tables to create:
+a) qr_codes
+Stores QR codes and their metadata.
+
+Field	Type	Notes
+id	uuid	Primary Key
+user_id	uuid	Owner or related user
+purpose	text	e.g. pickup, rental_driver_return_owner, service_checkin, business_booking
+related_id	uuid	Linked to order, rental, booking, or entertainment event
+created_at	timestamp	Automatic
+expires_at	timestamp	QR expiration time
+status	text	active, used, expired
+
+b) qr_scans
+Logs every scan event.
+
+Field	Type	Notes
+id	uuid	Primary Key
+qr_code_id	uuid	Foreign Key to qr_codes
+scanned_by	uuid	User/driver scanning
+timestamp	timestamp	Automatic
+geo_lat	float	Optional
+geo_lng	float	Optional
+
+c) rentals
+Tracks rental transactions.
+
+Field	Type	Notes
+id	uuid	Primary Key
+renter_id	uuid	Customer renting
+owner_id	uuid	Item owner
+item_id	uuid	Rental item
+delivery_type	text	"self_pickup" or "driver"
+status	text	pending, picked_up, returned, complete, issue_reported
+escrow_status	text	held, released, refunded, under_review
+paid_amount	float	Total paid
+escrow_id	text	Link to escrow/payment system
+pickup_confirmed_at	timestamp	Item pickup timestamp
+return_confirmed_at	timestamp	Item return timestamp
+
+3. Backend API Routes (Replit)
+/api/generate-qr (POST)
+Function: Generate and save QR code(s) per transaction.
+
+Input: { user_id, purpose, related_id }
+
+Process:
+
+Insert QR code record in qr_codes with expiry and status "active"
+
+Generate QR code image (base64 or URL) encoding a verification URL containing the QR id.
+
+Output: { qr_code_id, qr_img }
+
+/api/verify-qr (POST)
+Function: Handle QR scan verification.
+
+Input: { qr_code_id, scanned_by, geo_lat?, geo_lng? }
+
+Process:
+
+Validate QR code exists, active, and not expired.
+
+Insert scan record in qr_scans.
+
+Update QR status to "used".
+
+Depending on purpose, update:
+
+Order, rental, booking, or entertainment status (e.g., picked_up, returned, attended)
+
+Escrow status (e.g., hold, release)
+
+Output: { message, purpose, related_id, next_action }
+
+4. QR Code Purposes & Logic (Including Business Booking + Entertainment)
+QR Purpose	Action	Escrow Integration
+pickup	Buyer pickup confirmation	Release escrow after successful delivery
+service_checkin	Business attendance confirmation	Hold until service complete; auto-release after 10 mins post-appointment
+business_booking	Business confirms booking attendance	Hold booking fee escrow until confirmation
+rental_self_pickup	Owner confirms renter pickup	Hold escrow until item return
+rental_self_return	Renter confirms return	Release escrow after return
+rental_driver_pickup_owner	Driver picks up from owner	Hold escrow during transit
+rental_driver_dropoff_renter	Driver delivers rental to renter	Mark rental as picked up
+rental_driver_pickup_renter	Driver picks up rental from renter (return)	Rental return process
+rental_driver_return_owner	Driver returns rental to owner	Release escrow after final return
+
+5. Escrow Flow Summary
+On payment: escrow status = "held"
+
+Pickup QR scan: escrow remains held, status updates (order/rental/service)
+
+Return / service completion / booking attendance QR scan: escrow releases to business/seller/owner
+
+No-show scenarios: business can decline booking fee → refund renter immediately
+
+Dispute: flag escrow status as "under_review" → requires manual admin review before releasing/refunding
+
+6. Email Notifications (via Nodemailer or Supabase Edge)
+Trigger emails on:
+Booking confirmed (renter & business)
+
+Service/Entertainment attendance confirmed (both parties)
+
+QR scanned for pickup (notify involved parties)
+
+QR scanned for return or completion (notify involved parties)
+
+Escrow released or refunded (notify owner/renter)
+
+Late return or no-show alerts (business & admin)
+
+Issue reports (admin)
+
+7. Frontend Integration & UX
+For Members:
+“My Orders / Bookings / Rentals” page/tab
+
+Display QR codes with labels and instructions:
+
+“Pickup QR Code — show to seller/driver”
+
+“Return QR Code — scan to complete rental”
+
+“Service Attendance QR — scan at appointment”
+
+“Booking Confirmation QR — for entertainment or services”
+
+Download or fullscreen view option
+
+For Businesses/Sellers:
+Dashboard showing QR codes per transaction
+
+For services & entertainment:
+
+QR for business to confirm attendance (required for payment)
+
+For rentals:
+
+Pickup & return QR codes to scan or share
+
+For Drivers (Route Optimizer Dashboard):
+Show QR codes per stop (pickup/dropoff/return)
+
+Allow driver to:
+
+View full QR code image
+
+Scan QR codes presented by customers/businesses
+
+Confirm scan to update route progress and escrow status
+
+8. Backend-Frontend Data Flow Notes
+Backend includes QR code data (id, base64/img URL, purpose) in API responses for:
+
+User order/rental/booking queries
+
+Driver route queries
+
+Frontend renders these QR codes in relevant views with clear UX labels
+
+Scan confirmation calls /api/verify-qr to update statuses and escrow
+
+9. Security & Validation
+One-time use QR codes (status changes from active to used)
+
+Expiration enforced (e.g., 12–24 hours depending on use case)
+
+Optional geo-validation of scan location
+
+Role-based scan permission (driver, business, renter)
+
+Logging all scans with timestamps for audit/trust
+
+10. Admin Dashboard Requirements
+View all QR scans and statuses
+
+Manual override for escrow release/refund on disputes
+
+Monitor no-shows and late returns
+
+Alerts for flagged rentals/bookings/services
+
+11. Developer Checklist
+ Setup Supabase tables: qr_codes, qr_scans, rentals
+
+ Implement /api/generate-qr route
+
+ Implement /api/verify-qr route with business booking & entertainment logic
+
+ Tie escrow system with QR scans and transaction statuses
+
+ Build nodemailer email system with all necessary triggers
+
+ Integrate QR code display in all user dashboards (members, businesses, drivers)
+
+ Add driver dashboard features to display and scan QR codes on optimized routes
+
+ Implement security: one-time QR use, expiry, geo-validation (optional)
+
+ Provide error handling and user-friendly feedback for QR scans
+
+ Create admin tools for dispute management and escrow control

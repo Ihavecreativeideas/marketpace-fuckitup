@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Verification - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a0b3d 0%, #2d1b4e 25%, #4b0082 50%, #191970 75%, #00008b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .verification-container {
+            background: rgba(16, 24, 48, 0.9);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .marketpace-logo {
+            background: linear-gradient(135deg, #2a0845, #1a0033);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px #4169e1;
+            filter: drop-shadow(0 0 10px #0066ff);
+        }
+
+        .tagline {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .qr-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #00ffff, #0066ff);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(0, 255, 255, 0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(0, 255, 255, 0.6); }
+        }
+
+        .verification-status {
+            margin: 30px 0;
+        }
+
+        .status-loading {
+            color: #ffd700;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .status-success {
+            color: #22c55e;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .status-error {
+            color: #ef4444;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .verification-details {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .detail-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: bold;
+        }
+
+        .detail-value {
+            color: #00ffff;
+        }
+
+        .action-buttons {
+            margin-top: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #00ffff, #0066ff);
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-left: 4px solid #00ffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .next-action {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.1));
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .next-action-title {
+            color: #22c55e;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .next-action-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+
+        @media (max-width: 480px) {
+            .verification-container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            .marketpace-logo {
+                font-size: 24px;
+            }
+            
+            .btn {
+                display: block;
+                margin: 10px 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="verification-container">
+        <div class="marketpace-logo">MarketPace</div>
+        <div class="tagline">QR Code Verification</div>
+        
+        <div class="qr-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="white">
+                <path d="M3 3h6v6H3V3zm2 2v2h2V5H5zM3 15h6v6H3v-6zm2 2v2h2v-2H5zM15 3h6v6h-6V3zm2 2v2h2V5h-2zM19 19h2v2h-2v-2zM13 13h2v2h-2v-2zM15 15h2v2h-2v-2zM13 17h2v2h-2v-2zM15 19h2v2h-2v-2zM17 17h2v2h-2v-2zM17 13h2v2h-2v-2zM19 15h2v2h-2v-2z"/>
+            </svg>
+        </div>
+
+        <div class="verification-status">
+            <div id="loadingStatus" class="status-loading">
+                <div class="loading-spinner"></div>
+                Verifying QR Code...
+            </div>
+            <div id="successStatus" class="status-success" style="display: none;">
+                QR Code Verified Successfully!
+            </div>
+            <div id="errorStatus" class="status-error" style="display: none;">
+                Verification Failed
+            </div>
+        </div>
+
+        <div id="verificationDetails" class="verification-details" style="display: none;">
+            <div class="detail-row">
+                <span class="detail-label">Purpose:</span>
+                <span class="detail-value" id="purposeValue">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Related ID:</span>
+                <span class="detail-value" id="relatedIdValue">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Verified At:</span>
+                <span class="detail-value" id="timestampValue">-</span>
+            </div>
+        </div>
+
+        <div id="nextAction" class="next-action" style="display: none;">
+            <div class="next-action-title">Next Step:</div>
+            <div class="next-action-text" id="nextActionText">-</div>
+        </div>
+
+        <div id="errorMessage" class="verification-details" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);">
+            <div style="color: #ef4444; text-align: center;" id="errorText">-</div>
+        </div>
+
+        <div class="action-buttons">
+            <button id="verifyBtn" class="btn" onclick="verifyQRCode()">Verify QR Code</button>
+            <a href="/community.html" class="btn btn-secondary">Back to MarketPace</a>
+        </div>
+    </div>
+
+    <script>
+        // Get QR code ID from URL
+        const urlPath = window.location.pathname;
+        const qrCodeId = urlPath.split('/qr-verify/')[1];
+
+        // Auto-verify on page load if QR code ID exists
+        if (qrCodeId) {
+            setTimeout(verifyQRCode, 1000);
+        }
+
+        async function verifyQRCode() {
+            if (!qrCodeId) {
+                showError('No QR code ID found in URL');
+                return;
+            }
+
+            // Show loading state
+            document.getElementById('loadingStatus').style.display = 'block';
+            document.getElementById('successStatus').style.display = 'none';
+            document.getElementById('errorStatus').style.display = 'none';
+            document.getElementById('verificationDetails').style.display = 'none';
+            document.getElementById('nextAction').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('verifyBtn').style.display = 'none';
+
+            try {
+                // Get current user ID (in production, this would come from authentication)
+                const currentUserId = localStorage.getItem('currentUserId') || 'demo-user-' + Date.now();
+                
+                // Get geolocation if available
+                let geoLat, geoLng;
+                if (navigator.geolocation) {
+                    try {
+                        const position = await new Promise((resolve, reject) => {
+                            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+                        });
+                        geoLat = position.coords.latitude;
+                        geoLng = position.coords.longitude;
+                    } catch (e) {
+                        console.log('Geolocation not available or denied');
+                    }
+                }
+
+                const response = await fetch('/api/verify-qr', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        qrCodeId: qrCodeId,
+                        scannedBy: currentUserId,
+                        geoLat: geoLat,
+                        geoLng: geoLng
+                    }),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showSuccess(result);
+                } else {
+                    showError(result.message || 'Verification failed');
+                }
+
+            } catch (error) {
+                console.error('Verification error:', error);
+                showError('Network error. Please check your connection and try again.');
+            }
+        }
+
+        function showSuccess(result) {
+            document.getElementById('loadingStatus').style.display = 'none';
+            document.getElementById('successStatus').style.display = 'block';
+            document.getElementById('verificationDetails').style.display = 'block';
+            
+            // Populate details
+            document.getElementById('purposeValue').textContent = formatPurpose(result.purpose);
+            document.getElementById('relatedIdValue').textContent = result.relatedId || 'N/A';
+            document.getElementById('timestampValue').textContent = new Date().toLocaleString();
+
+            // Show next action if provided
+            if (result.nextAction) {
+                document.getElementById('nextAction').style.display = 'block';
+                document.getElementById('nextActionText').textContent = getNextActionText(result.nextAction);
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('loadingStatus').style.display = 'none';
+            document.getElementById('errorStatus').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'block';
+            document.getElementById('errorText').textContent = message;
+            document.getElementById('verifyBtn').style.display = 'inline-block';
+        }
+
+        function formatPurpose(purpose) {
+            const purposeMap = {
+                'pickup': 'Order Pickup',
+                'service_checkin': 'Service Check-in',
+                'business_booking': 'Business Booking',
+                'rental_self_pickup': 'Rental Pickup',
+                'rental_self_return': 'Rental Return',
+                'rental_driver_pickup_owner': 'Driver Pickup (from Owner)',
+                'rental_driver_dropoff_renter': 'Driver Delivery (to Renter)',
+                'rental_driver_pickup_renter': 'Driver Pickup (from Renter)',
+                'rental_driver_return_owner': 'Driver Return (to Owner)'
+            };
+            return purposeMap[purpose] || purpose;
+        }
+
+        function getNextActionText(nextAction) {
+            const actionMap = {
+                'order_completed': 'Order has been completed and payment released to seller.',
+                'service_attended': 'Service attendance confirmed. Payment will be released shortly.',
+                'booking_completed': 'Booking confirmed and payment released to business.',
+                'rental_active': 'Rental is now active. Remember to return the item on time.',
+                'rental_completed': 'Rental completed successfully. Payment released to owner.',
+                'rental_in_transit': 'Item is being delivered by driver.',
+                'rental_returning': 'Item is being returned to owner by driver.'
+            };
+            return actionMap[nextAction] || 'Action completed successfully.';
+        }
+    </script>
+</body>
+</html>

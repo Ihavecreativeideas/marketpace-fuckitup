@@ -17,6 +17,7 @@ import { notificationService, PurchaseNotificationData } from './notificationSer
 import { driverNotificationService } from './driverNotificationService';
 import { socialMediaRoutes } from './socialMediaRoutes';
 import { sendSMS } from './smsService';
+import { qrCodeService } from './qrCodeService';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -2156,6 +2157,95 @@ Welcome to MarketPace! 🎉`;
 
 app.get('/sms-opt-in', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'sms-opt-in.html'));
+});
+
+// QR Code API Endpoints
+app.post('/api/generate-qr', async (req, res) => {
+  try {
+    const { userId, purpose, relatedId, expiryHours } = req.body;
+    
+    if (!userId || !purpose || !relatedId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Missing required fields: userId, purpose, relatedId' 
+      });
+    }
+
+    const qrData = await qrCodeService.generateQRCode({
+      userId,
+      purpose,
+      relatedId,
+      expiryHours
+    });
+
+    res.json({ 
+      success: true, 
+      qrCode: qrData
+    });
+
+  } catch (error) {
+    console.error('QR generation error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to generate QR code' 
+    });
+  }
+});
+
+app.post('/api/verify-qr', async (req, res) => {
+  try {
+    const { qrCodeId, scannedBy, geoLat, geoLng } = req.body;
+    
+    if (!qrCodeId || !scannedBy) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Missing required fields: qrCodeId, scannedBy' 
+      });
+    }
+
+    const result = await qrCodeService.verifyQRCode({
+      qrCodeId,
+      scannedBy,
+      geoLat,
+      geoLng
+    });
+
+    res.json(result);
+
+  } catch (error) {
+    console.error('QR verification error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to verify QR code' 
+    });
+  }
+});
+
+app.get('/api/qr-codes/user/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const qrCodes = await qrCodeService.getQRCodesByUser(userId);
+    res.json({ success: true, qrCodes });
+  } catch (error) {
+    console.error('Error fetching user QR codes:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch QR codes' });
+  }
+});
+
+app.get('/api/qr-codes/related/:relatedId', async (req, res) => {
+  try {
+    const { relatedId } = req.params;
+    const qrCodes = await qrCodeService.getQRCodesByRelatedId(relatedId);
+    res.json({ success: true, qrCodes });
+  } catch (error) {
+    console.error('Error fetching related QR codes:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch QR codes' });
+  }
+});
+
+// QR Code verification page route
+app.get('/qr-verify/:qrCodeId', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'qr-verify.html'));
 });
 
 // Notification Settings API endpoints
