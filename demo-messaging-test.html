@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Messaging Test - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 30%, #4c2885 60%, #6b46c1 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            color: #00ffff;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 16px;
+        }
+
+        .demo-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .demo-item {
+            background: rgba(0, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 20px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            color: #00ffff;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .seller-name {
+            color: #ffd700;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .item-description {
+            color: #e2e8f0;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .item-price {
+            color: #10b981;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .message-button {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .message-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .navigation-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .nav-button {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .instructions h3 {
+            color: #00ffff;
+            margin-bottom: 12px;
+        }
+
+        .instructions ol {
+            color: #e2e8f0;
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .status-indicator {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid #10b981;
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: #10b981;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 16px;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 50%, #4c2885 100%);
+            border-radius: 16px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            width: 100%;
+            max-width: 400px;
+            padding: 24px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            font-size: 14px;
+            font-weight: 500;
+            min-width: 200px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Demo Messaging Test</h1>
+            <p class="subtitle">Test the bidirectional messaging system with demo sellers</p>
+        </div>
+
+        <div class="status-indicator">
+            🔴 LIVE DEMO - Interactive messaging with automatic seller responses
+        </div>
+
+        <div class="instructions">
+            <h3>How to Test:</h3>
+            <ol>
+                <li>Click "Message Seller" on any item below</li>
+                <li>Type and send a message to the seller</li>
+                <li>Wait 3 seconds for an automatic seller response</li>
+                <li>Check your Messages tab to see the full conversation</li>
+                <li>Continue the conversation by replying back and forth</li>
+            </ol>
+        </div>
+
+        <div class="demo-card">
+            <h2 style="color: #00ffff; margin-bottom: 20px;">Demo Items - Try Messaging!</h2>
+            
+            <div class="demo-item">
+                <div class="item-info">
+                    <div class="item-name">Vintage Leather Jacket</div>
+                    <div class="seller-name">Seller: Emily's Boutique</div>
+                    <div class="item-description">Authentic vintage leather jacket from the 80s, excellent condition</div>
+                    <div class="item-price">$120</div>
+                </div>
+                <button class="message-button" onclick="messageOwner('Emily\'s Boutique', 'Vintage Leather Jacket', 'demo1')">
+                    Message Seller
+                </button>
+            </div>
+
+            <div class="demo-item">
+                <div class="item-info">
+                    <div class="item-name">Professional Camera Equipment</div>
+                    <div class="seller-name">Seller: Mike's Tech Store</div>
+                    <div class="item-description">Canon DSLR camera with lens kit, perfect for photography</div>
+                    <div class="item-price">$850</div>
+                </div>
+                <button class="message-button" onclick="messageOwner('Mike\'s Tech Store', 'Professional Camera Equipment', 'demo2')">
+                    Message Seller
+                </button>
+            </div>
+
+            <div class="demo-item">
+                <div class="item-info">
+                    <div class="item-name">Handcrafted Wooden Table</div>
+                    <div class="seller-name">Seller: Coastal Woodworks</div>
+                    <div class="item-description">Beautiful handmade dining table, solid oak construction</div>
+                    <div class="item-price">$450</div>
+                </div>
+                <button class="message-button" onclick="messageOwner('Coastal Woodworks', 'Handcrafted Wooden Table', 'demo3')">
+                    Message Seller
+                </button>
+            </div>
+
+            <div class="demo-item">
+                <div class="item-info">
+                    <div class="item-name">Gaming Console Bundle</div>
+                    <div class="seller-name">Seller: GameHub Central</div>
+                    <div class="item-description">PlayStation 5 with 3 games and extra controller</div>
+                    <div class="item-price">$650</div>
+                </div>
+                <button class="message-button" onclick="messageOwner('GameHub Central', 'Gaming Console Bundle', 'demo4')">
+                    Message Seller
+                </button>
+            </div>
+        </div>
+
+        <div class="navigation-buttons">
+            <a href="/messages" class="nav-button">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                View Messages
+            </a>
+            <a href="/community" class="nav-button">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Back to Community
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Messaging functionality
+        function messageOwner(sellerName, itemName, itemId) {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3 style="color: #00ffff; margin-bottom: 20px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                            <rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/>
+                            <path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                        Message ${sellerName}
+                    </h3>
+                    <p style="color: #e2e8f0; margin-bottom: 20px;">Send a message about: <strong>${itemName}</strong></p>
+                    <textarea placeholder="Type your message here..." style="width: 100%; height: 100px; padding: 10px; background: rgba(0, 255, 255, 0.1); border: 2px solid #00ffff; border-radius: 8px; color: white; resize: vertical;"></textarea>
+                    <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
+                        <button onclick="closeMessageModal()" style="background: rgba(107, 114, 128, 0.6); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Cancel</button>
+                        <button onclick="sendMessage('${itemName}', '${sellerName}')" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Send Message</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function closeMessageModal() {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+                document.body.removeChild(modal);
+            }
+        }
+
+        function sendMessage(itemName, sellerName) {
+            const textarea = document.querySelector('.modal-overlay textarea');
+            const message = textarea ? textarea.value.trim() : '';
+            
+            if (message) {
+                showNotification(`Message sent to ${sellerName} about ${itemName}!`, 'success');
+                closeMessageModal();
+                
+                // Create conversation and save to localStorage
+                const conversationId = 'conv_' + Date.now();
+                const conversation = {
+                    id: conversationId,
+                    participants: ['You', sellerName || 'Seller'],
+                    lastMessage: message,
+                    timestamp: new Date().toISOString(),
+                    itemContext: {
+                        name: itemName,
+                        seller: sellerName
+                    },
+                    messages: [{
+                        sender: 'You',
+                        message: message,
+                        timestamp: new Date().toISOString()
+                    }]
+                };
+                
+                const conversations = JSON.parse(localStorage.getItem('marketpace_conversations') || '[]');
+                conversations.unshift(conversation);
+                localStorage.setItem('marketpace_conversations', JSON.stringify(conversations));
+                
+                // Simulate seller response after 3 seconds
+                setTimeout(() => {
+                    simulateSellerResponse(sellerName, itemName, conversationId);
+                }, 3000);
+                
+            } else {
+                showNotification('Please enter a message', 'error');
+            }
+        }
+
+        function simulateSellerResponse(sellerName, itemName, conversationId) {
+            const responses = [
+                `Hi! Thanks for your interest in the ${itemName}. I'd be happy to answer any questions!`,
+                `Hello! Yes, the ${itemName} is still available. What would you like to know?`,
+                `Hey there! I saw your message about the ${itemName}. It's in excellent condition!`,
+                `Thanks for reaching out! The ${itemName} is ready for pickup or delivery. What works for you?`,
+                `Hi! I appreciate your message. The ${itemName} is available. When would you like to see it?`,
+                `Hello! The ${itemName} is exactly as described. Would you like more photos?`,
+                `Thanks for your interest! The ${itemName} is priced to sell. Are you ready to move forward?`
+            ];
+            
+            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+            
+            // Add seller response to conversation
+            const conversations = JSON.parse(localStorage.getItem('marketpace_conversations') || '[]');
+            const conversation = conversations.find(c => c.id === conversationId);
+            if (conversation) {
+                if (!conversation.messages) conversation.messages = [];
+                conversation.messages.push({
+                    sender: sellerName,
+                    message: randomResponse,
+                    timestamp: new Date().toISOString()
+                });
+                conversation.lastMessage = randomResponse;
+                localStorage.setItem('marketpace_conversations', JSON.stringify(conversations));
+                
+                showNotification(`${sellerName} replied to your message!`, 'info');
+            }
+        }
+
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            // Show notification
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+
+            // Hide and remove notification
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 4000);
+        }
+
+        // Clear old demo data on page load for fresh testing
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Demo messaging test page loaded');
+            console.log('Current conversations:', JSON.parse(localStorage.getItem('marketpace_conversations') || '[]').length);
+        });
+    </script>
+</body>
+</html>
