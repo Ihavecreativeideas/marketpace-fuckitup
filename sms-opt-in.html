@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Notifications - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0d0221 0%, #1a0233 50%, #2d1b69 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding-top: 50px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(45deg, #4169e1, #00ffff);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #4169e1, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+
+        .opt-in-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .benefits {
+            margin-bottom: 30px;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(65, 105, 225, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #4169e1;
+        }
+
+        .benefit-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 15px;
+            background: #4169e1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .phone-input-container {
+            margin: 30px 0;
+        }
+
+        .phone-input-container label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #00ffff;
+        }
+
+        .phone-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid rgba(65, 105, 225, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .phone-input:focus {
+            outline: none;
+            border-color: #4169e1;
+            box-shadow: 0 0 20px rgba(65, 105, 225, 0.3);
+        }
+
+        .phone-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .consent-checkbox {
+            display: flex;
+            align-items: flex-start;
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(0, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .consent-checkbox input[type="checkbox"] {
+            margin-right: 15px;
+            margin-top: 5px;
+            transform: scale(1.2);
+        }
+
+        .consent-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .opt-in-button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(45deg, #4169e1, #00ffff);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .opt-in-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(65, 105, 225, 0.4);
+        }
+
+        .opt-in-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .skip-button {
+            width: 100%;
+            padding: 15px;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .skip-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .status-message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+
+        .status-success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.5);
+            color: #22c55e;
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #ef4444;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding-top: 30px;
+            }
+            
+            .opt-in-card {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="javascript:history.back()" class="back-button">← Back</a>
+    
+    <div class="container">
+        <div class="header">
+            <div class="logo">MP</div>
+            <h1>SMS Notifications</h1>
+            <p class="subtitle">Stay updated with instant text alerts</p>
+        </div>
+
+        <div class="opt-in-card">
+            <div class="benefits">
+                <h3 style="margin-bottom: 20px; color: #00ffff;">Get notified instantly about:</h3>
+                
+                <div class="benefit-item">
+                    <div class="benefit-icon">📱</div>
+                    <div>
+                        <strong>Order Updates</strong><br>
+                        <span style="opacity: 0.8;">Delivery status, pickup confirmations, and order changes</span>
+                    </div>
+                </div>
+                
+                <div class="benefit-item">
+                    <div class="benefit-icon">💰</div>
+                    <div>
+                        <strong>Sale Notifications</strong><br>
+                        <span style="opacity: 0.8;">Instant alerts when someone purchases your items</span>
+                    </div>
+                </div>
+                
+                <div class="benefit-item">
+                    <div class="benefit-icon">🎯</div>
+                    <div>
+                        <strong>Special Offers</strong><br>
+                        <span style="opacity: 0.8;">Exclusive deals and promotions in your area</span>
+                    </div>
+                </div>
+                
+                <div class="benefit-item">
+                    <div class="benefit-icon">👥</div>
+                    <div>
+                        <strong>Community Updates</strong><br>
+                        <span style="opacity: 0.8;">Local events, announcements, and neighbor activity</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="phone-input-container">
+                <label for="phoneNumber">Your Phone Number</label>
+                <input 
+                    type="tel" 
+                    id="phoneNumber" 
+                    class="phone-input" 
+                    placeholder="(555) 123-4567"
+                    pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+                >
+            </div>
+
+            <div class="consent-checkbox">
+                <input type="checkbox" id="smsConsent" required>
+                <div class="consent-text">
+                    <strong>SMS Consent Agreement</strong><br>
+                    I agree to receive text messages from MarketPace at the number provided. Message and data rates may apply. I understand I can opt out at any time by replying STOP. Message frequency varies. Privacy policy available at marketpace.shop/privacy
+                </div>
+            </div>
+
+            <button class="opt-in-button" onclick="enableSMSNotifications()" disabled id="optInButton">
+                Enable SMS Notifications
+            </button>
+            
+            <button class="skip-button" onclick="skipSMSNotifications()">
+                Skip for Now (Email Only)
+            </button>
+
+            <div class="status-message" id="statusMessage"></div>
+        </div>
+    </div>
+
+    <script>
+        // Enable/disable button based on form completion
+        function checkFormValidity() {
+            const phoneInput = document.getElementById('phoneNumber');
+            const consentCheckbox = document.getElementById('smsConsent');
+            const optInButton = document.getElementById('optInButton');
+            
+            const isValid = phoneInput.value.trim() !== '' && consentCheckbox.checked;
+            optInButton.disabled = !isValid;
+        }
+
+        // Add event listeners
+        document.getElementById('phoneNumber').addEventListener('input', checkFormValidity);
+        document.getElementById('smsConsent').addEventListener('change', checkFormValidity);
+
+        // Format phone number as user types
+        document.getElementById('phoneNumber').addEventListener('input', function(e) {
+            let x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+            e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+        });
+
+        async function enableSMSNotifications() {
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const statusMessage = document.getElementById('statusMessage');
+            const optInButton = document.getElementById('optInButton');
+            
+            // Show loading state
+            optInButton.textContent = 'Sending Confirmation...';
+            optInButton.disabled = true;
+            
+            try {
+                const response = await fetch('/api/sms/opt-in', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        phoneNumber: phoneNumber,
+                        consent: true,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    statusMessage.textContent = 'SMS notifications enabled! Check your phone for a confirmation message.';
+                    statusMessage.className = 'status-message status-success';
+                    statusMessage.style.display = 'block';
+                    
+                    optInButton.textContent = 'Enabled Successfully ✓';
+                    optInButton.style.background = 'linear-gradient(45deg, #22c55e, #10b981)';
+                    
+                    // Redirect after success
+                    setTimeout(() => {
+                        window.location.href = '/community';
+                    }, 3000);
+                    
+                } else {
+                    throw new Error(result.message || 'Failed to enable SMS notifications');
+                }
+                
+            } catch (error) {
+                console.error('SMS opt-in error:', error);
+                statusMessage.textContent = 'Error enabling SMS notifications. Please try again or contact support.';
+                statusMessage.className = 'status-message status-error';
+                statusMessage.style.display = 'block';
+                
+                optInButton.textContent = 'Try Again';
+                optInButton.disabled = false;
+            }
+        }
+
+        function skipSMSNotifications() {
+            // Store preference and redirect
+            localStorage.setItem('smsNotificationsSkipped', 'true');
+            window.location.href = '/community';
+        }
+    </script>
+</body>
+</html>

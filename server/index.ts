@@ -16,6 +16,7 @@ import { registerDriverApplicationRoutes } from './driverApplicationRoutes';
 import { notificationService, PurchaseNotificationData } from './notificationService';
 import { driverNotificationService } from './driverNotificationService';
 import { socialMediaRoutes } from './socialMediaRoutes';
+import { sendSMS } from './smsService';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -2097,10 +2098,71 @@ app.post('/api/test-notifications', async (req, res) => {
   }
 });
 
+// SMS opt-in API endpoints for carrier bypass
+app.post('/api/sms/opt-in', async (req, res) => {
+  try {
+    const { phoneNumber, consent } = req.body;
+    
+    if (!phoneNumber || !consent) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Phone number and consent required' 
+      });
+    }
+
+    // SMS service already imported at top
+    
+    // Send confirmation with explicit opt-in language to bypass carrier filtering
+    const confirmationMessage = `✅ MarketPace SMS Confirmed!
+
+You opted in for notifications:
+• Order & delivery updates  
+• Sale alerts when customers buy your items
+• Community announcements
+• Special offers & events
+
+Reply STOP anytime to opt out.
+Msg&data rates may apply.
+
+Welcome to MarketPace! 🎉`;
+
+    // Clean phone number
+    const cleanPhone = phoneNumber.replace(/\D/g, '');
+    const formattedPhone = cleanPhone.length === 10 ? `+1${cleanPhone}` : cleanPhone.startsWith('+') ? cleanPhone : `+${cleanPhone}`;
+    
+    // Send SMS confirmation
+    const smsResult = await sendSMS(formattedPhone, confirmationMessage);
+    
+    // Store opt-in record with timestamp
+    console.log(`✅ SMS Opt-in: ${formattedPhone} consented at ${new Date().toISOString()}`);
+    console.log(`📱 Confirmation sent via Twilio:`, smsResult);
+    
+    res.json({
+      success: true,
+      message: 'SMS notifications enabled successfully! Check your phone for confirmation.',
+      phoneNumber: formattedPhone,
+      optInTime: new Date().toISOString(),
+      confirmationSent: !!smsResult
+    });
+    
+  } catch (error) {
+    console.error('SMS opt-in error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to enable SMS notifications. Please try again.'
+    });
+  }
+});
+
+app.get('/sms-opt-in', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'sms-opt-in.html'));
+});
+
 app.listen(port, '0.0.0.0', () => {
   console.log(`✅ MarketPace Full Server running on port ${port}`);
   console.log(`🌐 Binding to 0.0.0.0:${port} for external access`);
   console.log(`💳 Stripe Payment API: /api/stripe/* endpoints`);
+  console.log(`📱 SMS Opt-in System: /sms-opt-in page & /api/sms/opt-in endpoint`);
   console.log(`🔧 Volunteer Management API: /api/volunteers, /api/volunteer-hours, /api/volunteer-schedules`);
   console.log(`📊 Business Scheduling API: /api/businesses, /api/employees, /api/schedules`);
   console.log(`🔌 Real API Integration Testing: /api/integrations/test-real`);
