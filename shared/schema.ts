@@ -39,6 +39,14 @@ export const users = pgTable("users", {
   businessAddress: text("business_address"),
   businessPhone: varchar("business_phone"),
   businessWebsite: varchar("business_website"),
+  // Social Media Integration
+  facebookPageUrl: varchar("facebook_page_url"),
+  instagramUrl: varchar("instagram_url"),
+  twitterUrl: varchar("twitter_url"),
+  tiktokUrl: varchar("tiktok_url"),
+  youtubeUrl: varchar("youtube_url"),
+  linkedinUrl: varchar("linkedin_url"),
+  socialMediaSettings: jsonb("social_media_settings"), // auto-response settings, cross-posting preferences
 });
 
 // Business profiles for Pro members
@@ -52,6 +60,17 @@ export const businesses = pgTable("businesses", {
   phone: varchar("phone"),
   website: varchar("website"),
   settings: jsonb("settings"), // business-specific settings
+  // Social Media Integration
+  facebookPageUrl: varchar("facebook_page_url"),
+  facebookPageId: varchar("facebook_page_id"), // for API integration
+  instagramUrl: varchar("instagram_url"),
+  twitterUrl: varchar("twitter_url"),
+  tiktokUrl: varchar("tiktok_url"),
+  youtubeUrl: varchar("youtube_url"),
+  linkedinUrl: varchar("linkedin_url"),
+  socialMediaSettings: jsonb("social_media_settings"), // auto-response settings, cross-posting preferences
+  facebookAutoResponseEnabled: boolean("facebook_auto_response_enabled").default(true),
+  deliveryAvailable: boolean("delivery_available").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -404,8 +423,38 @@ export const discountCodeUsageRelations = relations(discountCodeUsage, ({ one })
 }));
 
 // Type exports
+// Facebook Marketplace Integration
+export const facebookMarketplacePosts = pgTable("facebook_marketplace_posts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  marketplacePostId: varchar("marketplace_post_id").notNull(), // MarketPace internal post ID
+  facebookPostId: varchar("facebook_post_id"), // Facebook Marketplace post ID
+  title: varchar("title").notNull(),
+  description: text("description"),
+  price: varchar("price"),
+  category: varchar("category"),
+  deliveryAvailable: boolean("delivery_available").default(true),
+  autoResponseEnabled: boolean("auto_response_enabled").default(true),
+  crossPostingEnabled: boolean("cross_posting_enabled").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Facebook Auto-Response Log
+export const facebookAutoResponses = pgTable("facebook_auto_responses", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  facebookPostId: varchar("facebook_post_id").notNull(),
+  senderName: varchar("sender_name"),
+  messageReceived: text("message_received"),
+  responseMessage: text("response_message"),
+  responseType: varchar("response_type"), // 'delivery_available', 'pickup_only', 'cross_sell'
+  sentAt: timestamp("sent_at").defaultNow(),
+});
+
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+export type Business = typeof businesses.$inferSelect;
+export type FacebookMarketplacePost = typeof facebookMarketplacePosts.$inferSelect;
 
 // Type exports for volunteer management
 export type Volunteer = typeof volunteers.$inferSelect;

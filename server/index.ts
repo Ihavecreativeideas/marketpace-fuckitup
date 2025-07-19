@@ -15,6 +15,7 @@ import { registerDriverRoutes } from './driverRoutes';
 import { registerDriverApplicationRoutes } from './driverApplicationRoutes';
 import { notificationService, PurchaseNotificationData } from './notificationService';
 import { driverNotificationService } from './driverNotificationService';
+import { socialMediaRoutes } from './socialMediaRoutes';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -1545,6 +1546,7 @@ registerDriverRoutes(app);
 
 // Setup Driver Application Routes
 registerDriverApplicationRoutes(app);
+app.use(socialMediaRoutes);
 
 // Add missing admin routes for driver applications
 app.get('/api/admin/driver-applications', async (req, res) => {
