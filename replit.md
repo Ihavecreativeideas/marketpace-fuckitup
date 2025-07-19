@@ -264,6 +264,12 @@ All features are designed to strengthen local communities by keeping commerce lo
 
 ## Recent Changes
 
+✓ **SPONSOR TIER BENEFITS UPDATE** (July 18, 2025)
+✓ **COMMUNITY SUPPORTER BENEFITS UPDATED**: Changed Community Supporter tier from "Logo in app footer" and "Monthly newsletter mention" to "6 months without sustainability fees" and "12 months free pro features"
+✓ **ADMIN TRACKING SYSTEM**: Added comprehensive sponsor benefit tracking section to admin dashboard with real-time monitoring of member sustainability fee exemptions and pro feature access periods
+✓ **AUTOMATED BENEFIT APPLICATION**: System designed to automatically apply 6-month sustainability fee exemption (no 5% commission) and 12-month free pro features when members purchase any sponsor tier
+✓ **SPONSOR MANAGEMENT DASHBOARD**: Complete admin interface for tracking sponsor tiers, expiry dates, benefits status, and revenue with detailed member listings and management tools
+
 ✓ **PUBLIC PROFILE PRIVACY ENHANCEMENT** (July 18, 2025)
 ✓ **RECENT ACTIVITY REMOVED FROM PUBLIC PAGES**: Removed "Recent Activity" section from user-profile.html to maintain privacy - activity data now only visible in user's private menu
 ✓ **CLEANER PUBLIC PROFILE**: Public user profiles now only show profile header (avatar, name, stats) and About section for appropriate public information display
