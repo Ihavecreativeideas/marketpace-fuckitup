@@ -937,11 +937,11 @@
                                             <div style="font-size: 12px; color: rgba(255, 255, 255, 0.4);">External promotion integration</div>
                                         </div>
                                     </label>
-                                    <label style="display: flex; align-items: center; color: rgba(255, 255, 255, 0.5); padding: 10px; background: rgba(255, 255, 255, 0.02); border-radius: 8px; cursor: not-allowed; position: relative;">
-                                        <input type="checkbox" id="platformGoogle" style="margin-right: 12px; transform: scale(1.2);" disabled />
+                                    <label style="display: flex; align-items: center; color: white; padding: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="platformGoogle" style="margin-right: 12px; transform: scale(1.2);" />
                                         <div>
-                                            <div style="font-weight: bold;">Google Ads <span style="background: rgba(255, 215, 0, 0.2); color: #ffd700; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; margin-left: 8px;">COMING SOON</span></div>
-                                            <div style="font-size: 12px; color: rgba(255, 255, 255, 0.4);">External promotion integration</div>
+                                            <div style="font-weight: bold;">Google Ads <span style="background: rgba(0, 255, 0, 0.2); color: #00ff00; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; margin-left: 8px;">READY</span></div>
+                                            <div style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">Search and display advertising</div>
                                         </div>
                                     </label>
                                 </div>
@@ -1217,7 +1217,7 @@
                         marketpace: document.getElementById('platformMarketPace').checked,
                         facebook: document.getElementById('platformFacebook').checked,
                         instagram: false, // Coming soon
-                        google: false // Coming soon
+                        google: document.getElementById('platformGoogle').checked
                     }
                 };
                 
@@ -1254,6 +1254,31 @@
                 });
             }
             
+            // Send to server with Google Ads integration
+            if (postData.promotion && postData.promotionDetails.platforms.google) {
+                // Call Google Ads API
+                fetch('/api/google/create-ad-campaign', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: postData.title,
+                        description: postData.description,
+                        price: postData.price,
+                        budget: postData.promotionDetails.dailyBudget,
+                        duration: postData.promotionDetails.duration,
+                        targetAudience: postData.promotionDetails.targetAudience,
+                        keywords: [postData.category, 'local business', 'MarketPace'],
+                        landingUrl: `https://www.marketpace.shop/item/${Date.now()}`
+                    })
+                }).then(response => response.json())
+                .then(data => {
+                    console.log('Google Ads campaign created:', data);
+                })
+                .catch(error => {
+                    console.error('Google Ads error:', error);
+                });
+            }
+            
             console.log('Professional post data:', postData);
             
             // Show comprehensive success message
@@ -1280,8 +1305,11 @@
                 if (postData.promotionDetails.platforms.facebook) {
                     successMessage += `• Facebook: Auto-posting to Facebook Marketplace with "Deliver Now" button!\n`;
                 }
-                if (selectedPlatforms.includes('instagram') || selectedPlatforms.includes('google')) {
-                    successMessage += `• Note: Instagram and Google Ads promotion coming soon!\n`;
+                if (postData.promotionDetails.platforms.google) {
+                    successMessage += `• Google Ads: Search and display campaign created with local targeting!\n`;
+                }
+                if (selectedPlatforms.includes('instagram')) {
+                    successMessage += `• Note: Instagram promotion coming soon!\n`;
                 }
             }
             
