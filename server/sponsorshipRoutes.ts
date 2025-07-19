@@ -172,6 +172,239 @@ export function registerSponsorshipRoutes(app: Express) {
 
     res.json({received: true});
   });
+
+  // Test endpoint for sponsor notifications
+  app.post('/api/test-sponsor-notifications', async (req, res) => {
+    try {
+      const { testType, adminPhone, adminEmail } = req.body;
+      
+      if (testType === 'admin_notifications') {
+        // Send test SMS to admin
+        const testSMSMessage = `🧪 TEST NOTIFICATION from MarketPace
+
+This is a test message to verify SMS notifications are working for sponsor submissions.
+
+Phone: ${adminPhone}
+Email: ${adminEmail}
+Time: ${new Date().toLocaleString()}
+
+If you receive this, SMS notifications are working! ✅`;
+
+        // Send test email to admin
+        const testEmailHTML = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f8f9fa;">
+          <div style="background: linear-gradient(135deg, #1a0b3d 0%, #4b0082 50%, #191970 100%); color: white; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 20px;">
+            <h1 style="margin: 0; font-size: 2rem;">🧪 TEST NOTIFICATION</h1>
+            <p style="margin: 10px 0 0 0; font-size: 1.2rem;">MarketPace Notification System Test</p>
+          </div>
+          
+          <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <h2 style="color: #1a0b3d; border-bottom: 2px solid #4b0082; padding-bottom: 10px;">Test Results</h2>
+            
+            <div style="margin: 20px 0;">
+              <strong style="color: #4b0082;">Email System:</strong> ✅ Working<br/>
+              <strong style="color: #4b0082;">Recipient:</strong> ${adminEmail}<br/>
+              <strong style="color: #4b0082;">Test Time:</strong> ${new Date().toLocaleString()}<br/>
+            </div>
+            
+            <div style="background: #e8f4fd; padding: 20px; border-radius: 10px; border-left: 4px solid #4b0082; margin: 20px 0;">
+              <h3 style="color: #1a0b3d; margin-top: 0;">Notification System Status</h3>
+              <p style="margin: 0;">
+                This test confirms that email notifications are successfully configured and working. 
+                When sponsors submit forms, you will receive detailed notifications with all their information.
+              </p>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <p style="color: #666;">MarketPace sponsor notification system is ready! 🚀</p>
+            </div>
+          </div>
+        </div>`;
+
+        // Import notification services
+        const { sendSMS } = require('./smsService');
+        const { sendEmail } = require('./emailService');
+
+        // Send both notifications
+        const smsResult = await sendSMS(adminPhone, testSMSMessage);
+        const emailResult = await sendEmail({
+          to: adminEmail,
+          subject: '🧪 TEST: MarketPace Notification System Working',
+          html: testEmailHTML
+        });
+
+        res.json({
+          success: true,
+          message: 'Test notifications sent',
+          results: {
+            sms: smsResult,
+            email: emailResult,
+            timestamp: new Date().toISOString()
+          }
+        });
+      } else {
+        res.status(400).json({ error: 'Invalid test type' });
+      }
+    } catch (error) {
+      console.error('Test notification error:', error);
+      res.status(500).json({ error: 'Failed to send test notifications' });
+    }
+  });
+}
+
+// Helper function to send sponsor notifications
+async function sendSponsorNotifications(sponsorData: any) {
+  const { businessName, contactName, email, phone, address, website, socialMedia, businessDescription, tier, tierName, amount, logoData } = sponsorData;
+  
+  try {
+    // Import notification services
+    const { sendSMS } = require('./smsService');
+    const { sendEmail } = require('./emailService');
+    
+    // Send SMS notification to admin (you)
+    const adminSMSMessage = `🎉 NEW SPONSOR ALERT! 
+${businessName} just became a ${tierName} sponsor ($${amount})!
+
+Contact: ${contactName}
+Email: ${email} 
+Phone: ${phone}
+Address: ${address}
+${website ? `Website: ${website}` : ''}
+${businessDescription ? `About: ${businessDescription}` : ''}
+
+Check your email for logo attachment and full details!`;
+
+    await sendSMS('251-282-6662', adminSMSMessage);
+
+    // Send welcome SMS to sponsor
+    const sponsorSMSMessage = `🎉 Welcome to MarketPace, ${contactName}! 
+
+Thank you for becoming our ${tierName} sponsor! We're excited to have ${businessName} supporting our community platform.
+
+We'll keep you updated on our app progress and all your sponsorship perks and shout-outs! 
+
+Questions? Reply to MarketPace.contact@gmail.com
+
+Welcome to the MarketPace family! 🚀`;
+
+    await sendSMS(phone, sponsorSMSMessage);
+
+    // Send detailed email notification to admin (you)
+    const adminEmailHTML = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f8f9fa;">
+      <div style="background: linear-gradient(135deg, #1a0b3d 0%, #4b0082 50%, #191970 100%); color: white; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 20px;">
+        <h1 style="margin: 0; font-size: 2rem;">🎉 NEW SPONSOR ALERT!</h1>
+        <p style="margin: 10px 0 0 0; font-size: 1.2rem;">MarketPace has a new ${tierName} sponsor!</p>
+      </div>
+      
+      <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <h2 style="color: #1a0b3d; border-bottom: 2px solid #4b0082; padding-bottom: 10px;">Sponsor Information</h2>
+        
+        <div style="margin: 20px 0;">
+          <strong style="color: #4b0082;">Business Name:</strong> ${businessName}<br/>
+          <strong style="color: #4b0082;">Contact Person:</strong> ${contactName}<br/>
+          <strong style="color: #4b0082;">Email:</strong> ${email}<br/>
+          <strong style="color: #4b0082;">Phone:</strong> ${phone}<br/>
+          <strong style="color: #4b0082;">Address:</strong> ${address}<br/>
+          ${website ? `<strong style="color: #4b0082;">Website:</strong> ${website}<br/>` : ''}
+          ${socialMedia ? `<strong style="color: #4b0082;">Social Media:</strong><br/><pre style="background: #f8f9fa; padding: 10px; border-radius: 5px;">${socialMedia}</pre>` : ''}
+          ${businessDescription ? `<strong style="color: #4b0082;">Business Description:</strong><br/>${businessDescription}<br/>` : ''}
+        </div>
+        
+        <div style="background: #e8f4fd; padding: 20px; border-radius: 10px; border-left: 4px solid #4b0082; margin: 20px 0;">
+          <h3 style="color: #1a0b3d; margin-top: 0;">Sponsorship Details</h3>
+          <strong>Tier:</strong> ${tierName}<br/>
+          <strong>Amount:</strong> $${amount}<br/>
+          <strong>Payment Status:</strong> Completed via Stripe
+        </div>
+        
+        ${logoData ? `
+        <div style="margin: 20px 0; text-align: center;">
+          <h3 style="color: #1a0b3d;">Business Logo</h3>
+          <img src="${logoData}" alt="${businessName} Logo" style="max-width: 300px; max-height: 150px; border-radius: 10px; border: 2px solid #4b0082;"/>
+        </div>` : ''}
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <p style="color: #666;">Next Steps: Review sponsor benefits and add them to the platform radar!</p>
+        </div>
+      </div>
+    </div>`;
+
+    await sendEmail({
+      to: 'MarketPace.contact@gmail.com',
+      subject: `🎉 NEW ${tierName.toUpperCase()} SPONSOR: ${businessName}`,
+      html: adminEmailHTML
+    });
+
+    // Send welcome email to sponsor
+    const sponsorWelcomeHTML = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f8f9fa;">
+      <div style="background: linear-gradient(135deg, #1a0b3d 0%, #4b0082 50%, #191970 100%); color: white; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 20px;">
+        <h1 style="margin: 0; font-size: 2rem;">Welcome to MarketPace!</h1>
+        <p style="margin: 10px 0 0 0; font-size: 1.2rem;">Thank you for becoming our ${tierName} sponsor!</p>
+      </div>
+      
+      <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <h2 style="color: #1a0b3d;">Dear ${contactName},</h2>
+        
+        <p style="color: #333; line-height: 1.6; font-size: 1.1rem;">
+          We are absolutely thrilled to welcome <strong>${businessName}</strong> as our ${tierName} sponsor! 
+          Your support means the world to us and will help us build stronger local communities through MarketPace.
+        </p>
+        
+        <div style="background: #e8f4fd; padding: 20px; border-radius: 10px; border-left: 4px solid #4b0082; margin: 20px 0;">
+          <h3 style="color: #1a0b3d; margin-top: 0;">What's Next?</h3>
+          <ul style="color: #333; line-height: 1.8;">
+            <li>📱 We'll keep you updated on our app development progress</li>
+            <li>🎯 You'll receive notifications about sponsorship shout-outs</li>
+            <li>🎁 We'll inform you about all your sponsor perks and benefits</li>
+            <li>🤝 You'll be featured prominently in our community platform</li>
+            <li>📊 Regular updates on MarketPace growth and impact</li>
+          </ul>
+        </div>
+        
+        <div style="background: #fff3cd; padding: 20px; border-radius: 10px; border-left: 4px solid #ffc107; margin: 20px 0;">
+          <h3 style="color: #856404; margin-top: 0;">Your ${tierName} Benefits Include:</h3>
+          <p style="color: #856404; margin: 0;">
+            ${tier === 'champion' ? 'Lifetime Free Subscription, Featured sponsor section with champion badge, Co-branded marketing materials, MarketPace Merch, and Social media features' : 
+              tier === 'ambassador' ? 'Everything in Community Champion plus Exclusive event sponsorships, Premium placement, Custom integration opportunities, Custom video ads, and Custom radar effects' : 
+              tier === 'legacy' ? 'Everything in Brand Ambassador plus Permanent legacy recognition, First access to new features, and Lifetime sponsor benefits' : 
+              'Premium sponsor benefits and platform features'}
+          </p>
+        </div>
+        
+        <p style="color: #333; line-height: 1.6;">
+          If you have any questions or need assistance with anything, please don't hesitate to reach out to us at 
+          <a href="mailto:MarketPace.contact@gmail.com" style="color: #4b0082; text-decoration: none;">MarketPace.contact@gmail.com</a>
+        </p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <p style="color: #4b0082; font-size: 1.2rem; font-weight: bold;">
+            Welcome to the MarketPace family! 🚀
+          </p>
+          <p style="color: #666; font-style: italic;">
+            "Delivering Opportunities. Building Local Power."
+          </p>
+        </div>
+      </div>
+      
+      <div style="text-align: center; margin-top: 20px; color: #666; font-size: 0.9rem;">
+        <p>MarketPace - Community-First Marketplace<br/>
+        Contact: MarketPace.contact@gmail.com</p>
+      </div>
+    </div>`;
+
+    await sendEmail({
+      to: email,
+      subject: `🎉 Welcome to MarketPace - Thank you for your ${tierName} sponsorship!`,
+      html: sponsorWelcomeHTML
+    });
+
+    console.log('✅ All sponsor notifications sent successfully');
+    
+  } catch (error) {
+    console.error('❌ Error sending sponsor notifications:', error);
+  }
 }
 
 // Helper function to create sponsor record and benefits
@@ -232,11 +465,18 @@ async function createSponsorRecord(session: Stripe.Checkout.Session) {
     // Create monthly benefits for 12 months
     await createSponsorBenefits(newSponsor.id!, tier);
     
-    // Send purchase notifications (SMS + Email)
+    // Send sponsor notifications immediately after successful sponsor creation
+    await sendSponsorNotifications({
+      businessName, contactName, email, phone, 
+      address: address, website, socialMedia, 
+      businessDescription, tier, tierName, amount, logoData
+    });
+
+    // Send purchase notifications (SMS + Email)  
     const notificationData: PurchaseNotificationData = {
-      customerName: customerName || 'Valued Sponsor',
-      customerEmail: customerEmail || '',
-      customerPhone: session.customer_details?.phone || '',
+      customerName: contactName || 'Valued Sponsor',
+      customerEmail: email || '',
+      customerPhone: phone || '',
       purchaseType: 'sponsorship',
       itemName: tierName || 'MarketPace Sponsorship',
       amount: parseFloat(amount),

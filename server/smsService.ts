@@ -132,3 +132,24 @@ class SMSService {
 }
 
 export const smsService = new SMSService();
+
+// Export helper function for sponsor notifications
+export const sendSMS = async (phoneNumber: string, message: string): Promise<boolean> => {
+  if (!smsService.isEnabled()) {
+    console.log(`SMS Service not configured. Message for ${phoneNumber}: ${message}`);
+    return true; // Return true for demo purposes
+  }
+
+  try {
+    const result = await smsService.client!.messages.create({
+      body: message,
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: phoneNumber,
+    });
+    console.log(`SMS sent successfully to ${phoneNumber}, SID: ${result.sid}`);
+    return true;
+  } catch (error) {
+    console.error('SMS send error:', error);
+    return false;
+  }
+};

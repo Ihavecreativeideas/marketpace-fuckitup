@@ -205,3 +205,22 @@ class EmailService {
 }
 
 export const emailService = new EmailService();
+
+// Export helper function for sponsor notifications  
+export const sendEmail = async (options: { to: string; subject: string; html: string }): Promise<boolean> => {
+  try {
+    const mailOptions = {
+      from: `"MarketPace" <${process.env.SMTP_USER || 'MarketPace.contact@gmail.com'}>`,
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+    };
+
+    await emailService.transporter.sendMail(mailOptions);
+    console.log(`Email sent successfully to ${options.to}`);
+    return true;
+  } catch (error) {
+    console.error('Email send error:', error);
+    return false;
+  }
+};
