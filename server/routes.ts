@@ -13,6 +13,8 @@ import { setupFacebookAuth } from "./facebookAuth";
 import { facebookAPI } from "./facebookGraphAPI";
 import { registerAuthRoutes } from "./authRoutes";
 import { setupShopifyBusinessRoutes } from "./shopifyBusinessIntegration";
+import { sponsorExpirationNotificationService } from "./sponsorExpirationNotifications";
+import { sponsorNotificationScheduler } from "./sponsorNotificationScheduler";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -2882,6 +2884,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Temporarily disabled problematic Facebook routes causing routing errors
   // registerFacebookRoutes(app);
+
+  // Sponsor notification routes
+  app.get('/api/admin/sponsors/check-expiring', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.userType !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      await sponsorExpirationNotificationService.checkExpiringBenefits();
+      res.json({ success: true, message: 'Expiration check completed' });
+    } catch (error) {
+      console.error("Error checking sponsor expiring benefits:", error);
+      res.status(500).json({ message: "Failed to check expiring benefits" });
+    }
+  });
+
+  app.post('/api/admin/sponsors/test-notification', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.userType !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      const { sponsorId, notificationType } = req.body;
+      await sponsorExpirationNotificationService.sendTestNotification(sponsorId, notificationType);
+      
+      res.json({ 
+        success: true, 
+        message: `Test ${notificationType} notification sent to ${sponsorId}` 
+      });
+    } catch (error) {
+      console.error("Error sending test notification:", error);
+      res.status(500).json({ message: "Failed to send test notification" });
+    }
+  });
+
+  app.get('/api/admin/sponsors/manual-check', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.userType !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      await sponsorNotificationScheduler.runManualCheck();
+      res.json({ success: true, message: 'Manual sponsor check completed' });
+    } catch (error) {
+      console.error("Error running manual sponsor check:", error);
+      res.status(500).json({ message: "Failed to run manual check" });
+    }
+  });
+
+  // Start notification scheduler on server startup
+  sponsorNotificationScheduler.start();
 
   const httpServer = createServer(app);
   return httpServer;

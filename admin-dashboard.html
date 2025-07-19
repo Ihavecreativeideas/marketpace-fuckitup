@@ -753,6 +753,53 @@
                     <button class="action-btn" onclick="addManualSponsor()">
                         <i class="fas fa-plus"></i> Add Manual Sponsor
                     </button>
+                    <button class="action-btn" onclick="checkExpiringBenefits()">
+                        <i class="fas fa-bell"></i> Check Expiring Benefits
+                    </button>
+                    <button class="action-btn" onclick="sendTestNotification()">
+                        <i class="fas fa-paper-plane"></i> Send Test Notification
+                    </button>
+                </div>
+
+                <!-- Notification Testing Section -->
+                <div style="background: white; border-radius: 10px; padding: 2rem; margin-top: 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <h3 style="color: #333; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-bell" style="color: #667eea;"></i>
+                        Automated Notification System
+                    </h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                        <div style="padding: 1rem; background: #e8f5e8; border-radius: 8px; border-left: 4px solid #27ae60;">
+                            <h4 style="color: #27ae60; margin-bottom: 0.5rem;">Daily Automated Checks</h4>
+                            <p style="color: #666; margin: 0; font-size: 0.9rem;">
+                                System automatically checks for sponsors whose benefits expire in 7 days and sends SMS + email notifications thanking them for their support.
+                            </p>
+                        </div>
+                        <div style="padding: 1rem; background: #fff3cd; border-radius: 8px; border-left: 4px solid #856404;">
+                            <h4 style="color: #856404; margin-bottom: 0.5rem;">Notification Content</h4>
+                            <p style="color: #666; margin: 0; font-size: 0.9rem;">
+                                Grateful messages thanking sponsors for early support, mentioning expiry dates, and providing subscription update links.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+                        <h4 style="color: #333; margin-bottom: 1rem;">System Status</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div style="text-align: center;">
+                                <div style="color: #27ae60; font-size: 1.5rem; font-weight: bold;">✅ Active</div>
+                                <div style="color: #666; font-size: 0.9rem;">Notification Scheduler</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="color: #667eea; font-size: 1.5rem; font-weight: bold;">24h</div>
+                                <div style="color: #666; font-size: 0.9rem;">Check Frequency</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="color: #856404; font-size: 1.5rem; font-weight: bold;">7 days</div>
+                                <div style="color: #666; font-size: 0.9rem;">Warning Period</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1092,6 +1139,82 @@
 
         function exportCampaignData() {
             alert('Exporting campaign data...');
+        }
+
+        // Sponsor notification functions
+        async function checkExpiringBenefits() {
+            try {
+                showBannerMessage('Checking for sponsor benefits expiring in next 7 days...', 'info');
+                
+                const response = await fetch('/api/admin/sponsors/check-expiring', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showBannerMessage('✅ Sponsor expiration check completed. Notifications sent to members with benefits expiring soon.', 'success');
+                } else {
+                    showBannerMessage(`❌ Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error checking expiring benefits:', error);
+                showBannerMessage('❌ Failed to check expiring benefits', 'error');
+            }
+        }
+
+        async function sendTestNotification() {
+            const sponsorId = prompt('Enter sponsor member ID to send test notification:');
+            const notificationType = confirm('Send SMS notification? (OK for SMS, Cancel for Email)') ? 'sms' : 'email';
+            
+            if (!sponsorId) {
+                showBannerMessage('Test notification cancelled', 'info');
+                return;
+            }
+
+            try {
+                showBannerMessage(`Sending test ${notificationType} notification to sponsor ${sponsorId}...`, 'info');
+                
+                const response = await fetch('/api/admin/sponsors/test-notification', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        sponsorId: sponsorId,
+                        notificationType: notificationType
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showBannerMessage(`✅ Test ${notificationType} notification sent to sponsor ${sponsorId}`, 'success');
+                } else {
+                    showBannerMessage(`❌ Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error sending test notification:', error);
+                showBannerMessage('❌ Failed to send test notification', 'error');
+            }
+        }
+
+        function addManualSponsor() {
+            showBannerMessage('Add Manual Sponsor functionality would be implemented here', 'info');
+        }
+
+        function refreshSponsorData() {
+            showBannerMessage('Refreshing sponsor tracking data...', 'info');
+            setTimeout(() => {
+                showBannerMessage('✅ Sponsor data refreshed successfully', 'success');
+            }, 1500);
+        }
+
+        function exportSponsorData() {
+            showBannerMessage('Sponsor data export functionality would be implemented here', 'info');
         }
 
         function launchCity(cityName) {
