@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Event Calendar - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0a0a23 0%, #1a1a3a 50%, #0a0a23 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Futuristic background effects */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 60%, rgba(255, 215, 0, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            background: linear-gradient(135deg, #00ffff 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.2rem;
+            line-height: 1.6;
+        }
+
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, #00ffff 0%, #8b5cf6 100%);
+            color: #0a0a23;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .current-month {
+            color: #00ffff;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .calendar-day {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            min-height: 120px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-day.header {
+            background: linear-gradient(135deg, #00ffff 0%, #8b5cf6 100%);
+            color: #0a0a23;
+            font-weight: bold;
+            min-height: 40px;
+            padding: 10px 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.3;
+        }
+
+        .calendar-day.today {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 237, 74, 0.2) 100%);
+            border: 2px solid #ffd700;
+        }
+
+        .calendar-day.has-events {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .calendar-day:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.02);
+        }
+
+        .day-number {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #00ffff;
+        }
+
+        .event-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 1px;
+        }
+
+        .event-dot.festival {
+            background: #ff6b35;
+        }
+
+        .event-dot.market {
+            background: #4ade80;
+        }
+
+        .event-dot.music {
+            background: #8b5cf6;
+        }
+
+        .event-dot.community {
+            background: #00ffff;
+        }
+
+        .mini-event {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 2px;
+            line-height: 1.2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .event-details {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .events-section h2 {
+            color: #00ffff;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .event-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .event-card:hover {
+            border-color: #00ffff;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+        }
+
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .event-title {
+            color: #00ffff;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .event-meta {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .event-type {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .event-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #00ffff 0%, #8b5cf6 100%);
+            color: #0a0a23;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #00ffff;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .filter-tab.active, .filter-tab:hover {
+            background: linear-gradient(135deg, #00ffff 0%, #8b5cf6 100%);
+            color: #0a0a23;
+            border-color: transparent;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #00ffff;
+        }
+
+        .futuristic-icon {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .event-live {
+            animation: pulse 2s infinite;
+        }
+
+        @media (max-width: 768px) {
+            .calendar-grid {
+                font-size: 0.8rem;
+            }
+            
+            .calendar-day {
+                min-height: 80px;
+                padding: 10px 5px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="window.history.back()">
+        <svg class="futuristic-icon" viewBox="0 0 24 24">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        </svg>
+        Back
+    </button>
+
+    <div class="container">
+        <div class="header">
+            <h1>Local Event Calendar</h1>
+            <p>Discover live events, festivals, markets, and entertainment happening in your community</p>
+        </div>
+
+        <div class="calendar-nav">
+            <button class="nav-btn" onclick="previousMonth()">
+                <svg class="futuristic-icon" viewBox="0 0 24 24">
+                    <path d="M15 18l-6-6 6-6"/>
+                </svg>
+                Previous
+            </button>
+            <div class="current-month" id="currentMonth">January 2025</div>
+            <button class="nav-btn" onclick="nextMonth()">
+                Next
+                <svg class="futuristic-icon" viewBox="0 0 24 24">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="calendar-grid" id="calendarGrid">
+            <!-- Calendar will be generated by JavaScript -->
+        </div>
+
+        <div class="event-details">
+            <h2>
+                <svg class="futuristic-icon" viewBox="0 0 24 24">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                </svg>
+                Upcoming Events This Week
+            </h2>
+
+            <div class="filter-tabs">
+                <div class="filter-tab active" onclick="filterEvents('all')">All Events</div>
+                <div class="filter-tab" onclick="filterEvents('festival')">Festivals</div>
+                <div class="filter-tab" onclick="filterEvents('market')">Markets</div>
+                <div class="filter-tab" onclick="filterEvents('music')">Music</div>
+                <div class="filter-tab" onclick="filterEvents('community')">Community</div>
+            </div>
+
+            <div id="eventsList">
+                <!-- Events will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let selectedFilter = 'all';
+
+        // Sample event data
+        const events = [
+            {
+                id: 1,
+                title: "Gulf Coast Arts Festival",
+                date: "2025-01-20",
+                time: "10:00 AM - 6:00 PM",
+                location: "Gulf State Park",
+                type: "festival",
+                description: "Annual arts and crafts festival featuring local artists",
+                distance: "2.3 miles",
+                live: true
+            },
+            {
+                id: 2,
+                title: "Orange Beach Farmers Market",
+                date: "2025-01-22",
+                time: "8:00 AM - 2:00 PM",
+                location: "The Wharf",
+                type: "market",
+                description: "Fresh local produce, crafts, and food vendors",
+                distance: "1.8 miles",
+                live: false
+            },
+            {
+                id: 3,
+                title: "Live Music at Flora-Bama",
+                date: "2025-01-23",
+                time: "8:00 PM - 12:00 AM",
+                location: "Flora-Bama Lounge",
+                type: "music",
+                description: "Local band showcase featuring coastal favorites",
+                distance: "4.2 miles",
+                live: false
+            },
+            {
+                id: 4,
+                title: "Community Beach Cleanup",
+                date: "2025-01-25",
+                time: "9:00 AM - 12:00 PM",
+                location: "Gulf Shores Beach",
+                type: "community",
+                description: "Volunteer community beach cleanup with refreshments",
+                distance: "3.1 miles",
+                live: false
+            },
+            {
+                id: 5,
+                title: "Sunset Music Series",
+                date: "2025-01-26",
+                time: "7:00 PM - 9:00 PM",
+                location: "The Hangout",
+                type: "music",
+                description: "Weekly sunset acoustic performances",
+                distance: "2.7 miles",
+                live: false
+            }
+        ];
+
+        function generateCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            // Add day headers
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            days.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-day header';
+                dayHeader.textContent = day;
+                grid.appendChild(dayHeader);
+            });
+
+            // Get calendar data
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+            // Generate calendar days
+            for (let i = 0; i < 42; i++) {
+                const cellDate = new Date(startDate);
+                cellDate.setDate(startDate.getDate() + i);
+
+                const dayCell = document.createElement('div');
+                dayCell.className = 'calendar-day';
+                
+                if (cellDate.getMonth() !== month) {
+                    dayCell.classList.add('other-month');
+                }
+
+                if (cellDate.toDateString() === new Date().toDateString()) {
+                    dayCell.classList.add('today');
+                }
+
+                // Check for events on this date
+                const dayEvents = events.filter(event => {
+                    const eventDate = new Date(event.date);
+                    return eventDate.toDateString() === cellDate.toDateString();
+                });
+
+                if (dayEvents.length > 0) {
+                    dayCell.classList.add('has-events');
+                }
+
+                dayCell.innerHTML = `
+                    <div class="day-number">${cellDate.getDate()}</div>
+                    ${dayEvents.map(event => `
+                        <div class="event-dot ${event.type}"></div>
+                        <div class="mini-event">${event.title.substring(0, 15)}${event.title.length > 15 ? '...' : ''}</div>
+                    `).join('')}
+                `;
+
+                dayCell.onclick = () => showDayEvents(cellDate, dayEvents);
+                grid.appendChild(dayCell);
+            }
+
+            // Update month display
+            document.getElementById('currentMonth').textContent = 
+                currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        }
+
+        function showDayEvents(date, dayEvents) {
+            if (dayEvents.length === 0) return;
+
+            alert(`Events on ${date.toLocaleDateString()}:\n\n${dayEvents.map(event => 
+                `• ${event.title}\n  ${event.time}\n  ${event.location}`
+            ).join('\n\n')}`);
+        }
+
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            generateCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            generateCalendar();
+        }
+
+        function filterEvents(type) {
+            selectedFilter = type;
+            
+            // Update active tab
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            loadEvents();
+        }
+
+        function loadEvents() {
+            const eventsList = document.getElementById('eventsList');
+            const filteredEvents = selectedFilter === 'all' ? events : events.filter(event => event.type === selectedFilter);
+
+            eventsList.innerHTML = filteredEvents.map(event => `
+                <div class="event-card ${event.live ? 'event-live' : ''}">
+                    <div class="event-header">
+                        <div>
+                            <div class="event-title">${event.title}</div>
+                            <div class="event-meta">
+                                ${new Date(event.date).toLocaleDateString('en-US', { 
+                                    weekday: 'long', 
+                                    month: 'long', 
+                                    day: 'numeric' 
+                                })} • ${event.time}<br>
+                                📍 ${event.location} • ${event.distance} away
+                            </div>
+                        </div>
+                        <div class="event-type">${event.type.charAt(0).toUpperCase() + event.type.slice(1)}</div>
+                    </div>
+                    <p style="color: rgba(255, 255, 255, 0.8); margin: 10px 0;">${event.description}</p>
+                    <div class="event-actions">
+                        <button class="btn" onclick="addToCalendar(${event.id})">
+                            <svg class="futuristic-icon" viewBox="0 0 24 24">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                            Add to Calendar
+                        </button>
+                        <button class="btn btn-secondary" onclick="shareEvent(${event.id})">
+                            <svg class="futuristic-icon" viewBox="0 0 24 24">
+                                <circle cx="18" cy="5" r="3"/>
+                                <circle cx="6" cy="12" r="3"/>
+                                <circle cx="18" cy="19" r="3"/>
+                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                            </svg>
+                            Share
+                        </button>
+                        <button class="btn btn-secondary" onclick="getDirections('${event.location}')">
+                            <svg class="futuristic-icon" viewBox="0 0 24 24">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                            Directions
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addToCalendar(eventId) {
+            const event = events.find(e => e.id === eventId);
+            if (!event) return;
+
+            // Create calendar URL (Google Calendar format)
+            const startDate = new Date(event.date + ' ' + event.time.split(' - ')[0]);
+            const endDate = new Date(event.date + ' ' + (event.time.split(' - ')[1] || event.time.split(' - ')[0]));
+            
+            const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z&details=${encodeURIComponent(event.description)}&location=${encodeURIComponent(event.location)}`;
+            
+            window.open(calendarUrl, '_blank');
+        }
+
+        function shareEvent(eventId) {
+            const event = events.find(e => e.id === eventId);
+            if (!event) return;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: event.title,
+                    text: `${event.description} - ${event.date} at ${event.location}`,
+                    url: window.location.href
+                });
+            } else {
+                const shareText = `Check out this event: ${event.title}\n${event.date} • ${event.time}\n${event.location}\n\n${event.description}`;
+                navigator.clipboard.writeText(shareText).then(() => {
+                    alert('Event details copied to clipboard!');
+                });
+            }
+        }
+
+        function getDirections(location) {
+            const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(location)}`;
+            window.open(mapsUrl, '_blank');
+        }
+
+        // Initialize calendar
+        window.addEventListener('load', () => {
+            generateCalendar();
+            loadEvents();
+        });
+    </script>
+</body>
+</html>
