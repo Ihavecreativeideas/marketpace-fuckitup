@@ -264,6 +264,19 @@ All features are designed to strengthen local communities by keeping commerce lo
 
 ## Recent Changes
 
+✓ **PUBLIC PROFILE PRIVACY ENHANCEMENT** (July 18, 2025)
+✓ **RECENT ACTIVITY REMOVED FROM PUBLIC PAGES**: Removed "Recent Activity" section from user-profile.html to maintain privacy - activity data now only visible in user's private menu
+✓ **CLEANER PUBLIC PROFILE**: Public user profiles now only show profile header (avatar, name, stats) and About section for appropriate public information display
+
+✓ **BUSINESS PROFILE HUB POSTING ENHANCED** (July 18, 2025)
+✓ **COMPREHENSIVE CATEGORY SYSTEM**: Integrated all community posting categories (General, Electronics, Fashion, Home & Garden, Vehicles, Sports) into business profile posting modal
+✓ **COUNTER OFFER CONTROL**: Added seller-controlled counter offers toggle (sale items only) with detailed explanations
+✓ **DELIVERY METHOD SELECTION**: Implemented delivery method options (self-pickup FREE, MarketPace delivery split cost, custom delivery with fee input)
+✓ **MESSAGING OPTIONS**: Added customer messaging toggle with communication control for business posts
+✓ **RENTAL-SPECIFIC OPTIONS**: Added rental rate type selection (hourly, daily, weekly) for rent posts with conditional display
+✓ **ENHANCED IMAGE UPLOAD**: Improved image upload system with preview thumbnails and individual remove buttons
+✓ **FEATURE PARITY COMPLETE**: Business profile hub "Create Professional Post" modal now has identical functionality to community posting system
+
 ✓ **DEMO INTEGRATION COMPLETE & BACK BUTTON FIXED** (July 18, 2025)
 ✓ **DEMO BUSINESS INTEGRATION**: Successfully removed "back to demo pages" buttons and integrated demo business accounts directly into community feed as filtered posts
 ✓ **BUSINESS SCHEDULING BACK BUTTON**: Replaced complex back button with simple "← Back" text and added smart navigation function with browser history fallback
