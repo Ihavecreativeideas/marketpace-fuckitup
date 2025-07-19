@@ -4965,6 +4965,141 @@
             window.location.href = '/security';
             document.getElementById('menuDropdown').classList.remove('show');
         }
+
+        // Logo dropdown toggle function
+        function toggleLogoDropdown() {
+            const dropdown = document.querySelector('.dropdown-menu');
+            if (dropdown) {
+                const isVisible = dropdown.style.display === 'block';
+                dropdown.style.display = isVisible ? 'none' : 'block';
+            }
+        }
+
+        // Additional navigation functions
+        function showEvents() {
+            window.location.href = '/enhanced-community-feed.html';
+        }
+
+        function showServices() {
+            window.location.href = '/services.html';
+        }
+
+        function showRentals() {
+            window.location.href = '/rentals.html';
+        }
+
+        function showShops() {
+            window.location.href = '/shops.html';
+        }
+
+        function goToLogin() {
+            window.location.href = '/login.html';
+        }
+
+        function goToAdminDashboard() {
+            window.location.href = '/admin-dashboard.html';
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUserData');
+            localStorage.removeItem('currentUserEmail');
+            window.location.href = '/pitch-page.html';
+        }
+
+        // Utility functions to fix undefined function errors
+        function createParticles() {
+            const particlesContainer = document.querySelector('.particles');
+            if (!particlesContainer) return;
+            
+            const particleCount = 40;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function createLogoParticles() {
+            // Logo particle animation
+            const logoContainer = document.querySelector('.logo-container');
+            if (!logoContainer) return;
+            
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.style.cssText = `
+                        position: absolute;
+                        width: 6px;
+                        height: 6px;
+                        background: linear-gradient(45deg, #00ffff, #0ea5e9);
+                        border-radius: 50%;
+                        pointer-events: none;
+                        z-index: 1000;
+                        animation: logoParticleFlow 2s ease-out forwards;
+                    `;
+                    
+                    const rect = logoContainer.getBoundingClientRect();
+                    particle.style.left = (rect.left + rect.width / 2) + 'px';
+                    particle.style.top = (rect.top + rect.height / 2) + 'px';
+                    
+                    document.body.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, 2000);
+                }, i * 400);
+            }
+        }
+
+        function updateCartBadge() {
+            const badge = document.querySelector('.cart-badge');
+            if (badge) {
+                const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                badge.textContent = cart.length;
+                badge.style.display = cart.length > 0 ? 'block' : 'none';
+            }
+        }
+
+        function checkLoginStatus() {
+            const userData = localStorage.getItem('currentUserData');
+            const loginBtn = document.querySelector('.login-btn');
+            if (userData && loginBtn) {
+                const user = JSON.parse(userData);
+                loginBtn.textContent = user.name || 'Profile';
+                loginBtn.onclick = goToProfile;
+            }
+        }
+
+        function initializePostTypes() {
+            console.log('Initializing post types for rentals page');
+            // Initialize any post type specific functionality for rentals
+        }
+
+        // Add CSS for logo particle animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes logoParticleFlow {
+                0% {
+                    transform: translate(0, 0) scale(1);
+                    opacity: 1;
+                }
+                50% {
+                    transform: translate(${Math.random() * 200 - 100}px, ${Math.random() * 200 - 100}px) scale(1.2);
+                    opacity: 0.8;
+                }
+                100% {
+                    transform: translate(${Math.random() * 400 - 200}px, ${Math.random() * 400 - 200}px) scale(0);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>

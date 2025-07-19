@@ -2257,6 +2257,108 @@
         window.showTipModal = function(businessData) {
             window.tipModal.show(businessData);
         };
+
+        // Logo dropdown toggle function
+        function toggleLogoDropdown() {
+            const dropdown = document.querySelector('.dropdown-menu');
+            if (dropdown) {
+                const isVisible = dropdown.style.display === 'block';
+                dropdown.style.display = isVisible ? 'none' : 'block';
+            }
+        }
+
+        // Additional button functionality
+        function showEvents() {
+            window.location.href = '/enhanced-community-feed.html';
+        }
+
+        function showServices() {
+            window.location.href = '/services.html';
+        }
+
+        function showRentals() {
+            window.location.href = '/rentals.html';
+        }
+
+        function showShops() {
+            window.location.href = '/shops.html';
+        }
+
+        function goToLogin() {
+            window.location.href = '/login.html';
+        }
+
+        function goToProfile() {
+            const userData = localStorage.getItem('currentUserData');
+            if (userData) {
+                window.location.href = '/unified-pro-page.html';
+            } else {
+                window.location.href = '/login.html';
+            }
+        }
+
+        function goToAdminDashboard() {
+            window.location.href = '/admin-dashboard.html';
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUserData');
+            localStorage.removeItem('currentUserEmail');
+            window.location.href = '/pitch-page.html';
+        }
+
+        // Fix syntax errors in existing functions
+        if (typeof createParticles === 'undefined') {
+            function createParticles() {
+                const particlesContainer = document.querySelector('.particles');
+                if (!particlesContainer) return;
+                
+                const particleCount = 40;
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = Math.random() * 100 + '%';
+                    particle.style.animationDelay = Math.random() * 8 + 's';
+                    particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                    particlesContainer.appendChild(particle);
+                }
+            }
+        }
+
+        if (typeof updateCartBadge === 'undefined') {
+            function updateCartBadge() {
+                const badge = document.querySelector('.cart-badge');
+                if (badge) {
+                    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                    badge.textContent = cart.length;
+                    badge.style.display = cart.length > 0 ? 'block' : 'none';
+                }
+            }
+        }
+
+        if (typeof checkLoginStatus === 'undefined') {
+            function checkLoginStatus() {
+                const userData = localStorage.getItem('currentUserData');
+                const loginBtn = document.querySelector('.login-btn');
+                if (userData && loginBtn) {
+                    const user = JSON.parse(userData);
+                    loginBtn.textContent = user.name || 'Profile';
+                    loginBtn.onclick = goToProfile;
+                }
+            }
+        }
+
+        // Make sure functions are called when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                createParticles();
+                updateCartBadge();
+                checkLoginStatus();
+            } catch (error) {
+                console.error('Error initializing page:', error);
+            }
+        });
     </script>
 </body>
 </html>
