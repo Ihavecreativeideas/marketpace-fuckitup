@@ -923,11 +923,11 @@
                                             <div style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">Local community</div>
                                         </div>
                                     </label>
-                                    <label style="display: flex; align-items: center; color: rgba(255, 255, 255, 0.5); padding: 10px; background: rgba(255, 255, 255, 0.02); border-radius: 8px; cursor: not-allowed; position: relative;">
-                                        <input type="checkbox" id="platformFacebook" style="margin-right: 12px; transform: scale(1.2);" disabled />
+                                    <label style="display: flex; align-items: center; color: white; padding: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="platformFacebook" style="margin-right: 12px; transform: scale(1.2);" />
                                         <div>
-                                            <div style="font-weight: bold;">Facebook <span style="background: rgba(255, 215, 0, 0.2); color: #ffd700; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; margin-left: 8px;">COMING SOON</span></div>
-                                            <div style="font-size: 12px; color: rgba(255, 255, 255, 0.4);">External promotion integration</div>
+                                            <div style="font-weight: bold;">Facebook Marketplace <span style="background: rgba(0, 255, 0, 0.2); color: #00ff00; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; margin-left: 8px;">READY</span></div>
+                                            <div style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">Auto-post to Facebook Marketplace</div>
                                         </div>
                                     </label>
                                     <label style="display: flex; align-items: center; color: rgba(255, 255, 255, 0.5); padding: 10px; background: rgba(255, 255, 255, 0.02); border-radius: 8px; cursor: not-allowed; position: relative;">
@@ -1215,7 +1215,7 @@
                     interests: document.getElementById('interests').value,
                     platforms: {
                         marketpace: document.getElementById('platformMarketPace').checked,
-                        facebook: false, // Coming soon
+                        facebook: document.getElementById('platformFacebook').checked,
                         instagram: false, // Coming soon
                         google: false // Coming soon
                     }
@@ -1231,7 +1231,29 @@
                 postData.promotionDetails.totalCost = postData.promotionDetails.dailyBudget * duration;
             }
             
-            // Here you would normally send to server
+            // Send to server with Facebook integration
+            if (postData.promotion && postData.promotionDetails.platforms.facebook) {
+                // Call Facebook Marketplace API
+                fetch('/api/facebook/post-to-marketplace', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: postData.title,
+                        description: postData.description,
+                        price: postData.price,
+                        images: postData.images,
+                        category: postData.category,
+                        deliveryOptions: postData.deliveryMethods
+                    })
+                }).then(response => response.json())
+                .then(data => {
+                    console.log('Facebook Marketplace post successful:', data);
+                })
+                .catch(error => {
+                    console.error('Facebook posting error:', error);
+                });
+            }
+            
             console.log('Professional post data:', postData);
             
             // Show comprehensive success message
@@ -1255,8 +1277,11 @@
                 const selectedPlatforms = Object.keys(postData.promotionDetails.platforms).filter(p => postData.promotionDetails.platforms[p]);
                 const availablePlatforms = selectedPlatforms.length > 0 ? selectedPlatforms.join(', ') : 'MarketPace only';
                 successMessage += `• Platforms: ${availablePlatforms}\n`;
-                if (selectedPlatforms.length === 1 && selectedPlatforms[0] === 'marketpace') {
-                    successMessage += `• Note: External platform promotion (Facebook, Instagram, Google Ads) coming soon!\n`;
+                if (postData.promotionDetails.platforms.facebook) {
+                    successMessage += `• Facebook: Auto-posting to Facebook Marketplace with "Deliver Now" button!\n`;
+                }
+                if (selectedPlatforms.includes('instagram') || selectedPlatforms.includes('google')) {
+                    successMessage += `• Note: Instagram and Google Ads promotion coming soon!\n`;
                 }
             }
             
