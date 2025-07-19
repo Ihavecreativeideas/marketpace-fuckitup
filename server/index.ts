@@ -19,6 +19,9 @@ import { socialMediaRoutes } from './socialMediaRoutes';
 import { sendSMS } from './smsService';
 import { qrCodeService } from './qrCodeService';
 import { tipRoutes } from './tipRoutes';
+import { subscriptionRoutes } from './subscriptionManager';
+import { subscriptionScheduler } from './subscriptionScheduler';
+import { sponsorManagementRoutes } from './sponsorManagement';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -1889,6 +1892,8 @@ registerSponsorshipRoutes(app);
 
 // Setup Tip Routes with Stripe Integration
 app.use('/', tipRoutes);
+app.use('/', subscriptionRoutes);
+app.use('/', sponsorManagementRoutes);
 
 // Setup Marketplace Routes with Notifications
 registerMarketplaceRoutes(app);
