@@ -451,9 +451,12 @@ export const facebookAutoResponses = pgTable("facebook_auto_responses", {
   sentAt: timestamp("sent_at").defaultNow(),
 });
 
+
+
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type Business = typeof businesses.$inferSelect;
+export type InsertBusiness = typeof businesses.$inferInsert;
 export type FacebookMarketplacePost = typeof facebookMarketplacePosts.$inferSelect;
 
 // Type exports for volunteer management
@@ -463,8 +466,6 @@ export type VolunteerHours = typeof volunteerHours.$inferSelect;
 export type InsertVolunteerHours = typeof volunteerHours.$inferInsert;
 export type VolunteerSchedule = typeof volunteerSchedules.$inferSelect;
 export type InsertVolunteerSchedule = typeof volunteerSchedules.$inferInsert;
-export type Business = typeof businesses.$inferSelect;
-export type InsertBusiness = typeof businesses.$inferInsert;
 export type Employee = typeof employees.$inferSelect;
 export type InsertEmployee = typeof employees.$inferInsert;
 export type Schedule = typeof schedules.$inferSelect;
