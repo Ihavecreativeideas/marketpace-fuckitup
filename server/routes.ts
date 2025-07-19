@@ -15,6 +15,7 @@ import { registerAuthRoutes } from "./authRoutes";
 import { setupShopifyBusinessRoutes } from "./shopifyBusinessIntegration";
 import { sponsorExpirationNotificationService } from "./sponsorExpirationNotifications";
 import { sponsorNotificationScheduler } from "./sponsorNotificationScheduler";
+import { discountCodeService } from "./discountCodeService";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -2933,6 +2934,386 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error running manual sponsor check:", error);
       res.status(500).json({ message: "Failed to run manual check" });
+    }
+  });
+
+  // Discount code management routes
+  app.post('/api/admin/discount-codes', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.userType !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const discountData = {
+        ...req.body,
+        createdBy: req.user.claims.sub
+      };
+
+      const discount = await discountCodeService.createDiscountCode(discountData);
+      res.json(discount);
+    } catch (error) {
+      console.error("Error creating discount code:", error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : "Failed to create discount code" 
+      });
+    }
+  });
+
+  app.get('/api/admin/discount-codes', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.userType !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const codes = await discountCodeService.getAllDiscountCodes();
+      res.json(codes);
+    } catch (error) {
+      console.error("Error fetching discount codes:", error);
+      res.status(500).json({ message: "Failed to fetch discount codes" });
+    }
+  });
+
+  app.get('/api/admin/discount-codes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.userType !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { id } = req.params;
+      const discount = await discountCodeService.getDiscountCodeById(id);
+      
+      if (!discount) {
+        return res.status(404).json({ message: "Discount code not found" });
+      }
+
+      res.json(discount);
+    } catch (error) {
+      console.error("Error fetching discount code:", error);
+      res.status(500).json({ message: "Failed to fetch discount code" });
+    }
+  });
+
+  app.put('/api/admin/discount-codes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.userType !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { id } = req.params;
+      const updates = req.body;
+
+      const discount = await discountCodeService.updateDiscountCode(id, updates);
+      res.json(discount);
+    } catch (error) {
+      console.error("Error updating discount code:", error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : "Failed to update discount code" 
+      });
+    }
+  });
+
+  app.delete('/api/admin/discount-codes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.userType !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { id } = req.params;
+      const deleted = await discountCodeService.deleteDiscountCode(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Discount code not found" });
+      }
+
+      res.json({ message: "Discount code deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting discount code:", error);
+      res.status(500).json({ message: "Failed to delete discount code" });
+    }
+  });
+
+  app.get('/api/admin/discount-codes/:id/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.userType !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { id } = req.params;
+      const stats = await discountCodeService.getDiscountCodeStats(id);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching discount code stats:", error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to fetch stats" 
+      });
+    }
+  });
+
+  // Public discount code validation (for customers)
+  app.post('/api/discount-codes/validate', isAuthenticated, async (req: any, res) => {
+    try {
+      const { code, amount, categories, businessType } = req.body;
+      const userId = req.user.claims.sub;
+
+      const result = await discountCodeService.validateAndApplyDiscount({
+        code,
+        userId,
+        originalAmount: Math.round(amount * 100), // Convert to cents
+        categories,
+        businessType
+      });
+
+      res.json({
+        isValid: result.isValid,
+        error: result.error,
+        discountAmount: result.discountAmount ? result.discountAmount / 100 : 0, // Convert to dollars
+        finalAmount: result.finalAmount ? result.finalAmount / 100 : 0, // Convert to dollars
+        discountCode: result.discount ? {
+          name: result.discount.name,
+          description: result.discount.description,
+          type: result.discount.type,
+          value: result.discount.value
+        } : null
+      });
+    } catch (error) {
+      console.error("Error validating discount code:", error);
+      res.status(500).json({ message: "Failed to validate discount code" });
+    }
+  });
+
+  // Apply discount code during checkout
+  app.post('/api/discount-codes/apply', isAuthenticated, async (req: any, res) => {
+    try {
+      const { code, amount, orderId, categories, businessType } = req.body;
+      const userId = req.user.claims.sub;
+
+      const result = await discountCodeService.validateAndApplyDiscount({
+        code,
+        userId,
+        originalAmount: Math.round(amount * 100), // Convert to cents
+        categories,
+        businessType
+      });
+
+      if (!result.isValid || !result.discount) {
+        return res.status(400).json({ error: result.error });
+      }
+
+      // Record the usage
+      await discountCodeService.recordDiscountUsage({
+        codeId: result.discount.id,
+        userId,
+        orderId,
+        discountAmount: result.discountAmount!,
+        originalAmount: Math.round(amount * 100),
+        finalAmount: result.finalAmount!
+      });
+
+      res.json({
+        success: true,
+        discountAmount: result.discountAmount! / 100, // Convert to dollars
+        finalAmount: result.finalAmount! / 100, // Convert to dollars
+        discountCode: {
+          name: result.discount.name,
+          description: result.discount.description,
+          type: result.discount.type,
+          value: result.discount.value
+        }
+      });
+    } catch (error) {
+      console.error("Error applying discount code:", error);
+      res.status(500).json({ message: "Failed to apply discount code" });
+    }
+  });
+
+  // Generate random discount code
+  app.post('/api/admin/discount-codes/generate-code', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.userType !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { length = 8 } = req.body;
+      const code = discountCodeService.generateRandomCode(length);
+      
+      // Check if code already exists
+      const existing = await discountCodeService.getDiscountCodeByCode(code);
+      if (existing) {
+        // Generate a new one if it exists
+        return res.json({ code: discountCodeService.generateRandomCode(length + 2) });
+      }
+      
+      res.json({ code });
+    } catch (error) {
+      console.error("Error generating discount code:", error);
+      res.status(500).json({ message: "Failed to generate discount code" });
+    }
+  });
+
+  // Deactivate expired codes
+  app.post('/api/admin/discount-codes/cleanup-expired', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.userType !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const deactivatedCount = await discountCodeService.deactivateExpiredCodes();
+      res.json({ 
+        message: `${deactivatedCount} expired discount codes have been deactivated`,
+        deactivatedCount 
+      });
+    } catch (error) {
+      console.error("Error cleaning up expired codes:", error);
+      res.status(500).json({ message: "Failed to cleanup expired codes" });
+    }
+  });
+
+  // Pro member discount code routes
+  app.post('/api/business/discount-codes', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (!user?.isProMember) {
+        return res.status(403).json({ message: "Pro membership required" });
+      }
+
+      const { businessId, ...discountData } = req.body;
+      
+      // Verify the business belongs to the user
+      const business = await storage.getBusinessById(businessId);
+      if (!business || business.ownerId !== user.id) {
+        return res.status(403).json({ message: "You can only create discount codes for your own business" });
+      }
+
+      const discount = await discountCodeService.createBusinessDiscountCode({
+        ...discountData,
+        businessId,
+        createdBy: user.id
+      });
+
+      res.json(discount);
+    } catch (error) {
+      console.error("Error creating business discount code:", error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : "Failed to create discount code" 
+      });
+    }
+  });
+
+  app.get('/api/business/:businessId/discount-codes', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      const { businessId } = req.params;
+
+      // Verify the business belongs to the user
+      const business = await storage.getBusinessById(businessId);
+      if (!business || business.ownerId !== user.id) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const codes = await discountCodeService.getDiscountCodesByBusiness(businessId);
+      res.json(codes);
+    } catch (error) {
+      console.error("Error fetching business discount codes:", error);
+      res.status(500).json({ message: "Failed to fetch discount codes" });
+    }
+  });
+
+  app.put('/api/business/discount-codes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      const { id } = req.params;
+
+      // Get the discount code and verify ownership
+      const discount = await discountCodeService.getDiscountCodeById(id);
+      if (!discount || discount.createdBy !== user.id) {
+        return res.status(403).json({ message: "You can only edit your own discount codes" });
+      }
+
+      const updates = req.body;
+      const updatedDiscount = await discountCodeService.updateDiscountCode(id, updates);
+      res.json(updatedDiscount);
+    } catch (error) {
+      console.error("Error updating business discount code:", error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : "Failed to update discount code" 
+      });
+    }
+  });
+
+  app.delete('/api/business/discount-codes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      const { id } = req.params;
+
+      // Get the discount code and verify ownership
+      const discount = await discountCodeService.getDiscountCodeById(id);
+      if (!discount || discount.createdBy !== user.id) {
+        return res.status(403).json({ message: "You can only delete your own discount codes" });
+      }
+
+      const deleted = await discountCodeService.deleteDiscountCode(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Discount code not found" });
+      }
+
+      res.json({ message: "Discount code deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting business discount code:", error);
+      res.status(500).json({ message: "Failed to delete discount code" });
+    }
+  });
+
+  app.get('/api/business/discount-codes/:id/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      const { id } = req.params;
+
+      // Get the discount code and verify ownership
+      const discount = await discountCodeService.getDiscountCodeById(id);
+      if (!discount || discount.createdBy !== user.id) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const stats = await discountCodeService.getDiscountCodeStats(id);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching discount code stats:", error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to fetch stats" 
+      });
+    }
+  });
+
+  // Generate random discount code for Pro members
+  app.post('/api/business/discount-codes/generate-code', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (!user?.isProMember) {
+        return res.status(403).json({ message: "Pro membership required" });
+      }
+
+      const { length = 8 } = req.body;
+      const code = discountCodeService.generateRandomCode(length);
+      
+      // Check if code already exists
+      const existing = await discountCodeService.getDiscountCodeByCode(code);
+      if (existing) {
+        // Generate a new one if it exists
+        return res.json({ code: discountCodeService.generateRandomCode(length + 2) });
+      }
+      
+      res.json({ code });
+    } catch (error) {
+      console.error("Error generating discount code:", error);
+      res.status(500).json({ message: "Failed to generate discount code" });
     }
   });
 

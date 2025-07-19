@@ -1,5 +1,6 @@
 import {
   users,
+  businesses,
   passwordResetTokens,
   userIntegrations,
   categories,
@@ -16,6 +17,7 @@ import {
   appSettings,
   type User,
   type UpsertUser,
+  type Business,
   type PasswordResetToken,
   type InsertPasswordResetToken,
   type Category,
@@ -284,6 +286,9 @@ export interface IStorage {
   updateUserIntegration(userId: string, integration: any): Promise<any>;
   getUserIntegrations(userId: string): Promise<any[]>;
   removeUserIntegration(userId: string, platform: string): Promise<void>;
+  
+  // Business operations
+  getBusinessById(id: string): Promise<Business | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1784,6 +1789,12 @@ export class DatabaseStorage implements IStorage {
           eq(userIntegrations.platform, platform)
         )
       );
+  }
+
+  // Business operations
+  async getBusinessById(id: string): Promise<Business | undefined> {
+    const [business] = await db.select().from(businesses).where(eq(businesses.id, id));
+    return business;
   }
 }
 

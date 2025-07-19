@@ -269,6 +269,44 @@ export const notifications = pgTable("notifications", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Discount codes table
+export const discountCodes = pgTable("discount_codes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  code: varchar("code", { length: 50 }).notNull().unique(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  type: varchar("type").notNull(), // percentage, fixed_amount, free_shipping
+  value: integer("value").notNull(), // percentage (1-100) or amount in cents
+  minimumPurchase: integer("minimum_purchase").default(0), // minimum purchase in cents
+  maximumDiscount: integer("maximum_discount"), // maximum discount in cents (for percentage)
+  usageLimit: integer("usage_limit"), // null for unlimited
+  usedCount: integer("used_count").default(0),
+  isActive: boolean("is_active").default(true),
+  validFrom: timestamp("valid_from").defaultNow(),
+  validUntil: timestamp("valid_until"),
+  applicableCategories: jsonb("applicable_categories"), // array of category types
+  applicableBusinessTypes: jsonb("applicable_business_types"), // array of business types
+  excludeCategories: jsonb("exclude_categories"), // array of excluded categories
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  businessId: uuid("business_id").references(() => businesses.id), // null for global admin codes
+  scope: varchar("scope").default("business"), // 'global' for admin, 'business' for Pro members
+  specificProducts: jsonb("specific_products"), // array of specific product/service IDs
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Discount code usage tracking
+export const discountCodeUsage = pgTable("discount_code_usage", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  codeId: uuid("code_id").notNull().references(() => discountCodes.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  orderId: varchar("order_id"), // stripe payment intent id or order reference
+  discountAmount: integer("discount_amount").notNull(), // actual discount applied in cents
+  originalAmount: integer("original_amount").notNull(), // original order amount in cents
+  finalAmount: integer("final_amount").notNull(), // final amount after discount
+  usedAt: timestamp("used_at").defaultNow(),
+});
+
 // Relations
 export const businessesRelations = relations(businesses, ({ one, many }) => ({
   owner: one(users, {
@@ -279,6 +317,7 @@ export const businessesRelations = relations(businesses, ({ one, many }) => ({
   schedules: many(schedules),
   fillInRequests: many(fillInRequests),
   announcements: many(announcements),
+  discountCodes: many(discountCodes),
 }));
 
 export const employeesRelations = relations(employees, ({ one, many }) => ({
@@ -341,6 +380,29 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   }),
 }));
 
+export const discountCodesRelations = relations(discountCodes, ({ one, many }) => ({
+  creator: one(users, {
+    fields: [discountCodes.createdBy],
+    references: [users.id],
+  }),
+  business: one(businesses, {
+    fields: [discountCodes.businessId],
+    references: [businesses.id],
+  }),
+  usage: many(discountCodeUsage),
+}));
+
+export const discountCodeUsageRelations = relations(discountCodeUsage, ({ one }) => ({
+  code: one(discountCodes, {
+    fields: [discountCodeUsage.codeId],
+    references: [discountCodes.id],
+  }),
+  user: one(users, {
+    fields: [discountCodeUsage.userId],
+    references: [users.id],
+  }),
+}));
+
 // Type exports
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -364,3 +426,7 @@ export type Announcement = typeof announcements.$inferSelect;
 export type InsertAnnouncement = typeof announcements.$inferInsert;
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
+export type DiscountCode = typeof discountCodes.$inferSelect;
+export type InsertDiscountCode = typeof discountCodes.$inferInsert;
+export type DiscountCodeUsage = typeof discountCodeUsage.$inferSelect;
+export type InsertDiscountCodeUsage = typeof discountCodeUsage.$inferInsert;
