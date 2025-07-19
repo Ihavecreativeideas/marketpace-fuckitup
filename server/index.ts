@@ -17,7 +17,7 @@ import { notificationService, PurchaseNotificationData } from './notificationSer
 import { driverNotificationService } from './driverNotificationService';
 import { socialMediaRoutes } from './socialMediaRoutes';
 import { sendSMS } from './smsService';
-import { qrCodeService } from './qrCodeService';
+import { qrCodeService, QRCodeService } from './qrCodeService';
 import { tipRoutes } from './tipRoutes';
 import { subscriptionRoutes } from './subscriptionManager';
 import { subscriptionScheduler } from './subscriptionScheduler';
@@ -1178,6 +1178,12 @@ app.get('/api/booking/calendar/:providerId', async (req, res) => {
 app.post('/api/create-escrow-payment-intent', async (req, res) => {
   try {
     const { booking, customer } = req.body;
+    
+    // Validate amount
+    const amount = booking?.amount || 5000; // Default to $50 if not provided
+    if (isNaN(amount) || amount <= 0) {
+      return res.status(400).json({ success: false, error: 'Invalid amount provided' });
+    }
 
     if (!process.env.STRIPE_SECRET_KEY) {
       return res.status(500).json({
@@ -1190,7 +1196,7 @@ app.post('/api/create-escrow-payment-intent', async (req, res) => {
 
     // Create payment intent with application fee for MarketPace
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(booking.total * 100), // convert to cents
+      amount: amount, // amount already validated above
       currency: 'usd',
       metadata: {
         bookingId: booking.id || `booking_${Date.now()}`,
@@ -1390,6 +1396,41 @@ htmlRoutes.forEach(route => {
       }
     });
   });
+});
+
+// QR Code Generation API (available to ALL members)
+app.post('/api/qr/generate', async (req, res) => {
+  try {
+    const { purpose, relatedId, userId, geoValidation } = req.body;
+    
+    const qrData = {
+      purpose: purpose || 'general',
+      relatedId: relatedId || `item_${Date.now()}`,
+      userId: userId || 'anonymous',
+      timestamp: new Date().toISOString(),
+      geoValidation: geoValidation || { enabled: false }
+    };
+
+    // Generate verification URL
+    const verificationUrl = `${req.protocol}://${req.get('host')}/qr-verify?data=${Buffer.from(JSON.stringify(qrData)).toString('base64')}`;
+    
+    res.json({
+      success: true,
+      qrCode: {
+        id: `qr_${Date.now()}`,
+        verificationUrl,
+        data: qrData,
+        imageUrl: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(verificationUrl)}`
+      }
+    });
+
+  } catch (error: any) {
+    console.error('QR generation error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
 });
 
 // Catch-all for other HTML pages
