@@ -202,30 +202,35 @@ async function createSponsorRecord(session: Stripe.Checkout.Session) {
 async function createSponsorBenefits(sponsorId: number, tier: string) {
   const benefitTemplates = {
     supporter: [
-      { name: 'Personal Thank-You Letter', type: 'communication', recurring: false },
-      { name: 'Community Recognition', type: 'social_media', recurring: true },
-      { name: 'MarketPace Backer Badge', type: 'digital_badge', recurring: false }
+      { name: '6 months without sustainability fees', type: 'platform_benefit', recurring: false },
+      { name: '12 months free pro features', type: 'platform_benefit', recurring: false },
+      { name: 'Community supporter badge', type: 'digital_badge', recurring: false },
+      { name: 'Basic analytics dashboard', type: 'platform_feature', recurring: true }
     ],
     partner: [
-      { name: 'Zero Delivery Upcharge', type: 'platform_benefit', recurring: true },
-      { name: 'Monthly Check-in', type: 'communication', recurring: true }
+      { name: 'Homepage logo placement', type: 'marketing', recurring: true },
+      { name: 'Quarterly business showcase', type: 'promotion', recurring: true },
+      { name: 'Priority customer support', type: 'support', recurring: true },
+      { name: 'Local event promotion', type: 'marketing', recurring: true }
     ],
     champion: [
-      { name: 'Website Logo Feature', type: 'marketing', recurring: true },
-      { name: 'Social Media Shout-out', type: 'social_media', recurring: true },
-      { name: 'Custom Business Cards', type: 'physical_marketing', recurring: false },
-      { name: 'Monthly Spotlight', type: 'promotion', recurring: true }
+      { name: 'Lifetime Free Subscription', type: 'platform_benefit', recurring: false },
+      { name: 'Featured sponsor section with champion badge', type: 'marketing', recurring: true },
+      { name: 'Co-branded marketing materials', type: 'physical_marketing', recurring: false },
+      { name: 'MarketPace Merch', type: 'physical_marketing', recurring: false },
+      { name: 'Social media features', type: 'social_media', recurring: true }
     ],
     ambassador: [
-      { name: 'Personal Video from Founder', type: 'communication', recurring: false },
-      { name: 'Featured Banner Placement', type: 'marketing', recurring: true },
-      { name: 'Route Sponsorship', type: 'route_sponsor', recurring: true }
+      { name: 'Exclusive event sponsorships', type: 'event_sponsor', recurring: true },
+      { name: 'Premium placement in all channels', type: 'marketing', recurring: true },
+      { name: 'Custom integration opportunities', type: 'platform_integration', recurring: true },
+      { name: 'Custom video ads', type: 'video_marketing', recurring: true },
+      { name: 'Custom radar effects (like Browns Painting)', type: 'platform_customization', recurring: false }
     ],
     legacy: [
-      { name: 'Permanent Founding Partner Status', type: 'platform_recognition', recurring: false },
-      { name: 'VIP Updates & Roadmap', type: 'communication', recurring: true },
-      { name: 'Bi-monthly Route Sponsorship', type: 'route_sponsor', recurring: true },
-      { name: 'Press Mentions', type: 'marketing', recurring: true }
+      { name: 'Permanent legacy recognition', type: 'platform_recognition', recurring: false },
+      { name: 'First access to new features', type: 'platform_feature', recurring: true },
+      { name: 'Lifetime sponsor benefits', type: 'platform_benefit', recurring: false }
     ]
   };
 
