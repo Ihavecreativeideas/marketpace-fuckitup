@@ -173,6 +173,46 @@ export function registerSponsorshipRoutes(app: Express) {
     res.json({received: true});
   });
 
+  // Direct SMS test for sponsor notifications
+  app.post('/api/test-sponsor-sms', async (req, res) => {
+    try {
+      const testSponsorData = {
+        businessName: 'Test Business SMS',
+        contactName: 'SMS Test Contact',
+        email: 'smstest@example.com',
+        phone: '+15551234567',
+        tierName: 'Community Champion',
+        amount: 500,
+        website: 'https://testbusiness.com',
+        address: '123 Test St, Test City, ST 12345'
+      };
+
+      // Send the actual sponsor notification SMS to admin
+      const { sendSMS } = require('./smsService');
+      const adminSMSMessage = `New MarketPace sponsor: ${testSponsorData.businessName}
+Tier: ${testSponsorData.tierName} ($${testSponsorData.amount})
+Contact: ${testSponsorData.contactName}
+Email: ${testSponsorData.email}
+Phone: ${testSponsorData.phone}
+${testSponsorData.website ? `Website: ${testSponsorData.website}` : ''}
+
+Business info sent to your email.`;
+
+      const smsResult = await sendSMS('251-282-6662', adminSMSMessage);
+      
+      res.json({
+        success: true,
+        message: 'Sponsor notification SMS sent',
+        smsResult: smsResult,
+        testData: testSponsorData
+      });
+      
+    } catch (error) {
+      console.error('Test sponsor SMS error:', error);
+      res.status(500).json({ error: 'Failed to send test sponsor SMS' });
+    }
+  });
+
   // Test endpoint for sponsor notifications
   app.post('/api/test-sponsor-notifications', async (req, res) => {
     try {
@@ -403,12 +443,15 @@ ${website ? `Website: ${website}` : ''}
 
 Business info sent to your email.`;
 
-    await sendSMS('251-282-6662', adminSMSMessage);
+    // Send SMS notification to admin (you)
+    const smsResult = await sendSMS('251-282-6662', adminSMSMessage);
+    console.log(`Admin SMS notification sent: ${smsResult}`);
 
     // Send welcome SMS to sponsor - Simple format
     const sponsorSMSMessage = `Welcome to MarketPace ${contactName}. Thank you for becoming a ${tierName} sponsor. ${businessName} is now supporting our community platform. We will send updates on app progress and sponsor benefits. Contact: MarketPace.contact@gmail.com`;
 
-    await sendSMS(phone, sponsorSMSMessage);
+    const sponsorSMSResult = await sendSMS(phone, sponsorSMSMessage);
+    console.log(`Sponsor welcome SMS sent: ${sponsorSMSResult}`);
 
     // Send detailed email notification to admin (you)
     const adminEmailHTML = `
