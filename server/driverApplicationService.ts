@@ -372,12 +372,12 @@ export class DriverApplicationService {
   private async sendApprovalNotification(application: DriverApplication, username: string, password: string, employeeNumber: string): Promise<void> {
     try {
       // Dynamically import notification service to avoid circular dependencies
-      const { smsService } = await import('./smsService');
-      const { emailService } = await import('./emailService');
+      const { sendSMS } = await import('./smsService');
+      const { sendEmail } = await import('./emailService');
       
-      // Send SMS notification
+      // Send SMS notification  
       try {
-        await smsService.sendSMS(
+        await sendSMS(
           application.phone,
           `Congratulations! Your MarketPace driver application has been approved. Your credentials:\n\nUsername: ${username}\nPassword: ${password}\nEmployee ID: ${employeeNumber}\n\nAccess your driver dashboard at: https://www.marketpace.shop/driver-dashboard`
         );
@@ -401,7 +401,7 @@ export class DriverApplicationService {
           <p>Welcome to the MarketPace team!</p>
         `;
 
-        await emailService.sendEmail(
+        await sendEmail(
           application.email,
           'MarketPace Driver Application Approved',
           emailContent
@@ -417,12 +417,12 @@ export class DriverApplicationService {
   private async sendRejectionNotification(application: DriverApplication, reason: string): Promise<void> {
     try {
       // Dynamically import notification service to avoid circular dependencies
-      const { smsService } = await import('./smsService');
-      const { emailService } = await import('./emailService');
+      const { sendSMS } = await import('./smsService');
+      const { sendEmail } = await import('./emailService');
       
       // Send SMS notification
       try {
-        await smsService.sendSMS(
+        await sendSMS(
           application.phone,
           `Your MarketPace driver application has been reviewed. Unfortunately, we cannot proceed at this time. Reason: ${reason}. You may reapply in 30 days.`
         );
@@ -442,7 +442,7 @@ export class DriverApplicationService {
           <p>Thank you for your understanding.</p>
         `;
 
-        await emailService.sendEmail(
+        await sendEmail(
           application.email,
           'MarketPace Driver Application Update',
           emailContent
@@ -457,13 +457,13 @@ export class DriverApplicationService {
 
   private async sendApplicationConfirmation(application: DriverApplication): Promise<void> {
     try {
-      const { smsService } = await import('./smsService');
-      const { emailService } = await import('./emailService');
+      const { sendSMS } = await import('./smsService');
+      const { sendEmail } = await import('./emailService');
       
       // Send SMS confirmation if opted in
       if (application.notificationPreferences.smsNotifications) {
         try {
-          await smsService.sendSMS(
+          await sendSMS(
             application.phone,
             `Thank you ${application.firstName}! Your MarketPace driver application has been submitted successfully. We'll review it within 24-48 hours and notify you of the decision. Application ID: ${application.id}`
           );
@@ -491,7 +491,7 @@ export class DriverApplicationService {
             <p>Best regards,<br>The MarketPace Team</p>
           `;
 
-          await emailService.sendEmail(
+          await sendEmail(
             application.email,
             'MarketPace Driver Application Received',
             emailContent
