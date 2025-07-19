@@ -2248,6 +2248,205 @@ app.get('/qr-verify/:qrCodeId', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'qr-verify.html'));
 });
 
+// Rental confirmation page route
+app.get('/rental-confirmation', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'rental-confirmation.html'));
+});
+
+// Rental booking page route
+app.get('/rental-booking', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'rental-booking.html'));
+});
+
+// QR Rental test page route
+app.get('/qr-rental-test', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'qr-rental-test.html'));
+});
+
+// Rental creation API endpoint
+app.post('/api/rental/create', async (req, res) => {
+  try {
+    const { renterId, ownerId, itemId, itemName, duration, rentalCost, deliveryType } = req.body;
+    
+    // For demo/test users, create them if they don't exist
+    if (renterId.startsWith('test-') || ownerId.startsWith('test-')) {
+      const { users } = require('../shared/schema');
+      
+      if (renterId.startsWith('test-')) {
+        try {
+          await db.insert(users).values({
+            id: renterId,
+            email: null,
+            firstName: 'Test',
+            lastName: 'Renter',
+            profileImageUrl: null
+          }).onConflictDoNothing();
+        } catch (e) { 
+          console.log('Note: Could not create test renter user, continuing');
+        }
+      }
+      
+      if (ownerId.startsWith('test-')) {
+        try {
+          await db.insert(users).values({
+            id: ownerId,
+            email: null,
+            firstName: 'Test',
+            lastName: 'Owner',
+            profileImageUrl: null
+          }).onConflictDoNothing();
+        } catch (e) { 
+          console.log('Note: Could not create test owner user, continuing');
+        }
+      }
+    }
+    
+    // Create rental record (simplified for demo)
+    const rental = {
+      id: 'rental-' + Date.now(),
+      renterId,
+      ownerId,
+      itemId,
+      itemName,
+      duration,
+      rentalCost: parseFloat(rentalCost),
+      deliveryType,
+      status: 'confirmed',
+      totalCost: parseFloat(rentalCost) + (deliveryType === 'delivery' ? 15.00 : 0),
+      createdAt: new Date().toISOString()
+    };
+
+    // Generate QR codes for pickup and return
+    const qrService = new (await import('./qrCodeService')).QRCodeService();
+    
+    const pickupQR = await qrService.generateQRCode({
+      userId: renterId,
+      purpose: 'rental_pickup',
+      relatedId: rental.id,
+      expiryHours: 48
+    });
+
+    const returnQR = await qrService.generateQRCode({
+      userId: renterId,
+      purpose: 'rental_return',
+      relatedId: rental.id,
+      expiryHours: 168 // 7 days
+    });
+
+    res.json({
+      success: true,
+      rental,
+      qrCodes: {
+        pickup: pickupQR,
+        return: returnQR
+      },
+      message: 'Rental created successfully with QR codes for easy pickup and return!'
+    });
+
+  } catch (error) {
+    console.error('Rental creation error:', error);
+    res.json({
+      success: false,
+      error: 'Failed to create rental: ' + error.message
+    });
+  }
+});
+
+// Enhanced rental API with QR integration
+app.post('/api/rental/create', async (req, res) => {
+  try {
+    const { renterId, ownerId, itemId, itemName, duration, rentalCost, deliveryType } = req.body;
+    
+    if (!renterId || !ownerId || !itemId || !itemName || !rentalCost) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Missing required rental fields' 
+      });
+    }
+
+    const rentalId = `rental-${Date.now()}`;
+    const platformFee = rentalCost * 0.05; // 5% platform fee
+    const totalCost = rentalCost + platformFee;
+
+    // Create rental record
+    const rental = {
+      id: rentalId,
+      renterId,
+      ownerId,
+      itemId,
+      itemName,
+      duration: duration || '1 day',
+      rentalCost,
+      platformFee,
+      totalCost,
+      deliveryType: deliveryType || 'self_pickup',
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+
+    // Generate QR codes automatically
+    const pickupQR = await qrCodeService.generateQRCode({
+      userId: renterId,
+      purpose: 'rental_self_pickup',
+      relatedId: rentalId,
+      expiryHours: 48
+    });
+
+    const returnQR = await qrCodeService.generateQRCode({
+      userId: renterId,
+      purpose: 'rental_self_return',
+      relatedId: rentalId,
+      expiryHours: 72
+    });
+
+    res.json({ 
+      success: true, 
+      rental: {
+        ...rental,
+        pickupQR,
+        returnQR
+      }
+    });
+
+  } catch (error) {
+    console.error('Rental creation error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to create rental' 
+    });
+  }
+});
+
+app.get('/api/rental/:rentalId', async (req, res) => {
+  try {
+    const { rentalId } = req.params;
+    
+    // Get QR codes for this rental
+    const qrCodes = await qrCodeService.getQRCodesByRelatedId(rentalId);
+    
+    // Demo rental data (in production, this would come from database)
+    const rental = {
+      id: rentalId,
+      itemName: 'Professional Camera Kit',
+      ownerName: "Sarah's Photography",
+      ownerId: 'owner-123',
+      renterId: 'renter-456',
+      duration: '3 days',
+      rentalCost: 45.00,
+      platformFee: 2.25,
+      totalPaid: 47.25,
+      deliveryType: 'self_pickup',
+      status: 'pending',
+      qrCodes: qrCodes.qrCodes || []
+    };
+
+    res.json({ success: true, rental });
+  } catch (error) {
+    console.error('Error fetching rental:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch rental' });
+  }
+});
+
 // Notification Settings API endpoints
 app.get('/api/user/notification-settings', async (req, res) => {
   try {

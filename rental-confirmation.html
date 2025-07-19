@@ -3,15 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rental Confirmed - MarketPace</title>
+    <title>Rental Confirmation - MarketPace</title>
     <style>
-        body {
-            background: linear-gradient(135deg, #1a0b3d, #6b46c1);
-            color: white;
-            font-family: Arial, sans-serif;
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a0b3d 0%, #2d1b4e 25%, #4b0082 50%, #191970 75%, #00008b 100%);
+            color: #e2e8f0;
             min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         .header {
@@ -19,321 +29,526 @@
             margin-bottom: 30px;
         }
 
-        .logo {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
-        }
-
-        .confirmation-container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 30px;
-            backdrop-filter: blur(10px);
-        }
-
-        .success-badge {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 25px;
-            font-size: 16px;
+        .marketpace-logo {
+            background: linear-gradient(135deg, #2a0845, #1a0033);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 32px;
             font-weight: bold;
-            display: inline-block;
-            margin-bottom: 25px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px #4169e1;
+            filter: drop-shadow(0 0 10px #0066ff);
         }
 
-        .confirmation-details {
-            background: rgba(16, 185, 129, 0.1);
-            border-radius: 10px;
-            padding: 25px;
-            margin-bottom: 25px;
-            border: 2px solid rgba(16, 185, 129, 0.3);
+        .confirmation-card {
+            background: rgba(16, 24, 48, 0.9);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
 
-        .detail-line {
+        .rental-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .rental-title {
+            color: #00ffff;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .rental-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+        }
+
+        .rental-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .info-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .section-title {
+            color: #ffd700;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .info-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 15px;
-            padding: 8px 0;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .detail-line:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
+        .info-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: bold;
         }
 
-        .owner-contact {
-            background: rgba(0, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(0, 255, 255, 0.3);
+        .info-value {
+            color: #e2e8f0;
+            text-align: right;
         }
 
-        .next-steps {
-            background: rgba(139, 92, 246, 0.1);
-            border-radius: 10px;
-            padding: 20px;
+        .qr-section {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 102, 255, 0.1));
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .qr-title {
+            color: #00ffff;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .qr-instructions {
+            color: rgba(255, 255, 255, 0.8);
             margin-bottom: 20px;
-            border: 1px solid rgba(139, 92, 246, 0.3);
+            line-height: 1.5;
+        }
+
+        .qr-display {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .qr-item {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .qr-item-title {
+            color: #1a1a1a;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .qr-image {
+            width: 120px;
+            height: 120px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+
+        .qr-placeholder {
+            width: 120px;
+            height: 120px;
+            background: #f0f0f0;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px auto;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .qr-description {
+            color: #333;
+            font-size: 12px;
+            margin-top: 10px;
+            line-height: 1.3;
         }
 
         .action-buttons {
             display: flex;
-            gap: 15px;
             justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
             margin-top: 30px;
         }
 
         .btn {
-            padding: 15px 25px;
+            background: linear-gradient(135deg, #00ffff, #0066ff);
+            color: #000;
             border: none;
-            border-radius: 10px;
-            font-size: 16px;
+            padding: 15px 30px;
+            border-radius: 25px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #00ffff, #10b981);
-            color: #1a0b3d;
-        }
-
-        .btn-secondary {
-            background: rgba(139, 92, 246, 0.6);
-            color: white;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 20px rgba(0, 255, 255, 0.3);
         }
 
-        .icon {
-            display: inline-block;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-
-        .steps-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .steps-list li {
-            margin-bottom: 10px;
-            padding: 8px 0;
+        .btn-secondary {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
             color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .step-number {
-            background: #8b5cf6;
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 10px;
+        .status-indicator {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
             font-size: 12px;
             font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.5);
+        }
+
+        .status-active {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.5);
+        }
+
+        .next-steps {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.1));
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .next-steps-title {
+            color: #22c55e;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .step-list {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+
+        .step-item {
+            counter-increment: step-counter;
+            margin-bottom: 10px;
+            padding-left: 40px;
+            position: relative;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.4;
+        }
+
+        .step-item::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #22c55e;
+            color: #000;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .rental-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .qr-display {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo">
-            <img src="marketpace-logo-1.jpeg" alt="MarketPace" style="width: 100%; height: 100%; object-fit: contain;">
+    <div class="container">
+        <div class="header">
+            <div class="marketpace-logo">MarketPace</div>
         </div>
-        <h1>Rental Confirmed!</h1>
-        <div class="success-badge">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="icon">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="rgba(255, 255, 255, 0.2)"/>
-                <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2"/>
-            </svg>
-            Self-Pickup Rental Successful
-        </div>
-    </div>
 
-    <div class="confirmation-container">
-        <div class="confirmation-details">
-            <h3 style="color: #10b981; margin-bottom: 20px;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="icon">
-                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(16, 185, 129, 0.2)"/>
-                    <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.5"/>
-                </svg>
-                Rental Details
-            </h3>
-            
-            <div id="confirmationDetails">
-                <!-- Populated by JavaScript -->
+        <div class="confirmation-card">
+            <div class="rental-header">
+                <div class="rental-title">Rental Confirmed!</div>
+                <div class="rental-subtitle">Your QR codes have been generated for easy pickup and return</div>
             </div>
-        </div>
 
-        <div class="owner-contact">
-            <h4 style="color: #00ffff; margin-bottom: 15px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="icon">
-                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/>
-                    <path d="M16 2v4M8 2v4M3 10h18M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" stroke-width="1.5"/>
-                </svg>
-                Owner Contact Information
-            </h4>
-            <div style="background: rgba(255, 215, 0, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(255, 215, 0, 0.3);">
-                <p style="margin: 0 0 10px 0;"><strong>Contact Method:</strong> Message through MarketPace app</p>
-                <p style="margin: 0; font-size: 14px; color: #a0a0a0;">
-                    The owner will contact you within 2 hours to arrange pickup details. 
-                    You can also message them directly through the app.
-                </p>
+            <div class="rental-info">
+                <div class="info-section">
+                    <div class="section-title">Rental Details</div>
+                    <div class="info-row">
+                        <span class="info-label">Item:</span>
+                        <span class="info-value" id="itemName">Professional Camera Kit</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Owner:</span>
+                        <span class="info-value" id="ownerName">Sarah's Photography</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Duration:</span>
+                        <span class="info-value" id="duration">3 days</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Status:</span>
+                        <span class="info-value"><span class="status-indicator status-pending" id="status">Pending Pickup</span></span>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <div class="section-title">Payment Summary</div>
+                    <div class="info-row">
+                        <span class="info-label">Rental Cost:</span>
+                        <span class="info-value" id="rentalCost">$45.00</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Platform Fee:</span>
+                        <span class="info-value" id="platformFee">$2.25</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Delivery:</span>
+                        <span class="info-value" id="deliveryCost">Self Pickup</span>
+                    </div>
+                    <div class="info-row" style="border-bottom: 2px solid #00ffff; margin-top: 10px; padding-top: 10px;">
+                        <span class="info-label" style="color: #00ffff; font-size: 18px;">Total Paid:</span>
+                        <span class="info-value" style="color: #00ffff; font-size: 18px; font-weight: bold;" id="totalPaid">$47.25</span>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div class="next-steps">
-            <h4 style="color: #8b5cf6; margin-bottom: 15px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="icon">
-                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(139, 92, 246, 0.2)"/>
-                    <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="1.5"/>
-                </svg>
-                Next Steps
-            </h4>
-            <ol class="steps-list">
-                <li>
-                    <span class="step-number">1</span>
-                    Wait for owner to contact you with pickup location and time
-                </li>
-                <li>
-                    <span class="step-number">2</span>
-                    Meet at agreed location to pick up the item
-                </li>
-                <li>
-                    <span class="step-number">3</span>
-                    Enjoy your rental for the agreed duration
-                </li>
-                <li>
-                    <span class="step-number">4</span>
-                    Return item in same condition at agreed time
-                </li>
-                <li>
-                    <span class="step-number">5</span>
-                    Leave a review to help the community
-                </li>
-            </ol>
-        </div>
+            <div class="qr-section">
+                <div class="qr-title">Your QR Codes - Super Simple!</div>
+                <div class="qr-instructions">
+                    Show these QR codes to complete your rental. No typing, no forms - just scan and go!
+                </div>
+                
+                <div class="qr-display">
+                    <div class="qr-item">
+                        <div class="qr-item-title">PICKUP QR CODE</div>
+                        <div id="pickupQRPlaceholder" class="qr-placeholder">Generating...</div>
+                        <img id="pickupQRImage" class="qr-image" style="display: none;" alt="Pickup QR Code">
+                        <div class="qr-description">Show this to the owner when picking up the item</div>
+                    </div>
+                    
+                    <div class="qr-item">
+                        <div class="qr-item-title">RETURN QR CODE</div>
+                        <div id="returnQRPlaceholder" class="qr-placeholder">Generating...</div>
+                        <img id="returnQRImage" class="qr-image" style="display: none;" alt="Return QR Code">
+                        <div class="qr-description">Show this to the owner when returning the item</div>
+                    </div>
+                </div>
+            </div>
 
-        <div class="action-buttons">
-            <button class="btn btn-secondary" onclick="goToMessages()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="icon">
-                    <rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.5"/>
-                    <path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7" stroke="currentColor" stroke-width="1.5"/>
-                </svg>
-                Message Owner
-            </button>
-            
-            <button class="btn btn-primary" onclick="goToCommunity()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="icon">
-                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5"/>
-                    <path d="M3 12h18M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.5"/>
-                </svg>
-                Back to Community
-            </button>
-        </div>
+            <div class="next-steps">
+                <div class="next-steps-title">What Happens Next?</div>
+                <ol class="step-list">
+                    <li class="step-item">Meet the owner at the agreed pickup location</li>
+                    <li class="step-item">Show your PICKUP QR code - they scan it to confirm</li>
+                    <li class="step-item">Enjoy your rental! Payment is held securely in escrow</li>
+                    <li class="step-item">Return the item and show your RETURN QR code</li>
+                    <li class="step-item">Payment automatically releases to owner after confirmation</li>
+                </ol>
+            </div>
 
-        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-            <p style="color: #a0a0a0; font-size: 14px; margin-bottom: 10px;">
-                Thank you for choosing eco-friendly self-pickup!
-            </p>
-            <p style="color: #10b981; font-size: 12px; margin: 0;">
-                You've helped reduce carbon emissions by choosing self-pickup rental.
-            </p>
+            <div class="action-buttons">
+                <button class="btn" onclick="shareRental()">Share Rental Details</button>
+                <button class="btn btn-secondary" onclick="contactOwner()">Contact Owner</button>
+                <a href="/rentals.html" class="btn btn-secondary">View All Rentals</a>
+            </div>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            loadConfirmationData();
-        });
+        let rentalData = {
+            id: 'rental-' + Date.now(),
+            itemName: 'Professional Camera Kit',
+            ownerName: "Sarah's Photography",
+            ownerId: 'owner-123',
+            renterId: 'renter-456',
+            duration: '3 days',
+            rentalCost: 45.00,
+            platformFee: 2.25,
+            totalPaid: 47.25,
+            deliveryType: 'self_pickup',
+            status: 'pending'
+        };
 
-        function loadConfirmationData() {
-            const confirmationData = JSON.parse(localStorage.getItem('rentalConfirmation') || '{}');
+        // Load rental data from URL parameters or localStorage
+        function loadRentalData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const savedData = localStorage.getItem('currentRental');
             
-            if (!confirmationData.itemName) {
-                showError('No confirmation data found.');
-                return;
+            if (savedData) {
+                rentalData = { ...rentalData, ...JSON.parse(savedData) };
             }
 
-            // Populate confirmation details
-            document.getElementById('confirmationDetails').innerHTML = `
-                <div class="detail-line">
-                    <span><strong>Item:</strong></span>
-                    <span>${confirmationData.itemName}</span>
-                </div>
-                <div class="detail-line">
-                    <span><strong>Confirmation Number:</strong></span>
-                    <span style="color: #00ffff; font-family: monospace;">${confirmationData.confirmationNumber}</span>
-                </div>
-                <div class="detail-line">
-                    <span><strong>Duration:</strong></span>
-                    <span>${confirmationData.hours} hours</span>
-                </div>
-                <div class="detail-line">
-                    <span><strong>Rental Cost:</strong></span>
-                    <span>$${confirmationData.basePrice.toFixed(2)}</span>
-                </div>
-                <div class="detail-line">
-                    <span><strong>Delivery:</strong></span>
-                    <span style="color: #10b981;">FREE (Self-Pickup)</span>
-                </div>
-                <div class="detail-line">
-                    <span><strong>Platform Sustainability Fee (5%):</strong></span>
-                    <span>$${confirmationData.sustainabilityFee.toFixed(2)}</span>
-                </div>
-                <div class="detail-line">
-                    <span><strong>Stripe Processing Fee:</strong></span>
-                    <span>$${confirmationData.stripeFee.toFixed(2)}</span>
-                </div>
-                <div class="detail-line">
-                    <span><strong>Total Paid:</strong></span>
-                    <span style="color: #00ffff; font-weight: bold;">$${confirmationData.totalCost.toFixed(2)}</span>
-                </div>
-                <div class="detail-line" style="border-top: 1px solid rgba(0,255,255,0.3); padding-top: 10px; margin-top: 10px;">
-                    <span><strong>Owner Receives:</strong></span>
-                    <span style="color: #10b981; font-weight: bold;">$${confirmationData.ownerNet.toFixed(2)}</span>
-                </div>
-                <div class="detail-line">
-                    <span><strong>Pickup Method:</strong></span>
-                    <span style="color: #10b981;">Self-Pickup (Eco-Friendly)</span>
-                </div>
-                <div class="detail-line">
-                    <span><strong>Status:</strong></span>
-                    <span style="color: #10b981;">Confirmed - Awaiting Pickup</span>
-                </div>
-            `;
+            // Update display
+            document.getElementById('itemName').textContent = rentalData.itemName;
+            document.getElementById('ownerName').textContent = rentalData.ownerName;
+            document.getElementById('duration').textContent = rentalData.duration;
+            document.getElementById('rentalCost').textContent = `$${rentalData.rentalCost.toFixed(2)}`;
+            document.getElementById('platformFee').textContent = `$${rentalData.platformFee.toFixed(2)}`;
+            document.getElementById('totalPaid').textContent = `$${rentalData.totalPaid.toFixed(2)}`;
+            document.getElementById('deliveryCost').textContent = rentalData.deliveryType === 'self_pickup' ? 'Self Pickup' : 'MarketPace Delivery';
+            
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = formatStatus(rentalData.status);
+            statusElement.className = `status-indicator status-${rentalData.status === 'pending' ? 'pending' : 'active'}`;
         }
 
-        function goToMessages() {
-            window.location.href = '/messages.html';
+        function formatStatus(status) {
+            const statusMap = {
+                'pending': 'Pending Pickup',
+                'picked_up': 'Active Rental',
+                'returned': 'Returned',
+                'complete': 'Complete'
+            };
+            return statusMap[status] || status;
         }
 
-        function goToCommunity() {
-            window.location.href = '/community';
+        async function generateQRCodes() {
+            try {
+                // Generate Pickup QR Code
+                const pickupResponse = await fetch('/api/generate-qr', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: rentalData.renterId,
+                        purpose: 'rental_self_pickup',
+                        relatedId: rentalData.id,
+                        expiryHours: 48
+                    })
+                });
+
+                const pickupResult = await pickupResponse.json();
+
+                if (pickupResult.success) {
+                    document.getElementById('pickupQRPlaceholder').style.display = 'none';
+                    document.getElementById('pickupQRImage').style.display = 'block';
+                    document.getElementById('pickupQRImage').src = pickupResult.qrCode.qrImage;
+                    
+                    // Store QR data for sharing
+                    rentalData.pickupQRId = pickupResult.qrCode.id;
+                    rentalData.pickupQRUrl = pickupResult.qrCode.verificationUrl;
+                }
+
+                // Generate Return QR Code
+                const returnResponse = await fetch('/api/generate-qr', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: rentalData.renterId,
+                        purpose: 'rental_self_return',
+                        relatedId: rentalData.id,
+                        expiryHours: 72
+                    })
+                });
+
+                const returnResult = await returnResponse.json();
+
+                if (returnResult.success) {
+                    document.getElementById('returnQRPlaceholder').style.display = 'none';
+                    document.getElementById('returnQRImage').style.display = 'block';
+                    document.getElementById('returnQRImage').src = returnResult.qrCode.qrImage;
+                    
+                    // Store QR data for sharing
+                    rentalData.returnQRId = returnResult.qrCode.id;
+                    rentalData.returnQRUrl = returnResult.qrCode.verificationUrl;
+                }
+
+                // Save updated rental data
+                localStorage.setItem('currentRental', JSON.stringify(rentalData));
+
+            } catch (error) {
+                console.error('Error generating QR codes:', error);
+                document.getElementById('pickupQRPlaceholder').textContent = 'Error loading QR';
+                document.getElementById('returnQRPlaceholder').textContent = 'Error loading QR';
+            }
         }
 
-        function showError(message) {
-            document.querySelector('.confirmation-container').innerHTML = `
-                <div style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; padding: 25px; border-radius: 10px; text-align: center;">
-                    <h3>Error</h3>
-                    <p>${message}</p>
-                    <button onclick="window.location.href='/community'" style="background: white; color: #ef4444; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold;">
-                        Return to Community
-                    </button>
-                </div>
-            `;
+        function shareRental() {
+            const shareText = `MarketPace Rental Confirmation
+            
+Item: ${rentalData.itemName}
+Owner: ${rentalData.ownerName}
+Duration: ${rentalData.duration}
+Total: $${rentalData.totalPaid}
+
+Pickup QR: ${rentalData.pickupQRUrl || 'Generating...'}
+Return QR: ${rentalData.returnQRUrl || 'Generating...'}
+
+Easy rental with QR codes - no paperwork needed!`;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'MarketPace Rental Confirmation',
+                    text: shareText,
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(shareText).then(() => {
+                    alert('Rental details copied to clipboard!');
+                });
+            }
         }
+
+        function contactOwner() {
+            const message = `Hi ${rentalData.ownerName}! I've confirmed my rental of ${rentalData.itemName}. My QR codes are ready for pickup. When would be a good time to meet?`;
+            
+            // In production, this would open the MarketPace messaging system
+            alert(`Message to ${rentalData.ownerName}:\n\n${message}\n\n(This would open the MarketPace messaging system)`);
+        }
+
+        // Initialize page
+        window.addEventListener('load', () => {
+            loadRentalData();
+            generateQRCodes();
+        });
+
+        // Auto-refresh QR codes if they fail to load
+        setTimeout(() => {
+            if (document.getElementById('pickupQRImage').style.display === 'none' || 
+                document.getElementById('returnQRImage').style.display === 'none') {
+                console.log('Retrying QR code generation...');
+                generateQRCodes();
+            }
+        }, 3000);
     </script>
 </body>
 </html>
