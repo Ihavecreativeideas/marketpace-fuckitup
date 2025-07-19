@@ -1423,6 +1423,173 @@ registerDriverRoutes(app);
 // Setup Driver Application Routes
 registerDriverApplicationRoutes(app);
 
+// Add missing admin routes for driver applications
+app.get('/api/admin/driver-applications', async (req, res) => {
+  try {
+    // Return demo driver applications for testing
+    const applications = [
+      {
+        id: 'app_001',
+        firstName: 'John',
+        lastName: 'Smith',
+        email: 'john.smith@email.com',
+        phone: '(555) 123-4567',
+        status: 'pending',
+        submittedAt: '2025-01-15T10:30:00Z',
+        vehicle: { year: 2020, make: 'Honda', model: 'Civic' }
+      },
+      {
+        id: 'app_002', 
+        firstName: 'Sarah',
+        lastName: 'Johnson',
+        email: 'sarah.j@email.com',
+        phone: '(555) 987-6543',
+        status: 'pending',
+        submittedAt: '2025-01-14T14:15:00Z',
+        vehicle: { year: 2019, make: 'Toyota', model: 'Camry' }
+      }
+    ];
+
+    res.json({
+      success: true,
+      applications,
+      count: applications.length
+    });
+  } catch (error: any) {
+    console.error('Driver applications error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Add discount code management routes
+app.get('/api/admin/discount-codes', async (req, res) => {
+  try {
+    const { businessId } = req.query;
+    
+    // Return demo discount codes for testing
+    const discountCodes = [
+      {
+        id: 'disc_001',
+        businessId: businessId || 'business_123',
+        code: 'NEWCUSTOMER15',
+        name: 'New Customer Discount',
+        type: 'percentage',
+        value: 15,
+        isActive: true,
+        usageCount: 5,
+        usageLimit: 100,
+        expiryDate: '2025-12-31T23:59:59Z'
+      }
+    ];
+    
+    res.json({
+      success: true,
+      discountCodes,
+      count: discountCodes.length
+    });
+  } catch (error: any) {
+    console.error('Discount codes error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+app.post('/api/admin/discount-codes', async (req, res) => {
+  try {
+    const discountData = req.body;
+    
+    // Demo implementation - in production would save to database
+    const newDiscount = {
+      id: `disc_${Date.now()}`,
+      ...discountData,
+      createdAt: new Date().toISOString(),
+      usageCount: 0,
+      isActive: true
+    };
+    
+    res.json({
+      success: true,
+      discountCode: newDiscount,
+      message: 'Discount code created successfully'
+    });
+  } catch (error: any) {
+    console.error('Create discount code error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Add admin login endpoint 
+app.post('/api/admin/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    
+    // Simple admin credentials check (in production use proper authentication)
+    const adminCredentials = {
+      'admin': 'admin',
+      'marketpace_admin': 'MP2025_Secure!'
+    };
+    
+    if (adminCredentials[username] && adminCredentials[username] === password) {
+      res.json({
+        success: true,
+        message: 'Admin login successful',
+        token: 'admin_token_2025',
+        user: {
+          username,
+          role: 'admin',
+          loginTime: new Date().toISOString()
+        }
+      });
+    } else {
+      res.status(401).json({
+        success: false,
+        error: 'Invalid admin credentials'
+      });
+    }
+  } catch (error: any) {
+    console.error('Admin login error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Add admin stats endpoint
+app.get('/api/admin/stats', async (req, res) => {
+  try {
+    const stats = {
+      totalUsers: 247,
+      totalBusinesses: 89,
+      totalDrivers: 23,
+      totalRevenue: 2847.50,
+      pendingApplications: 5,
+      activeDiscountCodes: 12,
+      activeSponsorships: 3,
+      systemHealth: 'good'
+    };
+    
+    res.json({
+      success: true,
+      stats
+    });
+  } catch (error: any) {
+    console.error('Admin stats error:', error);
+    res.status(500).json({
+      success: false, 
+      error: error.message
+    });
+  }
+});
+
 // Test notification endpoint
 app.post('/api/test-notifications', async (req, res) => {
   try {

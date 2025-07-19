@@ -1304,14 +1304,18 @@
         async function refreshApplications() {
             try {
                 const response = await fetch('/api/admin/driver-applications');
-                const applications = await response.json();
                 
                 if (response.ok) {
-                    renderApplications(applications);
-                    updateApplicationStats(applications);
+                    const data = await response.json();
+                    if (data.success && data.applications) {
+                        console.log('Loaded applications:', data.applications.length);
+                        // Update application count displays
+                        const pendingCount = data.applications.filter(app => app.status === 'pending').length;
+                        document.getElementById('pending-count').textContent = pendingCount;
+                        document.getElementById('pending-applications').textContent = pendingCount;
+                    }
                 } else {
-                    console.log('Using demo data - server endpoint not available');
-                    // For demo purposes, show sample data
+                    console.log('API response not OK:', response.status);
                     updatePendingCount();
                 }
             } catch (error) {
