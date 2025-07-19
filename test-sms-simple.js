@@ -7,7 +7,7 @@ async function testSimpleMessage() {
   try {
     // Test with very simple, non-promotional message
     const message = await client.messages.create({
-      body: 'Hi this is a test',  // Simple, non-business message
+      body: 'Test message reply',  // Reply-style message
       from: process.env.TWILIO_PHONE_NUMBER,
       to: '+12512826662',
     });

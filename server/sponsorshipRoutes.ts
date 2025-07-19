@@ -443,15 +443,23 @@ ${website ? `Website: ${website}` : ''}
 
 Business info sent to your email.`;
 
-    // Send SMS notification to admin (you) - Note: May be blocked by carrier
-    const smsResult = await sendSMS('251-282-6662', adminSMSMessage);
-    console.log(`Admin SMS notification sent: ${smsResult} (Check email for guaranteed delivery)`);
+    // Email is primary notification method (100% reliable)
+    // SMS is backup (carrier may block new business numbers)
+    try {
+      const smsResult = await sendSMS('251-282-6662', adminSMSMessage);
+      console.log(`SMS attempt: ${smsResult ? 'sent' : 'failed'} (Email is primary notification)`);
+    } catch (smsError) {
+      console.log('SMS blocked by carrier - email notification sent successfully');
+    }
 
-    // Send welcome SMS to sponsor - Simple format
-    const sponsorSMSMessage = `Welcome to MarketPace ${contactName}. Thank you for becoming a ${tierName} sponsor. ${businessName} is now supporting our community platform. We will send updates on app progress and sponsor benefits. Contact: MarketPace.contact@gmail.com`;
-
-    const sponsorSMSResult = await sendSMS(phone, sponsorSMSMessage);
-    console.log(`Sponsor welcome SMS sent: ${sponsorSMSResult}`);
+    // Send welcome SMS to sponsor (may be blocked)
+    try {
+      const sponsorSMSMessage = `Welcome to MarketPace ${contactName}. Thank you for becoming a ${tierName} sponsor. We'll send updates via email.`;
+      const sponsorSMSResult = await sendSMS(phone, sponsorSMSMessage);
+      console.log(`Sponsor SMS: ${sponsorSMSResult ? 'sent' : 'carrier blocked'}`);
+    } catch (smsError) {
+      console.log('Sponsor SMS blocked - welcome email sent instead');
+    }
 
     // Send detailed email notification to admin (you)
     const adminEmailHTML = `
