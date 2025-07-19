@@ -274,8 +274,8 @@ All features are designed to strengthen local communities by keeping commerce lo
 
 ✓ **QR CODES & ESCROW SYSTEM UNIVERSALLY AVAILABLE TO ALL MEMBERS** (July 19, 2025)
 ✓ **CORE APP FEATURES**: QR code generation and escrow booking system now available to ALL MarketPace members, not Pro-only
-✓ **UNIVERSAL ACCESS**: Geo QR codes, escrow payments, and business scheduling accessible from main menu for all users
-✓ **PRO FEATURES LIMITED**: Only tip system and sponsor showcase remain Pro-exclusive for monetization and credibility
+✓ **UNIVERSAL ACCESS**: Geo QR codes and escrow payments accessible from main menu for all users
+✓ **PRO FEATURES**: Business scheduling, tip system, and sponsor showcase remain Pro-exclusive for monetization and credibility
 ✓ **DEMOCRATIC PLATFORM**: Core marketplace functions (QR verification, secure payments, booking calendars) available to everyone
 ✓ **MENU INTEGRATION**: Added QR Generator and Escrow System to MarketPace Features section with "CORE" and "SECURE" badges
 
