@@ -923,25 +923,25 @@
                                             <div style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">Local community</div>
                                         </div>
                                     </label>
-                                    <label style="display: flex; align-items: center; color: white; padding: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; cursor: pointer;">
-                                        <input type="checkbox" id="platformFacebook" style="margin-right: 12px; transform: scale(1.2);" />
+                                    <label style="display: flex; align-items: center; color: rgba(255, 255, 255, 0.5); padding: 10px; background: rgba(255, 255, 255, 0.02); border-radius: 8px; cursor: not-allowed; position: relative;">
+                                        <input type="checkbox" id="platformFacebook" style="margin-right: 12px; transform: scale(1.2);" disabled />
                                         <div>
-                                            <div style="font-weight: bold;">Facebook</div>
-                                            <div style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">Social network</div>
+                                            <div style="font-weight: bold;">Facebook <span style="background: rgba(255, 215, 0, 0.2); color: #ffd700; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; margin-left: 8px;">COMING SOON</span></div>
+                                            <div style="font-size: 12px; color: rgba(255, 255, 255, 0.4);">External promotion integration</div>
                                         </div>
                                     </label>
-                                    <label style="display: flex; align-items: center; color: white; padding: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; cursor: pointer;">
-                                        <input type="checkbox" id="platformInstagram" style="margin-right: 12px; transform: scale(1.2);" />
+                                    <label style="display: flex; align-items: center; color: rgba(255, 255, 255, 0.5); padding: 10px; background: rgba(255, 255, 255, 0.02); border-radius: 8px; cursor: not-allowed; position: relative;">
+                                        <input type="checkbox" id="platformInstagram" style="margin-right: 12px; transform: scale(1.2);" disabled />
                                         <div>
-                                            <div style="font-weight: bold;">Instagram</div>
-                                            <div style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">Visual content</div>
+                                            <div style="font-weight: bold;">Instagram <span style="background: rgba(255, 215, 0, 0.2); color: #ffd700; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; margin-left: 8px;">COMING SOON</span></div>
+                                            <div style="font-size: 12px; color: rgba(255, 255, 255, 0.4);">External promotion integration</div>
                                         </div>
                                     </label>
-                                    <label style="display: flex; align-items: center; color: white; padding: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; cursor: pointer;">
-                                        <input type="checkbox" id="platformGoogle" style="margin-right: 12px; transform: scale(1.2);" />
+                                    <label style="display: flex; align-items: center; color: rgba(255, 255, 255, 0.5); padding: 10px; background: rgba(255, 255, 255, 0.02); border-radius: 8px; cursor: not-allowed; position: relative;">
+                                        <input type="checkbox" id="platformGoogle" style="margin-right: 12px; transform: scale(1.2);" disabled />
                                         <div>
-                                            <div style="font-weight: bold;">Google Ads</div>
-                                            <div style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">Search results</div>
+                                            <div style="font-weight: bold;">Google Ads <span style="background: rgba(255, 215, 0, 0.2); color: #ffd700; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; margin-left: 8px;">COMING SOON</span></div>
+                                            <div style="font-size: 12px; color: rgba(255, 255, 255, 0.4);">External promotion integration</div>
                                         </div>
                                     </label>
                                 </div>
@@ -1215,9 +1215,9 @@
                     interests: document.getElementById('interests').value,
                     platforms: {
                         marketpace: document.getElementById('platformMarketPace').checked,
-                        facebook: document.getElementById('platformFacebook').checked,
-                        instagram: document.getElementById('platformInstagram').checked,
-                        google: document.getElementById('platformGoogle').checked
+                        facebook: false, // Coming soon
+                        instagram: false, // Coming soon
+                        google: false // Coming soon
                     }
                 };
                 
@@ -1252,7 +1252,12 @@
                 successMessage += `• Daily Budget: $${postData.promotionDetails.dailyBudget.toFixed(2)}\n`;
                 successMessage += `• Duration: ${postData.promotionDetails.duration} days\n`;
                 successMessage += `• Total Cost: $${postData.promotionDetails.totalCost.toFixed(2)}\n`;
-                successMessage += `• Platforms: ${Object.keys(postData.promotionDetails.platforms).filter(p => postData.promotionDetails.platforms[p]).join(', ')}\n`;
+                const selectedPlatforms = Object.keys(postData.promotionDetails.platforms).filter(p => postData.promotionDetails.platforms[p]);
+                const availablePlatforms = selectedPlatforms.length > 0 ? selectedPlatforms.join(', ') : 'MarketPace only';
+                successMessage += `• Platforms: ${availablePlatforms}\n`;
+                if (selectedPlatforms.length === 1 && selectedPlatforms[0] === 'marketpace') {
+                    successMessage += `• Note: External platform promotion (Facebook, Instagram, Google Ads) coming soon!\n`;
+                }
             }
             
             successMessage += `\nYour post will now appear in the community feed and on your public profile.`;
