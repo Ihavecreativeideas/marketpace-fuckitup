@@ -1382,7 +1382,7 @@ const htmlRoutes = [
   '/facebook-data-processor-configuration', '/facebook-business-verification-checklist',
   '/facebook-manual-integration-enhanced', '/facebook-connection-guide',
   '/provider-booking-calendar', '/customer-booking-calendar', '/escrow-payment', 
-  '/booking-confirmation', '/navigation-test'
+  '/booking-confirmation', '/navigation-test', '/unified-pro-page'
 ];
 
 htmlRoutes.forEach(route => {
