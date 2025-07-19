@@ -80,15 +80,16 @@ function showSellerPostingModal(postType = 'sale') {
                         <label class="delivery-option">
                             <input type="checkbox" name="deliveryMethods" value="seller-delivery">
                             <div class="option-content">
-                                <strong>I'll Deliver</strong> - You Set Price
-                                <small>You handle delivery and set the delivery fee</small>
+                                <strong>Private Party Delivery</strong> - You Set S&H Fee
+                                <small>You provide delivery service (not MarketPace delivery) and set shipping & handling fee. Marketplace still collects 5% commission.</small>
                             </div>
                         </label>
                     </div>
                     
                     <div class="custom-delivery-fee" id="customDeliveryFee" style="display: none;">
-                        <label>Your delivery fee:</label>
-                        <input type="number" id="sellerDeliveryFee" placeholder="Enter delivery fee" min="0" step="0.01">
+                        <label>Your S&H fee:</label>
+                        <input type="number" id="sellerDeliveryFee" placeholder="Enter shipping & handling fee" min="0" step="0.01">
+                        <small style="color: #ffc107; display: block; margin-top: 5px;">Note: MarketPace still collects 5% commission on the item price</small>
                     </div>
                 </div>
                 

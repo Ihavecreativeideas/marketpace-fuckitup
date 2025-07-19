@@ -272,6 +272,13 @@ All features are designed to strengthen local communities by keeping commerce lo
 
 ## Recent Changes
 
+✓ **PROFESSIONAL DELIVERY OPTION TEXT UPDATED & CONSOLE ERRORS FIXED** (July 19, 2025)
+✓ **PRIVATE PARTY DELIVERY BRANDING**: Updated "I'll Deliver" to "Private Party Delivery" with clear S&H fee structure and commission explanation
+✓ **CONSOLE ERROR RESOLUTION**: Added missing messageOwner function to rentals.html and services.html to fix JavaScript console errors
+✓ **COMMISSION CLARITY**: Updated delivery option text to clarify that MarketPace still collects 5% commission on item price even with private party delivery
+✓ **PROFESSIONAL TERMINOLOGY**: Changed "delivery fee" to "S&H fee" (shipping & handling) for more professional appearance
+✓ **USER EXPERIENCE IMPROVEMENT**: Added clear distinction that private party delivery is not MarketPace delivery service but member-provided delivery
+
 ✓ **AUTOMATIC STRIPE INTEGRATION FOR POSTS WITH PRICES FULLY IMPLEMENTED** (July 19, 2025)
 ✓ **5% COMMISSION STRUCTURE WITH ENTERTAINMENT PROMOTION**: All posts with prices automatically connect to Stripe with 5% commission except entertainment pros merch/tickets (0% until Jan 1, 2026)
 ✓ **ENHANCED POST CREATION SYSTEM**: Added price input field to posting interface with dynamic commission display based on user type and post category

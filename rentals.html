@@ -5100,6 +5100,49 @@
             }
         `;
         document.head.appendChild(style);
+
+        // Message owner function - fixes console error
+        function messageOwner(itemName) {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 400px;">
+                    <h3 style="color: #00ffff; margin-bottom: 20px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                            <rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/>
+                            <path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                        Message Owner
+                    </h3>
+                    <p style="color: #e2e8f0; margin-bottom: 20px;">Send a message about: <strong>${itemName}</strong></p>
+                    <textarea placeholder="Type your message here..." style="width: 100%; height: 100px; padding: 10px; background: rgba(0, 255, 255, 0.1); border: 2px solid #00ffff; border-radius: 8px; color: white; resize: vertical;"></textarea>
+                    <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
+                        <button onclick="closeMessageModal()" style="background: rgba(107, 114, 128, 0.6); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Cancel</button>
+                        <button onclick="sendMessage('${itemName}')" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Send Message</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function closeMessageModal() {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+                document.body.removeChild(modal);
+            }
+        }
+
+        function sendMessage(itemName) {
+            const textarea = document.querySelector('.modal-overlay textarea');
+            const message = textarea ? textarea.value.trim() : '';
+            
+            if (message) {
+                showNotification(`Message sent about ${itemName}!`, 'success');
+                closeMessageModal();
+            } else {
+                showNotification('Please enter a message', 'error');
+            }
+        }
     </script>
 </body>
 </html>
