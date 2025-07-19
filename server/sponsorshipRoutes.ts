@@ -178,17 +178,50 @@ export function registerSponsorshipRoutes(app: Express) {
     try {
       const { testType, adminPhone, adminEmail } = req.body;
       
-      if (testType === 'admin_notifications') {
-        // Send test SMS to admin
-        const testSMSMessage = `🧪 TEST NOTIFICATION from MarketPace
+      if (testType === 'simple_test') {
+        // Send very simple clean message
+        const simpleMessage = `Hello. This is a test message from MarketPace. Reply if you receive this.`;
+        
+        const { smsService } = require('./smsService');
+        
+        let smsResult = false;
+        try {
+          const message = await smsService.client.messages.create({
+            body: simpleMessage,
+            from: process.env.TWILIO_PHONE_NUMBER,
+            to: adminPhone,
+          });
+          console.log(`Simple SMS sent - SID: ${message.sid} to ${adminPhone}`);
+          smsResult = true;
+        } catch (error) {
+          console.error('Simple SMS Error:', error);
+          smsResult = false;
+        }
+        
+        res.json({
+          success: true,
+          message: 'Simple test message sent',
+          results: { sms: smsResult, phone: adminPhone },
+          sid: smsResult ? 'Check console for SID' : null
+        });
+        
+      } else if (testType === 'admin_notifications') {
+        // Format phone number properly
+        const formattedPhone = adminPhone.replace(/[^\d]/g, '');
+        const finalPhone = formattedPhone.length === 10 ? `+1${formattedPhone}` : `+${formattedPhone}`;
+        
+        console.log(`Attempting to send SMS to: ${finalPhone} (original: ${adminPhone})`);
+        
+        // Send test SMS to admin using direct smsService method
+        const testSMSMessage = `MarketPace SMS TEST
 
-This is a test message to verify SMS notifications are working for sponsor submissions.
+This is a test notification for your phone ${finalPhone}.
 
-Phone: ${adminPhone}
-Email: ${adminEmail}
 Time: ${new Date().toLocaleString()}
 
-If you receive this, SMS notifications are working! ✅`;
+If you receive this, notifications work!`;
+
+        console.log(`SMS Message to send: ${testSMSMessage}`);
 
         // Send test email to admin
         const testEmailHTML = `
@@ -222,11 +255,28 @@ If you receive this, SMS notifications are working! ✅`;
         </div>`;
 
         // Import notification services
-        const { sendSMS } = require('./smsService');
+        const { smsService } = require('./smsService');
         const { sendEmail } = require('./emailService');
 
-        // Send both notifications
-        const smsResult = await sendSMS(adminPhone, testSMSMessage);
+        // Send SMS using direct service method
+        let smsResult = false;
+        try {
+          if (smsService.isEnabled()) {
+            const message = await smsService.client.messages.create({
+              body: testSMSMessage,
+              from: process.env.TWILIO_PHONE_NUMBER,
+              to: finalPhone,
+            });
+            console.log(`SMS sent - SID: ${message.sid}, Status: ${message.status}, To: ${finalPhone}`);
+            smsResult = true;
+          } else {
+            console.log('SMS service not enabled - check Twilio credentials');
+            smsResult = false;
+          }
+        } catch (smsError) {
+          console.error('Direct SMS Error:', smsError);
+          smsResult = false;
+        }
         const emailResult = await sendEmail({
           to: adminEmail,
           subject: '🧪 TEST: MarketPace Notification System Working',
@@ -248,6 +298,88 @@ If you receive this, SMS notifications are working! ✅`;
     } catch (error) {
       console.error('Test notification error:', error);
       res.status(500).json({ error: 'Failed to send test notifications' });
+    }
+  });
+
+  // Debug endpoint to check Twilio account status and phone number verification
+  app.post('/api/debug-twilio-status', async (req, res) => {
+    try {
+      const { phone } = req.body;
+      const { smsService } = require('./smsService');
+      
+      if (!smsService.isEnabled()) {
+        return res.json({
+          status: 'disabled',
+          message: 'Twilio SMS service not configured',
+          hasCredentials: {
+            accountSid: !!process.env.TWILIO_ACCOUNT_SID,
+            authToken: !!process.env.TWILIO_AUTH_TOKEN,
+            phoneNumber: !!process.env.TWILIO_PHONE_NUMBER
+          }
+        });
+      }
+
+      // Check Twilio account info
+      let accountInfo = {};
+      try {
+        const account = await smsService.client.api.accounts(process.env.TWILIO_ACCOUNT_SID).fetch();
+        accountInfo = {
+          status: account.status,
+          type: account.type,
+          dateCreated: account.dateCreated
+        };
+      } catch (err) {
+        console.error('Account fetch error:', err);
+        accountInfo = { error: 'Could not fetch account info' };
+      }
+
+      // Try to get verified phone numbers (for trial accounts)
+      let verifiedNumbers = [];
+      try {
+        const numbers = await smsService.client.outgoingCallerIds.list({ limit: 20 });
+        verifiedNumbers = numbers.map(num => num.phoneNumber);
+      } catch (err) {
+        console.error('Verified numbers fetch error:', err);
+      }
+
+      // Send a basic test message
+      let testResult = null;
+      try {
+        const testMsg = await smsService.client.messages.create({
+          body: `TWILIO TEST: MarketPace SMS verification for ${phone} at ${new Date().toLocaleTimeString()}`,
+          from: process.env.TWILIO_PHONE_NUMBER,
+          to: phone,
+        });
+        testResult = {
+          sid: testMsg.sid,
+          status: testMsg.status,
+          to: testMsg.to,
+          from: testMsg.from,
+          dateCreated: testMsg.dateCreated
+        };
+      } catch (err) {
+        testResult = { error: err.message, code: err.code };
+      }
+
+      res.json({
+        status: 'enabled',
+        accountInfo,
+        verifiedNumbers,
+        testResult,
+        phone,
+        troubleshooting: {
+          isTrialAccount: accountInfo.type === 'Trial',
+          phoneIsVerified: verifiedNumbers.includes(phone),
+          recommendations: [
+            'For trial accounts, verify your phone number in Twilio Console',
+            'Check your phone for carrier spam filtering',
+            'Try sending from Twilio Console directly to test delivery'
+          ]
+        }
+      });
+    } catch (error) {
+      console.error('Debug Twilio error:', error);
+      res.status(500).json({ error: error.message });
     }
   });
 }
