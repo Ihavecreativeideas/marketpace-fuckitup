@@ -2268,6 +2268,23 @@ app.get('/driver-dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'driver-dashboard.html'));
 });
 
+// MarketPace Express routes
+app.get('/marketpace-express', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'marketpace-express.html'));
+});
+
+app.get('/express/create-event', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'express-create-event.html'));
+});
+
+app.get('/express/schedule-builder', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'express-schedule-builder.html'));
+});
+
+app.get('/express/live-dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'express-live-dashboard.html'));
+});
+
 // Driver QR verification API
 app.post('/api/driver/verify-qr', async (req, res) => {
   try {
@@ -2391,6 +2408,148 @@ app.post('/api/driver/accept-route', async (req, res) => {
     res.json({
       success: false,
       error: 'Failed to accept route: ' + error.message
+    });
+  }
+});
+
+// MarketPace Express API endpoints
+app.post('/api/express/create-event', async (req, res) => {
+  try {
+    const { 
+      eventName, 
+      eventType, 
+      startDate, 
+      endDate, 
+      venueAddress, 
+      gpsRange,
+      features,
+      staffRoles 
+    } = req.body;
+    
+    // Create event with generated ID
+    const eventId = `MP-EXP-${Date.now()}`;
+    const newEvent = {
+      id: eventId,
+      name: eventName,
+      type: eventType,
+      startDate,
+      endDate,
+      venue: {
+        address: venueAddress,
+        gpsRange: parseInt(gpsRange)
+      },
+      features: features || {
+        autoConfirmation: true,
+        offlineScanning: true,
+        liveMap: true,
+        smsNotifications: true
+      },
+      staffRoles: staffRoles || ['performers', 'vendors', 'staff', 'volunteers'],
+      status: 'draft',
+      createdAt: new Date().toISOString()
+    };
+
+    res.json({
+      success: true,
+      message: `Event "${eventName}" created successfully!`,
+      event: newEvent,
+      nextSteps: {
+        scheduleBuilder: `/express/schedule-builder?eventId=${eventId}`,
+        liveDashboard: `/express/live-dashboard?eventId=${eventId}`
+      }
+    });
+
+  } catch (error) {
+    console.error('Event creation error:', error);
+    res.json({
+      success: false,
+      error: 'Failed to create event: ' + error.message
+    });
+  }
+});
+
+app.get('/api/express/events', async (req, res) => {
+  try {
+    // Demo events data
+    const events = [
+      {
+        id: 'MP-EXP-DEMO-001',
+        name: 'Gulf Coast Music Festival 2025',
+        type: 'Music Festival',
+        startDate: '2025-08-15',
+        endDate: '2025-08-17',
+        status: 'active',
+        staffCount: 247,
+        checkinRate: 89,
+        livePayroll: 12480,
+        venues: 15
+      },
+      {
+        id: 'MP-EXP-DEMO-002', 
+        name: 'Songwriter Showcase Weekend',
+        type: 'Concert',
+        startDate: '2025-07-25',
+        endDate: '2025-07-27',
+        status: 'planning',
+        staffCount: 150,
+        checkinRate: 0,
+        livePayroll: 0,
+        venues: 8
+      }
+    ];
+
+    res.json({
+      success: true,
+      events,
+      totalEvents: events.length
+    });
+
+  } catch (error) {
+    console.error('Events fetch error:', error);
+    res.json({
+      success: false,
+      error: 'Failed to fetch events: ' + error.message
+    });
+  }
+});
+
+app.post('/api/express/qr-checkin', async (req, res) => {
+  try {
+    const { eventId, staffId, qrCode, location, action } = req.body;
+    
+    // Simulate GPS validation
+    const gpsValid = Math.random() > 0.1; // 90% success rate
+    
+    if (!gpsValid) {
+      return res.json({
+        success: false,
+        error: 'GPS validation failed - you are outside the allowed check-in area',
+        location: location
+      });
+    }
+
+    // Process check-in/out
+    const checkinResult = {
+      success: true,
+      eventId,
+      staffId,
+      action, // 'checkin' or 'checkout'
+      timestamp: new Date().toISOString(),
+      location: location,
+      earnings: action === 'checkout' ? Math.floor(Math.random() * 100) + 50 : null,
+      message: action === 'checkin' ? 'Successfully checked in!' : 'Successfully checked out!'
+    };
+
+    // Send SMS notification (simulated)
+    console.log(`SMS sent to staff ${staffId}: ${checkinResult.message} at ${new Date().toLocaleTimeString()}`);
+
+    res.json(checkinResult);
+
+  } catch (error) {
+    console.error('QR check-in error:', error);
+    res.json({
+      success: false,
+      error: 'Failed to process check-in: ' + error.message
     });
   }
 });

@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Event - MarketPace Express™</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0a0a23 0%, #1a1a3a 50%, #0a0a23 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .create-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .create-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .create-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ffff, #0066ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .create-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+
+        .event-form {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #00ffff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 0 2px rgba(0, 255, 255, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #00ffff;
+        }
+
+        .venue-builder {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .venue-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .venue-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #00ffff, #0066ff);
+            color: #0a0a23;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #666, #444);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #00ff88, #00cc6a);
+            color: #0a0a23;
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ff4444, #cc0000);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .feature-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 25px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: #00ffff;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 21px;
+            height: 21px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(25px);
+        }
+
+        @media (max-width: 768px) {
+            .create-container {
+                padding: 15px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="create-container">
+        <!-- Header -->
+        <div class="create-header">
+            <div class="create-title">Create New Event</div>
+            <div class="create-subtitle">Elite Event & Festival Management Setup</div>
+        </div>
+
+        <!-- Event Creation Form -->
+        <div class="event-form">
+            <!-- Basic Event Information -->
+            <div class="form-section">
+                <div class="section-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#00ffff">
+                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+                    </svg>
+                    Basic Event Information
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Event Name</label>
+                        <input type="text" class="form-input" id="eventName" placeholder="Gulf Coast Music Festival 2025">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Event Type</label>
+                        <select class="form-select" id="eventType">
+                            <option>Music Festival</option>
+                            <option>Food Festival</option>
+                            <option>Arts & Crafts Fair</option>
+                            <option>Concert</option>
+                            <option>Conference</option>
+                            <option>Pop-up Market</option>
+                            <option>Street Fair</option>
+                            <option>Nonprofit Event</option>
+                            <option>Corporate Event</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" class="form-input" id="startDate">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">End Date</label>
+                        <input type="date" class="form-input" id="endDate">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Event Description</label>
+                    <textarea class="form-textarea" id="eventDescription" placeholder="Describe your event, key features, and what makes it special..."></textarea>
+                </div>
+            </div>
+
+            <!-- Venue & Location Setup -->
+            <div class="form-section">
+                <div class="section-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#00ffff">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                    Venue & Location Setup
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Main Venue Address</label>
+                        <input type="text" class="form-input" id="venueAddress" placeholder="123 Festival Grounds, Gulf Shores, AL">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">GPS Validation Range</label>
+                        <select class="form-select" id="gpsRange">
+                            <option value="50">50 meters (strict)</option>
+                            <option value="100" selected>100 meters (recommended)</option>
+                            <option value="200">200 meters (flexible)</option>
+                            <option value="500">500 meters (very flexible)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="venue-builder">
+                    <label class="form-label">Additional Venues/Stages</label>
+                    <div id="venueList">
+                        <div class="venue-item">
+                            <input type="text" class="venue-input" placeholder="Venue Name">
+                            <input type="text" class="venue-input" placeholder="GPS Coordinates or Address">
+                            <button class="btn btn-danger" onclick="removeVenue(this)">Remove</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="addVenue()">Add Another Venue</button>
+                </div>
+            </div>
+
+            <!-- Staff Roles & Categories -->
+            <div class="form-section">
+                <div class="section-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#00ffff">
+                        <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A3.001 3.001 0 0 0 17 6.5c-1.18 0-2.23.68-2.74 1.74L16 8.5v6H8V9c0-1.1-.9-2-2-2s-2 .9-2 2v11h12zm-8-5h2v-3h-2v3z"/>
+                    </svg>
+                    Staff Roles & Categories
+                </div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="performers" checked>
+                        <label for="performers">Performers/Artists</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="vendors" checked>
+                        <label for="vendors">Vendors/Booths</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="staff" checked>
+                        <label for="staff">Paid Staff</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="volunteers" checked>
+                        <label for="volunteers">Volunteers</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="security">
+                        <label for="security">Security</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="tech">
+                        <label for="tech">Technical Crew</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="catering">
+                        <label for="catering">Catering Staff</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cleanup">
+                        <label for="cleanup">Cleanup Crew</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Features -->
+            <div class="form-section">
+                <div class="section-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#00ffff">
+                        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                    </svg>
+                    Advanced Features
+                </div>
+                
+                <div class="feature-toggle">
+                    <div>
+                        <strong>Automated Confirmation</strong>
+                        <br><small>QR scans automatically confirm attendance and trigger payouts</small>
+                    </div>
+                    <div class="toggle-switch active" onclick="toggleFeature(this)">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="feature-toggle">
+                    <div>
+                        <strong>Offline QR Scanning</strong>
+                        <br><small>Allow QR scanning without internet connection</small>
+                    </div>
+                    <div class="toggle-switch active" onclick="toggleFeature(this)">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="feature-toggle">
+                    <div>
+                        <strong>Real-Time Live Map</strong>
+                        <br><small>Show check-in status across all venues on live dashboard</small>
+                    </div>
+                    <div class="toggle-switch active" onclick="toggleFeature(this)">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="feature-toggle">
+                    <div>
+                        <strong>SMS Notifications</strong>
+                        <br><small>Send automatic shift reminders and check-in confirmations</small>
+                    </div>
+                    <div class="toggle-switch active" onclick="toggleFeature(this)">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="form-grid" style="margin-top: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Early Check-In Buffer (minutes)</label>
+                        <select class="form-select" id="earlyBuffer">
+                            <option value="0">No early check-in</option>
+                            <option value="15" selected>15 minutes</option>
+                            <option value="30">30 minutes</option>
+                            <option value="60">1 hour</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Late Check-In Grace Period (minutes)</label>
+                        <select class="form-select" id="lateBuffer">
+                            <option value="0">No grace period</option>
+                            <option value="15" selected>15 minutes</option>
+                            <option value="30">30 minutes</option>
+                            <option value="60">1 hour</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment & Payout Settings -->
+            <div class="form-section">
+                <div class="section-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#00ffff">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    Payment & Payout Settings
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Default Pay Type</label>
+                        <select class="form-select" id="payType">
+                            <option value="hourly">Hourly Rate</option>
+                            <option value="flat">Flat Rate</option>
+                            <option value="booth">Booth Fee</option>
+                            <option value="mixed">Mixed (set per role)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Payout Schedule</label>
+                        <select class="form-select" id="payoutSchedule">
+                            <option value="daily">Daily</option>
+                            <option value="weekly" selected>Weekly</option>
+                            <option value="biweekly">Bi-weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="event-end">After Event Completion</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="saveAsDraft()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/>
+                    </svg>
+                    Save as Draft
+                </button>
+                <button class="btn btn-success" onclick="createEvent()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                    </svg>
+                    Create Event
+                </button>
+                <button class="btn btn-primary" onclick="createAndSchedule()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    Create & Start Scheduling
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function addVenue() {
+            const venueList = document.getElementById('venueList');
+            const venueItem = document.createElement('div');
+            venueItem.className = 'venue-item';
+            venueItem.innerHTML = `
+                <input type="text" class="venue-input" placeholder="Venue Name">
+                <input type="text" class="venue-input" placeholder="GPS Coordinates or Address">
+                <button class="btn btn-danger" onclick="removeVenue(this)">Remove</button>
+            `;
+            venueList.appendChild(venueItem);
+        }
+
+        function removeVenue(button) {
+            button.parentElement.remove();
+        }
+
+        function toggleFeature(toggle) {
+            toggle.classList.toggle('active');
+        }
+
+        function saveAsDraft() {
+            showNotification('Event saved as draft', 'success');
+        }
+
+        function createEvent() {
+            const eventName = document.getElementById('eventName').value;
+            if (!eventName) {
+                showNotification('Please enter an event name', 'error');
+                return;
+            }
+            showNotification(`Creating event: ${eventName}...`, 'success');
+            setTimeout(() => {
+                window.location.href = '/express/live-dashboard';
+            }, 2000);
+        }
+
+        function createAndSchedule() {
+            const eventName = document.getElementById('eventName').value;
+            if (!eventName) {
+                showNotification('Please enter an event name', 'error');
+                return;
+            }
+            showNotification(`Creating event: ${eventName} and opening schedule builder...`, 'success');
+            setTimeout(() => {
+                window.location.href = '/express/schedule-builder';
+            }, 2000);
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'linear-gradient(45deg, #00ff88, #00cc6a)' : 
+                            type === 'error' ? 'linear-gradient(45deg, #ff4444, #cc0000)' : 
+                            'linear-gradient(45deg, #4169e1, #0066ff)'};
+                color: ${type === 'error' ? 'white' : '#0a0a23'};
+                padding: 15px 20px;
+                border-radius: 10px;
+                font-weight: bold;
+                z-index: 1000;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+                transform: translateX(100%);
+                transition: all 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Initialize form
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default dates
+            const today = new Date();
+            const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+            
+            document.getElementById('startDate').value = today.toISOString().split('T')[0];
+            document.getElementById('endDate').value = nextWeek.toISOString().split('T')[0];
+            
+            showNotification('Event creation form loaded', 'success');
+        });
+    </script>
+</body>
+</html>
