@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sponsor Information - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a0b3d 0%, #2d1b4e 25%, #4b0082 50%, #191970 75%, #00008b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(15, 23, 77, 0.8);
+            border-radius: 20px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ffff, #8a2be2, #00ffff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% 200%;
+            animation: shimmer 3s ease-in-out infinite;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .tier-info {
+            background: rgba(15, 23, 77, 0.9);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .tier-name {
+            font-size: 1.8rem;
+            color: #ffd700;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .tier-price {
+            font-size: 2rem;
+            color: #00ffff;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .sponsor-form {
+            background: rgba(15, 23, 77, 0.9);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #00ffff;
+            font-size: 1.1rem;
+        }
+
+        .required {
+            color: #ff6b6b;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(45, 32, 95, 0.8);
+            color: #e2e8f0;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #a0a0a0;
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            background: linear-gradient(45deg, #8a2be2, #da70d6);
+            color: #fff;
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .logo-preview {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .logo-preview img {
+            max-width: 200px;
+            max-height: 100px;
+            border-radius: 10px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ffff, #8a2be2);
+            color: #fff;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 20px;
+        }
+
+        .checkout-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+
+        .checkout-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .back-btn {
+            color: #00ffff;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .back-btn:hover {
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0%; }
+            50% { background-position: -200% 0%; }
+            100% { background-position: 200% 0%; }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #00ffff;
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .sponsor-form {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="sponsorship.html" class="back-btn">← Back to Sponsorship</a>
+        
+        <div class="header">
+            <h1>Sponsor Information</h1>
+            <p>Please provide your information to complete your sponsorship</p>
+        </div>
+
+        <div class="tier-info" id="tierInfo">
+            <div class="tier-name" id="tierName">Community Champion</div>
+            <div class="tier-price" id="tierPrice">$500</div>
+        </div>
+
+        <form class="sponsor-form" id="sponsorForm">
+            <div class="form-group">
+                <label for="businessName">Business/Organization Name <span class="required">*</span></label>
+                <input type="text" id="businessName" name="businessName" required 
+                       placeholder="Enter your business or organization name">
+            </div>
+
+            <div class="form-group">
+                <label for="contactName">Contact Person Name <span class="required">*</span></label>
+                <input type="text" id="contactName" name="contactName" required 
+                       placeholder="Enter the main contact person's name">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address <span class="required">*</span></label>
+                <input type="email" id="email" name="email" required 
+                       placeholder="Enter your email address for notifications">
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number <span class="required">*</span></label>
+                <input type="tel" id="phone" name="phone" required 
+                       placeholder="Enter your phone number">
+            </div>
+
+            <div class="form-group">
+                <label for="address">Business Address <span class="required">*</span></label>
+                <textarea id="address" name="address" required rows="3" 
+                          placeholder="Enter your business address"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="website">Website (Optional)</label>
+                <input type="url" id="website" name="website" 
+                       placeholder="https://your-website.com">
+            </div>
+
+            <div class="form-group">
+                <label for="socialMedia">Social Media Links (Optional)</label>
+                <textarea id="socialMedia" name="socialMedia" rows="3" 
+                          placeholder="Facebook: https://facebook.com/yourpage&#10;Instagram: https://instagram.com/yourpage&#10;Twitter: https://twitter.com/yourpage"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="businessDescription">Business Description (Optional)</label>
+                <textarea id="businessDescription" name="businessDescription" rows="4" 
+                          placeholder="Tell us about your business and why you want to sponsor MarketPace"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="logo">Business Logo (Optional)</label>
+                <div class="file-upload">
+                    <input type="file" id="logo" name="logo" accept="image/*" onchange="previewLogo(this)">
+                    Upload Logo Image
+                </div>
+                <div class="logo-preview" id="logoPreview"></div>
+            </div>
+
+            <button type="submit" class="checkout-btn" id="checkoutBtn">
+                Complete Sponsorship Payment
+            </button>
+            
+            <div class="loading" id="loading">
+                Processing your request...
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Get tier information from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const tier = urlParams.get('tier') || 'champion';
+        const tierName = urlParams.get('tierName') || 'Community Champion';
+        const amount = urlParams.get('amount') || '500';
+
+        // Update tier display
+        document.getElementById('tierName').textContent = tierName;
+        document.getElementById('tierPrice').textContent = `$${amount}`;
+
+        // Logo preview function
+        function previewLogo(input) {
+            const preview = document.getElementById('logoPreview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Logo Preview">`;
+                };
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                preview.innerHTML = '';
+            }
+        }
+
+        // Form submission
+        document.getElementById('sponsorForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('checkoutBtn');
+            const loading = document.getElementById('loading');
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            
+            try {
+                // Get form data
+                const formData = new FormData(this);
+                const sponsorData = {
+                    tier: tier,
+                    tierName: tierName,
+                    amount: parseFloat(amount),
+                    businessName: formData.get('businessName'),
+                    contactName: formData.get('contactName'),
+                    email: formData.get('email'),
+                    phone: formData.get('phone'),
+                    address: formData.get('address'),
+                    website: formData.get('website'),
+                    socialMedia: formData.get('socialMedia'),
+                    businessDescription: formData.get('businessDescription')
+                };
+
+                // Handle logo upload if present
+                const logoFile = formData.get('logo');
+                if (logoFile && logoFile.size > 0) {
+                    // Convert logo to base64 for storage
+                    const logoBase64 = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.readAsDataURL(logoFile);
+                    });
+                    sponsorData.logoData = logoBase64;
+                }
+
+                // Create Stripe checkout session
+                const response = await fetch('/api/create-sponsor-checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(sponsorData)
+                });
+
+                const result = await response.json();
+
+                if (result.sessionUrl) {
+                    // Redirect to Stripe checkout
+                    window.location.href = result.sessionUrl;
+                } else {
+                    throw new Error(result.error || 'Failed to create checkout session');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('There was an error processing your request. Please try again or contact support.');
+                
+                // Re-enable button and hide loading
+                submitBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+
+        // Validate required fields
+        const requiredFields = ['businessName', 'contactName', 'email', 'phone', 'address'];
+        requiredFields.forEach(fieldId => {
+            document.getElementById(fieldId).addEventListener('input', validateForm);
+        });
+
+        function validateForm() {
+            const submitBtn = document.getElementById('checkoutBtn');
+            let isValid = true;
+            
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (!field.value.trim()) {
+                    isValid = false;
+                }
+            });
+            
+            submitBtn.disabled = !isValid;
+        }
+
+        // Initial validation
+        validateForm();
+    </script>
+</body>
+</html>

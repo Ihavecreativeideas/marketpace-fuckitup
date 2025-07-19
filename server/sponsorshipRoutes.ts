@@ -14,9 +14,22 @@ export function registerSponsorshipRoutes(app: Express) {
   // Create Stripe checkout session for sponsorship
   app.post('/api/create-sponsor-checkout', async (req, res) => {
     try {
-      const { tier, tierName, amount } = req.body;
+      const { 
+        tier, 
+        tierName, 
+        amount, 
+        businessName, 
+        contactName, 
+        email, 
+        phone, 
+        address, 
+        website, 
+        socialMedia, 
+        businessDescription, 
+        logoData 
+      } = req.body;
       
-      if (!tier || !tierName || !amount) {
+      if (!tier || !tierName || !amount || !businessName || !contactName || !email || !phone || !address) {
         return res.status(400).json({ error: 'Missing required fields' });
       }
 
@@ -28,9 +41,8 @@ export function registerSponsorshipRoutes(app: Express) {
             price_data: {
               currency: 'usd',
               product_data: {
-                name: `MarketPace ${tierName}`,
-                description: `One-time sponsorship to support community commerce`,
-                images: ['https://your-domain.com/logo.png'], // Add your logo URL
+                name: `MarketPace ${tierName} Sponsorship`,
+                description: `${businessName} - ${tierName} sponsorship to support community commerce`,
               },
               unit_amount: amount * 100, // Stripe uses cents
             },
@@ -38,12 +50,22 @@ export function registerSponsorshipRoutes(app: Express) {
           },
         ],
         mode: 'payment',
+        customer_email: email,
         success_url: `${req.headers.origin || 'http://localhost:5000'}/sponsor-success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${req.headers.origin || 'http://localhost:5000'}/sponsorship.html`,
+        cancel_url: `${req.headers.origin || 'http://localhost:5000'}/sponsor-form.html?tier=${tier}&tierName=${encodeURIComponent(tierName)}&amount=${amount}`,
         metadata: {
           tier: tier,
           tierName: tierName,
-          amount: amount.toString()
+          amount: amount.toString(),
+          businessName: businessName,
+          contactName: contactName,
+          email: email,
+          phone: phone,
+          address: address,
+          website: website || '',
+          socialMedia: socialMedia || '',
+          businessDescription: businessDescription || '',
+          logoData: logoData || ''
         }
       });
 
@@ -155,24 +177,56 @@ export function registerSponsorshipRoutes(app: Express) {
 // Helper function to create sponsor record and benefits
 async function createSponsorRecord(session: Stripe.Checkout.Session) {
   try {
-    const { tier, tierName, amount } = session.metadata!;
+    const { 
+      tier, 
+      tierName, 
+      amount, 
+      businessName, 
+      contactName, 
+      email, 
+      phone, 
+      address, 
+      website, 
+      socialMedia, 
+      businessDescription, 
+      logoData 
+    } = session.metadata!;
     
-    // Get customer details from Stripe
-    const customer = await stripe.customers.retrieve(session.customer as string);
-    const customerEmail = (customer as Stripe.Customer).email || session.customer_details?.email;
-    const customerName = (customer as Stripe.Customer).name || session.customer_details?.name;
+    // Parse social media JSON if it exists
+    let socialMediaObject = null;
+    if (socialMedia) {
+      try {
+        // Parse social media links from textarea format
+        const lines = socialMedia.split('\n').filter(line => line.trim());
+        socialMediaObject = {};
+        lines.forEach(line => {
+          if (line.includes(':')) {
+            const [platform, url] = line.split(':').map(s => s.trim());
+            socialMediaObject[platform.toLowerCase()] = url;
+          }
+        });
+      } catch (e) {
+        console.log('Error parsing social media:', e);
+      }
+    }
     
-    // Create sponsor record
+    // Create sponsor record with full information
     const [newSponsor] = await db.insert(sponsors).values({
-      businessName: customerName || 'Business Name',
-      contactName: customerName || 'Contact Name',
-      email: customerEmail!,
+      businessName: businessName || 'Business Name',
+      contactName: contactName || 'Contact Name',
+      email: email,
+      phone: phone,
+      businessAddress: address,
+      website: website || null,
+      logoUrl: logoData || null, // Store base64 data temporarily, could be uploaded to CDN later
       tier: tier,
       amount: amount,
       stripeCustomerId: session.customer as string,
       status: 'active',
       joinedAt: new Date(),
-      totalPaid: parseFloat(amount)
+      totalPaid: parseFloat(amount),
+      businessDescription: businessDescription || null,
+      socialMedia: socialMediaObject
     }).returning();
 
     // Create monthly benefits for 12 months
