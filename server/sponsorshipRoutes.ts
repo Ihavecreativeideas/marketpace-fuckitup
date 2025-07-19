@@ -443,9 +443,9 @@ ${website ? `Website: ${website}` : ''}
 
 Business info sent to your email.`;
 
-    // Send SMS notification to admin (you)
+    // Send SMS notification to admin (you) - Note: May be blocked by carrier
     const smsResult = await sendSMS('251-282-6662', adminSMSMessage);
-    console.log(`Admin SMS notification sent: ${smsResult}`);
+    console.log(`Admin SMS notification sent: ${smsResult} (Check email for guaranteed delivery)`);
 
     // Send welcome SMS to sponsor - Simple format
     const sponsorSMSMessage = `Welcome to MarketPace ${contactName}. Thank you for becoming a ${tierName} sponsor. ${businessName} is now supporting our community platform. We will send updates on app progress and sponsor benefits. Contact: MarketPace.contact@gmail.com`;
