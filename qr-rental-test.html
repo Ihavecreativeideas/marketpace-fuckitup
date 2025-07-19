@@ -163,7 +163,8 @@
 
             <div class="test-section">
                 <div class="section-title">API Testing</div>
-                <button class="test-btn" onclick="testQRGeneration()">Generate Test QR</button>
+                <button class="test-btn" onclick="openQRSelector('rental_self_pickup')">Generate Pickup QR</button>
+                <button class="test-btn" onclick="openQRSelector('rental_self_return')">Generate Return QR</button>
                 <button class="test-btn secondary" onclick="testRentalCreation()">Test Rental API</button>
                 
                 <div id="apiResult" class="status-message"></div>
@@ -184,42 +185,10 @@
     </div>
 
     <script>
-        async function testQRGeneration() {
-            const resultDiv = document.getElementById('apiResult');
-            resultDiv.style.display = 'block';
-            resultDiv.className = 'status-message';
-            resultDiv.textContent = 'Generating QR code...';
-
-            try {
-                const response = await fetch('/api/generate-qr', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        userId: 'test-user-' + Date.now(),
-                        purpose: 'rental_self_pickup',
-                        relatedId: 'test-rental-' + Date.now(),
-                        expiryHours: 24
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    resultDiv.className = 'status-message status-success';
-                    resultDiv.innerHTML = `
-                        <strong>QR Code Generated Successfully!</strong><br>
-                        ID: ${result.qrCode.id}<br>
-                        Purpose: ${result.qrCode.purpose}<br>
-                        Verification URL: ${result.qrCode.verificationUrl}
-                    `;
-                } else {
-                    throw new Error(result.error || 'QR generation failed');
-                }
-
-            } catch (error) {
-                resultDiv.className = 'status-message status-error';
-                resultDiv.textContent = 'Error: ' + error.message;
-            }
+        function openQRSelector(purpose) {
+            const relatedId = 'rental-' + Date.now();
+            const url = `/geo-qr-selector.html?purpose=${purpose}&relatedId=${relatedId}`;
+            window.open(url, '_blank', 'width=900,height=700');
         }
 
         async function testRentalCreation() {

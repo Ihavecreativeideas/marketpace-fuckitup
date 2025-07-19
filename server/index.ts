@@ -2515,16 +2515,22 @@ app.get('/api/express/events', async (req, res) => {
 
 app.post('/api/express/qr-checkin', async (req, res) => {
   try {
-    const { eventId, staffId, qrCode, location, action } = req.body;
+    const { eventId, staffId, qrCode, location, action, geoLat, geoLng, bypassGeo } = req.body;
     
-    // Simulate GPS validation
-    const gpsValid = Math.random() > 0.1; // 90% success rate
-    
-    if (!gpsValid) {
+    // Use QR code service for verification
+    const verificationResult = await qrCodeService.verifyQRCode({
+      qrCodeId: qrCode,
+      scannedBy: staffId,
+      geoLat: geoLat,
+      geoLng: geoLng,
+      bypassGeoValidation: bypassGeo
+    });
+
+    if (!verificationResult.success) {
       return res.json({
         success: false,
-        error: 'GPS validation failed - you are outside the allowed check-in area',
-        location: location
+        error: verificationResult.message,
+        geoValidationResult: verificationResult.geoValidationResult
       });
     }
 
@@ -2537,7 +2543,8 @@ app.post('/api/express/qr-checkin', async (req, res) => {
       timestamp: new Date().toISOString(),
       location: location,
       earnings: action === 'checkout' ? Math.floor(Math.random() * 100) + 50 : null,
-      message: action === 'checkin' ? 'Successfully checked in!' : 'Successfully checked out!'
+      message: verificationResult.message,
+      geoValidationResult: verificationResult.geoValidationResult
     };
 
     // Send SMS notification (simulated)
@@ -2550,6 +2557,42 @@ app.post('/api/express/qr-checkin', async (req, res) => {
     res.json({
       success: false,
       error: 'Failed to process check-in: ' + error.message
+    });
+  }
+});
+
+// Generate Geo QR Code endpoint
+app.post('/api/qr/generate-geo', async (req, res) => {
+  try {
+    const { 
+      userId, 
+      purpose, 
+      relatedId, 
+      expiryHours,
+      geoValidation 
+    } = req.body;
+
+    const qrData = await qrCodeService.generateQRCode({
+      userId,
+      purpose,
+      relatedId,
+      expiryHours,
+      geoValidation
+    });
+
+    res.json({
+      success: true,
+      qrCode: qrData,
+      message: geoValidation?.enabled 
+        ? 'Geo QR code generated successfully! Location validation is enabled.'
+        : 'Standard QR code generated successfully!'
+    });
+
+  } catch (error) {
+    console.error('Geo QR generation error:', error);
+    res.json({
+      success: false,
+      error: 'Failed to generate QR code: ' + error.message
     });
   }
 });

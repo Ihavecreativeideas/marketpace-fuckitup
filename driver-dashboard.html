@@ -434,7 +434,8 @@
                             <p><strong>🎯 Ready for QR Scan Pickup</strong></p>
                         </div>
                         <div class="delivery-actions">
-                            <button class="btn btn-warning" onclick="openQRScanner('pickup')">📱 Scan Pickup QR</button>
+                            <button class="btn btn-warning" onclick="openQRScanner('pickup')">📱 Scan QR Code</button>
+                            <button class="btn btn-secondary" onclick="openGeoQRSelector('pickup')">📍 Generate Geo QR</button>
                             <button class="btn btn-secondary" onclick="callCustomer('2515550123')">📞 Call</button>
                         </div>
                     </div>
@@ -532,6 +533,14 @@
                     showNotification('✅ QR code scanned successfully!', 'success');
                 }
             }, 2000);
+        }
+
+        function openGeoQRSelector(type) {
+            const purpose = type === 'pickup' ? 'rental_driver_pickup_owner' : 'rental_driver_return_owner';
+            const relatedId = 'driver-route-' + Date.now();
+            const url = `/geo-qr-selector.html?purpose=${purpose}&relatedId=${relatedId}`;
+            window.open(url, '_blank', 'width=900,height=700');
+            showNotification(`Opening geo QR options for ${type}...`, 'info');
         }
 
         function callCustomer(phoneNumber) {

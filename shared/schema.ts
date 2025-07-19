@@ -464,6 +464,12 @@ export const qrCodes = pgTable("qr_codes", {
   purpose: varchar("purpose").notNull(), // pickup, rental_driver_return_owner, service_checkin, business_booking, etc.
   relatedId: varchar("related_id").notNull(), // linked to order, rental, booking, or entertainment event
   status: varchar("status").notNull().default("active"), // active, used, expired
+  // Geo QR Code Validation fields
+  geoValidationEnabled: boolean("geo_validation_enabled").default(false),
+  geoLatitude: real("geo_latitude"), // Target latitude for validation
+  geoLongitude: real("geo_longitude"), // Target longitude for validation
+  geoRadiusMeters: integer("geo_radius_meters").default(100), // Validation radius in meters
+  geoStrictMode: boolean("geo_strict_mode").default(false), // true = required, false = warning only
   createdAt: timestamp("created_at").defaultNow(),
   expiresAt: timestamp("expires_at").notNull(),
 });
@@ -474,8 +480,10 @@ export const qrScans = pgTable("qr_scans", {
   qrCodeId: uuid("qr_code_id").notNull().references(() => qrCodes.id),
   scannedBy: varchar("scanned_by").notNull().references(() => users.id),
   timestamp: timestamp("timestamp").defaultNow(),
-  geoLat: real("geo_lat"), // optional latitude
-  geoLng: real("geo_lng"), // optional longitude
+  geoLat: real("geo_lat"), // scanner's latitude
+  geoLng: real("geo_lng"), // scanner's longitude
+  geoValidationPassed: boolean("geo_validation_passed"), // null if no geo validation
+  geoDistanceMeters: real("geo_distance_meters"), // distance from target location
 });
 
 // Rentals table - tracks rental transactions with escrow

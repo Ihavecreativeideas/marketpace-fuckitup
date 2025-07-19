@@ -467,6 +467,37 @@
                     </div>
                 </div>
 
+                <div class="feature-toggle">
+                    <div>
+                        <strong>Geo QR Code Validation</strong>
+                        <br><small>Require staff to be within event location for QR check-ins</small>
+                    </div>
+                    <div class="toggle-switch" onclick="toggleFeature(this); toggleGeoSettings(this)">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="geo-settings" id="geoQRSettings" style="display: none; margin-top: 15px; padding: 15px; background: rgba(255, 102, 0, 0.1); border-radius: 10px; border: 1px solid rgba(255, 102, 0, 0.3);">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" style="color: #ff6600;">GPS Validation Radius</label>
+                            <select class="form-select" id="geoRadius">
+                                <option value="50">50 meters (very strict)</option>
+                                <option value="100" selected>100 meters (recommended)</option>
+                                <option value="200">200 meters (flexible)</option>
+                                <option value="500">500 meters (very flexible)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="color: #ff6600;">Validation Mode</label>
+                            <select class="form-select" id="geoMode">
+                                <option value="strict">Strict Mode (Required)</option>
+                                <option value="flexible" selected>Flexible Mode (Warning)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-grid" style="margin-top: 20px;">
                     <div class="form-group">
                         <label class="form-label">Early Check-In Buffer (minutes)</label>
@@ -565,20 +596,66 @@
             toggle.classList.toggle('active');
         }
 
+        function toggleGeoSettings(toggle) {
+            const geoSettings = document.getElementById('geoQRSettings');
+            if (toggle.classList.contains('active')) {
+                geoSettings.style.display = 'block';
+            } else {
+                geoSettings.style.display = 'none';
+            }
+        }
+
         function saveAsDraft() {
             showNotification('Event saved as draft', 'success');
         }
 
-        function createEvent() {
+        async function createEvent() {
             const eventName = document.getElementById('eventName').value;
             if (!eventName) {
                 showNotification('Please enter an event name', 'error');
                 return;
             }
+
+            // Collect geo QR settings
+            const geoQREnabled = document.querySelector('.feature-toggle:nth-of-type(5) .toggle-switch').classList.contains('active');
+            const eventData = {
+                name: eventName,
+                type: document.getElementById('eventType').value,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                geoQRSettings: geoQREnabled ? {
+                    enabled: true,
+                    radius: document.getElementById('geoRadius').value,
+                    mode: document.getElementById('geoMode').value
+                } : { enabled: false }
+            };
+
             showNotification(`Creating event: ${eventName}...`, 'success');
-            setTimeout(() => {
-                window.location.href = '/express/live-dashboard';
-            }, 2000);
+            
+            try {
+                const response = await fetch('/api/express/create-event', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(eventData)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    if (geoQREnabled) {
+                        showNotification(`Event created with Geo QR validation! Radius: ${eventData.geoQRSettings.radius}m`, 'success');
+                    } else {
+                        showNotification(`Event created successfully!`, 'success');
+                    }
+                    setTimeout(() => {
+                        window.location.href = '/marketpace-express';
+                    }, 2000);
+                } else {
+                    showNotification('Failed to create event: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showNotification('Network error creating event', 'error');
+            }
         }
 
         function createAndSchedule() {

@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geo QR Code Options - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0a0a23 0%, #1a1a3a 50%, #0a0a23 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ffff, #0066ff, #ff6600);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+
+        .qr-option-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .qr-option-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .qr-option-card:hover {
+            transform: translateY(-5px);
+            border-color: #00ffff;
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+        }
+
+        .qr-option-card.selected {
+            border-color: #ff6600;
+            background: rgba(255, 102, 0, 0.1);
+        }
+
+        .qr-type-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .qr-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .standard-qr-icon {
+            background: linear-gradient(45deg, #00ffff, #0066ff);
+        }
+
+        .geo-qr-icon {
+            background: linear-gradient(45deg, #ff6600, #ff3300);
+        }
+
+        .qr-icon::before {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            background: rgba(10, 10, 35, 0.9);
+            border-radius: 13px;
+        }
+
+        .qr-icon svg {
+            width: 30px;
+            height: 30px;
+            z-index: 1;
+            fill: currentColor;
+        }
+
+        .standard-qr-icon svg {
+            color: #00ffff;
+        }
+
+        .geo-qr-icon svg {
+            color: #ff6600;
+        }
+
+        .qr-type-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .standard-qr-title {
+            color: #00ffff;
+        }
+
+        .geo-qr-title {
+            color: #ff6600;
+        }
+
+        .qr-type-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .standard-badge {
+            background: linear-gradient(45deg, #00ffff, #0066ff);
+            color: #0a0a23;
+        }
+
+        .geo-badge {
+            background: linear-gradient(45deg, #ff6600, #ff3300);
+            color: white;
+        }
+
+        .qr-description {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .qr-features {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .qr-features li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .qr-features li::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .standard-qr .qr-features li::before {
+            background: #00ffff;
+        }
+
+        .geo-qr .qr-features li::before {
+            background: #ff6600;
+        }
+
+        .geo-settings {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 102, 0, 0.2);
+            display: none;
+        }
+
+        .geo-settings.active {
+            display: block;
+        }
+
+        .geo-setting-group {
+            margin-bottom: 20px;
+        }
+
+        .geo-setting-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #ff6600;
+        }
+
+        .geo-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid rgba(255, 102, 0, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 1rem;
+        }
+
+        .geo-input:focus {
+            outline: none;
+            border-color: #ff6600;
+            box-shadow: 0 0 0 2px rgba(255, 102, 0, 0.1);
+        }
+
+        .geo-select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid rgba(255, 102, 0, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 1rem;
+        }
+
+        .geo-checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .geo-checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: #ff6600;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #00ffff, #0066ff);
+            color: #0a0a23;
+        }
+
+        .btn-geo {
+            background: linear-gradient(45deg, #ff6600, #ff3300);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #666, #444);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.3);
+        }
+
+        .btn-geo:hover {
+            box-shadow: 0 10px 25px rgba(255, 102, 0, 0.3);
+        }
+
+        .comparison-table {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 30px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .comparison-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #00ffff;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            text-align: center;
+        }
+
+        .comparison-header {
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .comparison-standard {
+            background: rgba(0, 255, 255, 0.1);
+            color: #00ffff;
+        }
+
+        .comparison-geo {
+            background: rgba(255, 102, 0, 0.1);
+            color: #ff6600;
+        }
+
+        .comparison-feature {
+            padding: 8px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .qr-option-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .comparison-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title">Choose Your QR Code Type</div>
+            <div class="header-subtitle">Select standard QR codes or enable location-based geo validation</div>
+        </div>
+
+        <!-- QR Options -->
+        <div class="qr-option-grid">
+            <!-- Standard QR Code -->
+            <div class="qr-option-card standard-qr" onclick="selectQRType('standard')">
+                <div class="qr-type-header">
+                    <div class="qr-icon standard-qr-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM19 13h-2v2h2v-2zM19 17h-2v2h2v-2zM17 15h-2v2h2v-2zM15 13h-2v2h2v-2zM21 15h-2v2h2v-2zM21 19h-2v2h2v-2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="qr-type-title standard-qr-title">Standard QR Code</div>
+                        <div class="qr-type-badge standard-badge">BASIC</div>
+                    </div>
+                </div>
+                <div class="qr-description">
+                    Simple QR codes that work anywhere, anytime. Perfect for general use cases where location validation isn't required.
+                </div>
+                <ul class="qr-features">
+                    <li>Works from any location</li>
+                    <li>No GPS required</li>
+                    <li>Instant verification</li>
+                    <li>Offline compatibility</li>
+                    <li>Universal device support</li>
+                </ul>
+            </div>
+
+            <!-- Geo QR Code -->
+            <div class="qr-option-card geo-qr" onclick="selectQRType('geo')">
+                <div class="qr-type-header">
+                    <div class="qr-icon geo-qr-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="qr-type-title geo-qr-title">Geo QR Code</div>
+                        <div class="qr-type-badge geo-badge">ADVANCED</div>
+                    </div>
+                </div>
+                <div class="qr-description">
+                    Location-verified QR codes that only work within a specific geographic area. Perfect for events, deliveries, and secure check-ins.
+                </div>
+                <ul class="qr-features">
+                    <li>GPS location validation</li>
+                    <li>Customizable radius (50-500m)</li>
+                    <li>Strict or flexible mode</li>
+                    <li>Fraud prevention</li>
+                    <li>Real-time distance tracking</li>
+                </ul>
+
+                <!-- Geo Settings Panel -->
+                <div class="geo-settings" id="geoSettings">
+                    <div class="geo-setting-group">
+                        <label class="geo-setting-label">Validation Radius</label>
+                        <select class="geo-select" id="geoRadius">
+                            <option value="50">50 meters (very strict)</option>
+                            <option value="100" selected>100 meters (recommended)</option>
+                            <option value="200">200 meters (flexible)</option>
+                            <option value="500">500 meters (very flexible)</option>
+                        </select>
+                    </div>
+
+                    <div class="geo-setting-group">
+                        <label class="geo-setting-label">Validation Mode</label>
+                        <select class="geo-select" id="geoMode">
+                            <option value="strict">Strict Mode (Required within radius)</option>
+                            <option value="flexible" selected>Flexible Mode (Warning only)</option>
+                        </select>
+                    </div>
+
+                    <div class="geo-setting-group">
+                        <label class="geo-setting-label">Target Location (Optional)</label>
+                        <input type="text" class="geo-input" id="geoLocation" placeholder="Enter address or use current location">
+                        <div class="geo-checkbox-group">
+                            <input type="checkbox" class="geo-checkbox" id="useCurrentLocation" checked>
+                            <label for="useCurrentLocation">Use my current location</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="comparison-table">
+            <div class="comparison-title">Quick Comparison</div>
+            <div class="comparison-grid">
+                <div class="comparison-header">Feature</div>
+                <div class="comparison-header comparison-standard">Standard QR</div>
+                <div class="comparison-header comparison-geo">Geo QR</div>
+                
+                <div class="comparison-feature">Location Requirement</div>
+                <div class="comparison-feature">None</div>
+                <div class="comparison-feature">GPS Required</div>
+                
+                <div class="comparison-feature">Security Level</div>
+                <div class="comparison-feature">Basic</div>
+                <div class="comparison-feature">High</div>
+                
+                <div class="comparison-feature">Fraud Prevention</div>
+                <div class="comparison-feature">Limited</div>
+                <div class="comparison-feature">Advanced</div>
+                
+                <div class="comparison-feature">Use Cases</div>
+                <div class="comparison-feature">General Purpose</div>
+                <div class="comparison-feature">Events, Deliveries</div>
+                
+                <div class="comparison-feature">Offline Support</div>
+                <div class="comparison-feature">Full</div>
+                <div class="comparison-feature">Limited</div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="btn btn-secondary" onclick="window.history.back()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                </svg>
+                Back
+            </button>
+            <button class="btn btn-primary" id="generateBtn" onclick="generateSelectedQR()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4z"/>
+                </svg>
+                Generate Standard QR
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let selectedType = 'standard';
+
+        function selectQRType(type) {
+            selectedType = type;
+            
+            // Update visual selection
+            document.querySelectorAll('.qr-option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            if (type === 'standard') {
+                document.querySelector('.standard-qr').classList.add('selected');
+                document.getElementById('geoSettings').classList.remove('active');
+                document.getElementById('generateBtn').innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4z"/>
+                    </svg>
+                    Generate Standard QR
+                `;
+                document.getElementById('generateBtn').className = 'btn btn-primary';
+            } else if (type === 'geo') {
+                document.querySelector('.geo-qr').classList.add('selected');
+                document.getElementById('geoSettings').classList.add('active');
+                document.getElementById('generateBtn').innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                    Generate Geo QR
+                `;
+                document.getElementById('generateBtn').className = 'btn btn-geo';
+            }
+        }
+
+        function generateSelectedQR() {
+            if (selectedType === 'standard') {
+                generateStandardQR();
+            } else {
+                generateGeoQR();
+            }
+        }
+
+        function generateStandardQR() {
+            const qrData = {
+                userId: 'demo-user-123',
+                purpose: getPurposeFromURL(),
+                relatedId: getRelatedIdFromURL(),
+                geoValidation: {
+                    enabled: false
+                }
+            };
+
+            generateQRCode(qrData);
+        }
+
+        function generateGeoQR() {
+            const radius = document.getElementById('geoRadius').value;
+            const mode = document.getElementById('geoMode').value;
+            const useCurrentLocation = document.getElementById('useCurrentLocation').checked;
+
+            if (useCurrentLocation && navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const qrData = {
+                            userId: 'demo-user-123',
+                            purpose: getPurposeFromURL(),
+                            relatedId: getRelatedIdFromURL(),
+                            geoValidation: {
+                                enabled: true,
+                                latitude: position.coords.latitude,
+                                longitude: position.coords.longitude,
+                                radiusMeters: parseInt(radius),
+                                strictMode: mode === 'strict'
+                            }
+                        };
+
+                        generateQRCode(qrData);
+                    },
+                    (error) => {
+                        showNotification('Location access denied. Please enable GPS or enter location manually.', 'error');
+                    }
+                );
+            } else {
+                const qrData = {
+                    userId: 'demo-user-123',
+                    purpose: getPurposeFromURL(),
+                    relatedId: getRelatedIdFromURL(),
+                    geoValidation: {
+                        enabled: true,
+                        radiusMeters: parseInt(radius),
+                        strictMode: mode === 'strict'
+                    }
+                };
+
+                generateQRCode(qrData);
+            }
+        }
+
+        async function generateQRCode(qrData) {
+            showNotification('Generating QR code...', 'info');
+
+            try {
+                const response = await fetch('/api/qr/generate-geo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(qrData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification(result.message, 'success');
+                    displayQRCode(result.qrCode);
+                } else {
+                    showNotification(result.error || 'Failed to generate QR code', 'error');
+                }
+            } catch (error) {
+                showNotification('Network error. Please try again.', 'error');
+            }
+        }
+
+        function displayQRCode(qrCode) {
+            // Create QR display modal or redirect to QR page
+            const qrWindow = window.open('', '_blank', 'width=400,height=500');
+            qrWindow.document.write(`
+                <html>
+                <head>
+                    <title>Your ${qrCode.geoValidation?.enabled ? 'Geo ' : ''}QR Code</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background: #f0f0f0; }
+                        .qr-container { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+                        .qr-image { max-width: 100%; margin: 20px 0; }
+                        .qr-info { margin: 10px 0; color: #666; }
+                        .geo-info { background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 10px; margin: 10px 0; }
+                    </style>
+                </head>
+                <body>
+                    <div class="qr-container">
+                        <h2>${qrCode.geoValidation?.enabled ? 'Geo QR Code' : 'Standard QR Code'}</h2>
+                        <img src="${qrCode.qrImage}" alt="QR Code" class="qr-image">
+                        <div class="qr-info">Purpose: ${qrCode.purpose}</div>
+                        <div class="qr-info">Expires: ${new Date(qrCode.expiresAt).toLocaleString()}</div>
+                        ${qrCode.geoValidation?.enabled ? `
+                            <div class="geo-info">
+                                <strong>Geo Validation Enabled</strong><br>
+                                Radius: ${qrCode.geoValidation.radiusMeters}m<br>
+                                Mode: ${qrCode.geoValidation.strictMode ? 'Strict' : 'Flexible'}
+                            </div>
+                        ` : ''}
+                        <div class="qr-info">
+                            <small>Verification URL: ${qrCode.verificationUrl}</small>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `);
+        }
+
+        function getPurposeFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('purpose') || 'general';
+        }
+
+        function getRelatedIdFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('relatedId') || 'demo-related-123';
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'linear-gradient(45deg, #00ff88, #00cc6a)' : 
+                            type === 'error' ? 'linear-gradient(45deg, #ff4444, #cc0000)' : 
+                            'linear-gradient(45deg, #4169e1, #0066ff)'};
+                color: ${type === 'error' ? 'white' : '#0a0a23'};
+                padding: 15px 20px;
+                border-radius: 10px;
+                font-weight: bold;
+                z-index: 1000;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+                transform: translateX(100%);
+                transition: all 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Initialize with standard QR selected
+        selectQRType('standard');
+    </script>
+</body>
+</html>
