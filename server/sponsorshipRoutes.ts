@@ -26,7 +26,9 @@ export function registerSponsorshipRoutes(app: Express) {
         website, 
         socialMedia, 
         businessDescription, 
-        logoData 
+        logoData,
+        emailNotifications,
+        smsNotifications
       } = req.body;
       
       if (!tier || !tierName || !amount || !businessName || !contactName || !email || !phone || !address) {
@@ -65,7 +67,9 @@ export function registerSponsorshipRoutes(app: Express) {
           website: website || '',
           socialMedia: socialMedia || '',
           businessDescription: businessDescription || '',
-          logoData: logoData || ''
+          logoData: logoData || '',
+          emailNotifications: emailNotifications?.toString() || 'true',
+          smsNotifications: smsNotifications?.toString() || 'true'
         }
       });
 

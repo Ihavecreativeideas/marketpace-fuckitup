@@ -50,6 +50,10 @@ export interface DriverApplication {
     w9Form?: string;
     bankingInfo?: string;
   };
+  notificationPreferences: {
+    emailNotifications: boolean;
+    smsNotifications: boolean;
+  };
   applicationStatus: 'submitted' | 'under_review' | 'approved' | 'rejected' | 'hired';
   submittedAt: Date;
   reviewedAt?: Date;
@@ -137,6 +141,10 @@ export class DriverApplicationService {
         documents: {
           profilePhoto: 'john-profile.jpg'
         },
+        notificationPreferences: {
+          emailNotifications: true,
+          smsNotifications: true
+        },
         applicationStatus: 'submitted',
         submittedAt: new Date('2025-01-15'),
       },
@@ -186,6 +194,10 @@ export class DriverApplicationService {
         documents: {
           profilePhoto: 'maria-profile.jpg'
         },
+        notificationPreferences: {
+          emailNotifications: true,
+          smsNotifications: false
+        },
         applicationStatus: 'submitted',
         submittedAt: new Date('2025-01-16'),
       }
@@ -202,6 +214,71 @@ export class DriverApplicationService {
 
   getApplicationById(id: string): DriverApplication | undefined {
     return this.applications.get(id);
+  }
+
+  async submitApplication(applicationData: any): Promise<string> {
+    const applicationId = `app-${Date.now()}`;
+    
+    const application: DriverApplication = {
+      id: applicationId,
+      firstName: applicationData.firstName,
+      lastName: applicationData.lastName,
+      email: applicationData.email,
+      phone: applicationData.phone,
+      dateOfBirth: applicationData.dateOfBirth,
+      address: {
+        street: applicationData.address,
+        city: applicationData.city,
+        state: applicationData.state,
+        zipCode: applicationData.zipCode
+      },
+      driversLicense: {
+        number: applicationData.licenseNumber,
+        state: applicationData.licenseState,
+        expirationDate: applicationData.licenseExpiration
+      },
+      vehicle: {
+        make: applicationData.vehicleMake,
+        model: applicationData.vehicleModel,
+        year: parseInt(applicationData.vehicleYear),
+        licensePlate: applicationData.licensePlate,
+        insurance: {
+          company: applicationData.insuranceCompany || '',
+          policyNumber: applicationData.insurancePolicyNumber || '',
+          expirationDate: applicationData.insuranceExpiration || ''
+        }
+      },
+      experience: {
+        hasDeliveryExperience: applicationData.hasDeliveryExperience || false,
+        previousJobs: applicationData.previousJobs || '',
+        references: applicationData.references || ''
+      },
+      availability: {
+        preferredSlots: applicationData.preferredSlots || [],
+        maxHoursPerWeek: parseInt(applicationData.maxHours) || 20,
+        startDate: applicationData.startDate || ''
+      },
+      backgroundCheck: {
+        consentGiven: applicationData.backgroundConsent || false,
+        status: 'pending'
+      },
+      documents: {
+        profilePhoto: applicationData.profilePhoto || ''
+      },
+      notificationPreferences: {
+        emailNotifications: applicationData.emailNotifications !== false,
+        smsNotifications: applicationData.smsNotifications !== false
+      },
+      applicationStatus: 'submitted',
+      submittedAt: new Date()
+    };
+
+    this.applications.set(applicationId, application);
+    
+    // Send confirmation notifications based on user preferences
+    await this.sendApplicationConfirmation(application);
+    
+    return applicationId;
   }
 
   async approveApplication(applicationId: string): Promise<{ 
@@ -375,6 +452,56 @@ export class DriverApplicationService {
       }
     } catch (error) {
       console.error('Error sending rejection notification:', error);
+    }
+  }
+
+  private async sendApplicationConfirmation(application: DriverApplication): Promise<void> {
+    try {
+      const { smsService } = await import('./smsService');
+      const { emailService } = await import('./emailService');
+      
+      // Send SMS confirmation if opted in
+      if (application.notificationPreferences.smsNotifications) {
+        try {
+          await smsService.sendSMS(
+            application.phone,
+            `Thank you ${application.firstName}! Your MarketPace driver application has been submitted successfully. We'll review it within 24-48 hours and notify you of the decision. Application ID: ${application.id}`
+          );
+        } catch (smsError) {
+          console.warn('SMS confirmation failed:', smsError);
+        }
+      }
+
+      // Send email confirmation if opted in
+      if (application.notificationPreferences.emailNotifications) {
+        try {
+          const emailContent = `
+            <h2>Driver Application Received</h2>
+            <p>Dear ${application.firstName},</p>
+            <p>Thank you for applying to become a MarketPace driver!</p>
+            <p><strong>Application ID:</strong> ${application.id}</p>
+            <p><strong>Status:</strong> Under Review</p>
+            <h3>What's Next:</h3>
+            <ul>
+              <li>We'll review your application within 24-48 hours</li>
+              <li>You'll receive notification of our decision via ${application.notificationPreferences.smsNotifications ? 'SMS and email' : 'email'}</li>
+              <li>If approved, you'll receive your driver credentials immediately</li>
+            </ul>
+            <p>Thank you for your interest in joining MarketPace!</p>
+            <p>Best regards,<br>The MarketPace Team</p>
+          `;
+
+          await emailService.sendEmail(
+            application.email,
+            'MarketPace Driver Application Received',
+            emailContent
+          );
+        } catch (emailError) {
+          console.warn('Email confirmation failed:', emailError);
+        }
+      }
+    } catch (error) {
+      console.error('Error sending application confirmation:', error);
     }
   }
 }

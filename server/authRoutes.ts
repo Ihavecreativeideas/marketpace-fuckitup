@@ -108,7 +108,15 @@ export function registerAuthRoutes(app: Express): void {
   // User signup endpoint
   app.post('/api/seamless-signup', async (req: Request, res: Response) => {
     try {
-      const { email, password, phone } = req.body;
+      const { 
+        email, 
+        password, 
+        phone, 
+        firstName,
+        lastName,
+        emailNotifications = true,
+        smsNotifications = true
+      } = req.body;
       const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
       const userAgent = req.get('User-Agent') || 'unknown';
 
@@ -242,9 +250,11 @@ export function registerAuthRoutes(app: Express): void {
         email: email.toLowerCase(),
         passwordHash,
         phoneNumber: phone,
-        firstName: '',
-        lastName: '',
+        firstName: firstName || '',
+        lastName: lastName || '',
         isVerified: false,
+        emailNotifications: emailNotifications,
+        smsNotifications: smsNotifications,
         createdAt: new Date(),
         updatedAt: new Date()
       }).returning();
