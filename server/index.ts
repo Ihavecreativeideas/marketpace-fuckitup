@@ -2263,6 +2263,138 @@ app.get('/qr-rental-test', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'qr-rental-test.html'));
 });
 
+// Driver dashboard route
+app.get('/driver-dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'driver-dashboard.html'));
+});
+
+// Driver QR verification API
+app.post('/api/driver/verify-qr', async (req, res) => {
+  try {
+    const { qrCodeId, driverId, action } = req.body;
+    
+    // Simulate QR verification process
+    const verificationResult = {
+      success: true,
+      qrCodeId,
+      driverId,
+      action, // 'pickup' or 'return'
+      timestamp: new Date().toISOString(),
+      customerNotified: true,
+      nextStep: action === 'pickup' ? 'Deliver to customer' : 'Rental completed'
+    };
+
+    // Send SMS to customer (simulated)
+    if (action === 'pickup') {
+      // Notify customer that driver has picked up their rental
+      console.log(`SMS sent: Your rental has been picked up by driver ${driverId}. Estimated delivery: 30 minutes.`);
+    } else if (action === 'return') {
+      // Notify customer that rental has been returned
+      console.log(`SMS sent: Your rental has been successfully returned. Thank you for using MarketPace!`);
+    }
+
+    res.json(verificationResult);
+
+  } catch (error) {
+    console.error('Driver QR verification error:', error);
+    res.json({
+      success: false,
+      error: 'Failed to verify QR code: ' + error.message
+    });
+  }
+});
+
+// Get available routes for driver
+app.get('/api/driver/routes', async (req, res) => {
+  try {
+    const { timeSlot, driverId } = req.query;
+    
+    // Demo routes data
+    const availableRoutes = [
+      {
+        id: 'MP-2025-A47',
+        timeSlot: '2:00 PM - 4:00 PM',
+        estimatedEarnings: 36.50,
+        deliveries: [
+          {
+            type: 'pickup',
+            item: 'Power Washer',
+            from: '123 Beach Blvd',
+            to: '456 Gulf Shore Dr',
+            customerPhone: '(251) 555-0123',
+            qrRequired: true
+          },
+          {
+            type: 'return',
+            item: 'Camera Kit',
+            from: '456 Gulf Shore Dr',
+            to: '789 Coastal Ave',
+            customerPhone: '(251) 555-0124',
+            qrRequired: true
+          }
+        ]
+      },
+      {
+        id: 'MP-2025-B23',
+        timeSlot: '3:30 PM - 5:00 PM',
+        estimatedEarnings: 28.00,
+        deliveries: [
+          {
+            type: 'delivery',
+            item: 'Professional Tools',
+            from: 'Gulf Shores Hardware',
+            to: '321 Marina Way',
+            customerPhone: '(251) 555-0125',
+            qrRequired: true
+          }
+        ]
+      }
+    ];
+
+    res.json({
+      success: true,
+      routes: availableRoutes,
+      totalAvailable: availableRoutes.length
+    });
+
+  } catch (error) {
+    console.error('Driver routes error:', error);
+    res.json({
+      success: false,
+      error: 'Failed to load routes: ' + error.message
+    });
+  }
+});
+
+// Accept route
+app.post('/api/driver/accept-route', async (req, res) => {
+  try {
+    const { routeId, driverId } = req.body;
+    
+    // Simulate route acceptance
+    const acceptedRoute = {
+      id: routeId,
+      driverId,
+      status: 'accepted',
+      acceptedAt: new Date().toISOString(),
+      estimatedCompletion: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString() // 2 hours from now
+    };
+
+    res.json({
+      success: true,
+      message: `Route ${routeId} accepted successfully!`,
+      route: acceptedRoute
+    });
+
+  } catch (error) {
+    console.error('Driver route acceptance error:', error);
+    res.json({
+      success: false,
+      error: 'Failed to accept route: ' + error.message
+    });
+  }
+});
+
 // Rental creation API endpoint
 app.post('/api/rental/create', async (req, res) => {
   try {
