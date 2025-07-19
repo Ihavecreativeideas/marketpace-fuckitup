@@ -179,8 +179,8 @@ export function registerSponsorshipRoutes(app: Express) {
       const { testType, adminPhone, adminEmail } = req.body;
       
       if (testType === 'simple_test') {
-        // Send very simple clean message
-        const simpleMessage = `Hello. This is a test message from MarketPace. Reply if you receive this.`;
+        // Send very simple clean message using basic format
+        const simpleMessage = `MarketPace test message. Your notifications are working. Contact info: ${adminEmail}`;
         
         const { smsService } = require('./smsService');
         
@@ -393,31 +393,20 @@ async function sendSponsorNotifications(sponsorData: any) {
     const { sendSMS } = require('./smsService');
     const { sendEmail } = require('./emailService');
     
-    // Send SMS notification to admin (you)
-    const adminSMSMessage = `🎉 NEW SPONSOR ALERT! 
-${businessName} just became a ${tierName} sponsor ($${amount})!
-
+    // Send SMS notification to admin (you) - Simple format to avoid carrier filtering
+    const adminSMSMessage = `New MarketPace sponsor: ${businessName}
+Tier: ${tierName} ($${amount})
 Contact: ${contactName}
-Email: ${email} 
+Email: ${email}
 Phone: ${phone}
-Address: ${address}
 ${website ? `Website: ${website}` : ''}
-${businessDescription ? `About: ${businessDescription}` : ''}
 
-Check your email for logo attachment and full details!`;
+Business info sent to your email.`;
 
     await sendSMS('251-282-6662', adminSMSMessage);
 
-    // Send welcome SMS to sponsor
-    const sponsorSMSMessage = `🎉 Welcome to MarketPace, ${contactName}! 
-
-Thank you for becoming our ${tierName} sponsor! We're excited to have ${businessName} supporting our community platform.
-
-We'll keep you updated on our app progress and all your sponsorship perks and shout-outs! 
-
-Questions? Reply to MarketPace.contact@gmail.com
-
-Welcome to the MarketPace family! 🚀`;
+    // Send welcome SMS to sponsor - Simple format
+    const sponsorSMSMessage = `Welcome to MarketPace ${contactName}. Thank you for becoming a ${tierName} sponsor. ${businessName} is now supporting our community platform. We will send updates on app progress and sponsor benefits. Contact: MarketPace.contact@gmail.com`;
 
     await sendSMS(phone, sponsorSMSMessage);
 
