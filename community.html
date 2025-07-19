@@ -3258,33 +3258,57 @@
             }
             
             // Show notification
-            showNotification(`Filtered to ${category.replace('-', ' & ')} category - ${visibleCount} items found`, visibleCount > 0 ? '#10b981' : '#f59e0b');
+            showNotification(`Filtered to ${category.replace('-', ' & ')} category - ${visibleCount} items found`, visibleCount > 0 ? 'success' : 'warning');
         }
         
-        function showNotification(message, color = '#10b981') {
+        function showNotification(message, type = 'success') {
             const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            const colors = {
+                'success': '#10b981',
+                'error': '#ef4444',
+                'info': '#3b82f6',
+                'warning': '#f59e0b'
+            };
+            
             notification.style.cssText = `
                 position: fixed;
-                top: 120px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: ${color};
+                top: 20px;
+                right: 20px;
+                background: ${colors[type] || colors.success};
                 color: white;
                 padding: 12px 20px;
                 border-radius: 8px;
-                z-index: 1000;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                z-index: 2000;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
                 font-size: 14px;
                 font-weight: 500;
+                min-width: 200px;
+                opacity: 0;
+                transform: translateX(100%);
+                transition: all 0.3s ease;
             `;
+            
             notification.textContent = message;
             document.body.appendChild(notification);
             
+            // Show notification
             setTimeout(() => {
-                if (notification.parentNode) {
-                    document.body.removeChild(notification);
-                }
-            }, 3000);
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Hide and remove notification
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 4000);
         }
         
         function clearCategoryFilter() {
@@ -3302,7 +3326,7 @@
                 existingMessage.remove();
             }
             
-            showNotification('Category filter cleared - showing all posts', '#3b82f6');
+            showNotification('Category filter cleared - showing all posts', 'info');
         }
 
         // Main rental filtering function called by the rental button
@@ -3740,7 +3764,8 @@
             if (message) {
                 showNotification(`Message sent to ${sellerName} about ${itemName}!`, 'success');
                 closeMessageModal();
-                // Create a conversation and navigate to messages
+                
+                // Create conversation and save to localStorage
                 const conversationId = 'conv_' + Date.now();
                 const conversation = {
                     id: conversationId,
@@ -3750,15 +3775,55 @@
                     itemContext: {
                         name: itemName,
                         seller: sellerName
-                    }
+                    },
+                    messages: [{
+                        sender: 'You',
+                        message: message,
+                        timestamp: new Date().toISOString()
+                    }]
                 };
                 
-                // Save conversation to localStorage
                 const conversations = JSON.parse(localStorage.getItem('marketpace_conversations') || '[]');
                 conversations.unshift(conversation);
                 localStorage.setItem('marketpace_conversations', JSON.stringify(conversations));
+                
+                // Simulate seller response after 3 seconds
+                setTimeout(() => {
+                    simulateSellerResponse(sellerName, itemName, conversationId);
+                }, 3000);
+                
             } else {
                 showNotification('Please enter a message', 'error');
+            }
+        }
+
+        function simulateSellerResponse(sellerName, itemName, conversationId) {
+            const responses = [
+                `Hi! Thanks for your interest in my ${itemName}. I'd be happy to help!`,
+                `Hello! Yes, the ${itemName} is still available. What would you like to know?`,
+                `Hey there! I saw your message about the ${itemName}. It's in excellent condition!`,
+                `Thanks for reaching out! The ${itemName} is ready for pickup or delivery. What works for you?`,
+                `Hi! I appreciate your message. The ${itemName} is available. When would you like to see it?`,
+                `Hello! The ${itemName} is exactly as described. Would you like more photos?`,
+                `Thanks for your interest! The ${itemName} is priced to sell. Are you ready to move forward?`
+            ];
+            
+            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+            
+            // Add seller response to conversation
+            const conversations = JSON.parse(localStorage.getItem('marketpace_conversations') || '[]');
+            const conversation = conversations.find(c => c.id === conversationId);
+            if (conversation) {
+                if (!conversation.messages) conversation.messages = [];
+                conversation.messages.push({
+                    sender: sellerName,
+                    message: randomResponse,
+                    timestamp: new Date().toISOString()
+                });
+                conversation.lastMessage = randomResponse;
+                localStorage.setItem('marketpace_conversations', JSON.stringify(conversations));
+                
+                showNotification(`${sellerName} replied to your message!`, 'info');
             }
         }
 
@@ -4042,41 +4107,7 @@
             }
         }
 
-        // Notification system
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            const colors = {
-                success: 'linear-gradient(135deg, #10b981, #059669)',
-                error: 'linear-gradient(135deg, #ef4444, #dc2626)',
-                info: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-                warning: 'linear-gradient(135deg, #f59e0b, #d97706)'
-            };
-            
-            notification.style.cssText = `
-                position: fixed;
-                top: 100px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: ${colors[type] || colors.info};
-                color: white;
-                padding: 15px 25px;
-                border-radius: 10px;
-                z-index: 10000;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-                font-weight: bold;
-                text-align: center;
-                max-width: 400px;
-                animation: slideInDown 0.3s ease;
-            `;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    document.body.removeChild(notification);
-                }
-            }, 3000);
-        }
+        // Duplicate function removed - using main notification system above
 
         // Condition Verification Function - Navigate to Rental Details
         function verifyCondition(itemName, category) {
@@ -4730,46 +4761,7 @@
             }
         }
         
-        // Show notification function
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 15px 20px;
-                border-radius: 10px;
-                color: white;
-                font-weight: 600;
-                z-index: 10000;
-                max-width: 300px;
-                backdrop-filter: blur(20px);
-                border: 1px solid rgba(255, 255, 255, 0.2);
-            `;
-            
-            switch(type) {
-                case 'success':
-                    notification.style.background = 'rgba(34, 197, 94, 0.9)';
-                    break;
-                case 'error':
-                    notification.style.background = 'rgba(239, 68, 68, 0.9)';
-                    break;
-                case 'warning':
-                    notification.style.background = 'rgba(251, 191, 36, 0.9)';
-                    break;
-                default:
-                    notification.style.background = 'rgba(59, 130, 246, 0.9)';
-            }
-            
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 3000);
-        }
+        // Duplicate function removed - using main notification system
 
         function makeOffer(item) {
             const offer = prompt(`Make an offer for "${item}":`);
@@ -6576,35 +6568,7 @@ function closePromotionModal() {
     }
 }
 
-// Global notification function
-function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: ${type === 'success' ? 'linear-gradient(135deg, #10b981, #059669)' : 
-                    type === 'error' ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 
-                    'linear-gradient(135deg, #3b82f6, #2563eb)'};
-        color: white;
-        padding: 15px 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        z-index: 1000;
-        font-size: 14px;
-        max-width: 300px;
-        animation: slideIn 0.3s ease-out;
-        white-space: pre-line;
-    `;
-    notification.innerHTML = message;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease-in';
-        setTimeout(() => document.body.removeChild(notification), 300);
-    }, 3000);
-}
+// Duplicate function removed - using main notification system above
 
 // Self-pickup checkout functionality for rental items
 function addSelfPickupToRentals() {
