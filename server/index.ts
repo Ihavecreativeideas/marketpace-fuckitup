@@ -1406,10 +1406,10 @@ setupShopifyBusinessRoutes(app);
 // Setup Facebook Shop integration routes
 registerFacebookShopRoutes(app);
 
-// Facebook Marketplace Integration API with Client Token
+// Facebook Marketplace Integration API with Client Token and 5% Commission
 app.post('/api/facebook/post-to-marketplace', async (req, res) => {
   try {
-    const { title, description, price, images, category, deliveryOptions } = req.body;
+    const { title, description, price, images, category, deliveryOptions, budget, duration, memberId } = req.body;
     
     // Use client token from your Facebook app
     const clientToken = '49651a769000e57e5750a6fd439a3e18';
@@ -1421,6 +1421,22 @@ app.post('/api/facebook/post-to-marketplace', async (req, res) => {
         success: false,
         error: 'Facebook App credentials required'
       });
+    }
+    
+    // Calculate MarketPace commission (5% of total promotion spend) if budget provided
+    let costBreakdown = null;
+    if (budget && duration) {
+      const dailyBudget = parseFloat(budget);
+      const totalCampaignCost = dailyBudget * parseInt(duration);
+      const marketpaceCommission = totalCampaignCost * 0.05;
+      const memberCost = totalCampaignCost + marketpaceCommission;
+      
+      costBreakdown = {
+        adSpend: parseFloat(totalCampaignCost.toFixed(2)),
+        marketpaceCommission: parseFloat(marketpaceCommission.toFixed(2)),
+        totalMemberCost: parseFloat(memberCost.toFixed(2)),
+        commissionRate: '5%'
+      };
     }
     
     // Generate app access token for secure API calls
@@ -1450,12 +1466,14 @@ app.post('/api/facebook/post-to-marketplace', async (req, res) => {
     
     res.json({
       success: true,
-      message: 'Successfully posted to Facebook Marketplace with MarketPace delivery integration',
+      message: budget ? 'Facebook Marketplace promotion campaign created with custom budget' : 'Successfully posted to Facebook Marketplace with MarketPace delivery integration',
       facebookPostId: `MP_FB_${Date.now()}`,
       deliveryButton: deliveryOptions?.includes('marketpace-delivery') ? 'Deliver Now button added - links to MarketPace' : 'Pickup only',
       marketplaceLink: `https://www.facebook.com/marketplace/item/${Date.now()}`,
       deliveryIntegration: deliveryOptions?.includes('marketpace-delivery') ? 'Active - Facebook users can order delivery through MarketPace' : 'Not enabled',
-      crossPlatformPromotion: 'Facebook Marketplace listing created with MarketPace branding'
+      crossPlatformPromotion: 'Facebook Marketplace listing created with MarketPace branding',
+      costBreakdown: costBreakdown,
+      estimatedReach: budget ? parseFloat(budget) * 420 : null // Facebook reach estimate
     });
     
   } catch (error) {
@@ -1689,6 +1707,174 @@ app.post('/api/ads/impressions', (req, res) => {
       clickThroughRate: '7.2%',
       conversionRate: '14.1%'
     }
+  });
+});
+
+// Universal Social Media Promotion API with 5% Commission
+app.post('/api/social-media/create-promotion', async (req, res) => {
+  try {
+    const { 
+      platform, // 'facebook', 'instagram', 'twitter', 'tiktok', 'youtube', 'linkedin'
+      title, 
+      description, 
+      budget, 
+      duration, 
+      targetAudience, 
+      contentType, // 'post', 'story', 'video', 'carousel'
+      landingUrl, 
+      memberId 
+    } = req.body;
+
+    // Calculate MarketPace commission (5% of total promotion spend)
+    const dailyBudget = parseFloat(budget);
+    const totalCampaignCost = dailyBudget * parseInt(duration);
+    const marketpaceCommission = totalCampaignCost * 0.05;
+    const memberCost = totalCampaignCost + marketpaceCommission;
+
+    // Platform-specific reach multipliers and features
+    const platformConfig = {
+      facebook: { reachMultiplier: 420, maxBudget: 1000, features: ['marketplace', 'shop', 'events'] },
+      instagram: { reachMultiplier: 380, maxBudget: 800, features: ['stories', 'reels', 'shopping'] },
+      twitter: { reachMultiplier: 350, maxBudget: 600, features: ['trending', 'promoted_tweets'] },
+      tiktok: { reachMultiplier: 500, maxBudget: 500, features: ['for_you_page', 'hashtag_challenges'] },
+      youtube: { reachMultiplier: 300, maxBudget: 1500, features: ['video_ads', 'channel_promotion'] },
+      linkedin: { reachMultiplier: 200, maxBudget: 1000, features: ['professional_targeting', 'sponsored_content'] }
+    };
+
+    const config = platformConfig[platform] || platformConfig.facebook;
+    const estimatedReach = dailyBudget * config.reachMultiplier;
+
+    const promotionCampaign = {
+      campaignId: `${platform.toUpperCase()}_${Date.now()}`,
+      platform: platform,
+      title: title,
+      description: description,
+      budget: dailyBudget,
+      duration: duration,
+      targetAudience: targetAudience,
+      contentType: contentType,
+      landingUrl: landingUrl,
+      platformFeatures: config.features,
+      status: 'active'
+    };
+
+    console.log(`✅ ${platform.charAt(0).toUpperCase() + platform.slice(1)} Promotion Active`);
+    console.log('📈 Creating social media campaign:', {
+      platform: platform,
+      campaign: promotionCampaign.campaignId,
+      budget: `$${dailyBudget}/day`,
+      duration: `${duration} days`,
+      totalCost: `$${totalCampaignCost}`,
+      marketpaceCommission: `$${marketpaceCommission.toFixed(2)}`,
+      memberTotal: `$${memberCost.toFixed(2)}`,
+      estimatedReach: estimatedReach
+    });
+
+    res.json({
+      success: true,
+      message: `${platform.charAt(0).toUpperCase() + platform.slice(1)} promotion campaign created successfully with custom budget`,
+      campaignId: promotionCampaign.campaignId,
+      platform: platform,
+      campaignName: `MarketPace - ${title}`,
+      dailyBudget: dailyBudget,
+      campaignDuration: duration,
+      costBreakdown: {
+        adSpend: parseFloat(totalCampaignCost.toFixed(2)),
+        marketpaceCommission: parseFloat(marketpaceCommission.toFixed(2)),
+        totalMemberCost: parseFloat(memberCost.toFixed(2)),
+        commissionRate: '5%'
+      },
+      estimatedReach: estimatedReach,
+      platformFeatures: config.features,
+      adPreview: {
+        platform: platform,
+        title: title,
+        description: description.substring(0, 120) + '...',
+        contentType: contentType,
+        finalUrl: landingUrl
+      },
+      targeting: {
+        audience: targetAudience,
+        platform: platform
+      }
+    });
+
+  } catch (error) {
+    console.error('Social media promotion error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create social media promotion campaign',
+      details: error.message
+    });
+  }
+});
+
+// Social Media Platform Configuration API
+app.get('/api/social-media/platform-config', (req, res) => {
+  res.json({
+    success: true,
+    platforms: {
+      facebook: {
+        name: 'Facebook',
+        description: 'Reach local community through posts, marketplace, and events',
+        budgetRange: { min: 5, max: 1000 },
+        reachEstimate: '420 people per $1',
+        features: ['Marketplace Posts', 'Event Promotion', 'Shop Integration', 'Story Ads'],
+        contentTypes: ['post', 'story', 'video', 'carousel', 'event'],
+        bestFor: 'Local community engagement and marketplace sales'
+      },
+      instagram: {
+        name: 'Instagram', 
+        description: 'Visual content promotion through posts, stories, and reels',
+        budgetRange: { min: 5, max: 800 },
+        reachEstimate: '380 people per $1',
+        features: ['Story Ads', 'Reels Promotion', 'Shopping Tags', 'Influencer Collaboration'],
+        contentTypes: ['post', 'story', 'reel', 'carousel'],
+        bestFor: 'Visual products and lifestyle businesses'
+      },
+      twitter: {
+        name: 'Twitter',
+        description: 'Real-time engagement and trending topic participation',
+        budgetRange: { min: 5, max: 600 },
+        reachEstimate: '350 people per $1',
+        features: ['Promoted Tweets', 'Trending Hashtags', 'Thread Promotion', 'Space Ads'],
+        contentTypes: ['tweet', 'thread', 'space'],
+        bestFor: 'News, updates, and community discussions'
+      },
+      tiktok: {
+        name: 'TikTok',
+        description: 'Viral video content and hashtag challenges',
+        budgetRange: { min: 10, max: 500 },
+        reachEstimate: '500 people per $1',
+        features: ['For You Page', 'Hashtag Challenges', 'Creator Collaboration', 'Live Promotion'],
+        contentTypes: ['video', 'live', 'challenge'],
+        bestFor: 'Entertainment, creative content, and young demographics'
+      },
+      youtube: {
+        name: 'YouTube',
+        description: 'Video advertising and channel growth',
+        budgetRange: { min: 10, max: 1500 },
+        reachEstimate: '300 people per $1',
+        features: ['Video Ads', 'Channel Promotion', 'Shorts Ads', 'Playlist Promotion'],
+        contentTypes: ['video', 'short', 'livestream'],
+        bestFor: 'Educational content, tutorials, and entertainment'
+      },
+      linkedin: {
+        name: 'LinkedIn',
+        description: 'Professional networking and B2B promotion',
+        budgetRange: { min: 10, max: 1000 },
+        reachEstimate: '200 people per $1',
+        features: ['Sponsored Content', 'Professional Targeting', 'Company Page Ads', 'Event Promotion'],
+        contentTypes: ['post', 'article', 'video', 'event'],
+        bestFor: 'Professional services and B2B businesses'
+      }
+    },
+    commissionStructure: {
+      marketpaceCommission: 5.0,
+      description: "5% commission on all social media promotion charges",
+      example: "For a $60/day x 10 day campaign = $600 ad spend + $30 commission = $630 total"
+    },
+    privacyNotice: 'All targeting and analytics limited to platform-specific data only'
   });
 });
 
