@@ -1822,7 +1822,7 @@
                                 </svg>
                                 Rent Now
                             </button>
-                            <button class="commerce-btn" onclick="messageOwner('Power Washer', 'Tom\'s Tool Rentals', 45.00, 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400')">
+                            <button class="commerce-btn" onclick="messageOwner('Tom\'s Tool Rentals', 'Power Washer', 'item_power_washer')">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
                                     <rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/>
                                     <path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7" stroke="currentColor" stroke-width="1.5"/>
@@ -1943,7 +1943,7 @@
                                 </svg>
                                 Rent Now
                             </button>
-                            <button class="commerce-btn" onclick="messageOwner('beach chairs rental')">
+                            <button class="commerce-btn" onclick="messageOwner('Jessica Martinez', 'Beach Chairs Set', 'item_beach_chairs')">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
                                     <rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/>
                                     <path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7" stroke="currentColor" stroke-width="1.5"/>
@@ -2147,7 +2147,7 @@
                                 Book Service
                             </button>
                             <button class="commerce-btn" onclick="callService('handyman')">Call Now</button>
-                            <button class="commerce-btn" onclick="messageOwner('Handyman Service', 'Gulf Coast Handyman', 75.00, '')">Message</button>
+                            <button class="commerce-btn" onclick="messageOwner('Gulf Coast Handyman', 'Handyman Service', 'item_handyman')">Message</button>
                         </div>
                     </div>
                 </div>
@@ -2205,7 +2205,7 @@
                                 Book Event
                             </button>
                             <button class="commerce-btn" onclick="callService('dj')">Call DJ</button>
-                            <button class="commerce-btn" onclick="messageOwner('DJ Service', 'DJ Sunset Vibes', 200.00, 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400')">Message</button>
+                            <button class="commerce-btn" onclick="messageOwner('DJ Sunset Vibes', 'DJ Service', 'item_dj_service')">Message</button>
                         </div>
                     </div>
                 </div>
@@ -3703,29 +3703,64 @@
         }
 
         // Message Owner Function
-        function messageOwner(itemName, sellerName, itemPrice, imageUrl) {
-            // Create a conversation and navigate to messages
-            const conversationId = 'conv_' + Date.now();
-            const conversation = {
-                id: conversationId,
-                participants: ['You', sellerName || 'Seller'],
-                lastMessage: `Hi! I'm interested in ${itemName}`,
-                timestamp: new Date().toISOString(),
-                itemContext: {
-                    name: itemName,
-                    price: itemPrice,
-                    image: imageUrl,
-                    seller: sellerName
-                }
-            };
+        function messageOwner(sellerName, itemName, itemId) {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 400px;">
+                    <h3 style="color: #00ffff; margin-bottom: 20px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                            <rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/>
+                            <path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                        Message ${sellerName}
+                    </h3>
+                    <p style="color: #e2e8f0; margin-bottom: 20px;">Send a message about: <strong>${itemName}</strong></p>
+                    <textarea placeholder="Type your message here..." style="width: 100%; height: 100px; padding: 10px; background: rgba(0, 255, 255, 0.1); border: 2px solid #00ffff; border-radius: 8px; color: white; resize: vertical;"></textarea>
+                    <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
+                        <button onclick="closeMessageModal()" style="background: rgba(107, 114, 128, 0.6); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Cancel</button>
+                        <button onclick="sendMessage('${itemName}', '${sellerName}')" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Send Message</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function closeMessageModal() {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+                document.body.removeChild(modal);
+            }
+        }
+
+        function sendMessage(itemName, sellerName) {
+            const textarea = document.querySelector('.modal-overlay textarea');
+            const message = textarea ? textarea.value.trim() : '';
             
-            // Save conversation to localStorage
-            const conversations = JSON.parse(localStorage.getItem('marketpace_conversations') || '[]');
-            conversations.unshift(conversation);
-            localStorage.setItem('marketpace_conversations', JSON.stringify(conversations));
-            
-            // Navigate to messages page
-            window.location.href = '/messages';
+            if (message) {
+                showNotification(`Message sent to ${sellerName} about ${itemName}!`, 'success');
+                closeMessageModal();
+                // Create a conversation and navigate to messages
+                const conversationId = 'conv_' + Date.now();
+                const conversation = {
+                    id: conversationId,
+                    participants: ['You', sellerName || 'Seller'],
+                    lastMessage: message,
+                    timestamp: new Date().toISOString(),
+                    itemContext: {
+                        name: itemName,
+                        seller: sellerName
+                    }
+                };
+                
+                // Save conversation to localStorage
+                const conversations = JSON.parse(localStorage.getItem('marketpace_conversations') || '[]');
+                conversations.unshift(conversation);
+                localStorage.setItem('marketpace_conversations', JSON.stringify(conversations));
+            } else {
+                showNotification('Please enter a message', 'error');
+            }
+        }
         }
 
         // Profile Settings and Navigation Functions
