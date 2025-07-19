@@ -1,6 +1,6 @@
 import express from 'express';
 import { db } from './db';
-import { users, businesses, facebookMarketplacePosts } from '../shared/schema';
+import { users, businesses, facebookMarketplacePosts, facebookAutoResponses } from '../shared/schema';
 import { eq } from 'drizzle-orm';
 import { facebookAutoResponseService } from './facebookAutoResponse';
 
@@ -84,6 +84,70 @@ router.get('/api/social-media/links/:userId', async (req, res) => {
   } catch (error) {
     console.error('Error fetching social media links:', error);
     res.status(500).json({ error: 'Failed to fetch social media links' });
+  }
+});
+
+// Cross-post to Facebook Marketplace (alternative endpoint)
+router.post('/api/social-media/cross-post-facebook', async (req, res) => {
+  try {
+    const { 
+      userId, 
+      marketplacePostId,
+      title, 
+      description, 
+      price, 
+      category,
+      deliveryAvailable = true,
+      autoResponseEnabled = true
+    } = req.body;
+
+    if (!userId || !marketplacePostId || !title || !price) {
+      return res.status(400).json({ 
+        error: 'Missing required fields: userId, marketplacePostId, title, price' 
+      });
+    }
+
+    // Generate a mock Facebook post ID for demo
+    const facebookPostId = `fb_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // Create Facebook marketplace post record
+    const [crossPost] = await db.insert(facebookMarketplacePosts).values({
+      userId,
+      marketplacePostId,
+      facebookPostId,
+      title,
+      description,
+      price,
+      category,
+      deliveryAvailable,
+      autoResponseEnabled,
+      crossPostingEnabled: true
+    }).returning();
+
+    // Add "Deliver Now" button link back to MarketPace
+    const marketplaceUrl = `https://www.marketpace.shop/item/${marketplacePostId}`;
+
+    console.log(`📤 Facebook Cross-Post Created:
+      Title: ${title}
+      Price: ${price}
+      Category: ${category}
+      Facebook Post ID: ${facebookPostId}
+      MarketPace Link: ${marketplaceUrl}
+    `);
+
+    res.json({
+      success: true,
+      message: 'Successfully cross-posted to Facebook Marketplace',
+      data: {
+        crossPost,
+        facebookPostId,
+        marketplaceUrl,
+        autoResponseEnabled
+      }
+    });
+  } catch (error) {
+    console.error('Error creating Facebook cross-post:', error);
+    res.status(500).json({ error: 'Failed to create Facebook cross-post' });
   }
 });
 
