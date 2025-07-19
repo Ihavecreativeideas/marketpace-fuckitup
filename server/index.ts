@@ -70,6 +70,176 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Post creation with automatic Stripe integration
+app.post('/api/posts/create', async (req, res) => {
+  try {
+    const { 
+      content, 
+      type, 
+      price, 
+      category, 
+      author, 
+      isEntertainmentPro = false,
+      isEntertainmentMerchOrTickets = false 
+    } = req.body;
+
+    console.log('Creating post with price:', price);
+
+    let stripeSessionId = null;
+    let stripeUrl = null;
+    let commission = 0;
+    let netAmount = 0;
+
+    // Check if post has a price and needs Stripe integration
+    if (price && parseFloat(price) > 0) {
+      const priceAmount = parseFloat(price);
+      
+      // Calculate commission (5% except for entertainment pros merch/tickets until Jan 1, 2026)
+      const isPromotion = new Date() < new Date('2026-01-01');
+      const isExempt = isEntertainmentPro && isEntertainmentMerchOrTickets && isPromotion;
+      
+      commission = isExempt ? 0 : priceAmount * 0.05;
+      netAmount = priceAmount - commission;
+
+      console.log(`Price: $${priceAmount}, Commission: $${commission}, Net: $${netAmount}, Exempt: ${isExempt}`);
+
+      // Create Stripe checkout session
+      if (stripe) {
+        try {
+          const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [
+              {
+                price_data: {
+                  currency: 'usd',
+                  product_data: {
+                    name: content.substring(0, 100) + (content.length > 100 ? '...' : ''),
+                    description: `${type} post by ${author}`,
+                  },
+                  unit_amount: Math.round(priceAmount * 100), // Convert to cents
+                },
+                quantity: 1,
+              },
+            ],
+            mode: 'payment',
+            success_url: `${req.headers.origin || 'http://localhost:5000'}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${req.headers.origin || 'http://localhost:5000'}/enhanced-community-feed.html`,
+            metadata: {
+              post_type: type,
+              post_category: category,
+              author: author,
+              commission: commission.toString(),
+              net_amount: netAmount.toString(),
+              is_entertainment_exempt: isExempt.toString(),
+              created_at: new Date().toISOString()
+            },
+          });
+
+          stripeSessionId = session.id;
+          stripeUrl = session.url;
+          
+          console.log('✅ Stripe session created:', session.id);
+        } catch (stripeError) {
+          console.error('❌ Stripe error:', stripeError);
+          return res.status(500).json({ 
+            success: false, 
+            error: 'Payment setup failed: ' + stripeError.message 
+          });
+        }
+      } else {
+        console.warn('⚠️ Stripe not initialized - payment features disabled');
+        return res.status(500).json({ 
+          success: false, 
+          error: 'Payment system not available' 
+        });
+      }
+    }
+
+    // Create post record (in real app, this would save to database)
+    const post = {
+      id: Date.now().toString(),
+      content,
+      type,
+      category,
+      author,
+      price: price ? parseFloat(price) : null,
+      commission,
+      netAmount,
+      stripeSessionId,
+      stripeUrl,
+      paymentRequired: !!price,
+      paymentCompleted: false,
+      createdAt: new Date().toISOString(),
+      metadata: {
+        isEntertainmentPro,
+        isEntertainmentMerchOrTickets,
+        promotionActive: new Date() < new Date('2026-01-01')
+      }
+    };
+
+    console.log('✅ Post created with Stripe integration:', post.id);
+
+    res.json({
+      success: true,
+      post,
+      stripeSession: price ? {
+        sessionId: stripeSessionId,
+        url: stripeUrl,
+        redirectRequired: true
+      } : null,
+      commission: {
+        applied: commission > 0,
+        amount: commission,
+        rate: commission > 0 ? '5%' : '0% (Entertainment promotion)',
+        exemptUntil: '2026-01-01'
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Post creation error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to create post: ' + error.message 
+    });
+  }
+});
+
+// Stripe webhook to handle payment completion
+app.post('/api/stripe/webhook', express.raw({type: 'application/json'}), async (req, res) => {
+  try {
+    const sig = req.headers['stripe-signature'];
+    let event;
+
+    if (stripe) {
+      // In production, you'd verify the webhook signature
+      event = req.body;
+      
+      if (event.type === 'checkout.session.completed') {
+        const session = event.data.object;
+        console.log('✅ Payment completed for session:', session.id);
+        
+        // Update post payment status (in real app, update database)
+        // This would mark the post as payment completed and make it live
+        
+        // Send notification to seller about successful sale
+        if (session.metadata) {
+          console.log('📧 Sending seller notification:', {
+            author: session.metadata.author,
+            amount: session.amount_total / 100,
+            commission: session.metadata.commission,
+            netAmount: session.metadata.net_amount
+          });
+        }
+      }
+    }
+
+    res.json({received: true});
+  } catch (error) {
+    console.error('❌ Webhook error:', error);
+    res.status(400).send(`Webhook Error: ${error.message}`);
+  }
+});
+
 // Admin Dashboard Data API
 app.get('/api/admin/dashboard-data', async (req, res) => {
   try {

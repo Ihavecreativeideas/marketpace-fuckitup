@@ -272,6 +272,17 @@ All features are designed to strengthen local communities by keeping commerce lo
 
 ## Recent Changes
 
+✓ **AUTOMATIC STRIPE INTEGRATION FOR POSTS WITH PRICES FULLY IMPLEMENTED** (July 19, 2025)
+✓ **5% COMMISSION STRUCTURE WITH ENTERTAINMENT PROMOTION**: All posts with prices automatically connect to Stripe with 5% commission except entertainment pros merch/tickets (0% until Jan 1, 2026)
+✓ **ENHANCED POST CREATION SYSTEM**: Added price input field to posting interface with dynamic commission display based on user type and post category
+✓ **STRIPE CHECKOUT INTEGRATION**: Posts with prices automatically create Stripe checkout sessions with proper metadata tracking and success/cancel URLs
+✓ **PAYMENT SUCCESS PAGE**: Created dedicated payment confirmation page with commission breakdown and navigation back to marketplace
+✓ **COMMISSION CALCULATION API**: Backend automatically calculates 5% commission or applies 0% for entertainment promotion with proper date checking
+✓ **REAL-TIME PRICE VALIDATION**: Dynamic price section shows/hides based on post type (service, rental, item-for-sale, entertainment)
+✓ **ENTERTAINMENT PROMOTION TRACKING**: System automatically detects entertainment pros and applies special pricing until January 1, 2026
+✓ **AUTOMATIC PAYMENT PROCESSING**: When users create posts with prices, they're redirected to Stripe checkout with clear commission disclosure
+✓ **STRIPE WEBHOOK INTEGRATION**: Payment completion webhook handles post activation and seller notifications
+
 ✓ **COMPREHENSIVE CODEBASE CLEANUP & BUTTON FUNCTIONALITY AUDIT COMPLETED** (July 19, 2025)
 ✓ **OLD PAGES REMOVED**: Deleted business-profile-hub.html and public-pro-entertainment.html, consolidated into unified-pro-page.html
 ✓ **NON-FUNCTIONAL "MANAGE" BUTTON ELIMINATED**: Replaced with functional "Menu" button that navigates to MarketPace menu

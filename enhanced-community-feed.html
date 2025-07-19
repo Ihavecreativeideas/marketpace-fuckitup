@@ -834,6 +834,23 @@
                 <button class="post-type-btn" data-type="promotion" onclick="selectPostType('promotion')">Promotion</button>
             </div>
 
+            <!-- Price input for posts with prices -->
+            <div class="price-section" id="priceSection" style="display: none;">
+                <div style="display: flex; align-items: center; gap: 10px; margin: 15px 0;">
+                    <label for="priceInput" style="color: #00ffff; font-weight: 500; min-width: 60px;">Price:</label>
+                    <div style="position: relative; flex: 1;">
+                        <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #00ffff; font-weight: bold;">$</span>
+                        <input type="number" 
+                               id="priceInput" 
+                               placeholder="0.00" 
+                               min="0" 
+                               step="0.01"
+                               style="width: 100%; padding: 8px 8px 8px 25px; border: 1px solid #00ffff; border-radius: 6px; background: rgba(0,255,255,0.1); color: white; font-size: 14px;">
+                    </div>
+                    <small style="color: rgba(255,255,255,0.7); font-size: 12px;" id="commissionNote">5% commission applies</small>
+                </div>
+            </div>
+
             <div class="composer-actions">
                 <div class="media-options">
                     <button class="media-btn" onclick="attachImage()">Photo</button>
@@ -1196,6 +1213,34 @@
             };
             
             document.getElementById('postInput').placeholder = placeholders[type] || placeholders.general;
+            
+            // Show/hide price section based on post type
+            const priceSection = document.getElementById('priceSection');
+            const commissionNote = document.getElementById('commissionNote');
+            const pricedTypes = ['service', 'rental', 'item-for-sale', 'entertainment'];
+            
+            if (pricedTypes.includes(type)) {
+                priceSection.style.display = 'block';
+                
+                // Check if user is entertainment pro for commission note
+                const userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                const isEntertainmentPro = userData.accountType === 'entertainment' || userData.proType === 'entertainment';
+                const currentDate = new Date();
+                const promotionEnd = new Date('2026-01-01');
+                
+                if (isEntertainmentPro && type === 'entertainment' && currentDate < promotionEnd) {
+                    commissionNote.textContent = '0% commission (Entertainment promotion until Jan 1, 2026)';
+                    commissionNote.style.color = '#00ff00';
+                } else {
+                    commissionNote.textContent = '5% commission applies';
+                    commissionNote.style.color = 'rgba(255,255,255,0.7)';
+                }
+            } else {
+                priceSection.style.display = 'none';
+                // Clear price input when hiding
+                const priceInput = document.getElementById('priceInput');
+                if (priceInput) priceInput.value = '';
+            }
         }
 
         function attachImage() {
@@ -1206,33 +1251,101 @@
             alert('Share your shop feature will be available when MarketPace launches in your area!');
         }
 
-        function createPost() {
+        // Enhanced post creation with Stripe integration
+        async function submitPost() {
             const content = document.getElementById('postInput').value.trim();
+            const priceInput = document.getElementById('priceInput');
+            const price = priceInput ? priceInput.value.trim() : '';
+            
             if (!content) {
                 alert('Please enter some content for your post.');
                 return;
             }
             
             const userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
-            const newPost = {
-                id: posts.length + 1,
-                type: selectedPostType,
-                category: getCategoryFromType(selectedPostType),
-                author: userData.firstName || userData.name || 'Community Member',
-                avatar: (userData.firstName || userData.name || 'C').charAt(0).toUpperCase(),
-                time: 'Just now',
-                content: content,
-                likes: 0,
-                comments: 0,
-                shares: 0,
-                location: 'Orange Beach, AL'
-            };
+            const author = userData.firstName || userData.name || 'Community Member';
             
-            posts.unshift(newPost);
-            document.getElementById('postInput').value = '';
-            renderPosts();
+            // Check if this is an entertainment pro posting merch/tickets
+            const isEntertainmentPro = userData.accountType === 'entertainment' || userData.proType === 'entertainment';
+            const isEntertainmentMerchOrTickets = selectedPostType === 'merch' || selectedPostType === 'tickets' || 
+                                                   content.toLowerCase().includes('merch') || 
+                                                   content.toLowerCase().includes('ticket');
             
-            alert('Post created successfully!');
+            try {
+                const response = await fetch('/api/posts/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        content,
+                        type: selectedPostType,
+                        category: getCategoryFromType(selectedPostType),
+                        price: price || null,
+                        author,
+                        isEntertainmentPro,
+                        isEntertainmentMerchOrTickets
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    console.log('✅ Post created:', result.post);
+                    
+                    // Clear form
+                    document.getElementById('postInput').value = '';
+                    if (priceInput) priceInput.value = '';
+                    
+                    // If payment is required, redirect to Stripe
+                    if (result.stripeSession && result.stripeSession.redirectRequired) {
+                        const commissionMsg = result.commission.applied 
+                            ? `A ${result.commission.rate} commission will be deducted from your sale.`
+                            : `No commission during our Entertainment Promotion! (Until ${result.commission.exemptUntil})`;
+                        
+                        const confirmed = confirm(
+                            `Your post requires payment processing.\n\n` +
+                            `Price: $${result.post.price}\n` +
+                            `${commissionMsg}\n\n` +
+                            `You'll be redirected to complete the setup. Continue?`
+                        );
+                        
+                        if (confirmed) {
+                            window.location.href = result.stripeSession.url;
+                        }
+                    } else {
+                        // Free post - add to feed immediately
+                        const newPost = {
+                            id: result.post.id,
+                            type: selectedPostType,
+                            category: getCategoryFromType(selectedPostType),
+                            author: author,
+                            avatar: author.charAt(0).toUpperCase(),
+                            time: 'Just now',
+                            content: content,
+                            price: price ? `$${price}` : null,
+                            likes: 0,
+                            comments: 0,
+                            shares: 0,
+                            location: 'Orange Beach, AL'
+                        };
+                        
+                        posts.unshift(newPost);
+                        renderPosts();
+                        
+                        alert('Post created successfully!');
+                    }
+                } else {
+                    alert('Error creating post: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error creating post:', error);
+                alert('Error creating post. Please try again.');
+            }
+        }
+
+        function createPost() {
+            submitPost();
         }
 
         function getCategoryFromType(type) {
