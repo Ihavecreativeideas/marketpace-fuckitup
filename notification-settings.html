@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification Settings - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a0b3d 0%, #2d1b4e 25%, #4b0082 50%, #191970 75%, #00008b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(15, 23, 77, 0.9);
+            padding: 20px;
+            border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #00ffff;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .settings-card {
+            background: rgba(15, 23, 77, 0.8);
+            border-radius: 20px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-title {
+            color: #ffd700;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .notification-option {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 15px 0;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .notification-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(0, 255, 255, 0.4);
+        }
+
+        .option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .option-title {
+            color: #00ffff;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #00ffff;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .option-description {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .frequency-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .frequency-btn {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .frequency-btn.active {
+            background: rgba(0, 255, 255, 0.3);
+            border-color: #00ffff;
+        }
+
+        .frequency-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+        }
+
+        .phone-input-section {
+            background: rgba(255, 107, 53, 0.1);
+            border: 2px solid rgba(255, 107, 53, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .phone-input-section h3 {
+            color: #FF6B35;
+            margin-bottom: 15px;
+        }
+
+        .phone-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 15px;
+            border-radius: 10px;
+            width: 100%;
+            margin: 10px 0;
+            font-size: 1rem;
+        }
+
+        .phone-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .save-button {
+            background: linear-gradient(45deg, #00ffff, #8a2be2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        .save-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.3);
+        }
+
+        .back-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .success {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4CAF50;
+            color: #4CAF50;
+        }
+
+        .error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid #f44336;
+            color: #f44336;
+        }
+
+        .info {
+            background: rgba(33, 150, 243, 0.2);
+            border: 1px solid #2196F3;
+            color: #2196F3;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            .settings-card {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .option-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Notification Settings</h1>
+        <p>Customize how you receive updates from MarketPace</p>
+    </div>
+
+    <div class="container">
+        <button class="back-button" onclick="window.history.back()">← Back to Profile</button>
+        
+        <div id="statusMessage" class="status-message" style="display: none;"></div>
+
+        <div class="settings-card">
+            <div class="section-title">Email Notifications</div>
+            
+            <div class="notification-option">
+                <div class="option-header">
+                    <div class="option-title">Purchase & Order Updates</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="emailOrders" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="option-description">
+                    Receive email confirmations when you make purchases, track deliveries, and get order status updates.
+                </div>
+            </div>
+
+            <div class="notification-option">
+                <div class="option-header">
+                    <div class="option-title">Community Updates</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="emailCommunity" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="option-description">
+                    Stay informed about local community events, new members, and marketplace highlights in your area.
+                </div>
+            </div>
+
+            <div class="notification-option">
+                <div class="option-header">
+                    <div class="option-title">MarketPace News & Features</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="emailNews" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="option-description">
+                    Get updates about new MarketPace features, platform improvements, and important announcements.
+                </div>
+            </div>
+
+            <div class="notification-option">
+                <div class="option-header">
+                    <div class="option-title">Promotional Offers</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="emailOffers">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="option-description">
+                    Receive special offers, discounts, and promotional campaigns from local businesses and MarketPace.
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <div class="section-title">SMS Text Notifications</div>
+            
+            <div class="phone-input-section">
+                <h3>Phone Number</h3>
+                <input type="tel" class="phone-input" id="phoneNumber" placeholder="+1 (555) 123-4567" />
+                <small style="color: rgba(255, 255, 255, 0.6);">
+                    Standard messaging rates may apply. You can opt out anytime by texting STOP.
+                </small>
+            </div>
+
+            <div class="notification-option">
+                <div class="option-header">
+                    <div class="option-title">Delivery Alerts</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="smsDelivery" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="option-description">
+                    Get instant text alerts when your delivery is on the way, has arrived, or needs attention.
+                </div>
+            </div>
+
+            <div class="notification-option">
+                <div class="option-header">
+                    <div class="option-title">Purchase Confirmations</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="smsPurchase" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="option-description">
+                    Receive immediate text confirmation when you complete a purchase or when someone buys from you.
+                </div>
+            </div>
+
+            <div class="notification-option">
+                <div class="option-header">
+                    <div class="option-title">Time-Sensitive Updates</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="smsUrgent">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="option-description">
+                    Get urgent notifications about account security, payment issues, or important service announcements.
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <div class="section-title">Notification Frequency</div>
+            
+            <div class="notification-option">
+                <div class="option-title" style="margin-bottom: 15px;">Email Digest Frequency</div>
+                <div class="option-description" style="margin-bottom: 15px;">
+                    Choose how often you receive summary emails about community activity and marketplace updates.
+                </div>
+                <div class="frequency-options">
+                    <button class="frequency-btn active" data-frequency="daily">Daily</button>
+                    <button class="frequency-btn" data-frequency="weekly">Weekly</button>
+                    <button class="frequency-btn" data-frequency="monthly">Monthly</button>
+                    <button class="frequency-btn" data-frequency="never">Never</button>
+                </div>
+            </div>
+        </div>
+
+        <button class="save-button" onclick="saveNotificationSettings()">
+            Save Notification Preferences
+        </button>
+    </div>
+
+    <script>
+        // Load current notification settings on page load
+        window.onload = function() {
+            loadCurrentSettings();
+            setupFrequencyButtons();
+        };
+
+        function loadCurrentSettings() {
+            // Load from localStorage or API
+            const savedSettings = localStorage.getItem('notificationSettings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                
+                // Set email preferences
+                document.getElementById('emailOrders').checked = settings.emailOrders !== false;
+                document.getElementById('emailCommunity').checked = settings.emailCommunity !== false;
+                document.getElementById('emailNews').checked = settings.emailNews !== false;
+                document.getElementById('emailOffers').checked = settings.emailOffers === true;
+                
+                // Set SMS preferences
+                document.getElementById('smsDelivery').checked = settings.smsDelivery !== false;
+                document.getElementById('smsPurchase').checked = settings.smsPurchase !== false;
+                document.getElementById('smsUrgent').checked = settings.smsUrgent === true;
+                
+                // Set phone number
+                if (settings.phoneNumber) {
+                    document.getElementById('phoneNumber').value = settings.phoneNumber;
+                }
+            }
+        }
+
+        function setupFrequencyButtons() {
+            const buttons = document.querySelectorAll('.frequency-btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    buttons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        }
+
+        async function saveNotificationSettings() {
+            const saveButton = document.querySelector('.save-button');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            // Disable button and show loading
+            saveButton.textContent = 'Saving...';
+            saveButton.disabled = true;
+
+            try {
+                const settings = {
+                    emailOrders: document.getElementById('emailOrders').checked,
+                    emailCommunity: document.getElementById('emailCommunity').checked,
+                    emailNews: document.getElementById('emailNews').checked,
+                    emailOffers: document.getElementById('emailOffers').checked,
+                    smsDelivery: document.getElementById('smsDelivery').checked,
+                    smsPurchase: document.getElementById('smsPurchase').checked,
+                    smsUrgent: document.getElementById('smsUrgent').checked,
+                    phoneNumber: document.getElementById('phoneNumber').value,
+                    emailFrequency: document.querySelector('.frequency-btn.active').dataset.frequency
+                };
+
+                // Save to localStorage (in production, this would be an API call)
+                localStorage.setItem('notificationSettings', JSON.stringify(settings));
+                
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Show success message
+                showStatusMessage('Notification preferences saved successfully!', 'success');
+                
+                // If SMS notifications are enabled and phone number provided, opt in
+                if ((settings.smsDelivery || settings.smsPurchase || settings.smsUrgent) && settings.phoneNumber) {
+                    await optInToSMS(settings.phoneNumber);
+                }
+
+            } catch (error) {
+                showStatusMessage('Error saving preferences. Please try again.', 'error');
+                console.error('Save error:', error);
+            } finally {
+                // Re-enable button
+                saveButton.textContent = 'Save Notification Preferences';
+                saveButton.disabled = false;
+            }
+        }
+
+        async function optInToSMS(phoneNumber) {
+            try {
+                const response = await fetch('/api/sms/opt-in', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phoneNumber: phoneNumber,
+                        consent: true
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatusMessage('SMS notifications enabled! Check your phone for confirmation.', 'info');
+                } else {
+                    showStatusMessage('SMS opt-in failed. Please check your phone number.', 'error');
+                }
+            } catch (error) {
+                console.error('SMS opt-in error:', error);
+            }
+        }
+
+        function showStatusMessage(message, type) {
+            const statusElement = document.getElementById('statusMessage');
+            statusElement.textContent = message;
+            statusElement.className = `status-message ${type}`;
+            statusElement.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, 5000);
+        }
+
+        // Format phone number as user types
+        document.getElementById('phoneNumber').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 1) value = '+1 ' + value.slice(1);
+            if (value.length >= 6) value = value.slice(0, 6) + '(' + value.slice(6);
+            if (value.length >= 10) value = value.slice(0, 10) + ') ' + value.slice(10);
+            if (value.length >= 15) value = value.slice(0, 15) + '-' + value.slice(15, 19);
+            e.target.value = value;
+        });
+
+        console.log('Notification Settings page loaded');
+        console.log('✅ Comprehensive notification preference controls');
+        console.log('✅ Email and SMS toggle switches');
+        console.log('✅ Phone number input with SMS opt-in');
+        console.log('✅ Frequency controls for digest emails');
+    </script>
+</body>
+</html>

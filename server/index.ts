@@ -2158,6 +2158,89 @@ app.get('/sms-opt-in', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'sms-opt-in.html'));
 });
 
+// Notification Settings API endpoints
+app.get('/api/user/notification-settings', async (req, res) => {
+  try {
+    // In production, get user ID from session/auth
+    const userId = req.session?.user?.id || 'demo-user';
+    
+    // Mock user notification settings (in production, get from database)
+    const settings = {
+      emailNotifications: true,
+      smsNotifications: true,
+      emailOrders: true,
+      emailCommunity: true,
+      emailNews: true,
+      emailOffers: false,
+      smsDelivery: true,
+      smsPurchase: true,
+      smsUrgent: false,
+      phoneNumber: '',
+      emailFrequency: 'daily'
+    };
+
+    res.json({ success: true, settings });
+  } catch (error) {
+    console.error('Error fetching notification settings:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch settings' });
+  }
+});
+
+app.post('/api/user/notification-settings', async (req, res) => {
+  try {
+    const settings = req.body;
+    
+    // In production, get user ID from session/auth and save to database
+    const userId = req.session?.user?.id || 'demo-user';
+    
+    // Validate required fields
+    if (typeof settings.emailNotifications !== 'boolean' || 
+        typeof settings.smsNotifications !== 'boolean') {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid notification settings format' 
+      });
+    }
+
+    // Save notification settings (mock save - in production, save to database)
+    console.log(`Saving notification settings for user ${userId}:`, settings);
+    
+    // If SMS is enabled and phone number provided, ensure SMS opt-in
+    if (settings.smsNotifications && settings.phoneNumber) {
+      try {
+        const cleanPhone = settings.phoneNumber.replace(/\D/g, '');
+        const formattedPhone = cleanPhone.startsWith('1') ? `+${cleanPhone}` : `+1${cleanPhone}`;
+        
+        const confirmMessage = `MarketPace notification preferences updated! You'll receive SMS alerts based on your settings. Reply STOP to unsubscribe.`;
+        await sendSMS(formattedPhone, confirmMessage);
+      } catch (smsError) {
+        console.warn('SMS confirmation failed:', smsError);
+      }
+    }
+
+    res.json({ 
+      success: true, 
+      message: 'Notification settings saved successfully',
+      settings 
+    });
+
+  } catch (error) {
+    console.error('Error saving notification settings:', error);
+    res.status(500).json({ success: false, error: 'Failed to save settings' });
+  }
+});
+
+// Static file routes
+app.get("/self-pickup-checkout.html", (req, res) => { 
+  res.sendFile(path.join(__dirname, "..", "self-pickup-checkout.html")); 
+});
+app.get("/rental-confirmation.html", (req, res) => { 
+  res.sendFile(path.join(__dirname, "..", "rental-confirmation.html")); 
+});
+app.get("/notification-settings.html", (req, res) => { 
+  res.sendFile(path.join(__dirname, "..", "notification-settings.html")); 
+});
+
 app.listen(port, '0.0.0.0', () => {
   console.log(`✅ MarketPace Full Server running on port ${port}`);
   console.log(`🌐 Binding to 0.0.0.0:${port} for external access`);
@@ -2171,5 +2254,4 @@ app.listen(port, '0.0.0.0', () => {
   console.error(`❌ Failed to start on port ${port}:`, err.message);
 });
 
-export default app;app.get("/self-pickup-checkout.html", (req, res) => { res.sendFile(path.join(__dirname, "..", "self-pickup-checkout.html")); });
-app.get("/rental-confirmation.html", (req, res) => { res.sendFile(path.join(__dirname, "..", "rental-confirmation.html")); });
+export default app;
