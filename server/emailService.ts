@@ -7,12 +7,12 @@ class EmailService {
   constructor() {
     // Configure email transporter - using SMTP settings
     this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: false, // true for 465, false for other ports
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        user: 'MarketPace.contact@gmail.com', // Explicit Gmail address
+        pass: 'xqgijzurfbzuvzhf', // Gmail App Password (spaces removed)
       },
     });
   }
