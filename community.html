@@ -5682,258 +5682,32 @@
             }, 4000);
         }
 
-        // Make functions available globally IMMEDIATELY
-        window.openAdvancedPostModal = openAdvancedPostModal;
-        window.closePostModal = closePostModal;
-        window.selectCategory = selectCategory;
-        window.clearCategorySelection = clearCategorySelection;
-        window.toggleFieldsForCategory = toggleFieldsForCategory;
-        
-        console.log('✅ Advanced posting functions registered IMMEDIATELY:', {
-            openAdvancedPostModal: typeof window.openAdvancedPostModal,
-            closePostModal: typeof window.closePostModal,
-            toggleFieldsForCategory: typeof window.toggleFieldsForCategory
-        });
-            const priceGroup = document.getElementById('priceGroup');
-            const rentalPricingGroup = document.getElementById('rentalPricingGroup');
-            const eventDetailsGroup = document.getElementById('eventDetailsGroup');
-            const pollOptions = document.getElementById('pollOptions');
-            const jobCompanyGroup = document.getElementById('jobCompanyGroup');
-            const jobTypeGroup = document.getElementById('jobTypeGroup');
-            const jobSalaryGroup = document.getElementById('jobSalaryGroup');
-            const jobRequirementsGroup = document.getElementById('jobRequirementsGroup');
-            const jobBenefitsGroup = document.getElementById('jobBenefitsGroup');
-            const foodDrinksGroup = document.getElementById('foodDrinksGroup');
-            const deliveryOptionsGroup = document.getElementById('deliveryOptionsGroup');
-            const foodDrinksDeliveryNote = document.getElementById('foodDrinksDeliveryNote');
-            
-            // Hide all optional fields first
-            if (priceGroup) priceGroup.style.display = 'none';
-            if (rentalPricingGroup) rentalPricingGroup.style.display = 'none';
-            if (eventDetailsGroup) eventDetailsGroup.style.display = 'none';
-            if (pollOptions) pollOptions.style.display = 'none';
-            if (jobCompanyGroup) jobCompanyGroup.style.display = 'none';
-            if (jobTypeGroup) jobTypeGroup.style.display = 'none';
-            if (jobSalaryGroup) jobSalaryGroup.style.display = 'none';
-            if (jobRequirementsGroup) jobRequirementsGroup.style.display = 'none';
-            if (jobBenefitsGroup) jobBenefitsGroup.style.display = 'none';
-            if (foodDrinksGroup) foodDrinksGroup.style.display = 'none';
-            if (deliveryOptionsGroup) deliveryOptionsGroup.style.display = 'none';
-            if (foodDrinksDeliveryNote) foodDrinksDeliveryNote.style.display = 'none';
-
-            // Show appropriate fields based on category
-            switch(category) {
-                case 'sale':
-                    if (priceGroup) priceGroup.style.display = 'block';
-                    if (deliveryOptionsGroup) deliveryOptionsGroup.style.display = 'block';
-                    break;
-                case 'rent':
-                    if (rentalPricingGroup) rentalPricingGroup.style.display = 'block';
-                    if (deliveryOptionsGroup) deliveryOptionsGroup.style.display = 'block';
-                    break;
-                case 'service':
-                    if (priceGroup) priceGroup.style.display = 'block';
-                    if (deliveryOptionsGroup) deliveryOptionsGroup.style.display = 'block';
-                    break;
-                case 'event':
-                    if (eventDetailsGroup) eventDetailsGroup.style.display = 'block';
-                    break;
-                case 'poll':
-                    if (pollOptions) pollOptions.style.display = 'block';
-                    break;
-                case 'job':
-                    if (jobCompanyGroup) jobCompanyGroup.style.display = 'block';
-                    if (jobTypeGroup) jobTypeGroup.style.display = 'block';
-                    if (jobSalaryGroup) jobSalaryGroup.style.display = 'block';
-                    if (jobRequirementsGroup) jobRequirementsGroup.style.display = 'block';
-                    if (jobBenefitsGroup) jobBenefitsGroup.style.display = 'block';
-                    break;
-                case 'food-drinks':
-                    if (foodDrinksGroup) foodDrinksGroup.style.display = 'block';
-                    if (deliveryOptionsGroup) deliveryOptionsGroup.style.display = 'block';
-                    if (foodDrinksDeliveryNote) foodDrinksDeliveryNote.style.display = 'block';
-                    // Hide MarketPace delivery option for food & drinks
-                    const marketPaceOption = document.getElementById('marketPaceDeliveryOption');
-                    if (marketPaceOption) {
-                        marketPaceOption.parentElement.style.display = 'none';
-                    }
-                    break;
-                default:
-                    // For general, iso, announcement - no special fields needed
-                    break;
-            }
-            
-            // Special handling for food truck location group
-            const foodTruckLocationGroup = document.getElementById('foodTruckLocationGroup');
-            const foodBusinessType = document.getElementById('foodBusinessType');
-            
-            if (category === 'food-drinks' && foodBusinessType) {
-                foodBusinessType.addEventListener('change', function() {
-                    if (foodTruckLocationGroup) {
-                        foodTruckLocationGroup.style.display = this.value === 'food-truck' ? 'block' : 'none';
-                    }
-                });
-            }
-        };
-
-        // Add event handler for private party delivery checkbox and MarketPace delivery visibility
-        document.addEventListener('DOMContentLoaded', function() {
-            const privatePartyCheckbox = document.getElementById('privatePartyDeliveryOption');
-            const customDeliveryFeeGroup = document.getElementById('customDeliveryFeeGroup');
-            
-            if (privatePartyCheckbox && customDeliveryFeeGroup) {
-                privatePartyCheckbox.addEventListener('change', function() {
-                    customDeliveryFeeGroup.style.display = this.checked ? 'block' : 'none';
-                });
-            }
-            
-            // Ensure MarketPace delivery option visibility is handled properly
-            window.updateDeliveryOptionsVisibility = function(category) {
-                const marketPaceOption = document.getElementById('marketPaceDeliveryOption');
-                if (marketPaceOption && marketPaceOption.parentElement) {
-                    if (category === 'food-drinks') {
-                        marketPaceOption.parentElement.style.display = 'none';
-                    } else {
-                        marketPaceOption.parentElement.style.display = 'block';
-                    }
-                }
-            };
-        });
-        
-        // Food Truck Location Visibility Handler
-        function handleFoodBusinessTypeChange() {
-            const businessType = document.getElementById('foodBusinessType');
-            const foodTruckLocationGroup = document.getElementById('foodTruckLocationGroup');
-            
-            if (businessType && foodTruckLocationGroup) {
-                if (businessType.value === 'food-truck') {
-                    foodTruckLocationGroup.style.display = 'block';
-                    // Set today's date by default
-                    const today = new Date().toISOString().split('T')[0];
-                    document.getElementById('foodTruckDate').value = today;
-                } else {
-                    foodTruckLocationGroup.style.display = 'none';
-                }
-            }
-        }
-        
-        // Add event listener for business type changes
-        document.addEventListener('DOMContentLoaded', function() {
-            const businessType = document.getElementById('foodBusinessType');
-            if (businessType) {
-                businessType.addEventListener('change', handleFoodBusinessTypeChange);
-            }
-        });
-
-        // Food truck location posting function
-        async function submitFoodTruckLocation() {
-            const foodTruckData = {
-                foodTruckName: document.getElementById('postTitle').value,
-                currentLocation: document.getElementById('foodTruckLocation').value,
-                startTime: document.getElementById('foodTruckStartTime').value,
-                endTime: document.getElementById('foodTruckEndTime').value,
-                date: document.getElementById('foodTruckDate').value,
-                specialNotes: document.getElementById('foodTruckNotes').value,
-                locationDescription: document.getElementById('foodTruckLocationDesc').value,
-                addToMap: document.getElementById('addToMap').checked,
-                enableGPSTracking: document.getElementById('enableGPSTracking').checked,
-                menuHighlights: document.getElementById('postDescription').value,
-                businessType: 'food-truck'
-            };
-
-            // Validate required fields
-            if (!foodTruckData.foodTruckName || !foodTruckData.currentLocation) {
-                showNotification('Please fill in food truck name and location', 'error');
+        // Navigation function for bottom nav and other buttons
+        function goToPage(page) {
+            if (page === 'community') {
+                console.log('Already on Community page');
                 return;
             }
-
-            try {
-                const response = await fetch('/api/food-trucks/location', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(foodTruckData)
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showNotification('Food truck location posted successfully!', 'success');
-                    
-                    // Add food truck post to community feed
-                    addFoodTruckPostToFeed(result.locationPost);
-                    
-                    // Close modal and reset form
-                    closeSellerModal();
-                    resetPostForm();
-
-                    if (result.addedToMap) {
-                        showNotification('Food truck added to interactive map!', 'info');
-                    }
-                } else {
-                    showNotification('Error posting food truck location: ' + result.error, 'error');
-                }
-            } catch (error) {
-                console.error('Food truck location posting error:', error);
-                showNotification('Failed to post food truck location. Please try again.', 'error');
-            }
+            
+            const routes = {
+                'shops': 'shops.html',
+                'services': 'services.html',
+                'hub': 'the-hub.html',
+                'eats': 'food-and-drinks.html',
+                'rentals': 'rentals.html',
+                'menu': 'marketpace-menu.html',
+                'home': 'community.html'
+            };
+            
+            const targetPage = routes[page] || page;
+            window.location.href = targetPage;
         }
 
-        // Add food truck post to community feed
-        function addFoodTruckPostToFeed(locationPost) {
-            const postsContainer = document.getElementById('posts');
-            if (!postsContainer) return;
-
-            const postHtml = `
-                <div class="post-card">
-                    <div class="post-header">
-                        <div class="post-user-info">
-                            <div class="user-avatar">🚚</div>
-                            <div>
-                                <div class="post-username">${locationPost.name}</div>
-                                <div class="post-time">Just now • Food Truck Location</div>
-                            </div>
-                        </div>
-                        <div class="post-category-badge food-drinks">Food Truck</div>
-                    </div>
-                    <div class="post-content">
-                        <div class="post-title" style="color: #00ffff; font-weight: bold; margin-bottom: 10px;">
-                            📍 Now serving at: ${locationPost.currentLocation}
-                        </div>
-                        <div class="post-description">
-                            <strong>Hours:</strong> ${locationPost.operatingHours}<br>
-                            <strong>Menu:</strong> ${locationPost.menuHighlights}<br>
-                            ${locationPost.specialNotes ? `<strong>Special:</strong> ${locationPost.specialNotes}<br>` : ''}
-                            ${locationPost.locationDescription ? `<strong>Location Details:</strong> ${locationPost.locationDescription}` : ''}
-                        </div>
-                    </div>
-                    <div class="post-actions">
-                        <button class="action-button" onclick="viewOnMap('${locationPost.id}')">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                            </svg>
-                            View on Map
-                        </button>
-                        <button class="action-button" onclick="messageOwner('${locationPost.name}', 'Food Truck Location', '${locationPost.id}')">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-                            </svg>
-                            Message
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            postsContainer.insertAdjacentHTML('afterbegin', postHtml);
-        }
-
-        // View food truck on map function
-        function viewOnMap(foodTruckId) {
-            // Navigate to map page and highlight the food truck
-            window.location.href = `/local-event-calendar.html?highlight=${foodTruckId}&filter=food-trucks`;
-        }
-        }
+        // Make functions available globally
+        window.openAdvancedPostModal = openAdvancedPostModal;
+        window.openCommunityPost = openCommunityPost;
+        window.showNotification = showNotification;
+        window.goToPage = goToPage;
 
         function addPollOption() {
             const pollList = document.getElementById('pollOptionsList');
