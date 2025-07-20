@@ -172,21 +172,12 @@
             box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
         }
         
-        /* Dark Galaxy Purple MarketPace Text Styling */
+        /* Subtle Glow MarketPace Text Styling */
         .marketpace-text {
-            background: linear-gradient(135deg, #1a0033, #2a0845, #1a0033) !important;
-            background-clip: text !important;
-            -webkit-background-clip: text !important;
-            -webkit-text-fill-color: transparent !important;
+            color: #2a0845 !important;
             text-shadow: 
-                0 0 5px #ffff00,
-                0 0 10px #ffff00,
-                0 0 15px #ffff00,
-                0 0 20px #ffd700,
-                0 2px 4px rgba(255, 255, 0, 0.3) !important;
-            filter: drop-shadow(0 0 8px #ffff00) !important;
-            -webkit-text-fill-color: transparent !important;
-            filter: drop-shadow(0 0 15px #4169e1) !important;
+                0 0 2px rgba(65, 105, 225, 0.3),
+                0 0 4px rgba(65, 105, 225, 0.2) !important;
             font-weight: bold !important;
         }
 
@@ -4007,8 +3998,29 @@
         }
 
         function sendMessage(itemName, sellerName) {
-            const textarea = document.querySelector('.modal-overlay textarea');
-            const message = textarea ? textarea.value.trim() : '';
+            const messageText = document.querySelector('.modal-overlay textarea').value;
+            if (!messageText.trim()) {
+                showNotification('Please enter a message', 'error');
+                return;
+            }
+            
+            closeMessageModal();
+            showNotification(`Message sent to ${sellerName} about ${itemName}!`, 'success');
+            
+            // Store conversation in localStorage for demo
+            const conversations = JSON.parse(localStorage.getItem('marketpace_conversations') || '{}');
+            const conversationId = `${sellerName}_${itemName}`;
+            if (!conversations[conversationId]) {
+                conversations[conversationId] = [];
+            }
+            conversations[conversationId].push({
+                sender: 'You',
+                message: messageText,
+                timestamp: new Date().toISOString(),
+                itemName: itemName
+            });
+            localStorage.setItem('marketpace_conversations', JSON.stringify(conversations));
+        }
             
             if (message) {
                 showNotification(`Message sent to ${sellerName} about ${itemName}!`, 'success');
@@ -5062,12 +5074,17 @@
 
         // Social interaction functions
         function likePost(button) {
-            if (button.innerHTML.includes('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(236, 72, 153, 0.1)"/><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7z" stroke="currentColor" stroke-width="1.5"/></svg>')) {
-                button.innerHTML = ' Like';
-                button.style.color = '#ff6b6b';
-            } else {
-                button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(236, 72, 153, 0.1)"/><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7z" stroke="currentColor" stroke-width="1.5"/></svg>Like';
+            const isLiked = button.classList.contains('liked');
+            if (isLiked) {
+                button.classList.remove('liked');
+                button.innerHTML = 'Like';
                 button.style.color = 'rgba(255, 255, 255, 0.8)';
+                showNotification('Like removed', 'info');
+            } else {
+                button.classList.add('liked');
+                button.innerHTML = '❤️ Liked';
+                button.style.color = '#ff6b6b';
+                showNotification('Post liked!', 'success');
             }
         }
 
