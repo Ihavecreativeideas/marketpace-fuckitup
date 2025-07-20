@@ -1866,23 +1866,37 @@
 
         // Social interaction functions
         function likePost(button) {
-            if (button.innerHTML.includes('Like')) {
-                button.innerHTML = button.innerHTML.replace('Like', 'Like');
-                button.style.color = '#ff6b6b';
-            } else {
-                button.innerHTML = button.innerHTML.replace('Like', 'Like');
+            const likeCount = button.querySelector('.like-count');
+            let count = parseInt(likeCount.textContent) || 0;
+            
+            if (button.style.color === 'rgb(255, 107, 107)') {
+                // Unlike
                 button.style.color = 'rgba(255, 255, 255, 0.8)';
+                count--;
+            } else {
+                // Like
+                button.style.color = '#ff6b6b';
+                count++;
             }
+            likeCount.textContent = count;
+            showNotification('Post liked!', 'success');
         }
 
         function favoritePost(button) {
-            if (button.innerHTML.includes('Favorite')) {
-                button.innerHTML = button.innerHTML.replace('Favorite', 'Favorite');
-                button.style.color = '#ffd93d';
-            } else {
-                button.innerHTML = button.innerHTML.replace('Favorite', 'Favorite');
+            const favoriteCount = button.querySelector('.favorite-count');
+            let count = parseInt(favoriteCount.textContent) || 0;
+            
+            if (button.style.color === 'rgb(255, 217, 61)') {
+                // Unfavorite
                 button.style.color = 'rgba(255, 255, 255, 0.8)';
+                count--;
+            } else {
+                // Favorite
+                button.style.color = '#ffd93d';
+                count++;
             }
+            favoriteCount.textContent = count;
+            showNotification('Post favorited!', 'success');
         }
 
         function commentPost(postElement) {
@@ -2007,11 +2021,52 @@
             } else {
                 const url = window.location.href;
                 navigator.clipboard.writeText(url).then(() => {
-                    alert('Shop link copied to clipboard!');
+                    showNotification('Shop link copied to clipboard!', 'success');
                 }).catch(() => {
-                    alert('Share feature - link: ' + url);
+                    showNotification('Share feature - link: ' + url, 'info');
                 });
             }
+        }
+
+        // Notification function for consistent UI feedback
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 24px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 500;
+                z-index: 10000;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            `;
+            
+            switch(type) {
+                case 'success':
+                    notification.style.background = 'rgba(34, 197, 94, 0.9)';
+                    break;
+                case 'error':
+                    notification.style.background = 'rgba(239, 68, 68, 0.9)';
+                    break;
+                case 'warning':
+                    notification.style.background = 'rgba(251, 191, 36, 0.9)';
+                    break;
+                default:
+                    notification.style.background = 'rgba(59, 130, 246, 0.9)';
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 3000);
         }
 
         // Profile functions
@@ -2427,48 +2482,7 @@
                 console.error('Error initializing page:', error);
             }
         });
-        // Navigation functions for bottom navigation
-        function goToPage(page) {
-            console.log('Navigating to:', page);
-            try {
-                console.log(`Navigating to ${page}...`);
-                
-                switch(page) {
-                    case 'home':
-                        window.location.href = '/community';
-                        break;
-                    case 'shop':
-                    case 'shops':
-                        window.location.href = '/shops';
-                        break;
-                    case 'service':
-                    case 'services':
-                        window.location.href = '/services';
-                        break;
-                    case 'hub':
-                    case 'the-hub':
-                        window.location.href = '/the-hub';
-                        break;
-                    case 'delivery':
-                        window.location.href = '/delivery';
-                        break;
-                    case 'rentals':
-                        window.location.href = '/rentals';
-                        break;
-                    case 'menu':
-                        window.location.href = '/marketpace-menu';
-                        break;
-                    case 'profile':
-                        window.location.href = '/profile';
-                        break;
-                    default:
-                        console.log('Unknown page:', page);
-                        break;
-                }
-            } catch (error) {
-                console.error('Navigation error:', error);
-            }
-        }
+        // Remove duplicate goToPage function - already defined above
 
     </script>
 </body>

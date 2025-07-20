@@ -927,6 +927,37 @@
             color: #00ffff;
         }
 
+        /* Message Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a0b3d, #2d1b69);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            padding: 25px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
         .close-modal {
             background: none;
             border: none;
@@ -3991,33 +4022,136 @@
 
         // Social interaction functions
         function likePost(button) {
-            if (button.innerHTML.includes('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(236, 72, 153, 0.1)"/><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7z" stroke="currentColor" stroke-width="1.5"/></svg>')) {
-                button.innerHTML = 'Like';
-                button.style.color = '#ff6b6b';
-            } else {
-                button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(236, 72, 153, 0.1)"/><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7z" stroke="currentColor" stroke-width="1.5"/></svg>Like';
+            const likeCount = button.querySelector('.like-count');
+            let count = parseInt(likeCount.textContent) || 0;
+            
+            if (button.style.color === 'rgb(255, 107, 107)') {
+                // Unlike
                 button.style.color = 'rgba(255, 255, 255, 0.8)';
+                count--;
+            } else {
+                // Like
+                button.style.color = '#ff6b6b';
+                count++;
             }
+            likeCount.textContent = count;
+            showNotification('Post liked!', 'success');
         }
 
         function favoritePost(button) {
-            if (button.innerHTML.includes('Favorite')) {
-                button.innerHTML = 'Favorite';
-                button.style.color = '#ffd93d';
-            } else {
-                button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(245, 158, 11, 0.2)"/><path d="M12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2Z" stroke="currentColor" stroke-width="1.5"/></svg>Favorite';
+            const favoriteCount = button.querySelector('.favorite-count');
+            let count = parseInt(favoriteCount.textContent) || 0;
+            
+            if (button.style.color === 'rgb(255, 217, 61)') {
+                // Unfavorite
                 button.style.color = 'rgba(255, 255, 255, 0.8)';
+                count--;
+            } else {
+                // Favorite
+                button.style.color = '#ffd93d';
+                count++;
+            }
+            favoriteCount.textContent = count;
+            showNotification('Post favorited!', 'success');
+        }
+
+        function commentPost(postElement) {
+            const post = postElement ? postElement.closest('.feed-post') : event.target.closest('.feed-post');
+            
+            // Check if comment section already exists
+            let commentSection = post.querySelector('.comment-section');
+            if (commentSection) {
+                // Toggle visibility
+                commentSection.style.display = commentSection.style.display === 'none' ? 'block' : 'none';
+                return;
+            }
+            
+            // Create comment section
+            commentSection = document.createElement('div');
+            commentSection.className = 'comment-section';
+            commentSection.innerHTML = `
+                <div class="comment-input-area">
+                    <textarea class="comment-input" placeholder="Write a comment..." rows="2"></textarea>
+                    <button class="comment-send-btn" onclick="postComment(this)">Post</button>
+                </div>
+                <div class="comments-list">
+                    <div class="comment">
+                        <div class="comment-author">
+                            <div class="comment-avatar">JD</div>
+                            <div class="comment-content">
+                                <div class="comment-header">
+                                    <span class="comment-name">John Doe</span>
+                                    <span class="comment-time">5 minutes ago</span>
+                                </div>
+                                <p class="comment-text">This looks great! Is it available?</p>
+                                <div class="comment-actions">
+                                    <button class="comment-action-btn" onclick="likeComment(this)">Like</button>
+                                    <button class="comment-action-btn" onclick="replyComment(this)">Reply</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            post.appendChild(commentSection);
+        }
+
+        function postComment(button) {
+            const commentInput = button.parentElement.querySelector('.comment-input');
+            const commentText = commentInput.value.trim();
+            
+            if (!commentText) {
+                showNotification('Please write a comment first', 'error');
+                return;
+            }
+            
+            const commentsList = button.closest('.comment-section').querySelector('.comments-list');
+            const newComment = document.createElement('div');
+            newComment.className = 'comment';
+            newComment.innerHTML = `
+                <div class="comment-author">
+                    <div class="comment-avatar">ME</div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <span class="comment-name">You</span>
+                            <span class="comment-time">Just now</span>
+                        </div>
+                        <p class="comment-text">${commentText}</p>
+                        <div class="comment-actions">
+                            <button class="comment-action-btn" onclick="likeComment(this)">Like</button>
+                            <button class="comment-action-btn" onclick="replyComment(this)">Reply</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            commentsList.appendChild(newComment);
+            commentInput.value = '';
+            showNotification('Comment posted!', 'success');
+        }
+
+        function likeComment(button) {
+            const liked = button.classList.contains('liked');
+            if (liked) {
+                button.classList.remove('liked');
+                button.textContent = 'Like';
+                button.style.color = 'rgba(255, 255, 255, 0.8)';
+            } else {
+                button.classList.add('liked');
+                button.textContent = 'Liked';
+                button.style.color = '#ff6b6b';
             }
         }
 
-        function commentPost() {
-            const comment = prompt('Write your comment:');
-            if (comment) {
-                alert(`Comment posted: "${comment}"`);
-            }
+        function replyComment(button) {
+            const comment = button.closest('.comment');
+            const commentName = comment.querySelector('.comment-name').textContent;
+            const commentInput = comment.closest('.comment-section').querySelector('.comment-input');
+            commentInput.value = `@${commentName} `;
+            commentInput.focus();
         }
 
-        function sharePost() {
+        function sharePost(postData) {
             if (navigator.share) {
                 navigator.share({
                     title: 'MarketPace Community Post',
@@ -4028,9 +4162,9 @@
                 // Fallback for browsers without native sharing
                 const url = window.location.href;
                 navigator.clipboard.writeText(url).then(() => {
-                    alert('Post link copied to clipboard!');
+                    showNotification('Post link copied to clipboard!', 'success');
                 }).catch(() => {
-                    alert('Share feature - link: ' + url);
+                    showNotification('Share feature - link: ' + url, 'info');
                 });
             }
         }
