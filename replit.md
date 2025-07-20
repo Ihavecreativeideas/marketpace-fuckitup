@@ -730,6 +730,12 @@ All features are designed to strengthen local communities by keeping commerce lo
 ✓ **PAYMENT FLOW STREAMLINED**: Renter pays $90 rental + $61 delivery + tips = $161 total, owner receives $85.50 (after 5% platform fee auto-deduction)
 ✓ **REAL-TIME CALCULATION**: Time selection now properly calculates duration and applies correct hourly/daily rates
 
+✓ **COMPLETE $4 ROUTE BREAK FEE REMOVAL FROM RENTALS SECTION** (July 20, 2025)
+✓ **ELIMINATED ALL $4 ROUTE BREAK FEES**: Completely removed all instances of "$4 route break fee" and "Custom timing: +$4 route break fee" from rental listings
+✓ **CLEANED HTML STRUCTURE**: Fixed broken HTML elements and empty warning icons left behind from fee removal
+✓ **SIMPLIFIED PRICING DISPLAY**: Rental schedule now shows only pickup/dropoff times without confusing additional fees
+✓ **IMPROVED USER EXPERIENCE**: Cleaner rental pricing without unexpected extra charges for custom timing
+
 ✓ **COMMUNITY POSTING INTERFACE STREAMLINED & PERSONALIZED** (July 18, 2025)
 ✓ **SEARCH BAR OVERFLOW FIXED**: Reduced action buttons from 7 to 4 (kept Sell, Rent, Service, Event; removed Poll, ISO, Job)
 ✓ **PERSONALIZED PLACEHOLDER TEXT**: Changed from "What's on your mind?" to personalized "[Name], share with your community!" format
