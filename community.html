@@ -200,6 +200,34 @@
             z-index: 10;
         }
 
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a0b3d, #6b46c1);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 2px solid #00ffff;
+            box-shadow: 0 20px 60px rgba(0, 255, 255, 0.4);
+            color: white;
+        }
+
         /* Promotion Modal Styles */
         .promotion-modal-overlay {
             position: fixed;
@@ -5383,59 +5411,13 @@
             }
         }
 
-        // Advanced Post Modal Functions (Global Scope)
-        window.openAdvancedPostModal = function(category = 'general') {
-            const modal = document.getElementById('postModal');
-            const modalTitle = document.getElementById('modalTitle');
-            
-            // Set modal title based on category
-            const titles = {
-                'general': 'Share with Community',
-                'sale': 'List Item for Sale',
-                'rent': 'List Item for Rent',
-                'service': 'Offer Service',
-                'event': 'Create Event',
-                'poll': 'Create Poll',
-                'iso': 'In Search Of (ISO)',
-                'job': 'Post Job Opportunity',
-                'food-drinks': 'Food & Drinks Business'
-            };
-            
-            modalTitle.textContent = titles[category] || 'Create Post';
-            
-            // Pre-select category
-            selectCategory(category);
-            
-            // Show/hide relevant fields
-            toggleFieldsForCategory(category);
-            
-            modal.style.display = 'flex';
-        }
+        // Advanced Post Modal Functions (Global Scope)  
+        window.openAdvancedPostModal = openAdvancedPostModal;
 
-        window.closePostModal = function() {
-            document.getElementById('postModal').style.display = 'none';
-            document.getElementById('advancedPostForm').reset();
-            clearCategorySelection();
-        }
 
-        window.selectCategory = function(category) {
-            // Clear previous selections
-            clearCategorySelection();
-            
-            // Select new category
-            const categoryBtn = document.querySelector(`[data-category="${category}"]`);
-            if (categoryBtn) {
-                categoryBtn.classList.add('selected');
-            }
-            
-            toggleFieldsForCategory(category);
-        }
+        window.closePostModal = closePostModal;
 
-        window.clearCategorySelection = function() {
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-        }
+
 
         window.toggleFieldsForCategory = function(category) {
             const priceGroup = document.getElementById('priceGroup');
