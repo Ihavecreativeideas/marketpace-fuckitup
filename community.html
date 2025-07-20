@@ -5400,6 +5400,19 @@
             }
         }
 
+        function selectCategory(category) {
+            // Clear previous selections
+            clearCategorySelection();
+            
+            // Select new category
+            const categoryBtn = document.querySelector(`[data-category="${category}"]`);
+            if (categoryBtn) {
+                categoryBtn.classList.add('selected');
+            }
+            
+            toggleFieldsForCategory(category);
+        }
+
         function addPollOption() {
             const pollList = document.getElementById('pollOptionsList');
             const optionDiv = document.createElement('div');
@@ -6352,6 +6365,26 @@
             if (title) {
                 showNotification(`${type} post "${title}" created successfully!`, 'success');
             }
+        }
+
+        // Add missing function for comment functionality
+        function commentPost(postElement) {
+            const commentSection = postElement.querySelector('.comment-section');
+            if (commentSection) {
+                commentSection.style.display = commentSection.style.display === 'none' ? 'block' : 'none';
+            } else {
+                // Create comment section if it doesn't exist
+                const newCommentSection = document.createElement('div');
+                newCommentSection.className = 'comment-section';
+                newCommentSection.innerHTML = `
+                    <div style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <input type="text" placeholder="Write a comment..." style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 15px; color: white;">
+                        <div class="comments-list" style="margin-top: 10px;"></div>
+                    </div>
+                `;
+                postElement.appendChild(newCommentSection);
+            }
+            showNotification('Comment section opened', 'info');
         }
 
         // Reply to comment function
