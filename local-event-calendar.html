@@ -582,6 +582,40 @@
             display: flex;
             gap: 10px;
             margin-top: 15px;
+            align-items: center;
+        }
+
+        .favorite-btn {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .favorite-btn:hover {
+            border-color: #ff0080;
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255, 0, 128, 0.3);
+        }
+
+        .favorite-btn.favorited {
+            border-color: #ff0080;
+            background: rgba(255, 0, 128, 0.2);
+            color: #ff0080;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
         }
 
         .btn {
@@ -937,7 +971,8 @@
                 category: "music",
                 description: "Live DJ set with beachside views and dancing",
                 distance: "1.2 miles",
-                town: "orange-beach"
+                town: "orange-beach",
+                favorited: false
             },
             {
                 id: 2,
@@ -948,7 +983,8 @@
                 category: "sports",
                 description: "Annual beach volleyball competition",
                 distance: "2.8 miles",
-                town: "gulf-shores"
+                town: "gulf-shores",
+                favorited: false
             },
             {
                 id: 3,
@@ -959,7 +995,8 @@
                 category: "food",
                 description: "Local seafood, BBQ, and craft vendors",
                 distance: "3.1 miles",
-                town: "orange-beach"
+                town: "orange-beach",
+                favorited: true
             },
             {
                 id: 4,
@@ -970,7 +1007,8 @@
                 category: "community",
                 description: "Local artists showcasing handmade crafts",
                 distance: "0.8 miles",
-                town: "orange-beach"
+                town: "orange-beach",
+                favorited: false
             },
             {
                 id: 5,
@@ -981,7 +1019,8 @@
                 category: "business",
                 description: "Networking and business opportunities",
                 distance: "45.2 miles",
-                town: "mobile"
+                town: "mobile",
+                favorited: false
             },
             {
                 id: 6,
@@ -992,7 +1031,8 @@
                 category: "music",
                 description: "Live bands, food trucks, and beach activities",
                 distance: "4.5 miles",
-                town: "gulf-shores"
+                town: "gulf-shores",
+                favorited: false
             },
             {
                 id: 7,
@@ -1105,6 +1145,11 @@
                     <div class="event-actions">
                         <button class="btn" onclick="viewEventDetails(${event.id})">View Details</button>
                         <button class="btn btn-secondary" onclick="addToCalendar(${event.id})">Add to Calendar</button>
+                        <button class="favorite-btn ${event.favorited ? 'favorited' : ''}" onclick="toggleUpcomingFavorite(${event.id})" title="Add to favorites">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="${event.favorited ? '#ff0080' : 'none'}" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             `).join('');
@@ -1117,6 +1162,39 @@
 
         function addToCalendar(eventId) {
             alert('Event added to your calendar!');
+        }
+
+        function toggleUpcomingFavorite(eventId) {
+            const event = events.find(e => e.id === eventId);
+            if (!event) return;
+            
+            event.favorited = !event.favorited;
+            
+            // Refresh the display
+            filterEvents();
+            
+            // Show feedback notification
+            const feedback = document.createElement('div');
+            feedback.className = 'favorite-feedback';
+            feedback.textContent = event.favorited ? 'Added to favorites!' : 'Removed from favorites';
+            feedback.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 255, 255, 0.9);
+                color: #000;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-weight: bold;
+                z-index: 9999;
+                animation: fadeInOut 2s ease-in-out;
+            `;
+            document.body.appendChild(feedback);
+            
+            setTimeout(() => {
+                feedback.remove();
+            }, 2000);
         }
 
         function previousMonth() {
@@ -1135,94 +1213,10 @@
         });
     </script>
 
-    <!-- Bottom Navigation - Matching Rest of App -->
-    <div class="bottom-nav">
-        <div class="nav-item" onclick="goToPage('home')">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                <polyline points="9,22 9,12 15,12 15,22"/>
-            </svg>
-            <span>Home</span>
-        </div>
-        <div class="nav-item" onclick="goToPage('shops')">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="m6 2 3 6v14a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V8l3-6Z"/>
-                <path d="M5 8h14M5 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM19 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"/>
-            </svg>
-            <span>Shops</span>
-        </div>
-        <div class="nav-item" onclick="goToPage('services')">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-            </svg>
-            <span>Services</span>
-        </div>
-        <div class="nav-item active" onclick="goToPage('hub')">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-            </svg>
-            <span>The Hub</span>
-        </div>
-        <div class="nav-item" onclick="goToPage('rentals')">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                <line x1="8" y1="21" x2="16" y2="21"/>
-                <line x1="12" y1="17" x2="12" y2="21"/>
-            </svg>
-            <span>Rentals</span>
-        </div>
-        <div class="nav-item" onclick="goToPage('menu')">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="4" y1="12" x2="20" y2="12"/>
-                <line x1="4" y1="6" x2="20" y2="6"/>
-                <line x1="4" y1="18" x2="20" y2="18"/>
-            </svg>
-            <span>Menu</span>
-        </div>
-    </div>
+
 
     <style>
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 80px;
-            background: rgba(12, 18, 32, 0.95);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(0, 255, 255, 0.2);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 1000;
-            padding: 10px 0;
-            box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.5);
-        }
 
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            padding: 8px 12px;
-            border-radius: 12px;
-            color: rgba(255, 255, 255, 0.6);
-            min-width: 60px;
-        }
-
-        .nav-item:hover {
-            color: #00ffff;
-            background: rgba(0, 255, 255, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .nav-item.active {
-            color: #00ffff;
-            background: rgba(0, 255, 255, 0.2);
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
 
         .nav-item span {
             font-size: 11px;

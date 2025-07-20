@@ -1485,6 +1485,61 @@
             height: 18px;
         }
 
+        /* Pricing options styling */
+        .pricing-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .pricing-option {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        /* Event details styling */
+        .event-details {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .event-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .event-field {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .recurring-options {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .recurring-options label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #00ffff;
+            cursor: pointer;
+        }
+
+        .recurring-options input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #00ffff;
+        }
+
         .image-upload-area {
             border: 2px dashed rgba(255, 255, 255, 0.3);
             border-radius: 8px;
@@ -2494,6 +2549,69 @@
                     <div class="form-group" id="priceGroup" style="display: none;">
                         <label class="form-label" for="postPrice">Price</label>
                         <input type="text" id="postPrice" class="form-input" placeholder="$0 or price range">
+                    </div>
+
+                    <!-- Rental Pricing Options -->
+                    <div class="form-group" id="rentalPricingGroup" style="display: none;">
+                        <label class="form-label">Rental Pricing</label>
+                        <div class="pricing-options">
+                            <div class="pricing-option">
+                                <label class="form-label">Hourly Rate</label>
+                                <input type="text" id="hourlyRate" class="form-input" placeholder="$0/hour">
+                            </div>
+                            <div class="pricing-option">
+                                <label class="form-label">Daily Rate</label>
+                                <input type="text" id="dailyRate" class="form-input" placeholder="$0/day">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Event Details -->
+                    <div class="form-group" id="eventDetailsGroup" style="display: none;">
+                        <label class="form-label">Event Details</label>
+                        <div class="event-details">
+                            <div class="event-row">
+                                <div class="event-field">
+                                    <label class="form-label">Date</label>
+                                    <input type="date" id="eventDate" class="form-input">
+                                </div>
+                                <div class="event-field">
+                                    <label class="form-label">Start Time</label>
+                                    <input type="time" id="eventStartTime" class="form-input">
+                                </div>
+                            </div>
+                            <div class="event-row">
+                                <div class="event-field">
+                                    <label class="form-label">End Time</label>
+                                    <input type="time" id="eventEndTime" class="form-input">
+                                </div>
+                                <div class="event-field">
+                                    <label class="form-label">Location</label>
+                                    <input type="text" id="eventLocation" class="form-input" placeholder="Event location">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Recurring Event Options -->
+                        <div class="recurring-options">
+                            <label class="form-label">
+                                <input type="checkbox" id="isRecurring"> Make this a recurring event
+                            </label>
+                            <div id="recurringDetails" style="display: none; margin-top: 10px;">
+                                <select id="recurringType" class="form-input">
+                                    <option value="">Select frequency</option>
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="bi-weekly">Bi-weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="custom">Custom dates</option>
+                                </select>
+                                <div id="customDatesContainer" style="display: none; margin-top: 10px;">
+                                    <label class="form-label">Custom Dates</label>
+                                    <textarea id="customDates" class="form-textarea" placeholder="Enter custom dates (e.g., Dec 25, Jan 1, Feb 14)"></textarea>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Job-specific fields -->
@@ -5267,6 +5385,8 @@
 
         function toggleFieldsForCategory(category) {
             const priceGroup = document.getElementById('priceGroup');
+            const rentalPricingGroup = document.getElementById('rentalPricingGroup');
+            const eventDetailsGroup = document.getElementById('eventDetailsGroup');
             const pollOptions = document.getElementById('pollOptions');
             const jobCompanyGroup = document.getElementById('jobCompanyGroup');
             const jobTypeGroup = document.getElementById('jobTypeGroup');
@@ -5275,29 +5395,31 @@
             const jobBenefitsGroup = document.getElementById('jobBenefitsGroup');
             
             // Hide all optional fields first
-            priceGroup.style.display = 'none';
-            pollOptions.style.display = 'none';
-            jobCompanyGroup.style.display = 'none';
-            jobTypeGroup.style.display = 'none';
-            jobSalaryGroup.style.display = 'none';
-            jobRequirementsGroup.style.display = 'none';
-            jobBenefitsGroup.style.display = 'none';
+            if (priceGroup) priceGroup.style.display = 'none';
+            if (rentalPricingGroup) rentalPricingGroup.style.display = 'none';
+            if (eventDetailsGroup) eventDetailsGroup.style.display = 'none';
+            if (pollOptions) pollOptions.style.display = 'none';
+            if (jobCompanyGroup) jobCompanyGroup.style.display = 'none';
+            if (jobTypeGroup) jobTypeGroup.style.display = 'none';
+            if (jobSalaryGroup) jobSalaryGroup.style.display = 'none';
+            if (jobRequirementsGroup) jobRequirementsGroup.style.display = 'none';
+            if (jobBenefitsGroup) jobBenefitsGroup.style.display = 'none';
             
-            // Show relevant fields
-            if (['sale', 'rent', 'service'].includes(category)) {
-                priceGroup.style.display = 'block';
-            }
-            
-            if (category === 'poll') {
-                pollOptions.style.display = 'block';
-            }
-            
-            if (category === 'job') {
-                jobCompanyGroup.style.display = 'block';
-                jobTypeGroup.style.display = 'block';
-                jobSalaryGroup.style.display = 'block';
-                jobRequirementsGroup.style.display = 'block';
-                jobBenefitsGroup.style.display = 'block';
+            // Show relevant fields based on category
+            if (category === 'sale' || category === 'service') {
+                if (priceGroup) priceGroup.style.display = 'block';
+            } else if (category === 'rent') {
+                if (rentalPricingGroup) rentalPricingGroup.style.display = 'block';
+            } else if (category === 'event') {
+                if (eventDetailsGroup) eventDetailsGroup.style.display = 'block';
+            } else if (category === 'poll') {
+                if (pollOptions) pollOptions.style.display = 'block';
+            } else if (category === 'job') {
+                if (jobCompanyGroup) jobCompanyGroup.style.display = 'block';
+                if (jobTypeGroup) jobTypeGroup.style.display = 'block';
+                if (jobSalaryGroup) jobSalaryGroup.style.display = 'block';
+                if (jobRequirementsGroup) jobRequirementsGroup.style.display = 'block';
+                if (jobBenefitsGroup) jobBenefitsGroup.style.display = 'block';
             }
         }
 
