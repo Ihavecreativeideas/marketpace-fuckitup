@@ -5089,12 +5089,17 @@
         }
 
         function favoritePost(button) {
-            if (button.innerHTML.includes('Favorite')) {
+            const isFavorited = button.classList.contains('favorited');
+            if (isFavorited) {
+                button.classList.remove('favorited');
                 button.innerHTML = 'Favorite';
-                button.style.color = '#ffd93d';
-            } else {
-                button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(245, 158, 11, 0.2)"/><path d="M12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2Z" stroke="currentColor" stroke-width="1.5"/></svg>Favorite';
                 button.style.color = 'rgba(255, 255, 255, 0.8)';
+                showNotification('Removed from favorites', 'info');
+            } else {
+                button.classList.add('favorited');
+                button.innerHTML = '⭐ Favorited';
+                button.style.color = '#ffd93d';
+                showNotification('Added to favorites!', 'success');
             }
         }
 
@@ -6255,116 +6260,107 @@
             });
         });
 
-        // ==================== COMPREHENSIVE FACEBOOK-STYLE COMMENT SYSTEM ====================
-        
-        // Main comment function that creates comment interface
-        function commentPost(postElement) {
-            // Get the post element if not provided
-            if (!postElement) {
-                postElement = event.target.closest('.feed-post');
-            }
-            
-            // Check if comment section already exists
-            let commentSection = postElement.querySelector('.comments-section');
-            if (!commentSection) {
-                // Create comment section
-                commentSection = document.createElement('div');
-                commentSection.className = 'comments-section';
-                commentSection.innerHTML = `
-                    <div class="comment-input-section">
-                        <input type="text" class="comment-input" placeholder="Write a comment..." style="
-                            width: 100%; 
-                            padding: 10px; 
-                            background: rgba(255,255,255,0.1); 
-                            border: 1px solid rgba(255,255,255,0.2); 
-                            border-radius: 20px; 
-                            color: white; 
-                            margin: 10px 0;
-                        ">
-                        <button onclick="postComment(this)" style="
-                            background: linear-gradient(135deg, #00ffff, #9d4edd);
-                            border: none;
-                            color: white;
-                            padding: 8px 16px;
-                            border-radius: 15px;
-                            cursor: pointer;
-                            margin-left: 10px;
-                        ">Post</button>
-                    </div>
-                    <div class="comments-list"></div>
-                `;
-                postElement.appendChild(commentSection);
-            }
-            
-            // Focus on comment input
-            const commentInput = commentSection.querySelector('.comment-input');
-            commentInput.focus();
-        }
-
-        // Post comment function
+        // Add missing helper functions for comments
         function postComment(buttonElement) {
-            const commentSection = buttonElement.closest('.comment-input-section');
+            const commentSection = buttonElement.closest('.comments-section');
             const commentInput = commentSection.querySelector('.comment-input');
             const commentText = commentInput.value.trim();
             
-            if (!commentText) return;
+            if (!commentText) {
+                showNotification('Please enter a comment', 'error');
+                return;
+            }
             
-            const commentsList = commentSection.nextElementSibling;
-            const currentUser = JSON.parse(localStorage.getItem('marketpaceUser')) || { name: 'Community Member', id: 'user_' + Date.now() };
-            
-            const commentElement = document.createElement('div');
-            commentElement.className = 'comment-item';
-            commentElement.style.cssText = `
-                background: rgba(255,255,255,0.05);
-                border-radius: 10px;
-                padding: 10px;
-                margin: 8px 0;
-                border: 1px solid rgba(255,255,255,0.1);
-            `;
-            
-            commentElement.innerHTML = `
-                <div class="comment-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                    <div style="display: flex; align-items: center;">
-                        <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #00ffff, #9d4edd); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 8px; font-size: 12px; font-weight: bold;">
-                            ${currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                        </div>
-                        <span style="font-weight: 600; font-size: 14px;">${currentUser.name}</span>
-                        <span style="color: rgba(255,255,255,0.6); font-size: 12px; margin-left: 8px;">just now</span>
-                    </div>
-                    <button onclick="deleteComment(this)" style="background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; padding: 2px 6px;">×</button>
+            const commentsList = commentSection.querySelector('.comments-list');
+            const newComment = document.createElement('div');
+            newComment.className = 'comment';
+            newComment.innerHTML = `
+                <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; margin: 5px 0;">
+                    <strong style="color: #00ffff;">You</strong>
+                    <span style="color: #e2e8f0; font-size: 12px; margin-left: 10px;">just now</span>
+                    <p style="color: white; margin: 5px 0;">${commentText}</p>
+                    <button onclick="likeComment(this)" style="background: none; border: none; color: #ff6b6b; cursor: pointer; font-size: 12px;">Like</button>
                 </div>
-                <div class="comment-text" style="font-size: 14px; line-height: 1.4; margin-bottom: 8px;">${commentText}</div>
-                <div class="comment-actions" style="display: flex; gap: 15px; font-size: 12px;">
-                    <button onclick="likeComment(this)" style="background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer;">👍 Like</button>
-                    <button onclick="replyToComment(this)" style="background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer;">Reply</button>
-                </div>
-                <div class="replies-section" style="margin-left: 20px; margin-top: 10px;"></div>
             `;
-            
-            commentsList.appendChild(commentElement);
+            commentsList.appendChild(newComment);
             commentInput.value = '';
-            
-            showNotification('Comment posted successfully!', 'success');
+            showNotification('Comment posted!', 'success');
         }
 
-        // Delete comment function (only authors can delete their comments)
-        function deleteComment(buttonElement) {
-            if (confirm('Delete this comment?')) {
-                buttonElement.closest('.comment-item').remove();
-                showNotification('Comment deleted', 'info');
-            }
-        }
-
-        // Like comment function
         function likeComment(buttonElement) {
-            const isLiked = buttonElement.style.color === 'rgb(0, 255, 255)';
-            if (isLiked) {
-                buttonElement.style.color = 'rgba(255,255,255,0.7)';
-                buttonElement.textContent = '👍 Like';
+            if (buttonElement.style.color === 'rgb(255, 107, 107)') {
+                buttonElement.style.color = 'rgba(255, 255, 255, 0.6)';
+                buttonElement.textContent = 'Like';
             } else {
-                buttonElement.style.color = '#00ffff';
-                buttonElement.textContent = '👍 Liked';
+                buttonElement.style.color = '#ff6b6b';
+                buttonElement.textContent = '❤️ Liked';
             }
+        }
+
+        // Helper functions for comment interactions
+        function deleteComment(buttonElement) {
+            const comment = buttonElement.closest('.comment-item');
+            comment.remove();
+            showNotification('Comment deleted', 'info');
+        }
+
+        function replyToComment(buttonElement) {
+            const repliesSection = buttonElement.closest('.comment-item').querySelector('.replies-section');
+            if (repliesSection.querySelector('.reply-input')) return; // Already has reply box
+            
+            const replyBox = document.createElement('div');
+            replyBox.innerHTML = `
+                <div class="reply-input" style="margin-top: 8px;">
+                    <input type="text" placeholder="Write a reply..." style="width: 80%; padding: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 15px; color: white;">
+                    <button onclick="submitReply(this)" style="background: #00ffff; border: none; color: white; padding: 6px 12px; border-radius: 12px; cursor: pointer; margin-left: 8px;">Reply</button>
+                </div>
+            `;
+            repliesSection.appendChild(replyBox);
+        }
+
+        function submitReply(buttonElement) {
+            const replyInput = buttonElement.previousElementSibling;
+            const replyText = replyInput.value.trim();
+            if (!replyText) return;
+            
+            const repliesSection = buttonElement.closest('.replies-section');
+            const replyElement = document.createElement('div');
+            replyElement.innerHTML = `
+                <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: 8px; margin: 5px 0; border-left: 2px solid #00ffff;">
+                    <strong style="color: #00ffff; font-size: 12px;">You</strong>
+                    <span style="color: #e2e8f0; font-size: 11px; margin-left: 8px;">just now</span>
+                    <p style="color: white; font-size: 13px; margin: 3px 0;">${replyText}</p>
+                </div>
+            `;
+            repliesSection.appendChild(replyElement);
+            buttonElement.closest('.reply-input').remove();
+            showNotification('Reply posted!', 'success');
+        }
+
+        // Add missing messageOwner function
+        function messageOwner(sellerName, itemName, itemId) {
+            // Create and store conversation
+            const conversations = JSON.parse(localStorage.getItem('marketpaceConversations') || '{}');
+            const conversationId = `${sellerName}-${Date.now()}`;
+            
+            if (!conversations[conversationId]) {
+                conversations[conversationId] = {
+                    id: conversationId,
+                    participant: sellerName,
+                    itemName: itemName,
+                    itemId: itemId,
+                    messages: [],
+                    lastUpdate: new Date().toISOString()
+                };
+            }
+            
+            localStorage.setItem('marketpaceConversations', JSON.stringify(conversations));
+            
+            // Show success and navigate
+            showNotification(`Opening conversation with ${sellerName}`, 'success');
+            setTimeout(() => {
+                window.location.href = '/messages';
+            }, 1000);
         }
 
         // Reply to comment function
