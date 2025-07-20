@@ -172,12 +172,21 @@
             box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
         }
         
-        /* Subtle Glow MarketPace Text Styling */
+        /* Dark Galaxy Purple MarketPace Text Styling */
         .marketpace-text {
-            color: #2a0845 !important;
+            background: linear-gradient(135deg, #1a0033, #2a0845, #1a0033) !important;
+            background-clip: text !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
             text-shadow: 
-                0 0 2px rgba(65, 105, 225, 0.3),
-                0 0 4px rgba(65, 105, 225, 0.2) !important;
+                0 0 5px #ffff00,
+                0 0 10px #ffff00,
+                0 0 15px #ffff00,
+                0 0 20px #ffd700,
+                0 2px 4px rgba(255, 255, 0, 0.3) !important;
+            filter: drop-shadow(0 0 8px #ffff00) !important;
+            -webkit-text-fill-color: transparent !important;
+            filter: drop-shadow(0 0 15px #4169e1) !important;
             font-weight: bold !important;
         }
 
@@ -3328,7 +3337,7 @@
         }
 
         function filterBy(type) {
-            alert('Filtering by: ' + type);
+            alert(`Filtering by: ${type}`);
             document.getElementById('filterDropdown').classList.remove('show');
         }
 
@@ -3405,7 +3414,7 @@
             `;
             notification.innerHTML = `
                 <div style="text-align: center;">
-                    <div style="font-weight: bold; margin-bottom: 5px;">Showing ' + rentalCount + ' rental items in your area</div>
+                    <div style="font-weight: bold; margin-bottom: 5px;">Showing ${rentalCount} rental items in your area</div>
                     <div style="font-size: 12px; opacity: 0.9;">Click "<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(34, 197, 94, 0.2)"/><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/><path d="M9 22V12h6v10" stroke="currentColor" stroke-width="1.5"/></svg> Map" in header to view on interactive map</div>
                 </div>
             `;
@@ -3486,7 +3495,7 @@
                         <circle cx="7" cy="7" r="1" fill="#00ffff"/>
                     </svg>
                     <h3 style="color: #00ffff; margin-bottom: 12px; font-size: 20px;">None Available at This Time</h3>
-                    <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 20px;">No ' + category.replace('-', ' & ') + ' items found in your area. Be the first to post!</p>
+                    <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 20px;">No ${category.replace('-', ' & ')} items found in your area. Be the first to post!</p>
                     <button class="commerce-btn primary" onclick="openAdvancedPostModal('sale')" style="background: linear-gradient(135deg, #00ffff, #8b5cf6); margin-top: 10px;">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
                             <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2"/>
@@ -3932,7 +3941,24 @@
         function openItemDetails(itemName, type, distance, price) {
             const detailModal = document.createElement('div');
             detailModal.className = 'modal-overlay';
-            detailModal.innerHTML = '<div class="modal-content" style="max-width: 500px;"><h3 style="color: #00ffff; margin-bottom: 20px;">' + itemName + '</h3><div style="background: rgba(0, 255, 255, 0.1); padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(0, 255, 255, 0.3);"><p><strong>Type:</strong> ' + type.toUpperCase() + '</p><p><strong>Distance:</strong> ' + distance + '</p><p><strong>Price:</strong> ' + price + '</p></div><div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;"><button onclick="closeItemDetails()" style="background: rgba(107, 114, 128, 0.6); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Close</button><button onclick="contactSeller(\'' + itemName + '\')" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Contact</button></div></div>';
+            detailModal.innerHTML = `
+                <div class="modal-content" style="max-width: 500px;">
+                    <h3 style="color: #00ffff; margin-bottom: 20px;">${itemName}</h3>
+                    
+                    <div style="background: rgba(0, 255, 255, 0.1); padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(0, 255, 255, 0.3);">
+                        <p><strong>Type:</strong> ${type.toUpperCase()}</p>
+                        <p><strong>Distance:</strong> ${distance}</p>
+                        <p><strong>Price:</strong> ${price}</p>
+                        <p><strong>Location Privacy:</strong> ${type === 'service' || type === 'shop' ? 'Exact address shown' : 'General area only for privacy'}</p>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                        <button onclick="closeItemDetails()" style="background: rgba(107, 114, 128, 0.6); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Close</button>
+                        <button onclick="contactSeller('${itemName}')" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Contact</button>
+                        ${type === 'rental' ? `<button onclick="verifyCondition('${itemName}', '${type}s')" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 255, 255, 0.2)"/><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5"/><path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="1.5"/></svg>Verify Condition</button>` : ''}
+                    </div>
+                </div>
+            `;
             document.body.appendChild(detailModal);
         }
 
@@ -3945,7 +3971,7 @@
         }
 
         function contactSeller(itemName) {
-            alert('Contact request sent for ' + itemName + '. Seller will be notified.');
+            alert(`Contact request sent for ${itemName}. Seller will be notified.`);
             closeItemDetails();
         }
 
@@ -3981,29 +4007,8 @@
         }
 
         function sendMessage(itemName, sellerName) {
-            const messageText = document.querySelector('.modal-overlay textarea').value;
-            if (!messageText.trim()) {
-                showNotification('Please enter a message', 'error');
-                return;
-            }
-            
-            closeMessageModal();
-            showNotification(`Message sent to ${sellerName} about ${itemName}!`, 'success');
-            
-            // Store conversation in localStorage for demo
-            const conversations = JSON.parse(localStorage.getItem('marketpace_conversations') || '{}');
-            const conversationId = `${sellerName}_${itemName}`;
-            if (!conversations[conversationId]) {
-                conversations[conversationId] = [];
-            }
-            conversations[conversationId].push({
-                sender: 'You',
-                message: messageText,
-                timestamp: new Date().toISOString(),
-                itemName: itemName
-            });
-            localStorage.setItem('marketpace_conversations', JSON.stringify(conversations));
-        }
+            const textarea = document.querySelector('.modal-overlay textarea');
+            const message = textarea ? textarea.value.trim() : '';
             
             if (message) {
                 showNotification(`Message sent to ${sellerName} about ${itemName}!`, 'success');
@@ -4766,9 +4771,10 @@
         }
 
         // End of navigation functions
+        }
 
         // Facebook Marketplace-style posting modal
-        function openAdvancedPostModal_OLD(type = 'general') {
+        function openAdvancedPostModal(type = 'general') {
             const modal = document.createElement('div');
             modal.style.cssText = `
                 position: fixed;
@@ -5056,32 +5062,22 @@
 
         // Social interaction functions
         function likePost(button) {
-            const isLiked = button.classList.contains('liked');
-            if (isLiked) {
-                button.classList.remove('liked');
-                button.innerHTML = 'Like';
-                button.style.color = 'rgba(255, 255, 255, 0.8)';
-                showNotification('Like removed', 'info');
-            } else {
-                button.classList.add('liked');
-                button.innerHTML = '❤️ Liked';
+            if (button.innerHTML.includes('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(236, 72, 153, 0.1)"/><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7z" stroke="currentColor" stroke-width="1.5"/></svg>')) {
+                button.innerHTML = ' Like';
                 button.style.color = '#ff6b6b';
-                showNotification('Post liked!', 'success');
+            } else {
+                button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(236, 72, 153, 0.1)"/><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7z" stroke="currentColor" stroke-width="1.5"/></svg>Like';
+                button.style.color = 'rgba(255, 255, 255, 0.8)';
             }
         }
 
         function favoritePost(button) {
-            const isFavorited = button.classList.contains('favorited');
-            if (isFavorited) {
-                button.classList.remove('favorited');
+            if (button.innerHTML.includes('Favorite')) {
                 button.innerHTML = 'Favorite';
-                button.style.color = 'rgba(255, 255, 255, 0.8)';
-                showNotification('Removed from favorites', 'info');
-            } else {
-                button.classList.add('favorited');
-                button.innerHTML = '⭐ Favorited';
                 button.style.color = '#ffd93d';
-                showNotification('Added to favorites!', 'success');
+            } else {
+                button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(245, 158, 11, 0.2)"/><path d="M12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2Z" stroke="currentColor" stroke-width="1.5"/></svg>Favorite';
+                button.style.color = 'rgba(255, 255, 255, 0.8)';
             }
         }
 
@@ -5335,7 +5331,52 @@
             }
         }
 
-        // Advanced Post Modal Functions - REMOVED DUPLICATE
+        // Advanced Post Modal Functions
+        function openAdvancedPostModal(category = 'general') {
+            const modal = document.getElementById('postModal');
+            const modalTitle = document.getElementById('modalTitle');
+            
+            // Set modal title based on category
+            const titles = {
+                'general': 'Share with Community',
+                'sale': 'List Item for Sale',
+                'rent': 'List Item for Rent',
+                'service': 'Offer Service',
+                'event': 'Create Event',
+                'poll': 'Create Poll',
+                'iso': 'In Search Of (ISO)',
+                'job': 'Post Job Opportunity'
+            };
+            
+            modalTitle.textContent = titles[category] || 'Create Post';
+            
+            // Pre-select category
+            selectCategory(category);
+            
+            // Show/hide relevant fields
+            toggleFieldsForCategory(category);
+            
+            modal.style.display = 'flex';
+        }
+
+        function closePostModal() {
+            document.getElementById('postModal').style.display = 'none';
+            document.getElementById('advancedPostForm').reset();
+            clearCategorySelection();
+        }
+
+        function selectCategory(category) {
+            // Clear previous selections
+            clearCategorySelection();
+            
+            // Select new category
+            const categoryBtn = document.querySelector(`[data-category="${category}"]`);
+            if (categoryBtn) {
+                categoryBtn.classList.add('selected');
+            }
+            
+            toggleFieldsForCategory(category);
+        }
 
         function clearCategorySelection() {
             document.querySelectorAll('.category-btn').forEach(btn => {
@@ -5381,19 +5422,6 @@
                 if (jobRequirementsGroup) jobRequirementsGroup.style.display = 'block';
                 if (jobBenefitsGroup) jobBenefitsGroup.style.display = 'block';
             }
-        }
-
-        function selectCategory(category) {
-            // Clear previous selections
-            clearCategorySelection();
-            
-            // Select new category
-            const categoryBtn = document.querySelector(`[data-category="${category}"]`);
-            if (categoryBtn) {
-                categoryBtn.classList.add('selected');
-            }
-            
-            toggleFieldsForCategory(category);
         }
 
         function addPollOption() {
@@ -6210,200 +6238,199 @@
             });
         });
 
-        // Add missing helper functions for comments
+        // ==================== COMPREHENSIVE FACEBOOK-STYLE COMMENT SYSTEM ====================
+        
+        // Main comment function that creates comment interface
+        function commentPost(postElement) {
+            // Get the post element if not provided
+            if (!postElement) {
+                postElement = event.target.closest('.feed-post');
+            }
+            
+            // Check if comment section already exists
+            let commentSection = postElement.querySelector('.comments-section');
+            if (!commentSection) {
+                // Create comment section
+                commentSection = document.createElement('div');
+                commentSection.className = 'comments-section';
+                commentSection.innerHTML = `
+                    <div class="comment-input-section">
+                        <input type="text" class="comment-input" placeholder="Write a comment..." style="
+                            width: 100%; 
+                            padding: 10px; 
+                            background: rgba(255,255,255,0.1); 
+                            border: 1px solid rgba(255,255,255,0.2); 
+                            border-radius: 20px; 
+                            color: white; 
+                            margin: 10px 0;
+                        ">
+                        <button onclick="postComment(this)" style="
+                            background: linear-gradient(135deg, #00ffff, #9d4edd);
+                            border: none;
+                            color: white;
+                            padding: 8px 16px;
+                            border-radius: 15px;
+                            cursor: pointer;
+                            margin-left: 10px;
+                        ">Post</button>
+                    </div>
+                    <div class="comments-list"></div>
+                `;
+                postElement.appendChild(commentSection);
+            }
+            
+            // Focus on comment input
+            const commentInput = commentSection.querySelector('.comment-input');
+            commentInput.focus();
+        }
+
+        // Post comment function
         function postComment(buttonElement) {
-            const commentSection = buttonElement.closest('.comments-section');
+            const commentSection = buttonElement.closest('.comment-input-section');
             const commentInput = commentSection.querySelector('.comment-input');
             const commentText = commentInput.value.trim();
             
-            if (!commentText) {
-                showNotification('Please enter a comment', 'error');
-                return;
-            }
+            if (!commentText) return;
             
-            const commentsList = commentSection.querySelector('.comments-list');
-            const newComment = document.createElement('div');
-            newComment.className = 'comment';
-            newComment.innerHTML = `
-                <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; margin: 5px 0;">
-                    <strong style="color: #00ffff;">You</strong>
-                    <span style="color: #e2e8f0; font-size: 12px; margin-left: 10px;">just now</span>
-                    <p style="color: white; margin: 5px 0;">${commentText}</p>
-                    <button onclick="likeComment(this)" style="background: none; border: none; color: #ff6b6b; cursor: pointer; font-size: 12px;">Like</button>
-                </div>
+            const commentsList = commentSection.nextElementSibling;
+            const currentUser = JSON.parse(localStorage.getItem('marketpaceUser')) || { name: 'Community Member', id: 'user_' + Date.now() };
+            
+            const commentElement = document.createElement('div');
+            commentElement.className = 'comment-item';
+            commentElement.style.cssText = `
+                background: rgba(255,255,255,0.05);
+                border-radius: 10px;
+                padding: 10px;
+                margin: 8px 0;
+                border: 1px solid rgba(255,255,255,0.1);
             `;
-            commentsList.appendChild(newComment);
+            
+            commentElement.innerHTML = `
+                <div class="comment-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #00ffff, #9d4edd); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 8px; font-size: 12px; font-weight: bold;">
+                            ${currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                        </div>
+                        <span style="font-weight: 600; font-size: 14px;">${currentUser.name}</span>
+                        <span style="color: rgba(255,255,255,0.6); font-size: 12px; margin-left: 8px;">just now</span>
+                    </div>
+                    <button onclick="deleteComment(this)" style="background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; padding: 2px 6px;">×</button>
+                </div>
+                <div class="comment-text" style="font-size: 14px; line-height: 1.4; margin-bottom: 8px;">${commentText}</div>
+                <div class="comment-actions" style="display: flex; gap: 15px; font-size: 12px;">
+                    <button onclick="likeComment(this)" style="background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer;">👍 Like</button>
+                    <button onclick="replyToComment(this)" style="background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer;">Reply</button>
+                </div>
+                <div class="replies-section" style="margin-left: 20px; margin-top: 10px;"></div>
+            `;
+            
+            commentsList.appendChild(commentElement);
             commentInput.value = '';
-            showNotification('Comment posted!', 'success');
+            
+            showNotification('Comment posted successfully!', 'success');
         }
 
-        function likeComment(buttonElement) {
-            if (buttonElement.style.color === 'rgb(255, 107, 107)') {
-                buttonElement.style.color = 'rgba(255, 255, 255, 0.6)';
-                buttonElement.textContent = 'Like';
-            } else {
-                buttonElement.style.color = '#ff6b6b';
-                buttonElement.textContent = '❤️ Liked';
+        // Delete comment function (only authors can delete their comments)
+        function deleteComment(buttonElement) {
+            if (confirm('Delete this comment?')) {
+                buttonElement.closest('.comment-item').remove();
+                showNotification('Comment deleted', 'info');
             }
         }
 
-        // Helper functions for comment interactions
-        function deleteComment(buttonElement) {
-            const comment = buttonElement.closest('.comment-item');
-            comment.remove();
-            showNotification('Comment deleted', 'info');
+        // Like comment function
+        function likeComment(buttonElement) {
+            const isLiked = buttonElement.style.color === 'rgb(0, 255, 255)';
+            if (isLiked) {
+                buttonElement.style.color = 'rgba(255,255,255,0.7)';
+                buttonElement.textContent = '👍 Like';
+            } else {
+                buttonElement.style.color = '#00ffff';
+                buttonElement.textContent = '👍 Liked';
+            }
         }
 
+        // Reply to comment function
         function replyToComment(buttonElement) {
             const repliesSection = buttonElement.closest('.comment-item').querySelector('.replies-section');
-            if (repliesSection.querySelector('.reply-input')) return; // Already has reply box
             
-            const replyBox = document.createElement('div');
-            replyBox.innerHTML = `
-                <div class="reply-input" style="margin-top: 8px;">
-                    <input type="text" placeholder="Write a reply..." style="width: 80%; padding: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 15px; color: white;">
-                    <button onclick="submitReply(this)" style="background: #00ffff; border: none; color: white; padding: 6px 12px; border-radius: 12px; cursor: pointer; margin-left: 8px;">Reply</button>
-                </div>
-            `;
-            repliesSection.appendChild(replyBox);
+            if (!repliesSection.querySelector('.reply-input')) {
+                const replyInput = document.createElement('div');
+                replyInput.className = 'reply-input';
+                replyInput.innerHTML = `
+                    <input type="text" placeholder="Write a reply..." style="
+                        width: 100%; 
+                        padding: 8px; 
+                        background: rgba(255,255,255,0.1); 
+                        border: 1px solid rgba(255,255,255,0.2); 
+                        border-radius: 15px; 
+                        color: white; 
+                        margin: 5px 0;
+                        font-size: 12px;
+                    ">
+                    <button onclick="postReply(this)" style="
+                        background: linear-gradient(135deg, #00ffff, #9d4edd);
+                        border: none;
+                        color: white;
+                        padding: 6px 12px;
+                        border-radius: 12px;
+                        cursor: pointer;
+                        margin-left: 8px;
+                        font-size: 12px;
+                    ">Reply</button>
+                `;
+                repliesSection.appendChild(replyInput);
+                replyInput.querySelector('input').focus();
+            }
         }
 
-        function submitReply(buttonElement) {
+        // Post reply function
+        function postReply(buttonElement) {
             const replyInput = buttonElement.previousElementSibling;
             const replyText = replyInput.value.trim();
+            
             if (!replyText) return;
             
+            const currentUser = JSON.parse(localStorage.getItem('marketpaceUser')) || { name: 'Community Member' };
             const repliesSection = buttonElement.closest('.replies-section');
+            
             const replyElement = document.createElement('div');
-            replyElement.innerHTML = `
-                <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: 8px; margin: 5px 0; border-left: 2px solid #00ffff;">
-                    <strong style="color: #00ffff; font-size: 12px;">You</strong>
-                    <span style="color: #e2e8f0; font-size: 11px; margin-left: 8px;">just now</span>
-                    <p style="color: white; font-size: 13px; margin: 3px 0;">${replyText}</p>
-                </div>
+            replyElement.className = 'reply-item';
+            replyElement.style.cssText = `
+                background: rgba(255,255,255,0.03);
+                border-radius: 8px;
+                padding: 8px;
+                margin: 5px 0;
+                border-left: 2px solid #00ffff;
             `;
-            repliesSection.appendChild(replyElement);
+            
+            replyElement.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #00ffff, #9d4edd); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 6px; font-size: 10px; font-weight: bold;">
+                            ${currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                        </div>
+                        <span style="font-weight: 600; font-size: 12px;">${currentUser.name}</span>
+                        <span style="color: rgba(255,255,255,0.6); font-size: 10px; margin-left: 6px;">just now</span>
+                    </div>
+                    <button onclick="deleteComment(this)" style="background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; padding: 2px 4px; font-size: 10px;">×</button>
+                </div>
+                <div style="font-size: 12px; line-height: 1.3;">${replyText}</div>
+            `;
+            
+            repliesSection.insertBefore(replyElement, repliesSection.querySelector('.reply-input'));
             buttonElement.closest('.reply-input').remove();
+            
             showNotification('Reply posted!', 'success');
-        }
-
-        // Add all missing functions for community page
-        function messageOwner(sellerName, itemName, itemId) {
-            const conversations = JSON.parse(localStorage.getItem('marketpaceConversations') || '{}');
-            const conversationId = `${sellerName}-${Date.now()}`;
-            
-            if (!conversations[conversationId]) {
-                conversations[conversationId] = {
-                    id: conversationId,
-                    participant: sellerName,
-                    itemName: itemName,
-                    itemId: itemId,
-                    messages: [],
-                    lastUpdate: new Date().toISOString()
-                };
-            }
-            
-            localStorage.setItem('marketpaceConversations', JSON.stringify(conversations));
-            showNotification(`Opening conversation with ${sellerName}`, 'success');
-            setTimeout(() => {
-                window.location.href = '/messages';
-            }, 1000);
-        }
-
-        function goToPage(page) {
-            const pageMap = {
-                'home': '/community',
-                'community': '/community',
-                'shops': '/shops',
-                'services': '/services',
-                'the-hub': '/the-hub',
-                'rentals': '/rentals',
-                'menu': '/marketpace-menu',
-                '/cart': '/cart',
-                '/settings': '/settings'
-            };
-            
-            const targetPage = pageMap[page] || page;
-            window.location.href = targetPage;
-        }
-
-        function selfPickup(itemName) {
-            showNotification(`Self pickup selected for ${itemName}`, 'success');
-            // Add self pickup logic here
-        }
-
-        // ESSENTIAL FUNCTIONS - CLEAN IMPLEMENTATION
-        function openLocalEventCalendar() {
-            window.location.href = '/local-event-calendar';
-        }
-
-        function showInteractiveMap() {
-            window.location.href = '/interactive-map';
-        }
-
-        function openAdvancedPostModal(type) {
-            var title = prompt('Enter title for your ' + type + ' post:');
-            if (title) {
-                showNotification(type + ' post "' + title + '" created successfully!', 'success');
-            }
-        }
-
-        function commentPost(postElement) {
-            showNotification('Comment section opened', 'info');
-        }
-
-        // SIMPLIFIED REPLY FUNCTIONS 
-        function replyToComment(buttonElement) {
-            showNotification('Reply function activated', 'info');
-        }
-
-        function postReply(buttonElement) {
-            showNotification('Reply posted!', 'success');
-        }
-
-        // ADD ALL MISSING FUNCTIONS HERE - CLEAN IMPLEMENTATION
-        function goToPage(page) {
-            console.log('Navigating to:', page);
-            if (page === 'shops') {
-                window.location.href = '/shops';
-            } else if (page === 'services') {
-                window.location.href = '/services';
-            } else if (page === 'community') {
-                window.location.href = '/community';
-            } else if (page === 'rentals') {
-                window.location.href = '/rentals';
-            } else if (page === 'the-hub') {
-                window.location.href = '/the-hub';
-            } else if (page === 'menu') {
-                window.location.href = '/marketpace-menu';
-            }
-        }
-
-        function likePost() {
-            showNotification('Post liked!', 'success');
-        }
-
-        function favoritePost() {
-            showNotification('Post favorited!', 'success');
-        }
-
-        function selectCategory(category) {
-            showNotification('Category ' + category + ' selected', 'info');
-        }
-
-        function selfPickup(itemName) {
-            showNotification('Self pickup selected for ' + itemName, 'success');
-        }
-
-        function messageOwner(sellerName, itemName, itemId) {
-            showNotification('Message sent to ' + sellerName + ' about ' + itemName, 'success');
         }
 
         // ==================== FACEBOOK FRIEND INVITE SYSTEM ====================
         
         // Facebook friend invite functions
         function shareFacebookPost() {
-            const message = 'Hey friends! I just joined MarketPace - a new community marketplace for our neighborhood! Buy, sell, rent items locally';
+            const message = `🏘️ Hey friends! I just joined MarketPace - a new community marketplace for our neighborhood! 
+
+✨ Buy, sell, rent items locally
 Get delivery from neighbors  
 🤝 Support local businesses
 Build stronger community connections
@@ -6469,7 +6496,7 @@ Let's keep our money circulating locally and support each other! 💪
             
             // Show success notification with cart count
             const cartCount = cartData.items.length;
-            showNotification(itemName + ' added to cart! (' + cartCount + ' item' + (cartCount > 1 ? 's' : '') + ')', 'success');
+            showNotification(`${itemName} added to cart! (${cartCount} item${cartCount > 1 ? 's' : ''})`, 'success');
             
             // Update cart badge if exists
             updateCartBadge(cartCount);
@@ -6639,7 +6666,7 @@ Let's keep our money circulating locally and support each other! 💪
                 type: 'purchase',
                 sellerId: 'current_seller', // In production, get from item data
                 title: '🛒 New Purchase!',
-                message: buyerName + ' just bought your "' + itemName + '"! Order #' + orderId,
+                message: `${buyerName} just bought your "${itemName}"! Order #${orderId}`,
                 deliveryInfo: deliveryMethod,
                 createdAt: new Date().toISOString(),
                 read: false
@@ -7507,8 +7534,6 @@ function closeTipModal() {
     }
 }
 </script>
-
-
 
 <style>
 @keyframes slideIn {
