@@ -1185,13 +1185,23 @@
         }
 
         function openMapView() {
-            // Create comprehensive map modal with event locations
+            // Get all current marketplace items (events, shops, services, restaurants, bars, venues)
+            const allMarketplaceItems = [
+                ...events.filter(event => matchesCurrentFilters(event) && isCurrentDay(event.date)),
+                ...getLocalShops().filter(shop => shop.location && shop.location.includes(currentTown.replace('-', ' '))),
+                ...getLocalServices().filter(service => service.location && service.location.includes(currentTown.replace('-', ' '))),
+                ...getLocalRestaurants().filter(restaurant => restaurant.location && restaurant.location.includes(currentTown.replace('-', ' '))),
+                ...getLocalBars().filter(bar => bar.location && bar.location.includes(currentTown.replace('-', ' '))),
+                ...getLiveMusicVenues().filter(venue => venue.location && venue.location.includes(currentTown.replace('-', ' ')))
+            ];
+            
+            // Create comprehensive map modal with marketplace locations
             const modal = document.createElement('div');
             modal.className = 'event-modal-overlay';
             modal.innerHTML = `
                 <div class="map-modal">
                     <div class="modal-header">
-                        <h3>Events Map - ${currentTown.charAt(0).toUpperCase() + currentTown.slice(1).replace('-', ' ')} (${currentRadius}mi radius)</h3>
+                        <h3>Local Map - ${currentTown.charAt(0).toUpperCase() + currentTown.slice(1).replace('-', ' ')} (${currentRadius}mi radius)</h3>
                         <button onclick="closeModal()" class="close-btn">&times;</button>
                     </div>
                     
@@ -1210,21 +1220,25 @@
                             </div>
                             
                             <div class="event-markers">
-                                ${events.filter(event => matchesCurrentFilters(event)).slice(0, 10).map((event, index) => {
-                                    const angle = (index * 36) * (Math.PI / 180);
-                                    const distance = 50 + (index * 35);
+                                ${allMarketplaceItems.slice(0, 12).map((item, index) => {
+                                    const angle = (index * 30) * (Math.PI / 180);
+                                    const distance = 60 + (index * 25);
                                     const x = 250 + Math.cos(angle) * distance;
                                     const y = 250 + Math.sin(angle) * distance;
                                     
+                                    const itemType = item.type || item.category || (item.businessType ? 'shop' : 'service');
+                                    const displayName = item.title || item.name || item.businessName;
+                                    const displayTime = item.time || item.hours || 'Open';
+                                    
                                     return `
-                                        <div class="event-marker ${event.type || event.category || 'community'}" 
+                                        <div class="event-marker ${itemType}" 
                                              style="left: ${x}px; top: ${y}px;"
-                                             onclick="showEventDetails(${JSON.stringify(event).replace(/"/g, '&quot;')})"
-                                             title="${event.title}">
+                                             onclick="showItemDetails(${JSON.stringify(item).replace(/"/g, '&quot;')})"
+                                             title="${displayName}">
                                             <div class="marker-pulse"></div>
                                             <div class="marker-content">
-                                                <span>${event.title.substring(0, 15)}${event.title.length > 15 ? '...' : ''}</span>
-                                                <small>${event.time}</small>
+                                                <span>${displayName.substring(0, 15)}${displayName.length > 15 ? '...' : ''}</span>
+                                                <small>${displayTime}</small>
                                             </div>
                                         </div>
                                     `;
@@ -1234,40 +1248,56 @@
                             <div class="map-legend">
                                 <div class="legend-item">
                                     <div class="legend-color music"></div>
-                                    <span>Music & Entertainment</span>
-                                </div>
-                                <div class="legend-item">
-                                    <div class="legend-color sports"></div>
-                                    <span>Sports & Recreation</span>
-                                </div>
-                                <div class="legend-item">
-                                    <div class="legend-color food"></div>
-                                    <span>Food & Dining</span>
-                                </div>
-                                <div class="legend-item">
-                                    <div class="legend-color community"></div>
-                                    <span>Community & Social</span>
+                                    <span>Events & Music</span>
                                 </div>
                                 <div class="legend-item">
                                     <div class="legend-color business"></div>
-                                    <span>Business & Professional</span>
+                                    <span>Shops & Services</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color food"></div>
+                                    <span>Restaurants</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color nightlife"></div>
+                                    <span>Bars & Nightlife</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color service"></div>
+                                    <span>Live Music Venues</span>
                                 </div>
                             </div>
                         </div>
                         
                         <div class="map-sidebar">
-                            <h4>Events in Map Area (${events.filter(event => matchesCurrentFilters(event)).length})</h4>
-                            <div class="map-events-list">
-                                ${events.filter(event => matchesCurrentFilters(event)).slice(0, 8).map(event => `
-                                    <div class="map-event-item" onclick="showEventDetails(${JSON.stringify(event).replace(/"/g, '&quot;')})">
-                                        <div class="event-marker-mini ${event.type || event.category || 'community'}"></div>
-                                        <div class="event-info">
-                                            <div class="event-title">${event.title}</div>
-                                            <div class="event-details">${event.time} • ${event.distance}</div>
-                                            <div class="event-location">${event.location}</div>
+                            <h4>Local Marketplace (${allMarketplaceItems.length})</h4>
+                            <div class="marketplace-tabs" style="display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap;">
+                                <button class="tab-btn active" onclick="filterMapItems('all')" style="background: rgba(0,255,255,0.2); color: #00ffff; border: 1px solid rgba(0,255,255,0.5); padding: 6px 12px; border-radius: 15px; font-size: 12px;">All</button>
+                                <button class="tab-btn" onclick="filterMapItems('events')" style="background: rgba(192,132,252,0.2); color: #c084fc; border: 1px solid rgba(192,132,252,0.5); padding: 6px 12px; border-radius: 15px; font-size: 12px;">Events</button>
+                                <button class="tab-btn" onclick="filterMapItems('shops')" style="background: rgba(34,211,238,0.2); color: #22d3ee; border: 1px solid rgba(34,211,238,0.5); padding: 6px 12px; border-radius: 15px; font-size: 12px;">Shops</button>
+                                <button class="tab-btn" onclick="filterMapItems('services')" style="background: rgba(157,78,221,0.2); color: #9d4edd; border: 1px solid rgba(157,78,221,0.5); padding: 6px 12px; border-radius: 15px; font-size: 12px;">Services</button>
+                                <button class="tab-btn" onclick="filterMapItems('restaurants')" style="background: rgba(251,191,36,0.2); color: #fbbf24; border: 1px solid rgba(251,191,36,0.5); padding: 6px 12px; border-radius: 15px; font-size: 12px;">Food</button>
+                                <button class="tab-btn" onclick="filterMapItems('bars')" style="background: rgba(255,107,53,0.2); color: #ff6b35; border: 1px solid rgba(255,107,53,0.5); padding: 6px 12px; border-radius: 15px; font-size: 12px;">Bars</button>
+                                <button class="tab-btn" onclick="filterMapItems('music')" style="background: rgba(192,132,252,0.2); color: #c084fc; border: 1px solid rgba(192,132,252,0.5); padding: 6px 12px; border-radius: 15px; font-size: 12px;">Venues</button>
+                            </div>
+                            <div class="map-events-list" id="mapItemsList">
+                                ${allMarketplaceItems.slice(0, 8).map(item => {
+                                    const itemType = item.type || item.category || (item.businessType ? 'shop' : 'service');
+                                    const displayName = item.title || item.name || item.businessName;
+                                    const displayDetails = item.time || item.hours || item.description;
+                                    const displayLocation = item.location || 'Local';
+                                    
+                                    return `
+                                        <div class="map-event-item" onclick="showItemDetails(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                                            <div class="event-marker-mini ${itemType}"></div>
+                                            <div class="event-info">
+                                                <div class="event-title">${displayName}</div>
+                                                <div class="event-details">${displayDetails} • ${item.distance || '0.2mi'}</div>
+                                                <div class="event-location">${displayLocation}</div>
+                                            </div>
                                         </div>
-                                    </div>
-                                `).join('')}
+                                    `;
+                                }).join('')}
                             </div>
                             
                             <div class="map-actions">
@@ -1467,6 +1497,8 @@
                     .legend-color.food { background: #fbbf24; }
                     .legend-color.community { background: #f472b6; }
                     .legend-color.business { background: #22d3ee; }
+                    .legend-color.nightlife { background: #ff6b35; }
+                    .legend-color.service { background: #9d4edd; }
                     
                     @keyframes radar-sweep {
                         0% { opacity: 0.3; transform: translate(-50%, -50%) scale(0.8); }
@@ -2259,6 +2291,247 @@
         document.addEventListener('DOMContentLoaded', function() {
             generateCalendar();
         });
+
+        function isCurrentDay(eventDate) {
+            const today = new Date();
+            const currentDateStr = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+            return eventDate === currentDateStr;
+        }
+
+        function getLocalShops() {
+            return [
+                {
+                    name: "Gulf Coast Treasures",
+                    businessType: "shop",
+                    category: "retail",
+                    location: "Orange Beach, AL",
+                    hours: "9am-8pm",
+                    description: "Beachwear, souvenirs, local art",
+                    distance: "0.3mi",
+                    type: "business"
+                },
+                {
+                    name: "Coastal Coffee Co",
+                    businessType: "shop", 
+                    category: "food",
+                    location: "Gulf Shores, AL",
+                    hours: "6am-6pm",
+                    description: "Fresh roasted coffee, pastries, light meals",
+                    distance: "0.5mi",
+                    type: "food"
+                },
+                {
+                    name: "Sunset Boutique",
+                    businessType: "shop",
+                    category: "fashion",
+                    location: "Orange Beach, AL", 
+                    hours: "10am-9pm",
+                    description: "Beach fashion, resort wear, accessories",
+                    distance: "0.7mi",
+                    type: "business"
+                }
+            ];
+        }
+
+        function getLocalServices() {
+            return [
+                {
+                    name: "Beach House Cleaning",
+                    businessType: "service",
+                    category: "cleaning",
+                    location: "Gulf Shores, AL",
+                    hours: "7am-6pm",
+                    description: "Professional vacation rental cleaning",
+                    distance: "0.4mi",
+                    type: "service"
+                },
+                {
+                    name: "Coastal Handyman",
+                    businessType: "service",
+                    category: "maintenance", 
+                    location: "Orange Beach, AL",
+                    hours: "8am-5pm",
+                    description: "Home repairs, maintenance, installations",
+                    distance: "0.6mi",
+                    type: "service"
+                },
+                {
+                    name: "Gulf Photography",
+                    businessType: "service",
+                    category: "photography",
+                    location: "Gulf Shores, AL",
+                    hours: "By appointment",
+                    description: "Wedding, family, event photography",
+                    distance: "0.8mi",
+                    type: "service"
+                }
+            ];
+        }
+
+        function showItemDetails(item) {
+            const modal = document.createElement('div');
+            modal.className = 'event-modal-overlay';
+            
+            const itemType = item.type || item.category || (item.businessType ? 'shop' : 'service');
+            const displayName = item.title || item.name || item.businessName;
+            const displayDetails = item.time || item.hours || item.description;
+            const displayLocation = item.location || 'Local';
+            
+            modal.innerHTML = `
+                <div class="event-detail-modal">
+                    <div class="modal-header">
+                        <h3>${displayName}</h3>
+                        <button onclick="closeModal()" class="close-btn">&times;</button>
+                    </div>
+                    
+                    <div class="modal-content">
+                        <div class="item-info">
+                            <p><strong>Type:</strong> ${itemType.charAt(0).toUpperCase() + itemType.slice(1)}</p>
+                            <p><strong>Location:</strong> ${displayLocation}</p>
+                            <p><strong>${item.businessType ? 'Hours' : 'Time'}:</strong> ${displayDetails}</p>
+                            <p><strong>Distance:</strong> ${item.distance || '0.2mi'}</p>
+                            ${item.description ? `<p><strong>Description:</strong> ${item.description}</p>` : ''}
+                        </div>
+                        
+                        <div class="item-actions">
+                            ${item.businessType ? `
+                                <button class="btn btn-primary" onclick="visitBusiness('${displayName}')">Visit</button>
+                                <button class="btn btn-secondary" onclick="contactBusiness('${displayName}')">Contact</button>
+                            ` : `
+                                <button class="btn btn-primary" onclick="bookEvent('${item.id || displayName}')">Get Tickets</button>
+                                <button class="btn btn-secondary" onclick="shareEvent('${displayName}')">Share</button>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        function filterMapItems(type) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Filter and display items (placeholder for demo)
+            console.log(`Filtering map items by type: ${type}`);
+        }
+
+        function visitBusiness(name) {
+            alert(`Visiting ${name} - would open business page`);
+            closeModal();
+        }
+
+        function contactBusiness(name) {
+            alert(`Contacting ${name} - would open messaging or call`);
+            closeModal();
+        }
+
+        function getLocalRestaurants() {
+            return [
+                {
+                    name: "The Wharf Restaurant",
+                    businessType: "restaurant",
+                    category: "dining",
+                    location: "Orange Beach, AL",
+                    hours: "11am-10pm",
+                    description: "Fresh seafood, steaks, waterfront dining",
+                    distance: "0.2mi",
+                    type: "food"
+                },
+                {
+                    name: "Gulf Coast Grill",
+                    businessType: "restaurant",
+                    category: "dining",
+                    location: "Gulf Shores, AL",
+                    hours: "4pm-11pm",
+                    description: "Casual dining, burgers, seafood, family friendly",
+                    distance: "0.6mi",
+                    type: "food"
+                },
+                {
+                    name: "Sunset Cafe",
+                    businessType: "restaurant", 
+                    category: "dining",
+                    location: "Orange Beach, AL",
+                    hours: "7am-3pm",
+                    description: "Breakfast, brunch, coffee, beachside patio",
+                    distance: "0.4mi",
+                    type: "food"
+                }
+            ];
+        }
+
+        function getLocalBars() {
+            return [
+                {
+                    name: "The Sandbar",
+                    businessType: "bar",
+                    category: "nightlife",
+                    location: "Gulf Shores, AL",
+                    hours: "3pm-2am",
+                    description: "Beach bar, craft cocktails, live music weekends",
+                    distance: "0.3mi",
+                    type: "nightlife"
+                },
+                {
+                    name: "Tiki Bar & Grill",
+                    businessType: "bar",
+                    category: "nightlife", 
+                    location: "Orange Beach, AL",
+                    hours: "12pm-1am",
+                    description: "Tropical drinks, pool bar, happy hour specials",
+                    distance: "0.5mi",
+                    type: "nightlife"
+                },
+                {
+                    name: "Pier 33",
+                    businessType: "bar",
+                    category: "nightlife",
+                    location: "Gulf Shores, AL", 
+                    hours: "5pm-12am",
+                    description: "Waterfront bar, wine, craft beer, sunset views",
+                    distance: "0.7mi",
+                    type: "nightlife"
+                }
+            ];
+        }
+
+        function getLiveMusicVenues() {
+            return [
+                {
+                    name: "The Music Hall",
+                    businessType: "venue",
+                    category: "entertainment",
+                    location: "Orange Beach, AL",
+                    hours: "Shows 7pm-11pm",
+                    description: "Live music venue, local and touring acts",
+                    distance: "0.4mi",
+                    type: "music"
+                },
+                {
+                    name: "Beachside Amphitheater", 
+                    businessType: "venue",
+                    category: "entertainment",
+                    location: "Gulf Shores, AL",
+                    hours: "Events vary",
+                    description: "Outdoor concert venue, festivals, community events",
+                    distance: "0.8mi",
+                    type: "music"
+                },
+                {
+                    name: "Jazz & Blues Lounge",
+                    businessType: "venue",
+                    category: "entertainment", 
+                    location: "Orange Beach, AL",
+                    hours: "8pm-1am",
+                    description: "Intimate venue, jazz, blues, acoustic performances",
+                    distance: "0.6mi",
+                    type: "music"
+                }
+            ];
+        }
     </script>
 
     <style>
