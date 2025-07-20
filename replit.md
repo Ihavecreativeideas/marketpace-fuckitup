@@ -277,7 +277,7 @@ All features are designed to strengthen local communities by keeping commerce lo
 ✓ **IMPROVED SOCIAL INTERACTION FUNCTIONS**: Updated like/favorite buttons to provide visual feedback and notifications without requiring additional DOM elements
 ✓ **RENT NOW REDIRECT FIXED**: Fixed community.html "rent now" button to properly redirect to rentals page on first click by updating rentNow function
 ✓ **PRIVATE PARTY DELIVERY OPTION ADDED**: Added private party delivery option to rentals page where owners can deliver items themselves and set custom S&H fees
-✓ **COUNTER OFFER SYSTEM COMPLETELY REBUILT**: Fixed shops.html counter offer system with proper modal display, centered positioning, and full screen visibility
+✓ **COUNTER OFFER SYSTEM COMPLETELY REBUILT**: Fixed shops.html counter offer system with 5 preset discounted prices (15%, 25%, 35%, 45%, 55% off) with color-coded buttons and one-click selection
 ✓ **HUB COMMENT SYSTEM FULLY OPERATIONAL**: Replaced basic alert-based comments with interactive Facebook-style comment system with replies, likes, and threading
 ✓ **COMMENT HELPER FUNCTIONS ADDED**: Added missing postComment, likeComment, and replyComment functions to services.html and rentals.html
 ✓ **STANDARDIZED NOTIFICATION SYSTEM**: Implemented consistent showNotification function across all pages for better user feedback
