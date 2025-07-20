@@ -1184,9 +1184,542 @@
             alert('Next month navigation - would update calendar display');
         }
 
-        // Initialize page
+        function openMapView() {
+            // Create comprehensive map modal with event locations
+            const modal = document.createElement('div');
+            modal.className = 'event-modal-overlay';
+            modal.innerHTML = `
+                <div class="map-modal">
+                    <div class="modal-header">
+                        <h3>Events Map - ${currentTown.charAt(0).toUpperCase() + currentTown.slice(1).replace('-', ' ')} (${currentRadius}mi radius)</h3>
+                        <button onclick="closeModal()" class="close-btn">&times;</button>
+                    </div>
+                    
+                    <div class="map-container">
+                        <div class="map-radar">
+                            <div class="radar-center">
+                                <div class="location-dot"></div>
+                                <span>You are here</span>
+                            </div>
+                            
+                            <div class="radar-rings">
+                                <div class="radar-ring" style="width: 100px; height: 100px;"></div>
+                                <div class="radar-ring" style="width: 200px; height: 200px;"></div>
+                                <div class="radar-ring" style="width: 300px; height: 300px;"></div>
+                                <div class="radar-ring" style="width: 400px; height: 400px;"></div>
+                            </div>
+                            
+                            <div class="event-markers">
+                                ${events.filter(event => matchesCurrentFilters(event)).slice(0, 10).map((event, index) => {
+                                    const angle = (index * 36) * (Math.PI / 180);
+                                    const distance = 50 + (index * 35);
+                                    const x = 250 + Math.cos(angle) * distance;
+                                    const y = 250 + Math.sin(angle) * distance;
+                                    
+                                    return `
+                                        <div class="event-marker ${event.type || event.category || 'community'}" 
+                                             style="left: ${x}px; top: ${y}px;"
+                                             onclick="showEventDetails(${JSON.stringify(event).replace(/"/g, '&quot;')})"
+                                             title="${event.title}">
+                                            <div class="marker-pulse"></div>
+                                            <div class="marker-content">
+                                                <span>${event.title.substring(0, 15)}${event.title.length > 15 ? '...' : ''}</span>
+                                                <small>${event.time}</small>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                            
+                            <div class="map-legend">
+                                <div class="legend-item">
+                                    <div class="legend-color music"></div>
+                                    <span>Music & Entertainment</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color sports"></div>
+                                    <span>Sports & Recreation</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color food"></div>
+                                    <span>Food & Dining</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color community"></div>
+                                    <span>Community & Social</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color business"></div>
+                                    <span>Business & Professional</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="map-sidebar">
+                            <h4>Events in Map Area (${events.filter(event => matchesCurrentFilters(event)).length})</h4>
+                            <div class="map-events-list">
+                                ${events.filter(event => matchesCurrentFilters(event)).slice(0, 8).map(event => `
+                                    <div class="map-event-item" onclick="showEventDetails(${JSON.stringify(event).replace(/"/g, '&quot;')})">
+                                        <div class="event-marker-mini ${event.type || event.category || 'community'}"></div>
+                                        <div class="event-info">
+                                            <div class="event-title">${event.title}</div>
+                                            <div class="event-details">${event.time} • ${event.distance}</div>
+                                            <div class="event-location">${event.location}</div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            
+                            <div class="map-actions">
+                                <button class="btn" onclick="syncFacebookEvents(); setTimeout(() => { closeModal(); openMapView(); }, 1000);">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                                    </svg>
+                                    Sync Facebook Events
+                                </button>
+                                <button class="btn-secondary" onclick="openCreateEventModal(); closeModal();">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 5v14m-7-7h14"/>
+                                    </svg>
+                                    Create Event
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Add CSS for map modal if not already present
+            if (!document.getElementById('map-modal-styles')) {
+                const mapStyles = document.createElement('style');
+                mapStyles.id = 'map-modal-styles';
+                mapStyles.textContent = `
+                    .map-modal {
+                        background: linear-gradient(135deg, #0a0a23 0%, #1a1a3e 100%);
+                        border-radius: 20px;
+                        width: 90vw;
+                        max-width: 1200px;
+                        height: 80vh;
+                        position: relative;
+                        overflow: hidden;
+                        border: 2px solid rgba(0, 255, 255, 0.3);
+                    }
+                    
+                    .map-container {
+                        display: flex;
+                        height: calc(100% - 60px);
+                    }
+                    
+                    .map-radar {
+                        flex: 2;
+                        position: relative;
+                        background: radial-gradient(circle at center, rgba(0, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0.3) 70%);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    
+                    .radar-center {
+                        position: absolute;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        color: #00ffff;
+                        font-weight: bold;
+                        z-index: 10;
+                    }
+                    
+                    .location-dot {
+                        width: 12px;
+                        height: 12px;
+                        background: #00ffff;
+                        border-radius: 50%;
+                        box-shadow: 0 0 20px #00ffff;
+                        animation: pulse 2s infinite;
+                    }
+                    
+                    .radar-rings {
+                        position: absolute;
+                    }
+                    
+                    .radar-ring {
+                        position: absolute;
+                        border: 1px solid rgba(0, 255, 255, 0.2);
+                        border-radius: 50%;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        animation: radar-sweep 4s linear infinite;
+                    }
+                    
+                    .event-markers {
+                        position: absolute;
+                        width: 500px;
+                        height: 500px;
+                    }
+                    
+                    .event-marker {
+                        position: absolute;
+                        cursor: pointer;
+                        z-index: 5;
+                        animation: float 3s ease-in-out infinite;
+                    }
+                    
+                    .marker-pulse {
+                        width: 8px;
+                        height: 8px;
+                        border-radius: 50%;
+                        animation: pulse 2s infinite;
+                    }
+                    
+                    .event-marker.music .marker-pulse { background: #c084fc; box-shadow: 0 0 10px #c084fc; }
+                    .event-marker.sports .marker-pulse { background: #34d399; box-shadow: 0 0 10px #34d399; }
+                    .event-marker.food .marker-pulse { background: #fbbf24; box-shadow: 0 0 10px #fbbf24; }
+                    .event-marker.community .marker-pulse { background: #f472b6; box-shadow: 0 0 10px #f472b6; }
+                    .event-marker.business .marker-pulse { background: #22d3ee; box-shadow: 0 0 10px #22d3ee; }
+                    
+                    .marker-content {
+                        background: rgba(0, 0, 0, 0.8);
+                        padding: 4px 8px;
+                        border-radius: 6px;
+                        margin-top: 5px;
+                        font-size: 0.7rem;
+                        color: white;
+                        text-align: center;
+                        white-space: nowrap;
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                    }
+                    
+                    .map-sidebar {
+                        flex: 1;
+                        background: rgba(0, 0, 0, 0.5);
+                        padding: 20px;
+                        overflow-y: auto;
+                        border-left: 1px solid rgba(0, 255, 255, 0.3);
+                    }
+                    
+                    .map-sidebar h4 {
+                        color: #00ffff;
+                        margin-bottom: 15px;
+                    }
+                    
+                    .map-events-list {
+                        margin-bottom: 20px;
+                    }
+                    
+                    .map-event-item {
+                        display: flex;
+                        align-items: center;
+                        padding: 10px;
+                        margin-bottom: 8px;
+                        background: rgba(255, 255, 255, 0.05);
+                        border-radius: 8px;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .map-event-item:hover {
+                        background: rgba(0, 255, 255, 0.1);
+                    }
+                    
+                    .event-marker-mini {
+                        width: 8px;
+                        height: 8px;
+                        border-radius: 50%;
+                        margin-right: 10px;
+                    }
+                    
+                    .event-marker-mini.music { background: #c084fc; }
+                    .event-marker-mini.sports { background: #34d399; }
+                    .event-marker-mini.food { background: #fbbf24; }
+                    .event-marker-mini.community { background: #f472b6; }
+                    .event-marker-mini.business { background: #22d3ee; }
+                    
+                    .map-legend {
+                        position: absolute;
+                        bottom: 20px;
+                        left: 20px;
+                        background: rgba(0, 0, 0, 0.8);
+                        padding: 15px;
+                        border-radius: 10px;
+                        border: 1px solid rgba(0, 255, 255, 0.3);
+                    }
+                    
+                    .legend-item {
+                        display: flex;
+                        align-items: center;
+                        margin-bottom: 8px;
+                        font-size: 0.8rem;
+                        color: white;
+                    }
+                    
+                    .legend-color {
+                        width: 12px;
+                        height: 12px;
+                        border-radius: 50%;
+                        margin-right: 8px;
+                    }
+                    
+                    .legend-color.music { background: #c084fc; }
+                    .legend-color.sports { background: #34d399; }
+                    .legend-color.food { background: #fbbf24; }
+                    .legend-color.community { background: #f472b6; }
+                    .legend-color.business { background: #22d3ee; }
+                    
+                    @keyframes radar-sweep {
+                        0% { opacity: 0.3; transform: translate(-50%, -50%) scale(0.8); }
+                        50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+                        100% { opacity: 0.3; transform: translate(-50%, -50%) scale(0.8); }
+                    }
+                    
+                    @keyframes float {
+                        0%, 100% { transform: translateY(0px); }
+                        50% { transform: translateY(-3px); }
+                    }
+                `;
+                document.head.appendChild(mapStyles);
+            }
+        }
+
+        // Zapier Facebook Events Integration
+        async function syncFacebookEvents() {
+            try {
+                const response = await fetch('/api/zapier/facebook-events/sync', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer demo_api_key_12345'
+                    },
+                    body: JSON.stringify({
+                        user_id: localStorage.getItem('user_id') || 'demo_user_1',
+                        radius_miles: currentRadius,
+                        location: currentTown
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.events && result.events.length > 0) {
+                        // Add Facebook events to the local events array
+                        result.events.forEach(fbEvent => {
+                            events.push({
+                                id: fbEvent.id,
+                                title: fbEvent.name,
+                                date: fbEvent.start_time ? fbEvent.start_time.split('T')[0] : new Date().toISOString().split('T')[0],
+                                time: fbEvent.start_time ? new Date(fbEvent.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'TBD',
+                                location: fbEvent.location || 'Facebook Event',
+                                category: 'community',
+                                description: fbEvent.description || 'Imported from Facebook',
+                                distance: calculateDistance(fbEvent.location) + ' miles',
+                                town: currentTown,
+                                favorited: false,
+                                source: 'facebook'
+                            });
+                        });
+                        
+                        // Refresh display
+                        filterEvents();
+                        generateCalendar();
+                        
+                        showNotification(`Synced ${result.events.length} Facebook events!`, 'success');
+                    }
+                }
+            } catch (error) {
+                console.log('Facebook sync unavailable:', error);
+            }
+        }
+
+        function calculateDistance(location) {
+            // Simple distance calculation for demo
+            return Math.floor(Math.random() * 15) + 1;
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#10b981' : '#3b82f6'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-weight: bold;
+                z-index: 10000;
+                animation: slideIn 0.3s ease-out;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Enhanced event creation modal
+        function openCreateEventModal() {
+            const modal = document.createElement('div');
+            modal.className = 'event-modal-overlay';
+            modal.innerHTML = `
+                <div class="event-create-modal">
+                    <div class="modal-header">
+                        <h3>Create New Event</h3>
+                        <button onclick="closeModal()" class="close-btn">&times;</button>
+                    </div>
+                    
+                    <form id="eventForm" class="event-form">
+                        <div class="form-group">
+                            <label>Event Title *</label>
+                            <input type="text" id="eventTitle" required>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Date *</label>
+                                <input type="date" id="eventDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Time *</label>
+                                <input type="time" id="eventTime" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Location *</label>
+                            <input type="text" id="eventLocation" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="eventCategory">
+                                <option value="music">Music & Entertainment</option>
+                                <option value="sports">Sports & Recreation</option>
+                                <option value="food">Food & Dining</option>
+                                <option value="community">Community & Social</option>
+                                <option value="business">Business & Professional</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="eventDescription" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Recurring Event</label>
+                            <select id="eventRecurrence">
+                                <option value="none">One-time event</option>
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" onclick="closeModal()" class="btn-secondary">Cancel</button>
+                            <button type="submit" class="btn-primary">Create Event</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Handle form submission
+            document.getElementById('eventForm').onsubmit = function(e) {
+                e.preventDefault();
+                createNewEvent();
+            };
+        }
+
+        function createNewEvent() {
+            const formData = {
+                title: document.getElementById('eventTitle').value,
+                date: document.getElementById('eventDate').value,
+                time: document.getElementById('eventTime').value,
+                location: document.getElementById('eventLocation').value,
+                category: document.getElementById('eventCategory').value,
+                description: document.getElementById('eventDescription').value,
+                recurrence: document.getElementById('eventRecurrence').value
+            };
+            
+            const newEvent = {
+                id: Date.now(),
+                title: formData.title,
+                date: formData.date,
+                time: formData.time,
+                location: formData.location,
+                type: formData.category,
+                category: formData.category,
+                description: formData.description,
+                distance: Math.floor(Math.random() * 10) + 1 + ' miles',
+                town: currentTown,
+                favorited: false,
+                creator: {
+                    name: localStorage.getItem('username') || 'You',
+                    avatar: 'https://via.placeholder.com/40x40',
+                    verified: false
+                },
+                favorites: 0,
+                source: 'user_created'
+            };
+            
+            // Add to events array
+            events.push(newEvent);
+            
+            // Handle recurring events
+            if (formData.recurrence !== 'none') {
+                createRecurringEvents(newEvent, formData.recurrence);
+            }
+            
+            // Refresh display
+            filterEvents();
+            generateCalendar();
+            
+            closeModal();
+            showNotification('Event created successfully!', 'success');
+        }
+
+        function createRecurringEvents(baseEvent, recurrence) {
+            const baseDate = new Date(baseEvent.date);
+            let nextDate = new Date(baseDate);
+            
+            // Create 10 recurring instances
+            for (let i = 1; i <= 10; i++) {
+                switch(recurrence) {
+                    case 'daily':
+                        nextDate.setDate(nextDate.getDate() + 1);
+                        break;
+                    case 'weekly':
+                        nextDate.setDate(nextDate.getDate() + 7);
+                        break;
+                    case 'monthly':
+                        nextDate.setMonth(nextDate.getMonth() + 1);
+                        break;
+                }
+                
+                const recurringEvent = {
+                    ...baseEvent,
+                    id: Date.now() + i,
+                    date: nextDate.toISOString().split('T')[0]
+                };
+                
+                events.push(recurringEvent);
+            }
+        }
+
+        // Initialize page with Facebook sync
         document.addEventListener('DOMContentLoaded', function() {
             filterEvents();
+            
+            // Auto-sync Facebook events on load
+            setTimeout(() => {
+                syncFacebookEvents();
+            }, 1000);
         });
     </script>
 
@@ -1646,6 +2179,13 @@
             if (modal) modal.remove();
         }
 
+        function matchesCurrentFilters(event) {
+            if (selectedFilter !== 'all' && event.type !== selectedFilter && event.category !== selectedFilter) {
+                return false;
+            }
+            return true;
+        }
+
         function formatDate(dateStr) {
             const date = new Date(dateStr);
             return date.toLocaleDateString('en-US', { 
@@ -1722,6 +2262,90 @@
     </script>
 
     <style>
+        /* Event Creation Form Styling */
+        .event-create-modal {
+            background: linear-gradient(135deg, #0a0a23 0%, #1a1a3e 100%);
+            border-radius: 20px;
+            width: 90vw;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .event-form {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            color: #00ffff;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-family: inherit;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00ffff 0%, #0066ff 100%);
+            color: #0a0a23;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.4);
+        }
+
         /* Enhanced Event Modal Styling */
         .event-modal-overlay {
             position: fixed;

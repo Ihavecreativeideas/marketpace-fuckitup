@@ -180,4 +180,56 @@ function detectEventCategory(title: string, description: string): string {
   return 'community'; // default category
 }
 
+// Facebook Events sync endpoint for calendar integration
+router.post('/facebook-events/sync', async (req, res) => {
+  try {
+    const { user_id, radius_miles, location } = req.body;
+    
+    // Get user's connected Facebook pages
+    const userPages = await storage.getUserFacebookPages(user_id);
+    let allEvents = [];
+    
+    // Collect events from all connected Facebook pages
+    for (const page of userPages) {
+      const pageEvents = await storage.getFacebookPageEvents(page.facebook_page_id);
+      allEvents = allEvents.concat(pageEvents);
+    }
+    
+    // Filter events by radius and location if specified
+    const filteredEvents = allEvents.filter(event => {
+      // In a real implementation, this would use actual geolocation
+      // For demo purposes, we'll return all events
+      return event.status === 'active';
+    });
+    
+    res.status(200).json({
+      success: true,
+      events: filteredEvents.map(event => ({
+        id: event.facebook_event_id,
+        name: event.title,
+        description: event.description,
+        start_time: event.start_time,
+        end_time: event.end_time,
+        location: event.location,
+        category: event.category,
+        event_url: event.event_url,
+        cover_photo: event.cover_photo,
+        ticket_uri: event.ticket_uri
+      })),
+      total_events: filteredEvents.length,
+      location: location,
+      radius_miles: radius_miles
+    });
+    
+    console.log(`✅ Synced ${filteredEvents.length} Facebook events for user ${user_id}`);
+    
+  } catch (error) {
+    console.error('❌ Facebook events sync failed:', error);
+    res.status(500).json({ 
+      error: 'Failed to sync Facebook events',
+      details: error.message 
+    });
+  }
+});
+
 export { router as zapierRouter };
