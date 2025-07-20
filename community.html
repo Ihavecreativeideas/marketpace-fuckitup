@@ -5444,8 +5444,22 @@
 
         // Advanced Post Modal Functions (Global Scope)
         function openAdvancedPostModal(category = 'general') {
+            console.log('openAdvancedPostModal called with category:', category);
+            
             const modal = document.getElementById('postModal');
             const modalTitle = document.getElementById('modalTitle');
+            
+            if (!modal) {
+                console.error('postModal element not found');
+                return;
+            }
+            
+            if (!modalTitle) {
+                console.error('modalTitle element not found');
+                return;
+            }
+            
+            console.log('Modal and title elements found, proceeding...');
             
             // Set modal title based on category
             const titles = {
@@ -5469,6 +5483,7 @@
             toggleFieldsForCategory(category);
             
             modal.style.display = 'flex';
+            console.log('Modal displayed successfully');
         }
 
         function closePostModal() {
@@ -5496,10 +5511,25 @@
             });
         }
 
+        // Ensure functions are available globally immediately
         window.openAdvancedPostModal = openAdvancedPostModal;
         window.closePostModal = closePostModal;
         window.selectCategory = selectCategory;
         window.clearCategorySelection = clearCategorySelection;
+        
+        // Also register on DOM ready to be absolutely sure
+        document.addEventListener('DOMContentLoaded', function() {
+            window.openAdvancedPostModal = openAdvancedPostModal;
+            window.closePostModal = closePostModal;
+            window.selectCategory = selectCategory;
+            window.clearCategorySelection = clearCategorySelection;
+            
+            console.log('Advanced posting functions registered on DOM ready:', {
+                openAdvancedPostModal: typeof window.openAdvancedPostModal,
+                closePostModal: typeof window.closePostModal,
+                postModal: document.getElementById('postModal') ? 'found' : 'not found'
+            });
+        });
 
 
 
