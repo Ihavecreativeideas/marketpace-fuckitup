@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food & Drinks - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 30%, #4c2885 60%, #6b46c1 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding-top: 120px;
+            padding-bottom: 80px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Header Section */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(26, 11, 61, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: #00ffff;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .marketpace-text {
+            background: linear-gradient(135deg, #2a0845 0%, #1a0033 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 20px #4169e1, 0 0 40px #0066ff, 0 0 60px #4169e1;
+            filter: drop-shadow(0 0 10px rgba(65, 105, 225, 0.5));
+        }
+
+        /* Filter Section */
+        .filter-section {
+            max-width: 1200px;
+            margin: 0 auto 30px;
+            padding: 0 20px;
+        }
+
+        .filter-controls {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-group label {
+            color: #00ffff;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .filter-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 14px;
+            min-width: 150px;
+        }
+
+        .category-filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .category-btn.active {
+            background: rgba(255, 165, 0, 0.3);
+            border-color: #ffa500;
+            color: #ffa500;
+        }
+
+        .category-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Business Listings */
+        .business-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .business-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .business-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+            border-color: rgba(0, 255, 255, 0.5);
+        }
+
+        .business-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: linear-gradient(45deg, #ffa500, #ff6347);
+        }
+
+        .business-info {
+            padding: 20px;
+        }
+
+        .business-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .business-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00ffff;
+            margin-bottom: 5px;
+        }
+
+        .business-type {
+            background: rgba(255, 165, 0, 0.2);
+            color: #ffa500;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .business-description {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .business-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .business-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ffa500 0%, #ff6347 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 165, 0, 0.4);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(12, 18, 32, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 11px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: #ffa500;
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+            stroke-width: 1.5;
+        }
+
+        /* No Results */
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .no-results h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #ffa500;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <button class="back-button" onclick="goBack()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="m15 18-6-6 6-6"/>
+                </svg>
+                Back
+            </button>
+            <h1 class="marketpace-text">Food & Drinks</h1>
+            <div style="width: 80px;"></div>
+        </div>
+    </div>
+
+    <!-- Filter Controls -->
+    <div class="filter-section">
+        <div class="filter-controls">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Town:</label>
+                    <select class="filter-select" id="townFilter">
+                        <option value="orange-beach">Orange Beach</option>
+                        <option value="gulf-shores">Gulf Shores</option>
+                        <option value="mobile">Mobile</option>
+                        <option value="pensacola">Pensacola</option>
+                        <option value="destin">Destin</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Distance:</label>
+                    <select class="filter-select" id="radiusFilter">
+                        <option value="5">5 miles</option>
+                        <option value="10" selected>10 miles</option>
+                        <option value="25">25 miles</option>
+                        <option value="50">50 miles</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="category-filters">
+                <button class="category-btn active" data-category="all">All</button>
+                <button class="category-btn" data-category="restaurant">Restaurants</button>
+                <button class="category-btn" data-category="fast-food">Fast Food</button>
+                <button class="category-btn" data-category="bar">Bars & Pubs</button>
+                <button class="category-btn" data-category="cafe">Cafes</button>
+                <button class="category-btn" data-category="fine-dining">Fine Dining</button>
+                <button class="category-btn" data-category="takeout">Takeout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Business Grid -->
+    <div class="business-grid" id="businessGrid">
+        <!-- Businesses will be populated by JavaScript -->
+    </div>
+
+    <!-- No Results Message -->
+    <div class="no-results" id="noResults" style="display: none;">
+        <h3>No businesses found</h3>
+        <p>Try adjusting your filters or expanding your search radius</p>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-container">
+            <div class="nav-item" onclick="goToPage('community')">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                </svg>
+                <span>Home</span>
+            </div>
+            <div class="nav-item" onclick="goToPage('shops')">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/>
+                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                </svg>
+                <span>Marketplace</span>
+            </div>
+            <div class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M2 17h20v2H2zm1.15-4.05L4 11l4-7 4 7 .85 1.95z"/>
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                <span>Food & Drinks</span>
+            </div>
+            <div class="nav-item" onclick="goToPage('hub')">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M12 1v6m0 6v6"/>
+                </svg>
+                <span>The Hub</span>
+            </div>
+            <div class="nav-item" onclick="goToPage('menu')">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <line x1="4" x2="20" y1="12" y2="12"/>
+                    <line x1="4" x2="20" y1="6" y2="6"/>
+                    <line x1="4" x2="20" y1="18" y2="18"/>
+                </svg>
+                <span>Menu</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTown = 'orange-beach';
+        let currentRadius = 10;
+        let currentCategory = 'all';
+
+        const foodBusinesses = [
+            {
+                id: 1,
+                name: "The Gulf Grill",
+                type: "restaurant",
+                category: "fine-dining",
+                description: "Upscale waterfront dining featuring fresh Gulf seafood, steaks, and craft cocktails with stunning sunset views.",
+                location: "Orange Beach, AL",
+                hours: "4:00 PM - 10:00 PM",
+                phone: "(251) 974-1717",
+                cuisine: "Seafood, Steakhouse",
+                priceRange: "$$$",
+                rating: 4.6,
+                distance: "0.3mi",
+                image: "restaurant-1.jpg"
+            },
+            {
+                id: 2,
+                name: "Coastal Coffee Co",
+                type: "cafe",
+                category: "cafe", 
+                description: "Locally roasted coffee, fresh pastries, and light breakfast served in a cozy beachside atmosphere.",
+                location: "Gulf Shores, AL",
+                hours: "6:00 AM - 6:00 PM",
+                phone: "(251) 948-2233",
+                cuisine: "Coffee, Breakfast",
+                priceRange: "$",
+                rating: 4.8,
+                distance: "0.5mi",
+                image: "cafe-1.jpg"
+            },
+            {
+                id: 3,
+                name: "The Sandbar",
+                type: "bar",
+                category: "bar",
+                description: "Beachfront bar and grill with live music, craft cocktails, cold beer, and casual dining right on the sand.",
+                location: "Orange Beach, AL",
+                hours: "11:00 AM - 2:00 AM",
+                phone: "(251) 981-5565",
+                cuisine: "Bar Food, Burgers",
+                priceRange: "$$",
+                rating: 4.4,
+                distance: "0.2mi",
+                image: "bar-1.jpg"
+            },
+            {
+                id: 4,
+                name: "Shrimp Basket",
+                type: "restaurant",
+                category: "fast-food",
+                description: "Gulf Coast favorite serving fresh shrimp, fish, and Southern sides in a casual, family-friendly setting.",
+                location: "Gulf Shores, AL",
+                hours: "10:30 AM - 9:00 PM",
+                phone: "(251) 968-3221",
+                cuisine: "Seafood, Southern",
+                priceRange: "$$",
+                rating: 4.3,
+                distance: "0.7mi",
+                image: "restaurant-2.jpg"
+            },
+            {
+                id: 5,
+                name: "Flora-Bama",
+                type: "bar",
+                category: "bar",
+                description: "World-famous beach bar spanning Alabama-Florida border with live music, dancing, and legendary atmosphere.",
+                location: "Orange Beach, AL",
+                hours: "8:00 AM - 2:30 AM",
+                phone: "(251) 980-5118",
+                cuisine: "Bar Food, Seafood",
+                priceRange: "$$",
+                rating: 4.5,
+                distance: "1.2mi",
+                image: "bar-2.jpg"
+            },
+            {
+                id: 6,
+                name: "Sunset Cafe",
+                type: "restaurant",
+                category: "restaurant",
+                description: "Breakfast and brunch specialists with fresh eggs, pancakes, and beachside patio seating overlooking the Gulf.",
+                location: "Orange Beach, AL",
+                hours: "7:00 AM - 3:00 PM",
+                phone: "(251) 974-4455",
+                cuisine: "Breakfast, American",
+                priceRange: "$",
+                rating: 4.7,
+                distance: "0.4mi",
+                image: "restaurant-3.jpg"
+            }
+        ];
+
+        function renderBusinesses() {
+            const grid = document.getElementById('businessGrid');
+            const noResults = document.getElementById('noResults');
+            
+            const filteredBusinesses = foodBusinesses.filter(business => {
+                if (currentCategory !== 'all' && business.category !== currentCategory) {
+                    return false;
+                }
+                return business.location.toLowerCase().includes(currentTown.replace('-', ' '));
+            });
+
+            if (filteredBusinesses.length === 0) {
+                grid.style.display = 'none';
+                noResults.style.display = 'block';
+                return;
+            }
+
+            grid.style.display = 'grid';
+            noResults.style.display = 'none';
+
+            grid.innerHTML = filteredBusinesses.map(business => `
+                <div class="business-card" onclick="viewBusiness(${business.id})">
+                    <div class="business-image" style="background: linear-gradient(45deg, #ffa500, #ff6347); display: flex; align-items: center; justify-content: center; color: white; font-size: 48px;">
+                        ${business.type === 'restaurant' ? '🍽️' : business.type === 'bar' ? '🍺' : '☕'}
+                    </div>
+                    
+                    <div class="business-info">
+                        <div class="business-header">
+                            <div>
+                                <div class="business-name">${business.name}</div>
+                                <div class="business-type">${business.type.charAt(0).toUpperCase() + business.type.slice(1)}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="business-description">
+                            ${business.description}
+                        </div>
+                        
+                        <div class="business-details">
+                            <div class="detail-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12,6 12,12 16,14"/>
+                                </svg>
+                                ${business.hours}
+                            </div>
+                            <div class="detail-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                    <circle cx="12" cy="10" r="3"/>
+                                </svg>
+                                ${business.distance}
+                            </div>
+                            <div class="detail-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+                                </svg>
+                                ${business.rating} ${business.priceRange}
+                            </div>
+                        </div>
+                        
+                        <div class="business-actions">
+                            <button class="action-btn btn-primary" onclick="event.stopPropagation(); callBusiness(${business.id})">
+                                Call
+                            </button>
+                            <button class="action-btn btn-secondary" onclick="event.stopPropagation(); getDirections(${business.id})">
+                                Directions
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function setupFilters() {
+            // Town filter
+            document.getElementById('townFilter').addEventListener('change', (e) => {
+                currentTown = e.target.value;
+                renderBusinesses();
+            });
+
+            // Radius filter
+            document.getElementById('radiusFilter').addEventListener('change', (e) => {
+                currentRadius = parseInt(e.target.value);
+                renderBusinesses();
+            });
+
+            // Category filters
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentCategory = btn.dataset.category;
+                    renderBusinesses();
+                });
+            });
+        }
+
+        function viewBusiness(id) {
+            const business = foodBusinesses.find(b => b.id === id);
+            alert(`Viewing ${business.name} - would open detailed business page`);
+        }
+
+        function callBusiness(id) {
+            const business = foodBusinesses.find(b => b.id === id);
+            window.open(`tel:${business.phone}`, '_self');
+        }
+
+        function getDirections(id) {
+            const business = foodBusinesses.find(b => b.id === id);
+            alert(`Getting directions to ${business.name} - would open maps app`);
+        }
+
+        function goBack() {
+            if (document.referrer) {
+                window.history.back();
+            } else {
+                window.location.href = '/community.html';
+            }
+        }
+
+        function goToPage(page) {
+            const pageMap = {
+                'community': '/community.html',
+                'shops': '/shops.html',
+                'hub': '/the-hub.html',
+                'menu': '/marketpace-menu.html'
+            };
+            
+            if (pageMap[page]) {
+                window.location.href = pageMap[page];
+            }
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            setupFilters();
+            renderBusinesses();
+            console.log('Food & Drinks page initialized');
+        });
+    </script>
+</body>
+</html>
