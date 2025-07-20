@@ -4545,6 +4545,57 @@
             }
             selectedRating = 0;
         }
+
+        // Advanced Post Modal Function
+        function openAdvancedPostModal(postType = 'general') {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 500px;">
+                    <h3 style="color: #00ffff; margin-bottom: 20px;">Create Post - ${postType.toUpperCase()}</h3>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <textarea id="postContent" placeholder="What's happening in your community?" style="width: 100%; height: 100px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(0,255,255,0.3); border-radius: 8px; padding: 10px; resize: vertical;"></textarea>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <input type="file" id="postImage" accept="image/*" style="background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(0,255,255,0.3); border-radius: 8px; padding: 8px; width: 100%;">
+                    </div>
+                    
+                    ${postType === 'sale' || postType === 'rental' || postType === 'service' ? `
+                    <div style="margin-bottom: 15px;">
+                        <input type="number" id="postPrice" placeholder="Price ($)" style="background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(0,255,255,0.3); border-radius: 8px; padding: 8px; width: 100%;">
+                    </div>
+                    ` : ''}
+                    
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button onclick="closePostModal()" style="background: rgba(107, 114, 128, 0.6); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Cancel</button>
+                        <button onclick="submitPost('${postType}')" style="background: linear-gradient(135deg, #00ffff, #0099cc); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Post</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function closePostModal() {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+                document.body.removeChild(modal);
+            }
+        }
+
+        function submitPost(postType) {
+            const content = document.getElementById('postContent').value;
+            const price = document.getElementById('postPrice')?.value;
+            
+            if (!content.trim()) {
+                alert('Please enter some content for your post');
+                return;
+            }
+            
+            closePostModal();
+            showNotification(`Your ${postType} post has been created!`, 'success');
+        }
         function verifyCondition(itemName, type) {
             closeItemDetails();
             
