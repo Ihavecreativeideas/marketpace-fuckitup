@@ -1817,9 +1817,91 @@
         }
 
         function counterOffer(item, price) {
-            // Use the new counter offer system
-            window.originalPrice = parseFloat(price);
-            showCounterOfferModal(item, parseFloat(price), `item_${Date.now()}`, 'seller_123');
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                backdrop-filter: blur(10px);
+            `;
+            
+            modal.innerHTML = `
+                <div class="modal-content" style="
+                    background: linear-gradient(135deg, #1a0b3d, #2d1b69);
+                    border-radius: 20px;
+                    max-width: 400px;
+                    width: 90%;
+                    border: 2px solid rgba(0, 255, 255, 0.3);
+                    padding: 30px;
+                    text-align: center;
+                    max-height: 90vh;
+                    overflow-y: auto;
+                ">
+                    <h3 style="color: #00ffff; margin-bottom: 20px;">Make Counter Offer</h3>
+                    <p style="color: white; margin-bottom: 15px;">${item}</p>
+                    <p style="color: #ffd93d; margin-bottom: 20px;">Original Price: $${price}</p>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="color: white; display: block; margin-bottom: 10px;">Your Offer:</label>
+                        <input type="number" id="counterOfferAmount" style="
+                            width: 100%;
+                            padding: 10px;
+                            border: 1px solid rgba(0, 255, 255, 0.3);
+                            border-radius: 8px;
+                            background: rgba(255, 255, 255, 0.1);
+                            color: white;
+                            font-size: 16px;
+                        " placeholder="Enter your offer" max="${price * 0.9}">
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button onclick="closeCounterOfferModal()" style="
+                            background: rgba(107, 114, 128, 0.6);
+                            color: white;
+                            border: none;
+                            padding: 10px 20px;
+                            border-radius: 8px;
+                            cursor: pointer;
+                        ">Cancel</button>
+                        <button onclick="submitCounterOffer('${item}', '${price}')" style="
+                            background: linear-gradient(135deg, #10b981, #059669);
+                            color: white;
+                            border: none;
+                            padding: 10px 20px;
+                            border-radius: 8px;
+                            cursor: pointer;
+                        ">Submit Offer</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        function closeCounterOfferModal() {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+                document.body.removeChild(modal);
+            }
+        }
+        
+        function submitCounterOffer(item, originalPrice) {
+            const offerAmount = document.getElementById('counterOfferAmount').value;
+            if (!offerAmount || offerAmount <= 0) {
+                alert('Please enter a valid offer amount');
+                return;
+            }
+            
+            closeCounterOfferModal();
+            showNotification(`Counter offer of $${offerAmount} submitted for ${item}!`, 'success');
         }
 
         function messageOwner(sellerName, itemName, itemId) {
@@ -1866,37 +1948,27 @@
 
         // Social interaction functions
         function likePost(button) {
-            const likeCount = button.querySelector('.like-count');
-            let count = parseInt(likeCount.textContent) || 0;
-            
             if (button.style.color === 'rgb(255, 107, 107)') {
                 // Unlike
                 button.style.color = 'rgba(255, 255, 255, 0.8)';
-                count--;
+                showNotification('Post unliked!', 'info');
             } else {
                 // Like
                 button.style.color = '#ff6b6b';
-                count++;
+                showNotification('Post liked!', 'success');
             }
-            likeCount.textContent = count;
-            showNotification('Post liked!', 'success');
         }
 
         function favoritePost(button) {
-            const favoriteCount = button.querySelector('.favorite-count');
-            let count = parseInt(favoriteCount.textContent) || 0;
-            
             if (button.style.color === 'rgb(255, 217, 61)') {
                 // Unfavorite
                 button.style.color = 'rgba(255, 255, 255, 0.8)';
-                count--;
+                showNotification('Removed from favorites!', 'info');
             } else {
                 // Favorite
                 button.style.color = '#ffd93d';
-                count++;
+                showNotification('Added to favorites!', 'success');
             }
-            favoriteCount.textContent = count;
-            showNotification('Post favorited!', 'success');
         }
 
         function commentPost(postElement) {

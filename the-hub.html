@@ -1328,11 +1328,183 @@
             }
         }
 
-        function commentPost() {
-            const comment = prompt('Write your comment:');
-            if (comment) {
-                alert(`Comment posted: "${comment}"`);
+        function commentPost(postElement) {
+            const post = postElement ? postElement.closest('.post-card') : event.target.closest('.post-card');
+            
+            // Check if comment section already exists
+            let commentSection = post.querySelector('.comment-section');
+            if (commentSection) {
+                // Toggle visibility
+                commentSection.style.display = commentSection.style.display === 'none' ? 'block' : 'none';
+                return;
             }
+            
+            // Create comment section
+            commentSection = document.createElement('div');
+            commentSection.className = 'comment-section';
+            commentSection.style.cssText = `
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                padding: 15px;
+                background: rgba(0, 0, 0, 0.3);
+                border-radius: 0 0 15px 15px;
+                margin-top: 15px;
+            `;
+            
+            commentSection.innerHTML = `
+                <div class="comment-input-area" style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <textarea class="comment-input" placeholder="Write a comment..." rows="2" style="
+                        flex: 1;
+                        padding: 10px;
+                        background: rgba(255, 255, 255, 0.1);
+                        border: 1px solid rgba(0, 255, 255, 0.3);
+                        border-radius: 8px;
+                        color: white;
+                        resize: vertical;
+                    "></textarea>
+                    <button class="comment-send-btn" onclick="postComment(this)" style="
+                        background: linear-gradient(135deg, #3b82f6, #2563eb);
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                    ">Post</button>
+                </div>
+                <div class="comments-list">
+                    <div class="comment" style="margin-bottom: 15px;">
+                        <div class="comment-author" style="display: flex; gap: 10px; align-items: flex-start;">
+                            <div class="comment-avatar" style="
+                                width: 32px;
+                                height: 32px;
+                                border-radius: 8px;
+                                background: linear-gradient(135deg, #6366f1, #8b5cf6);
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                color: white;
+                                font-size: 12px;
+                                font-weight: bold;
+                            ">ML</div>
+                            <div class="comment-content" style="flex: 1;">
+                                <div class="comment-header" style="display: flex; gap: 10px; align-items: center; margin-bottom: 5px;">
+                                    <span class="comment-name" style="color: #00ffff; font-weight: bold; font-size: 14px;">Music Lover</span>
+                                    <span class="comment-time" style="color: rgba(255, 255, 255, 0.6); font-size: 12px;">2 minutes ago</span>
+                                </div>
+                                <p class="comment-text" style="color: white; margin: 0; line-height: 1.4;">This sounds amazing! Can't wait to hear it live!</p>
+                                <div class="comment-actions" style="margin-top: 8px; display: flex; gap: 15px;">
+                                    <button class="comment-action-btn" onclick="likeComment(this)" style="background: none; border: none; color: rgba(255, 255, 255, 0.8); cursor: pointer; font-size: 12px;">Like</button>
+                                    <button class="comment-action-btn" onclick="replyComment(this)" style="background: none; border: none; color: rgba(255, 255, 255, 0.8); cursor: pointer; font-size: 12px;">Reply</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            post.appendChild(commentSection);
+            
+            // Show notification
+            showNotification('Comment section opened!', 'info');
+        }
+        
+        function postComment(button) {
+            const commentInput = button.parentElement.querySelector('.comment-input');
+            const commentText = commentInput.value.trim();
+            
+            if (!commentText) {
+                showNotification('Please write a comment first', 'error');
+                return;
+            }
+            
+            const commentsList = button.closest('.comment-section').querySelector('.comments-list');
+            const newComment = document.createElement('div');
+            newComment.className = 'comment';
+            newComment.style.marginBottom = '15px';
+            newComment.innerHTML = `
+                <div class="comment-author" style="display: flex; gap: 10px; align-items: flex-start;">
+                    <div class="comment-avatar" style="
+                        width: 32px;
+                        height: 32px;
+                        border-radius: 8px;
+                        background: linear-gradient(135deg, #10b981, #059669);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-size: 12px;
+                        font-weight: bold;
+                    ">ME</div>
+                    <div class="comment-content" style="flex: 1;">
+                        <div class="comment-header" style="display: flex; gap: 10px; align-items: center; margin-bottom: 5px;">
+                            <span class="comment-name" style="color: #00ffff; font-weight: bold; font-size: 14px;">You</span>
+                            <span class="comment-time" style="color: rgba(255, 255, 255, 0.6); font-size: 12px;">Just now</span>
+                        </div>
+                        <p class="comment-text" style="color: white; margin: 0; line-height: 1.4;">${commentText}</p>
+                        <div class="comment-actions" style="margin-top: 8px; display: flex; gap: 15px;">
+                            <button class="comment-action-btn" onclick="likeComment(this)" style="background: none; border: none; color: rgba(255, 255, 255, 0.8); cursor: pointer; font-size: 12px;">Like</button>
+                            <button class="comment-action-btn" onclick="replyComment(this)" style="background: none; border: none; color: rgba(255, 255, 255, 0.8); cursor: pointer; font-size: 12px;">Reply</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            commentsList.appendChild(newComment);
+            commentInput.value = '';
+            showNotification('Comment posted!', 'success');
+        }
+        
+        function likeComment(button) {
+            const liked = button.classList.contains('liked');
+            if (liked) {
+                button.classList.remove('liked');
+                button.textContent = 'Like';
+                button.style.color = 'rgba(255, 255, 255, 0.8)';
+            } else {
+                button.classList.add('liked');
+                button.textContent = 'Liked';
+                button.style.color = '#ff6b6b';
+            }
+        }
+        
+        function replyComment(button) {
+            const comment = button.closest('.comment');
+            const commentName = comment.querySelector('.comment-name').textContent;
+            const commentInput = comment.closest('.comment-section').querySelector('.comment-input');
+            commentInput.value = `@${commentName} `;
+            commentInput.focus();
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'linear-gradient(135deg, #10b981, #059669)' : 
+                             type === 'error' ? 'linear-gradient(135deg, #ef4444, #dc2626)' :
+                             'linear-gradient(135deg, #3b82f6, #2563eb)'};
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                z-index: 1000;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            document.body.removeChild(notification);
+                        }
+                    }, 300);
+                }
+            }, 3000);
         }
 
         function sharePost() {
