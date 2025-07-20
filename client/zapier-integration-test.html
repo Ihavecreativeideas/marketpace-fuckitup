@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zapier Integration Test - MarketPace</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0c1220 0%, #001122 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(12, 18, 32, 0.8);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            backdrop-filter: blur(20px);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.1));
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            margin: 0 0 10px;
+            color: #00ffff;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .test-section {
+            background: rgba(0, 18, 35, 0.5);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .test-section h3 {
+            color: #00ffff;
+            margin-top: 0;
+        }
+
+        .test-button {
+            background: linear-gradient(45deg, #00ff00, #00cc88);
+            color: #0c1220;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 10px 10px 0;
+        }
+
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 0, 0.3);
+        }
+
+        .test-results {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .status {
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .status.success {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            color: #00ff00;
+        }
+
+        .status.error {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            color: #ff4444;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            color: #00ffff;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0, 18, 35, 0.5);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 255, 255, 0.2);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(0, 255, 255, 0.3);
+        }
+
+        .demo-webhook {
+            background: rgba(255, 165, 0, 0.1);
+            border: 1px solid rgba(255, 165, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .endpoint-info {
+            background: rgba(0, 100, 200, 0.1);
+            border: 1px solid rgba(0, 100, 200, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <a href="/facebook-zapier-setup.html" class="back-button">← Back to Setup</a>
+    
+    <div class="container">
+        <div class="header">
+            <h1>Zapier Integration Testing</h1>
+            <p>Test Facebook Events API integration with real-time webhook processing</p>
+        </div>
+
+        <div class="content">
+            <div class="test-section">
+                <h3>1. Authentication Test</h3>
+                <p>Test Zapier authentication with MarketPace API</p>
+                
+                <div class="input-group">
+                    <label for="apiKey">API Key (demo: demo_api_key_12345):</label>
+                    <input type="text" id="apiKey" value="demo_api_key_12345" placeholder="Enter your MarketPace API key">
+                </div>
+                
+                <div class="input-group">
+                    <label for="facebookPageIdAuth">Facebook Page ID:</label>
+                    <input type="text" id="facebookPageIdAuth" value="123456789012345" placeholder="Your Facebook Page ID">
+                </div>
+                
+                <button class="test-button" onclick="testAuthentication()">Test Authentication</button>
+                <div id="authResults" class="test-results" style="display: none;"></div>
+            </div>
+
+            <div class="test-section">
+                <h3>2. Facebook Event Webhook Test</h3>
+                <p>Simulate a Facebook event being sent from Zapier to MarketPace</p>
+                
+                <div class="demo-webhook">
+                    <strong>Demo Event Data:</strong> This simulates a real Facebook event being imported via Zapier automation
+                </div>
+                
+                <button class="test-button" onclick="testWebhook()">Simulate Facebook Event Import</button>
+                <div id="webhookResults" class="test-results" style="display: none;"></div>
+            </div>
+
+            <div class="test-section">
+                <h3>3. Facebook Page Connection Test</h3>
+                <p>Test connecting a Facebook page to MarketPace for event sync</p>
+                
+                <div class="input-group">
+                    <label for="pageConnectionId">Facebook Page ID:</label>
+                    <input type="text" id="pageConnectionId" value="567890123456789" placeholder="Facebook Page ID">
+                </div>
+                
+                <div class="input-group">
+                    <label for="pageConnectionName">Page Name:</label>
+                    <input type="text" id="pageConnectionName" value="Gulf Coast Demo Events" placeholder="Page Name">
+                </div>
+                
+                <div class="input-group">
+                    <label for="webhookUrl">Zapier Webhook URL:</label>
+                    <input type="text" id="webhookUrl" value="https://hooks.zapier.com/hooks/catch/demo/webhook" placeholder="Zapier Webhook URL">
+                </div>
+                
+                <button class="test-button" onclick="testPageConnection()">Test Page Connection</button>
+                <div id="connectionResults" class="test-results" style="display: none;"></div>
+            </div>
+
+            <div class="test-section">
+                <h3>4. Event Retrieval Test</h3>
+                <p>Test retrieving Facebook events for a connected page</p>
+                
+                <div class="input-group">
+                    <label for="retrievalPageId">Facebook Page ID:</label>
+                    <input type="text" id="retrievalPageId" value="123456789012345" placeholder="Connected Page ID">
+                </div>
+                
+                <button class="test-button" onclick="testEventRetrieval()">Get Facebook Events</button>
+                <div id="retrievalResults" class="test-results" style="display: none;"></div>
+            </div>
+
+            <div class="test-section">
+                <h3>5. API Endpoint Information</h3>
+                <div class="endpoint-info">
+                    <p><strong>Base URL:</strong> https://workspace.ihavecreativeid.repl.co</p>
+                    <p><strong>Webhook Endpoint:</strong> /api/zapier/facebook-events/webhook</p>
+                    <p><strong>Auth Test Endpoint:</strong> /api/zapier/auth/test</p>
+                    <p><strong>Page Connection Endpoint:</strong> /api/zapier/connect-facebook-page</p>
+                    <p><strong>Event Retrieval:</strong> /api/zapier/facebook-pages/{pageId}/events</p>
+                </div>
+                
+                <button class="test-button" onclick="testAllEndpoints()">Test All Endpoints</button>
+                <div id="allResults" class="test-results" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function testAuthentication() {
+            const apiKey = document.getElementById('apiKey').value;
+            const pageId = document.getElementById('facebookPageIdAuth').value;
+            const resultsDiv = document.getElementById('authResults');
+            
+            resultsDiv.style.display = 'block';
+            resultsDiv.textContent = 'Testing authentication...';
+            
+            try {
+                const response = await fetch('/api/zapier/auth/test', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        api_key: apiKey,
+                        facebook_page_id: pageId
+                    })
+                });
+                
+                const result = await response.json();
+                resultsDiv.textContent = `Status: ${response.status}\n\n` + JSON.stringify(result, null, 2);
+                
+                if (result.success) {
+                    showStatus('Authentication successful!', 'success');
+                } else {
+                    showStatus('Authentication failed: ' + result.error, 'error');
+                }
+            } catch (error) {
+                resultsDiv.textContent = 'Error: ' + error.message;
+                showStatus('Authentication test failed', 'error');
+            }
+        }
+
+        async function testWebhook() {
+            const resultsDiv = document.getElementById('webhookResults');
+            resultsDiv.style.display = 'block';
+            resultsDiv.textContent = 'Simulating Facebook event webhook...';
+            
+            const demoEvent = {
+                event: {
+                    id: 'demo_fb_event_' + Date.now(),
+                    name: 'Orange Beach Summer Festival 2025',
+                    description: 'Join us for live music, local food vendors, and family fun at our annual summer festival!',
+                    start_time: '2025-07-25T18:00:00Z',
+                    end_time: '2025-07-25T23:00:00Z',
+                    location: 'Orange Beach Main Beach',
+                    place: { name: 'Orange Beach Amphitheater' },
+                    cover: { source: '/placeholder-festival.jpg' },
+                    ticket_uri: 'https://eventbrite.com/orange-beach-festival'
+                },
+                user_id: 'demo_user_1',
+                facebook_page_id: '123456789012345',
+                zapier_signature: 'zapier_demo_' + Date.now()
+            };
+            
+            try {
+                const response = await fetch('/api/zapier/facebook-events/webhook', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(demoEvent)
+                });
+                
+                const result = await response.json();
+                resultsDiv.textContent = `Status: ${response.status}\n\n` + JSON.stringify(result, null, 2);
+                
+                if (result.success) {
+                    showStatus('Facebook event imported successfully!', 'success');
+                } else {
+                    showStatus('Event import failed: ' + result.error, 'error');
+                }
+            } catch (error) {
+                resultsDiv.textContent = 'Error: ' + error.message;
+                showStatus('Webhook test failed', 'error');
+            }
+        }
+
+        async function testPageConnection() {
+            const pageId = document.getElementById('pageConnectionId').value;
+            const pageName = document.getElementById('pageConnectionName').value;
+            const webhookUrl = document.getElementById('webhookUrl').value;
+            const resultsDiv = document.getElementById('connectionResults');
+            
+            resultsDiv.style.display = 'block';
+            resultsDiv.textContent = 'Testing page connection...';
+            
+            try {
+                const response = await fetch('/api/zapier/connect-facebook-page', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: 'demo_user_1',
+                        facebook_page_id: pageId,
+                        page_name: pageName,
+                        zapier_webhook_url: webhookUrl
+                    })
+                });
+                
+                const result = await response.json();
+                resultsDiv.textContent = `Status: ${response.status}\n\n` + JSON.stringify(result, null, 2);
+                
+                if (result.success) {
+                    showStatus('Facebook page connected successfully!', 'success');
+                } else {
+                    showStatus('Page connection failed: ' + result.error, 'error');
+                }
+            } catch (error) {
+                resultsDiv.textContent = 'Error: ' + error.message;
+                showStatus('Page connection test failed', 'error');
+            }
+        }
+
+        async function testEventRetrieval() {
+            const pageId = document.getElementById('retrievalPageId').value;
+            const resultsDiv = document.getElementById('retrievalResults');
+            
+            resultsDiv.style.display = 'block';
+            resultsDiv.textContent = 'Retrieving Facebook events...';
+            
+            try {
+                const response = await fetch(`/api/zapier/facebook-pages/${pageId}/events?api_key=demo_api_key_12345`);
+                
+                const result = await response.json();
+                resultsDiv.textContent = `Status: ${response.status}\n\n` + JSON.stringify(result, null, 2);
+                
+                if (result.success) {
+                    showStatus(`Retrieved ${result.events.length} events successfully!`, 'success');
+                } else {
+                    showStatus('Event retrieval failed: ' + result.error, 'error');
+                }
+            } catch (error) {
+                resultsDiv.textContent = 'Error: ' + error.message;
+                showStatus('Event retrieval test failed', 'error');
+            }
+        }
+
+        async function testAllEndpoints() {
+            const resultsDiv = document.getElementById('allResults');
+            resultsDiv.style.display = 'block';
+            resultsDiv.textContent = 'Running comprehensive endpoint tests...\n\n';
+            
+            // Test 1: Authentication
+            try {
+                const authResponse = await fetch('/api/zapier/auth/test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ api_key: 'demo_api_key_12345', facebook_page_id: '123456789012345' })
+                });
+                const authResult = await authResponse.json();
+                resultsDiv.textContent += `✅ Authentication: ${authResult.success ? 'PASS' : 'FAIL'}\n`;
+            } catch (error) {
+                resultsDiv.textContent += `❌ Authentication: ERROR - ${error.message}\n`;
+            }
+            
+            // Test 2: Webhook
+            try {
+                const webhookResponse = await fetch('/api/zapier/facebook-events/webhook', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        event: { id: 'test_event', name: 'Test Event', description: 'Test', start_time: '2025-07-25T18:00:00Z' },
+                        user_id: 'demo_user_1',
+                        facebook_page_id: '123456789012345',
+                        zapier_signature: 'test_sig'
+                    })
+                });
+                const webhookResult = await webhookResponse.json();
+                resultsDiv.textContent += `✅ Webhook: ${webhookResult.success ? 'PASS' : 'FAIL'}\n`;
+            } catch (error) {
+                resultsDiv.textContent += `❌ Webhook: ERROR - ${error.message}\n`;
+            }
+            
+            // Test 3: Page Connection
+            try {
+                const connectionResponse = await fetch('/api/zapier/connect-facebook-page', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: 'demo_user_1',
+                        facebook_page_id: '987654321098765',
+                        page_name: 'Test Page',
+                        zapier_webhook_url: 'https://hooks.zapier.com/test'
+                    })
+                });
+                const connectionResult = await connectionResponse.json();
+                resultsDiv.textContent += `✅ Page Connection: ${connectionResult.success ? 'PASS' : 'FAIL'}\n`;
+            } catch (error) {
+                resultsDiv.textContent += `❌ Page Connection: ERROR - ${error.message}\n`;
+            }
+            
+            // Test 4: Event Retrieval
+            try {
+                const retrievalResponse = await fetch('/api/zapier/facebook-pages/123456789012345/events?api_key=demo_api_key_12345');
+                const retrievalResult = await retrievalResponse.json();
+                resultsDiv.textContent += `✅ Event Retrieval: ${retrievalResult.success ? 'PASS' : 'FAIL'}\n`;
+            } catch (error) {
+                resultsDiv.textContent += `❌ Event Retrieval: ERROR - ${error.message}\n`;
+            }
+            
+            resultsDiv.textContent += '\n🎉 All endpoint tests completed!';
+            showStatus('Comprehensive testing completed', 'success');
+        }
+
+        function showStatus(message, type) {
+            // Remove existing status messages
+            const existingStatus = document.querySelector('.status');
+            if (existingStatus) {
+                existingStatus.remove();
+            }
+            
+            // Create new status message
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            
+            // Insert after the header
+            const header = document.querySelector('.header');
+            header.insertAdjacentElement('afterend', statusDiv);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                statusDiv.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

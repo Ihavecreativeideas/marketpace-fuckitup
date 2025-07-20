@@ -22,6 +22,7 @@ import { tipRoutes } from './tipRoutes';
 import { subscriptionRoutes } from './subscriptionManager';
 import { subscriptionScheduler } from './subscriptionScheduler';
 import { sponsorManagementRoutes } from './sponsorManagement';
+import { zapierRouter } from './zapier-integration';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -2118,6 +2119,7 @@ registerDriverRoutes(app);
 // Setup Driver Application Routes
 registerDriverApplicationRoutes(app);
 app.use(socialMediaRoutes);
+app.use('/api/zapier', zapierRouter);
 
 // Add missing admin routes for driver applications
 app.get('/api/admin/driver-applications', async (req, res) => {

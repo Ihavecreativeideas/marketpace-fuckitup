@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Events Integration - MarketPace</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0c1220 0%, #001122 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(12, 18, 32, 0.8);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            backdrop-filter: blur(20px);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.1));
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            margin: 0 0 10px;
+            color: #00ffff;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .header p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .step {
+            background: rgba(0, 18, 35, 0.5);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(0, 255, 255, 0.2);
+            color: #00ffff;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .step h3 {
+            display: inline-block;
+            color: #00ffff;
+            margin: 0 0 15px;
+            vertical-align: top;
+        }
+
+        .step p {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            color: #00ffff;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        .zapier-button {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff6a00, #ff8c42);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 10px 0;
+        }
+
+        .zapier-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 106, 0, 0.3);
+        }
+
+        .facebook-button {
+            display: inline-block;
+            background: linear-gradient(45deg, #1877f2, #42a5f5);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 10px 0;
+        }
+
+        .facebook-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(24, 119, 242, 0.3);
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            color: #00ff00;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .warning {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .warning-icon {
+            color: #ffc107;
+            font-size: 18px;
+            margin-right: 8px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            color: #00ffff;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .input-group input, .input-group select, .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 18, 35, 0.5);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .connect-button {
+            background: linear-gradient(45deg, #00ff00, #00cc88);
+            color: #0c1220;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .connect-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 0, 0.3);
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .status.success {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            color: #00ff00;
+        }
+
+        .status.error {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            color: #ff4444;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 255, 255, 0.2);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(0, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a href="/local-event-calendar.html" class="back-button">← Back to Calendar</a>
+    
+    <div class="container">
+        <div class="header">
+            <h1>Facebook Events Integration</h1>
+            <p>Automatically sync your Facebook page events to MarketPace calendar</p>
+        </div>
+
+        <div class="content">
+            <div class="step">
+                <span class="step-number">1</span>
+                <h3>Benefits of Integration</h3>
+                <ul class="feature-list">
+                    <li>Automatic event synchronization from Facebook to MarketPace</li>
+                    <li>Cross-platform promotion reaches both Facebook and local audiences</li>
+                    <li>Real-time updates when events are modified on Facebook</li>
+                    <li>Preserve event details, images, and ticket links</li>
+                    <li>Increase local event visibility and attendance</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <h3>Set Up Zapier Account</h3>
+                <p>Zapier is the automation platform that connects Facebook to MarketPace. If you don't have an account yet:</p>
+                <a href="https://zapier.com/sign-up" target="_blank" class="zapier-button">Create Free Zapier Account</a>
+                <p><strong>Cost:</strong> Free tier includes 100 tasks/month (perfect for most local businesses)</p>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <h3>Connect Your Facebook Page</h3>
+                <div class="input-group">
+                    <label for="facebookPageId">Facebook Page ID:</label>
+                    <input type="text" id="facebookPageId" placeholder="e.g., 123456789012345">
+                    <small style="color: rgba(255,255,255,0.7);">Find this in your Facebook Page settings under "Page Info"</small>
+                </div>
+                
+                <div class="input-group">
+                    <label for="pageName">Page Name:</label>
+                    <input type="text" id="pageName" placeholder="e.g., Orange Beach Music Festival">
+                </div>
+
+                <div class="input-group">
+                    <label for="webhookUrl">Zapier Webhook URL:</label>
+                    <input type="url" id="webhookUrl" placeholder="https://hooks.zapier.com/hooks/catch/...">
+                    <small style="color: rgba(255,255,255,0.7);">Get this from your Zapier webhook trigger</small>
+                </div>
+
+                <button class="connect-button" onclick="connectFacebookPage()">Connect Facebook Page</button>
+                <div id="connectionStatus"></div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">4</span>
+                <h3>Create Zapier Automation</h3>
+                <p>Set up the automation workflow in Zapier:</p>
+                
+                <div class="code-block">
+<strong>Trigger:</strong> Facebook Pages → New Event
+<strong>Action:</strong> Webhooks → POST Request
+
+<strong>Webhook URL:</strong>
+https://workspace.ihavecreativeid.repl.co/api/zapier/facebook-events/webhook
+
+<strong>Payload (JSON):</strong>
+{
+  "event": {
+    "id": "{{event_id}}",
+    "name": "{{event_name}}",
+    "description": "{{event_description}}",
+    "start_time": "{{start_time}}",
+    "end_time": "{{end_time}}",
+    "location": "{{location}}",
+    "cover": {"source": "{{cover_photo}}"},
+    "ticket_uri": "{{ticket_link}}"
+  },
+  "user_id": "YOUR_MARKETPACE_USER_ID",
+  "facebook_page_id": "{{page_id}}",
+  "zapier_signature": "{{zap_meta_human_now}}"
+}
+                </div>
+                
+                <a href="https://zapier.com/apps/facebook-pages/integrations/webhook" target="_blank" class="zapier-button">Create Zapier Automation</a>
+            </div>
+
+            <div class="step">
+                <span class="step-number">5</span>
+                <h3>Test Integration</h3>
+                <p>After setting up your Zapier automation:</p>
+                <ul class="feature-list">
+                    <li>Create a test event on your Facebook page</li>
+                    <li>Wait 2-3 minutes for Zapier to process</li>
+                    <li>Check your MarketPace calendar for the imported event</li>
+                    <li>Verify event details, location, and links are correct</li>
+                </ul>
+                
+                <div class="warning">
+                    <span class="warning-icon">⚠️</span>
+                    <strong>Note:</strong> It may take up to 15 minutes for new events to appear in Zapier's trigger list.
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">6</span>
+                <h3>Troubleshooting</h3>
+                <p><strong>Common Issues:</strong></p>
+                <ul class="feature-list">
+                    <li><strong>Events not syncing:</strong> Check Zapier task history for errors</li>
+                    <li><strong>Missing event details:</strong> Ensure Facebook event has complete information</li>
+                    <li><strong>Webhook errors:</strong> Verify the webhook URL is correct and accessible</li>
+                    <li><strong>Facebook permissions:</strong> Ensure you have admin access to the Facebook page</li>
+                </ul>
+                
+                <p>Need help? Contact MarketPace support with your Zapier task ID and error details.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function connectFacebookPage() {
+            const pageId = document.getElementById('facebookPageId').value;
+            const pageName = document.getElementById('pageName').value;
+            const webhookUrl = document.getElementById('webhookUrl').value;
+            const statusDiv = document.getElementById('connectionStatus');
+
+            if (!pageId || !pageName || !webhookUrl) {
+                showStatus('Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                // Get current user ID from localStorage or session
+                const userId = localStorage.getItem('currentUserId') || 'demo_user_1';
+                
+                const response = await fetch('/api/zapier/connect-facebook-page', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        facebook_page_id: pageId,
+                        page_name: pageName,
+                        zapier_webhook_url: webhookUrl
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus('Facebook page connected successfully! You can now set up your Zapier automation.', 'success');
+                    
+                    // Clear form
+                    document.getElementById('facebookPageId').value = '';
+                    document.getElementById('pageName').value = '';
+                    document.getElementById('webhookUrl').value = '';
+                } else {
+                    showStatus('Connection failed: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Connection error:', error);
+                showStatus('Connection failed: Network error', 'error');
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('connectionStatus');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        // Auto-fill demo data for testing
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('demo') === 'true') {
+                document.getElementById('facebookPageId').value = '123456789012345';
+                document.getElementById('pageName').value = 'Orange Beach Events Demo';
+                document.getElementById('webhookUrl').value = 'https://hooks.zapier.com/hooks/catch/demo/webhook';
+            }
+        });
+    </script>
+</body>
+</html>
