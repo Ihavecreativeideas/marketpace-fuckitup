@@ -4786,7 +4786,7 @@
         }
 
         // Facebook Marketplace-style posting modal
-        function openAdvancedPostModal(type = 'general') {
+        function openAdvancedPostModal_OLD(type = 'general') {
             const modal = document.createElement('div');
             modal.style.cssText = `
                 position: fixed;
@@ -6337,9 +6337,8 @@
             showNotification('Reply posted!', 'success');
         }
 
-        // Add missing messageOwner function
+        // Add all missing functions for community page
         function messageOwner(sellerName, itemName, itemId) {
-            // Create and store conversation
             const conversations = JSON.parse(localStorage.getItem('marketpaceConversations') || '{}');
             const conversationId = `${sellerName}-${Date.now()}`;
             
@@ -6355,12 +6354,32 @@
             }
             
             localStorage.setItem('marketpaceConversations', JSON.stringify(conversations));
-            
-            // Show success and navigate
             showNotification(`Opening conversation with ${sellerName}`, 'success');
             setTimeout(() => {
                 window.location.href = '/messages';
             }, 1000);
+        }
+
+        function goToPage(page) {
+            const pageMap = {
+                'home': '/community',
+                'community': '/community',
+                'shops': '/shops',
+                'services': '/services',
+                'the-hub': '/the-hub',
+                'rentals': '/rentals',
+                'menu': '/marketpace-menu',
+                '/cart': '/cart',
+                '/settings': '/settings'
+            };
+            
+            const targetPage = pageMap[page] || page;
+            window.location.href = targetPage;
+        }
+
+        function selfPickup(itemName) {
+            showNotification(`Self pickup selected for ${itemName}`, 'success');
+            // Add self pickup logic here
         }
 
         // Reply to comment function
