@@ -941,11 +941,11 @@
             </h2>
 
             <div class="filter-tabs">
-                <div class="filter-tab active" onclick="filterEvents('all')">All Events</div>
-                <div class="filter-tab" onclick="filterEvents('festival')">Festivals</div>
-                <div class="filter-tab" onclick="filterEvents('market')">Markets</div>
-                <div class="filter-tab" onclick="filterEvents('music')">Music</div>
-                <div class="filter-tab" onclick="filterEvents('community')">Community</div>
+                <div class="filter-tab active" onclick="updateCategory('all')">All Events</div>
+                <div class="filter-tab" onclick="updateCategory('festival')">Festivals</div>
+                <div class="filter-tab" onclick="updateCategory('market')">Markets</div>
+                <div class="filter-tab" onclick="updateCategory('music')">Music</div>
+                <div class="filter-tab" onclick="updateCategory('community')">Community</div>
             </div>
 
             <div id="eventsList">
@@ -1078,8 +1078,8 @@
 
         function filterEvents() {
             const filteredEvents = events.filter(event => {
-                // Filter by category
-                if (selectedFilter !== 'all' && event.category !== selectedFilter) {
+                // Filter by category (check both 'category' and 'type' fields for compatibility)
+                if (selectedFilter !== 'all' && event.category !== selectedFilter && event.type !== selectedFilter) {
                     return false;
                 }
                 
@@ -1105,14 +1105,16 @@
             const eventsContainer = document.getElementById('eventsList');
             if (!eventsContainer) return;
             
-            eventsContainer.innerHTML = eventList.map(event => `
-                <div class="event-card" data-category="${event.category}">
+            eventsContainer.innerHTML = eventList.map(event => {
+                const eventType = event.category || event.type || 'community';
+                return `
+                <div class="event-card" data-category="${eventType}">
                     <div class="event-header">
                         <div>
                             <div class="event-title">${event.title}</div>
                             <div class="event-meta">${event.date} • ${event.time} • ${event.distance}</div>
                         </div>
-                        <span class="event-type event-${event.category}">${event.category}</span>
+                        <span class="event-type event-${eventType}">${eventType}</span>
                     </div>
                     <p style="color: rgba(255,255,255,0.8); margin: 10px 0;">${event.description}</p>
                     <p style="color: #00ffff; font-size: 0.9rem;">📍 ${event.location}</p>
@@ -1126,7 +1128,8 @@
                         </button>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function viewEventDetails(eventId) {
@@ -1430,7 +1433,7 @@
         }
 
         function matchesCurrentFilters(event) {
-            if (currentCategory !== 'all' && event.type !== currentCategory) {
+            if (selectedFilter !== 'all' && event.type !== selectedFilter && event.category !== selectedFilter) {
                 return false;
             }
             return true;
@@ -1687,11 +1690,26 @@
         function updateCategory(category) {
             selectedFilter = category;
             
-            // Update button states
+            // Update main filter button states
             document.querySelectorAll('.category-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            document.querySelector(`[data-category="${category}"]`).classList.add('active');
+            const mainCategoryBtn = document.querySelector(`[data-category="${category}"]`);
+            if (mainCategoryBtn) {
+                mainCategoryBtn.classList.add('active');
+            }
+            
+            // Update upcoming events filter tab states
+            document.querySelectorAll('.filter-tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const filterTabs = document.querySelectorAll('.filter-tab');
+            filterTabs.forEach(tab => {
+                if (tab.textContent.toLowerCase().includes(category.toLowerCase()) || 
+                    (category === 'all' && tab.textContent.includes('All Events'))) {
+                    tab.classList.add('active');
+                }
+            });
             
             filterEvents();
             generateCalendar();
