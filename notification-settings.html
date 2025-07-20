@@ -436,11 +436,30 @@
                 document.getElementById('smsPurchase').checked = settings.smsPurchase !== false;
                 document.getElementById('smsUrgent').checked = settings.smsUrgent === true;
                 
-                // Set phone number
+                // Set phone number with proper formatting
                 if (settings.phoneNumber) {
-                    document.getElementById('phoneNumber').value = settings.phoneNumber;
+                    const phoneInput = document.getElementById('phoneNumber');
+                    phoneInput.value = formatPhoneNumber(settings.phoneNumber);
                 }
             }
+        }
+
+        function formatPhoneNumber(phone) {
+            // Clean phone number to digits only
+            let digits = phone.replace(/\D/g, '');
+            
+            // If it starts with 1, keep it; otherwise assume US number and add 1
+            if (digits.length === 10) {
+                digits = '1' + digits;
+            }
+            
+            // Format as +1 (XXX) XXX-XXXX
+            if (digits.length === 11 && digits[0] === '1') {
+                return '+1 (' + digits.slice(1, 4) + ') ' + digits.slice(4, 7) + '-' + digits.slice(7, 11);
+            }
+            
+            // Return original if can't format
+            return phone;
         }
 
         function setupFrequencyButtons() {
@@ -500,11 +519,20 @@
 
         async function optInToSMS(phoneNumber) {
             try {
+                // Clean phone number for API - remove formatting and ensure E.164 format
+                let cleanPhone = phoneNumber.replace(/\D/g, '');
+                if (cleanPhone.length === 10) {
+                    cleanPhone = '1' + cleanPhone;
+                }
+                if (cleanPhone.length === 11 && cleanPhone[0] === '1') {
+                    cleanPhone = '+' + cleanPhone;
+                }
+
                 const response = await fetch('/api/sms/opt-in', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        phoneNumber: phoneNumber,
+                        phoneNumber: cleanPhone,
                         consent: true
                     })
                 });
@@ -518,6 +546,7 @@
                 }
             } catch (error) {
                 console.error('SMS opt-in error:', error);
+                showStatusMessage('Error enabling SMS notifications. Please try again.', 'error');
             }
         }
 
@@ -536,11 +565,24 @@
         // Format phone number as user types
         document.getElementById('phoneNumber').addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
-            if (value.length >= 1) value = '+1 ' + value.slice(1);
-            if (value.length >= 6) value = value.slice(0, 6) + '(' + value.slice(6);
-            if (value.length >= 10) value = value.slice(0, 10) + ') ' + value.slice(10);
-            if (value.length >= 15) value = value.slice(0, 15) + '-' + value.slice(15, 19);
-            e.target.value = value;
+            
+            // Limit to 11 digits (1 + 10 digit phone number)
+            if (value.length > 11) {
+                value = value.slice(0, 11);
+            }
+            
+            // Format based on length
+            if (value.length === 0) {
+                e.target.value = '';
+            } else if (value.length <= 1) {
+                e.target.value = '+1';
+            } else if (value.length <= 4) {
+                e.target.value = '+1 (' + value.slice(1);
+            } else if (value.length <= 7) {
+                e.target.value = '+1 (' + value.slice(1, 4) + ') ' + value.slice(4);
+            } else {
+                e.target.value = '+1 (' + value.slice(1, 4) + ') ' + value.slice(4, 7) + '-' + value.slice(7, 11);
+            }
         });
 
         console.log('Notification Settings page loaded');
