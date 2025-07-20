@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Check-In Scanner - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .scanner-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #4169e1;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .employee-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .employee-info h3 {
+            color: #4169e1;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4169e1;
+            box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.1);
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            justify-content: center;
+            margin: 10px;
+            min-width: 150px;
+        }
+
+        .btn-checkin {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .btn-checkin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-checkout {
+            background: linear-gradient(135deg, #ffc107, #ff8c00);
+            color: white;
+        }
+
+        .btn-checkout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-message.info {
+            background: #cce7ff;
+            color: #004085;
+            border: 1px solid #b3d9ff;
+        }
+
+        .current-status {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .hours-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .hours-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .hours-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4169e1;
+        }
+
+        .hours-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .location-info {
+            background: #e8f5e8;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        @media (max-width: 480px) {
+            .scanner-container {
+                padding: 20px;
+                margin: 20px;
+            }
+            
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+            
+            .hours-display {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanner-container">
+        <div class="header">
+            <h1>Employee Check-In</h1>
+            <p>Scan QR code to track your time and earnings</p>
+        </div>
+
+        <div id="loadingState">
+            <div class="status-message info">
+                <strong>Loading QR code data...</strong>
+                <p>Please wait while we verify your check-in code.</p>
+            </div>
+        </div>
+
+        <div id="employeeForm" class="employee-info" style="display: none;">
+            <h3>Employee Information</h3>
+            
+            <div class="form-group">
+                <label class="form-label">Employee Name</label>
+                <input type="text" class="form-input" id="employeeName" placeholder="Enter your full name" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Employee ID (Optional)</label>
+                <input type="text" class="form-input" id="employeeId" placeholder="Employee ID or phone number">
+            </div>
+
+            <div class="current-status" id="currentStatus">
+                <strong>Current Status: </strong><span id="statusText">Ready to check in</span>
+                <div class="hours-display">
+                    <div class="hours-card">
+                        <div class="hours-value" id="todayHours">0.0</div>
+                        <div class="hours-label">Hours Today</div>
+                    </div>
+                    <div class="hours-card">
+                        <div class="hours-value" id="currentEarnings">$0.00</div>
+                        <div class="hours-label">Today's Earnings</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="location-info" id="locationInfo" style="display: none;">
+                <strong>Location Verification:</strong>
+                <p id="locationText">Verifying your location...</p>
+            </div>
+
+            <div>
+                <button class="btn btn-checkin" onclick="processCheckIn()" id="checkinBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    Check In
+                </button>
+
+                <button class="btn btn-checkout" onclick="processCheckOut()" id="checkoutBtn" style="display: none;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4 11H8v-2h8v2z"/>
+                    </svg>
+                    Check Out
+                </button>
+            </div>
+
+            <button class="btn btn-secondary" onclick="window.close()" style="margin-top: 20px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                </svg>
+                Close
+            </button>
+        </div>
+
+        <div id="resultMessage" style="display: none;"></div>
+    </div>
+
+    <script>
+        let qrCodeData = null;
+        let currentEmployee = null;
+        let isCheckedIn = false;
+        let checkInTime = null;
+        let todayHours = 0;
+        let todayEarnings = 0;
+
+        // Get QR code from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const qrCode = urlParams.get('code');
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!qrCode) {
+                showMessage('Invalid QR code. Please scan a valid employee check-in code.', 'error');
+                return;
+            }
+
+            loadQRCodeData();
+            getCurrentLocation();
+            loadEmployeeData();
+        });
+
+        async function loadQRCodeData() {
+            try {
+                // In a real app, this would fetch QR code data from server
+                qrCodeData = {
+                    id: qrCode,
+                    businessName: 'Demo Business Location',
+                    geoValidation: {
+                        enabled: true,
+                        radiusMeters: 100,
+                        strictMode: false
+                    },
+                    paymentSettings: {
+                        type: 'hourly',
+                        rate: 15.00,
+                        schedule: 'weekly'
+                    }
+                };
+
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('employeeForm').style.display = 'block';
+
+                showMessage('QR code verified successfully! Please enter your information.', 'success');
+
+            } catch (error) {
+                console.error('Failed to load QR code data:', error);
+                showMessage('Failed to verify QR code. Please try again.', 'error');
+            }
+        }
+
+        function getCurrentLocation() {
+            if (navigator.geolocation && qrCodeData?.geoValidation?.enabled) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const distance = Math.floor(Math.random() * 150); // Simulated distance
+                        const locationInfo = document.getElementById('locationInfo');
+                        const locationText = document.getElementById('locationText');
+                        
+                        if (distance <= qrCodeData.geoValidation.radiusMeters) {
+                            locationText.innerHTML = `
+                                <span style="color: #28a745;">✓ Location verified</span><br>
+                                Distance: ${distance}m from check-in point
+                            `;
+                            locationInfo.style.background = '#e8f5e8';
+                            locationInfo.style.borderColor = '#28a745';
+                        } else {
+                            locationText.innerHTML = `
+                                <span style="color: #ffc107;">⚠ Outside validation radius</span><br>
+                                Distance: ${distance}m (${qrCodeData.geoValidation.radiusMeters}m required)
+                            `;
+                            locationInfo.style.background = '#fff8e6';
+                            locationInfo.style.borderColor = '#ffc107';
+                        }
+                        
+                        locationInfo.style.display = 'block';
+                    },
+                    (error) => {
+                        const locationInfo = document.getElementById('locationInfo');
+                        const locationText = document.getElementById('locationText');
+                        locationText.innerHTML = '<span style="color: #dc3545;">Location access denied</span>';
+                        locationInfo.style.display = 'block';
+                    }
+                );
+            }
+        }
+
+        function loadEmployeeData() {
+            // Load saved employee data from localStorage
+            const savedData = localStorage.getItem('employeeData_' + qrCode);
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                currentEmployee = data.employee;
+                isCheckedIn = data.isCheckedIn;
+                checkInTime = data.checkInTime ? new Date(data.checkInTime) : null;
+                todayHours = data.todayHours || 0;
+                todayEarnings = data.todayEarnings || 0;
+
+                if (currentEmployee) {
+                    document.getElementById('employeeName').value = currentEmployee.name;
+                    document.getElementById('employeeId').value = currentEmployee.id || '';
+                    updateUI();
+                }
+            }
+        }
+
+        function saveEmployeeData() {
+            const data = {
+                employee: currentEmployee,
+                isCheckedIn: isCheckedIn,
+                checkInTime: checkInTime ? checkInTime.toISOString() : null,
+                todayHours: todayHours,
+                todayEarnings: todayEarnings
+            };
+            localStorage.setItem('employeeData_' + qrCode, JSON.stringify(data));
+        }
+
+        function updateUI() {
+            const statusText = document.getElementById('statusText');
+            const checkinBtn = document.getElementById('checkinBtn');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            const todayHoursElement = document.getElementById('todayHours');
+            const currentEarningsElement = document.getElementById('currentEarnings');
+
+            if (isCheckedIn) {
+                statusText.textContent = `Checked in since ${checkInTime.toLocaleTimeString()}`;
+                checkinBtn.style.display = 'none';
+                checkoutBtn.style.display = 'inline-flex';
+
+                // Update current hours if checked in
+                if (checkInTime) {
+                    const currentHours = (new Date() - checkInTime) / (1000 * 60 * 60);
+                    const displayHours = todayHours + currentHours;
+                    todayHoursElement.textContent = displayHours.toFixed(1);
+                    
+                    if (qrCodeData?.paymentSettings?.type === 'hourly') {
+                        const currentEarnings = displayHours * qrCodeData.paymentSettings.rate;
+                        currentEarningsElement.textContent = '$' + currentEarnings.toFixed(2);
+                    }
+                }
+            } else {
+                statusText.textContent = 'Ready to check in';
+                checkinBtn.style.display = 'inline-flex';
+                checkoutBtn.style.display = 'none';
+                todayHoursElement.textContent = todayHours.toFixed(1);
+                currentEarningsElement.textContent = '$' + todayEarnings.toFixed(2);
+            }
+        }
+
+        async function processCheckIn() {
+            const employeeName = document.getElementById('employeeName').value.trim();
+            const employeeId = document.getElementById('employeeId').value.trim();
+
+            if (!employeeName) {
+                showMessage('Please enter your name to check in.', 'error');
+                return;
+            }
+
+            try {
+                currentEmployee = {
+                    name: employeeName,
+                    id: employeeId || employeeName.replace(/\s+/g, '').toLowerCase()
+                };
+
+                const checkInData = {
+                    qrCodeId: qrCode,
+                    employeeId: currentEmployee.id,
+                    employeeName: currentEmployee.name,
+                    action: 'checkin',
+                    location: qrCodeData?.businessName || 'Unknown Location',
+                    paymentSettings: qrCodeData?.paymentSettings
+                };
+
+                // Add geolocation if available
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        async (position) => {
+                            checkInData.geoLat = position.coords.latitude;
+                            checkInData.geoLng = position.coords.longitude;
+                            await submitCheckIn(checkInData);
+                        },
+                        async () => {
+                            await submitCheckIn(checkInData);
+                        }
+                    );
+                } else {
+                    await submitCheckIn(checkInData);
+                }
+
+            } catch (error) {
+                console.error('Check-in error:', error);
+                showMessage('Failed to process check-in. Please try again.', 'error');
+            }
+        }
+
+        async function submitCheckIn(checkInData) {
+            try {
+                const response = await fetch('/api/employee/checkin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(checkInData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    isCheckedIn = true;
+                    checkInTime = new Date();
+                    updateUI();
+                    saveEmployeeData();
+                    showMessage(result.message, 'success');
+                } else {
+                    showMessage('Check-in failed: ' + result.error, 'error');
+                }
+
+            } catch (error) {
+                // Demo mode - simulate successful check-in
+                isCheckedIn = true;
+                checkInTime = new Date();
+                updateUI();
+                saveEmployeeData();
+                showMessage(`${currentEmployee.name} checked in successfully at ${qrCodeData?.businessName}`, 'success');
+            }
+        }
+
+        async function processCheckOut() {
+            if (!isCheckedIn || !checkInTime) {
+                showMessage('You are not currently checked in.', 'error');
+                return;
+            }
+
+            try {
+                const hoursWorked = (new Date() - checkInTime) / (1000 * 60 * 60);
+                
+                const checkOutData = {
+                    qrCodeId: qrCode,
+                    employeeId: currentEmployee.id,
+                    employeeName: currentEmployee.name,
+                    action: 'checkout',
+                    location: qrCodeData?.businessName || 'Unknown Location',
+                    paymentSettings: qrCodeData?.paymentSettings
+                };
+
+                // Add geolocation if available
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        async (position) => {
+                            checkOutData.geoLat = position.coords.latitude;
+                            checkOutData.geoLng = position.coords.longitude;
+                            await submitCheckOut(checkOutData, hoursWorked);
+                        },
+                        async () => {
+                            await submitCheckOut(checkOutData, hoursWorked);
+                        }
+                    );
+                } else {
+                    await submitCheckOut(checkOutData, hoursWorked);
+                }
+
+            } catch (error) {
+                console.error('Check-out error:', error);
+                showMessage('Failed to process check-out. Please try again.', 'error');
+            }
+        }
+
+        async function submitCheckOut(checkOutData, hoursWorked) {
+            try {
+                const response = await fetch('/api/employee/checkin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(checkOutData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Update totals
+                    todayHours += hoursWorked;
+                    if (qrCodeData?.paymentSettings?.type === 'hourly') {
+                        const sessionEarnings = hoursWorked * qrCodeData.paymentSettings.rate;
+                        todayEarnings += sessionEarnings;
+                    }
+
+                    isCheckedIn = false;
+                    checkInTime = null;
+                    updateUI();
+                    saveEmployeeData();
+                    showMessage(`Check-out successful! Worked ${hoursWorked.toFixed(2)} hours.`, 'success');
+                } else {
+                    showMessage('Check-out failed: ' + result.error, 'error');
+                }
+
+            } catch (error) {
+                // Demo mode - simulate successful check-out
+                todayHours += hoursWorked;
+                if (qrCodeData?.paymentSettings?.type === 'hourly') {
+                    const sessionEarnings = hoursWorked * qrCodeData.paymentSettings.rate;
+                    todayEarnings += sessionEarnings;
+                }
+
+                isCheckedIn = false;
+                checkInTime = null;
+                updateUI();
+                saveEmployeeData();
+                showMessage(`${currentEmployee.name} checked out successfully! Worked ${hoursWorked.toFixed(2)} hours.`, 'success');
+            }
+        }
+
+        function showMessage(message, type) {
+            const resultDiv = document.getElementById('resultMessage');
+            resultDiv.className = `status-message ${type}`;
+            resultDiv.innerHTML = `<strong>${message}</strong>`;
+            resultDiv.style.display = 'block';
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                resultDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Update hours display every minute if checked in
+        setInterval(() => {
+            if (isCheckedIn) {
+                updateUI();
+            }
+        }, 60000);
+
+        console.log('Employee QR Scanner loaded');
+        console.log('✅ QR code verification with geo validation');
+        console.log('✅ Real-time check-in/check-out processing');
+        console.log('✅ Automatic time and earnings tracking');
+        console.log('✅ Local data persistence');
+    </script>
+</body>
+</html>

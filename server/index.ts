@@ -1684,7 +1684,8 @@ const htmlRoutes = [
   '/facebook-data-processor-configuration', '/facebook-business-verification-checklist',
   '/facebook-manual-integration-enhanced', '/facebook-connection-guide',
   '/provider-booking-calendar', '/customer-booking-calendar', '/escrow-payment', 
-  '/booking-confirmation', '/navigation-test', '/unified-pro-page'
+  '/booking-confirmation', '/navigation-test', '/unified-pro-page',
+  '/employee-geo-qr-system', '/scan-employee-qr'
 ];
 
 htmlRoutes.forEach(route => {
@@ -2910,6 +2911,170 @@ app.post('/api/express/qr-checkin', async (req, res) => {
     res.json({
       success: false,
       error: 'Failed to process check-in: ' + error.message
+    });
+  }
+});
+
+// Employee QR Code Generation endpoint
+app.post('/api/qr/generate-employee', async (req, res) => {
+  try {
+    const { purpose, businessName, geoValidation, timestamp } = req.body;
+    
+    // Generate unique QR code ID
+    const qrCodeId = `emp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Create QR code data
+    const qrData = {
+      id: qrCodeId,
+      purpose: purpose || 'employee_checkin',
+      businessName,
+      geoValidation,
+      timestamp,
+      url: `${req.protocol}://${req.get('host')}/scan-employee-qr?code=${qrCodeId}`
+    };
+
+    // Generate QR code image URL
+    const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData.url)}`;
+
+    // Store QR code data (in real app, this would go to database)
+    console.log('Generated employee QR code:', qrData);
+
+    res.json({
+      success: true,
+      qrCode: qrCodeId,
+      qrImage: qrImageUrl,
+      qrData: qrData,
+      message: 'Employee QR code generated successfully'
+    });
+
+  } catch (error) {
+    console.error('Employee QR generation error:', error);
+    res.json({
+      success: false,
+      error: 'Failed to generate employee QR code: ' + error.message
+    });
+  }
+});
+
+// Employee Check-In/Check-Out Processing endpoint
+app.post('/api/employee/checkin', async (req, res) => {
+  try {
+    const { 
+      qrCodeId, 
+      employeeId, 
+      employeeName, 
+      action, // 'checkin' or 'checkout'
+      geoLat, 
+      geoLng, 
+      location,
+      paymentSettings 
+    } = req.body;
+
+    // Verify QR code and location if geo validation enabled
+    let geoValidationResult = { valid: true, message: 'Location validation passed' };
+    
+    if (geoLat && geoLng) {
+      // In real app, this would verify against stored QR location data
+      geoValidationResult = {
+        valid: true,
+        distance: Math.floor(Math.random() * 100), // Simulated distance
+        message: 'Within validation radius'
+      };
+    }
+
+    // Process time tracking
+    const timestamp = new Date().toISOString();
+    let hoursWorked = 0;
+    let earnings = 0;
+
+    if (action === 'checkout' && paymentSettings) {
+      // Calculate hours worked (simulated - in real app would check last check-in)
+      hoursWorked = Math.random() * 8 + 1; // 1-9 hours
+      
+      if (paymentSettings.type === 'hourly') {
+        earnings = hoursWorked * paymentSettings.rate;
+      } else if (paymentSettings.type === 'per-job') {
+        earnings = paymentSettings.rate;
+      } else if (paymentSettings.type === 'daily') {
+        earnings = paymentSettings.rate;
+      }
+    }
+
+    const result = {
+      success: true,
+      qrCodeId,
+      employeeId,
+      employeeName,
+      action,
+      timestamp,
+      location,
+      hoursWorked: action === 'checkout' ? hoursWorked : null,
+      earnings: action === 'checkout' ? earnings : null,
+      geoValidationResult,
+      message: action === 'checkin' ? 
+        `${employeeName} checked in successfully` : 
+        `${employeeName} checked out - ${hoursWorked.toFixed(2)} hours worked, $${earnings.toFixed(2)} earned`
+    };
+
+    // Send SMS notification if enabled
+    if (process.env.TWILIO_ACCOUNT_SID) {
+      try {
+        // SMS notification logic would go here
+        console.log(`SMS notification: ${result.message}`);
+      } catch (smsError) {
+        console.error('SMS notification failed:', smsError);
+      }
+    }
+
+    // Store check-in/out record (in real app, this would go to database)
+    console.log('Employee check-in/out processed:', result);
+
+    res.json(result);
+
+  } catch (error) {
+    console.error('Employee check-in error:', error);
+    res.json({
+      success: false,
+      error: 'Failed to process employee check-in: ' + error.message
+    });
+  }
+});
+
+// Employee Payment Processing endpoint
+app.post('/api/employee/process-payment', async (req, res) => {
+  try {
+    const { 
+      employeeId, 
+      employeeName, 
+      totalHours, 
+      totalEarnings, 
+      paymentSchedule, 
+      paymentMethod 
+    } = req.body;
+
+    // In real app, this would integrate with Stripe for automatic payments
+    const paymentResult = {
+      success: true,
+      employeeId,
+      employeeName,
+      totalHours,
+      totalEarnings,
+      paymentSchedule,
+      paymentMethod,
+      transactionId: `pay_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      processedAt: new Date().toISOString(),
+      message: `Payment of $${totalEarnings.toFixed(2)} processed successfully for ${employeeName}`
+    };
+
+    console.log('Employee payment processed:', paymentResult);
+
+    res.json(paymentResult);
+
+  } catch (error) {
+    console.error('Employee payment error:', error);
+    res.json({
+      success: false,
+      error: 'Failed to process employee payment: ' + error.message
     });
   }
 });

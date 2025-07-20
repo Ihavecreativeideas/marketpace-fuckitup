@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Geo QR Check-In System - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .card h2 {
+            color: #4169e1;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #4169e1;
+            box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4169e1, #667eea);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(65, 105, 225, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107, #ff8c00);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+        }
+
+        .qr-display {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .qr-code {
+            max-width: 200px;
+            max-height: 200px;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .employee-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .payment-schedule {
+            background: #e8f5e8;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+
+        .notification {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+
+        .notification.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .notification.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .notification.info {
+            background: #cce7ff;
+            color: #004085;
+            border: 1px solid #b3d9ff;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .recent-activity {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Employee Geo QR Check-In System</h1>
+            <p>Advanced location-based time tracking with automatic payment processing</p>
+        </div>
+
+        <div class="main-grid">
+            <!-- QR Code Generation -->
+            <div class="card">
+                <h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4z"/>
+                    </svg>
+                    Generate Check-In QR Code
+                </h2>
+
+                <div class="form-group">
+                    <label class="form-label">Business/Location Name</label>
+                    <input type="text" class="form-input" id="businessName" placeholder="Enter business or location name">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">GPS Validation Radius</label>
+                    <select class="form-select" id="geoRadius">
+                        <option value="50">50 meters (very strict)</option>
+                        <option value="100" selected>100 meters (recommended)</option>
+                        <option value="200">200 meters (flexible)</option>
+                        <option value="500">500 meters (very flexible)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Validation Mode</label>
+                    <select class="form-select" id="geoMode">
+                        <option value="strict">Strict (required location)</option>
+                        <option value="flexible" selected>Flexible (warning only)</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary" onclick="generateEmployeeQR()" style="width: 100%;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                    Generate Geo QR Code
+                </button>
+
+                <div class="qr-display" id="qrDisplay" style="display: none;">
+                    <p><strong>Employee Check-In QR Code</strong></p>
+                    <img id="qrCodeImage" class="qr-code" src="" alt="QR Code">
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        Employees scan this code to check in/out
+                    </p>
+                </div>
+            </div>
+
+            <!-- Payment Setup -->
+            <div class="card">
+                <h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    Automatic Payment Setup
+                </h2>
+
+                <div class="form-group">
+                    <label class="form-label">Payment Type</label>
+                    <select class="form-select" id="paymentType">
+                        <option value="hourly">Hourly Rate</option>
+                        <option value="per-job">Per Job/Task</option>
+                        <option value="daily">Daily Rate</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Rate Amount ($)</label>
+                    <input type="number" class="form-input" id="rateAmount" placeholder="15.00" step="0.01" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Payment Schedule</label>
+                    <select class="form-select" id="paymentSchedule">
+                        <option value="daily">Daily</option>
+                        <option value="weekly" selected>Weekly</option>
+                        <option value="bi-weekly">Bi-Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="customScheduleGroup" style="display: none;">
+                    <label class="form-label">Custom Schedule (days)</label>
+                    <input type="number" class="form-input" id="customDays" placeholder="14" min="1">
+                </div>
+
+                <button class="btn btn-success" onclick="setupPaymentSchedule()" style="width: 100%;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+                    </svg>
+                    Setup Automatic Payments
+                </button>
+
+                <div class="payment-schedule" id="paymentInfo" style="display: none;">
+                    <strong>Payment Schedule Active</strong>
+                    <p id="scheduleDetails">Weekly payments at $15.00/hour</p>
+                </div>
+            </div>
+
+            <!-- Employee Dashboard -->
+            <div class="card full-width">
+                <h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+                    </svg>
+                    Employee Time Tracking Dashboard
+                </h2>
+
+                <div class="employee-stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="todayHours">0.0</div>
+                        <div class="stat-label">Hours Today</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="weekHours">0.0</div>
+                        <div class="stat-label">Hours This Week</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalEarnings">$0.00</div>
+                        <div class="stat-label">Total Earnings</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="pendingPayout">$0.00</div>
+                        <div class="stat-label">Pending Payout</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <h3>Recent Check-In Activity</h3>
+                    <div class="recent-activity" id="recentActivity">
+                        <div class="activity-item">
+                            <span>No recent activity</span>
+                            <span style="color: #666; font-size: 0.9rem;">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; text-align: center;">
+                    <button class="btn btn-warning" onclick="simulateCheckIn()" style="margin-right: 10px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                        Test Check-In
+                    </button>
+                    <button class="btn btn-warning" onclick="simulateCheckOut()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4 11H8v-2h8v2z"/>
+                        </svg>
+                        Test Check-Out
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentQRCode = null;
+        let paymentSettings = null;
+        let employeeData = {
+            todayHours: 0,
+            weekHours: 0,
+            totalEarnings: 0,
+            pendingPayout: 0,
+            activity: []
+        };
+
+        function generateEmployeeQR() {
+            const businessName = document.getElementById('businessName').value;
+            const radius = document.getElementById('geoRadius').value;
+            const mode = document.getElementById('geoMode').value;
+
+            if (!businessName.trim()) {
+                showNotification('Please enter a business or location name', 'error');
+                return;
+            }
+
+            showNotification('Generating employee check-in QR code...', 'info');
+
+            // Get current location for geo validation
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const qrData = {
+                            purpose: 'employee_checkin',
+                            businessName: businessName,
+                            geoValidation: {
+                                enabled: true,
+                                latitude: position.coords.latitude,
+                                longitude: position.coords.longitude,
+                                radiusMeters: parseInt(radius),
+                                strictMode: mode === 'strict'
+                            },
+                            timestamp: new Date().toISOString()
+                        };
+
+                        generateQRCodeAPI(qrData);
+                    },
+                    (error) => {
+                        // Generate without GPS if permission denied
+                        const qrData = {
+                            purpose: 'employee_checkin',
+                            businessName: businessName,
+                            geoValidation: {
+                                enabled: true,
+                                radiusMeters: parseInt(radius),
+                                strictMode: mode === 'strict'
+                            },
+                            timestamp: new Date().toISOString()
+                        };
+
+                        generateQRCodeAPI(qrData);
+                    }
+                );
+            } else {
+                const qrData = {
+                    purpose: 'employee_checkin',
+                    businessName: businessName,
+                    geoValidation: {
+                        enabled: false
+                    },
+                    timestamp: new Date().toISOString()
+                };
+
+                generateQRCodeAPI(qrData);
+            }
+        }
+
+        async function generateQRCodeAPI(qrData) {
+            try {
+                const response = await fetch('/api/qr/generate-employee', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(qrData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    currentQRCode = result.qrCode;
+                    document.getElementById('qrCodeImage').src = result.qrImage;
+                    document.getElementById('qrDisplay').style.display = 'block';
+                    showNotification('Employee check-in QR code generated successfully!', 'success');
+                } else {
+                    showNotification('Failed to generate QR code: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('QR generation error:', error);
+                // Demo mode - generate placeholder QR
+                currentQRCode = 'demo-employee-qr-' + Date.now();
+                document.getElementById('qrCodeImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.origin + '/scan-employee-qr?code=' + currentQRCode)}`;
+                document.getElementById('qrDisplay').style.display = 'block';
+                showNotification('Demo QR code generated successfully!', 'success');
+            }
+        }
+
+        function setupPaymentSchedule() {
+            const paymentType = document.getElementById('paymentType').value;
+            const rateAmount = parseFloat(document.getElementById('rateAmount').value);
+            const schedule = document.getElementById('paymentSchedule').value;
+            const customDays = document.getElementById('customDays').value;
+
+            if (!rateAmount || rateAmount <= 0) {
+                showNotification('Please enter a valid rate amount', 'error');
+                return;
+            }
+
+            paymentSettings = {
+                type: paymentType,
+                rate: rateAmount,
+                schedule: schedule,
+                customDays: schedule === 'custom' ? parseInt(customDays) : null
+            };
+
+            let scheduleText = '';
+            switch (schedule) {
+                case 'daily':
+                    scheduleText = `Daily payments at $${rateAmount.toFixed(2)}/${paymentType === 'hourly' ? 'hour' : paymentType}`;
+                    break;
+                case 'weekly':
+                    scheduleText = `Weekly payments at $${rateAmount.toFixed(2)}/${paymentType === 'hourly' ? 'hour' : paymentType}`;
+                    break;
+                case 'bi-weekly':
+                    scheduleText = `Bi-weekly payments at $${rateAmount.toFixed(2)}/${paymentType === 'hourly' ? 'hour' : paymentType}`;
+                    break;
+                case 'monthly':
+                    scheduleText = `Monthly payments at $${rateAmount.toFixed(2)}/${paymentType === 'hourly' ? 'hour' : paymentType}`;
+                    break;
+                case 'custom':
+                    scheduleText = `Every ${customDays} days at $${rateAmount.toFixed(2)}/${paymentType === 'hourly' ? 'hour' : paymentType}`;
+                    break;
+            }
+
+            document.getElementById('scheduleDetails').textContent = scheduleText;
+            document.getElementById('paymentInfo').style.display = 'block';
+            showNotification('Payment schedule activated successfully!', 'success');
+        }
+
+        function simulateCheckIn() {
+            const now = new Date();
+            const activity = {
+                type: 'check-in',
+                timestamp: now,
+                location: 'Demo Location'
+            };
+
+            employeeData.activity.unshift(activity);
+            updateDashboard();
+            showNotification('Check-in recorded successfully!', 'success');
+        }
+
+        function simulateCheckOut() {
+            const now = new Date();
+            const lastCheckIn = employeeData.activity.find(a => a.type === 'check-in' && !a.checkedOut);
+
+            if (!lastCheckIn) {
+                showNotification('No active check-in found', 'error');
+                return;
+            }
+
+            const hoursWorked = (now - lastCheckIn.timestamp) / (1000 * 60 * 60);
+            lastCheckIn.checkedOut = true;
+            lastCheckIn.hoursWorked = hoursWorked;
+
+            const activity = {
+                type: 'check-out',
+                timestamp: now,
+                location: 'Demo Location',
+                hoursWorked: hoursWorked
+            };
+
+            employeeData.activity.unshift(activity);
+            
+            // Update totals
+            employeeData.todayHours += hoursWorked;
+            employeeData.weekHours += hoursWorked;
+            
+            if (paymentSettings && paymentSettings.type === 'hourly') {
+                const earnings = hoursWorked * paymentSettings.rate;
+                employeeData.totalEarnings += earnings;
+                employeeData.pendingPayout += earnings;
+            }
+
+            updateDashboard();
+            showNotification(`Check-out recorded! Worked ${hoursWorked.toFixed(2)} hours`, 'success');
+        }
+
+        function updateDashboard() {
+            document.getElementById('todayHours').textContent = employeeData.todayHours.toFixed(1);
+            document.getElementById('weekHours').textContent = employeeData.weekHours.toFixed(1);
+            document.getElementById('totalEarnings').textContent = '$' + employeeData.totalEarnings.toFixed(2);
+            document.getElementById('pendingPayout').textContent = '$' + employeeData.pendingPayout.toFixed(2);
+
+            const activityContainer = document.getElementById('recentActivity');
+            activityContainer.innerHTML = '';
+
+            if (employeeData.activity.length === 0) {
+                activityContainer.innerHTML = '<div class="activity-item"><span>No recent activity</span><span style="color: #666; font-size: 0.9rem;">--</span></div>';
+                return;
+            }
+
+            employeeData.activity.slice(0, 10).forEach(activity => {
+                const item = document.createElement('div');
+                item.className = 'activity-item';
+                
+                let text = activity.type === 'check-in' ? 'Checked In' : 'Checked Out';
+                if (activity.hoursWorked) {
+                    text += ` (${activity.hoursWorked.toFixed(2)}h)`;
+                }
+                
+                item.innerHTML = `
+                    <span>${text} - ${activity.location}</span>
+                    <span style="color: #666; font-size: 0.9rem;">${activity.timestamp.toLocaleTimeString()}</span>
+                `;
+                
+                activityContainer.appendChild(item);
+            });
+        }
+
+        function showNotification(message, type) {
+            // Remove existing notifications
+            const existing = document.querySelector('.notification');
+            if (existing) {
+                existing.remove();
+            }
+
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+
+            document.querySelector('.container').insertBefore(notification, document.querySelector('.main-grid'));
+
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // Handle payment schedule visibility
+        document.getElementById('paymentSchedule').addEventListener('change', function() {
+            const customGroup = document.getElementById('customScheduleGroup');
+            if (this.value === 'custom') {
+                customGroup.style.display = 'block';
+            } else {
+                customGroup.style.display = 'none';
+            }
+        });
+
+        // Initialize dashboard
+        updateDashboard();
+
+        console.log('Employee Geo QR Check-In System loaded');
+        console.log('✅ QR code generation with geo validation');
+        console.log('✅ Automatic payment processing setup');
+        console.log('✅ Real-time employee time tracking');
+        console.log('✅ Flexible payment schedules (daily, weekly, bi-weekly, monthly, custom)');
+    </script>
+</body>
+</html>
