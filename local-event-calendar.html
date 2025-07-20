@@ -1184,13 +1184,14 @@
             alert('Next month navigation - would update calendar display');
         }
 
-        function openMapView() {
+        async function openMapView() {
             // Get all current marketplace items (events, shops, services, restaurants, bars, venues)
             const allMarketplaceItems = [
                 ...events.filter(event => matchesCurrentFilters(event) && isCurrentDay(event.date)),
                 ...getLocalShops().filter(shop => shop.location && shop.location.includes(currentTown.replace('-', ' '))),
                 ...getLocalServices().filter(service => service.location && service.location.includes(currentTown.replace('-', ' '))),
                 ...getLocalRestaurants().filter(restaurant => restaurant.location && restaurant.location.includes(currentTown.replace('-', ' '))),
+                ...getLocalFoodTrucks().filter(truck => truck.isActiveToday && truck.location && truck.location.includes(currentTown.replace('-', ' '))),
                 ...getLocalBars().filter(bar => bar.location && bar.location.includes(currentTown.replace('-', ' '))),
                 ...getLiveMusicVenues().filter(venue => venue.location && venue.location.includes(currentTown.replace('-', ' ')))
             ];
@@ -1277,6 +1278,7 @@
                                 <button class="tab-btn" onclick="filterMapItems('shops')" style="background: rgba(34,211,238,0.2); color: #22d3ee; border: 1px solid rgba(34,211,238,0.5); padding: 6px 12px; border-radius: 15px; font-size: 12px;">Shops</button>
                                 <button class="tab-btn" onclick="filterMapItems('services')" style="background: rgba(157,78,221,0.2); color: #9d4edd; border: 1px solid rgba(157,78,221,0.5); padding: 6px 12px; border-radius: 15px; font-size: 12px;">Services</button>
                                 <button class="tab-btn" onclick="filterMapItems('restaurants')" style="background: rgba(251,191,36,0.2); color: #fbbf24; border: 1px solid rgba(251,191,36,0.5); padding: 6px 12px; border-radius: 15px; font-size: 12px;">Food</button>
+                                <button class="tab-btn" onclick="filterMapItems('food-trucks')" style="background: rgba(0,255,255,0.2); color: #00ffff; border: 1px solid rgba(0,255,255,0.5); padding: 6px 12px; border-radius: 15px; font-size: 12px;">Food Trucks</button>
                                 <button class="tab-btn" onclick="filterMapItems('bars')" style="background: rgba(255,107,53,0.2); color: #ff6b35; border: 1px solid rgba(255,107,53,0.5); padding: 6px 12px; border-radius: 15px; font-size: 12px;">Bars</button>
                                 <button class="tab-btn" onclick="filterMapItems('music')" style="background: rgba(192,132,252,0.2); color: #c084fc; border: 1px solid rgba(192,132,252,0.5); padding: 6px 12px; border-radius: 15px; font-size: 12px;">Venues</button>
                             </div>
@@ -1407,6 +1409,10 @@
                     .event-marker.music .marker-pulse { background: #c084fc; box-shadow: 0 0 10px #c084fc; }
                     .event-marker.sports .marker-pulse { background: #34d399; box-shadow: 0 0 10px #34d399; }
                     .event-marker.food .marker-pulse { background: #fbbf24; box-shadow: 0 0 10px #fbbf24; }
+                    .event-marker.food-truck .marker-pulse { 
+                        background: #00ffff; 
+                        box-shadow: 0 0 15px #00ffff, 0 0 25px rgba(0, 255, 255, 0.4);
+                    }
                     .event-marker.community .marker-pulse { background: #f472b6; box-shadow: 0 0 10px #f472b6; }
                     .event-marker.business .marker-pulse { background: #22d3ee; box-shadow: 0 0 10px #22d3ee; }
                     
@@ -1464,6 +1470,11 @@
                     .event-marker-mini.music { background: #c084fc; }
                     .event-marker-mini.sports { background: #34d399; }
                     .event-marker-mini.food { background: #fbbf24; }
+                    .event-marker-mini.food-truck { 
+                        background: linear-gradient(135deg, #00ffff 0%, #0099cc 100%);
+                        box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+                        animation: foodTruckPulse 2s ease-in-out infinite;
+                    }
                     .event-marker-mini.community { background: #f472b6; }
                     .event-marker-mini.business { background: #22d3ee; }
                     
@@ -1504,6 +1515,17 @@
                         0% { opacity: 0.3; transform: translate(-50%, -50%) scale(0.8); }
                         50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
                         100% { opacity: 0.3; transform: translate(-50%, -50%) scale(0.8); }
+                    }
+                    
+                    @keyframes foodTruckPulse {
+                        0%, 100% { 
+                            transform: scale(1);
+                            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+                        }
+                        50% { 
+                            transform: scale(1.1);
+                            box-shadow: 0 0 20px rgba(0, 255, 255, 1), 0 0 30px rgba(0, 255, 255, 0.6);
+                        }
                     }
                     
                     @keyframes float {
@@ -2414,8 +2436,35 @@
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
             
-            // Filter and display items (placeholder for demo)
-            console.log(`Filtering map items by type: ${type}`);
+            // Get the map items list
+            const itemsList = document.getElementById('mapItemsList');
+            if (!itemsList) return;
+            
+            const items = itemsList.querySelectorAll('.map-event-item');
+            
+            // Filter items based on type
+            items.forEach(item => {
+                const marker = item.querySelector('.event-marker-mini');
+                if (type === 'all') {
+                    item.style.display = 'flex';
+                } else if (type === 'events') {
+                    item.style.display = marker.classList.contains('festival') || 
+                                        marker.classList.contains('music') || 
+                                        marker.classList.contains('community') ? 'flex' : 'none';
+                } else if (type === 'restaurants') {
+                    item.style.display = marker.classList.contains('food') ? 'flex' : 'none';
+                } else if (type === 'food-trucks') {
+                    item.style.display = marker.classList.contains('food-truck') ? 'flex' : 'none';
+                } else if (type === 'bars') {
+                    item.style.display = marker.classList.contains('bar') ? 'flex' : 'none';
+                } else if (type === 'music') {
+                    item.style.display = marker.classList.contains('venue') ? 'flex' : 'none';
+                } else {
+                    item.style.display = marker.classList.contains(type) ? 'flex' : 'none';
+                }
+            });
+            
+            console.log(`Filtered map items by type: ${type}`);
         }
 
         function visitBusiness(name) {
@@ -2426,6 +2475,99 @@
         function contactBusiness(name) {
             alert(`Contacting ${name} - would open messaging or call`);
             closeModal();
+        }
+
+        // Get local food trucks from server API with fallback
+        async function getLocalFoodTrucks() {
+            try {
+                const response = await fetch('/api/food-trucks/active');
+                const data = await response.json();
+                
+                if (data.success && data.foodTrucks && data.foodTrucks.length > 0) {
+                    console.log(`Loaded ${data.foodTrucks.length} active food trucks from server`);
+                    return data.foodTrucks.map(truck => ({
+                        ...truck,
+                        businessType: "food-truck",
+                        category: "food-truck",
+                        type: "food-truck",
+                        isActiveToday: true
+                    }));
+                }
+            } catch (error) {
+                console.error('Error fetching active food trucks from API:', error);
+            }
+
+            // Return sample data as fallback
+            return [
+                {
+                    name: "Coastal Bites Food Truck",
+                    businessType: "food-truck",
+                    category: "food-truck",
+                    location: "The Wharf, Orange Beach, AL",
+                    hours: "11am-9pm Today",
+                    description: "Gourmet tacos, fresh shrimp po'boys, daily specials",
+                    distance: "0.3mi",
+                    type: "food-truck",
+                    currentLocation: "The Wharf Amphitheater - East Parking Lot",
+                    operatingHours: "11:00 AM - 9:00 PM",
+                    specialNotes: "Live music at The Wharf tonight!",
+                    isActiveToday: true,
+                    lastUpdated: new Date().toISOString(),
+                    gpsEnabled: true,
+                    menuHighlights: "Fish Tacos $12, Shrimp & Grits $14, Daily Catch $16"
+                },
+                {
+                    name: "Gulf Coast Rolling Kitchen",
+                    businessType: "food-truck",
+                    category: "food-truck", 
+                    location: "Flora-Bama, Gulf Shores, AL",
+                    hours: "12pm-10pm Today",
+                    description: "BBQ, burgers, craft beer pairings, weekend specials",
+                    distance: "1.2mi",
+                    type: "food-truck",
+                    currentLocation: "Flora-Bama Main Parking Area - Near Beach Access",
+                    operatingHours: "12:00 PM - 10:00 PM",
+                    specialNotes: "Happy hour 3-6pm, live DJ tonight",
+                    isActiveToday: true,
+                    lastUpdated: new Date().toISOString(),
+                    gpsEnabled: true,
+                    menuHighlights: "BBQ Platter $15, Craft Burger $11, Wings $9"
+                },
+                {
+                    name: "Sunset Seafood Wheels",
+                    businessType: "food-truck",
+                    category: "food-truck",
+                    location: "Gulf State Park, Gulf Shores, AL", 
+                    hours: "10am-8pm Today",
+                    description: "Fresh catch daily, seafood platters, family portions",
+                    distance: "2.1mi",
+                    type: "food-truck",
+                    currentLocation: "Gulf State Park Fishing Pier - Main Entrance",
+                    operatingHours: "10:00 AM - 8:00 PM",
+                    specialNotes: "Fresh red snapper caught this morning!",
+                    isActiveToday: true,
+                    lastUpdated: new Date().toISOString(),
+                    gpsEnabled: false,
+                    menuHighlights: "Red Snapper $18, Seafood Platter $22, Fish & Chips $13"
+                },
+                {
+                    name: "Beach City Fusion",
+                    businessType: "food-truck",
+                    category: "food-truck",
+                    location: "The Track, Gulf Shores, AL",
+                    hours: "4pm-11pm Today",
+                    description: "Asian fusion, Korean BBQ, Vietnamese pho, boba tea",
+                    distance: "1.8mi", 
+                    type: "food-truck",
+                    currentLocation: "The Track Family Recreation Center - Food Court Area",
+                    operatingHours: "4:00 PM - 11:00 PM",
+                    specialNotes: "Korean BBQ night - bulgogi special!",
+                    isActiveToday: true,
+                    lastUpdated: new Date().toISOString(),
+                    gpsEnabled: true,
+                    menuHighlights: "Bulgogi Bowl $13, Pho $10, Boba Tea $5"
+                }
+            ];
         }
 
         function getLocalRestaurants() {

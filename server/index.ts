@@ -71,6 +71,137 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Food truck location posting API
+app.post('/api/food-trucks/location', async (req, res) => {
+  try {
+    const {
+      foodTruckName,
+      currentLocation,
+      operatingHours,
+      startTime,
+      endTime,
+      date,
+      specialNotes,
+      locationDescription,
+      addToMap,
+      enableGPSTracking,
+      menuHighlights,
+      businessType
+    } = req.body;
+
+    // Create food truck location post
+    const locationPost = {
+      id: `ft_${Date.now()}`,
+      name: foodTruckName,
+      businessType: 'food-truck',
+      category: 'food-truck',
+      type: 'food-truck',
+      currentLocation: currentLocation,
+      location: currentLocation,
+      operatingHours: `${startTime} - ${endTime}`,
+      hours: `${startTime}-${endTime} Today`,
+      date: date,
+      specialNotes: specialNotes || '',
+      locationDescription: locationDescription || '',
+      menuHighlights: menuHighlights || '',
+      isActiveToday: true,
+      addToMap: addToMap || false,
+      gpsEnabled: enableGPSTracking || false,
+      lastUpdated: new Date().toISOString(),
+      distance: '0.1mi', // Dynamic based on user location
+      description: locationDescription || specialNotes || 'Food truck location update'
+    };
+
+    // Store in temporary food truck locations (would be database in production)
+    global.activeFoodTruckLocations = global.activeFoodTruckLocations || [];
+    
+    // Remove any existing location for this truck today
+    global.activeFoodTruckLocations = global.activeFoodTruckLocations.filter(
+      (truck: any) => !(truck.name === foodTruckName && truck.date === date)
+    );
+    
+    // Add new location
+    global.activeFoodTruckLocations.push(locationPost);
+
+    console.log(`Food truck location posted: ${foodTruckName} at ${currentLocation}`);
+
+    res.json({
+      success: true,
+      message: 'Food truck location posted successfully!',
+      locationPost: locationPost,
+      addedToMap: addToMap
+    });
+
+  } catch (error) {
+    console.error('Error creating food truck location post:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create food truck location post'
+    });
+  }
+});
+
+// Get active food truck locations for map
+app.get('/api/food-trucks/active', async (req, res) => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const activeTrucks = global.activeFoodTruckLocations || [];
+    
+    // Filter for today's active trucks
+    const todaysTrucks = activeTrucks.filter((truck: any) => 
+      truck.date === today && truck.isActiveToday
+    );
+
+    res.json({
+      success: true,
+      foodTrucks: todaysTrucks,
+      count: todaysTrucks.length
+    });
+
+  } catch (error) {
+    console.error('Error getting active food trucks:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get active food trucks'
+    });
+  }
+});
+
+// Update food truck GPS location
+app.post('/api/food-trucks/update-location', async (req, res) => {
+  try {
+    const { foodTruckId, newLocation, latitude, longitude } = req.body;
+
+    const activeTrucks = global.activeFoodTruckLocations || [];
+    const truckIndex = activeTrucks.findIndex((truck: any) => truck.id === foodTruckId);
+
+    if (truckIndex !== -1) {
+      activeTrucks[truckIndex].currentLocation = newLocation;
+      activeTrucks[truckIndex].latitude = latitude;
+      activeTrucks[truckIndex].longitude = longitude;
+      activeTrucks[truckIndex].lastUpdated = new Date().toISOString();
+
+      res.json({
+        success: true,
+        message: 'Food truck location updated successfully',
+        updatedLocation: activeTrucks[truckIndex]
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: 'Food truck not found'
+      });
+    }
+
+  } catch (error) {
+    console.error('Error updating food truck location:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update food truck location'
+    });
+  }
+});
+
 // Post creation with automatic Stripe integration
 app.post('/api/posts/create', async (req, res) => {
   try {
