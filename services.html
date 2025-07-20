@@ -4056,25 +4056,31 @@
 
         // Social interaction functions
         function likePost(button) {
-            if (button.innerHTML.includes('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(236, 72, 153, 0.1)"/><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7z" stroke="currentColor" stroke-width="1.5"/></svg>')) {
-                button.innerHTML = 'Like';
-                button.style.color = '#ff6b6b';
-                showNotification('Post unliked!', 'info');
-            } else {
+            const isLiked = button.classList.contains('liked');
+            if (isLiked) {
+                button.classList.remove('liked');
                 button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(236, 72, 153, 0.1)"/><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7z" stroke="currentColor" stroke-width="1.5"/></svg>Like';
                 button.style.color = 'rgba(255, 255, 255, 0.8)';
+                showNotification('Post unliked!', 'info');
+            } else {
+                button.classList.add('liked');
+                button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="#ff6b6b" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="#ff6b6b" stroke-width="1.5" fill="rgba(255, 107, 107, 0.3)"/><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7z" stroke="#ff6b6b" stroke-width="1.5" fill="#ff6b6b"/></svg>Liked';
+                button.style.color = '#ff6b6b';
                 showNotification('Post liked!', 'success');
             }
         }
 
         function favoritePost(button) {
-            if (button.style.color === 'rgb(255, 217, 61)') {
-                // Unfavorite
+            const isFavorited = button.classList.contains('favorited');
+            if (isFavorited) {
+                button.classList.remove('favorited');
+                button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="1.5"/></svg>Favorite';
                 button.style.color = 'rgba(255, 255, 255, 0.8)';
                 showNotification('Removed from favorites!', 'info');
             } else {
-                // Favorite
-                button.style.color = '#ffd93d';
+                button.classList.add('favorited');
+                button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="#fbbf24" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="#fbbf24" stroke-width="1.5" fill="#fbbf24"/></svg>Favorited';
+                button.style.color = '#fbbf24';
                 showNotification('Added to favorites!', 'success');
             }
         }
