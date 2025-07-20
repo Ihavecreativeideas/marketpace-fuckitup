@@ -434,6 +434,50 @@
             min-height: 100px;
         }
 
+        .messages-icon {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #e2e8f0;
+        }
+
+        .messages-icon:hover {
+            background: rgba(0, 255, 255, 0.2);
+            color: #00ffff;
+            transform: scale(1.05);
+        }
+
+        .messages-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            border: 2px solid rgba(0, 0, 0, 0.9);
+        }
+
+        .messages-badge.hidden {
+            display: none;
+        }
+
         .header-content {
             display: flex;
             align-items: center;
@@ -1533,6 +1577,18 @@
                     <div class="logo-particles" id="logoParticles"></div>
                 </div>
             </div>
+            
+            <!-- Facebook-style Messages Icon -->
+            <button class="messages-icon" onclick="goToMessages()" id="messagesIcon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="8" cy="10" r="0.8" fill="currentColor" opacity="0.6"/>
+                    <circle cx="12" cy="10" r="0.8" fill="currentColor" opacity="0.6"/>
+                    <circle cx="16" cy="10" r="0.8" fill="currentColor" opacity="0.6"/>
+                </svg>
+                <span class="messages-badge hidden" id="messagesBadge">0</span>
+            </button>
             <div class="header-right">
                 <div class="top-section">
                     
@@ -3050,20 +3106,7 @@
                 </div>
                 <div class="nav-label">Rentals</div>
             </button>
-            <button class="nav-item" onclick="goToPage('messages')">
-                <div class="nav-icon">
-                    <svg viewBox="0 0 24 24" fill="none">
-                        <!-- Futuristic Messages Icon -->
-                        <rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="2" fill="none"/>
-                        <path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7" stroke="currentColor" stroke-width="2"/>
-                        <circle cx="8" cy="10" r="1" fill="currentColor" opacity="0.6"/>
-                        <circle cx="12" cy="10" r="1" fill="currentColor" opacity="0.6"/>
-                        <circle cx="16" cy="10" r="1" fill="currentColor" opacity="0.6"/>
-                        <path d="M6 14H18" stroke="currentColor" stroke-width="1" opacity="0.4"/>
-                    </svg>
-                </div>
-                <div class="nav-label">Messages</div>
-            </button>
+
             <button class="nav-item" onclick="goToPage('menu')">
                 <div class="nav-icon">
                     <svg viewBox="0 0 24 24" fill="none">
@@ -3801,9 +3844,16 @@
                 conversations.unshift(conversation);
                 localStorage.setItem('marketpace_conversations', JSON.stringify(conversations));
                 
+                // Update messages badge
+                incrementMessagesBadge();
+                
                 // Simulate seller response after 3 seconds
                 setTimeout(() => {
                     simulateSellerResponse(sellerName, itemName, conversationId);
+                    // Update badge again after seller response
+                    setTimeout(() => {
+                        updateMessagesBadge();
+                    }, 100);
                 }, 3000);
                 
             } else {
@@ -5647,6 +5697,44 @@
         
         // Initialize cart badge on page load
         updateCartBadge();
+        
+        // Initialize messages badge on page load
+        updateMessagesBadge();
+
+        // Facebook-style Messages Navigation
+        function goToMessages() {
+            window.location.href = '/messages';
+        }
+
+        // Update messages badge with notification count
+        function updateMessagesBadge() {
+            const conversations = JSON.parse(localStorage.getItem('marketpace_conversations') || '[]');
+            const badge = document.getElementById('messagesBadge');
+            
+            if (conversations.length > 0) {
+                badge.textContent = conversations.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        // Update badge when new messages are created
+        function incrementMessagesBadge() {
+            const conversations = JSON.parse(localStorage.getItem('marketpace_conversations') || '[]');
+            const badge = document.getElementById('messagesBadge');
+            
+            if (conversations.length > 0) {
+                badge.textContent = conversations.length;
+                badge.classList.remove('hidden');
+                
+                // Animate the badge
+                badge.style.transform = 'scale(1.3)';
+                setTimeout(() => {
+                    badge.style.transform = 'scale(1)';
+                }, 200);
+            }
+        }
 
         // Navigation functions for bottom navigation
         function goToPage(page) {
@@ -5675,9 +5763,6 @@
                         break;
                     case 'rentals':
                         window.location.href = '/rentals';
-                        break;
-                    case 'messages':
-                        window.location.href = '/messages';
                         break;
                     case 'menu':
                         window.location.href = '/marketpace-menu';
