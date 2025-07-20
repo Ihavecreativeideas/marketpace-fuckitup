@@ -174,20 +174,9 @@
         
         /* Dark Galaxy Purple MarketPace Text Styling */
         .marketpace-text {
-            background: linear-gradient(135deg, #1a0033, #2a0845, #1a0033) !important;
-            background-clip: text !important;
-            -webkit-background-clip: text !important;
-            -webkit-text-fill-color: transparent !important;
-            text-shadow: 
-                0 0 5px #ffff00,
-                0 0 10px #ffff00,
-                0 0 15px #ffff00,
-                0 0 20px #ffd700,
-                0 2px 4px rgba(255, 255, 0, 0.3) !important;
-            filter: drop-shadow(0 0 8px #ffff00) !important;
-            -webkit-text-fill-color: transparent !important;
-            filter: drop-shadow(0 0 15px #4169e1) !important;
-            font-weight: bold !important;
+            color: #2a0845 !important;
+            font-weight: 700 !important;
+            text-shadow: 0 1px 3px rgba(42, 8, 69, 0.5) !important;
         }
 
         /* Business Mode Styles */
@@ -209,6 +198,34 @@
             font-size: 12px;
             font-weight: bold;
             z-index: 10;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a0b3d, #6b46c1);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 2px solid #00ffff;
+            box-shadow: 0 20px 60px rgba(0, 255, 255, 0.4);
+            color: white;
         }
 
         /* Promotion Modal Styles */
@@ -723,34 +740,7 @@
             object-fit: cover;
         }
 
-        /* Food & Drinks Filter */
-        .food-drinks-filter {
-            position: fixed;
-            top: 70px;
-            right: 20px;
-            z-index: 999;
-            background: rgba(255, 165, 0, 0.9);
-            color: white;
-            border: none;
-            border-radius: 20px;
-            padding: 8px 16px;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);
-            transition: all 0.3s ease;
-            display: none;
-        }
 
-        .food-drinks-filter:hover {
-            background: rgba(255, 165, 0, 1);
-            transform: translateY(-2px);
-        }
-
-        .food-drinks-filter.active {
-            display: block;
-            background: rgba(255, 69, 0, 0.9);
-        }
 
         .bl-profile-initials {
             color: #00ffff;
@@ -1884,10 +1874,7 @@
         <span class="messages-badge hidden" id="messagesBadge">0</span>
     </button>
 
-    <!-- Food & Drinks Filter Button -->
-    <button class="food-drinks-filter" id="foodDrinksFilter" onclick="toggleFoodDrinksFilter()">
-        🍽️ Food & Drinks
-    </button>
+
 
     <!-- Compact Account Switcher Button -->
     <button class="compact-account-switcher" onclick="toggleAccountSwitcher()" id="accountSwitcherBtn">
@@ -1940,13 +1927,13 @@
                 <div class="profile-pic" style="width: 35px; height: 35px; border-radius: 6px;">
                     <span id="userInitials2" style="font-size: 14px;">DU</span>
                 </div>
-                <input type="text" id="statusInput" name="status" class="status-input" placeholder="Share with your community!" onclick="openAdvancedPostModal()" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); font-size: 14px; padding: 8px 12px;">
+                <input type="text" id="statusInput" name="status" class="status-input" placeholder="Share with your community!" onclick="openAdvancedPostModal('general')" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); font-size: 14px; padding: 8px 12px;">
             </div>
             <div class="composer-actions">
                 <button class="action-btn" onclick="openAdvancedPostModal('sale')">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(34, 197, 94, 0.2)"/><path d="M21 12a9 9 0 1 1-6.219-8.56" stroke="currentColor" stroke-width="1.5"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.5"/></svg> Sell
                 </button>
-                <button class="action-btn" onclick="openAdvancedPostModal('rental')">
+                <button class="action-btn" onclick="openAdvancedPostModal('rent')">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(34, 197, 94, 0.2)"/><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/><path d="M9 22V12h6v10" stroke="currentColor" stroke-width="1.5"/></svg> Rent
                 </button>
                 <button class="action-btn" onclick="openAdvancedPostModal('service')">
@@ -1954,9 +1941,6 @@
                 </button>
                 <button class="action-btn" onclick="openAdvancedPostModal('event')">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(236, 72, 153, 0.2)"/><path d="M12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2Z" stroke="currentColor" stroke-width="1.5" fill="rgba(236, 72, 153, 0.3)"/></svg> Event
-                </button>
-                <button class="action-btn" onclick="openAdvancedPostModal('food-drinks')" style="background: linear-gradient(135deg, #ff6b35, #f7931e); color: white; border: 1px solid rgba(255, 165, 0, 0.5);">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(255, 165, 0, 0.2)"/><path d="M12.5 2C13.3 2 14 2.7 14 3.5V9.5C14 11.7 12.2 13.5 10 13.5H8.5V22H7V13.5H6.5C4.3 13.5 2.5 11.7 2.5 9.5V3.5C2.5 2.7 3.2 2 4 2H12.5ZM16.5 8V6H18V8H20.5V9.5H18V22H16.5V9.5H14V8H16.5Z" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 165, 0, 0.3)"/></svg> Food & Drinks
                 </button>
             </div>
         </div>
@@ -2480,8 +2464,8 @@
         </div>
     </div>
 
-    <!-- Advanced Post Modal -->
-    <div id="postModal" class="post-modal" style="display: none;">
+    <!-- Clean Community Posting Modal -->
+    <div id="communityPostModal" class="post-modal" style="display: none;">
         <div class="post-modal-content">
             <div class="post-modal-header">
                 <h3 class="post-modal-title" id="modalTitle">Create Post</h3>
@@ -2493,14 +2477,14 @@
                     <div class="form-group">
                         <label class="form-label">Category</label>
                         <div class="category-buttons" id="categoryButtons">
-                            <div class="category-btn" data-category="general">
+                            <div class="category-btn" data-category="general" onclick="selectCategory('general')">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
                                     <rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/>
                                     <path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7" stroke="currentColor" stroke-width="1.5"/>
                                 </svg>
                                 General
                             </div>
-                            <div class="category-btn" data-category="sale">
+                            <div class="category-btn" data-category="sale" onclick="selectCategory('sale')">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
                                     <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(239, 68, 68, 0.2)"/>
                                     <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" stroke="currentColor" stroke-width="1.5"/>
@@ -2508,7 +2492,7 @@
                                 </svg>
                                 For Sale
                             </div>
-                            <div class="category-btn" data-category="rent">
+                            <div class="category-btn" data-category="rent" onclick="selectCategory('rent')">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
                                     <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(16, 185, 129, 0.2)"/>
                                     <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/>
@@ -2516,14 +2500,14 @@
                                 </svg>
                                 For Rent
                             </div>
-                            <div class="category-btn" data-category="service">
+                            <div class="category-btn" data-category="service" onclick="selectCategory('service')">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
                                     <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(245, 158, 11, 0.2)"/>
                                     <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="currentColor" stroke-width="1.5"/>
                                 </svg>
                                 Service
                             </div>
-                            <div class="category-btn" data-category="event">
+                            <div class="category-btn" data-category="event" onclick="selectCategory('event')">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
                                     <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(139, 92, 246, 0.2)"/>
                                     <path d="M9 9h6v6h-6z" stroke="currentColor" stroke-width="1.5" fill="rgba(139, 92, 246, 0.3)"/>
@@ -2531,7 +2515,7 @@
                                 </svg>
                                 Event
                             </div>
-                            <div class="category-btn" data-category="job">
+                            <div class="category-btn" data-category="job" onclick="selectCategory('job')">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
                                     <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.2)"/>
                                     <rect x="2" y="7" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
@@ -2539,7 +2523,7 @@
                                 </svg>
                                 Job/Hiring
                             </div>
-                            <div class="category-btn" data-category="iso">
+                            <div class="category-btn" data-category="iso" onclick="selectCategory('iso')">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
                                     <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/>
                                     <circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5"/>
@@ -2547,7 +2531,7 @@
                                 </svg>
                                 ISO
                             </div>
-                            <div class="category-btn" data-category="poll">
+                            <div class="category-btn" data-category="poll" onclick="selectCategory('poll')">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
                                     <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(16, 185, 129, 0.2)"/>
                                     <rect x="3" y="8" width="3" height="8" fill="currentColor"/>
@@ -2557,7 +2541,7 @@
                                 </svg>
                                 Poll
                             </div>
-                            <div class="category-btn" data-category="announcement">
+                            <div class="category-btn" data-category="announcement" onclick="selectCategory('announcement')">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
                                     <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(168, 85, 247, 0.2)"/>
                                     <path d="M3 11l18-5v12L3 14v-3z" stroke="currentColor" stroke-width="1.5" fill="rgba(168, 85, 247, 0.1)"/>
@@ -2565,7 +2549,7 @@
                                 </svg>
                                 Announcement
                             </div>
-                            <div class="category-btn" data-category="food-drinks">
+                            <div class="category-btn" data-category="food-drinks" onclick="selectCategory('food-drinks')">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
                                     <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 165, 0, 0.2)"/>
                                     <path d="M12.5 2C13.3 2 14 2.7 14 3.5V9.5C14 11.7 12.2 13.5 10 13.5H8.5V22H7V13.5H6.5C4.3 13.5 2.5 11.7 2.5 9.5V3.5C2.5 2.7 3.2 2 4 2H12.5ZM16.5 8V6H18V8H20.5V9.5H18V22H16.5V9.5H14V8H16.5Z" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 165, 0, 0.3)"/>
@@ -2830,6 +2814,86 @@
                                     <small style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 5px;">
                                         Customers can get live updates if you move locations during the day
                                     </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Options (for sale/rent/service categories) -->
+                    <div class="form-group" id="deliveryOptionsGroup" style="display: none;">
+                        <label class="form-label">Delivery Options (Select all that apply)</label>
+                        <div class="delivery-options" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 15px; margin-top: 10px;">
+                            
+                            <!-- Self Pickup -->
+                            <label class="delivery-checkbox-label" style="display: block; margin-bottom: 15px; cursor: pointer;">
+                                <input type="checkbox" id="selfPickupOption" name="deliveryOptions" value="self-pickup" style="margin-right: 10px;">
+                                <div style="display: inline-block;">
+                                    <div style="font-weight: bold; color: #10b981;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                            <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(34, 197, 94, 0.2)"/>
+                                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/>
+                                            <path d="M9 22V12h6v10" stroke="currentColor" stroke-width="1.5"/>
+                                        </svg>
+                                        Self Pickup - FREE
+                                    </div>
+                                    <div style="font-size: 13px; color: rgba(255,255,255,0.7); margin-left: 20px;">Buyer picks up directly from you</div>
+                                </div>
+                            </label>
+
+                            <!-- MarketPace Delivery -->
+                            <label class="delivery-checkbox-label" style="display: block; margin-bottom: 15px; cursor: pointer;">
+                                <input type="checkbox" id="marketPaceDeliveryOption" name="deliveryOptions" value="marketpace-delivery" style="margin-right: 10px;">
+                                <div style="display: inline-block;">
+                                    <div style="font-weight: bold; color: #3b82f6;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                            <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.2)"/>
+                                            <path d="M16 3h5v4h-5z" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.1)"/>
+                                            <path d="M2 21h20v-7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z" stroke="currentColor" stroke-width="1.5"/>
+                                            <circle cx="7" cy="17" r="2" stroke="currentColor" stroke-width="1.5"/>
+                                            <circle cx="17" cy="17" r="2" stroke="currentColor" stroke-width="1.5"/>
+                                        </svg>
+                                        MarketPace Delivery (if available in your area)
+                                    </div>
+                                    <div style="font-size: 13px; color: rgba(255,255,255,0.7); margin-left: 20px;">Professional drivers with tracking - Cost split 50/50 buyer/seller</div>
+                                </div>
+                            </label>
+
+                            <!-- Private Party Delivery -->
+                            <label class="delivery-checkbox-label" style="display: block; margin-bottom: 10px; cursor: pointer;">
+                                <input type="checkbox" id="privatePartyDeliveryOption" name="deliveryOptions" value="private-delivery" style="margin-right: 10px;">
+                                <div style="display: inline-block;">
+                                    <div style="font-weight: bold; color: #f59e0b;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                            <rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(245, 158, 11, 0.2)"/>
+                                            <path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7" stroke="currentColor" stroke-width="1.5"/>
+                                        </svg>
+                                        Private Party Delivery
+                                    </div>
+                                    <div style="font-size: 13px; color: rgba(255,255,255,0.7); margin-left: 20px;">You deliver yourself and set custom S&H fee</div>
+                                </div>
+                            </label>
+
+                            <!-- Custom Delivery Fee Input (shows when Private Party is selected) -->
+                            <div id="customDeliveryFeeGroup" style="display: none; margin-left: 20px; margin-top: 10px; padding: 10px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px;">
+                                <label class="form-label" for="customDeliveryFee" style="font-size: 13px;">Custom S&H Fee</label>
+                                <input type="number" id="customDeliveryFee" class="form-input" placeholder="0.00" step="0.01" min="0" style="width: 100px; font-size: 13px;">
+                                <small style="color: rgba(255,255,255,0.6); font-size: 12px; display: block; margin-top: 5px;">
+                                    MarketPace still collects 5% commission on item price
+                                </small>
+                            </div>
+
+                            <!-- Special Note for Food & Drinks -->
+                            <div id="foodDrinksDeliveryNote" style="display: none; margin-top: 15px; padding: 10px; background: rgba(255, 165, 0, 0.1); border: 1px solid rgba(255, 165, 0, 0.3); border-radius: 6px;">
+                                <div style="color: #ffa500; font-weight: bold; font-size: 13px;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                        <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(245, 158, 11, 0.2)"/>
+                                        <path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" stroke="currentColor" stroke-width="1.5"/>
+                                        <path d="M12 15.75h.007v.008H12v-.008z" stroke="currentColor" stroke-width="2"/>
+                                    </svg>
+                                    Food & Drinks Delivery Policy
+                                </div>
+                                <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 5px;">
+                                    MarketPace delivery is NOT available for food items due to food safety regulations. Use only self-pickup, private delivery, or third-party platforms (UberEats, DoorDash, etc.).
                                 </div>
                             </div>
                         </div>
@@ -3446,14 +3510,23 @@
             <button class="nav-item" onclick="goToPage('the-hub')">
                 <div class="nav-icon">
                     <svg viewBox="0 0 24 24" fill="none">
-                        <!-- Futuristic Entertainment Hub Icon -->
-                        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
-                        <path d="M12 2V5M12 19V22M4.22 4.22L6.34 6.34M17.66 17.66L19.78 19.78M2 12H5M19 12H22M4.22 19.78L6.34 17.66M17.66 6.34L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        <circle cx="12" cy="12" r="7" stroke="currentColor" stroke-width="1" opacity="0.5"/>
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                        <!-- Star Icon for @Hub -->
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
                     </svg>
                 </div>
-                <div class="nav-label">The Hub</div>
+                <div class="nav-label">@Hub</div>
+            </button>
+            <button class="nav-item" onclick="goToPage('food-drinks')">
+                <div class="nav-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <!-- Food & Drinks Icon -->
+                        <path d="M12.5 2C13.3 2 14 2.7 14 3.5V9.5C14 11.7 12.2 13.5 10 13.5H8.5V22H7V13.5H6.5C4.3 13.5 2.5 11.7 2.5 9.5V3.5C2.5 2.7 3.2 2 4 2H12.5Z" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 165, 0, 0.3)"/>
+                        <path d="M16.5 8V6H18V8H20.5V9.5H18V22H16.5V9.5H14V8H16.5Z" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 165, 0, 0.3)"/>
+                        <circle cx="8" cy="6" r="1" fill="currentColor" opacity="0.7"/>
+                        <circle cx="18" cy="6" r="1" fill="currentColor" opacity="0.7"/>
+                    </svg>
+                </div>
+                <div class="nav-label">Eats</div>
             </button>
             <button class="nav-item" onclick="goToPage('rentals')">
                 <div class="nav-icon">
@@ -3666,7 +3739,7 @@
                     </svg>
                     <h3 style="color: #00ffff; margin-bottom: 12px; font-size: 20px;">None Available at This Time</h3>
                     <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 20px;">No ${category.replace('-', ' & ')} items found in your area. Be the first to post!</p>
-                    <button class="commerce-btn primary" onclick="openAdvancedPostModal('sale')" style="background: linear-gradient(135deg, #00ffff, #8b5cf6); margin-top: 10px;">
+                    <button class="commerce-btn primary" onclick="window.openAdvancedPostModal('sale')" style="background: linear-gradient(135deg, #00ffff, #8b5cf6); margin-top: 10px;">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
                             <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2"/>
                         </svg>
@@ -4577,6 +4650,8 @@
             }
             selectedRating = 0;
         }
+
+        // Simple modal removed - using the full advanced modal below with categories and delivery options
         function verifyCondition(itemName, type) {
             closeItemDetails();
             
@@ -4928,296 +5003,6 @@
 
         // End of navigation functions
 
-        // Facebook Marketplace-style posting modal
-        function openAdvancedPostModal(type = 'general') {
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.8);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 10000;
-            `;
-            
-            const modalContent = document.createElement('div');
-            modalContent.style.cssText = `
-                background: #1a0b3d;
-                border: 2px solid #00ffff;
-                border-radius: 15px;
-                padding: 30px;
-                width: 90%;
-                max-width: 600px;
-                max-height: 80vh;
-                overflow-y: auto;
-                box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
-            `;
-            
-            modalContent.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2 style="color: #00ffff; margin: 0;">Create ${type.charAt(0).toUpperCase() + type.slice(1)} Post</h2>
-                    <button onclick="this.closest('.posting-modal').remove()" style="background: none; border: none; color: #00ffff; font-size: 24px; cursor: pointer;">&times;</button>
-                </div>
-                
-                <form id="postForm" style="color: #e2e8f0;">
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Post Category:</label>
-                        <select id="postCategory" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
-                            <option value="general">General</option>
-                            <option value="sale">For Sale</option>
-                            <option value="rent">For Rent</option>
-                            <option value="service">Service</option>
-                            <option value="event">Event</option>
-                            <option value="job">Job/Hiring</option>
-                            <option value="iso">ISO (In Search Of)</option>
-                            <option value="poll">Poll</option>
-                            <option value="announcement">Announcement</option>
-                            <option value="food-drinks">Food & Drinks</option>
-                        </select>
-                    </div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Title:</label>
-                        <input type="text" id="postTitle" placeholder="What are you posting about?" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;" required>
-                    </div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Description:</label>
-                        <textarea id="postDescription" placeholder="Tell us more about your post..." style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0; min-height: 100px;" required></textarea>
-                    </div>
-                    
-                    <div id="priceField" style="margin-bottom: 20px; display: none;">
-                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Price:</label>
-                        <input type="text" id="postPrice" placeholder="$0.00" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
-                    </div>
-                    
-                    <div id="eventFields" style="display: none;">
-                        <div style="margin-bottom: 20px;">
-                            <label style="display: block; margin-bottom: 5px; color: #00ffff;">Event Date:</label>
-                            <input type="date" id="eventDate" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
-                        </div>
-                        <div style="margin-bottom: 20px;">
-                            <label style="display: block; margin-bottom: 5px; color: #00ffff;">Event Time:</label>
-                            <input type="time" id="eventTime" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
-                        </div>
-                        <div style="margin-bottom: 20px;">
-                            <label style="display: block; margin-bottom: 5px; color: #00ffff;">Location:</label>
-                            <input type="text" id="eventLocation" placeholder="Event location" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
-                        </div>
-                    </div>
-                    
-                    <div id="pollFields" style="display: none;">
-                        <div style="margin-bottom: 20px;">
-                            <label style="display: block; margin-bottom: 5px; color: #00ffff;">Poll Options:</label>
-                            <input type="text" id="pollOption1" placeholder="Option 1" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0; margin-bottom: 10px;">
-                            <input type="text" id="pollOption2" placeholder="Option 2" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
-                        </div>
-                    </div>
-                    
-                    <!-- Food & Drinks Business Fields -->
-                    <div id="foodDrinksFields" style="display: none; background: rgba(255, 165, 0, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid rgba(255, 165, 0, 0.3);">
-                        <h4 style="color: #ffa500; margin-bottom: 15px;">Food & Drinks Business Details</h4>
-                        
-                        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                            <div style="flex: 1;">
-                                <label style="display: block; margin-bottom: 5px; color: #00ffff;">Business Type:</label>
-                                <select id="businessType" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
-                                    <option value="">Select Business Type</option>
-                                    <option value="restaurant">Restaurant</option>
-                                    <option value="bar">Bar/Pub</option>
-                                    <option value="cafe">Cafe/Coffee Shop</option>
-                                    <option value="fast-food">Fast Food</option>
-                                    <option value="food-truck">Food Truck</option>
-                                    <option value="bakery">Bakery</option>
-                                    <option value="catering">Catering Service</option>
-                                </select>
-                            </div>
-                            <div style="flex: 1;">
-                                <label style="display: block; margin-bottom: 5px; color: #00ffff;">Cuisine Type:</label>
-                                <select id="cuisineType" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
-                                    <option value="">Select Cuisine</option>
-                                    <option value="american">American</option>
-                                    <option value="italian">Italian</option>
-                                    <option value="mexican">Mexican</option>
-                                    <option value="asian">Asian</option>
-                                    <option value="seafood">Seafood</option>
-                                    <option value="southern">Southern</option>
-                                    <option value="bbq">BBQ</option>
-                                    <option value="pizza">Pizza</option>
-                                    <option value="burgers">Burgers</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                            <div style="flex: 1;">
-                                <label style="display: block; margin-bottom: 5px; color: #00ffff;">Price Range:</label>
-                                <select id="priceRange" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
-                                    <option value="">Select Price Range</option>
-                                    <option value="$">$ - Budget Friendly</option>
-                                    <option value="$$">$$ - Moderate</option>
-                                    <option value="$$$">$$$ - Upscale</option>
-                                    <option value="$$$$">$$$$ - Fine Dining</option>
-                                </select>
-                            </div>
-                            <div style="flex: 1;">
-                                <label style="display: block; margin-bottom: 5px; color: #00ffff;">Phone Number:</label>
-                                <input type="tel" id="businessPhone" placeholder="(251) 555-0123" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
-                            </div>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; margin-bottom: 5px; color: #00ffff;">Business Address:</label>
-                            <input type="text" id="businessAddress" placeholder="123 Main St, Orange Beach, AL" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
-                        </div>
-                        
-                        <div style="display: flex; gap: 15px; align-items: center;">
-                            <label style="display: flex; align-items: center; color: #e2e8f0;">
-                                <input type="checkbox" id="deliveryAvailable" style="margin-right: 8px;"> Delivery Available
-                            </label>
-                            <label style="display: flex; align-items: center; color: #e2e8f0;">
-                                <input type="checkbox" id="takeoutAvailable" style="margin-right: 8px;"> Takeout Available
-                            </label>
-                            <label style="display: flex; align-items: center; color: #e2e8f0;">
-                                <input type="checkbox" id="dineInAvailable" style="margin-right: 8px;"> Dine-In Available
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Images:</label>
-                        <input type="file" id="postImages" multiple accept="image/*" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
-                    </div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 10px; color: #00ffff;">Action Buttons:</label>
-                        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                            <label style="display: flex; align-items: center; color: #e2e8f0;">
-                                <input type="checkbox" id="deliverNow" style="margin-right: 5px;"> Deliver Now
-                            </label>
-                            <label style="display: flex; align-items: center; color: #e2e8f0;">
-                                <input type="checkbox" id="selfPickup" style="margin-right: 5px;"> Self Pickup
-                            </label>
-                            <label style="display: flex; align-items: center; color: #e2e8f0;">
-                                <input type="checkbox" id="bookNow" style="margin-right: 5px;"> Book Now
-                            </label>
-                            <label style="display: flex; align-items: center; color: #e2e8f0;">
-                                <input type="checkbox" id="callNow" style="margin-right: 5px;"> Call Now
-                            </label>
-                            <label style="display: flex; align-items: center; color: #e2e8f0;">
-                                <input type="checkbox" id="messageNow" style="margin-right: 5px;"> Message Now
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                        <button type="button" onclick="this.closest('.posting-modal').remove()" style="padding: 10px 20px; background: #666; color: white; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
-                        <button type="submit" style="padding: 10px 20px; background: #00ffff; color: #1a0b3d; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Create Post</button>
-                    </div>
-                </form>
-            `;
-            
-            modal.className = 'posting-modal';
-            modal.appendChild(modalContent);
-            document.body.appendChild(modal);
-            
-            // Set initial category
-            document.getElementById('postCategory').value = type;
-            updateFormFields();
-            
-            // Add event listeners
-            document.getElementById('postCategory').addEventListener('change', updateFormFields);
-            document.getElementById('postForm').addEventListener('submit', handlePostSubmit);
-            
-            function updateFormFields() {
-                const category = document.getElementById('postCategory').value;
-                const priceField = document.getElementById('priceField');
-                const eventFields = document.getElementById('eventFields');
-                const pollFields = document.getElementById('pollFields');
-                const foodDrinksFields = document.getElementById('foodDrinksFields');
-                
-                // Hide all conditional fields
-                priceField.style.display = 'none';
-                eventFields.style.display = 'none';
-                pollFields.style.display = 'none';
-                foodDrinksFields.style.display = 'none';
-                
-                // Show relevant fields based on category
-                if (category === 'sale' || category === 'service' || category === 'rent') {
-                    priceField.style.display = 'block';
-                }
-                
-                if (category === 'event') {
-                    eventFields.style.display = 'block';
-                }
-                
-                if (category === 'poll') {
-                    pollFields.style.display = 'block';
-                }
-                
-                if (category === 'food-drinks') {
-                    foodDrinksFields.style.display = 'block';
-                }
-            }
-            
-            function handlePostSubmit(e) {
-                e.preventDefault();
-                
-                const formData = {
-                    category: document.getElementById('postCategory').value,
-                    title: document.getElementById('postTitle').value,
-                    description: document.getElementById('postDescription').value,
-                    price: document.getElementById('postPrice').value,
-                    eventDate: document.getElementById('eventDate').value,
-                    eventTime: document.getElementById('eventTime').value,
-                    eventLocation: document.getElementById('eventLocation').value,
-                    pollOption1: document.getElementById('pollOption1').value,
-                    pollOption2: document.getElementById('pollOption2').value,
-                    businessDetails: {
-                        type: document.getElementById('businessType') ? document.getElementById('businessType').value : '',
-                        cuisine: document.getElementById('cuisineType') ? document.getElementById('cuisineType').value : '',
-                        priceRange: document.getElementById('priceRange') ? document.getElementById('priceRange').value : '',
-                        phone: document.getElementById('businessPhone') ? document.getElementById('businessPhone').value : '',
-                        address: document.getElementById('businessAddress') ? document.getElementById('businessAddress').value : '',
-                        deliveryAvailable: document.getElementById('deliveryAvailable') ? document.getElementById('deliveryAvailable').checked : false,
-                        takeoutAvailable: document.getElementById('takeoutAvailable') ? document.getElementById('takeoutAvailable').checked : false,
-                        dineInAvailable: document.getElementById('dineInAvailable') ? document.getElementById('dineInAvailable').checked : false
-                    },
-                    actionButtons: {
-                        deliverNow: document.getElementById('deliverNow').checked,
-                        selfPickup: document.getElementById('selfPickup').checked,
-                        bookNow: document.getElementById('bookNow').checked,
-                        callNow: document.getElementById('callNow').checked,
-                        messageNow: document.getElementById('messageNow').checked
-                    },
-                    created: new Date().toISOString(),
-                    author: 'Community Member'
-                };
-                
-                // Save to localStorage
-                const existingPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
-                existingPosts.unshift(formData);
-                localStorage.setItem('communityPosts', JSON.stringify(existingPosts));
-                
-                // Close modal
-                modal.remove();
-                
-                // Show success message
-                showNotification(`${formData.category.charAt(0).toUpperCase() + formData.category.slice(1)} post "${formData.title}" created successfully!`, 'success');
-                
-                // Refresh page to show new post
-                setTimeout(() => location.reload(), 1000);
-            }
-        }
-
-        // Post creation
-        function createPost(type = 'general') {
-            openAdvancedPostModal(type);
-        }
 
         // Commerce functions
         function addToCart(itemName, price = null, seller = null, image = null) {
@@ -5654,239 +5439,275 @@
             }
         }
 
-        // Advanced Post Modal Functions
-        // Fixed duplicate - single openAdvancedPostModal function
-        function openAdvancedPostModal(category = 'general') {
-            const modal = document.getElementById('postModal');
-            const modalTitle = document.getElementById('modalTitle');
+        // Facebook Marketplace-style posting modal (copied from working rentals.html)
+        function openAdvancedPostModal(type = 'general') {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+            `;
             
-            // Set modal title based on category
-            const titles = {
-                'general': 'Share with Community',
-                'sale': 'List Item for Sale',
-                'rent': 'List Item for Rent',
-                'service': 'Offer Service',
-                'event': 'Create Event',
-                'poll': 'Create Poll',
-                'iso': 'In Search Of (ISO)',
-                'job': 'Post Job Opportunity',
-                'food-drinks': 'Food & Drinks Business'
-            };
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: #1a0b3d;
+                border: 2px solid #00ffff;
+                border-radius: 15px;
+                padding: 30px;
+                width: 90%;
+                max-width: 600px;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+            `;
             
-            modalTitle.textContent = titles[category] || 'Create Post';
+            modalContent.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="color: #00ffff; margin: 0;">Create ${type.charAt(0).toUpperCase() + type.slice(1)} Post</h2>
+                    <button onclick="this.closest('.posting-modal').remove()" style="background: none; border: none; color: #00ffff; font-size: 24px; cursor: pointer;">&times;</button>
+                </div>
+                
+                <form id="postForm" style="color: #e2e8f0;">
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Post Category:</label>
+                        <select id="postCategory" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                            <option value="general">General</option>
+                            <option value="sale">For Sale</option>
+                            <option value="rent">For Rent</option>
+                            <option value="service">Service</option>
+                            <option value="event">Event</option>
+                            <option value="job">Job/Hiring</option>
+                            <option value="iso">ISO (In Search Of)</option>
+                            <option value="poll">Poll</option>
+                            <option value="announcement">Announcement</option>
+                        </select>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Title:</label>
+                        <input type="text" id="postTitle" placeholder="What are you posting about?" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;" required>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Description:</label>
+                        <textarea id="postDescription" placeholder="Tell us more about your post..." style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0; min-height: 100px;" required></textarea>
+                    </div>
+                    
+                    <div id="priceField" style="margin-bottom: 20px; display: block;">
+                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Price:</label>
+                        <input type="text" id="postPrice" placeholder="$0.00" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                    </div>
+                    
+                    <div id="eventFields" style="display: none;">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 5px; color: #00ffff;">Event Date:</label>
+                            <input type="date" id="eventDate" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 5px; color: #00ffff;">Event Time:</label>
+                            <input type="time" id="eventTime" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 5px; color: #00ffff;">Location:</label>
+                            <input type="text" id="eventLocation" placeholder="Event location" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                        </div>
+                    </div>
+                    
+                    <div id="pollFields" style="display: none;">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 5px; color: #00ffff;">Poll Options:</label>
+                            <input type="text" id="pollOption1" placeholder="Option 1" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0; margin-bottom: 10px;">
+                            <input type="text" id="pollOption2" placeholder="Option 2" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Images:</label>
+                        <input type="file" id="postImages" multiple accept="image/*" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 10px; color: #00ffff;">Action Buttons:</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" id="deliverNow" style="margin-right: 5px;"> Deliver Now
+                            </label>
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" id="selfPickup" style="margin-right: 5px;"> Self Pickup
+                            </label>
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" id="bookNow" style="margin-right: 5px;"> Book Now
+                            </label>
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" id="callNow" style="margin-right: 5px;"> Call Now
+                            </label>
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" id="messageNow" style="margin-right: 5px;"> Message Now
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button type="button" onclick="this.closest('.posting-modal').remove()" style="padding: 10px 20px; background: #666; color: white; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
+                        <button type="submit" style="padding: 10px 20px; background: #00ffff; color: #1a0b3d; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Create Post</button>
+                    </div>
+                </form>
+            `;
             
-            // Pre-select category
-            selectCategory(category);
+            modal.className = 'posting-modal';
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
             
-            // Show/hide relevant fields
-            toggleFieldsForCategory(category);
+            // Set initial category
+            document.getElementById('postCategory').value = type;
+            updateFormFields();
             
-            modal.style.display = 'flex';
-        }
-
-        function closePostModal() {
-            document.getElementById('postModal').style.display = 'none';
-            document.getElementById('advancedPostForm').reset();
-            clearCategorySelection();
-        }
-
-        function selectCategory(category) {
-            // Clear previous selections
-            clearCategorySelection();
+            // Add event listeners
+            document.getElementById('postCategory').addEventListener('change', updateFormFields);
+            document.getElementById('postForm').addEventListener('submit', handlePostSubmit);
             
-            // Select new category
-            const categoryBtn = document.querySelector(`[data-category="${category}"]`);
-            if (categoryBtn) {
-                categoryBtn.classList.add('selected');
-            }
-            
-            toggleFieldsForCategory(category);
-        }
-
-        function clearCategorySelection() {
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-        }
-
-        function toggleFieldsForCategory(category) {
-            const priceGroup = document.getElementById('priceGroup');
-            const rentalPricingGroup = document.getElementById('rentalPricingGroup');
-            const eventDetailsGroup = document.getElementById('eventDetailsGroup');
-            const pollOptions = document.getElementById('pollOptions');
-            const jobCompanyGroup = document.getElementById('jobCompanyGroup');
-            const jobTypeGroup = document.getElementById('jobTypeGroup');
-            const jobSalaryGroup = document.getElementById('jobSalaryGroup');
-            const jobRequirementsGroup = document.getElementById('jobRequirementsGroup');
-            const jobBenefitsGroup = document.getElementById('jobBenefitsGroup');
-            const foodDrinksGroup = document.getElementById('foodDrinksGroup');
-            
-            // Hide all optional fields first
-            if (priceGroup) priceGroup.style.display = 'none';
-            if (rentalPricingGroup) rentalPricingGroup.style.display = 'none';
-            if (eventDetailsGroup) eventDetailsGroup.style.display = 'none';
-            if (pollOptions) pollOptions.style.display = 'none';
-            if (jobCompanyGroup) jobCompanyGroup.style.display = 'none';
-            if (jobTypeGroup) jobTypeGroup.style.display = 'none';
-            if (jobSalaryGroup) jobSalaryGroup.style.display = 'none';
-            if (jobRequirementsGroup) jobRequirementsGroup.style.display = 'none';
-            if (jobBenefitsGroup) jobBenefitsGroup.style.display = 'none';
-            if (foodDrinksGroup) foodDrinksGroup.style.display = 'none';
-            
-            // Show relevant fields based on category
-            if (category === 'sale' || category === 'service') {
-                if (priceGroup) priceGroup.style.display = 'block';
-            } else if (category === 'rent') {
-                if (rentalPricingGroup) rentalPricingGroup.style.display = 'block';
-            } else if (category === 'event') {
-                if (eventDetailsGroup) eventDetailsGroup.style.display = 'block';
-            } else if (category === 'poll') {
-                if (pollOptions) pollOptions.style.display = 'block';
-            } else if (category === 'job') {
-                if (jobCompanyGroup) jobCompanyGroup.style.display = 'block';
-                if (jobTypeGroup) jobTypeGroup.style.display = 'block';
-                if (jobSalaryGroup) jobSalaryGroup.style.display = 'block';
-                if (jobRequirementsGroup) jobRequirementsGroup.style.display = 'block';
-                if (jobBenefitsGroup) jobBenefitsGroup.style.display = 'block';
-            } else if (category === 'food-drinks') {
-                if (foodDrinksGroup) foodDrinksGroup.style.display = 'block';
-            }
-        }
-        
-        // Food Truck Location Visibility Handler
-        function handleFoodBusinessTypeChange() {
-            const businessType = document.getElementById('foodBusinessType');
-            const foodTruckLocationGroup = document.getElementById('foodTruckLocationGroup');
-            
-            if (businessType && foodTruckLocationGroup) {
-                if (businessType.value === 'food-truck') {
-                    foodTruckLocationGroup.style.display = 'block';
-                    // Set today's date by default
-                    const today = new Date().toISOString().split('T')[0];
-                    document.getElementById('foodTruckDate').value = today;
-                } else {
-                    foodTruckLocationGroup.style.display = 'none';
+            function updateFormFields() {
+                const category = document.getElementById('postCategory').value;
+                const priceField = document.getElementById('priceField');
+                const eventFields = document.getElementById('eventFields');
+                const pollFields = document.getElementById('pollFields');
+                
+                // Hide all conditional fields
+                priceField.style.display = 'none';
+                eventFields.style.display = 'none';
+                pollFields.style.display = 'none';
+                
+                // Show relevant fields based on category
+                if (category === 'sale' || category === 'service' || category === 'rent') {
+                    priceField.style.display = 'block';
+                }
+                
+                if (category === 'event') {
+                    eventFields.style.display = 'block';
+                }
+                
+                if (category === 'poll') {
+                    pollFields.style.display = 'block';
                 }
             }
-        }
-        
-        // Add event listener for business type changes
-        document.addEventListener('DOMContentLoaded', function() {
-            const businessType = document.getElementById('foodBusinessType');
-            if (businessType) {
-                businessType.addEventListener('change', handleFoodBusinessTypeChange);
+            
+            function handlePostSubmit(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    category: document.getElementById('postCategory').value,
+                    title: document.getElementById('postTitle').value,
+                    description: document.getElementById('postDescription').value,
+                    price: document.getElementById('postPrice').value,
+                    eventDate: document.getElementById('eventDate').value,
+                    eventTime: document.getElementById('eventTime').value,
+                    eventLocation: document.getElementById('eventLocation').value,
+                    pollOption1: document.getElementById('pollOption1').value,
+                    pollOption2: document.getElementById('pollOption2').value,
+                    actionButtons: {
+                        deliverNow: document.getElementById('deliverNow').checked,
+                        selfPickup: document.getElementById('selfPickup').checked,
+                        bookNow: document.getElementById('bookNow').checked,
+                        callNow: document.getElementById('callNow').checked,
+                        messageNow: document.getElementById('messageNow').checked
+                    },
+                    created: new Date().toISOString(),
+                    author: 'Community Member'
+                };
+                
+                // Save to localStorage
+                const existingPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+                existingPosts.unshift(formData);
+                localStorage.setItem('communityPosts', JSON.stringify(existingPosts));
+                
+                // Close modal
+                modal.remove();
+                
+                // Show success message
+                showNotification(`${formData.category.charAt(0).toUpperCase() + formData.category.slice(1)} post "${formData.title}" created successfully!`, 'success');
+                
+                // Refresh page to show new post
+                setTimeout(() => location.reload(), 1000);
             }
-        });
+        }
 
-        // Food truck location posting function
-        async function submitFoodTruckLocation() {
-            const foodTruckData = {
-                foodTruckName: document.getElementById('postTitle').value,
-                currentLocation: document.getElementById('foodTruckLocation').value,
-                startTime: document.getElementById('foodTruckStartTime').value,
-                endTime: document.getElementById('foodTruckEndTime').value,
-                date: document.getElementById('foodTruckDate').value,
-                specialNotes: document.getElementById('foodTruckNotes').value,
-                locationDescription: document.getElementById('foodTruckLocationDesc').value,
-                addToMap: document.getElementById('addToMap').checked,
-                enableGPSTracking: document.getElementById('enableGPSTracking').checked,
-                menuHighlights: document.getElementById('postDescription').value,
-                businessType: 'food-truck'
-            };
+        // Alias for community posting
+        function openCommunityPost(category = 'general') {
+            openAdvancedPostModal(category);
+        }
 
-            // Validate required fields
-            if (!foodTruckData.foodTruckName || !foodTruckData.currentLocation) {
-                showNotification('Please fill in food truck name and location', 'error');
+        // Show notification function
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 10px;
+                color: white;
+                font-weight: 600;
+                z-index: 10000;
+                max-width: 300px;
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            `;
+            
+            switch(type) {
+                case 'success':
+                    notification.style.background = 'rgba(34, 197, 94, 0.9)';
+                    break;
+                case 'error':
+                    notification.style.background = 'rgba(239, 68, 68, 0.9)';
+                    break;
+                case 'warning':
+                    notification.style.background = 'rgba(245, 158, 11, 0.9)';
+                    break;
+                default:
+                    notification.style.background = 'rgba(59, 130, 246, 0.9)';
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 4000);
+        }
+
+        // Navigation function for bottom nav and other buttons
+        function goToPage(page) {
+            if (page === 'community') {
+                console.log('Already on Community page');
                 return;
             }
-
-            try {
-                const response = await fetch('/api/food-trucks/location', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(foodTruckData)
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showNotification('Food truck location posted successfully!', 'success');
-                    
-                    // Add food truck post to community feed
-                    addFoodTruckPostToFeed(result.locationPost);
-                    
-                    // Close modal and reset form
-                    closeSellerModal();
-                    resetPostForm();
-
-                    if (result.addedToMap) {
-                        showNotification('Food truck added to interactive map!', 'info');
-                    }
-                } else {
-                    showNotification('Error posting food truck location: ' + result.error, 'error');
-                }
-            } catch (error) {
-                console.error('Food truck location posting error:', error);
-                showNotification('Failed to post food truck location. Please try again.', 'error');
-            }
+            
+            const routes = {
+                'shops': 'shops.html',
+                'services': 'services.html',
+                'hub': 'the-hub.html',
+                'eats': 'food-and-drinks.html',
+                'rentals': 'rentals.html',
+                'menu': 'marketpace-menu.html',
+                'home': 'community.html'
+            };
+            
+            const targetPage = routes[page] || page;
+            window.location.href = targetPage;
         }
 
-        // Add food truck post to community feed
-        function addFoodTruckPostToFeed(locationPost) {
-            const postsContainer = document.getElementById('posts');
-            if (!postsContainer) return;
-
-            const postHtml = `
-                <div class="post-card">
-                    <div class="post-header">
-                        <div class="post-user-info">
-                            <div class="user-avatar">🚚</div>
-                            <div>
-                                <div class="post-username">${locationPost.name}</div>
-                                <div class="post-time">Just now • Food Truck Location</div>
-                            </div>
-                        </div>
-                        <div class="post-category-badge food-drinks">Food Truck</div>
-                    </div>
-                    <div class="post-content">
-                        <div class="post-title" style="color: #00ffff; font-weight: bold; margin-bottom: 10px;">
-                            📍 Now serving at: ${locationPost.currentLocation}
-                        </div>
-                        <div class="post-description">
-                            <strong>Hours:</strong> ${locationPost.operatingHours}<br>
-                            <strong>Menu:</strong> ${locationPost.menuHighlights}<br>
-                            ${locationPost.specialNotes ? `<strong>Special:</strong> ${locationPost.specialNotes}<br>` : ''}
-                            ${locationPost.locationDescription ? `<strong>Location Details:</strong> ${locationPost.locationDescription}` : ''}
-                        </div>
-                    </div>
-                    <div class="post-actions">
-                        <button class="action-button" onclick="viewOnMap('${locationPost.id}')">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                            </svg>
-                            View on Map
-                        </button>
-                        <button class="action-button" onclick="messageOwner('${locationPost.name}', 'Food Truck Location', '${locationPost.id}')">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-                            </svg>
-                            Message
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            postsContainer.insertAdjacentHTML('afterbegin', postHtml);
-        }
-
-        // View food truck on map function
-        function viewOnMap(foodTruckId) {
-            // Navigate to map page and highlight the food truck
-            window.location.href = `/local-event-calendar.html?highlight=${foodTruckId}&filter=food-trucks`;
-        }
-        }
+        // Make functions available globally
+        window.openAdvancedPostModal = openAdvancedPostModal;
+        window.openCommunityPost = openCommunityPost;
+        window.showNotification = showNotification;
+        window.goToPage = goToPage;
 
         function addPollOption() {
             const pollList = document.getElementById('pollOptionsList');
@@ -6418,6 +6239,9 @@
                     case 'hub':
                     case 'the-hub':
                         window.location.href = '/the-hub';
+                        break;
+                    case 'food-drinks':
+                        window.location.href = '/food-and-drinks';
                         break;
                     case 'delivery':
                         window.location.href = '/delivery';
