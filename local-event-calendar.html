@@ -739,7 +739,7 @@
         <div class="filter-controls">
             <div class="filter-row">
                 <div class="compact-controls">
-                    <select class="town-select" id="townSelect" onchange="switchTown()">
+                    <select class="town-select" id="townSelect" onchange="updateTown()">
                         <option value="orange-beach">Orange Beach, AL</option>
                         <option value="gulf-shores">Gulf Shores, AL</option>
                         <option value="mobile">Mobile, AL</option>
@@ -749,46 +749,46 @@
                     </select>
                     
                     <div class="radius-buttons">
-                        <button class="radius-btn active" data-radius="5" onclick="setRadius(5)">5mi</button>
-                        <button class="radius-btn" data-radius="10" onclick="setRadius(10)">10mi</button>
-                        <button class="radius-btn" data-radius="25" onclick="setRadius(25)">25mi</button>
-                        <button class="radius-btn" data-radius="50" onclick="setRadius(50)">50mi</button>
+                        <button class="radius-btn active" data-radius="5" onclick="updateRadius(5)">5mi</button>
+                        <button class="radius-btn" data-radius="10" onclick="updateRadius(10)">10mi</button>
+                        <button class="radius-btn" data-radius="25" onclick="updateRadius(25)">25mi</button>
+                        <button class="radius-btn" data-radius="50" onclick="updateRadius(50)">50mi</button>
                     </div>
                 </div>
                 
                 <div class="category-filters">
-                    <button class="category-btn active" data-category="all" onclick="filterByCategory('all')">
+                    <button class="category-btn active" data-category="all" onclick="updateCategory('all')">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                             <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2"/>
                         </svg>
                         All Events
                     </button>
-                    <button class="category-btn" data-category="music" onclick="filterByCategory('music')">
+                    <button class="category-btn" data-category="music" onclick="updateCategory('music')">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                             <path d="M9 18V5l12-2v13" stroke="currentColor" stroke-width="2"/>
                             <circle cx="6" cy="18" r="3" stroke="currentColor" stroke-width="2"/>
                         </svg>
                         Music
                     </button>
-                    <button class="category-btn" data-category="sports" onclick="filterByCategory('sports')">
+                    <button class="category-btn" data-category="sports" onclick="updateCategory('sports')">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                             <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
                         </svg>
                         Sports
                     </button>
-                    <button class="category-btn" data-category="food" onclick="filterByCategory('food')">
+                    <button class="category-btn" data-category="food" onclick="updateCategory('food')">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                             <path d="M7 2v20" stroke="currentColor" stroke-width="2"/>
                         </svg>
                         Food
                     </button>
-                    <button class="category-btn" data-category="community" onclick="filterByCategory('community')">
+                    <button class="category-btn" data-category="community" onclick="updateCategory('community')">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                             <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
                         </svg>
                         Community
                     </button>
-                    <button class="category-btn" data-category="business" onclick="filterByCategory('business')">
+                    <button class="category-btn" data-category="business" onclick="updateCategory('business')">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2"/>
                         </svg>
@@ -1074,33 +1074,7 @@
             window.history.back();
         }
 
-        function switchTown() {
-            const townSelect = document.getElementById('townSelect');
-            currentTown = townSelect.value;
-            filterEvents();
-            updateCalendarEvents();
-        }
-
-        function setRadius(radius) {
-            currentRadius = radius;
-            
-            // Update active radius button
-            document.querySelectorAll('.radius-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`[data-radius="${radius}"]`).classList.add('active');
-            
-            filterEvents();
-        }
-
-        function filterByCategory(category) {
-            selectedFilter = category;
-            
-            // Update active category button
-            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`[data-category="${category}"]`).classList.add('active');
-            
-            filterEvents();
-            updateCalendarEvents();
-        }
+        // Duplicate functions removed - using updateTown, updateRadius, updateCategory instead
 
         function filterEvents() {
             const filteredEvents = events.filter(event => {
@@ -1394,9 +1368,7 @@
             }
         ];
 
-        let currentTown = 'orange-beach';
-        let currentRadius = 5;
-        let currentCategory = 'all';
+        // Variables already declared above - removing duplicates
 
         function generateCalendar() {
             const grid = document.getElementById('calendarGrid');
@@ -1692,13 +1664,14 @@
             return names[type] || type;
         }
 
-        function switchTown() {
+        function updateTown() {
             const select = document.getElementById('townSelect');
             currentTown = select.value;
+            filterEvents();
             generateCalendar();
         }
 
-        function setRadius(radius) {
+        function updateRadius(radius) {
             currentRadius = radius;
             
             // Update button states
@@ -1707,11 +1680,12 @@
             });
             document.querySelector(`[data-radius="${radius}"]`).classList.add('active');
             
+            filterEvents();
             generateCalendar();
         }
 
-        function filterByCategory(category) {
-            currentCategory = category;
+        function updateCategory(category) {
+            selectedFilter = category;
             
             // Update button states
             document.querySelectorAll('.category-btn').forEach(btn => {
@@ -1719,6 +1693,7 @@
             });
             document.querySelector(`[data-category="${category}"]`).classList.add('active');
             
+            filterEvents();
             generateCalendar();
         }
 
