@@ -4997,13 +4997,31 @@ ${selectedCustomTitle ? `📝 Custom Title: ${scheduleTitle}` : ''}
             const existingCustomOptions = roleSelect.querySelectorAll('.custom-role-option');
             existingCustomOptions.forEach(option => option.remove());
             
-            // Add custom roles
-            customRoles.forEach(role => {
+            // Add separator if there are custom roles
+            if (customRoles.length > 0) {
+                const separator = document.createElement('option');
+                separator.value = '';
+                separator.textContent = '── Custom Roles ──';
+                separator.disabled = true;
+                separator.className = 'custom-role-option';
+                separator.style.fontStyle = 'italic';
+                separator.style.color = '#8a2be2';
+                roleSelect.appendChild(separator);
+            }
+            
+            // Add custom roles with visual indicators
+            customRoles.forEach((role, index) => {
                 const option = document.createElement('option');
                 option.value = role.name;
-                option.textContent = role.name;
+                
+                // Check if role was created recently (within last 5 minutes)
+                const isNew = new Date() - new Date(role.created) < 5 * 60 * 1000;
+                option.textContent = isNew ? `${role.name} ⭐ NEW` : role.name;
+                
                 option.className = 'custom-role-option';
                 option.dataset.color = role.color;
+                option.style.color = role.color;
+                option.style.fontWeight = isNew ? 'bold' : 'normal';
                 roleSelect.appendChild(option);
             });
         }
@@ -6743,10 +6761,11 @@ ${selectedCustomTitle ? `📝 Custom Title: ${scheduleTitle}` : ''}
             existingRoles.push(customRole);
             localStorage.setItem('marketpace_custom_roles', JSON.stringify(existingRoles));
 
-            // Refresh displays
+            // Refresh displays and update all role dropdowns
             loadCustomRoles();
             updateRoleFilters();
-            populateRoleDropdown();
+            populateRoleDropdown(); // Update the Add Employee modal dropdown
+            updateAllRoleSelections(); // Update any other role dropdowns
             
             // Close modal and show success
             closeCustomRoleModal();
@@ -6813,10 +6832,8 @@ ${selectedCustomTitle ? `📝 Custom Title: ${scheduleTitle}` : ''}
                 customRoles = customRoles.filter(role => role.id !== roleId);
                 localStorage.setItem('marketpace_custom_roles', JSON.stringify(customRoles));
                 
-                loadCustomRoles();
-                updateRoleFilters();
-                populateRoleDropdown();
-                showNotification('Custom role deleted', 'success');
+                refreshCustomRoleDisplays();
+                showNotification('Custom role deleted and removed from all selections', 'success');
             }
         }
 
@@ -6840,81 +6857,38 @@ ${selectedCustomTitle ? `📝 Custom Title: ${scheduleTitle}` : ''}
             });
         }
 
-        // Missing essential functions
-        function setEventScale(scale) {
-            console.log(`Setting event scale to: ${scale}`);
-            // Implementation for event scaling
-        }
-
-        function editShift(shiftId) {
-            console.log(`Editing shift: ${shiftId}`);
-            showNotification('Shift editing feature - click to modify shift details', 'info');
-        }
-
-        function showCreateShiftTemplates() {
-            console.log('Showing shift templates');
-            showNotification('Shift template creator - select templates to create shifts', 'info');
-        }
-
-        function switchToView(viewType) {
-            console.log(`Switching to ${viewType} view`);
-            const calendarBtn = document.querySelector('.view-toggle button:first-child');
-            const listBtn = document.querySelector('.view-toggle button:last-child');
+        function updateAllRoleSelections() {
+            // Update all role dropdowns across the system
+            const customRoles = JSON.parse(localStorage.getItem('marketpace_custom_roles') || '[]');
             
-            if (viewType === 'calendar') {
-                calendarBtn.style.background = 'rgba(65, 105, 225, 0.3)';
-                calendarBtn.style.color = '#4169e1';
-                listBtn.style.background = 'rgba(255, 255, 255, 0.1)';
-                listBtn.style.color = 'white';
-                showNotification('Calendar view active', 'info');
-            } else if (viewType === 'list') {
-                listBtn.style.background = 'rgba(65, 105, 225, 0.3)';
-                listBtn.style.color = '#4169e1';
-                calendarBtn.style.background = 'rgba(255, 255, 255, 0.1)';
-                calendarBtn.style.color = 'white';
-                showNotification('List view active', 'info');
-            }
-        }
-
-        function showTab(tabName) {
-            console.log(`Showing tab: ${tabName}`);
+            // Update any other role selection elements that might exist
+            const allRoleSelects = document.querySelectorAll('select[id*="role"], select[id*="Role"]');
             
-            // Hide all tab contents
-            const tabContents = document.querySelectorAll('.tab-content');
-            tabContents.forEach(content => content.style.display = 'none');
-            
-            // Remove active class from all nav chips
-            const navChips = document.querySelectorAll('.nav-chip');
-            navChips.forEach(chip => {
-                chip.style.background = 'rgba(255, 255, 255, 0.1)';
-                chip.style.color = 'white';
+            allRoleSelects.forEach(select => {
+                if (select.id === 'newEmployeeRole') return; // Skip - handled by populateRoleDropdown
+                if (select.id === 'modalRoleFilter') return; // Skip - handled by updateRoleFilters
+                
+                // Remove existing custom options
+                const existingCustomOptions = select.querySelectorAll('.custom-role-option');
+                existingCustomOptions.forEach(option => option.remove());
+                
+                // Add custom roles
+                customRoles.forEach(role => {
+                    const option = document.createElement('option');
+                    option.value = role.name;
+                    option.textContent = role.name;
+                    option.className = 'custom-role-option';
+                    select.appendChild(option);
+                });
             });
-            
-            // Show the selected tab content
-            const selectedTab = document.getElementById(`${tabName}-tab`);
-            if (selectedTab) {
-                selectedTab.style.display = 'block';
-            }
-            
-            // Highlight the active nav chip
-            const activeChip = document.querySelector(`[onclick="showTab('${tabName}')"]`);
-            if (activeChip) {
-                if (tabName === 'employees') {
-                    activeChip.style.background = 'rgba(255, 215, 0, 0.3)';
-                    activeChip.style.color = '#ffd700';
-                } else if (tabName === 'volunteers') {
-                    activeChip.style.background = 'rgba(138, 43, 226, 0.3)';
-                    activeChip.style.color = '#8a2be2';
-                } else if (tabName === 'qr-system') {
-                    activeChip.style.background = 'rgba(0, 255, 255, 0.3)';
-                    activeChip.style.color = '#00ffff';
-                } else {
-                    activeChip.style.background = 'rgba(65, 105, 225, 0.3)';
-                    activeChip.style.color = '#4169e1';
-                }
-            }
-            
-            showNotification(`${tabName.charAt(0).toUpperCase() + tabName.slice(1)} section active`, 'success');
+        }
+
+        function refreshCustomRoleDisplays() {
+            // Called whenever custom roles are modified to update all displays
+            loadCustomRoles();
+            updateRoleFilters();
+            populateRoleDropdown();
+            updateAllRoleSelections();
         }
 
         // Initialize page
@@ -6935,7 +6909,7 @@ ${selectedCustomTitle ? `📝 Custom Title: ${scheduleTitle}` : ''}
             
             // Welcome message
             setTimeout(() => {
-                updateVoiceOutput('🚀 Sleek voice assistant ready - click "Command" to begin');
+                updateVoiceConsole('🚀 Sleek voice assistant ready - click "Command" to begin');
             }, 1000);
         });
     </script>
@@ -7083,6 +7057,5 @@ ${selectedCustomTitle ? `📝 Custom Title: ${scheduleTitle}` : ''}
 
         </div> <!-- Close tab-container -->
     </div> <!-- Close main container -->
-    </script>
 </body>
 </html>
