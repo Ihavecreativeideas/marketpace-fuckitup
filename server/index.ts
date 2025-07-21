@@ -2006,6 +2006,11 @@ app.post('/api/employee/send-invitation', async (req, res) => {
   }
 });
 
+// Employee Dashboard Route
+app.get('/employee-dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '../employee-dashboard.html'));
+});
+
 // Catch-all for other HTML pages
 app.get('/:page', (req, res) => {
   const pageName = req.params.page;
