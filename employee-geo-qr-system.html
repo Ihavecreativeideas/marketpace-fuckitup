@@ -1009,12 +1009,23 @@
             
             // Get value from different element types
             let businessName = '';
-            if (businessNameElement.value !== undefined) {
+            
+            // Try to get the current input value first
+            if (window.getCurrentInputValue && typeof window.getCurrentInputValue === 'function') {
+                businessName = window.getCurrentInputValue();
+                console.log('📝 Got value from input tracker:', businessName);
+            }
+            
+            // Fallback methods
+            if (!businessName && businessNameElement.value !== undefined) {
                 businessName = businessNameElement.value;
-            } else if (businessNameElement.textContent) {
+                console.log('📝 Got value from .value property:', businessName);
+            } else if (!businessName && businessNameElement.textContent) {
                 businessName = businessNameElement.textContent;
-            } else if (businessNameElement.getAttribute && businessNameElement.getAttribute('value')) {
+                console.log('📝 Got value from textContent:', businessName);
+            } else if (!businessName && businessNameElement.getAttribute && businessNameElement.getAttribute('value')) {
                 businessName = businessNameElement.getAttribute('value');
+                console.log('📝 Got value from attribute:', businessName);
             }
             
             const radius = radiusElement.value || '100';
@@ -1653,6 +1664,27 @@
                         // Store reference for form access
                         window.businessNameElement = autocompleteElement;
                         
+                        // Store the current input value
+                        let currentInputValue = '';
+                        
+                        // Listen for input changes
+                        autocompleteElement.addEventListener('input', (event) => {
+                            currentInputValue = event.target.value || '';
+                            console.log('📝 Input changed:', currentInputValue);
+                        });
+                        
+                        // Listen for keydown events (Enter key)
+                        autocompleteElement.addEventListener('keydown', (event) => {
+                            if (event.key === 'Enter') {
+                                console.log('⌨️ Enter key pressed, submitting form');
+                                event.preventDefault();
+                                generateEmployeeQR();
+                            }
+                        });
+                        
+                        // Store reference to current input value
+                        window.getCurrentInputValue = () => currentInputValue;
+                        
                         autocompleteElement.addEventListener('gmp-placeselect', async (event) => {
                             console.log('🏢 Place selection event triggered:', event);
                             
@@ -1681,6 +1713,7 @@
                                 
                                 // Update the visible input value for user feedback
                                 autocompleteElement.value = place.displayName || place.formattedAddress;
+                                currentInputValue = place.displayName || place.formattedAddress;
                                 
                                 showNotification(`Location selected: ${place.displayName || place.formattedAddress}`, 'success');
                                 console.log('✅ NEW Google Places location selected and stored:', selectedPlace);
