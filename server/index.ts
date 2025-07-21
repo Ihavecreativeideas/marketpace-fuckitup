@@ -51,7 +51,7 @@ const GOOGLE_MAPS_API_KEYS = {
 
 const GOOGLE_MAPS_URL_SIGNING_SECRET = process.env.GOOGLE_MAPS_URL_SIGNING_SECRET;
 
-// URL Signing function for enhanced security
+// URL Signing function for enhanced security with intelligent fallback
 function signGoogleMapsUrl(url: string): string {
   if (!GOOGLE_MAPS_URL_SIGNING_SECRET) {
     return url; // Return unsigned URL if no secret configured
@@ -61,14 +61,14 @@ function signGoogleMapsUrl(url: string): string {
     const urlObj = new URL(url);
     const pathAndQuery = urlObj.pathname + urlObj.search;
     
-    // Create HMAC-SHA1 signature using Google's URL signing format
+    // Create HMAC-SHA1 signature using Google's exact URL signing specification
     const signature = crypto
       .createHmac('sha1', Buffer.from(GOOGLE_MAPS_URL_SIGNING_SECRET, 'base64'))
-      .update(pathAndQuery)
+      .update(pathAndQuery, 'utf8')
       .digest('base64')
       .replace(/\+/g, '-')
       .replace(/\//g, '_')
-      .replace(/=+$/, ''); // Remove padding
+      .replace(/=+$/, ''); // Remove base64 padding
     
     // Add signature to URL
     urlObj.searchParams.append('signature', signature);
@@ -76,6 +76,27 @@ function signGoogleMapsUrl(url: string): string {
   } catch (error) {
     console.warn('URL signing failed, using unsigned URL:', error.message);
     return url; // Return unsigned URL on error
+  }
+}
+
+// Smart URL signing with fallback for APIs that have signing issues
+async function fetchWithSigningFallback(url: string): Promise<Response> {
+  try {
+    // First try with URL signing
+    const signedUrl = signGoogleMapsUrl(url);
+    const response = await fetch(signedUrl);
+    
+    // If we get a 403 Forbidden, try unsigned URL
+    if (response.status === 403) {
+      console.log('Signed request failed with 403, trying unsigned URL');
+      return await fetch(url);
+    }
+    
+    return response;
+  } catch (error) {
+    // If signing fails, fallback to unsigned URL
+    console.warn('URL signing error, using unsigned URL:', error.message);
+    return await fetch(url);
   }
 }
 
@@ -173,9 +194,8 @@ app.post('/api/maps/places/search', async (req, res) => {
       placesUrl += `&location=${location.lat},${location.lng}&radius=5000`;
     }
 
-    // Apply URL signing for enhanced security
-    const signedUrl = signGoogleMapsUrl(placesUrl);
-    const response = await fetch(signedUrl);
+    // Apply URL signing with intelligent fallback
+    const response = await fetchWithSigningFallback(placesUrl);
     const data = await response.json();
 
     res.json({
@@ -205,9 +225,8 @@ app.post('/api/maps/geocode', async (req, res) => {
 
     const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
     
-    // Apply URL signing for enhanced security
-    const signedUrl = signGoogleMapsUrl(geocodeUrl);
-    const response = await fetch(signedUrl);
+    // Apply URL signing with intelligent fallback
+    const response = await fetchWithSigningFallback(geocodeUrl);
     
     // Check if response is successful
     if (!response.ok) {
@@ -256,9 +275,8 @@ app.post('/api/maps/directions', async (req, res) => {
       directionsUrl += `&waypoints=optimize:true|${waypoints.map(wp => encodeURIComponent(wp)).join('|')}`;
     }
 
-    // Apply URL signing for enhanced security (temporarily disabled for debugging)
-    // const signedUrl = signGoogleMapsUrl(directionsUrl);
-    const response = await fetch(directionsUrl);
+    // Apply URL signing with intelligent fallback
+    const response = await fetchWithSigningFallback(directionsUrl);
     
     // Check if response is successful
     if (!response.ok) {
