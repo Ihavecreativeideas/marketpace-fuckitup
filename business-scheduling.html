@@ -3527,28 +3527,41 @@
         ];
 
         function initializeSmartEmployeeManagement() {
-            generateEmployeeCards();
+            console.log('Smart Employee Management positioned at top of Employees tab');
+            generateSmartEmployeeCards();
             generateMultiDayCalendar();
         }
 
-        function generateEmployeeCards() {
-            const grid = document.getElementById('smartEmployeeGrid');
-            grid.innerHTML = '';
+        function generateSmartEmployeeCards() {
+            const smartEmployeeGrid = document.getElementById('smartEmployeeGrid');
+            if (!smartEmployeeGrid) {
+                console.error('Smart Employee Grid element not found');
+                return;
+            }
+            
+            smartEmployeeGrid.innerHTML = '';
+
+            const employees = [
+                { id: 'sarah', name: 'Sarah Johnson', role: 'Manager', status: 'Available', avatar: 'S', color: 'manager' },
+                { id: 'mike', name: 'Mike Chen', role: 'Cashier', status: 'Available', avatar: 'M', color: 'cashier' },
+                { id: 'jessica', name: 'Jessica Martinez', role: 'Sales', status: 'Scheduled', avatar: 'J', color: 'sales' },
+                { id: 'david', name: 'David Wilson', role: 'Stock', status: 'Available', avatar: 'D', color: 'stock' },
+                { id: 'emma', name: 'Emma Davis', role: 'Assistant', status: 'Off', avatar: 'E', color: 'assistant' },
+                { id: 'carlos', name: 'Carlos Rodriguez', role: 'Security', status: 'Available', avatar: 'C', color: 'security' }
+            ];
 
             employees.forEach(employee => {
-                const statusColor = {
-                    'Available': '#00ff88',
-                    'Scheduled': '#00ffff', 
-                    'Off': '#ff6b9d'
-                }[employee.status];
-
                 const card = document.createElement('div');
                 card.className = 'employee-card';
-                card.dataset.employeeId = employee.id;
+                // Add status indicator colors
+                let statusColor = '#00ff88'; // Available
+                if (employee.status === 'Scheduled') statusColor = '#ffd700';
+                if (employee.status === 'Off') statusColor = '#ff6b9d';
+
                 card.style.cssText = `
-                    background: rgba(0,0,0,0.4);
-                    border: 2px solid rgba(255,255,255,0.1);
-                    border-radius: 16px;
+                    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+                    border: 1px solid rgba(255,255,255,0.2);
+                    border-radius: 12px;
                     padding: 16px;
                     cursor: pointer;
                     transition: all 0.3s ease;
@@ -3557,75 +3570,52 @@
                 `;
 
                 card.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
-                        <div style="width: 60px; height: 60px; background: ${employee.color}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: white;">
-                            ${employee.avatar}
-                        </div>
+                    <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                        <div class="employee-avatar ${employee.color}" style="width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; margin-right: 12px;">${employee.avatar}</div>
                         <div style="flex: 1;">
-                            <div style="font-size: 18px; font-weight: bold; color: white; margin-bottom: 4px;">${employee.name}</div>
-                            <div style="color: #94a3b8; font-size: 14px;">${employee.role} • $${employee.rate}/hr</div>
+                            <div style="font-weight: bold; color: white; font-size: 16px;">${employee.name}</div>
+                            <div style="color: #94a3b8; font-size: 14px;">${employee.role}</div>
                         </div>
-                        <div style="width: 12px; height: 12px; background: ${statusColor}; border-radius: 50%; box-shadow: 0 0 8px ${statusColor};"></div>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="color: ${statusColor}; font-size: 14px; font-weight: 500;">${employee.status}</div>
-                        <div style="display: flex; gap: 8px;">
-                            <button onclick="viewEmployeeDetails(${employee.id}); event.stopPropagation();" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">View</button>
-                            <button onclick="selectEmployeeForScheduling(${employee.id}); event.stopPropagation();" style="background: linear-gradient(135deg, #00ffff, #0066ff); border: none; color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">Schedule</button>
+                        <div class="status-widget">
+                            <button class="status-button ${employee.status.toLowerCase()}" onclick="toggleStatusDropdown('${employee.id}')" id="status-btn-${employee.id}">
+                                ${employee.status}
+                            </button>
+                            <div class="status-dropdown" id="status-dropdown-${employee.id}">
+                                <button class="status-option available" onclick="updateEmployeeStatus('${employee.id}', 'Available')">Available</button>
+                                <button class="status-option scheduled" onclick="updateEmployeeStatus('${employee.id}', 'Scheduled')">Scheduled</button>
+                                <button class="status-option break" onclick="updateEmployeeStatus('${employee.id}', 'Break')">Break</button>
+                                <button class="status-option off" onclick="updateEmployeeStatus('${employee.id}', 'Off')">Off</button>
+                            </div>
                         </div>
+                        <button style="background: linear-gradient(135deg, #00ffff, #4169e1); border: none; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;" onclick="openEmployeeScheduling(${JSON.stringify(employee).replace(/"/g, '&quot;')})">Schedule</button>
                     </div>
                 `;
 
-                card.addEventListener('click', () => selectEmployeeForScheduling(employee.id));
-                card.addEventListener('mouseenter', () => {
-                    card.style.border = '2px solid #00ffff';
-                    card.style.transform = 'translateY(-2px)';
-                    card.style.boxShadow = '0 8px 32px rgba(0,255,255,0.3)';
-                });
-                card.addEventListener('mouseleave', () => {
-                    if (selectedEmployee?.id !== employee.id) {
-                        card.style.border = '2px solid rgba(255,255,255,0.1)';
-                        card.style.transform = 'translateY(0)';
-                        card.style.boxShadow = 'none';
-                    }
-                });
+                // Add click handler to open scheduling interface
+                card.onclick = function() {
+                    openEmployeeScheduling(employee);
+                };
 
-                grid.appendChild(card);
+                // Add hover effects
+                card.onmouseenter = function() {
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 8px 25px rgba(0,255,255,0.3)';
+                    this.style.borderColor = '#00ffff';
+                };
+
+                card.onmouseleave = function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = 'none';
+                    this.style.borderColor = 'rgba(255,255,255,0.2)';
+                };
+
+                smartEmployeeGrid.appendChild(card);
             });
         }
 
-        function selectEmployeeForScheduling(employeeId) {
-            selectedEmployee = employees.find(emp => emp.id === employeeId);
-            
-            // Update card styling
-            document.querySelectorAll('.employee-card').forEach(card => {
-                if (parseInt(card.dataset.employeeId) === employeeId) {
-                    card.style.border = '2px solid #ffd700';
-                    card.style.background = 'rgba(255,215,0,0.1)';
-                    card.style.transform = 'translateY(-2px)';
-                } else {
-                    card.style.border = '2px solid rgba(255,255,255,0.1)';
-                    card.style.background = 'rgba(0,0,0,0.4)';
-                    card.style.transform = 'translateY(0)';
-                }
-            });
-
-            // Show scheduling interface
-            document.getElementById('selectedEmployeeScheduling').style.display = 'block';
-            document.getElementById('selectedEmployeeName').textContent = selectedEmployee.name;
-            document.getElementById('selectedEmployeeRole').textContent = `${selectedEmployee.role} • $${selectedEmployee.rate}/hr • ${selectedEmployee.status}`;
-
-            // Initialize comprehensive scheduling calendar
-            generateFullScheduleCalendar();
-            generateCoverageAnalysis();
-
-            // Reset selections
-            selectedShiftTemplate = null;
-            selectedCalendarDays = [];
-            updateShiftTemplateSelection();
-
-            showNotification(`Selected ${selectedEmployee.name} for scheduling`, 'success');
-        }
+        // Remove this duplicate function since openEmployeeScheduling is already defined
 
         function closeEmployeeScheduling() {
             selectedEmployee = null;
@@ -4255,93 +4245,7 @@
             // In a real app, this would open a modal for custom time selection
         }
 
-        // Initialize smart employee management
-        function initializeSmartEmployeeManagement() {
-            console.log('Smart Employee Management positioned at top of Employees tab');
-            
-            // Generate employee cards
-            const smartEmployeeGrid = document.getElementById('smartEmployeeGrid');
-            if (smartEmployeeGrid) {
-                generateEmployeeCards();
-            }
-        }
-
-        function generateEmployeeCards() {
-            const employees = [
-                { id: 'sarah', name: 'Sarah Johnson', role: 'Manager', status: 'Available', avatar: 'S', color: 'manager' },
-                { id: 'mike', name: 'Mike Chen', role: 'Cashier', status: 'Available', avatar: 'M', color: 'cashier' },
-                { id: 'jessica', name: 'Jessica Martinez', role: 'Sales', status: 'Scheduled', avatar: 'J', color: 'sales' },
-                { id: 'david', name: 'David Wilson', role: 'Stock', status: 'Available', avatar: 'D', color: 'stock' },
-                { id: 'emma', name: 'Emma Davis', role: 'Assistant', status: 'Off', avatar: 'E', color: 'assistant' },
-                { id: 'carlos', name: 'Carlos Rodriguez', role: 'Security', status: 'Available', avatar: 'C', color: 'security' }
-            ];
-
-            const smartEmployeeGrid = document.getElementById('smartEmployeeGrid');
-            smartEmployeeGrid.innerHTML = '';
-
-            employees.forEach(employee => {
-                const card = document.createElement('div');
-                card.className = 'employee-card';
-                card.style.cssText = `
-                    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-                    border: 1px solid rgba(255,255,255,0.2);
-                    border-radius: 12px;
-                    padding: 16px;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    position: relative;
-                `;
-
-                // Add status indicator colors
-                let statusColor = '#00ff88'; // Available
-                if (employee.status === 'Scheduled') statusColor = '#ffd700';
-                if (employee.status === 'Off') statusColor = '#ff6b9d';
-
-                card.innerHTML = `
-                    <div style="display: flex; align-items: center; margin-bottom: 12px;">
-                        <div class="employee-avatar ${employee.color}" style="width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; margin-right: 12px;">${employee.avatar}</div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: bold; color: white; font-size: 16px;">${employee.name}</div>
-                            <div style="color: #94a3b8; font-size: 14px;">${employee.role}</div>
-                        </div>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="status-widget">
-                            <button class="status-button ${employee.status.toLowerCase()}" onclick="toggleStatusDropdown('${employee.id}')" id="status-btn-${employee.id}">
-                                ${employee.status}
-                            </button>
-                            <div class="status-dropdown" id="status-dropdown-${employee.id}">
-                                <button class="status-option available" onclick="updateEmployeeStatus('${employee.id}', 'Available')">Available</button>
-                                <button class="status-option scheduled" onclick="updateEmployeeStatus('${employee.id}', 'Scheduled')">Scheduled</button>
-                                <button class="status-option break" onclick="updateEmployeeStatus('${employee.id}', 'Break')">Break</button>
-                                <button class="status-option off" onclick="updateEmployeeStatus('${employee.id}', 'Off')">Off</button>
-                            </div>
-                        </div>
-                        <button style="background: linear-gradient(135deg, #00ffff, #4169e1); border: none; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;" onclick="openEmployeeScheduling(${JSON.stringify(employee).replace(/"/g, '&quot;')})">Schedule</button>
-                    </div>
-                `;
-
-                // Add click handler to open scheduling interface
-                card.onclick = function() {
-                    openEmployeeScheduling(employee);
-                };
-
-                // Add hover effects
-                card.onmouseenter = function() {
-                    this.style.transform = 'translateY(-2px)';
-                    this.style.boxShadow = '0 8px 25px rgba(0,255,255,0.3)';
-                    this.style.borderColor = '#00ffff';
-                };
-
-                card.onmouseleave = function() {
-                    this.style.transform = 'translateY(0)';
-                    this.style.boxShadow = 'none';
-                    this.style.borderColor = 'rgba(255,255,255,0.2)';
-                };
-
-                smartEmployeeGrid.appendChild(card);
-            });
-        }
+        // Remove duplicate function - using the primary generateSmartEmployeeCards function above
 
         function openEmployeeScheduling(employee) {
             // Set employee details in the scheduling interface
