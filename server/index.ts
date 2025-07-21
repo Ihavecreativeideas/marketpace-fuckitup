@@ -2059,6 +2059,21 @@ app.get('/driver-qr-scanner', (req, res) => {
   res.sendFile(path.join(__dirname, '../driver-qr-scanner.html'));
 });
 
+// Driver Application Route (for members to apply)
+app.get('/driver-application', (req, res) => {
+  res.sendFile(path.join(__dirname, '../driver-application.html'));
+});
+
+// Unified Portal System Demo Route
+app.get('/unified-portal-system-demo', (req, res) => {
+  res.sendFile(path.join(__dirname, '../unified-portal-system-demo.html'));
+});
+
+// Unified Workflow Confirmation Route
+app.get('/unified-workflow-confirmation', (req, res) => {
+  res.sendFile(path.join(__dirname, '../unified-workflow-confirmation.html'));
+});
+
 // Catch-all for other HTML pages
 app.get('/:page', (req, res) => {
   const pageName = req.params.page;
