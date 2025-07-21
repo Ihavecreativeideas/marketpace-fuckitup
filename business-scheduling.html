@@ -819,8 +819,8 @@
         <div id="schedule" class="tab-content active">
             <div class="tab-title">Schedule Management</div>
             
-            <!-- Voice Assistant Card -->
-            <div style="background: linear-gradient(135deg, rgba(138, 43, 226, 0.2), rgba(65, 105, 225, 0.1)); border: 1px solid rgba(138, 43, 226, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+            <!-- Voice Control at Top -->
+            <div class="voice-control-compact" style="background: linear-gradient(135deg, rgba(138, 43, 226, 0.2), rgba(65, 105, 225, 0.1)); border: 1px solid rgba(138, 43, 226, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                     <div style="display: flex; align-items: center; gap: 16px;">
                         <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #8a2be2, #4169e1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
@@ -834,44 +834,43 @@
                             <p style="color: #94a3b8; margin: 0; font-size: 14px;">Natural language scheduling</p>
                         </div>
                     </div>
-                    <button onclick="toggleVoiceRecognition()" style="background: linear-gradient(135deg, #8a2be2, #4169e1); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">COMMAND</button>
+                    <button onclick="activateVoiceCommand()" style="background: linear-gradient(135deg, #8a2be2, #4169e1); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">COMMAND</button>
+                </div>
+                
+                <div id="voiceConsole" style="margin-top: 16px; padding: 12px; background: rgba(0, 0, 0, 0.5); border-radius: 8px; min-height: 40px; color: #00ffff; font-family: monospace; font-size: 12px;">
+                    [2:44:05 PM] All systems operational — voice assistant, calendar, employee management, and QR system ready
                 </div>
             </div>
 
-            <!-- View Controls -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <div style="display: flex; gap: 12px;">
-                    <button onclick="switchToView('calendar')" class="view-toggle active" style="background: linear-gradient(135deg, #00ffff, #4169e1); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">Calendar</button>
-                    <button onclick="switchToView('list')" class="view-toggle" style="background: rgba(0, 0, 0, 0.3); color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">List</button>
-                </div>
-                <button onclick="showAddEmployeeModal()" style="background: linear-gradient(135deg, #00ffff, #4169e1); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">+ Add</button>
+            <!-- View Toggle Buttons -->
+            <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                <button onclick="switchToView('calendar')" class="view-toggle active" style="background: linear-gradient(135deg, #00ffff, #4169e1); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">Calendar</button>
+                <button onclick="switchToView('list')" class="view-toggle" style="background: rgba(0, 0, 0, 0.3); color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">List</button>
             </div>
 
-            <!-- Week Navigation -->
-            <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <button onclick="previousWeek()" style="background: rgba(0, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); color: #00ffff; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;">‹</button>
-                    <h3 style="color: #00ffff; margin: 0; font-size: 18px; font-weight: 600;" id="currentWeek">July 20 - 26, 2025</h3>
-                    <button onclick="nextWeek()" style="background: rgba(0, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); color: #00ffff; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;">›</button>
-                </div>
-            </div>
-
-            <!-- Calendar View -->
+            <!-- Advanced Calendar with Time Slots -->
             <div id="calendar-view" class="calendar-view">
-                <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; overflow: hidden;">
-                    <!-- Calendar Grid -->
-                    <div style="display: grid; grid-template-columns: 80px repeat(7, 1fr); gap: 1px; background: rgba(0, 0, 0, 0.6);">
-                        <!-- Time Column Header -->
-                        <div style="background: rgba(0, 0, 0, 0.8); padding: 12px 8px; text-align: center; color: #64748b; font-size: 12px; font-weight: bold;">TIME</div>
+                <div class="schedule-header">
+                    <div class="week-navigation">
+                        <button class="week-nav-btn" onclick="previousWeek()">‹</button>
+                        <div style="color: #00ffff; font-weight: bold; font-size: 18px;" id="currentWeek">July 20 - 26, 2025</div>
+                        <button class="week-nav-btn" onclick="nextWeek()">›</button>
+                    </div>
+                </div>
+                
+                <div class="calendar-container">
+                    <div style="display: grid; grid-template-columns: 80px repeat(7, 1fr); gap: 1px; background: rgba(0, 0, 0, 0.6); border-radius: 12px; overflow: hidden;">
+                        <!-- Time Column -->
+                        <div style="background: rgba(0, 0, 0, 0.8); padding: 8px; text-align: center; color: #64748b; font-size: 12px; font-weight: bold;">TIME</div>
                         
                         <!-- Day Headers -->
-                        <div style="background: rgba(0, 0, 0, 0.8); padding: 12px 8px; text-align: center; color: #00ffff; font-weight: bold; font-size: 14px;">MON<br><span style="font-size: 20px; font-weight: normal;">20</span></div>
-                        <div style="background: rgba(0, 0, 0, 0.8); padding: 12px 8px; text-align: center; color: #00ffff; font-weight: bold; font-size: 14px;">TUE<br><span style="font-size: 20px; font-weight: normal;">21</span></div>
-                        <div style="background: rgba(0, 0, 0, 0.8); padding: 12px 8px; text-align: center; color: #00ffff; font-weight: bold; font-size: 14px;">WED<br><span style="font-size: 20px; font-weight: normal;">22</span></div>
-                        <div style="background: rgba(0, 0, 0, 0.8); padding: 12px 8px; text-align: center; color: #00ffff; font-weight: bold; font-size: 14px;">THU<br><span style="font-size: 20px; font-weight: normal;">23</span></div>
-                        <div style="background: rgba(0, 0, 0, 0.8); padding: 12px 8px; text-align: center; color: #00ffff; font-weight: bold; font-size: 14px;">FRI<br><span style="font-size: 20px; font-weight: normal;">24</span></div>
-                        <div style="background: rgba(0, 0, 0, 0.8); padding: 12px 8px; text-align: center; color: #00ffff; font-weight: bold; font-size: 14px;">SAT<br><span style="font-size: 20px; font-weight: normal;">25</span></div>
-                        <div style="background: rgba(0, 0, 0, 0.8); padding: 12px 8px; text-align: center; color: #00ffff; font-weight: bold; font-size: 14px;">SUN<br><span style="font-size: 20px; font-weight: normal;">26</span></div>
+                        <div style="background: rgba(0, 0, 0, 0.8); padding: 12px 8px; text-align: center; color: #00ffff; font-weight: bold;">MON<br><span style="font-size: 24px; font-weight: normal;">20</span></div>
+                        <div style="background: rgba(0, 0, 0, 0.8); padding: 12px 8px; text-align: center; color: #00ffff; font-weight: bold;">TUE<br><span style="font-size: 24px; font-weight: normal;">21</span></div>
+                        <div style="background: rgba(0, 0, 0, 0.8); padding: 12px 8px; text-align: center; color: #00ffff; font-weight: bold;">WED<br><span style="font-size: 24px; font-weight: normal;">22</span></div>
+                        <div style="background: rgba(0, 0, 0, 0.8); padding: 12px 8px; text-align: center; color: #00ffff; font-weight: bold;">THU<br><span style="font-size: 24px; font-weight: normal;">23</span></div>
+                        <div style="background: rgba(0, 0, 0, 0.8); padding: 12px 8px; text-align: center; color: #00ffff; font-weight: bold;">FRI<br><span style="font-size: 24px; font-weight: normal;">24</span></div>
+                        <div style="background: rgba(0, 0, 0, 0.8); padding: 12px 8px; text-align: center; color: #00ffff; font-weight: bold;">SAT<br><span style="font-size: 24px; font-weight: normal;">25</span></div>
+                        <div style="background: rgba(0, 0, 0, 0.8); padding: 12px 8px; text-align: center; color: #00ffff; font-weight: bold;">SUN<br><span style="font-size: 24px; font-weight: normal;">26</span></div>
 
                         <!-- Time Slots -->
                         <div class="time-slot" style="background: rgba(0, 0, 0, 0.8); padding: 8px; text-align: center; color: #64748b; font-size: 11px;">6 AM</div>
@@ -885,7 +884,7 @@
 
                         <div class="time-slot" style="background: rgba(0, 0, 0, 0.8); padding: 8px; text-align: center; color: #64748b; font-size: 11px;">7 AM</div>
                         <div class="calendar-cell" data-day="mon" data-time="7">
-                            <div class="shift-block" style="background: linear-gradient(135deg, #ffd700, #ffb347); color: #000; padding: 4px; border-radius: 4px; font-size: 10px; margin: 2px;">Manager<br>8h</div>
+                            <div class="shift-block" style="background: linear-gradient(135deg, #8B4513, #D2691E); color: white; padding: 6px; border-radius: 6px; font-size: 11px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); backdrop-filter: blur(5px); margin: 2px; border: 1px solid rgba(255,255,255,0.1);">Manager<br>8h</div>
                         </div>
                         <div class="calendar-cell" data-day="tue" data-time="7"></div>
                         <div class="calendar-cell" data-day="wed" data-time="7"></div>
@@ -893,8 +892,64 @@
                         <div class="calendar-cell" data-day="fri" data-time="7"></div>
                         <div class="calendar-cell" data-day="sat" data-time="7"></div>
                         <div class="calendar-cell" data-day="sun" data-time="7">
-                            <div class="shift-block" style="background: linear-gradient(135deg, #00ffff, #4169e1); color: #fff; padding: 4px; border-radius: 4px; font-size: 10px; margin: 2px;">Cashier<br>6h</div>
+                            <div class="shift-block" style="background: linear-gradient(135deg, #22C55E, #16A34A); color: white; padding: 6px; border-radius: 6px; font-size: 11px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); backdrop-filter: blur(5px); margin: 2px; border: 1px solid rgba(255,255,255,0.1);">Cashier<br>6h</div>
                         </div>
+
+                        <div class="time-slot" style="background: rgba(0, 0, 0, 0.8); padding: 8px; text-align: center; color: #64748b; font-size: 11px;">8 AM</div>
+                        <div class="calendar-cell" data-day="mon" data-time="8"></div>
+                        <div class="calendar-cell" data-day="tue" data-time="8">
+                            <div class="shift-block" style="background: linear-gradient(135deg, #FF69B4, #FF1493); color: white; padding: 6px; border-radius: 6px; font-size: 11px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); backdrop-filter: blur(5px); margin: 2px; border: 1px solid rgba(255,255,255,0.1);">Sales<br>4h</div>
+                        </div>
+                        <div class="calendar-cell" data-day="wed" data-time="8"></div>
+                        <div class="calendar-cell" data-day="thu" data-time="8"></div>
+                        <div class="calendar-cell" data-day="fri" data-time="8"></div>
+                        <div class="calendar-cell" data-day="sat" data-time="8"></div>
+                        <div class="calendar-cell" data-day="sun" data-time="8"></div>
+
+                        <div class="time-slot" style="background: rgba(0, 0, 0, 0.8); padding: 8px; text-align: center; color: #64748b; font-size: 11px;">9 AM</div>
+                        <div class="calendar-cell" data-day="mon" data-time="9"></div>
+                        <div class="calendar-cell" data-day="tue" data-time="9"></div>
+                        <div class="calendar-cell" data-day="wed" data-time="9">
+                            <div class="shift-block" style="background: linear-gradient(135deg, #3B82F6, #1D4ED8); color: white; padding: 6px; border-radius: 6px; font-size: 11px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); backdrop-filter: blur(5px); margin: 2px; border: 1px solid rgba(255,255,255,0.1);">Stock<br>5h</div>
+                        </div>
+                        <div class="calendar-cell" data-day="thu" data-time="9"></div>
+                        <div class="calendar-cell" data-day="fri" data-time="9"></div>
+                        <div class="calendar-cell" data-day="sat" data-time="9"></div>
+                        <div class="calendar-cell" data-day="sun" data-time="9"></div>
+
+                        <div class="time-slot" style="background: rgba(0, 0, 0, 0.8); padding: 8px; text-align: center; color: #64748b; font-size: 11px;">10 AM</div>
+                        <div class="calendar-cell" data-day="mon" data-time="10"></div>
+                        <div class="calendar-cell" data-day="tue" data-time="10"></div>
+                        <div class="calendar-cell" data-day="wed" data-time="10"></div>
+                        <div class="calendar-cell" data-day="thu" data-time="10">
+                            <div class="shift-block" style="background: linear-gradient(135deg, #8B5CF6, #7C3AED); color: white; padding: 6px; border-radius: 6px; font-size: 11px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); backdrop-filter: blur(5px); margin: 2px; border: 1px solid rgba(255,255,255,0.1);">Assistant<br>7h</div>
+                        </div>
+                        <div class="calendar-cell" data-day="fri" data-time="10"></div>
+                        <div class="calendar-cell" data-day="sat" data-time="10"></div>
+                        <div class="calendar-cell" data-day="sun" data-time="10"></div>
+
+                        <!-- Continue pattern for more hours -->
+                        <div class="time-slot" style="background: rgba(0, 0, 0, 0.8); padding: 8px; text-align: center; color: #64748b; font-size: 11px;">11 AM</div>
+                        <div class="calendar-cell" data-day="mon" data-time="11"></div>
+                        <div class="calendar-cell" data-day="tue" data-time="11"></div>
+                        <div class="calendar-cell" data-day="wed" data-time="11"></div>
+                        <div class="calendar-cell" data-day="thu" data-time="11"></div>
+                        <div class="calendar-cell" data-day="fri" data-time="11">
+                            <div class="shift-block" style="background: linear-gradient(135deg, #EF4444, #DC2626); color: white; padding: 6px; border-radius: 6px; font-size: 11px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); backdrop-filter: blur(5px); margin: 2px; border: 1px solid rgba(255,255,255,0.1);">Security<br>8h</div>
+                        </div>
+                        <div class="calendar-cell" data-day="sat" data-time="11"></div>
+                        <div class="calendar-cell" data-day="sun" data-time="11"></div>
+
+                        <div class="time-slot" style="background: rgba(0, 0, 0, 0.8); padding: 8px; text-align: center; color: #64748b; font-size: 11px;">12 PM</div>
+                        <div class="calendar-cell" data-day="mon" data-time="12"></div>
+                        <div class="calendar-cell" data-day="tue" data-time="12"></div>
+                        <div class="calendar-cell" data-day="wed" data-time="12"></div>
+                        <div class="calendar-cell" data-day="thu" data-time="12"></div>
+                        <div class="calendar-cell" data-day="fri" data-time="12"></div>
+                        <div class="calendar-cell" data-day="sat" data-time="12">
+                            <div class="shift-block" style="background: linear-gradient(135deg, #22C55E, #16A34A); color: white; padding: 6px; border-radius: 6px; font-size: 11px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); backdrop-filter: blur(5px); margin: 2px; border: 1px solid rgba(255,255,255,0.1);">Cashier<br>4h</div>
+                        </div>
+                        <div class="calendar-cell" data-day="sun" data-time="12"></div>
                     </div>
                 </div>
             </div>
