@@ -984,18 +984,47 @@
         }
 
         function generateEmployeeQR() {
-            const businessNameElement = document.getElementById('businessName');
+            // Try multiple ways to get the business name element
+            const businessNameElement = document.getElementById('businessName') || 
+                                       window.businessNameElement || 
+                                       document.querySelector('gmp-place-autocomplete');
             const radiusElement = document.getElementById('geoRadius');
             const modeElement = document.getElementById('geoMode');
             
+            console.log('🔍 Form elements found:', {
+                businessElement: !!businessNameElement,
+                radiusElement: !!radiusElement,
+                modeElement: !!modeElement
+            });
+            
             if (!businessNameElement || !radiusElement || !modeElement) {
                 showNotification('Error: Form elements not found', 'error');
+                console.log('❌ Missing form elements:', {
+                    businessName: !!businessNameElement,
+                    radius: !!radiusElement,
+                    mode: !!modeElement
+                });
                 return;
             }
             
-            const businessName = businessNameElement.value || '';
+            // Get value from different element types
+            let businessName = '';
+            if (businessNameElement.value !== undefined) {
+                businessName = businessNameElement.value;
+            } else if (businessNameElement.textContent) {
+                businessName = businessNameElement.textContent;
+            } else if (businessNameElement.getAttribute && businessNameElement.getAttribute('value')) {
+                businessName = businessNameElement.getAttribute('value');
+            }
+            
             const radius = radiusElement.value || '100';
             const mode = modeElement.value || 'flexible';
+            
+            console.log('📝 Form values extracted:', {
+                businessName: businessName,
+                radius: radius,
+                mode: mode
+            });
 
             if (!businessName.trim()) {
                 showNotification('Please enter a business or location name', 'error');
@@ -1620,6 +1649,9 @@
                         // Replace the input with the new element
                         businessInput.parentNode.replaceChild(autocompleteElement, businessInput);
                         autocompleteElement.id = 'businessName';
+                        
+                        // Store reference for form access
+                        window.businessNameElement = autocompleteElement;
                         
                         autocompleteElement.addEventListener('gmp-placeselect', async (event) => {
                             console.log('🏢 Place selection event triggered:', event);
