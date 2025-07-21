@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Check-In Portal - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23, #1a1a2e, #16213e);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+        }
+
+        .marketpace-text {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #2a0845, #1a0033);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(65, 105, 225, 0.5), 0 0 40px rgba(65, 105, 225, 0.3);
+            filter: drop-shadow(0 0 10px rgba(65, 105, 225, 0.7));
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 16px;
+        }
+
+        .check-in-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .status-display {
+            margin-bottom: 30px;
+        }
+
+        .status-text {
+            font-size: 18px;
+            color: #00ffff;
+            margin-bottom: 10px;
+        }
+
+        .time-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+
+        .date-display {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .check-in-button {
+            background: linear-gradient(135deg, #00ffff, #4169e1);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 300px;
+            margin: 20px auto;
+            display: block;
+        }
+
+        .check-in-button:hover {
+            background: linear-gradient(135deg, #4169e1, #00ffff);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 255, 0.3);
+        }
+
+        .check-in-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .check-out-button {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 300px;
+            margin: 20px auto;
+            display: block;
+        }
+
+        .check-out-button:hover {
+            background: linear-gradient(135deg, #ee5a24, #ff6b6b);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+        }
+
+        .location-info {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .location-title {
+            color: #00ffff;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .location-address {
+            color: #94a3b8;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .shift-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .shift-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .shift-card-title {
+            color: #00ffff;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .shift-card-value {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: none;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .loading-content {
+            text-align: center;
+            color: #00ffff;
+        }
+
+        .spinner {
+            border: 3px solid rgba(0, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #00ffff;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #00ffff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: rgba(0, 255, 255, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .marketpace-text {
+                font-size: 24px;
+            }
+            
+            .check-in-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="goBack()">← Back</button>
+    
+    <div class="container">
+        <div class="header">
+            <h1 class="marketpace-text">MarketPace</h1>
+            <p class="subtitle">Employee Check-In Portal</p>
+        </div>
+
+        <div class="check-in-card">
+            <div class="status-display">
+                <div id="statusText" class="status-text">Ready to Check In</div>
+                <div id="timeDisplay" class="time-display">--:--</div>
+                <div id="dateDisplay" class="date-display">Loading...</div>
+            </div>
+
+            <button id="checkInButton" class="check-in-button" onclick="handleCheckIn()">
+                Check In to Work
+            </button>
+
+            <button id="checkOutButton" class="check-out-button" onclick="handleCheckOut()" style="display: none;">
+                Check Out from Work
+            </button>
+        </div>
+
+        <div class="location-info">
+            <div class="location-title">Work Location</div>
+            <div id="locationAddress" class="location-address">GPS location will be verified during check-in</div>
+        </div>
+
+        <div class="shift-info">
+            <div class="shift-card">
+                <div class="shift-card-title">Today's Hours</div>
+                <div id="todayHours" class="shift-card-value">0:00</div>
+            </div>
+            <div class="shift-card">
+                <div class="shift-card-title">This Week</div>
+                <div id="weekHours" class="shift-card-value">0:00</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+    
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <div>Processing check-in...</div>
+        </div>
+    </div>
+
+    <script>
+        let isCheckedIn = false;
+        let checkInTime = null;
+        let currentLocation = null;
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Employee Check-In Portal initialized');
+            updateTimeDisplay();
+            loadSavedState();
+            initializeGeolocation();
+            
+            // Update time every second
+            setInterval(updateTimeDisplay, 1000);
+            
+            console.log('Portal ready for employee check-in/out');
+        });
+
+        function updateTimeDisplay() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            const dateString = now.toLocaleDateString('en-US', { 
+                weekday: 'long',
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            document.getElementById('timeDisplay').textContent = timeString;
+            document.getElementById('dateDisplay').textContent = dateString;
+        }
+
+        function loadSavedState() {
+            const savedState = localStorage.getItem('employeeCheckInState');
+            const savedTime = localStorage.getItem('employeeCheckInTime');
+            
+            console.log('Loading saved state:', {savedState, savedTime});
+            
+            if (savedState === 'checked-in' && savedTime) {
+                isCheckedIn = true;
+                checkInTime = new Date(savedTime);
+                updateUIForCheckedIn();
+                updateHoursDisplay();
+            } else {
+                console.log('No previous check-in found');
+                updateUIForCheckedOut();
+            }
+        }
+
+        function initializeGeolocation() {
+            if (navigator.geolocation) {
+                console.log('GPS available and ready');
+                document.getElementById('locationAddress').textContent = 'GPS location will be verified during check-in';
+            } else {
+                console.log('GPS not available');
+                document.getElementById('locationAddress').textContent = 'GPS location verification not available';
+            }
+            console.log('System ready for use');
+        }
+
+        function handleCheckIn() {
+            console.log('Check-in initiated - requesting GPS location');
+            showLoading();
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        currentLocation = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            accuracy: position.coords.accuracy
+                        };
+                        
+                        console.log('GPS location obtained:', currentLocation);
+                        processCheckIn();
+                    },
+                    (error) => {
+                        console.log('GPS error:', error.message);
+                        hideLoading();
+                        showNotification('GPS location required for check-in', 'error');
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 30000
+                    }
+                );
+            } else {
+                hideLoading();
+                showNotification('GPS not available on this device', 'error');
+            }
+        }
+
+        function processCheckIn() {
+            // Simulate API call for check-in
+            setTimeout(() => {
+                isCheckedIn = true;
+                checkInTime = new Date();
+                
+                // Save state
+                localStorage.setItem('employeeCheckInState', 'checked-in');
+                localStorage.setItem('employeeCheckInTime', checkInTime.toISOString());
+                
+                // Update location display
+                if (currentLocation) {
+                    document.getElementById('locationAddress').textContent = 
+                        `Location verified: ${currentLocation.latitude.toFixed(6)}, ${currentLocation.longitude.toFixed(6)}`;
+                }
+                
+                updateUIForCheckedIn();
+                updateHoursDisplay();
+                hideLoading();
+                showNotification('Successfully checked in to work!', 'success');
+                
+                console.log('Check-in completed successfully');
+            }, 2000);
+        }
+
+        function handleCheckOut() {
+            console.log('Check-out initiated');
+            showLoading();
+            
+            // Simulate API call for check-out
+            setTimeout(() => {
+                const checkOutTime = new Date();
+                const workDuration = checkOutTime - checkInTime;
+                const hoursWorked = (workDuration / (1000 * 60 * 60)).toFixed(2);
+                
+                // Clear saved state
+                localStorage.removeItem('employeeCheckInState');
+                localStorage.removeItem('employeeCheckInTime');
+                
+                isCheckedIn = false;
+                checkInTime = null;
+                currentLocation = null;
+                
+                updateUIForCheckedOut();
+                hideLoading();
+                showNotification(`Checked out successfully! Worked ${hoursWorked} hours today.`, 'success');
+                
+                console.log('Check-out completed successfully');
+            }, 1500);
+        }
+
+        function updateUIForCheckedIn() {
+            document.getElementById('statusText').textContent = 'Currently Checked In';
+            document.getElementById('statusText').style.color = '#22c55e';
+            document.getElementById('checkInButton').style.display = 'none';
+            document.getElementById('checkOutButton').style.display = 'block';
+        }
+
+        function updateUIForCheckedOut() {
+            document.getElementById('statusText').textContent = 'Ready to Check In';
+            document.getElementById('statusText').style.color = '#00ffff';
+            document.getElementById('checkInButton').style.display = 'block';
+            document.getElementById('checkOutButton').style.display = 'none';
+            document.getElementById('locationAddress').textContent = 'GPS location will be verified during check-in';
+        }
+
+        function updateHoursDisplay() {
+            if (isCheckedIn && checkInTime) {
+                const now = new Date();
+                const workDuration = now - checkInTime;
+                const hours = Math.floor(workDuration / (1000 * 60 * 60));
+                const minutes = Math.floor((workDuration % (1000 * 60 * 60)) / (1000 * 60));
+                
+                document.getElementById('todayHours').textContent = `${hours}:${minutes.toString().padStart(2, '0')}`;
+            } else {
+                document.getElementById('todayHours').textContent = '0:00';
+            }
+            
+            // Simulate weekly hours (this would come from server)
+            document.getElementById('weekHours').textContent = '32:45';
+        }
+
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            
+            if (type === 'error') {
+                notification.style.borderColor = 'rgba(255, 107, 107, 0.5)';
+                notification.style.color = '#ff6b6b';
+                notification.style.background = 'rgba(255, 107, 107, 0.1)';
+            } else if (type === 'success') {
+                notification.style.borderColor = 'rgba(34, 197, 94, 0.5)';
+                notification.style.color = '#22c55e';
+                notification.style.background = 'rgba(34, 197, 94, 0.1)';
+            } else {
+                notification.style.borderColor = 'rgba(0, 255, 255, 0.3)';
+                notification.style.color = '#00ffff';
+                notification.style.background = 'rgba(0, 255, 255, 0.1)';
+            }
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 4000);
+        }
+
+        function goBack() {
+            // Navigate back to MarketPace menu
+            window.location.href = '/marketpace-menu';
+        }
+
+        // Update hours display every minute when checked in
+        setInterval(() => {
+            if (isCheckedIn) {
+                updateHoursDisplay();
+            }
+        }, 60000);
+    </script>
+</body>
+</html>

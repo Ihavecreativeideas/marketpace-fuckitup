@@ -2050,7 +2050,7 @@ const htmlRoutes = [
   '/facebook-manual-integration-enhanced', '/facebook-connection-guide',
   '/provider-booking-calendar', '/customer-booking-calendar', '/escrow-payment', 
   '/booking-confirmation', '/navigation-test', '/unified-pro-page',
-  '/employee-geo-qr-system', '/scan-employee-qr'
+  '/employee-geo-qr-system', '/scan-employee-qr', '/employee-check-in-portal'
 ];
 
 htmlRoutes.forEach(route => {
