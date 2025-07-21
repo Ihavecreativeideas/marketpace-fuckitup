@@ -4997,31 +4997,13 @@ ${selectedCustomTitle ? `📝 Custom Title: ${scheduleTitle}` : ''}
             const existingCustomOptions = roleSelect.querySelectorAll('.custom-role-option');
             existingCustomOptions.forEach(option => option.remove());
             
-            // Add separator if there are custom roles
-            if (customRoles.length > 0) {
-                const separator = document.createElement('option');
-                separator.value = '';
-                separator.textContent = '── Custom Roles ──';
-                separator.disabled = true;
-                separator.className = 'custom-role-option';
-                separator.style.fontStyle = 'italic';
-                separator.style.color = '#8a2be2';
-                roleSelect.appendChild(separator);
-            }
-            
-            // Add custom roles with visual indicators
-            customRoles.forEach((role, index) => {
+            // Add custom roles
+            customRoles.forEach(role => {
                 const option = document.createElement('option');
                 option.value = role.name;
-                
-                // Check if role was created recently (within last 5 minutes)
-                const isNew = new Date() - new Date(role.created) < 5 * 60 * 1000;
-                option.textContent = isNew ? `${role.name} ⭐ NEW` : role.name;
-                
+                option.textContent = role.name;
                 option.className = 'custom-role-option';
                 option.dataset.color = role.color;
-                option.style.color = role.color;
-                option.style.fontWeight = isNew ? 'bold' : 'normal';
                 roleSelect.appendChild(option);
             });
         }
@@ -6761,11 +6743,10 @@ ${selectedCustomTitle ? `📝 Custom Title: ${scheduleTitle}` : ''}
             existingRoles.push(customRole);
             localStorage.setItem('marketpace_custom_roles', JSON.stringify(existingRoles));
 
-            // Refresh displays and update all role dropdowns
+            // Refresh displays
             loadCustomRoles();
             updateRoleFilters();
-            populateRoleDropdown(); // Update the Add Employee modal dropdown
-            updateAllRoleSelections(); // Update any other role dropdowns
+            populateRoleDropdown();
             
             // Close modal and show success
             closeCustomRoleModal();
@@ -6857,39 +6838,7 @@ ${selectedCustomTitle ? `📝 Custom Title: ${scheduleTitle}` : ''}
             });
         }
 
-        function updateAllRoleSelections() {
-            // Update all role dropdowns across the system
-            const customRoles = JSON.parse(localStorage.getItem('marketpace_custom_roles') || '[]');
-            
-            // Update any other role selection elements that might exist
-            const allRoleSelects = document.querySelectorAll('select[id*="role"], select[id*="Role"]');
-            
-            allRoleSelects.forEach(select => {
-                if (select.id === 'newEmployeeRole') return; // Skip - handled by populateRoleDropdown
-                if (select.id === 'modalRoleFilter') return; // Skip - handled by updateRoleFilters
-                
-                // Remove existing custom options
-                const existingCustomOptions = select.querySelectorAll('.custom-role-option');
-                existingCustomOptions.forEach(option => option.remove());
-                
-                // Add custom roles
-                customRoles.forEach(role => {
-                    const option = document.createElement('option');
-                    option.value = role.name;
-                    option.textContent = role.name;
-                    option.className = 'custom-role-option';
-                    select.appendChild(option);
-                });
-            });
-        }
 
-        function refreshCustomRoleDisplays() {
-            // Called whenever custom roles are modified to update all displays
-            loadCustomRoles();
-            updateRoleFilters();
-            populateRoleDropdown();
-            updateAllRoleSelections();
-        }
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
