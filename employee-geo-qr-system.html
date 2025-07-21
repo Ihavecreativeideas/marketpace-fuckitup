@@ -1038,8 +1038,16 @@
             });
 
             if (!businessName.trim()) {
-                showNotification('Please enter a business or location name', 'error');
-                return;
+                // Final attempt: prompt user for manual input
+                console.log('❌ No business name found, asking user for manual input');
+                const manualInput = prompt('Please enter the business or location name:');
+                if (manualInput && manualInput.trim()) {
+                    businessName = manualInput.trim();
+                    console.log('✅ Manual input received:', businessName);
+                } else {
+                    showNotification('Please enter a business or location name', 'error');
+                    return;
+                }
             }
 
             console.log('🎯 Generating QR for:', businessName);
@@ -1667,11 +1675,27 @@
                         // Store the current input value
                         let currentInputValue = '';
                         
-                        // Listen for input changes
-                        autocompleteElement.addEventListener('input', (event) => {
-                            currentInputValue = event.target.value || '';
-                            console.log('📝 Input changed:', currentInputValue);
+                        // Listen for multiple types of input events
+                        const updateInputValue = () => {
+                            // Try multiple ways to get the current value
+                            const inputElement = autocompleteElement.querySelector('input') || autocompleteElement;
+                            const newValue = inputElement.value || inputElement.textContent || '';
+                            if (newValue !== currentInputValue) {
+                                currentInputValue = newValue;
+                                console.log('📝 Input value updated:', currentInputValue);
+                            }
+                        };
+                        
+                        // Listen for various input events
+                        autocompleteElement.addEventListener('input', updateInputValue);
+                        autocompleteElement.addEventListener('change', updateInputValue);
+                        autocompleteElement.addEventListener('keyup', updateInputValue);
+                        autocompleteElement.addEventListener('paste', () => {
+                            setTimeout(updateInputValue, 10); // Delay for paste content
                         });
+                        
+                        // Poll for value changes as backup
+                        setInterval(updateInputValue, 500);
                         
                         // Listen for keydown events (Enter key)
                         autocompleteElement.addEventListener('keydown', (event) => {
@@ -1682,8 +1706,12 @@
                             }
                         });
                         
-                        // Store reference to current input value
+                        // Store reference to current input value and allow external updates
                         window.getCurrentInputValue = () => currentInputValue;
+                        window.setCurrentInputValue = (value) => {
+                            currentInputValue = value;
+                            console.log('📝 Input value set externally:', currentInputValue);
+                        };
                         
                         autocompleteElement.addEventListener('gmp-placeselect', async (event) => {
                             console.log('🏢 Place selection event triggered:', event);
