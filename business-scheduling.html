@@ -5162,12 +5162,7 @@ ${selectedCustomTitle ? `📝 Custom Title: ${scheduleTitle}` : ''}
             document.body.insertAdjacentHTML('beforeend', modalHTML);
         }
         
-        function closeAddEmployeeModal() {
-            const modal = document.getElementById('addEmployeeModal');
-            if (modal) {
-                modal.remove();
-            }
-        }
+        // Removed duplicate closeAddEmployeeModal function
         
         function updateModalTitle() {
             const category = document.getElementById('positionCategory').value;
@@ -6834,7 +6829,7 @@ ${selectedCustomTitle ? `📝 Custom Title: ${scheduleTitle}` : ''}
             });
         }
 
-        // Missing Tab Navigation Functions
+        // Tab Navigation Functions - Fixed for correct tab IDs
         function showTab(tabName) {
             // Hide all tab contents
             document.querySelectorAll('.tab-content').forEach(tab => {
@@ -6846,10 +6841,13 @@ ${selectedCustomTitle ? `📝 Custom Title: ${scheduleTitle}` : ''}
                 chip.classList.remove('active');
             });
             
-            // Show selected tab
-            const selectedTab = document.getElementById(tabName + 'Tab');
+            // Show selected tab (using correct ID without 'Tab' suffix)
+            const selectedTab = document.getElementById(tabName);
             if (selectedTab) {
                 selectedTab.classList.add('active');
+                console.log(`Successfully switched to ${tabName} tab`);
+            } else {
+                console.error(`Tab with ID '${tabName}' not found`);
             }
             
             // Add active class to clicked nav chip
@@ -6858,24 +6856,30 @@ ${selectedCustomTitle ? `📝 Custom Title: ${scheduleTitle}` : ''}
                 activeChip.classList.add('active');
             }
             
-            console.log(`Switched to ${tabName} tab`);
+            showNotification(`Switched to ${tabName} section`, 'success');
         }
 
-        // View Switching Functions
+        // View Switching Functions - Fixed for correct IDs
         function switchToView(viewType) {
-            const calendarView = document.getElementById('calendarView');
-            const listView = document.getElementById('listView');
+            const calendarView = document.getElementById('calendar-view');
+            const listView = document.getElementById('list-view');
             const calendarBtn = document.querySelector('[onclick="switchToView(\'calendar\')"]');
             const listBtn = document.querySelector('[onclick="switchToView(\'list\')"]');
             
             if (viewType === 'calendar') {
-                if (calendarView) calendarView.style.display = 'block';
+                if (calendarView) {
+                    calendarView.style.display = 'block';
+                    console.log('Switched to calendar view');
+                }
                 if (listView) listView.style.display = 'none';
                 if (calendarBtn) calendarBtn.classList.add('active');
                 if (listBtn) listBtn.classList.remove('active');
             } else {
                 if (calendarView) calendarView.style.display = 'none';
-                if (listView) listView.style.display = 'block';
+                if (listView) {
+                    listView.style.display = 'block';
+                    console.log('Switched to list view');
+                }
                 if (calendarBtn) calendarBtn.classList.remove('active');
                 if (listBtn) listBtn.classList.add('active');
             }
@@ -7141,6 +7145,8 @@ ${selectedCustomTitle ? `📝 Custom Title: ${scheduleTitle}` : ''}
             </form>
         </div>
     </div>
+
+    </script>
 
         </div> <!-- Close tab-container -->
     </div> <!-- Close main container -->
