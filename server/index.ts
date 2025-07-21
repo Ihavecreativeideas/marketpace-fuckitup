@@ -256,10 +256,25 @@ app.post('/api/maps/directions', async (req, res) => {
       directionsUrl += `&waypoints=optimize:true|${waypoints.map(wp => encodeURIComponent(wp)).join('|')}`;
     }
 
-    // Apply URL signing for enhanced security
-    const signedUrl = signGoogleMapsUrl(directionsUrl);
-    const response = await fetch(signedUrl);
-    const data = await response.json();
+    // Apply URL signing for enhanced security (temporarily disabled for debugging)
+    // const signedUrl = signGoogleMapsUrl(directionsUrl);
+    const response = await fetch(directionsUrl);
+    
+    // Check if response is successful
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    const responseText = await response.text();
+    
+    // Check if response is valid JSON
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Invalid JSON response:', responseText.substring(0, 200));
+      throw new Error(`Invalid API response: ${responseText.substring(0, 100)}`);
+    }
 
     res.json({
       success: true,
