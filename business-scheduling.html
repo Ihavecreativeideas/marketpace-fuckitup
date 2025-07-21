@@ -1358,13 +1358,35 @@
                 </div>
             </div>
 
-            <!-- Employee Check-In Details -->
+            <!-- QR Code Assignment Management -->
             <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
-                <h3 style="color: #00ffff; margin-bottom: 16px;">Employee Check-In</h3>
+                <h3 style="color: #00ffff; margin-bottom: 16px;">QR Code Location Management</h3>
                 <p style="color: #94a3b8; margin-bottom: 16px; line-height: 1.6;">
-                    Generate QR codes for employees to check in and out of shifts with GPS verification. The system automatically tracks hours and processes payments upon shift completion.
+                    Manage QR codes for different work locations and assign employees to specific codes. Perfect for businesses with multiple locations or work areas.
                 </p>
-                <button class="qr-action-btn" onclick="showEmployeeGeoQR()" style="max-width: 300px;">Generate QR Codes</button>
+                
+                <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <button class="qr-action-btn" onclick="showQRLocationManager()" style="background: linear-gradient(135deg, #00ffff, #4169e1);">Manage QR Locations</button>
+                    <button class="qr-action-btn" onclick="showEmployeeGeoQR()" style="background: linear-gradient(135deg, #22c55e, #16a34a);">Generate New QR Code</button>
+                    <button class="qr-action-btn" onclick="showEmployeeQRAssignments()" style="background: linear-gradient(135deg, #f59e0b, #d97706);">View Employee Assignments</button>
+                </div>
+
+                <!-- Current QR Locations Overview -->
+                <div id="qrLocationsOverview" style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 16px;">
+                    <h4 style="color: #00ffff; margin-bottom: 12px; font-size: 16px;">Current QR Code Locations</h4>
+                    <div id="qrLocationsList" style="color: #94a3b8;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                            <div>
+                                <strong style="color: #00ffff;">Main Store Location</strong><br>
+                                <span style="font-size: 12px;">Brown Barnes - 3 employees assigned</span>
+                            </div>
+                            <div style="background: rgba(0, 255, 255, 0.2); color: #00ffff; padding: 4px 8px; border-radius: 4px; font-size: 12px;">ACTIVE</div>
+                        </div>
+                        <div style="text-align: center; padding: 12px; color: #64748b; font-style: italic;">
+                            Click "Manage QR Locations" to add more locations or assign employees
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- QR Scanner Details -->
@@ -2214,6 +2236,199 @@
             setTimeout(() => {
                 window.open('/employee-geo-qr-system.html', '_blank');
             }, 500);
+        }
+
+        function showQRLocationManager() {
+            const modal = document.getElementById('qrLocationModal');
+            if (modal) {
+                modal.classList.add('show');
+            } else {
+                // Create the modal if it doesn't exist
+                createQRLocationModal();
+            }
+        }
+
+        function showEmployeeQRAssignments() {
+            const modal = document.getElementById('qrAssignmentModal');
+            if (modal) {
+                modal.classList.add('show');
+            } else {
+                // Create the assignment modal if it doesn't exist
+                createQRAssignmentModal();
+            }
+        }
+
+        function createQRLocationModal() {
+            const modalHTML = `
+                <div id="qrLocationModal" class="modal show">
+                    <div class="modal-content" style="max-width: 600px;">
+                        <div class="modal-header">
+                            <h2 class="modal-title">QR Location Manager</h2>
+                            <button class="close-btn" onclick="closeQRLocationModal()">&times;</button>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <p style="color: #94a3b8; line-height: 1.5;">
+                                Manage QR codes for different work locations. Each location can have its own QR code that employees can scan to check in.
+                            </p>
+                        </div>
+                        
+                        <!-- Existing Locations -->
+                        <div style="margin-bottom: 24px;">
+                            <h3 style="color: #00ffff; margin-bottom: 12px; font-size: 18px;">Current Locations</h3>
+                            <div id="existingQRLocations">
+                                <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                                        <div>
+                                            <h4 style="color: #00ffff; margin: 0 0 4px 0;">Main Store Location</h4>
+                                            <p style="color: #94a3b8; margin: 0 0 8px 0; font-size: 14px;">Brown Barnes</p>
+                                            <div style="font-size: 12px; color: #64748b;">
+                                                <span>QR ID: emp_1753137983666_gcgt4z3rr</span><br>
+                                                <span>Created: July 21, 2025</span>
+                                            </div>
+                                        </div>
+                                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                                            <button onclick="viewQRCode('emp_1753137983666_gcgt4z3rr')" style="background: rgba(0, 255, 255, 0.2); color: #00ffff; border: 1px solid rgba(0, 255, 255, 0.3); padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;">View QR</button>
+                                            <button onclick="assignEmployeesToQR('emp_1753137983666_gcgt4z3rr')" style="background: rgba(255, 165, 0, 0.2); color: #f59e0b; border: 1px solid rgba(255, 165, 0, 0.3); padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;">Assign Employees</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add New Location -->
+                        <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 20px;">
+                            <h3 style="color: #22c55e; margin-bottom: 12px; font-size: 18px;">Add New Location</h3>
+                            <button onclick="addNewQRLocation()" style="background: linear-gradient(135deg, #22c55e, #16a34a); border: none; color: white; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                                Generate QR for New Location
+                            </button>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 20px;">
+                            <button onclick="closeQRLocationModal()" class="btn-cancel">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
+        function createQRAssignmentModal() {
+            const modalHTML = `
+                <div id="qrAssignmentModal" class="modal show">
+                    <div class="modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+                        <div class="modal-header">
+                            <h2 class="modal-title">Employee QR Code Assignments</h2>
+                            <button class="close-btn" onclick="closeQRAssignmentModal()">&times;</button>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <p style="color: #94a3b8; line-height: 1.5;">
+                                View which employees are assigned to each QR code location. Employees can only check in at locations they're assigned to.
+                            </p>
+                        </div>
+
+                        <!-- QR Code Locations and Assignments -->
+                        <div id="qrAssignmentsList">
+                            <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 8px; padding: 20px; margin-bottom: 16px;">
+                                <h3 style="color: #00ffff; margin: 0 0 12px 0; font-size: 16px;">Main Store Location</h3>
+                                <div style="color: #94a3b8; font-size: 12px; margin-bottom: 16px;">
+                                    QR Code: emp_1753137983666_gcgt4z3rr • GPS Validation: Enabled
+                                </div>
+                                
+                                <div style="margin-bottom: 16px;">
+                                    <h4 style="color: #f59e0b; margin: 0 0 8px 0; font-size: 14px;">Assigned Employees (3)</h4>
+                                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                                        <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 6px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+                                            <div>
+                                                <strong style="color: #00ffff;">Sarah Johnson</strong>
+                                                <span style="color: #94a3b8; font-size: 12px; margin-left: 8px;">Manager • W-2 Status</span>
+                                            </div>
+                                            <button onclick="removeQRAssignment('sarah', 'emp_1753137983666_gcgt4z3rr')" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">Remove</button>
+                                        </div>
+                                        
+                                        <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 6px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+                                            <div>
+                                                <strong style="color: #00ffff;">Mike Rodriguez</strong>
+                                                <span style="color: #94a3b8; font-size: 12px; margin-left: 8px;">Cashier • W-2 Status</span>
+                                            </div>
+                                            <button onclick="removeQRAssignment('mike', 'emp_1753137983666_gcgt4z3rr')" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">Remove</button>
+                                        </div>
+                                        
+                                        <div style="background: rgba(138, 43, 226, 0.1); border: 1px solid rgba(138, 43, 226, 0.3); border-radius: 6px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+                                            <div>
+                                                <strong style="color: #00ffff;">Alex Kim</strong>
+                                                <span style="color: #94a3b8; font-size: 12px; margin-left: 8px;">Stock Specialist • 1099 Status</span>
+                                            </div>
+                                            <button onclick="removeQRAssignment('alex', 'emp_1753137983666_gcgt4z3rr')" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">Remove</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <button onclick="addEmployeeToQR('emp_1753137983666_gcgt4z3rr')" style="background: linear-gradient(135deg, #22c55e, #16a34a); border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">
+                                    + Add Employee
+                                </button>
+                            </div>
+                            
+                            <div style="text-align: center; padding: 20px; color: #64748b; font-style: italic;">
+                                Need more locations? Click "Manage QR Locations" to add new work areas.
+                            </div>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 16px;">
+                            <button onclick="closeQRAssignmentModal()" class="btn-cancel">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
+        function closeQRLocationModal() {
+            const modal = document.getElementById('qrLocationModal');
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => modal.remove(), 300);
+            }
+        }
+
+        function closeQRAssignmentModal() {
+            const modal = document.getElementById('qrAssignmentModal');
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => modal.remove(), 300);
+            }
+        }
+
+        function viewQRCode(qrId) {
+            showNotification(`Opening QR code viewer for ${qrId}`, 'info');
+            // This would show the actual QR code image
+        }
+
+        function assignEmployeesToQR(qrId) {
+            showNotification(`Opening employee assignment for QR ${qrId}`, 'info');
+            // This would open an employee selection interface
+        }
+
+        function addNewQRLocation() {
+            showNotification('Redirecting to QR code generation for new location', 'success');
+            setTimeout(() => {
+                window.open('/employee-geo-qr-system.html', '_blank');
+                closeQRLocationModal();
+            }, 500);
+        }
+
+        function removeQRAssignment(employeeId, qrId) {
+            if (confirm('Remove this employee from the QR code location?')) {
+                showNotification(`Removed employee from QR location ${qrId}`, 'success');
+                // Here you would call an API to remove the assignment
+            }
+        }
+
+        function addEmployeeToQR(qrId) {
+            showNotification(`Adding employee to QR location ${qrId}`, 'info');
+            // This would open an employee selection modal
         }
 
         function generateQR() {
