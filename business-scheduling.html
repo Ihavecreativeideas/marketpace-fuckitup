@@ -1802,6 +1802,105 @@
             color: #00ffff;
         }
 
+        /* One-Click Status Update Widget */
+        .status-widget {
+            position: relative;
+            display: inline-block;
+        }
+
+        .status-button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .status-button.available {
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            box-shadow: 0 2px 8px rgba(0, 255, 136, 0.3);
+        }
+
+        .status-button.scheduled {
+            background: linear-gradient(135deg, #ffd700, #ffb300);
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+        }
+
+        .status-button.off {
+            background: linear-gradient(135deg, #ff6b9d, #ff4757);
+            box-shadow: 0 2px 8px rgba(255, 107, 157, 0.3);
+        }
+
+        .status-button.break {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            box-shadow: 0 2px 8px rgba(155, 89, 182, 0.3);
+        }
+
+        .status-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .status-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 8px;
+            display: none;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            margin-top: 4px;
+        }
+
+        .status-dropdown.show {
+            display: block;
+            animation: statusDropdownFade 0.2s ease-out;
+        }
+
+        @keyframes statusDropdownFade {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .status-option {
+            display: block;
+            width: 100%;
+            background: none;
+            border: none;
+            color: white;
+            padding: 6px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-bottom: 2px;
+        }
+
+        .status-option:last-child {
+            margin-bottom: 0;
+        }
+
+        .status-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(2px);
+        }
+
+        .status-option.available { border-left: 3px solid #00ff88; }
+        .status-option.scheduled { border-left: 3px solid #ffd700; }
+        .status-option.off { border-left: 3px solid #ff6b9d; }
+        .status-option.break { border-left: 3px solid #9b59b6; }
+
         .shift-timeline {
             flex: 1;
             height: 40px;
@@ -4157,14 +4256,24 @@
                 card.innerHTML = `
                     <div style="display: flex; align-items: center; margin-bottom: 12px;">
                         <div class="employee-avatar ${employee.color}" style="width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; margin-right: 12px;">${employee.avatar}</div>
-                        <div>
+                        <div style="flex: 1;">
                             <div style="font-weight: bold; color: white; font-size: 16px;">${employee.name}</div>
                             <div style="color: #94a3b8; font-size: 14px;">${employee.role}</div>
                         </div>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="color: ${statusColor}; font-size: 12px; font-weight: bold;">${employee.status}</div>
-                        <button style="background: linear-gradient(135deg, #00ffff, #4169e1); border: none; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">Schedule</button>
+                        <div class="status-widget">
+                            <button class="status-button ${employee.status.toLowerCase()}" onclick="toggleStatusDropdown('${employee.id}')" id="status-btn-${employee.id}">
+                                ${employee.status}
+                            </button>
+                            <div class="status-dropdown" id="status-dropdown-${employee.id}">
+                                <button class="status-option available" onclick="updateEmployeeStatus('${employee.id}', 'Available')">Available</button>
+                                <button class="status-option scheduled" onclick="updateEmployeeStatus('${employee.id}', 'Scheduled')">Scheduled</button>
+                                <button class="status-option break" onclick="updateEmployeeStatus('${employee.id}', 'Break')">Break</button>
+                                <button class="status-option off" onclick="updateEmployeeStatus('${employee.id}', 'Off')">Off</button>
+                            </div>
+                        </div>
+                        <button style="background: linear-gradient(135deg, #00ffff, #4169e1); border: none; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;" onclick="openEmployeeScheduling(${JSON.stringify(employee).replace(/"/g, '&quot;')})">Schedule</button>
                     </div>
                 `;
 
@@ -4210,6 +4319,98 @@
         function closeEmployeeScheduling() {
             document.getElementById('selectedEmployeeScheduling').style.display = 'none';
             showNotification('Closed employee scheduling interface', 'success');
+        }
+
+        // One-Click Status Update Functions
+        function toggleStatusDropdown(employeeId) {
+            // Close all other dropdowns first
+            document.querySelectorAll('.status-dropdown').forEach(dropdown => {
+                if (dropdown.id !== `status-dropdown-${employeeId}`) {
+                    dropdown.classList.remove('show');
+                }
+            });
+
+            // Toggle the clicked dropdown
+            const dropdown = document.getElementById(`status-dropdown-${employeeId}`);
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+            }
+
+            // Close dropdown when clicking outside
+            setTimeout(() => {
+                document.addEventListener('click', function closeDropdown(e) {
+                    if (!e.target.closest('.status-widget')) {
+                        document.querySelectorAll('.status-dropdown').forEach(dropdown => {
+                            dropdown.classList.remove('show');
+                        });
+                        document.removeEventListener('click', closeDropdown);
+                    }
+                });
+            }, 100);
+        }
+
+        function updateEmployeeStatus(employeeId, newStatus) {
+            const statusButton = document.getElementById(`status-btn-${employeeId}`);
+            const dropdown = document.getElementById(`status-dropdown-${employeeId}`);
+            
+            if (statusButton && dropdown) {
+                // Update button text and styling
+                statusButton.textContent = newStatus;
+                statusButton.className = `status-button ${newStatus.toLowerCase()}`;
+                
+                // Close dropdown
+                dropdown.classList.remove('show');
+                
+                // Update employee data
+                const employees = [
+                    { id: 'sarah', name: 'Sarah Johnson', role: 'Manager', status: 'Available', avatar: 'S', color: 'manager' },
+                    { id: 'mike', name: 'Mike Chen', role: 'Cashier', status: 'Available', avatar: 'M', color: 'cashier' },
+                    { id: 'jessica', name: 'Jessica Martinez', role: 'Sales', status: 'Scheduled', avatar: 'J', color: 'sales' },
+                    { id: 'david', name: 'David Wilson', role: 'Stock', status: 'Available', avatar: 'D', color: 'stock' },
+                    { id: 'emma', name: 'Emma Davis', role: 'Assistant', status: 'Off', avatar: 'E', color: 'assistant' },
+                    { id: 'carlos', name: 'Carlos Rodriguez', role: 'Security', status: 'Available', avatar: 'C', color: 'security' }
+                ];
+                
+                const employee = employees.find(emp => emp.id === employeeId);
+                if (employee) {
+                    employee.status = newStatus;
+                    
+                    // Show success notification with employee name
+                    showNotification(`Updated ${employee.name} status to ${newStatus}`, 'success');
+                    
+                    // Update schedule view if visible
+                    updateScheduleView();
+                    
+                    // Update statistics
+                    updateEmployeeStats();
+                }
+            }
+        }
+
+        function updateScheduleView() {
+            // Update any schedule displays that show employee status
+            console.log('Schedule view updated with new employee status');
+        }
+
+        function updateEmployeeStats() {
+            // Update employee statistics counters
+            const employees = document.querySelectorAll('.status-button');
+            let availableCount = 0;
+            let scheduledCount = 0;
+            let offCount = 0;
+            let breakCount = 0;
+            
+            employees.forEach(button => {
+                const status = button.textContent.toLowerCase();
+                switch(status) {
+                    case 'available': availableCount++; break;
+                    case 'scheduled': scheduledCount++; break;
+                    case 'off': offCount++; break;
+                    case 'break': breakCount++; break;
+                }
+            });
+            
+            console.log(`Employee Status Stats: Available: ${availableCount}, Scheduled: ${scheduledCount}, Off: ${offCount}, Break: ${breakCount}`);
         }
 
         // Smooth Tab Switching Function - Simple and Effective
