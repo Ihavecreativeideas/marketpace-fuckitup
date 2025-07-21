@@ -2993,10 +2993,10 @@
                             <h3 id="selectedEmployeeName" style="color: #00ffff; margin: 0; font-size: 24px;"></h3>
                             <p id="selectedEmployeeRole" style="color: #94a3b8; margin: 4px 0 0 0;"></p>
                         </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button onclick="switchSchedulingView('shifts')" id="shiftsViewBtn" style="background: rgba(0,255,255,0.2); border: 1px solid rgba(0,255,255,0.5); color: #00ffff; padding: 8px 16px; border-radius: 6px; cursor: pointer;">All Shifts</button>
-                            <button onclick="switchSchedulingView('coverage')" id="coverageViewBtn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Coverage</button>
-                            <button onclick="closeEmployeeScheduling()" style="background: rgba(255,0,0,0.2); border: 1px solid rgba(255,0,0,0.5); color: #ff4444; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Close</button>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            <button onclick="switchSchedulingView('shifts')" id="shiftsViewBtn" style="background: rgba(0,255,255,0.2); border: 1px solid rgba(0,255,255,0.5); color: #00ffff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">Shifts</button>
+                            <button onclick="switchSchedulingView('coverage')" id="coverageViewBtn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">Coverage</button>
+                            <button onclick="closeEmployeeScheduling()" style="background: rgba(255,0,0,0.2); border: 1px solid rgba(255,0,0,0.5); color: #ff4444; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">Close</button>
                         </div>
                     </div>
 
@@ -3048,11 +3048,11 @@
                     </div>
 
                     <!-- Schedule Actions -->
-                    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-                        <button id="addShiftBtn" onclick="addShiftToCalendar()" style="background: linear-gradient(135deg, #00ffff, #0066ff); border: none; color: white; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold;">Add Shift</button>
-                        <button onclick="replaceShift()" style="background: rgba(255,215,0,0.2); border: 1px solid rgba(255,215,0,0.5); color: #ffd700; padding: 12px 24px; border-radius: 8px; cursor: pointer;">Replace Shift</button>
-                        <button onclick="swapShifts()" style="background: rgba(255,107,157,0.2); border: 1px solid rgba(255,107,157,0.5); color: #ff6b9d; padding: 12px 24px; border-radius: 8px; cursor: pointer;">Swap Shifts</button>
-                        <button onclick="viewEmployeeStats()" style="background: rgba(0,255,136,0.2); border: 1px solid rgba(0,255,136,0.5); color: #00ff88; padding: 12px 24px; border-radius: 8px; cursor: pointer;">View Stats</button>
+                    <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+                        <button id="addShiftBtn" onclick="addShiftToCalendar()" style="background: linear-gradient(135deg, #00ffff, #0066ff); border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px;">Add Shift</button>
+                        <button onclick="replaceShift()" style="background: rgba(255,215,0,0.2); border: 1px solid rgba(255,215,0,0.5); color: #ffd700; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px;">Replace</button>
+                        <button onclick="swapShifts()" style="background: rgba(255,107,157,0.2); border: 1px solid rgba(255,107,157,0.5); color: #ff6b9d; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px;">Swap</button>
+                        <button onclick="viewEmployeeStats()" style="background: rgba(0,255,136,0.2); border: 1px solid rgba(0,255,136,0.5); color: #00ff88; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px;">Stats</button>
                     </div>
                 </div>
 
@@ -3639,6 +3639,7 @@
                 name: button.textContent.split('\n')[0]
             };
             updateShiftTemplateSelection();
+            updateScheduleButton();
             showNotification(`Selected ${selectedShiftTemplate.name}`, 'success');
         }
 
@@ -3774,6 +3775,35 @@
             selectedCalendarDays = [];
             updateCalendarSelection();
             updateScheduleButton();
+        }
+
+        function updateCalendarSelection() {
+            document.querySelectorAll('.calendar-day').forEach(dayElement => {
+                const date = dayElement.dataset.date;
+                if (selectedCalendarDays.includes(date)) {
+                    dayElement.style.background = 'rgba(255,215,0,0.3)';
+                    dayElement.style.borderColor = '#ffd700';
+                    dayElement.style.transform = 'scale(1.05)';
+                } else {
+                    dayElement.style.background = 'rgba(255,255,255,0.08)';
+                    dayElement.style.borderColor = 'rgba(255,255,255,0.1)';
+                    dayElement.style.transform = 'scale(1)';
+                }
+            });
+        }
+
+        function updateScheduleButton() {
+            const addShiftBtn = document.getElementById('addShiftBtn');
+            if (addShiftBtn) {
+                if (selectedCalendarDays.length > 0 && selectedEmployee && selectedShiftTemplate) {
+                    addShiftBtn.style.background = 'linear-gradient(135deg, #00ff88, #00cc66)';
+                    addShiftBtn.textContent = `Add to ${selectedCalendarDays.length} Day${selectedCalendarDays.length > 1 ? 's' : ''}`;
+                } else {
+                    addShiftBtn.style.background = 'linear-gradient(135deg, #00ffff, #0066ff)';
+                    addShiftBtn.textContent = 'Add Shift';
+                }
+            }
+        }
         }
 
         function updateCalendarSelection() {
@@ -4131,10 +4161,39 @@
                 return;
             }
             if (!selectedShiftTemplate) {
-                showNotification('Please select a shift template', 'warning');
+                showNotification('Please select a shift template first', 'warning');
                 return;
             }
-            showNotification('Click on any empty time slot to add the shift', 'info');
+            if (selectedCalendarDays.length === 0) {
+                showNotification('Please select days on the calendar first', 'warning');
+                return;
+            }
+            
+            // Add shifts to selected days
+            selectedCalendarDays.forEach(dateStr => {
+                const date = new Date(dateStr);
+                const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+                const dayName = dayNames[date.getDay()];
+                
+                if (!existingShifts[dayName]) existingShifts[dayName] = [];
+                
+                const newShift = {
+                    employee: selectedEmployee.name,
+                    role: selectedEmployee.role,
+                    start: selectedShiftTemplate.start,
+                    end: selectedShiftTemplate.end,
+                    color: selectedEmployee.color
+                };
+                
+                existingShifts[dayName].push(newShift);
+            });
+            
+            // Reset selections
+            selectedCalendarDays = [];
+            generateFullScheduleCalendar();
+            generateCoverageAnalysis();
+            
+            showNotification(`Added ${selectedShiftTemplate.name} shifts for ${selectedEmployee.name}`, 'success');
         }
 
         function replaceShift() {
@@ -4248,6 +4307,9 @@
         // Remove duplicate function - using the primary generateSmartEmployeeCards function above
 
         function openEmployeeScheduling(employee) {
+            // Set the global selectedEmployee variable
+            selectedEmployee = employee;
+            
             // Set employee details in the scheduling interface
             document.getElementById('selectedEmployeeName').textContent = employee.name;
             document.getElementById('selectedEmployeeRole').textContent = employee.role;
@@ -4255,13 +4317,20 @@
             // Show the scheduling interface
             document.getElementById('selectedEmployeeScheduling').style.display = 'block';
             
+            // Initialize the scheduling calendar
+            generateFullScheduleCalendar();
+            generateCoverageAnalysis();
+            
+            // Update schedule button
+            updateScheduleButton();
+            
             // Scroll to the scheduling interface
             document.getElementById('selectedEmployeeScheduling').scrollIntoView({
                 behavior: 'smooth',
                 block: 'start'
             });
 
-            showNotification(`Opening schedule for ${employee.name}`, 'success');
+            showNotification(`Selected ${employee.name} for scheduling`, 'success');
         }
 
         function closeEmployeeScheduling() {
