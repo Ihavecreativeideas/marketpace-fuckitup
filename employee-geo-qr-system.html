@@ -381,44 +381,74 @@
         });
 
         function checkIn() {
-            if (navigator.geolocation) {
-                showNotification('Getting your location...', 'success');
-                
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        // In a real implementation, you would verify the location against work location
-                        // For now, we'll simulate a successful check-in
-                        
-                        console.log('Check-in location obtained:', position.coords.latitude, position.coords.longitude);
-                        
-                        isCheckedIn = true;
-                        checkInTime = new Date();
-                        
-                        // Save state to localStorage
-                        localStorage.setItem('employeeCheckedIn', 'true');
-                        localStorage.setItem('employeeCheckInTime', checkInTime.toISOString());
-                        
-                        console.log('Checking in at:', checkInTime);
-                        
-                        updateStatus();
-                        updateButtons();
-                        showNotification('Successfully checked in!', 'success');
-                        
-                        // Send check-in data to server (implement as needed)
-                        console.log('Check-in data:', {
-                            timestamp: checkInTime,
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude
-                        });
-                    },
-                    function(error) {
-                        showNotification('Location access required for check-in', 'error');
-                        console.error('Geolocation error:', error);
-                    }
-                );
-            } else {
-                showNotification('Geolocation not supported', 'error');
+            console.log('Check-in button clicked');
+            
+            if (!navigator.geolocation) {
+                console.error('Geolocation not supported by browser');
+                showNotification('Geolocation not supported by your browser', 'error');
+                return;
             }
+            
+            console.log('Geolocation supported, requesting location...');
+            showNotification('Getting your location...', 'success');
+            
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000
+            };
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    console.log('Check-in location obtained:', position.coords.latitude, position.coords.longitude);
+                    
+                    isCheckedIn = true;
+                    checkInTime = new Date();
+                    
+                    // Save state to localStorage
+                    localStorage.setItem('employeeCheckedIn', 'true');
+                    localStorage.setItem('employeeCheckInTime', checkInTime.toISOString());
+                    
+                    console.log('Successfully checked in at:', checkInTime);
+                    
+                    updateStatus();
+                    updateButtons();
+                    showNotification('Successfully checked in!', 'success');
+                    
+                    // Send check-in data to server (implement as needed)
+                    console.log('Check-in data:', {
+                        timestamp: checkInTime,
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    });
+                },
+                function(error) {
+                    console.error('Geolocation error:', error);
+                    let errorMessage = 'Location access required for check-in';
+                    
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'Location permission denied. Please enable location access and try again.';
+                            console.log('Location permission denied by user');
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'Location information unavailable. Please try again.';
+                            console.log('Location information unavailable');
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'Location request timed out. Please try again.';
+                            console.log('Location request timed out');
+                            break;
+                        default:
+                            errorMessage = 'Unknown location error. Please try again.';
+                            console.log('Unknown geolocation error');
+                            break;
+                    }
+                    
+                    showNotification(errorMessage, 'error');
+                },
+                options
+            );
         }
 
         function checkOut() {
