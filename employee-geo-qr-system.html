@@ -1117,13 +1117,25 @@
         }
 
         function useCurrentLocation() {
+            console.log('🔄 Location button clicked, starting geolocation...');
+            
             if (!navigator.geolocation) {
                 showNotification('Geolocation is not supported by this browser', 'error');
                 return;
             }
 
+            // Find the location button safely
+            const locationBtn = document.querySelector('[onclick*="useCurrentLocation"]') || 
+                               document.querySelector('button[onclick*="useCurrentLocation"]') ||
+                               event?.target;
+            
+            if (!locationBtn) {
+                console.log('❌ Could not find location button');
+                showNotification('Error: Could not find location button', 'error');
+                return;
+            }
+
             // Disable button and show loading state
-            const locationBtn = event.target;
             locationBtn.disabled = true;
             locationBtn.classList.add('location-detecting');
             locationBtn.innerHTML = `
@@ -1143,7 +1155,7 @@
                 console.log('⏱️ Location timeout triggered - forcing reset');
                 forceResetLocationButton();
                 showNotification('Location detection timed out. Please try again or enter location manually.', 'error');
-            }, 10000); // Shorter 10 second timeout
+            }, 8000); // 8 second timeout to prevent page crashes
 
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -1505,11 +1517,7 @@
                         console.log('✅ NEW Google Places AutocompleteElement available!');
                         
                         const autocompleteElement = new PlaceAutocompleteElement({
-                            locationBias: { radius: 50000, center: { lat: 30.6943, lng: -88.0431 } }, // Gulf Coast area
-                            locationRestriction: { 
-                                north: 35, south: 25, 
-                                east: -80, west: -95 
-                            } // Southeastern US
+                            locationBias: { radius: 100000, center: { lat: 30.6943, lng: -88.0431 } } // Gulf Coast area bias only
                         });
                         
                         // Style the element to match our design
