@@ -4911,8 +4911,132 @@
         }
 
         function showAddEmployeeModal() {
-            showNotification('Opening employee creation form', 'success');
-            // In a real app, this would open a modal to add new employees
+            console.log('Opening Add Employee Modal');
+            
+            // Create modal HTML
+            const modalHTML = `
+                <div id="addEmployeeModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: linear-gradient(135deg, #1a1a2e 0%, #2d1b69 100%); border: 2px solid #00ffff; border-radius: 16px; padding: 32px; width: 90%; max-width: 500px; color: white;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                            <h2 style="color: #00ffff; margin: 0; font-size: 24px;">Add New Employee</h2>
+                            <button onclick="closeAddEmployeeModal()" style="background: transparent; border: none; color: #00ffff; font-size: 24px; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">×</button>
+                        </div>
+                        
+                        <form id="addEmployeeForm" onsubmit="submitNewEmployee(event)">
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 500;">Full Name</label>
+                                <input type="text" id="employeeName" required style="width: 100%; padding: 12px; border: 2px solid rgba(0,255,255,0.3); border-radius: 8px; background: rgba(0,0,0,0.3); color: white; font-size: 16px;" placeholder="Enter employee name">
+                            </div>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 500;">Role</label>
+                                <select id="employeeRole" required style="width: 100%; padding: 12px; border: 2px solid rgba(0,255,255,0.3); border-radius: 8px; background: rgba(0,0,0,0.3); color: white; font-size: 16px;">
+                                    <option value="">Select Role</option>
+                                    <option value="Manager">Manager</option>
+                                    <option value="Cashier">Cashier</option>
+                                    <option value="Sales">Sales Associate</option>
+                                    <option value="Stock">Stock Clerk</option>
+                                    <option value="Assistant">Assistant</option>
+                                    <option value="Security">Security</option>
+                                </select>
+                            </div>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 500;">Phone Number</label>
+                                <input type="tel" id="employeePhone" required style="width: 100%; padding: 12px; border: 2px solid rgba(0,255,255,0.3); border-radius: 8px; background: rgba(0,0,0,0.3); color: white; font-size: 16px;" placeholder="(555) 123-4567">
+                            </div>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 500;">Hourly Rate ($)</label>
+                                <input type="number" id="employeeRate" required min="7.25" step="0.25" style="width: 100%; padding: 12px; border: 2px solid rgba(0,255,255,0.3); border-radius: 8px; background: rgba(0,0,0,0.3); color: white; font-size: 16px;" placeholder="15.00">
+                            </div>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 500;">Status</label>
+                                <select id="employeeStatus" required style="width: 100%; padding: 12px; border: 2px solid rgba(0,255,255,0.3); border-radius: 8px; background: rgba(0,0,0,0.3); color: white; font-size: 16px;">
+                                    <option value="Available">Available</option>
+                                    <option value="Scheduled">Scheduled</option>
+                                    <option value="Off">Off Duty</option>
+                                </select>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin-top: 32px;">
+                                <button type="button" onclick="closeAddEmployeeModal()" style="background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold;">Cancel</button>
+                                <button type="submit" style="background: linear-gradient(135deg, #00ffff, #0066ff); border: none; color: white; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold;">Add Employee</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+        
+        function closeAddEmployeeModal() {
+            const modal = document.getElementById('addEmployeeModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        function submitNewEmployee(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('employeeName').value.trim();
+            const role = document.getElementById('employeeRole').value;
+            const phone = document.getElementById('employeePhone').value.trim();
+            const rate = document.getElementById('employeeRate').value;
+            const status = document.getElementById('employeeStatus').value;
+            
+            if (!name || !role || !phone || !rate) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            // Create new employee object
+            const newEmployee = {
+                id: Date.now().toString(),
+                name: name,
+                role: role,
+                phone: phone,
+                rate: parseFloat(rate),
+                status: status,
+                avatar: name.charAt(0).toUpperCase(),
+                color: getRoleColor(role),
+                dateAdded: new Date().toISOString()
+            };
+            
+            // Get existing employees from localStorage or create new array
+            let employees = JSON.parse(localStorage.getItem('marketpace_employees') || '[]');
+            
+            // Add new employee
+            employees.push(newEmployee);
+            
+            // Save to localStorage
+            localStorage.setItem('marketpace_employees', JSON.stringify(employees));
+            
+            // Refresh employee grid
+            generateEmployeeCards();
+            
+            // Close modal
+            closeAddEmployeeModal();
+            
+            // Show success message
+            showNotification(`Employee ${name} added successfully!`, 'success');
+            
+            console.log('New employee added:', newEmployee);
+        }
+        
+        function getRoleColor(role) {
+            const roleColors = {
+                'Manager': 'manager',
+                'Cashier': 'cashier',
+                'Sales': 'sales',
+                'Stock': 'stock',
+                'Assistant': 'assistant',
+                'Security': 'security'
+            };
+            return roleColors[role] || 'cashier';
         }
 
         function showCustomTimeModal() {
@@ -4932,14 +5056,22 @@
         }
 
         function generateEmployeeCards() {
-            const employees = [
-                { id: 'sarah', name: 'Sarah Johnson', role: 'Manager', status: 'Available', avatar: 'S', color: 'manager' },
-                { id: 'mike', name: 'Mike Chen', role: 'Cashier', status: 'Available', avatar: 'M', color: 'cashier' },
-                { id: 'jessica', name: 'Jessica Martinez', role: 'Sales', status: 'Scheduled', avatar: 'J', color: 'sales' },
-                { id: 'david', name: 'David Wilson', role: 'Stock', status: 'Available', avatar: 'D', color: 'stock' },
-                { id: 'emma', name: 'Emma Davis', role: 'Assistant', status: 'Off', avatar: 'E', color: 'assistant' },
-                { id: 'carlos', name: 'Carlos Rodriguez', role: 'Security', status: 'Available', avatar: 'C', color: 'security' }
-            ];
+            // Get employees from localStorage, fallback to default employees
+            let employees = JSON.parse(localStorage.getItem('marketpace_employees') || '[]');
+            
+            // If no saved employees, use default demo employees
+            if (employees.length === 0) {
+                employees = [
+                    { id: 'sarah', name: 'Sarah Johnson', role: 'Manager', status: 'Available', avatar: 'S', color: 'manager', phone: '(555) 123-4567', rate: 25.00 },
+                    { id: 'mike', name: 'Mike Chen', role: 'Cashier', status: 'Available', avatar: 'M', color: 'cashier', phone: '(555) 234-5678', rate: 15.00 },
+                    { id: 'jessica', name: 'Jessica Martinez', role: 'Sales', status: 'Scheduled', avatar: 'J', color: 'sales', phone: '(555) 345-6789', rate: 18.00 },
+                    { id: 'david', name: 'David Wilson', role: 'Stock', status: 'Available', avatar: 'D', color: 'stock', phone: '(555) 456-7890', rate: 16.00 },
+                    { id: 'emma', name: 'Emma Davis', role: 'Assistant', status: 'Off', avatar: 'E', color: 'assistant', phone: '(555) 567-8901', rate: 14.00 },
+                    { id: 'carlos', name: 'Carlos Rodriguez', role: 'Security', status: 'Available', avatar: 'C', color: 'security', phone: '(555) 678-9012', rate: 20.00 }
+                ];
+                // Save default employees to localStorage
+                localStorage.setItem('marketpace_employees', JSON.stringify(employees));
+            }
 
             const smartEmployeeGrid = document.getElementById('smartEmployeeGrid');
             smartEmployeeGrid.innerHTML = '';
