@@ -2510,46 +2510,74 @@
                     <!-- Employee Cards will be dynamically generated -->
                 </div>
 
-                <!-- Selected Employee Scheduling Interface -->
+                <!-- Comprehensive Employee Scheduling Calendar -->
                 <div id="selectedEmployeeScheduling" style="display: none; background: rgba(0,0,0,0.4); border: 2px solid #00ffff; border-radius: 16px; padding: 24px; margin-top: 24px;">
+                    <!-- Header -->
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <div>
                             <h3 id="selectedEmployeeName" style="color: #00ffff; margin: 0; font-size: 24px;"></h3>
                             <p id="selectedEmployeeRole" style="color: #94a3b8; margin: 4px 0 0 0;"></p>
                         </div>
-                        <button onclick="closeEmployeeScheduling()" style="background: rgba(255,0,0,0.2); border: 1px solid rgba(255,0,0,0.5); color: #ff4444; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Close</button>
-                    </div>
-
-                    <!-- Shift Templates Selection -->
-                    <div style="margin-bottom: 20px;">
-                        <h4 style="color: #ffd700; margin-bottom: 12px;">Quick Shift Templates</h4>
-                        <div id="shiftTemplates" style="display: flex; gap: 12px; flex-wrap: wrap;">
-                            <button class="shift-template" data-start="06:00" data-end="14:00" onclick="selectShiftTemplate(this)" style="background: rgba(255,215,0,0.2); border: 1px solid rgba(255,215,0,0.5); color: #ffd700; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Morning Shift<br><small>6:00 AM - 2:00 PM</small></button>
-                            <button class="shift-template" data-start="14:00" data-end="22:00" onclick="selectShiftTemplate(this)" style="background: rgba(0,255,255,0.2); border: 1px solid rgba(0,255,255,0.5); color: #00ffff; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Afternoon Shift<br><small>2:00 PM - 10:00 PM</small></button>
-                            <button class="shift-template" data-start="22:00" data-end="06:00" onclick="selectShiftTemplate(this)" style="background: rgba(255,107,157,0.2); border: 1px solid rgba(255,107,157,0.5); color: #ff6b9d; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Night Shift<br><small>10:00 PM - 6:00 AM</small></button>
-                            <button class="shift-template" data-start="09:00" data-end="17:00" onclick="selectShiftTemplate(this)" style="background: rgba(0,255,136,0.2); border: 1px solid rgba(0,255,136,0.5); color: #00ff88; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Day Shift<br><small>9:00 AM - 5:00 PM</small></button>
-                            <button onclick="showCustomTimeModal()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Custom Times<br><small>Set specific hours</small></button>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="switchSchedulingView('shifts')" id="shiftsViewBtn" style="background: rgba(0,255,255,0.2); border: 1px solid rgba(0,255,255,0.5); color: #00ffff; padding: 8px 16px; border-radius: 6px; cursor: pointer;">All Shifts</button>
+                            <button onclick="switchSchedulingView('coverage')" id="coverageViewBtn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Coverage</button>
+                            <button onclick="closeEmployeeScheduling()" style="background: rgba(255,0,0,0.2); border: 1px solid rgba(255,0,0,0.5); color: #ff4444; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Close</button>
                         </div>
                     </div>
 
-                    <!-- Calendar for Multi-Day Selection -->
+                    <!-- Week Navigation -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px;">
+                        <button onclick="navigateSchedulingWeek(-1)" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer;">← Previous</button>
+                        <h4 id="schedulingWeekRange" style="color: #ffd700; margin: 0; font-size: 18px;">January 21-27, 2025</h4>
+                        <button onclick="navigateSchedulingWeek(1)" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer;">Next →</button>
+                    </div>
+
+                    <!-- Shift Templates Quick Selection -->
                     <div style="margin-bottom: 20px;">
-                        <h4 style="color: #ffd700; margin-bottom: 12px;">Select Multiple Days</h4>
-                        <div id="multiDayCalendar" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; background: rgba(0,0,0,0.3); padding: 16px; border-radius: 12px;">
-                            <!-- Calendar days will be generated dynamically -->
+                        <h4 style="color: #ffd700; margin-bottom: 12px; font-size: 16px;">Quick Shift Templates</h4>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button class="shift-template" data-start="06:00" data-end="14:00" onclick="selectShiftTemplate(this)" style="background: rgba(255,215,0,0.2); border: 1px solid rgba(255,215,0,0.5); color: #ffd700; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">Morning<br>6AM-2PM</button>
+                            <button class="shift-template" data-start="14:00" data-end="22:00" onclick="selectShiftTemplate(this)" style="background: rgba(0,255,255,0.2); border: 1px solid rgba(0,255,255,0.5); color: #00ffff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">Afternoon<br>2PM-10PM</button>
+                            <button class="shift-template" data-start="22:00" data-end="06:00" onclick="selectShiftTemplate(this)" style="background: rgba(255,107,157,0.2); border: 1px solid rgba(255,107,157,0.5); color: #ff6b9d; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">Night<br>10PM-6AM</button>
+                            <button class="shift-template" data-start="09:00" data-end="17:00" onclick="selectShiftTemplate(this)" style="background: rgba(0,255,136,0.2); border: 1px solid rgba(0,255,136,0.5); color: #00ff88; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">Day<br>9AM-5PM</button>
+                            <button onclick="showCustomTimeModal()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">Custom</button>
                         </div>
-                        <div style="margin-top: 12px; display: flex; gap: 12px;">
-                            <button onclick="selectCalendarRange('thisWeek')" style="background: rgba(0,255,255,0.2); border: 1px solid rgba(0,255,255,0.5); color: #00ffff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">This Week</button>
-                            <button onclick="selectCalendarRange('nextWeek')" style="background: rgba(255,215,0,0.2); border: 1px solid rgba(255,215,0,0.5); color: #ffd700; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">Next Week</button>
-                            <button onclick="selectCalendarRange('weekends')" style="background: rgba(255,107,157,0.2); border: 1px solid rgba(255,107,157,0.5); color: #ff6b9d; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">Weekends</button>
-                            <button onclick="clearCalendarSelection()" style="background: rgba(255,0,0,0.2); border: 1px solid rgba(255,0,0,0.5); color: #ff4444; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">Clear</button>
+                    </div>
+
+                    <!-- Full Schedule Calendar with All Shifts -->
+                    <div id="fullScheduleCalendar" style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+                        <!-- Calendar Header -->
+                        <div style="display: grid; grid-template-columns: 80px repeat(7, 1fr); gap: 8px; margin-bottom: 12px;">
+                            <div style="color: #94a3b8; font-size: 12px; font-weight: bold; text-align: center;">Time</div>
+                            <div style="color: #94a3b8; font-size: 12px; font-weight: bold; text-align: center;">Mon</div>
+                            <div style="color: #94a3b8; font-size: 12px; font-weight: bold; text-align: center;">Tue</div>
+                            <div style="color: #94a3b8; font-size: 12px; font-weight: bold; text-align: center;">Wed</div>
+                            <div style="color: #94a3b8; font-size: 12px; font-weight: bold; text-align: center;">Thu</div>
+                            <div style="color: #94a3b8; font-size: 12px; font-weight: bold; text-align: center;">Fri</div>
+                            <div style="color: #94a3b8; font-size: 12px; font-weight: bold; text-align: center;">Sat</div>
+                            <div style="color: #94a3b8; font-size: 12px; font-weight: bold; text-align: center;">Sun</div>
+                        </div>
+                        
+                        <!-- Time Slots with Existing Shifts -->
+                        <div id="scheduleTimeSlots" style="display: grid; grid-template-columns: 80px repeat(7, 1fr); gap: 8px;">
+                            <!-- Time slots will be generated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Coverage Analysis -->
+                    <div id="coverageAnalysis" style="display: none; background: rgba(0,0,0,0.3); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+                        <h4 style="color: #ffd700; margin-bottom: 12px;">Staffing Coverage Analysis</h4>
+                        <div id="coverageChart" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;">
+                            <!-- Coverage analysis will be generated -->
                         </div>
                     </div>
 
                     <!-- Schedule Actions -->
-                    <div style="display: flex; gap: 12px; justify-content: center;">
-                        <button id="scheduleEmployeeBtn" onclick="scheduleSelectedEmployee()" style="background: linear-gradient(135deg, #00ffff, #0066ff); border: none; color: white; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold;">Schedule Selected Days</button>
-                        <button onclick="viewEmployeeStats()" style="background: rgba(255,215,0,0.2); border: 1px solid rgba(255,215,0,0.5); color: #ffd700; padding: 12px 24px; border-radius: 8px; cursor: pointer;">View Stats & History</button>
+                    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                        <button id="addShiftBtn" onclick="addShiftToCalendar()" style="background: linear-gradient(135deg, #00ffff, #0066ff); border: none; color: white; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold;">Add Shift</button>
+                        <button onclick="replaceShift()" style="background: rgba(255,215,0,0.2); border: 1px solid rgba(255,215,0,0.5); color: #ffd700; padding: 12px 24px; border-radius: 8px; cursor: pointer;">Replace Shift</button>
+                        <button onclick="swapShifts()" style="background: rgba(255,107,157,0.2); border: 1px solid rgba(255,107,157,0.5); color: #ff6b9d; padding: 12px 24px; border-radius: 8px; cursor: pointer;">Swap Shifts</button>
+                        <button onclick="viewEmployeeStats()" style="background: rgba(0,255,136,0.2); border: 1px solid rgba(0,255,136,0.5); color: #00ff88; padding: 12px 24px; border-radius: 8px; cursor: pointer;">View Stats</button>
                     </div>
                 </div>
             </div>
@@ -2982,11 +3010,14 @@
             document.getElementById('selectedEmployeeName').textContent = selectedEmployee.name;
             document.getElementById('selectedEmployeeRole').textContent = `${selectedEmployee.role} • $${selectedEmployee.rate}/hr • ${selectedEmployee.status}`;
 
+            // Initialize comprehensive scheduling calendar
+            generateFullScheduleCalendar();
+            generateCoverageAnalysis();
+
             // Reset selections
             selectedShiftTemplate = null;
             selectedCalendarDays = [];
             updateShiftTemplateSelection();
-            updateCalendarSelection();
 
             showNotification(`Selected ${selectedEmployee.name} for scheduling`, 'success');
         }
@@ -3245,6 +3276,277 @@
             if (!selectedEmployee) return;
             showNotification(`Viewing stats for ${selectedEmployee.name}`, 'success');
             // In a real app, this would show detailed analytics
+        }
+
+        // Comprehensive Scheduling Calendar Functions
+        let currentSchedulingWeek = new Date();
+        let existingShifts = {
+            // Sample existing shifts data for demonstration
+            'monday': [
+                { employee: 'Sarah Johnson', role: 'Manager', start: '06:00', end: '14:00', color: '#ff6b9d' },
+                { employee: 'Morgan Casey', role: 'Cashier', start: '14:00', end: '22:00', color: '#10b981' }
+            ],
+            'tuesday': [
+                { employee: 'Riley Thompson', role: 'Cashier', start: '09:00', end: '17:00', color: '#10b981' },
+                { employee: 'Alex Rivera', role: 'Cashier', start: '17:00', end: '23:00', color: '#10b981' }
+            ],
+            'wednesday': [
+                { employee: 'Jordan Kim', role: 'Cashier', start: '06:00', end: '14:00', color: '#10b981' },
+                { employee: 'Sarah Johnson', role: 'Manager', start: '12:00', end: '20:00', color: '#ff6b9d' }
+            ],
+            'thursday': [
+                { employee: 'Casey Morgan', role: 'Cashier', start: '08:00', end: '16:00', color: '#ffd700' },
+                { employee: 'Morgan Casey', role: 'Cashier', start: '16:00', end: '24:00', color: '#10b981' }
+            ],
+            'friday': [
+                { employee: 'Riley Thompson', role: 'Cashier', start: '10:00', end: '18:00', color: '#10b981' },
+                { employee: 'Alex Rivera', role: 'Cashier', start: '18:00', end: '02:00', color: '#10b981' }
+            ],
+            'saturday': [
+                { employee: 'Jordan Kim', role: 'Cashier', start: '09:00', end: '17:00', color: '#10b981' },
+                { employee: 'Sarah Johnson', role: 'Manager', start: '15:00', end: '23:00', color: '#ff6b9d' }
+            ],
+            'sunday': [
+                { employee: 'Casey Morgan', role: 'Cashier', start: '11:00', end: '19:00', color: '#ffd700' }
+            ]
+        };
+
+        function generateFullScheduleCalendar() {
+            const container = document.getElementById('scheduleTimeSlots');
+            container.innerHTML = '';
+            
+            // Generate time slots from 6 AM to 11 PM (17 hours)
+            const timeSlots = [];
+            for (let hour = 6; hour <= 23; hour++) {
+                timeSlots.push(formatHour(hour));
+            }
+            
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            
+            timeSlots.forEach(time => {
+                // Time label
+                const timeLabel = document.createElement('div');
+                timeLabel.style.cssText = `
+                    color: #94a3b8;
+                    font-size: 11px;
+                    text-align: center;
+                    padding: 6px 4px;
+                    border-bottom: 1px solid rgba(255,255,255,0.1);
+                `;
+                timeLabel.textContent = time;
+                container.appendChild(timeLabel);
+                
+                // Day slots
+                days.forEach(day => {
+                    const slot = document.createElement('div');
+                    slot.className = 'schedule-slot';
+                    slot.dataset.day = day;
+                    slot.dataset.time = time;
+                    slot.style.cssText = `
+                        border: 1px solid rgba(255,255,255,0.1);
+                        border-radius: 4px;
+                        min-height: 35px;
+                        position: relative;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                    `;
+                    
+                    // Check for existing shifts
+                    const dayShifts = existingShifts[day] || [];
+                    const currentHour = parseInt(time.split(':')[0]) || parseInt(time.split('M')[0]);
+                    const shift = dayShifts.find(s => {
+                        const startHour = parseInt(s.start.split(':')[0]);
+                        const endHour = parseInt(s.end.split(':')[0]);
+                        return currentHour >= startHour && currentHour < endHour;
+                    });
+                    
+                    if (shift) {
+                        slot.style.background = `linear-gradient(135deg, ${shift.color}20, ${shift.color}40)`;
+                        slot.style.border = `1px solid ${shift.color}`;
+                        slot.innerHTML = `
+                            <div style="font-size: 9px; color: ${shift.color}; font-weight: bold; padding: 2px;">${shift.employee.split(' ')[0]}</div>
+                            <div style="font-size: 8px; color: #94a3b8; padding: 0 2px;">${shift.role}</div>
+                        `;
+                    }
+                    
+                    slot.addEventListener('click', () => selectScheduleSlot(day, time, shift));
+                    slot.addEventListener('mouseenter', () => {
+                        if (!shift) {
+                            slot.style.background = 'rgba(0,255,255,0.1)';
+                            slot.style.border = '1px solid rgba(0,255,255,0.5)';
+                        }
+                    });
+                    slot.addEventListener('mouseleave', () => {
+                        if (!shift) {
+                            slot.style.background = 'transparent';
+                            slot.style.border = '1px solid rgba(255,255,255,0.1)';
+                        }
+                    });
+                    
+                    container.appendChild(slot);
+                });
+            });
+        }
+
+        function generateCoverageAnalysis() {
+            const container = document.getElementById('coverageChart');
+            container.innerHTML = '';
+            
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const dayKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            
+            days.forEach((day, index) => {
+                const dayKey = dayKeys[index];
+                const shifts = existingShifts[dayKey] || [];
+                const coverage = calculateDayCoverage(shifts);
+                
+                const coverageCard = document.createElement('div');
+                coverageCard.style.cssText = `
+                    background: rgba(0,0,0,0.3);
+                    border-radius: 8px;
+                    padding: 12px;
+                    text-align: center;
+                `;
+                
+                const coverageLevel = coverage.total > 24 ? 'high' : coverage.total > 16 ? 'medium' : 'low';
+                const coverageColor = coverageLevel === 'high' ? '#00ff88' : coverageLevel === 'medium' ? '#ffd700' : '#ff6b9d';
+                
+                coverageCard.innerHTML = `
+                    <div style="color: #94a3b8; font-size: 12px; margin-bottom: 4px;">${day}</div>
+                    <div style="color: ${coverageColor}; font-size: 18px; font-weight: bold;">${coverage.total}h</div>
+                    <div style="color: #94a3b8; font-size: 10px;">${shifts.length} shifts</div>
+                    <div style="margin-top: 4px; font-size: 9px; color: ${coverageColor};">${coverageLevel.toUpperCase()}</div>
+                `;
+                
+                container.appendChild(coverageCard);
+            });
+        }
+
+        function calculateDayCoverage(shifts) {
+            let totalHours = 0;
+            shifts.forEach(shift => {
+                const start = parseInt(shift.start.split(':')[0]);
+                const end = parseInt(shift.end.split(':')[0]);
+                const hours = end > start ? end - start : (24 - start) + end;
+                totalHours += hours;
+            });
+            return { total: totalHours, shifts: shifts.length };
+        }
+
+        function formatHour(hour) {
+            if (hour === 0) return '12AM';
+            if (hour < 12) return `${hour}AM`;
+            if (hour === 12) return '12PM';
+            return `${hour - 12}PM`;
+        }
+
+        function selectScheduleSlot(day, time, existingShift) {
+            if (existingShift) {
+                showShiftManagementOptions(day, time, existingShift);
+            } else {
+                if (selectedShiftTemplate && selectedEmployee) {
+                    addShiftToSlot(day, time);
+                } else {
+                    showNotification('Select an employee and shift template first', 'warning');
+                }
+            }
+        }
+
+        function showShiftManagementOptions(day, time, shift) {
+            const options = [
+                `Edit ${shift.employee}'s shift`,
+                `Replace ${shift.employee}`,
+                `Swap with another shift`,
+                `Remove this shift`
+            ];
+            
+            showNotification(`Managing ${shift.employee}'s ${shift.role} shift on ${day.toUpperCase()}`, 'success');
+        }
+
+        function addShiftToSlot(day, time) {
+            if (!selectedEmployee || !selectedShiftTemplate) return;
+            
+            const newShift = {
+                employee: selectedEmployee.name,
+                role: selectedEmployee.role,
+                start: selectedShiftTemplate.start,
+                end: selectedShiftTemplate.end,
+                color: selectedEmployee.color
+            };
+            
+            if (!existingShifts[day]) existingShifts[day] = [];
+            existingShifts[day].push(newShift);
+            
+            showNotification(`Added ${selectedEmployee.name} to ${day.toUpperCase()} ${selectedShiftTemplate.name}`, 'success');
+            generateFullScheduleCalendar();
+            generateCoverageAnalysis();
+        }
+
+        function switchSchedulingView(view) {
+            const shiftsBtn = document.getElementById('shiftsViewBtn');
+            const coverageBtn = document.getElementById('coverageViewBtn');
+            const shiftsView = document.getElementById('fullScheduleCalendar');
+            const coverageView = document.getElementById('coverageAnalysis');
+            
+            if (view === 'shifts') {
+                shiftsBtn.style.background = 'rgba(0,255,255,0.2)';
+                shiftsBtn.style.borderColor = 'rgba(0,255,255,0.5)';
+                shiftsBtn.style.color = '#00ffff';
+                coverageBtn.style.background = 'rgba(255,255,255,0.1)';
+                coverageBtn.style.borderColor = 'rgba(255,255,255,0.3)';
+                coverageBtn.style.color = 'white';
+                shiftsView.style.display = 'block';
+                coverageView.style.display = 'none';
+            } else {
+                coverageBtn.style.background = 'rgba(255,215,0,0.2)';
+                coverageBtn.style.borderColor = 'rgba(255,215,0,0.5)';
+                coverageBtn.style.color = '#ffd700';
+                shiftsBtn.style.background = 'rgba(255,255,255,0.1)';
+                shiftsBtn.style.borderColor = 'rgba(255,255,255,0.3)';
+                shiftsBtn.style.color = 'white';
+                shiftsView.style.display = 'none';
+                coverageView.style.display = 'block';
+            }
+        }
+
+        function navigateSchedulingWeek(direction) {
+            currentSchedulingWeek.setDate(currentSchedulingWeek.getDate() + (direction * 7));
+            updateSchedulingWeekDisplay();
+            generateFullScheduleCalendar();
+        }
+
+        function updateSchedulingWeekDisplay() {
+            const start = new Date(currentSchedulingWeek);
+            start.setDate(currentSchedulingWeek.getDate() - currentSchedulingWeek.getDay() + 1);
+            const end = new Date(start);
+            end.setDate(start.getDate() + 6);
+            
+            const formatDate = (date) => {
+                return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+            };
+            
+            document.getElementById('schedulingWeekRange').textContent = 
+                `${formatDate(start)} - ${formatDate(end)}, ${start.getFullYear()}`;
+        }
+
+        function addShiftToCalendar() {
+            if (!selectedEmployee) {
+                showNotification('Please select an employee first', 'warning');
+                return;
+            }
+            if (!selectedShiftTemplate) {
+                showNotification('Please select a shift template', 'warning');
+                return;
+            }
+            showNotification('Click on any empty time slot to add the shift', 'info');
+        }
+
+        function replaceShift() {
+            showNotification('Click on an existing shift to replace it with the selected employee', 'info');
+        }
+
+        function swapShifts() {
+            showNotification('Shift swapping feature - click two shifts to swap employees', 'info');
         }
 
         function showCreateShiftTemplates() {
