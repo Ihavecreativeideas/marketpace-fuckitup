@@ -2288,7 +2288,8 @@
                                         </div>
                                         <div style="display: flex; flex-direction: column; gap: 8px;">
                                             <button onclick="viewQRCode('emp_1753137983666_gcgt4z3rr')" style="background: rgba(0, 255, 255, 0.2); color: #00ffff; border: 1px solid rgba(0, 255, 255, 0.3); padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;">View QR</button>
-                                            <button onclick="assignEmployeesToQR('emp_1753137983666_gcgt4z3rr')" style="background: rgba(255, 165, 0, 0.2); color: #f59e0b; border: 1px solid rgba(255, 165, 0, 0.3); padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;">Assign Employees</button>
+                                            <button onclick="openLocationSchedule('Main Store Location', 'emp_1753137983666_gcgt4z3rr')" style="background: rgba(34, 197, 94, 0.2); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;">Schedule Board</button>
+                                            <button onclick="assignEmployeesToQR('emp_1753137983666_gcgt4z3rr')" style="background: rgba(255, 165, 0, 0.2); color: #f59e0b; border: 1px solid rgba(255, 165, 0, 0.3); padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;">Assign Workers</button>
                                         </div>
                                     </div>
                                 </div>
@@ -2429,6 +2430,250 @@
         function addEmployeeToQR(qrId) {
             showNotification(`Adding employee to QR location ${qrId}`, 'info');
             // This would open an employee selection modal
+        }
+
+        // Location-Based Schedule Calendar System
+        function openLocationSchedule(locationName, qrId) {
+            const modal = document.getElementById('locationScheduleModal');
+            if (modal) {
+                modal.classList.add('show');
+                updateLocationScheduleContent(locationName, qrId);
+            } else {
+                createLocationScheduleModal(locationName, qrId);
+            }
+        }
+
+        function createLocationScheduleModal(locationName, qrId) {
+            const modalHTML = `
+                <div id="locationScheduleModal" class="modal show">
+                    <div class="modal-content" style="max-width: 95vw; max-height: 90vh; width: 100%; overflow-y: auto;">
+                        <div class="modal-header" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05)); border-bottom: 1px solid rgba(34, 197, 94, 0.3);">
+                            <h2 class="modal-title" style="color: #22c55e;">${locationName} - Schedule Board</h2>
+                            <button class="close-btn" onclick="closeLocationScheduleModal()">&times;</button>
+                        </div>
+                        
+                        <div id="locationScheduleContent" style="padding: 20px;">
+                            <!-- Quick Add Worker Section -->
+                            <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                                <h3 style="color: #22c55e; margin-bottom: 16px; font-size: 18px;">Quick Add Worker</h3>
+                                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                                    <select id="workerSelect" style="background: rgba(0, 0, 0, 0.5); color: white; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 10px; min-width: 150px;">
+                                        <option value="">Select Worker</option>
+                                        <option value="sarah_employee">Sarah Johnson (Employee)</option>
+                                        <option value="mike_employee">Mike Rodriguez (Employee)</option>
+                                        <option value="alex_contractor">Alex Kim (Contractor)</option>
+                                        <option value="jessica_volunteer">Jessica Torres (Volunteer)</option>
+                                        <option value="david_employee">David Chen (Employee)</option>
+                                    </select>
+                                    <select id="daySelect" style="background: rgba(0, 0, 0, 0.5); color: white; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 10px;">
+                                        <option value="">Select Day</option>
+                                        <option value="monday">Monday</option>
+                                        <option value="tuesday">Tuesday</option>
+                                        <option value="wednesday">Wednesday</option>
+                                        <option value="thursday">Thursday</option>
+                                        <option value="friday">Friday</option>
+                                        <option value="saturday">Saturday</option>
+                                        <option value="sunday">Sunday</option>
+                                    </select>
+                                    <input type="time" id="startTime" style="background: rgba(0, 0, 0, 0.5); color: white; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 10px;" value="09:00">
+                                    <input type="time" id="endTime" style="background: rgba(0, 0, 0, 0.5); color: white; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 10px;" value="17:00">
+                                    <button onclick="addWorkerToSchedule('${qrId}')" style="background: linear-gradient(135deg, #22c55e, #16a34a); border: none; color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                                        Add to Schedule
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Weekly Schedule Calendar -->
+                            <div style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                                <h3 style="color: #00ffff; margin-bottom: 16px; font-size: 18px;">Weekly Schedule - ${locationName}</h3>
+                                <div id="weeklyScheduleGrid" style="display: grid; grid-template-columns: 100px repeat(7, 1fr); gap: 2px; font-size: 12px;">
+                                    <!-- Header Row -->
+                                    <div style="background: rgba(0, 255, 255, 0.1); padding: 8px; text-align: center; font-weight: bold; color: #00ffff; border-radius: 4px;">Time</div>
+                                    <div style="background: rgba(0, 255, 255, 0.1); padding: 8px; text-align: center; font-weight: bold; color: #00ffff; border-radius: 4px;">Mon</div>
+                                    <div style="background: rgba(0, 255, 255, 0.1); padding: 8px; text-align: center; font-weight: bold; color: #00ffff; border-radius: 4px;">Tue</div>
+                                    <div style="background: rgba(0, 255, 255, 0.1); padding: 8px; text-align: center; font-weight: bold; color: #00ffff; border-radius: 4px;">Wed</div>
+                                    <div style="background: rgba(0, 255, 255, 0.1); padding: 8px; text-align: center; font-weight: bold; color: #00ffff; border-radius: 4px;">Thu</div>
+                                    <div style="background: rgba(0, 255, 255, 0.1); padding: 8px; text-align: center; font-weight: bold; color: #00ffff; border-radius: 4px;">Fri</div>
+                                    <div style="background: rgba(0, 255, 255, 0.1); padding: 8px; text-align: center; font-weight: bold; color: #00ffff; border-radius: 4px;">Sat</div>
+                                    <div style="background: rgba(0, 255, 255, 0.1); padding: 8px; text-align: center; font-weight: bold; color: #00ffff; border-radius: 4px;">Sun</div>
+                                    
+                                    <!-- Schedule Slots -->
+                                    ${generateScheduleGrid()}
+                                </div>
+                            </div>
+
+                            <!-- Current Workers at Location -->
+                            <div style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 165, 0, 0.2); border-radius: 12px; padding: 20px;">
+                                <h3 style="color: #f59e0b; margin-bottom: 16px; font-size: 18px;">Workers Assigned to ${locationName}</h3>
+                                <div id="assignedWorkersList" style="display: flex; flex-direction: column; gap: 8px;">
+                                    <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 6px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            <strong style="color: #00ffff;">Sarah Johnson</strong>
+                                            <span style="color: #94a3b8; font-size: 12px; margin-left: 8px;">Manager • Mon-Fri 9AM-5PM</span>
+                                        </div>
+                                        <button onclick="editWorkerSchedule('sarah', '${qrId}')" style="background: rgba(34, 197, 94, 0.2); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">Edit Schedule</button>
+                                    </div>
+                                    <div style="background: rgba(138, 43, 226, 0.1); border: 1px solid rgba(138, 43, 226, 0.3); border-radius: 6px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            <strong style="color: #00ffff;">Alex Kim</strong>
+                                            <span style="color: #94a3b8; font-size: 12px; margin-left: 8px;">Contractor • Tue/Thu 2PM-6PM</span>
+                                        </div>
+                                        <button onclick="editWorkerSchedule('alex', '${qrId}')" style="background: rgba(34, 197, 94, 0.2); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">Edit Schedule</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
+        function generateScheduleGrid() {
+            const timeSlots = ['6:00', '7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'];
+            let gridHTML = '';
+            
+            for (let time of timeSlots) {
+                // Time slot
+                gridHTML += `<div style="background: rgba(0, 0, 0, 0.3); padding: 6px; text-align: center; color: #94a3b8; border-radius: 4px;">${time}</div>`;
+                
+                // Days of the week
+                for (let day = 0; day < 7; day++) {
+                    const cellId = `schedule-${time.replace(':', '')}-${day}`;
+                    gridHTML += `<div id="${cellId}" style="background: rgba(0, 0, 0, 0.1); border: 1px dashed rgba(255, 255, 255, 0.1); padding: 4px; min-height: 30px; border-radius: 4px; cursor: pointer;" 
+                                     onclick="quickAddToSlot('${time}', ${day})"
+                                     ondragover="event.preventDefault()" 
+                                     ondrop="dropWorkerToSlot(event, '${time}', ${day})">
+                                </div>`;
+                }
+            }
+            return gridHTML;
+        }
+
+        function addWorkerToSchedule(qrId) {
+            const worker = document.getElementById('workerSelect').value;
+            const day = document.getElementById('daySelect').value;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+
+            if (!worker || !day || !startTime || !endTime) {
+                showNotification('Please fill in all fields to add worker to schedule', 'error');
+                return;
+            }
+
+            // Send notification to worker about schedule addition
+            sendScheduleNotification(worker, 'added', {
+                location: 'Main Store Location',
+                day: day,
+                startTime: startTime,
+                endTime: endTime,
+                action: 'Schedule Added'
+            });
+
+            showNotification(`Added ${worker} to ${day} ${startTime}-${endTime} schedule`, 'success');
+            
+            // Reset form
+            document.getElementById('workerSelect').value = '';
+            document.getElementById('daySelect').value = '';
+            document.getElementById('startTime').value = '09:00';
+            document.getElementById('endTime').value = '17:00';
+
+            // Update the schedule grid visually
+            updateScheduleGrid(worker, day, startTime, endTime);
+        }
+
+        function updateScheduleGrid(worker, day, startTime, endTime) {
+            const dayIndex = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].indexOf(day);
+            const startHour = parseInt(startTime.split(':')[0]);
+            const endHour = parseInt(endTime.split(':')[0]);
+            
+            for (let hour = startHour; hour < endHour; hour++) {
+                const timeStr = hour.toString().padStart(2, '0') + '00';
+                const cellId = `schedule-${timeStr}-${dayIndex}`;
+                const cell = document.getElementById(cellId);
+                
+                if (cell) {
+                    const workerName = worker.split('_')[0].charAt(0).toUpperCase() + worker.split('_')[0].slice(1);
+                    const workerType = worker.split('_')[1];
+                    const bgColor = workerType === 'employee' ? 'rgba(255, 215, 0, 0.3)' : 
+                                   workerType === 'contractor' ? 'rgba(138, 43, 226, 0.3)' : 
+                                   'rgba(34, 197, 94, 0.3)';
+                    
+                    cell.style.background = bgColor;
+                    cell.innerHTML = `<div style="font-size: 10px; color: #00ffff; font-weight: bold;">${workerName}</div>`;
+                    cell.onclick = () => editScheduleSlot(worker, day, hour);
+                }
+            }
+        }
+
+        function editWorkerSchedule(workerId, qrId) {
+            showNotification(`Opening schedule editor for worker ${workerId}`, 'info');
+            // This would open a detailed schedule editing modal
+        }
+
+        function editScheduleSlot(worker, day, hour) {
+            if (confirm(`Edit or remove ${worker} from ${day} at ${hour}:00?`)) {
+                // Send notification about schedule change
+                sendScheduleNotification(worker, 'modified', {
+                    location: 'Main Store Location',
+                    day: day,
+                    time: `${hour}:00`,
+                    action: 'Schedule Modified'
+                });
+                
+                showNotification(`Schedule updated for ${worker}`, 'success');
+            }
+        }
+
+        function quickAddToSlot(time, dayIndex) {
+            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            const dayName = days[dayIndex];
+            
+            showNotification(`Quick add to ${dayName} at ${time} - select worker from dropdown above`, 'info');
+            document.getElementById('daySelect').value = dayName.toLowerCase();
+            document.getElementById('startTime').value = time;
+        }
+
+        // Schedule Notification System
+        function sendScheduleNotification(workerId, action, scheduleData) {
+            const workerName = workerId.split('_')[0].charAt(0).toUpperCase() + workerId.split('_')[0].slice(1);
+            const workerType = workerId.split('_')[1];
+            
+            // Simulate API call to send SMS/Email notification
+            fetch('/api/schedule/notify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    workerId: workerId,
+                    workerName: workerName,
+                    workerType: workerType,
+                    action: action,
+                    scheduleData: scheduleData,
+                    timestamp: new Date().toISOString()
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    console.log(`Notification sent to ${workerName}: ${action} - ${scheduleData.action}`);
+                    showNotification(`${workerName} notified about schedule change`, 'success');
+                }
+            })
+            .catch(error => {
+                console.error('Notification error:', error);
+                showNotification('Schedule updated but notification failed', 'warning');
+            });
+        }
+
+        function closeLocationScheduleModal() {
+            const modal = document.getElementById('locationScheduleModal');
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => modal.remove(), 300);
+            }
         }
 
         function generateQR() {

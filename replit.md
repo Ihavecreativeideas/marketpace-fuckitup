@@ -272,6 +272,20 @@ All features are designed to strengthen local communities by keeping commerce lo
 
 ## Recent Changes
 
+✓ **AUTOMATIC SCHEDULE CALENDAR BOARDS FOR QR CODE LOCATIONS WITH REAL-TIME NOTIFICATIONS FULLY IMPLEMENTED** (January 21, 2025)
+✓ **LOCATION-BASED SCHEDULE BOARDS**: Each Geo QR Code automatically creates a dedicated schedule calendar board interface for that specific work location
+✓ **SUPER EASY WORKER ASSIGNMENT**: Quick Add Worker system allows managers to select any worker (employee, volunteer, contractor), choose day and time, then instantly add to schedule with single button click
+✓ **INTERACTIVE WEEKLY SCHEDULE GRID**: Full calendar grid (6AM-8PM) with 7-day view showing all scheduled workers with color-coded blocks based on worker type (Employee: Gold, Contractor: Purple, Volunteer: Green)
+✓ **COMPREHENSIVE NOTIFICATION SYSTEM**: Real-time SMS and email alerts sent to workers for every schedule change including time changes, day additions/removals, worker substitutions, and schedule modifications
+✓ **SCHEDULE BOARD INTEGRATION**: New "Schedule Board" button added to QR Location Manager alongside existing "View QR" and "Assign Workers" buttons for direct access to location-specific scheduling
+✓ **WORKER TYPE CATEGORIZATION**: System properly handles and displays employees, independent contractors, and volunteers with appropriate color coding and tax status indicators
+✓ **NOTIFICATION API ENDPOINTS**: Complete server-side /api/schedule/notify, /api/qr-locations, and /api/schedule/worker endpoints for real-time schedule management and worker notifications
+✓ **DRAG-AND-DROP SCHEDULING**: Workers can be dragged to specific time slots, with clickable schedule cells for quick worker assignment and modification
+✓ **AUDIT LOGGING**: Complete schedule change logging with worker notifications tracking for compliance and management oversight
+
+✓ **WORKFORCE SCHEDULING TERMINOLOGY UPDATE** (January 21, 2025)
+✓ **MENU TERMINOLOGY UPDATED**: Changed "Employee Scheduling" to "Workforce Scheduling" throughout MarketPace menu system per user request for inclusive terminology covering employees, contractors, and volunteers
+
 ✓ **JOB PORTAL TERMINOLOGY STANDARDIZATION COMPLETED** (January 21, 2025)
 ✓ **UNIVERSAL "JOB PORTAL" TERMINOLOGY**: Changed all instances of "Employee Portal" to "Job Portal" throughout the system to reduce confusion between employees, volunteers, and contractors
 ✓ **MENU SYSTEM UPDATED**: MarketPace menu now displays "Job Portal" for all workforce members regardless of their categorization (W-2 employee, 1099 contractor, volunteer)

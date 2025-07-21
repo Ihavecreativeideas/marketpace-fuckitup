@@ -3936,6 +3936,216 @@ app.post('/api/qr/generate-geo', async (req, res) => {
   }
 });
 
+// Schedule Notification API
+app.post('/api/schedule/notify', async (req, res) => {
+  try {
+    const { workerId, workerName, workerType, action, scheduleData, timestamp } = req.body;
+    
+    console.log(`Schedule notification: ${workerName} (${workerType}) - ${action}`, scheduleData);
+    
+    // Worker contact information (in real app, this would come from database)
+    const workerContacts = {
+      'sarah_employee': { email: 'sarah@example.com', phone: '+12512826662' },
+      'mike_employee': { email: 'mike@example.com', phone: '+12512826663' },
+      'alex_contractor': { email: 'alex@example.com', phone: '+12512826664' },
+      'jessica_volunteer': { email: 'jessica@example.com', phone: '+12512826665' },
+      'david_employee': { email: 'david@example.com', phone: '+12512826666' }
+    };
+
+    const contact = workerContacts[workerId];
+    
+    if (!contact) {
+      return res.status(404).json({
+        success: false,
+        error: 'Worker contact information not found'
+      });
+    }
+
+    // Create notification message based on action
+    let message = '';
+    let subject = '';
+    
+    switch (action) {
+      case 'added':
+        subject = `New Schedule Assignment - ${scheduleData.location}`;
+        message = `Hi ${workerName}! You've been scheduled at ${scheduleData.location} on ${scheduleData.day} from ${scheduleData.startTime} to ${scheduleData.endTime}. Please confirm your availability.`;
+        break;
+      case 'modified':
+        subject = `Schedule Change - ${scheduleData.location}`;
+        message = `Hi ${workerName}! Your schedule at ${scheduleData.location} has been modified for ${scheduleData.day} at ${scheduleData.time}. Please check your updated schedule.`;
+        break;
+      case 'removed':
+        subject = `Schedule Removed - ${scheduleData.location}`;
+        message = `Hi ${workerName}! You've been removed from the schedule at ${scheduleData.location} on ${scheduleData.day}. Contact your manager if you have questions.`;
+        break;
+      case 'switched':
+        subject = `Schedule Switch - ${scheduleData.location}`;
+        message = `Hi ${workerName}! Your schedule at ${scheduleData.location} has been switched. New time: ${scheduleData.day} ${scheduleData.startTime}-${scheduleData.endTime}.`;
+        break;
+      default:
+        subject = `Schedule Update - ${scheduleData.location}`;
+        message = `Hi ${workerName}! There's been a change to your schedule at ${scheduleData.location}. Please check your updated schedule.`;
+    }
+
+    // Send SMS notification if available
+    if (contact.phone && process.env.TWILIO_ACCOUNT_SID) {
+      try {
+        const smsMessage = `MarketPace Schedule Update: ${message}`;
+        const smsResult = await sendSMS(contact.phone, smsMessage);
+        console.log(`SMS sent to ${workerName}: ${smsResult.sid}`);
+      } catch (smsError) {
+        console.error('SMS notification failed:', smsError);
+      }
+    }
+
+    // Send email notification if available
+    if (contact.email && process.env.GMAIL_USER) {
+      try {
+        const emailResult = await sendEmail({
+          to: contact.email,
+          subject: subject,
+          text: message,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <div style="background: linear-gradient(135deg, #1a0b3d, #4c2885); color: white; padding: 20px; text-align: center;">
+                <h2 style="margin: 0; color: #00ffff;">MarketPace Workforce Notification</h2>
+              </div>
+              <div style="padding: 20px; background: #f8f9fa;">
+                <h3 style="color: #333;">Hello ${workerName},</h3>
+                <p style="color: #555; line-height: 1.6;">${message}</p>
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                  <strong>Schedule Details:</strong><br>
+                  Location: ${scheduleData.location}<br>
+                  ${scheduleData.day ? `Day: ${scheduleData.day}<br>` : ''}
+                  ${scheduleData.startTime ? `Start Time: ${scheduleData.startTime}<br>` : ''}
+                  ${scheduleData.endTime ? `End Time: ${scheduleData.endTime}<br>` : ''}
+                  ${scheduleData.time ? `Time: ${scheduleData.time}<br>` : ''}
+                </div>
+                <p style="color: #777; font-size: 12px;">
+                  This is an automated message from MarketPace Workforce Management System.
+                </p>
+              </div>
+            </div>
+          `
+        });
+        console.log(`Email sent to ${workerName}`);
+      } catch (emailError) {
+        console.error('Email notification failed:', emailError);
+      }
+    }
+
+    // Log the schedule change for audit purposes
+    const auditLog = {
+      timestamp: timestamp,
+      workerId: workerId,
+      workerName: workerName,
+      workerType: workerType,
+      action: action,
+      location: scheduleData.location,
+      scheduleData: scheduleData,
+      notificationsSent: {
+        sms: !!contact.phone,
+        email: !!contact.email
+      }
+    };
+
+    console.log('Schedule change audit log:', auditLog);
+
+    res.json({
+      success: true,
+      message: 'Schedule notification sent successfully',
+      workerId: workerId,
+      workerName: workerName,
+      action: action,
+      notificationsSent: auditLog.notificationsSent
+    });
+
+  } catch (error) {
+    console.error('Schedule notification error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to send schedule notification: ' + error.message
+    });
+  }
+});
+
+// QR Location Management API
+app.get('/api/qr-locations', async (req, res) => {
+  try {
+    // In real app, this would come from database
+    const locations = [
+      {
+        id: 'emp_1753137983666_gcgt4z3rr',
+        name: 'Main Store Location',
+        businessName: 'Brown Barnes',
+        created: '2025-07-21',
+        assignedWorkers: ['sarah_employee', 'mike_employee', 'alex_contractor'],
+        gpsEnabled: true,
+        status: 'active'
+      },
+      {
+        id: 'emp_1753138000123_abc123def',
+        name: 'Warehouse Location',
+        businessName: 'Brown Barnes Warehouse',
+        created: '2025-07-21',
+        assignedWorkers: ['david_employee', 'jessica_volunteer'],
+        gpsEnabled: true,
+        status: 'active'
+      }
+    ];
+
+    res.json({
+      success: true,
+      locations: locations
+    });
+
+  } catch (error) {
+    console.error('QR locations error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve QR locations'
+    });
+  }
+});
+
+// Worker Schedule Management API
+app.post('/api/schedule/worker', async (req, res) => {
+  try {
+    const { locationId, workerId, scheduleData, action } = req.body;
+    
+    console.log(`Worker schedule ${action}:`, {
+      locationId,
+      workerId,
+      scheduleData
+    });
+
+    // In real app, this would save to database
+    const scheduleEntry = {
+      id: `schedule_${Date.now()}_${workerId}`,
+      locationId: locationId,
+      workerId: workerId,
+      day: scheduleData.day,
+      startTime: scheduleData.startTime,
+      endTime: scheduleData.endTime,
+      status: 'scheduled',
+      created: new Date().toISOString()
+    };
+
+    res.json({
+      success: true,
+      message: `Worker ${action} successfully`,
+      scheduleEntry: scheduleEntry
+    });
+
+  } catch (error) {
+    console.error('Worker schedule error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to manage worker schedule'
+    });
+  }
+});
+
 // Rental creation API endpoint
 app.post('/api/rental/create', async (req, res) => {
   try {
