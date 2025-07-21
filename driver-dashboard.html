@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MarketPace Driver Dashboard</title>
+    <title>Driver Portal - MarketPace</title>
     <style>
         * {
             margin: 0;
@@ -290,9 +290,13 @@
     <div class="dashboard-container">
         <!-- Driver Header -->
         <div class="driver-header">
-            <div class="driver-status">🚗 ACTIVE DRIVER</div>
-            <h1>Welcome, Driver #MP-2025-001</h1>
-            <p>Mike Johnson • Gulf Shores Area • Since Jan 2025</p>
+            <div style="text-align: left; margin-bottom: 20px;">
+                <button onclick="goToMenu()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px;">← Back to Menu</button>
+            </div>
+            <div class="driver-status">🚗 APPROVED DRIVER</div>
+            <h1 id="driverWelcome">Driver Portal</h1>
+            <p>Manage routes, scan QR codes, track earnings</p>
+            <p style="color: rgba(255,255,255,0.7); font-size: 14px; margin-top: 10px;">Access through your personalized MarketPace menu portal</p>
         </div>
 
         <!-- Driver Stats -->
@@ -643,15 +647,35 @@ Need help with:
             }, 3000);
         }
 
+        function goToMenu() {
+            window.location.href = '/menu';
+        }
+
+        function checkDriverStatus() {
+            // Check if user has driver status and update display
+            const userProfile = JSON.parse(localStorage.getItem('marketpaceUser') || '{}');
+            const driverData = localStorage.getItem('driverData');
+            
+            if (userProfile.driverInfo || driverData) {
+                const driverInfo = userProfile.driverInfo || JSON.parse(driverData);
+                if (driverInfo && driverInfo.name) {
+                    document.getElementById('driverWelcome').textContent = `Welcome back, ${driverInfo.name}!`;
+                }
+            }
+        }
+
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
-            showNotification('Driver dashboard loaded successfully!', 'success');
+            checkDriverStatus();
+            showNotification('Driver portal loaded successfully!', 'success');
             
             // Auto-refresh data every 30 seconds
             setInterval(() => {
                 console.log('Refreshing driver data...');
                 // In a real app, this would fetch updated routes and stats
             }, 30000);
+            
+            console.log('Driver Portal page loaded - accessed through unified portal system');
         });
     </script>
 </body>

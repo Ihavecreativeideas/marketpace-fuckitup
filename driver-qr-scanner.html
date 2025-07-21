@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver QR Scanner - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .back-button {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .scanner-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(34, 197, 94, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .qr-scanner-display {
+            width: 200px;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px dashed rgba(34, 197, 94, 0.5);
+            border-radius: 12px;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .scan-btn {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            font-size: 16px;
+        }
+
+        .scan-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .scan-type {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #22c55e;
+        }
+
+        .scan-result {
+            background: rgba(34, 197, 94, 0.1);
+            border: 2px solid rgba(34, 197, 94, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .status-success {
+            background: #22c55e;
+            color: white;
+        }
+
+        .status-pending {
+            background: #ffd700;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <button onclick="goBack()" class="back-button">← Back to Driver Portal</button>
+            <h1 style="color: #22c55e;">Driver QR Scanner</h1>
+            <p>Scan pickup and delivery QR codes for route confirmations</p>
+        </div>
+
+        <!-- Scanner Interface -->
+        <div class="scanner-section">
+            <h2 style="color: #22c55e; margin-bottom: 20px;">QR Code Scanner</h2>
+            
+            <div class="qr-scanner-display" id="scannerDisplay">
+                <div style="text-align: center; color: rgba(255,255,255,0.7);">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" style="color: #22c55e; margin-bottom: 10px;">
+                        <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="6" y="6" width="4" height="4" fill="currentColor"/>
+                        <rect x="14" y="6" width="4" height="4" fill="currentColor"/>
+                        <rect x="6" y="14" width="4" height="4" fill="currentColor"/>
+                        <rect x="14" y="14" width="4" height="4" fill="currentColor"/>
+                    </svg>
+                    <p>Ready to scan</p>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;">
+                <button class="scan-btn" onclick="startScan('pickup')">Scan Pickup QR</button>
+                <button class="scan-btn" onclick="startScan('delivery')">Scan Delivery QR</button>
+            </div>
+            
+            <p style="color: rgba(255,255,255,0.7); font-size: 14px; margin-top: 15px;">
+                Point camera at customer's QR code to confirm pickup or delivery
+            </p>
+        </div>
+
+        <!-- Scan Types -->
+        <div class="scan-type">
+            <h3 style="color: #22c55e;">Pickup QR Codes</h3>
+            <p>• Customer shows QR when ready for pickup</p>
+            <p>• Scan to confirm item collection</p>
+            <p>• Automatic SMS sent to customer</p>
+        </div>
+
+        <div class="scan-type">
+            <h3 style="color: #22c55e;">Delivery QR Codes</h3>
+            <p>• Customer shows QR upon delivery</p>
+            <p>• Scan to confirm successful delivery</p>
+            <p>• Route completion and payment triggered</p>
+        </div>
+
+        <!-- Recent Scans -->
+        <div class="scanner-section">
+            <h2 style="color: #22c55e; margin-bottom: 20px;">Recent Scans</h2>
+            
+            <div class="scan-result">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h4>Power Washer Pickup</h4>
+                        <p>Customer: Sarah M. • 555 Adventure Ave</p>
+                        <p>Time: 2:15 PM</p>
+                    </div>
+                    <span class="status-indicator status-success">CONFIRMED</span>
+                </div>
+            </div>
+
+            <div class="scan-result">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h4>Camera Kit Delivery</h4>
+                        <p>Customer: Mike R. • 789 Coastal Ave</p>
+                        <p>Time: 1:45 PM</p>
+                    </div>
+                    <span class="status-indicator status-success">DELIVERED</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.location.href = '/driver-dashboard';
+        }
+
+        function startScan(type) {
+            const display = document.getElementById('scannerDisplay');
+            
+            // Simulate scanning process
+            display.innerHTML = `
+                <div style="text-align: center; color: #22c55e;">
+                    <div style="animation: pulse 1s infinite;">
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" style="color: #22c55e;">
+                            <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5"/>
+                            <rect x="6" y="6" width="4" height="4" fill="currentColor"/>
+                            <rect x="14" y="6" width="4" height="4" fill="currentColor"/>
+                            <rect x="6" y="14" width="4" height="4" fill="currentColor"/>
+                            <rect x="14" y="14" width="4" height="4" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <p>Scanning ${type} QR...</p>
+                </div>
+            `;
+
+            // Simulate successful scan after 2 seconds
+            setTimeout(() => {
+                const qrData = {
+                    pickup: {
+                        customer: 'Sarah Martinez',
+                        item: 'Power Washer',
+                        address: '555 Adventure Ave',
+                        phone: '(251) 555-0123'
+                    },
+                    delivery: {
+                        customer: 'Mike Rodriguez',
+                        item: 'Camera Kit',
+                        address: '789 Coastal Ave',
+                        phone: '(251) 555-0456'
+                    }
+                };
+
+                const data = qrData[type];
+                
+                display.innerHTML = `
+                    <div style="text-align: center; color: #22c55e;">
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" style="color: #22c55e;">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <p><strong>QR Scan Successful!</strong></p>
+                        <p style="font-size: 12px;">${data.customer}</p>
+                    </div>
+                `;
+
+                // Show confirmation
+                showScanConfirmation(type, data);
+                
+                // Reset after 3 seconds
+                setTimeout(() => {
+                    display.innerHTML = `
+                        <div style="text-align: center; color: rgba(255,255,255,0.7);">
+                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" style="color: #22c55e;">
+                                <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5"/>
+                                <rect x="6" y="6" width="4" height="4" fill="currentColor"/>
+                                <rect x="14" y="6" width="4" height="4" fill="currentColor"/>
+                                <rect x="6" y="14" width="4" height="4" fill="currentColor"/>
+                                <rect x="14" y="14" width="4" height="4" fill="currentColor"/>
+                            </svg>
+                            <p>Ready to scan</p>
+                        </div>
+                    `;
+                }, 3000);
+
+            }, 2000);
+        }
+
+        function showScanConfirmation(type, data) {
+            const message = type === 'pickup' 
+                ? `✅ Pickup confirmed for ${data.item}\n\nCustomer: ${data.customer}\nAddress: ${data.address}\n\nSMS notification sent to customer.\nProceed to delivery location.`
+                : `✅ Delivery confirmed for ${data.item}\n\nCustomer: ${data.customer}\nAddress: ${data.address}\n\nRoute completed successfully!\nPayment will be processed.`;
+
+            alert(message);
+        }
+
+        // Add CSS animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        console.log('Driver QR Scanner loaded - part of unified portal system');
+    </script>
+</body>
+</html>

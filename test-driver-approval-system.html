@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Application Approval System Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #22c55e;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(34, 197, 94, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            color: #22c55e;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #94a3b8;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(34, 197, 94, 0.3);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 16px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #22c55e;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            transform: scale(1.05);
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 2px solid #22c55e;
+            color: #22c55e;
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid #ef4444;
+            color: #ef4444;
+        }
+
+        .workflow-step {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #22c55e;
+        }
+
+        .step-number {
+            background: #22c55e;
+            color: #000;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .link-button {
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px solid #ffd700;
+            color: #ffd700;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .link-button:hover {
+            background: rgba(255, 215, 0, 0.3);
+            transform: scale(1.05);
+        }
+
+        .driver-application {
+            background: rgba(34, 197, 94, 0.1);
+            border: 2px solid rgba(34, 197, 94, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .approve-btn {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .reject-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Driver Application Approval System Test</h1>
+
+        <!-- Test Driver Application Approval -->
+        <div class="test-section">
+            <div class="section-title">1. Test Driver Application Approval</div>
+            <p style="margin-bottom: 20px; color: #94a3b8;">Simulate approving a driver application and sending invitation</p>
+            
+            <form id="approvalForm">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label>Driver Name *</label>
+                        <input type="text" id="driverName" value="Michael Rodriguez" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Email Address *</label>
+                        <input type="email" id="driverEmail" value="michael.driver@example.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Phone Number *</label>
+                        <input type="tel" id="driverPhone" value="2512826662" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Application ID</label>
+                        <input type="text" id="applicationId" value="APP-2025-001" readonly>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Vehicle Information</label>
+                    <textarea id="vehicleInfo" rows="3" placeholder="2020 Honda Civic, Blue, License: ABC123">2020 Honda Civic, Blue, License: ABC123</textarea>
+                </div>
+                
+                <button type="submit" class="btn">Approve Application & Send Invitation</button>
+            </form>
+            
+            <div id="approvalStatus"></div>
+        </div>
+
+        <!-- Sample Driver Applications -->
+        <div class="test-section">
+            <div class="section-title">2. Sample Driver Applications (Admin View)</div>
+            <p style="margin-bottom: 20px; color: #94a3b8;">Demo applications waiting for approval</p>
+            
+            <div class="driver-application">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div>
+                        <h4 style="color: #22c55e; margin: 0 0 10px 0;">Sarah Thompson</h4>
+                        <p><strong>Email:</strong> sarah.thompson@email.com</p>
+                        <p><strong>Phone:</strong> (251) 555-0123</p>
+                        <p><strong>Vehicle:</strong> 2019 Toyota Camry, Silver</p>
+                        <p><strong>Experience:</strong> 2 years delivery experience</p>
+                        <p><strong>Applied:</strong> January 20, 2025</p>
+                    </div>
+                    <div>
+                        <button class="approve-btn" onclick="approveApplication('Sarah Thompson', 'sarah.thompson@email.com', '2515550123', '2019 Toyota Camry, Silver')">Approve</button>
+                        <button class="reject-btn" onclick="rejectApplication('APP-2025-002')">Reject</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="driver-application">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div>
+                        <h4 style="color: #22c55e; margin: 0 0 10px 0;">James Wilson</h4>
+                        <p><strong>Email:</strong> james.wilson@email.com</p>
+                        <p><strong>Phone:</strong> (251) 555-0456</p>
+                        <p><strong>Vehicle:</strong> 2021 Ford F-150, Black</p>
+                        <p><strong>Experience:</strong> New to delivery, excellent driving record</p>
+                        <p><strong>Applied:</strong> January 21, 2025</p>
+                    </div>
+                    <div>
+                        <button class="approve-btn" onclick="approveApplication('James Wilson', 'james.wilson@email.com', '2515550456', '2021 Ford F-150, Black')">Approve</button>
+                        <button class="reject-btn" onclick="rejectApplication('APP-2025-003')">Reject</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Driver Workflow Demo -->
+        <div class="test-section">
+            <div class="section-title">3. Complete Driver Workflow</div>
+            <p style="margin-bottom: 20px; color: #94a3b8;">Test the complete flow from approval to driver portal access</p>
+            
+            <div class="workflow-step">
+                <span class="step-number">1</span>
+                <strong>Application Review</strong> - Admin reviews driver application and approves
+            </div>
+            
+            <div class="workflow-step">
+                <span class="step-number">2</span>
+                <strong>Automatic Invitations</strong> - SMS and email sent with congratulations and MarketPace signup link
+            </div>
+            
+            <div class="workflow-step">
+                <span class="step-number">3</span>
+                <strong>Driver Signs Up</strong> - Driver follows link and creates MarketPace account
+                <button class="btn" onclick="simulateDriverSignup()" style="margin-left: 15px;">Simulate Driver Signup</button>
+            </div>
+            
+            <div class="workflow-step">
+                <span class="step-number">4</span>
+                <strong>Driver Portal Access</strong> - Driver gets personalized menu section
+                <a href="/menu" class="link-button">View Menu (Driver Portal)</a>
+                <a href="/driver-dashboard" class="link-button">Driver Dashboard</a>
+                <a href="/driver-qr-scanner" class="link-button">QR Scanner</a>
+            </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <div class="test-section">
+            <div class="section-title">4. Driver System Access Points</div>
+            <p style="margin-bottom: 20px; color: #94a3b8;">Direct links to test driver features</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <a href="/driver-dashboard" class="link-button">Driver Dashboard</a>
+                <a href="/driver-qr-scanner" class="link-button">QR Scanner</a>
+                <a href="/menu" class="link-button">MarketPace Menu</a>
+                <a href="/admin-dashboard" class="link-button">Admin Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('approvalForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const statusDiv = document.getElementById('approvalStatus');
+            statusDiv.innerHTML = '<div class="status" style="background: rgba(255, 215, 0, 0.2); border: 2px solid #ffd700; color: #ffd700;">Approving application and sending invitation...</div>';
+            
+            const driverData = {
+                applicationId: document.getElementById('applicationId').value,
+                name: document.getElementById('driverName').value,
+                email: document.getElementById('driverEmail').value,
+                phone: document.getElementById('driverPhone').value,
+                vehicleInfo: document.getElementById('vehicleInfo').value
+            };
+            
+            try {
+                const response = await fetch('/api/driver/approve-and-invite', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(driverData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    statusDiv.innerHTML = `
+                        <div class="status success">
+                            ✅ Driver application approved and invitation sent!<br>
+                            <strong>SMS:</strong> ${result.sms ? 'Sent' : 'Failed'}<br>
+                            <strong>Email:</strong> ${result.email ? 'Sent' : 'Failed'}<br>
+                            <strong>Driver ID:</strong> ${result.driverData?.driverId || 'Generated'}
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="status error">
+                            ❌ Error: ${result.error || 'Failed to approve application'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div class="status error">
+                        ❌ Network error: ${error.message}
+                    </div>
+                `;
+            }
+        });
+        
+        async function approveApplication(name, email, phone, vehicleInfo) {
+            const driverData = {
+                applicationId: 'APP-' + Date.now(),
+                name,
+                email,
+                phone,
+                vehicleInfo
+            };
+            
+            try {
+                const response = await fetch('/api/driver/approve-and-invite', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(driverData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`✅ ${name}'s application approved and invitation sent!\n\nSMS: ${result.sms ? 'Sent' : 'Failed'}\nEmail: ${result.email ? 'Sent' : 'Failed'}`);
+                } else {
+                    alert(`❌ Failed to approve ${name}'s application: ${result.error}`);
+                }
+            } catch (error) {
+                alert(`❌ Error approving ${name}'s application: ${error.message}`);
+            }
+        }
+        
+        function rejectApplication(applicationId) {
+            alert(`❌ Application ${applicationId} rejected. (Rejection notification system would be implemented here)`);
+        }
+        
+        function simulateDriverSignup() {
+            // Simulate driver accepting invitation and signing up
+            const driverInfo = {
+                name: document.getElementById('driverName').value,
+                email: document.getElementById('driverEmail').value,
+                phone: document.getElementById('driverPhone').value,
+                vehicleInfo: document.getElementById('vehicleInfo').value,
+                driverId: 'drv_' + Date.now(),
+                status: 'Approved Driver',
+                routesToday: '2',
+                earningsToday: '$85',
+                deliveriesToday: '8'
+            };
+            
+            // Store driver status in localStorage
+            const userProfile = JSON.parse(localStorage.getItem('marketpaceUser') || '{}');
+            userProfile.driverInfo = driverInfo;
+            localStorage.setItem('marketpaceUser', JSON.stringify(userProfile));
+            
+            // Also store as separate driver data
+            localStorage.setItem('driverData', JSON.stringify(driverInfo));
+            
+            alert('✅ Driver signup simulated! The user now has driver status and will see the Driver Portal in their menu.');
+        }
+        
+        console.log('Driver Application Approval Test System loaded');
+    </script>
+</body>
+</html>

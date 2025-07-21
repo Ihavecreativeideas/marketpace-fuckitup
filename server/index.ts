@@ -28,6 +28,8 @@ import { subscriptionScheduler } from './subscriptionScheduler';
 import { sponsorManagementRoutes } from './sponsorManagement';
 import { zapierRouter } from './zapier-integration';
 const { sendEmployeeInvitation } = require('./employeeInvitation.js');
+// Import driver invitation module
+const { sendDriverInvitation } = require('./driverInvitation.js');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -2009,6 +2011,52 @@ app.post('/api/employee/send-invitation', async (req, res) => {
 // Employee Dashboard Route
 app.get('/employee-dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, '../employee-dashboard.html'));
+});
+
+// Driver Application Approval and Invitation API
+app.post('/api/driver/approve-and-invite', async (req, res) => {
+  try {
+    const { applicationId, name, email, phone, vehicleInfo } = req.body;
+    
+    if (!name || !email || !phone) {
+      return res.status(400).json({
+        success: false,
+        error: 'Name, email, and phone are required'
+      });
+    }
+    
+    // Create driver invitation
+    const driverData = {
+      name,
+      email,
+      phone,
+      vehicleInfo,
+      driverId: 'drv_' + Date.now(),
+      status: 'Approved Driver',
+      approvalDate: new Date().toISOString()
+    };
+    
+    // Send driver invitation SMS and email
+    const result = await sendDriverInvitation(driverData);
+    
+    res.json(result);
+  } catch (error: any) {
+    console.error('Driver approval invitation error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to send driver invitation'
+    });
+  }
+});
+
+// Driver Dashboard Route
+app.get('/driver-dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '../driver-dashboard.html'));
+});
+
+// Driver QR Scanner Route  
+app.get('/driver-qr-scanner', (req, res) => {
+  res.sendFile(path.join(__dirname, '../driver-qr-scanner.html'));
 });
 
 // Catch-all for other HTML pages
