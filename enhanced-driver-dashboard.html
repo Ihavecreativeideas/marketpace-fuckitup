@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPace Enhanced Driver Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: 
+                radial-gradient(circle at 15% 25%, rgba(65, 105, 225, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 85% 75%, rgba(255, 20, 147, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(0, 255, 255, 0.05) 0%, transparent 50%),
+                linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .dashboard-header {
+            padding: 20px 20px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .dashboard-title {
+            background: linear-gradient(135deg, #2a0845, #1a0033);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: #2a0845;
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            text-shadow: 
+                0 0 20px rgba(65, 105, 225, 0.5),
+                0 0 40px rgba(0, 102, 255, 0.3),
+                0 2px 4px rgba(0, 0, 0, 0.3);
+            filter: drop-shadow(0 0 10px rgba(65, 105, 225, 0.4));
+            position: relative;
+            z-index: 2;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid rgba(0, 255, 0, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #00ff00;
+            margin-bottom: 20px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #00ff00;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+        }
+
+        /* Enhanced Map Container */
+        .map-container {
+            margin: 20px;
+            height: 350px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.4),
+                0 0 40px rgba(0, 255, 255, 0.1);
+            position: relative;
+        }
+
+        #googleMap {
+            width: 100%;
+            height: 100%;
+            border-radius: 16px;
+        }
+
+        .map-controls {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .map-btn {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(0, 255, 255, 0.5);
+            color: #00ffff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .map-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+        }
+
+        /* Route Cards */
+        .routes-section {
+            padding: 0 20px 20px;
+        }
+
+        .section-title {
+            color: #00ffff;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .route-card {
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .route-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .route-id {
+            color: #00ffff;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .earnings {
+            color: #ffd700;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .time-slot {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .delivery-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border-left: 4px solid #4169e1;
+        }
+
+        .delivery-type {
+            width: 80px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #00ffff;
+            text-transform: uppercase;
+        }
+
+        .delivery-details {
+            flex: 1;
+        }
+
+        .item-name {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .addresses {
+            color: #888;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-align: center;
+        }
+
+        .accept-btn {
+            background: linear-gradient(135deg, #00ff00, #32cd32);
+            color: black;
+        }
+
+        .decline-btn {
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid rgba(255, 0, 0, 0.5);
+            color: #ff4444;
+        }
+
+        .view-route-btn {
+            background: rgba(0, 255, 255, 0.2);
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            color: #00ffff;
+        }
+
+        /* Earnings Panel */
+        .earnings-panel {
+            margin: 20px;
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .daily-earnings {
+            color: #ffd700;
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .earnings-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .earning-item {
+            text-align: center;
+        }
+
+        .earning-label {
+            color: #888;
+            font-size: 11px;
+            margin-bottom: 4px;
+        }
+
+        .earning-value {
+            color: #ffd700;
+            font-weight: 700;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: 
+                rgba(0, 0, 0, 0.9),
+                linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+            backdrop-filter: blur(20px);
+            border-top: 2px solid rgba(0, 255, 255, 0.2);
+            padding: 12px 0;
+        }
+
+        .nav-items {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .nav-item {
+            text-align: center;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+
+        .nav-item:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            margin: 0 auto 4px;
+            fill: #00ffff;
+        }
+
+        .nav-label {
+            color: #00ffff;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-title {
+                font-size: 24px;
+            }
+            
+            .map-container {
+                margin: 15px;
+                height: 280px;
+            }
+            
+            .route-card {
+                margin: 0 15px 12px;
+                padding: 16px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">MarketPace Driver</h1>
+        <div class="status-indicator">
+            <div class="status-dot"></div>
+            Available for Routes
+        </div>
+    </div>
+
+    <!-- Enhanced Google Maps Integration -->
+    <div class="map-container">
+        <div id="googleMap"></div>
+        <div class="map-controls">
+            <button class="map-btn" onclick="centerOnDriver()">My Location</button>
+            <button class="map-btn" onclick="toggleTraffic()">Traffic</button>
+            <button class="map-btn" onclick="optimizeRoute()">Optimize Route</button>
+        </div>
+    </div>
+
+    <!-- Available Routes -->
+    <div class="routes-section">
+        <h2 class="section-title">Available Routes</h2>
+        
+        <div class="route-card">
+            <div class="route-header">
+                <div class="route-id">MP-2025-A47</div>
+                <div class="earnings">$36.50</div>
+            </div>
+            <div class="time-slot">2:00 PM - 4:00 PM • 2 deliveries</div>
+            
+            <div class="delivery-item">
+                <div class="delivery-type">Pickup</div>
+                <div class="delivery-details">
+                    <div class="item-name">Power Washer Rental</div>
+                    <div class="addresses">From: 123 Beach Blvd → To: 456 Gulf Shore Dr</div>
+                </div>
+            </div>
+            
+            <div class="delivery-item">
+                <div class="delivery-type">Return</div>
+                <div class="delivery-details">
+                    <div class="item-name">Camera Equipment</div>
+                    <div class="addresses">From: 456 Gulf Shore Dr → To: 789 Coastal Ave</div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="action-btn accept-btn" onclick="acceptRoute('MP-2025-A47')">Accept Route</button>
+                <button class="action-btn view-route-btn" onclick="viewRouteDetails('MP-2025-A47')">View Details</button>
+                <button class="action-btn decline-btn" onclick="declineRoute('MP-2025-A47')">Decline</button>
+            </div>
+        </div>
+
+        <div class="route-card">
+            <div class="route-header">
+                <div class="route-id">MP-2025-B23</div>
+                <div class="earnings">$28.00</div>
+            </div>
+            <div class="time-slot">3:30 PM - 5:00 PM • 1 delivery</div>
+            
+            <div class="delivery-item">
+                <div class="delivery-type">Delivery</div>
+                <div class="delivery-details">
+                    <div class="item-name">Professional Tools</div>
+                    <div class="addresses">From: Gulf Shores Hardware → To: 321 Marina Rd</div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="action-btn accept-btn" onclick="acceptRoute('MP-2025-B23')">Accept Route</button>
+                <button class="action-btn view-route-btn" onclick="viewRouteDetails('MP-2025-B23')">View Details</button>
+                <button class="action-btn decline-btn" onclick="declineRoute('MP-2025-B23')">Decline</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Earnings Panel -->
+    <div class="earnings-panel">
+        <div class="daily-earnings">Today: $124.75</div>
+        <div style="color: #888; font-size: 14px;">4 routes completed</div>
+        
+        <div class="earnings-breakdown">
+            <div class="earning-item">
+                <div class="earning-label">Base Pay</div>
+                <div class="earning-value">$98.50</div>
+            </div>
+            <div class="earning-item">
+                <div class="earning-label">Tips</div>
+                <div class="earning-value">$18.00</div>
+            </div>
+            <div class="earning-item">
+                <div class="earning-label">Mileage</div>
+                <div class="earning-value">$8.25</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-items">
+            <div class="nav-item" onclick="goToRoutes()">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                <div class="nav-label">Routes</div>
+            </div>
+            
+            <div class="nav-item" onclick="goToEarnings()">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <div class="nav-label">Earnings</div>
+            </div>
+            
+            <div class="nav-item" onclick="openQRScanner()">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="M9.5 6.5v3h-3v-3h3M11 5H5v6h6V5zm-1.5 9.5v3h-3v-3h3M11 13H5v6h6v-6zm6.5-6.5v3h-3v-3h3M19 5h-6v6h6V5zm-6.5 9.5v3h-3v-3h3M13 13h6v6h-6v-6zm-2-8V3H9v2H7V3H5v2H3v2h2v2h2V7h2V5zm10 0V3h-2v2h-2V3h-2v2h-2v2h2v2h2V7h2V5z"/>
+                </svg>
+                <div class="nav-label">QR Scan</div>
+            </div>
+            
+            <div class="nav-item" onclick="goToProfile()">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+                <div class="nav-label">Profile</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let map;
+        let trafficLayer;
+        let driverMarker;
+        let routePolyline;
+        let googleMapsApiKey;
+
+        // Initialize Google Maps
+        async function initMap() {
+            try {
+                // Get API key from server
+                const response = await fetch('/api/maps/api-key');
+                const data = await response.json();
+                
+                if (data.error) {
+                    console.error('Google Maps API key not available:', data.error);
+                    showFallbackMap();
+                    return;
+                }
+                
+                googleMapsApiKey = data.apiKey;
+                
+                // Initialize Google Map
+                map = new google.maps.Map(document.getElementById("googleMap"), {
+                    center: { lat: 30.2672, lng: -87.5947 }, // Gulf Shores, AL
+                    zoom: 13,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    styles: [
+                        {
+                            "featureType": "all",
+                            "stylers": [{"saturation": -20}]
+                        },
+                        {
+                            "featureType": "road.highway",
+                            "stylers": [{"color": "#4169e1"}]
+                        }
+                    ]
+                });
+                
+                // Add driver location marker
+                driverMarker = new google.maps.Marker({
+                    position: { lat: 30.2672, lng: -87.5947 },
+                    map: map,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 10,
+                        fillColor: '#00ff00',
+                        fillOpacity: 1,
+                        strokeWeight: 2,
+                        strokeColor: '#ffffff'
+                    },
+                    title: 'Your Location'
+                });
+                
+                // Initialize traffic layer
+                trafficLayer = new google.maps.TrafficLayer();
+                
+                // Add sample route
+                displaySampleRoute();
+                
+                console.log('Google Maps initialized successfully');
+                
+            } catch (error) {
+                console.error('Google Maps initialization failed:', error);
+                showFallbackMap();
+            }
+        }
+
+        function showFallbackMap() {
+            const mapElement = document.getElementById('googleMap');
+            mapElement.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: rgba(0,0,0,0.3); color: #00ffff; text-align: center; padding: 20px;">
+                    <div>
+                        <h3>Map Loading...</h3>
+                        <p>Google Maps API key configuration in progress</p>
+                        <div style="margin-top: 20px; color: #888;">
+                            <p>Current Location: Gulf Shores, AL</p>
+                            <p>Available Routes: 2</p>
+                            <p>Estimated Earnings: $64.50</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displaySampleRoute() {
+            if (!map) return;
+            
+            const routeCoordinates = [
+                { lat: 30.2672, lng: -87.5947 }, // Start
+                { lat: 30.2745, lng: -87.5891 }, // Pickup
+                { lat: 30.2698, lng: -87.5823 }, // Delivery
+                { lat: 30.2756, lng: -87.5978 }, // Next pickup
+                { lat: 30.2634, lng: -87.5945 }  // Final delivery
+            ];
+            
+            routePolyline = new google.maps.Polyline({
+                path: routeCoordinates,
+                geodesic: true,
+                strokeColor: '#00ffff',
+                strokeOpacity: 1.0,
+                strokeWeight: 4
+            });
+            
+            routePolyline.setMap(map);
+        }
+
+        function centerOnDriver() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    
+                    if (map) {
+                        map.setCenter(pos);
+                        driverMarker.setPosition(pos);
+                    }
+                    
+                    showNotification('Centered on your location', 'success');
+                }, () => {
+                    showNotification('Location access denied', 'error');
+                });
+            } else {
+                showNotification('Geolocation not supported', 'error');
+            }
+        }
+
+        function toggleTraffic() {
+            if (trafficLayer && map) {
+                if (trafficLayer.getMap()) {
+                    trafficLayer.setMap(null);
+                    showNotification('Traffic layer hidden', 'info');
+                } else {
+                    trafficLayer.setMap(map);
+                    showNotification('Traffic layer shown', 'info');
+                }
+            }
+        }
+
+        async function optimizeRoute() {
+            showNotification('Optimizing route with Google Directions...', 'info');
+            
+            try {
+                const response = await fetch('/api/maps/directions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        origin: '30.2672,-87.5947',
+                        destination: '30.2634,-87.5945',
+                        waypoints: ['30.2745,-87.5891', '30.2698,-87.5823']
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.routes.length > 0) {
+                    showNotification('Route optimized! Estimated time: ' + data.routes[0].legs[0].duration.text, 'success');
+                } else {
+                    showNotification('Route optimization unavailable', 'warning');
+                }
+                
+            } catch (error) {
+                showNotification('Route optimization failed', 'error');
+            }
+        }
+
+        // Route Management Functions
+        function acceptRoute(routeId) {
+            showNotification(`Accepting route ${routeId}...`, 'info');
+            
+            // Simulate API call
+            setTimeout(() => {
+                showNotification(`Route ${routeId} accepted! Check your active routes.`, 'success');
+                // In real app, refresh available routes
+            }, 1500);
+        }
+
+        function viewRouteDetails(routeId) {
+            alert(`Route Details for ${routeId}:
+
+📍 Route: MP-2025-A47
+⏰ Time: 2:00 PM - 4:00 PM
+💰 Estimated Earnings: $36.50
+📦 Deliveries: 2 stops
+
+Stop 1: Pickup
+• Item: Power Washer Rental
+• From: 123 Beach Blvd
+• To: 456 Gulf Shore Dr
+• Contact: (251) 555-0123
+
+Stop 2: Return
+• Item: Camera Equipment
+• From: 456 Gulf Shore Dr
+• To: 789 Coastal Ave
+• Contact: (251) 555-0124
+
+🗺️ Total Distance: 12.4 miles
+⏱️ Estimated Duration: 1 hour 45 minutes`);
+        }
+
+        function declineRoute(routeId) {
+            showNotification(`Route ${routeId} declined`, 'warning');
+            // In real app, remove from available routes
+        }
+
+        // Navigation Functions
+        function goToRoutes() {
+            window.location.href = '/driver-dashboard.html';
+        }
+
+        function goToEarnings() {
+            alert('Earnings Report:\n\n📊 Today: $124.75\n📈 This Week: $523.40\n💰 This Month: $2,187.30\n\n⭐ 4.8/5 Customer Rating\n🚗 127 Deliveries Completed');
+        }
+
+        function openQRScanner() {
+            window.location.href = '/scan-employee-qr.html';
+        }
+
+        function goToProfile() {
+            alert('Driver Profile:\n\n👤 Alex Johnson\n🆔 Driver ID: MP-DR-2025-001\n⭐ Rating: 4.8/5\n🚗 Vehicle: Blue Honda Civic\n📱 Phone: (251) 555-0789\n\n✅ Background Check: Passed\n✅ Insurance: Active\n✅ License: Valid');
+        }
+
+        // Notification System
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'rgba(0,255,0,0.2)' : 
+                             type === 'error' ? 'rgba(255,0,0,0.2)' : 
+                             type === 'warning' ? 'rgba(255,165,0,0.2)' : 
+                             'rgba(0,255,255,0.2)'};
+                border: 2px solid ${type === 'success' ? '#00ff00' : 
+                                   type === 'error' ? '#ff0000' : 
+                                   type === 'warning' ? '#ffa500' : 
+                                   '#00ffff'};
+                color: ${type === 'success' ? '#00ff00' : 
+                         type === 'error' ? '#ff0000' : 
+                         type === 'warning' ? '#ffa500' : 
+                         '#00ffff'};
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 14px;
+                z-index: 1000;
+                backdrop-filter: blur(10px);
+                animation: slideIn 0.3s ease-out;
+                max-width: 300px;
+            `;
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-in forwards';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Initialize when page loads
+        window.onload = function() {
+            console.log('Enhanced Driver Dashboard loaded');
+            
+            // Try to initialize Google Maps
+            if (typeof google !== 'undefined' && google.maps) {
+                initMap();
+            } else {
+                // Load Google Maps API dynamically
+                loadGoogleMapsAPI();
+            }
+        };
+
+        function loadGoogleMapsAPI() {
+            fetch('/api/maps/api-key')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.apiKey) {
+                        const script = document.createElement('script');
+                        script.src = `https://maps.googleapis.com/maps/api/js?key=${data.apiKey}&callback=initMap`;
+                        script.async = true;
+                        script.defer = true;
+                        document.head.appendChild(script);
+                    } else {
+                        showFallbackMap();
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed to load Google Maps API key:', error);
+                    showFallbackMap();
+                });
+        }
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

@@ -31,11 +31,28 @@ const port = process.env.PORT || 5000;
 let stripe: Stripe | null = null;
 if (process.env.STRIPE_SECRET_KEY) {
   stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: '2024-12-18.acacia',
+    apiVersion: '2025-06-30.basil',
   });
   console.log('✅ Stripe initialized successfully');
 } else {
   console.warn('⚠️ STRIPE_SECRET_KEY not found - payment endpoints will return errors');
+}
+
+// Google Maps API Keys
+const GOOGLE_MAPS_API_KEYS = {
+  web: process.env.GOOGLE_MAPS_API_KEY_WEB,
+  ios: process.env.GOOGLE_MAPS_API_KEY_IOS, 
+  android: process.env.GOOGLE_MAPS_API_KEY_ANDROID
+};
+
+// Log Google Maps API status
+if (GOOGLE_MAPS_API_KEYS.web || GOOGLE_MAPS_API_KEYS.ios || GOOGLE_MAPS_API_KEYS.android) {
+  console.log('🗺️ Google Maps API keys configured for platform support');
+  if (GOOGLE_MAPS_API_KEYS.web) console.log('   ✓ Web API key ready');
+  if (GOOGLE_MAPS_API_KEYS.ios) console.log('   ✓ iOS API key ready');
+  if (GOOGLE_MAPS_API_KEYS.android) console.log('   ✓ Android API key ready');
+} else {
+  console.warn('⚠️ No Google Maps API keys found - map features will be limited');
 }
 
 // Middleware
@@ -69,6 +86,133 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     server: 'MarketPace Full Server with Volunteer Management'
   });
+});
+
+// Google Maps API key endpoint for frontend
+app.get('/api/maps/api-key', (req, res) => {
+  const userAgent = req.get('User-Agent') || '';
+  let apiKey = '';
+
+  // Determine platform and return appropriate API key
+  if (userAgent.includes('iPhone') || userAgent.includes('iOS')) {
+    apiKey = GOOGLE_MAPS_API_KEYS.ios || '';
+  } else if (userAgent.includes('Android')) {
+    apiKey = GOOGLE_MAPS_API_KEYS.android || '';
+  } else {
+    apiKey = GOOGLE_MAPS_API_KEYS.web || '';
+  }
+
+  if (!apiKey) {
+    return res.status(500).json({ 
+      error: 'Google Maps API key not configured for this platform',
+      platform: userAgent.includes('iPhone') || userAgent.includes('iOS') ? 'iOS' : 
+                userAgent.includes('Android') ? 'Android' : 'Web'
+    });
+  }
+
+  res.json({ 
+    apiKey,
+    platform: userAgent.includes('iPhone') || userAgent.includes('iOS') ? 'iOS' : 
+              userAgent.includes('Android') ? 'Android' : 'Web'
+  });
+});
+
+// Google Places API for business search (used in geo QR system)
+app.post('/api/maps/places/search', async (req, res) => {
+  try {
+    const { query, location } = req.body;
+    const apiKey = GOOGLE_MAPS_API_KEYS.web;
+
+    if (!apiKey) {
+      return res.status(500).json({ error: 'Google Maps API key not configured' });
+    }
+
+    let placesUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${apiKey}`;
+    
+    if (location) {
+      placesUrl += `&location=${location.lat},${location.lng}&radius=5000`;
+    }
+
+    const response = await fetch(placesUrl);
+    const data = await response.json();
+
+    res.json({
+      success: true,
+      results: data.results?.slice(0, 10) || [], // Limit to 10 results
+      status: data.status
+    });
+
+  } catch (error) {
+    console.error('Places API error:', error);
+    res.status(500).json({ 
+      error: 'Failed to search places', 
+      message: error.message 
+    });
+  }
+});
+
+// Geocoding API for address validation
+app.post('/api/maps/geocode', async (req, res) => {
+  try {
+    const { address } = req.body;
+    const apiKey = GOOGLE_MAPS_API_KEYS.web;
+
+    if (!apiKey) {
+      return res.status(500).json({ error: 'Google Maps API key not configured' });
+    }
+
+    const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
+    
+    const response = await fetch(geocodeUrl);
+    const data = await response.json();
+
+    res.json({
+      success: true,
+      results: data.results || [],
+      status: data.status
+    });
+
+  } catch (error) {
+    console.error('Geocoding API error:', error);
+    res.status(500).json({ 
+      error: 'Failed to geocode address', 
+      message: error.message 
+    });
+  }
+});
+
+// Directions API for driver routing
+app.post('/api/maps/directions', async (req, res) => {
+  try {
+    const { origin, destination, waypoints } = req.body;
+    const apiKey = GOOGLE_MAPS_API_KEYS.web;
+
+    if (!apiKey) {
+      return res.status(500).json({ error: 'Google Maps API key not configured' });
+    }
+
+    let directionsUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&key=${apiKey}`;
+    
+    if (waypoints && waypoints.length > 0) {
+      directionsUrl += `&waypoints=optimize:true|${waypoints.map(wp => encodeURIComponent(wp)).join('|')}`;
+    }
+
+    const response = await fetch(directionsUrl);
+    const data = await response.json();
+
+    res.json({
+      success: true,
+      routes: data.routes || [],
+      status: data.status
+    });
+
+  } catch (error) {
+    console.error('Directions API error:', error);
+    res.status(500).json({ 
+      error: 'Failed to get directions', 
+      message: error.message 
+    });
+  }
 });
 
 // Food truck location posting API
