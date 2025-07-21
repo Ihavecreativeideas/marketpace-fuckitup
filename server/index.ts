@@ -5,6 +5,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import session from 'express-session';
+import crypto from 'crypto';
 import Stripe from 'stripe';
 import { BusinessSchedulingService } from './business-scheduling';
 import { setupRealIntegrationRoutes } from './realIntegrationTester';
@@ -41,12 +42,42 @@ if (process.env.STRIPE_SECRET_KEY) {
   console.warn('⚠️ STRIPE_SECRET_KEY not found - payment endpoints will return errors');
 }
 
-// Google Maps API Keys
+// Google Maps API Keys and URL Signing Secret
 const GOOGLE_MAPS_API_KEYS = {
   web: process.env.GOOGLE_MAPS_API_KEY_WEB,
   ios: process.env.GOOGLE_MAPS_API_KEY_IOS, 
   android: process.env.GOOGLE_MAPS_API_KEY_ANDROID
 };
+
+const GOOGLE_MAPS_URL_SIGNING_SECRET = process.env.GOOGLE_MAPS_URL_SIGNING_SECRET;
+
+// URL Signing function for enhanced security
+function signGoogleMapsUrl(url: string): string {
+  if (!GOOGLE_MAPS_URL_SIGNING_SECRET) {
+    return url; // Return unsigned URL if no secret configured
+  }
+  
+  try {
+    const urlObj = new URL(url);
+    const pathAndQuery = urlObj.pathname + urlObj.search;
+    
+    // Create HMAC-SHA1 signature using Google's URL signing format
+    const signature = crypto
+      .createHmac('sha1', Buffer.from(GOOGLE_MAPS_URL_SIGNING_SECRET, 'base64'))
+      .update(pathAndQuery)
+      .digest('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, ''); // Remove padding
+    
+    // Add signature to URL
+    urlObj.searchParams.append('signature', signature);
+    return urlObj.toString();
+  } catch (error) {
+    console.warn('URL signing failed, using unsigned URL:', error.message);
+    return url; // Return unsigned URL on error
+  }
+}
 
 // Log Google Maps API status
 if (GOOGLE_MAPS_API_KEYS.web || GOOGLE_MAPS_API_KEYS.ios || GOOGLE_MAPS_API_KEYS.android) {
@@ -54,6 +85,12 @@ if (GOOGLE_MAPS_API_KEYS.web || GOOGLE_MAPS_API_KEYS.ios || GOOGLE_MAPS_API_KEYS
   if (GOOGLE_MAPS_API_KEYS.web) console.log('   ✓ Web API key ready');
   if (GOOGLE_MAPS_API_KEYS.ios) console.log('   ✓ iOS API key ready');
   if (GOOGLE_MAPS_API_KEYS.android) console.log('   ✓ Android API key ready');
+  
+  if (GOOGLE_MAPS_URL_SIGNING_SECRET) {
+    console.log('   🔐 URL signing enabled for enhanced security');
+  } else {
+    console.log('   ⚠️ URL signing not configured - requests limited to 25,000/day');
+  }
 } else {
   console.warn('⚠️ No Google Maps API keys found - map features will be limited');
 }
@@ -136,7 +173,9 @@ app.post('/api/maps/places/search', async (req, res) => {
       placesUrl += `&location=${location.lat},${location.lng}&radius=5000`;
     }
 
-    const response = await fetch(placesUrl);
+    // Apply URL signing for enhanced security
+    const signedUrl = signGoogleMapsUrl(placesUrl);
+    const response = await fetch(signedUrl);
     const data = await response.json();
 
     res.json({
@@ -167,7 +206,22 @@ app.post('/api/maps/geocode', async (req, res) => {
     const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
     
     const response = await fetch(geocodeUrl);
-    const data = await response.json();
+    
+    // Check if response is successful
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    const responseText = await response.text();
+    
+    // Check if response is valid JSON
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Invalid JSON response:', responseText.substring(0, 200));
+      throw new Error(`Invalid API response: ${responseText.substring(0, 100)}`);
+    }
 
     res.json({
       success: true,
@@ -200,7 +254,9 @@ app.post('/api/maps/directions', async (req, res) => {
       directionsUrl += `&waypoints=optimize:true|${waypoints.map(wp => encodeURIComponent(wp)).join('|')}`;
     }
 
-    const response = await fetch(directionsUrl);
+    // Apply URL signing for enhanced security
+    const signedUrl = signGoogleMapsUrl(directionsUrl);
+    const response = await fetch(signedUrl);
     const data = await response.json();
 
     res.json({
