@@ -4947,8 +4947,22 @@
                             </div>
                             
                             <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 500;">Payment Type</label>
+                                <select id="paymentType" required onchange="togglePaymentFields()" style="width: 100%; padding: 12px; border: 2px solid rgba(0,255,255,0.3); border-radius: 8px; background: rgba(0,0,0,0.3); color: white; font-size: 16px;">
+                                    <option value="">Select Payment Type</option>
+                                    <option value="hourly">Hourly Rate</option>
+                                    <option value="per_job">Per Job Base Pay</option>
+                                </select>
+                            </div>
+                            
+                            <div id="hourlyRateField" style="margin-bottom: 20px; display: none;">
                                 <label style="display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 500;">Hourly Rate ($)</label>
-                                <input type="number" id="employeeRate" required min="7.25" step="0.25" style="width: 100%; padding: 12px; border: 2px solid rgba(0,255,255,0.3); border-radius: 8px; background: rgba(0,0,0,0.3); color: white; font-size: 16px;" placeholder="15.00">
+                                <input type="number" id="employeeHourlyRate" min="7.25" step="0.25" style="width: 100%; padding: 12px; border: 2px solid rgba(0,255,255,0.3); border-radius: 8px; background: rgba(0,0,0,0.3); color: white; font-size: 16px;" placeholder="15.00">
+                            </div>
+                            
+                            <div id="perJobField" style="margin-bottom: 20px; display: none;">
+                                <label style="display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 500;">Per Job Base Pay ($)</label>
+                                <input type="number" id="employeeJobPay" min="10.00" step="5.00" style="width: 100%; padding: 12px; border: 2px solid rgba(0,255,255,0.3); border-radius: 8px; background: rgba(0,0,0,0.3); color: white; font-size: 16px;" placeholder="50.00">
                             </div>
                             
                             <div style="margin-bottom: 20px;">
@@ -4962,7 +4976,7 @@
                             
                             <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin-top: 32px;">
                                 <button type="button" onclick="closeAddEmployeeModal()" style="background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold;">Cancel</button>
-                                <button type="submit" style="background: linear-gradient(135deg, #00ffff, #0066ff); border: none; color: white; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold;">Add Employee</button>
+                                <button type="submit" onclick="submitNewEmployee(event)" style="background: linear-gradient(135deg, #00ffff, #0066ff); border: none; color: white; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold;">Add Employee</button>
                             </div>
                         </form>
                     </div>
@@ -4979,16 +4993,51 @@
             }
         }
         
+        function togglePaymentFields() {
+            const paymentType = document.getElementById('paymentType').value;
+            const hourlyField = document.getElementById('hourlyRateField');
+            const perJobField = document.getElementById('perJobField');
+            
+            if (paymentType === 'hourly') {
+                hourlyField.style.display = 'block';
+                perJobField.style.display = 'none';
+                document.getElementById('employeeHourlyRate').required = true;
+                document.getElementById('employeeJobPay').required = false;
+            } else if (paymentType === 'per_job') {
+                hourlyField.style.display = 'none';
+                perJobField.style.display = 'block';
+                document.getElementById('employeeHourlyRate').required = false;
+                document.getElementById('employeeJobPay').required = true;
+            } else {
+                hourlyField.style.display = 'none';
+                perJobField.style.display = 'none';
+                document.getElementById('employeeHourlyRate').required = false;
+                document.getElementById('employeeJobPay').required = false;
+            }
+        }
+        
         function submitNewEmployee(event) {
             event.preventDefault();
+            event.stopPropagation();
             
             const name = document.getElementById('employeeName').value.trim();
             const role = document.getElementById('employeeRole').value;
             const phone = document.getElementById('employeePhone').value.trim();
-            const rate = document.getElementById('employeeRate').value;
+            const paymentType = document.getElementById('paymentType').value;
             const status = document.getElementById('employeeStatus').value;
             
-            if (!name || !role || !phone || !rate) {
+            let rate = 0;
+            let paymentInfo = '';
+            
+            if (paymentType === 'hourly') {
+                rate = document.getElementById('employeeHourlyRate').value;
+                paymentInfo = `$${rate}/hour`;
+            } else if (paymentType === 'per_job') {
+                rate = document.getElementById('employeeJobPay').value;
+                paymentInfo = `$${rate}/job`;
+            }
+            
+            if (!name || !role || !phone || !paymentType || !rate) {
                 showNotification('Please fill in all required fields', 'error');
                 return;
             }
@@ -5000,6 +5049,8 @@
                 role: role,
                 phone: phone,
                 rate: parseFloat(rate),
+                paymentType: paymentType,
+                paymentInfo: paymentInfo,
                 status: status,
                 avatar: name.charAt(0).toUpperCase(),
                 color: getRoleColor(role),
@@ -5062,12 +5113,12 @@
             // If no saved employees, use default demo employees
             if (employees.length === 0) {
                 employees = [
-                    { id: 'sarah', name: 'Sarah Johnson', role: 'Manager', status: 'Available', avatar: 'S', color: 'manager', phone: '(555) 123-4567', rate: 25.00 },
-                    { id: 'mike', name: 'Mike Chen', role: 'Cashier', status: 'Available', avatar: 'M', color: 'cashier', phone: '(555) 234-5678', rate: 15.00 },
-                    { id: 'jessica', name: 'Jessica Martinez', role: 'Sales', status: 'Scheduled', avatar: 'J', color: 'sales', phone: '(555) 345-6789', rate: 18.00 },
-                    { id: 'david', name: 'David Wilson', role: 'Stock', status: 'Available', avatar: 'D', color: 'stock', phone: '(555) 456-7890', rate: 16.00 },
-                    { id: 'emma', name: 'Emma Davis', role: 'Assistant', status: 'Off', avatar: 'E', color: 'assistant', phone: '(555) 567-8901', rate: 14.00 },
-                    { id: 'carlos', name: 'Carlos Rodriguez', role: 'Security', status: 'Available', avatar: 'C', color: 'security', phone: '(555) 678-9012', rate: 20.00 }
+                    { id: 'sarah', name: 'Sarah Johnson', role: 'Manager', status: 'Available', avatar: 'S', color: 'manager', phone: '(555) 123-4567', rate: 25.00, paymentType: 'hourly', paymentInfo: '$25.00/hour' },
+                    { id: 'mike', name: 'Mike Chen', role: 'Cashier', status: 'Available', avatar: 'M', color: 'cashier', phone: '(555) 234-5678', rate: 15.00, paymentType: 'hourly', paymentInfo: '$15.00/hour' },
+                    { id: 'jessica', name: 'Jessica Martinez', role: 'Sales', status: 'Scheduled', avatar: 'J', color: 'sales', phone: '(555) 345-6789', rate: 75.00, paymentType: 'per_job', paymentInfo: '$75.00/job' },
+                    { id: 'david', name: 'David Wilson', role: 'Stock', status: 'Available', avatar: 'D', color: 'stock', phone: '(555) 456-7890', rate: 16.00, paymentType: 'hourly', paymentInfo: '$16.00/hour' },
+                    { id: 'emma', name: 'Emma Davis', role: 'Assistant', status: 'Off', avatar: 'E', color: 'assistant', phone: '(555) 567-8901', rate: 50.00, paymentType: 'per_job', paymentInfo: '$50.00/job' },
+                    { id: 'carlos', name: 'Carlos Rodriguez', role: 'Security', status: 'Available', avatar: 'C', color: 'security', phone: '(555) 678-9012', rate: 20.00, paymentType: 'hourly', paymentInfo: '$20.00/hour' }
                 ];
                 // Save default employees to localStorage
                 localStorage.setItem('marketpace_employees', JSON.stringify(employees));
@@ -5100,6 +5151,14 @@
                         <div style="flex: 1;">
                             <div style="font-weight: bold; color: white; font-size: 16px;">${employee.name}</div>
                             <div style="color: #94a3b8; font-size: 14px;">${employee.role}</div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <div style="color: #00ffff; font-size: 12px; margin-bottom: 4px;">
+                            ${employee.paymentInfo || `$${employee.rate}/hour`}
+                        </div>
+                        <div style="color: #888; font-size: 12px;">
+                            ${employee.phone}
                         </div>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
