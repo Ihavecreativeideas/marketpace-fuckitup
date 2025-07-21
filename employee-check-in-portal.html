@@ -301,6 +301,11 @@
         <div class="location-info">
             <div class="location-title">Work Location</div>
             <div id="locationAddress" class="location-address">GPS location will be verified during check-in</div>
+            <div style="text-align: center; margin-top: 10px;">
+                <button onclick="requestLocationPermission()" id="locationPermissionBtn" style="background: rgba(0, 255, 255, 0.2); border: 1px solid rgba(0, 255, 255, 0.4); color: #00ffff; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                    Enable Location Access
+                </button>
+            </div>
         </div>
 
         <div class="shift-info">
@@ -380,7 +385,26 @@
         function initializeGeolocation() {
             if (navigator.geolocation) {
                 console.log('GPS available and ready');
-                document.getElementById('locationAddress').textContent = 'GPS location will be verified during check-in';
+                
+                // Check if we already have location permissions
+                if (navigator.permissions) {
+                    navigator.permissions.query({name: 'geolocation'}).then(function(result) {
+                        console.log('Location permission status:', result.state);
+                        
+                        if (result.state === 'granted') {
+                            document.getElementById('locationAddress').textContent = 'GPS location access granted - ready for check-in';
+                        } else if (result.state === 'denied') {
+                            document.getElementById('locationAddress').textContent = 'GPS location denied - please enable location permissions in browser settings';
+                        } else {
+                            document.getElementById('locationAddress').textContent = 'GPS location will be requested during check-in';
+                        }
+                    }).catch(function(error) {
+                        console.log('Permission query not supported');
+                        document.getElementById('locationAddress').textContent = 'GPS location will be verified during check-in';
+                    });
+                } else {
+                    document.getElementById('locationAddress').textContent = 'GPS location will be verified during check-in';
+                }
             } else {
                 console.log('GPS not available');
                 document.getElementById('locationAddress').textContent = 'GPS location verification not available';
@@ -486,6 +510,47 @@
                 console.log('✅ Check-in completed successfully with geo validation');
                 console.log('📍 Location stored:', currentLocation);
             }, 1000);
+        }
+
+        function requestLocationPermission() {
+            console.log('🔐 Requesting location permission...');
+            
+            if (!navigator.geolocation) {
+                showNotification('GPS not available on this device', 'error');
+                return;
+            }
+            
+            // Request location access to trigger permission dialog
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    console.log('✅ Location permission granted');
+                    document.getElementById('locationAddress').textContent = 'GPS location access granted - ready for check-in';
+                    document.getElementById('locationPermissionBtn').style.display = 'none';
+                    showNotification('Location access enabled! You can now check in.', 'success');
+                },
+                (error) => {
+                    console.log('❌ Location permission error:', error.message);
+                    let message = 'Location access required. ';
+                    
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            message += 'Please click the location icon in your browser\'s address bar and allow location access.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            message += 'Please check your device\'s location settings.';
+                            break;
+                        default:
+                            message += 'Please try again or use Quick Check-In option.';
+                    }
+                    
+                    showNotification(message, 'error');
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 60000
+                }
+            );
         }
 
         function manualCheckIn() {
