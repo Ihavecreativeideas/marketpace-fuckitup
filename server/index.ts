@@ -2074,6 +2074,11 @@ app.get('/unified-workflow-confirmation', (req, res) => {
   res.sendFile(path.join(__dirname, '../unified-workflow-confirmation.html'));
 });
 
+// Driver Features Overview Route
+app.get('/driver-features-overview', (req, res) => {
+  res.sendFile(path.join(__dirname, '../driver-features-comprehensive-overview.html'));
+});
+
 // Catch-all for other HTML pages
 app.get('/:page', (req, res) => {
   const pageName = req.params.page;
