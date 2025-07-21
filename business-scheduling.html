@@ -4430,41 +4430,7 @@
             console.log(`Employee Status Stats: Available: ${availableCount}, Scheduled: ${scheduledCount}, Off: ${offCount}, Break: ${breakCount}`);
         }
 
-        // Smooth Tab Switching Function - Simple and Effective
-        function showTab(tabId) {
-            // Remove active class from all nav chips
-            document.querySelectorAll('.nav-chip').forEach(chip => {
-                chip.classList.remove('active');
-            });
 
-            // Add active class to clicked nav chip
-            const activeChip = document.querySelector(`[data-tab="${tabId}"]`);
-            if (activeChip) {
-                activeChip.classList.add('active');
-            }
-
-            // Hide all tabs immediately
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.style.display = 'none';
-                content.classList.remove('active');
-            });
-
-            // Show the selected tab
-            const targetTab = document.getElementById(tabId);
-            if (targetTab) {
-                targetTab.style.display = 'block';
-                targetTab.classList.add('active');
-            }
-
-            // Initialize tab-specific functionality
-            if (tabId === 'employees') {
-                initializeSmartEmployeeManagement();
-            } else if (tabId === 'volunteers') {
-                console.log('Volunteer Management positioned at top of Volunteers tab');
-            } else if (tabId === 'qr-system') {
-                console.log('Employee QR System positioned at top of QR System tab');
-            }
-        }
 
         // Initialize smart employee management when the tab is loaded
         document.addEventListener('DOMContentLoaded', function() {
@@ -5037,6 +5003,19 @@
             updateVoiceConsole(message);
         }
 
+        function updateVoiceConsole(message) {
+            const consoleElement = document.getElementById('voice-output-console') || document.getElementById('voice-console-text');
+            if (consoleElement) {
+                const timestamp = new Date().toLocaleTimeString();
+                if (consoleElement.id === 'voice-output-console') {
+                    consoleElement.innerHTML += `<div style="margin-bottom: 8px; color: #94a3b8;"><span style="color: #8a2be2;">[${timestamp}]</span> ${message}</div>`;
+                    consoleElement.scrollTop = consoleElement.scrollHeight;
+                } else {
+                    consoleElement.innerHTML = `[${timestamp}] ${message}`;
+                }
+            }
+        }
+
         function filterEmployees() {
             const searchTerm = document.getElementById('employee-search').value.toLowerCase();
             const roleFilter = document.getElementById('role-filter').value;
@@ -5271,13 +5250,7 @@
             updateVoiceConsole('Voice system ready...');
         }
 
-        function updateVoiceConsole(message) {
-            const console = document.getElementById('voice-console-text');
-            if (console) {
-                const timestamp = new Date().toLocaleTimeString();
-                console.innerHTML = `[${timestamp}] ${message}`;
-            }
-        }
+
 
         // Enhanced Voice Recognition for Sleek Interface
         function startVoiceRecognition() {
