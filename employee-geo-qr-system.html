@@ -1002,10 +1002,18 @@
                 return;
             }
 
+            console.log('🎯 Generating QR for:', businessName);
+            console.log('📍 Selected place data:', selectedPlace);
+
             showNotification('Generating employee check-in QR code...', 'info');
 
-            // Use selected place coordinates if available, otherwise get current location
+            // Use selected place coordinates if available, otherwise fallback to manual geocoding
             if (selectedPlace && selectedPlace.geometry) {
+                console.log('✅ Using selected place coordinates');
+                const lat = typeof selectedPlace.geometry.location.lat === 'function' ? 
+                           selectedPlace.geometry.location.lat() : selectedPlace.geometry.location.lat;
+                const lng = typeof selectedPlace.geometry.location.lng === 'function' ? 
+                           selectedPlace.geometry.location.lng() : selectedPlace.geometry.location.lng;
                 const qrData = {
                     purpose: 'employee_checkin',
                     businessName: businessName,
@@ -1013,8 +1021,8 @@
                     placeId: selectedPlace.place_id || '',
                     geoValidation: {
                         enabled: true,
-                        latitude: selectedPlace.geometry.location.lat(),
-                        longitude: selectedPlace.geometry.location.lng(),
+                        latitude: lat,
+                        longitude: lng,
                         radiusMeters: parseInt(radius),
                         strictMode: mode === 'strict'
                     },
@@ -1022,6 +1030,10 @@
                 };
 
                 generateQRCodeAPI(qrData);
+            } else if (businessName.trim()) {
+                // Try to geocode the manually entered address
+                console.log('🔍 No selected place, attempting to geocode manually entered address');
+                geocodeAddress(businessName, radius, mode);
             } else if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
@@ -1123,6 +1135,74 @@
             });
             
             showNotification('Employee check-in QR code generated successfully!', 'success');
+        }
+
+        function geocodeAddress(address, radius, mode) {
+            console.log(`🗺️ Geocoding address: ${address}`);
+            
+            if (typeof google !== 'undefined' && google.maps && google.maps.Geocoder) {
+                const geocoder = new google.maps.Geocoder();
+                
+                geocoder.geocode({ address: address }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        const location = results[0].geometry.location;
+                        const formattedAddress = results[0].formatted_address;
+                        
+                        console.log('✅ Geocoding successful:', {
+                            address: formattedAddress,
+                            lat: location.lat(),
+                            lng: location.lng()
+                        });
+                        
+                        const qrData = {
+                            purpose: 'employee_checkin',
+                            businessName: address,
+                            businessAddress: formattedAddress,
+                            placeId: results[0].place_id || '',
+                            geoValidation: {
+                                enabled: true,
+                                latitude: location.lat(),
+                                longitude: location.lng(),
+                                radiusMeters: parseInt(radius),
+                                strictMode: mode === 'strict'
+                            },
+                            timestamp: new Date().toISOString()
+                        };
+                        
+                        generateQRCodeAPI(qrData);
+                    } else {
+                        console.log('❌ Geocoding failed:', status);
+                        // Generate QR without coordinates
+                        const qrData = {
+                            purpose: 'employee_checkin',
+                            businessName: address,
+                            businessAddress: address,
+                            geoValidation: {
+                                enabled: false
+                            },
+                            timestamp: new Date().toISOString()
+                        };
+                        
+                        generateQRCodeAPI(qrData);
+                        showNotification('QR code generated without GPS validation (address not found)', 'warning');
+                    }
+                });
+            } else {
+                console.log('⚠️ Google Geocoder not available, generating QR without GPS');
+                // Generate QR without coordinates
+                const qrData = {
+                    purpose: 'employee_checkin',
+                    businessName: address,
+                    businessAddress: address,
+                    geoValidation: {
+                        enabled: false
+                    },
+                    timestamp: new Date().toISOString()
+                };
+                
+                generateQRCodeAPI(qrData);
+                showNotification('QR code generated without GPS validation', 'warning');
+            }
         }
 
         function useCurrentLocation() {
@@ -1542,20 +1622,41 @@
                         autocompleteElement.id = 'businessName';
                         
                         autocompleteElement.addEventListener('gmp-placeselect', async (event) => {
-                            const place = event.placePrediction.toPlace();
-                            await place.fetchFields({ 
-                                fields: ['displayName', 'formattedAddress', 'location', 'id']
-                            });
+                            console.log('🏢 Place selection event triggered:', event);
                             
-                            selectedPlace = {
-                                name: place.displayName,
-                                formatted_address: place.formattedAddress,
-                                geometry: { location: place.location },
-                                place_id: place.id
-                            };
-                            
-                            showNotification(`Location selected: ${place.displayName || place.formattedAddress}`, 'success');
-                            console.log('✅ NEW Google Places location selected:', selectedPlace);
+                            try {
+                                const place = event.placePrediction.toPlace();
+                                console.log('📍 Converting place prediction:', place);
+                                
+                                await place.fetchFields(['displayName', 'formattedAddress', 'location', 'id']);
+                                console.log('✅ Place details fetched:', {
+                                    name: place.displayName,
+                                    address: place.formattedAddress,
+                                    location: place.location
+                                });
+                                
+                                selectedPlace = {
+                                    name: place.displayName,
+                                    formatted_address: place.formattedAddress,
+                                    geometry: { 
+                                        location: {
+                                            lat: () => place.location?.lat || 0,
+                                            lng: () => place.location?.lng || 0
+                                        }
+                                    },
+                                    place_id: place.id
+                                };
+                                
+                                // Update the visible input value for user feedback
+                                autocompleteElement.value = place.displayName || place.formattedAddress;
+                                
+                                showNotification(`Location selected: ${place.displayName || place.formattedAddress}`, 'success');
+                                console.log('✅ NEW Google Places location selected and stored:', selectedPlace);
+                                
+                            } catch (error) {
+                                console.log('❌ Error in place selection:', error);
+                                showNotification('Error selecting location. Please try again.', 'error');
+                            }
                         });
                         
                         console.log('✅ NEW Google Places AutocompleteElement initialized successfully');
