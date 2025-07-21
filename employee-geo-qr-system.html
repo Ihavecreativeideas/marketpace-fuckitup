@@ -1135,17 +1135,29 @@
 
             showNotification('Getting your current location...', 'info');
 
+            // Store button reference for timeout
+            window.currentLocationButton = locationBtn;
+            
+            // Set up timeout FIRST before starting geolocation
+            const timeoutId = setTimeout(() => {
+                console.log('⏱️ Location timeout triggered - forcing reset');
+                forceResetLocationButton();
+                showNotification('Location detection timed out. Please try again or enter location manually.', 'error');
+            }, 10000); // Shorter 10 second timeout
+
             navigator.geolocation.getCurrentPosition(
                 (position) => {
+                    clearTimeout(timeoutId);
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
                     const accuracy = position.coords.accuracy;
 
                     // Reverse geocode to get address
                     reverseGeocode(lat, lng, accuracy);
-                    resetLocationButton();
+                    forceResetLocationButton();
                 },
                 (error) => {
+                    clearTimeout(timeoutId);
                     let errorMessage = 'Unable to get location: ';
                     switch(error.code) {
                         case error.PERMISSION_DENIED:
@@ -1163,19 +1175,44 @@
                     }
                     
                     showNotification(errorMessage, 'error');
-                    resetLocationButton();
+                    forceResetLocationButton();
                 },
                 {
-                    enableHighAccuracy: true,
-                    timeout: 15000, // 15 seconds
-                    maximumAge: 60000
+                    enableHighAccuracy: false, // Faster but less accurate
+                    timeout: 8000, // 8 seconds
+                    maximumAge: 300000 // 5 minutes
                 }
             );
+        }
+
+        function forceResetLocationButton() {
+            // Multiple methods to find and reset the button
+            let locationBtn = window.currentLocationButton;
             
-            // Failsafe timeout to reset button if geolocation hangs
-            setTimeout(() => {
-                resetLocationButton();
-            }, 20000); // 20 seconds total failsafe
+            if (!locationBtn || !locationBtn.parentNode) {
+                // Try different selectors
+                locationBtn = document.querySelector('[onclick*="useCurrentLocation"]') ||
+                           document.querySelector('button[disabled]') ||
+                           Array.from(document.querySelectorAll('button')).find(btn => 
+                               btn.textContent.includes('Detecting Location')
+                           );
+            }
+            
+            if (locationBtn) {
+                locationBtn.disabled = false;
+                locationBtn.classList.remove('location-detecting');
+                locationBtn.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                    Use Current Location
+                `;
+                console.log('✅ Force reset location button successful');
+            } else {
+                console.log('❌ Could not find location button to reset');
+            }
+            
+            window.currentLocationButton = null;
         }
 
         async function reverseGeocode(lat, lng, accuracy) {
@@ -1451,6 +1488,12 @@
         window.initGooglePlaces = function() {
             initializeGooglePlaces();
         };
+
+        // Initialize search functionality
+        function initializeGlobalSearch() {
+            console.log('✅ Global business search initialized - ' + globalBusinessDatabase.length + ' business types available worldwide');
+            setupEnhancedManualSearch();
+        }
 
         // Initialize global search system without Google Maps dependency
         setTimeout(() => {
