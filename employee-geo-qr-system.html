@@ -1178,9 +1178,9 @@
                     forceResetLocationButton();
                 },
                 {
-                    enableHighAccuracy: false, // Faster but less accurate
-                    timeout: 8000, // 8 seconds
-                    maximumAge: 300000 // 5 minutes
+                    enableHighAccuracy: true,
+                    timeout: 15000, // 15 seconds
+                    maximumAge: 60000 // 1 minute
                 }
             );
         }
@@ -1484,21 +1484,59 @@
         // Initialize dashboard
         updateDashboard();
 
-        // Initialize search functionality 
-        window.initGooglePlaces = function() {
-            initializeGooglePlaces();
+        // Initialize Google Maps with proper autocomplete
+        window.initGoogleMaps = function() {
+            console.log('🗺️ Google Maps API loaded, initializing Places service');
+            initializeGooglePlacesAutocomplete();
         };
 
-        // Initialize search functionality
+        function initializeGooglePlacesAutocomplete() {
+            const businessInput = document.getElementById('businessName');
+            
+            if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+                console.log('✅ Initializing Google Places Autocomplete for address predictions');
+                
+                // Initialize Google Places Autocomplete for full address predictions
+                const autocomplete = new google.maps.places.Autocomplete(businessInput, {
+                    types: ['establishment', 'geocode', 'address'],
+                    fields: ['name', 'formatted_address', 'geometry', 'place_id', 'types', 'address_components']
+                });
+
+                autocomplete.addListener('place_changed', function() {
+                    const place = autocomplete.getPlace();
+                    if (place.geometry) {
+                        selectedPlace = place;
+                        const displayName = place.name || place.formatted_address;
+                        businessInput.value = displayName;
+                        showNotification(`Location selected: ${displayName}`, 'success');
+                        console.log('✅ Google Places location selected:', place);
+                    }
+                });
+
+                // Also add Places service for manual search
+                const map = new google.maps.Map(document.createElement('div'));
+                placesService = new google.maps.places.PlacesService(map);
+                console.log('✅ Google Places Autocomplete and search initialized successfully');
+            } else {
+                console.log('⚠️ Google Maps not available, using enhanced manual search');
+                initializeGlobalSearch();
+            }
+        }
+
+        // Fallback search functionality
         function initializeGlobalSearch() {
             console.log('✅ Global business search initialized - ' + globalBusinessDatabase.length + ' business types available worldwide');
             setupEnhancedManualSearch();
         }
 
-        // Initialize global search system without Google Maps dependency
+        // Initialize search system
         setTimeout(() => {
-            initializeGlobalSearch();
-        }, 1000);
+            if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+                initializeGooglePlacesAutocomplete();
+            } else {
+                initializeGlobalSearch();
+            }
+        }, 2000);
 
         console.log('Employee Geo QR Check-In System loaded');
         console.log('✅ QR code generation with geo validation');
