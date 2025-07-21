@@ -364,7 +364,7 @@
 
         <div class="check-buttons">
             <button class="check-btn check-in-btn" id="checkInBtn">
-                Check In
+                Check In (GPS)
             </button>
             <button class="check-btn check-out-btn" id="checkOutBtn" disabled>
                 Check Out
@@ -372,8 +372,11 @@
         </div>
 
         <div class="debug-controls">
+            <button class="reset-btn" id="manualCheckInBtn" style="background: rgba(50, 205, 50, 0.2); border-color: #32cd32; color: #90ee90; margin-right: 10px;">
+                Manual Check In
+            </button>
             <button class="reset-btn" id="resetBtn">
-                Reset State (Debug)
+                Reset State
             </button>
         </div>
     </div>
@@ -423,6 +426,7 @@
         function setupEventListeners() {
             document.getElementById('checkInBtn').addEventListener('click', handleCheckIn);
             document.getElementById('checkOutBtn').addEventListener('click', handleCheckOut);
+            document.getElementById('manualCheckInBtn').addEventListener('click', performCheckInFallback);
             document.getElementById('resetBtn').addEventListener('click', resetState);
         }
 
@@ -430,17 +434,18 @@
             console.log('Check-in initiated');
             
             if (!navigator.geolocation) {
-                console.error('Geolocation not supported');
-                showNotification('Your browser does not support location services', 'error');
+                console.error('Geolocation not supported - using fallback');
+                showNotification('Location not available - using fallback check-in', 'success');
+                performCheckInFallback();
                 return;
             }
             
             showNotification('Getting your location...', 'success');
             
             const options = {
-                enableHighAccuracy: true,
-                timeout: 15000,
-                maximumAge: 300000
+                enableHighAccuracy: false,
+                timeout: 8000,
+                maximumAge: 60000
             };
             
             navigator.geolocation.getCurrentPosition(
@@ -455,10 +460,38 @@
                 },
                 function(error) {
                     console.error('Geolocation error:', error);
-                    handleLocationError(error);
+                    console.log('Falling back to manual check-in due to location error');
+                    showNotification('Location unavailable - using manual check-in', 'success');
+                    performCheckInFallback();
                 },
                 options
             );
+        }
+
+        function performCheckInFallback() {
+            console.log('Using fallback check-in method');
+            
+            isCheckedIn = true;
+            checkInTime = new Date();
+            
+            // Save to localStorage
+            localStorage.setItem('employeeCheckedIn', 'true');
+            localStorage.setItem('employeeCheckInTime', checkInTime.toISOString());
+            
+            console.log('Fallback check-in successful at:', checkInTime);
+            
+            // Update UI
+            updateStatus();
+            updateButtons();
+            
+            showNotification('Successfully checked in! (Manual mode)', 'success');
+            
+            // Log data for server integration
+            console.log('Fallback check-in data:', {
+                timestamp: checkInTime.toISOString(),
+                method: 'fallback',
+                location: 'manual'
+            });
         }
 
         function performCheckIn(position) {
