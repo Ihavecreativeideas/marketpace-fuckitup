@@ -314,6 +314,43 @@
             color: #666;
             pointer-events: none;
         }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #495057, #343a40);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+        }
+
+        .btn-secondary:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .location-detecting {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
     </style>
 
 </head>
@@ -343,6 +380,12 @@
                         </svg>
                         <div class="autocomplete-suggestions" id="businessSuggestions"></div>
                     </div>
+                    <button type="button" class="btn btn-secondary" onclick="useCurrentLocation()" style="margin-top: 10px; width: 100%;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                            <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+                        </svg>
+                        Use Current Location
+                    </button>
                 </div>
 
                 <div class="form-group">
@@ -1033,6 +1076,102 @@
             });
             
             showNotification('Employee check-in QR code generated successfully!', 'success');
+        }
+
+        function useCurrentLocation() {
+            if (!navigator.geolocation) {
+                showNotification('Geolocation is not supported by this browser', 'error');
+                return;
+            }
+
+            // Disable button and show loading state
+            const locationBtn = event.target;
+            locationBtn.disabled = true;
+            locationBtn.classList.add('location-detecting');
+            locationBtn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                    <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+                </svg>
+                Detecting Location...
+            `;
+
+            showNotification('Getting your current location...', 'info');
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+
+                    // Reverse geocode to get address
+                    reverseGeocode(lat, lng, accuracy);
+                    resetLocationButton();
+                },
+                (error) => {
+                    let errorMessage = 'Unable to get location: ';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage += 'Location access denied. Please enable location permissions.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage += 'Location information unavailable.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage += 'Location request timed out.';
+                            break;
+                        default:
+                            errorMessage += 'Unknown error.';
+                            break;
+                    }
+                    
+                    showNotification(errorMessage, 'error');
+                    resetLocationButton();
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 60000
+                }
+            );
+        }
+
+        function reverseGeocode(lat, lng, accuracy) {
+            const businessInput = document.getElementById('businessName');
+            
+            // Format location with GPS coordinates and accuracy
+            const locationName = `Current Location (±${Math.round(accuracy)}m)`;
+            const detailedAddress = `GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            
+            businessInput.value = locationName;
+            
+            // Store current location data
+            selectedPlace = {
+                geometry: {
+                    location: {
+                        lat: () => lat,
+                        lng: () => lng
+                    }
+                },
+                formatted_address: detailedAddress,
+                name: locationName,
+                place_id: `current_location_${Date.now()}`
+            };
+            
+            showNotification(`Location pinned! Accuracy: ±${Math.round(accuracy)} meters`, 'success');
+        }
+
+        function resetLocationButton() {
+            const locationBtns = document.querySelectorAll('button[onclick="useCurrentLocation()"]');
+            locationBtns.forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('location-detecting');
+                btn.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                        <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+                    </svg>
+                    Use Current Location
+                `;
+            });
         }
 
         function setupPaymentSchedule() {
