@@ -1167,39 +1167,90 @@
                 },
                 {
                     enableHighAccuracy: true,
-                    timeout: 10000,
+                    timeout: 15000, // 15 seconds
                     maximumAge: 60000
                 }
             );
+            
+            // Failsafe timeout to reset button if geolocation hangs
+            setTimeout(() => {
+                resetLocationButton();
+            }, 20000); // 20 seconds total failsafe
+            );
         }
 
-        function reverseGeocode(lat, lng, accuracy) {
+        async function reverseGeocode(lat, lng, accuracy) {
             const businessInput = document.getElementById('businessName');
             
-            // Format location with GPS coordinates and accuracy
-            const locationName = `Current Location (±${Math.round(accuracy)}m)`;
-            const detailedAddress = `GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-            
-            businessInput.value = locationName;
-            
-            // Store current location data
-            selectedPlace = {
-                geometry: {
-                    location: {
-                        lat: () => lat,
-                        lng: () => lng
+            try {
+                // Try to get a readable address using our Google Maps API
+                const response = await fetch('/api/maps/geocode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        latlng: `${lat},${lng}`
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.results && data.results.length > 0) {
+                        const address = data.results[0].formatted_address;
+                        businessInput.value = address;
+                        
+                        selectedPlace = {
+                            geometry: {
+                                location: {
+                                    lat: () => lat,
+                                    lng: () => lng
+                                }
+                            },
+                            formatted_address: address,
+                            name: address,
+                            place_id: `current_location_${Date.now()}`
+                        };
+                        
+                        showNotification(`Location found: ${address} (±${Math.round(accuracy)}m)`, 'success');
+                    } else {
+                        throw new Error('No address found');
                     }
-                },
-                formatted_address: detailedAddress,
-                name: locationName,
-                place_id: `current_location_${Date.now()}`
-            };
+                } else {
+                    throw new Error('Geocoding failed');
+                }
+            } catch (error) {
+                console.log('Reverse geocoding failed, using GPS coordinates:', error);
+                
+                // Fallback to GPS coordinates
+                const locationName = `GPS Location (±${Math.round(accuracy)}m)`;
+                const detailedAddress = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                
+                businessInput.value = detailedAddress;
+                
+                selectedPlace = {
+                    geometry: {
+                        location: {
+                            lat: () => lat,
+                            lng: () => lng
+                        }
+                    },
+                    formatted_address: detailedAddress,
+                    name: locationName,
+                    place_id: `current_location_${Date.now()}`
+                };
+                
+                showNotification(`Location pinned: ${detailedAddress} (±${Math.round(accuracy)}m)`, 'success');
+            }
             
-            showNotification(`Location pinned! Accuracy: ±${Math.round(accuracy)} meters`, 'success');
+            // Always reset the button regardless of success or failure
+            resetLocationButton();
         }
 
         function resetLocationButton() {
-            const locationBtns = document.querySelectorAll('button[onclick="useCurrentLocation()"]');
+            // Try multiple ways to find the location button
+            const locationBtns = document.querySelectorAll('button[onclick="useCurrentLocation()"], .btn-secondary[onclick="useCurrentLocation()"], button[onclick*="useCurrentLocation"]');
+            
             locationBtns.forEach(btn => {
                 btn.disabled = false;
                 btn.classList.remove('location-detecting');
@@ -1209,7 +1260,26 @@
                     </svg>
                     Use Current Location
                 `;
+                console.log('Reset location button:', btn);
             });
+            
+            // If no buttons found, try a more aggressive search
+            if (locationBtns.length === 0) {
+                const allButtons = document.querySelectorAll('button');
+                allButtons.forEach(btn => {
+                    if (btn.textContent.includes('Detecting Location') || btn.textContent.includes('Use Current Location')) {
+                        btn.disabled = false;
+                        btn.classList.remove('location-detecting');
+                        btn.innerHTML = `
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                                <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+                            </svg>
+                            Use Current Location
+                        `;
+                        console.log('Reset location button (fallback):', btn);
+                    }
+                });
+            }
         }
 
         function goBack() {

@@ -1985,6 +1985,59 @@ app.get('/:page', (req, res) => {
   });
 });
 
+// Employee QR Code Generation endpoint
+app.post('/api/qr/generate-employee', async (req, res) => {
+  try {
+    const { purpose, businessName, businessAddress, placeId, geoValidation, timestamp } = req.body;
+    
+    if (!purpose || !businessName) {
+      return res.status(400).json({
+        success: false,
+        error: 'Purpose and business name are required'
+      });
+    }
+    
+    // Generate unique QR code ID
+    const qrCodeId = `emp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Create verification URL
+    const verificationUrl = `${req.protocol}://${req.get('host')}/scan-employee-qr?code=${qrCodeId}`;
+    
+    // Generate QR code image using QR server API
+    const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(verificationUrl)}&bgcolor=FFFFFF&color=000000`;
+    
+    // Store QR code data (in production, save to database)
+    const qrData = {
+      id: qrCodeId,
+      purpose,
+      businessName,
+      businessAddress: businessAddress || '',
+      placeId: placeId || '',
+      geoValidation: geoValidation || { enabled: false },
+      timestamp,
+      verificationUrl,
+      created: new Date().toISOString()
+    };
+    
+    console.log('Employee QR Code generated:', qrData);
+    
+    res.json({
+      success: true,
+      qrCode: qrCodeId,
+      qrImage: qrImageUrl,
+      verificationUrl,
+      geoValidation: geoValidation
+    });
+    
+  } catch (error) {
+    console.error('Employee QR generation error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to generate employee QR code'
+    });
+  }
+});
+
 // Setup real integration testing routes
 setupRealIntegrationRoutes(app);
 
