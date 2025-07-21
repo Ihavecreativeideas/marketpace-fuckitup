@@ -2079,6 +2079,302 @@ app.get('/driver-features-overview', (req, res) => {
   res.sendFile(path.join(__dirname, '../driver-features-comprehensive-overview.html'));
 });
 
+// Independent Contractor Invitation Route
+app.get('/independent-contractor-invitation', (req, res) => {
+  res.sendFile(path.join(__dirname, '../independent-contractor-invitation.html'));
+});
+
+// Independent Contractor Application Route
+app.get('/independent-contractor-application', (req, res) => {
+  res.sendFile(path.join(__dirname, '../independent-contractor-application.html'));
+});
+
+// Independent Contractor Invitation API
+app.post('/api/admin/send-contractor-invitation', async (req, res) => {
+  try {
+    const { 
+      fullName, 
+      email, 
+      phone, 
+      licenseNumber,
+      vehicleModel,
+      vehicleYear,
+      licensePlate,
+      insuranceCompany,
+      insurancePolicy,
+      deliverySizes,
+      hasTruck,
+      hasTrailer,
+      personalMessage,
+      contractorType,
+      backgroundCheckRequired 
+    } = req.body;
+    
+    if (!fullName || !email || !phone || !licenseNumber) {
+      return res.status(400).json({
+        success: false,
+        error: 'Name, email, phone, and license number are required'
+      });
+    }
+    
+    if (!deliverySizes || deliverySizes.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'At least one delivery size preference is required'
+      });
+    }
+    
+    const invitationId = `IC-${Date.now()}`;
+    const joinUrl = `${req.protocol}://${req.get('host')}/signup-login?contractorInvite=${invitationId}`;
+    
+    // Create contractor invitation record
+    const contractorInvitation = {
+      id: invitationId,
+      fullName,
+      email,
+      phone,
+      licenseNumber,
+      vehicle: {
+        model: vehicleModel,
+        year: vehicleYear,
+        licensePlate,
+        insurance: {
+          company: insuranceCompany,
+          policyNumber: insurancePolicy
+        }
+      },
+      deliveryPreferences: {
+        sizes: deliverySizes,
+        hasTruck,
+        hasTrailer
+      },
+      personalMessage,
+      contractorType: 'independent',
+      backgroundCheckRequired: false,
+      status: 'invited',
+      invitedAt: new Date().toISOString(),
+      invitedBy: 'admin'
+    };
+    
+    // Store invitation (in production, save to database)
+    if (!global.contractorInvitations) global.contractorInvitations = {};
+    global.contractorInvitations[invitationId] = contractorInvitation;
+    
+    // Prepare SMS message
+    const deliverySizeText = deliverySizes.map(size => 
+      size.charAt(0).toUpperCase() + size.slice(1)
+    ).join(', ');
+    
+    const additionalCapabilities = [];
+    if (hasTruck) additionalCapabilities.push('pickup truck');
+    if (hasTrailer) additionalCapabilities.push('trailer');
+    
+    const smsMessage = `🚛 MarketPace Independent Contractor Invitation
+
+Hi ${fullName}! You've been personally invited to join MarketPace as an Independent Contractor driver.
+
+✅ NO background check required
+✅ Fast-track approval process  
+✅ Delivery preferences: ${deliverySizeText}
+${additionalCapabilities.length > 0 ? `✅ Additional capabilities: ${additionalCapabilities.join(', ')}` : ''}
+
+Join MarketPace and get Driver Portal access:
+${joinUrl}
+
+${personalMessage ? `Personal note: ${personalMessage}` : ''}
+
+Questions? Reply to this message.`;
+
+    // Send SMS notification
+    try {
+      await sendSMS(phone, smsMessage);
+      console.log(`Independent contractor SMS invitation sent to ${phone}`);
+    } catch (smsError) {
+      console.error('SMS sending error:', smsError);
+    }
+    
+    res.json({
+      success: true,
+      invitationId,
+      message: `Independent contractor invitation sent successfully to ${fullName}`,
+      joinUrl,
+      contractorInfo: {
+        name: fullName,
+        email,
+        phone,
+        deliverySizes,
+        hasTruck,
+        hasTrailer,
+        contractorType: 'independent'
+      }
+    });
+    
+  } catch (error: any) {
+    console.error('Independent contractor invitation error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to send independent contractor invitation'
+    });
+  }
+});
+
+// Independent Contractor Application Submission API
+app.post('/api/driver/submit-independent-contractor-application', async (req, res) => {
+  try {
+    const { 
+      firstName, 
+      lastName, 
+      email, 
+      phone, 
+      dateOfBirth,
+      licenseNumber,
+      vehicle,
+      insurance,
+      deliveryPreferences,
+      availability,
+      contractorType,
+      backgroundCheckRequired,
+      applicationSource
+    } = req.body;
+    
+    if (!firstName || !lastName || !email || !phone || !licenseNumber) {
+      return res.status(400).json({
+        success: false,
+        error: 'All required personal information fields must be completed'
+      });
+    }
+    
+    if (!deliveryPreferences.sizes || deliveryPreferences.sizes.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'At least one delivery size preference is required'
+      });
+    }
+    
+    const applicationId = `ICA-${Date.now()}`;
+    
+    // Create independent contractor application record
+    const contractorApplication = {
+      id: applicationId,
+      applicationType: 'independent_contractor',
+      personalInfo: {
+        firstName,
+        lastName,
+        email,
+        phone,
+        dateOfBirth,
+        licenseNumber
+      },
+      vehicle,
+      insurance,
+      deliveryPreferences,
+      availability,
+      contractorType: 'independent',
+      backgroundCheckRequired: false,
+      applicationSource,
+      status: 'submitted',
+      submittedAt: new Date().toISOString(),
+      adminNotes: 'Independent contractor - no background check required'
+    };
+    
+    // Store application (in production, save to database)
+    if (!global.independentContractorApplications) global.independentContractorApplications = {};
+    global.independentContractorApplications[applicationId] = contractorApplication;
+    
+    // Add to regular driver applications for admin review
+    if (!global.driverApplications) global.driverApplications = {};
+    global.driverApplications[applicationId] = {
+      ...contractorApplication,
+      applicantName: `${firstName} ${lastName}`,
+      applicantEmail: email,
+      applicantPhone: phone,
+      contractorBadge: 'INDEPENDENT CONTRACTOR'
+    };
+    
+    // Prepare confirmation SMS
+    const deliverySizeText = deliveryPreferences.sizes.map(size => 
+      size.charAt(0).toUpperCase() + size.slice(1)
+    ).join(', ');
+    
+    const additionalCapabilities = [];
+    if (deliveryPreferences.hasTruck) additionalCapabilities.push('pickup truck');
+    if (deliveryPreferences.hasTrailer) additionalCapabilities.push('trailer');
+    if (deliveryPreferences.hasVan) additionalCapabilities.push('cargo van');
+    
+    const confirmationSMS = `✅ Independent Contractor Application Received!
+
+Hi ${firstName}! Your MarketPace independent contractor application has been submitted successfully.
+
+Application ID: ${applicationId}
+Status: Under Review (No Background Check Needed)
+
+Your Preferences:
+• Delivery sizes: ${deliverySizeText}
+${additionalCapabilities.length > 0 ? `• Additional capabilities: ${additionalCapabilities.join(', ')}` : ''}
+• Availability: ${availability.hoursPerWeek} hours/week
+
+You'll receive approval notification within 24-48 hours. Once approved, you'll get Driver Portal access in your MarketPace menu.
+
+Questions? Reply to this message.`;
+
+    // Send confirmation SMS
+    try {
+      await sendSMS(phone, confirmationSMS);
+      console.log(`Independent contractor confirmation SMS sent to ${phone}`);
+    } catch (smsError) {
+      console.error('SMS sending error:', smsError);
+    }
+    
+    // Send admin notification SMS
+    try {
+      const adminNotificationSMS = `🚛 NEW Independent Contractor Application
+
+Name: ${firstName} ${lastName}
+Email: ${email}
+Phone: ${phone}
+Application ID: ${applicationId}
+
+Vehicle: ${vehicle.year} ${vehicle.make} ${vehicle.model}
+Insurance: ${insurance.company}
+Delivery sizes: ${deliverySizeText}
+${additionalCapabilities.length > 0 ? `Additional capabilities: ${additionalCapabilities.join(', ')}` : ''}
+
+⚡ NO BACKGROUND CHECK REQUIRED
+Ready for fast-track approval in admin dashboard.`;
+
+      await sendSMS('2512826662', adminNotificationSMS); // Admin phone
+      console.log('Independent contractor admin notification sent');
+    } catch (adminSmsError) {
+      console.error('Admin SMS notification error:', adminSmsError);
+    }
+    
+    res.json({
+      success: true,
+      applicationId,
+      message: `Independent contractor application submitted successfully for ${firstName} ${lastName}`,
+      status: 'submitted',
+      estimatedReviewTime: '24-48 hours',
+      contractorInfo: {
+        name: `${firstName} ${lastName}`,
+        email,
+        phone,
+        deliverySizes: deliveryPreferences.sizes,
+        additionalCapabilities,
+        contractorType: 'independent'
+      }
+    });
+    
+  } catch (error: any) {
+    console.error('Independent contractor application error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to submit independent contractor application'
+    });
+  }
+});
+
+
+
 // Catch-all for other HTML pages
 app.get('/:page', (req, res) => {
   const pageName = req.params.page;

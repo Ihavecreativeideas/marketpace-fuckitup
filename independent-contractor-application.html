@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Independent Contractor Application - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #ffd700;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .contractor-badge {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #000;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            color: #ffd700;
+            font-size: 18px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #00ffff;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 255, 255, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover {
+            border-color: rgba(0, 255, 255, 0.5);
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .checkbox-item.selected {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.2);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            border: none;
+            color: #000;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn:disabled {
+            background: rgba(255, 255, 255, 0.3);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .status-success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 2px solid rgba(34, 197, 94, 0.5);
+            color: #22c55e;
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid rgba(239, 68, 68, 0.5);
+            color: #ef4444;
+        }
+
+        .benefits-info {
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .benefits-info h3 {
+            color: #00ffff;
+            margin-bottom: 15px;
+        }
+
+        .benefits-info ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .benefits-info li {
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .benefits-info li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #00ffff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Independent Contractor Application</h1>
+            <p>Complete your driver application - No background check required!</p>
+        </div>
+
+        <div class="contractor-badge">
+            INDEPENDENT CONTRACTOR STATUS
+            <br><small>Personally Recommended - Fast Track Approval</small>
+        </div>
+
+        <div class="benefits-info">
+            <h3>Your Independent Contractor Benefits</h3>
+            <ul>
+                <li>No background check required (personal recommendation)</li>
+                <li>Fast-track approval process</li>
+                <li>Same Driver Portal access as regular drivers</li>
+                <li>All delivery features and earnings system</li>
+                <li>Independent contractor status (not MarketPace employee)</li>
+                <li>Flexible schedule - work when you want</li>
+            </ul>
+        </div>
+
+        <div class="form-container">
+            <form id="contractorApplicationForm">
+                <!-- Personal Information -->
+                <div class="form-section">
+                    <div class="section-title">Personal Information</div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>First Name *</label>
+                            <input type="text" id="firstName" required placeholder="John">
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name *</label>
+                            <input type="text" id="lastName" required placeholder="Smith">
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address *</label>
+                            <input type="email" id="email" required placeholder="john@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number *</label>
+                            <input type="tel" id="phone" required placeholder="(555) 123-4567">
+                        </div>
+                        <div class="form-group">
+                            <label>Date of Birth *</label>
+                            <input type="date" id="dateOfBirth" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Driver's License # *</label>
+                            <input type="text" id="licenseNumber" required placeholder="D123456789">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vehicle Information -->
+                <div class="form-section">
+                    <div class="section-title">Vehicle Information</div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Vehicle Make *</label>
+                            <input type="text" id="vehicleMake" required placeholder="Honda">
+                        </div>
+                        <div class="form-group">
+                            <label>Vehicle Model *</label>
+                            <input type="text" id="vehicleModel" required placeholder="Civic">
+                        </div>
+                        <div class="form-group">
+                            <label>Vehicle Year *</label>
+                            <input type="number" id="vehicleYear" required placeholder="2020" min="2010" max="2025">
+                        </div>
+                        <div class="form-group">
+                            <label>Vehicle Color *</label>
+                            <input type="text" id="vehicleColor" required placeholder="Silver">
+                        </div>
+                        <div class="form-group">
+                            <label>License Plate *</label>
+                            <input type="text" id="licensePlate" required placeholder="ABC123">
+                        </div>
+                        <div class="form-group">
+                            <label>Vehicle Condition *</label>
+                            <select id="vehicleCondition" required>
+                                <option value="">Select condition</option>
+                                <option value="excellent">Excellent</option>
+                                <option value="good">Good</option>
+                                <option value="fair">Fair</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insurance Information -->
+                <div class="form-section">
+                    <div class="section-title">Insurance Information</div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Insurance Company *</label>
+                            <input type="text" id="insuranceCompany" required placeholder="State Farm">
+                        </div>
+                        <div class="form-group">
+                            <label>Policy Number *</label>
+                            <input type="text" id="insurancePolicy" required placeholder="Policy #123456789">
+                        </div>
+                        <div class="form-group">
+                            <label>Policy Expiration Date *</label>
+                            <input type="date" id="insuranceExpiry" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Coverage Amount *</label>
+                            <select id="coverageAmount" required>
+                                <option value="">Select coverage</option>
+                                <option value="25000">$25,000 minimum</option>
+                                <option value="50000">$50,000</option>
+                                <option value="100000">$100,000</option>
+                                <option value="250000">$250,000+</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delivery Preferences -->
+                <div class="form-section">
+                    <div class="section-title">Delivery Size Preferences</div>
+                    <p style="color: #94a3b8; margin-bottom: 15px;">Select all delivery sizes you're comfortable handling:</p>
+                    
+                    <div class="checkbox-group">
+                        <div class="checkbox-item" onclick="toggleCheckbox(this, 'small')">
+                            <input type="checkbox" id="deliverySmall" value="small">
+                            <label for="deliverySmall">
+                                <strong>Small Items</strong><br>
+                                <small>Documents, electronics, small packages</small>
+                            </label>
+                        </div>
+                        <div class="checkbox-item" onclick="toggleCheckbox(this, 'medium')">
+                            <input type="checkbox" id="deliveryMedium" value="medium">
+                            <label for="deliveryMedium">
+                                <strong>Medium Items</strong><br>
+                                <small>Clothing, books, medium boxes</small>
+                            </label>
+                        </div>
+                        <div class="checkbox-item" onclick="toggleCheckbox(this, 'large')">
+                            <input type="checkbox" id="deliveryLarge" value="large">
+                            <label for="deliveryLarge">
+                                <strong>Large Items</strong><br>
+                                <small>Furniture, appliances, large packages</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Capabilities -->
+                <div class="form-section">
+                    <div class="section-title">Additional Vehicle Capabilities</div>
+                    
+                    <div class="checkbox-group">
+                        <div class="checkbox-item" onclick="toggleCheckbox(this, 'truck')">
+                            <input type="checkbox" id="hasTruck" value="truck">
+                            <label for="hasTruck">
+                                <strong>I have a pickup truck</strong><br>
+                                <small>For large item deliveries</small>
+                            </label>
+                        </div>
+                        <div class="checkbox-item" onclick="toggleCheckbox(this, 'trailer')">
+                            <input type="checkbox" id="hasTrailer" value="trailer">
+                            <label for="hasTrailer">
+                                <strong>I have a trailer</strong><br>
+                                <small>For extra-large deliveries</small>
+                            </label>
+                        </div>
+                        <div class="checkbox-item" onclick="toggleCheckbox(this, 'van')">
+                            <input type="checkbox" id="hasVan" value="van">
+                            <label for="hasVan">
+                                <strong>I have a cargo van</strong><br>
+                                <small>For weather-protected deliveries</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Availability -->
+                <div class="form-section">
+                    <div class="section-title">Availability</div>
+                    
+                    <div class="form-group">
+                        <label>How many hours per week can you work? *</label>
+                        <select id="hoursPerWeek" required>
+                            <option value="">Select hours</option>
+                            <option value="5-10">5-10 hours</option>
+                            <option value="10-20">10-20 hours</option>
+                            <option value="20-30">20-30 hours</option>
+                            <option value="30-40">30-40 hours</option>
+                            <option value="40+">40+ hours</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Preferred working days *</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item" onclick="toggleCheckbox(this, 'weekdays')">
+                                <input type="checkbox" id="weekdays" value="weekdays">
+                                <label for="weekdays">Weekdays (Mon-Fri)</label>
+                            </div>
+                            <div class="checkbox-item" onclick="toggleCheckbox(this, 'weekends')">
+                                <input type="checkbox" id="weekends" value="weekends">
+                                <label for="weekends">Weekends (Sat-Sun)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">Submit Independent Contractor Application</button>
+            </form>
+        </div>
+
+        <div id="statusMessage"></div>
+    </div>
+
+    <script>
+        function toggleCheckbox(element, type) {
+            const checkbox = element.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                element.classList.add('selected');
+            } else {
+                element.classList.remove('selected');
+            }
+        }
+
+        document.getElementById('contractorApplicationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Validate delivery sizes
+            const deliverySizes = [];
+            if (document.getElementById('deliverySmall').checked) deliverySizes.push('small');
+            if (document.getElementById('deliveryMedium').checked) deliverySizes.push('medium');
+            if (document.getElementById('deliveryLarge').checked) deliverySizes.push('large');
+            
+            if (deliverySizes.length === 0) {
+                showStatusMessage('Please select at least one delivery size preference.', 'error');
+                return;
+            }
+
+            // Validate working days
+            const workingDays = [];
+            if (document.getElementById('weekdays').checked) workingDays.push('weekdays');
+            if (document.getElementById('weekends').checked) workingDays.push('weekends');
+            
+            if (workingDays.length === 0) {
+                showStatusMessage('Please select at least one preferred working day option.', 'error');
+                return;
+            }
+
+            // Collect form data
+            const formData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                dateOfBirth: document.getElementById('dateOfBirth').value,
+                licenseNumber: document.getElementById('licenseNumber').value,
+                vehicle: {
+                    make: document.getElementById('vehicleMake').value,
+                    model: document.getElementById('vehicleModel').value,
+                    year: document.getElementById('vehicleYear').value,
+                    color: document.getElementById('vehicleColor').value,
+                    licensePlate: document.getElementById('licensePlate').value,
+                    condition: document.getElementById('vehicleCondition').value
+                },
+                insurance: {
+                    company: document.getElementById('insuranceCompany').value,
+                    policyNumber: document.getElementById('insurancePolicy').value,
+                    expiryDate: document.getElementById('insuranceExpiry').value,
+                    coverageAmount: document.getElementById('coverageAmount').value
+                },
+                deliveryPreferences: {
+                    sizes: deliverySizes,
+                    hasTruck: document.getElementById('hasTruck').checked,
+                    hasTrailer: document.getElementById('hasTrailer').checked,
+                    hasVan: document.getElementById('hasVan').checked
+                },
+                availability: {
+                    hoursPerWeek: document.getElementById('hoursPerWeek').value,
+                    workingDays: workingDays
+                },
+                contractorType: 'independent',
+                backgroundCheckRequired: false,
+                applicationSource: 'invitation'
+            };
+
+            try {
+                showStatusMessage('Submitting your independent contractor application...', 'info');
+                
+                const response = await fetch('/api/driver/submit-independent-contractor-application', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatusMessage(`✅ Application submitted successfully! Your application ID is: ${result.applicationId}. You'll receive SMS/email confirmation shortly.`, 'success');
+                    
+                    // Clear form
+                    document.getElementById('contractorApplicationForm').reset();
+                    document.querySelectorAll('.checkbox-item').forEach(item => {
+                        item.classList.remove('selected');
+                        item.querySelector('input').checked = false;
+                    });
+                    
+                } else {
+                    showStatusMessage(`❌ Error: ${result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error submitting application:', error);
+                showStatusMessage('❌ Network error. Please try again.', 'error');
+            }
+        });
+
+        function showStatusMessage(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.innerHTML = `<div class="status-message status-${type}">${message}</div>`;
+            
+            // Auto-hide info messages
+            if (type === 'info') {
+                setTimeout(() => {
+                    statusDiv.innerHTML = '';
+                }, 3000);
+            }
+        }
+
+        // Check for invitation parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const inviteId = urlParams.get('inviteId');
+        
+        if (inviteId) {
+            console.log('Processing independent contractor invitation:', inviteId);
+            // You could pre-fill some information from the invitation here
+        }
+
+        console.log('=== INDEPENDENT CONTRACTOR APPLICATION ===');
+        console.log('✅ No background check required');
+        console.log('✅ Full driver application with vehicle details');
+        console.log('✅ Delivery size and capability preferences');
+        console.log('✅ Independent contractor status (not employee)');
+        console.log('✅ Fast-track approval process');
+        console.log('==============================================');
+    </script>
+</body>
+</html>
