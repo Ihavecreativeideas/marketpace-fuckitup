@@ -57,28 +57,48 @@
         .employee-avatar.security { background: linear-gradient(135deg, #ff4444, #cc0000); color: white; }
 
         .tab-content {
-            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
             opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: all 0.3s ease-in-out;
+            background: transparent;
+            min-height: 100vh;
+            z-index: 1;
         }
 
         .tab-content.active {
-            display: block;
+            position: relative;
             opacity: 1;
+            visibility: visible;
             transform: translateY(0);
-            animation: smoothFadeIn 0.4s ease-out forwards;
+            z-index: 2;
         }
 
-        @keyframes smoothFadeIn {
-            0% {
-                opacity: 0;
-                transform: translateY(15px) scale(0.98);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+        /* Tab Container */
+        .tab-container {
+            position: relative;
+            min-height: 80vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 20px;
+            border-radius: 16px;
+            margin-top: 20px;
+        }
+
+        /* Ensure body and container have dark background */
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: transparent;
+            padding: 0 20px;
         }
 
         .tab-content.active {
@@ -2373,8 +2393,10 @@
             </button>
         </div>
 
-        <!-- Daily Schedule Tab -->
-        <div id="schedule" class="tab-content active">
+        <!-- Tab Container with Dark Background -->
+        <div class="tab-container">
+            <!-- Daily Schedule Tab -->
+            <div id="schedule" class="tab-content active">
             <!-- Sleek Voice Control Assistant -->
             <div class="voice-control-panel-sleek">
                 <!-- Compact Header with Futuristic Icon -->
@@ -4201,7 +4223,7 @@
             showNotification('Closed employee scheduling interface', 'success');
         }
 
-        // Smooth Tab Switching Function
+        // Smooth Tab Switching Function with No Flash
         function showTab(tabId) {
             // Remove active class from all nav chips
             document.querySelectorAll('.nav-chip').forEach(chip => {
@@ -4214,48 +4236,33 @@
                 activeChip.classList.add('active');
             }
 
-            // Hide all tab content with smooth fade out
+            // Remove active class from all tabs immediately
             document.querySelectorAll('.tab-content').forEach(content => {
-                if (content.style.display !== 'none') {
-                    content.style.opacity = '0';
-                    content.style.transform = 'translateY(10px)';
-                    
-                    setTimeout(() => {
-                        content.style.display = 'none';
-                        content.classList.remove('active');
-                    }, 200);
-                }
+                content.classList.remove('active');
             });
 
-            // Show the selected tab with smooth fade in
-            setTimeout(() => {
-                const targetTab = document.getElementById(tabId);
-                if (targetTab) {
-                    targetTab.style.display = 'block';
+            // Show the selected tab immediately with smooth transition
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) {
+                // Force a reflow to ensure the CSS takes effect
+                targetTab.offsetHeight;
+                
+                // Add active class to trigger smooth transition
+                requestAnimationFrame(() => {
                     targetTab.classList.add('active');
-                    
-                    // Trigger smooth animation
-                    setTimeout(() => {
-                        targetTab.style.opacity = '1';
-                        targetTab.style.transform = 'translateY(0)';
-                    }, 50);
-                }
-            }, 250);
-
-            // Initialize tab-specific functionality
-            if (tabId === 'employees') {
-                setTimeout(() => {
-                    initializeSmartEmployeeManagement();
-                }, 300);
-            } else if (tabId === 'volunteers') {
-                setTimeout(() => {
-                    console.log('Volunteer Management positioned at top of Volunteers tab');
-                }, 300);
-            } else if (tabId === 'qr-system') {
-                setTimeout(() => {
-                    console.log('Employee QR System positioned at top of QR System tab');
-                }, 300);
+                });
             }
+
+            // Initialize tab-specific functionality after transition
+            setTimeout(() => {
+                if (tabId === 'employees') {
+                    initializeSmartEmployeeManagement();
+                } else if (tabId === 'volunteers') {
+                    console.log('Volunteer Management positioned at top of Volunteers tab');
+                } else if (tabId === 'qr-system') {
+                    console.log('Employee QR System positioned at top of QR System tab');
+                }
+            }, 100);
         }
 
         // Initialize smart employee management when the tab is loaded
@@ -5137,5 +5144,7 @@
             }, 1000);
         });
     </script>
+        </div> <!-- Close tab-container -->
+    </div> <!-- Close main container -->
 </body>
 </html>
