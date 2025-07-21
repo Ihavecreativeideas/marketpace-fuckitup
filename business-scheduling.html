@@ -3194,6 +3194,160 @@
             </div>
         </div>
 
+        <!-- Comprehensive Shift Template and Employee Scheduling Modal -->
+        <div id="comprehensiveSchedulingModal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 2000; padding: 20px; box-sizing: border-box; overflow-y: auto;">
+            <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); border: 2px solid #00ffff; border-radius: 20px; max-width: 1200px; margin: 20px auto; padding: 32px; position: relative;">
+                
+                <!-- Header -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+                    <h2 style="color: #00ffff; margin: 0; font-size: 28px;">Create Shift Template and Add Employees</h2>
+                    <button onclick="closeComprehensiveSchedulingModal()" style="background: rgba(255,0,0,0.3); border: 2px solid #ff4444; color: #ff4444; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: bold;">✕ Close</button>
+                </div>
+
+                <!-- Step Progress Indicator -->
+                <div style="display: flex; gap: 24px; margin-bottom: 32px; align-items: center; justify-content: center;">
+                    <div id="step1Indicator" style="display: flex; flex-direction: column; align-items: center; min-width: 120px;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #ffd700, #4169e1); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-bottom: 8px;">1</div>
+                        <span style="color: #ffd700; font-size: 14px; font-weight: bold; text-align: center;">Select Employees</span>
+                    </div>
+                    <div style="width: 60px; height: 2px; background: linear-gradient(90deg, #ffd700, #00ffff); margin: 0 16px;"></div>
+                    <div id="step2Indicator" style="display: flex; flex-direction: column; align-items: center; min-width: 120px;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(0,255,255,0.3); border: 2px solid #00ffff; display: flex; align-items: center; justify-content: center; color: #00ffff; font-weight: bold; margin-bottom: 8px;">2</div>
+                        <span style="color: #00ffff; font-size: 14px; text-align: center;">Choose Shifts</span>
+                    </div>
+                    <div style="width: 60px; height: 2px; background: linear-gradient(90deg, #00ffff, #8a2be2); margin: 0 16px;"></div>
+                    <div id="step3Indicator" style="display: flex; flex-direction: column; align-items: center; min-width: 120px;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(138,43,226,0.3); border: 2px solid #8a2be2; display: flex; align-items: center; justify-content: center; color: #8a2be2; font-weight: bold; margin-bottom: 8px;">3</div>
+                        <span style="color: #8a2be2; font-size: 14px; text-align: center;">Select Days</span>
+                    </div>
+                </div>
+
+                <!-- Main Content Grid -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 32px;">
+                    
+                    <!-- Left Column: Employee Selection -->
+                    <div style="background: rgba(0,0,0,0.4); border-radius: 16px; padding: 24px; border: 2px solid rgba(255,215,0,0.3);">
+                        <h3 style="color: #ffd700; margin-bottom: 20px; font-size: 20px; display: flex; align-items: center; gap: 12px;">
+                            <span style="width: 32px; height: 32px; border-radius: 50%; background: #ffd700; color: black; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">1</span>
+                            Select Employees to Schedule
+                        </h3>
+                        
+                        <!-- Employee Search and Filter -->
+                        <div style="margin-bottom: 20px;">
+                            <input type="text" id="modalEmployeeSearch" placeholder="Search employees..." style="width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; background: rgba(0,0,0,0.3); color: white; margin-bottom: 12px;" onkeyup="filterModalEmployees()">
+                            <select id="modalRoleFilter" style="width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; background: rgba(0,0,0,0.3); color: white;" onchange="filterModalEmployees()">
+                                <option value="">All Roles</option>
+                                <option value="Manager">Managers</option>
+                                <option value="Cashier">Cashiers</option>
+                                <option value="Sales">Sales</option>
+                                <option value="Stock">Stock</option>
+                                <option value="Assistant">Assistants</option>
+                                <option value="Security">Security</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Employee Selection Grid -->
+                        <div id="modalEmployeeGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; max-height: 400px; overflow-y: auto;">
+                            <!-- Employees will be populated here -->
+                        </div>
+                        
+                        <!-- Selected Employees Display -->
+                        <div style="margin-top: 20px;">
+                            <h4 style="color: #00ffff; margin-bottom: 12px;">Selected Employees (<span id="selectedEmployeeCount">0</span>)</h4>
+                            <div id="selectedEmployeesList" style="display: flex; flex-wrap: wrap; gap: 8px; min-height: 40px; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                                <span style="color: #94a3b8; font-style: italic;">No employees selected</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Shift Selection -->
+                    <div style="background: rgba(0,0,0,0.4); border-radius: 16px; padding: 24px; border: 2px solid rgba(0,255,255,0.3);">
+                        <h3 style="color: #00ffff; margin-bottom: 20px; font-size: 20px; display: flex; align-items: center; gap: 12px;">
+                            <span style="width: 32px; height: 32px; border-radius: 50%; background: #00ffff; color: black; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">2</span>
+                            Choose Shift Templates
+                        </h3>
+                        
+                        <!-- Preset Shift Templates -->
+                        <div style="margin-bottom: 24px;">
+                            <h4 style="color: #94a3b8; margin-bottom: 12px; font-size: 16px;">Quick Templates</h4>
+                            <div id="modalShiftTemplates" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                                <button class="modal-shift-template" data-start="06:00" data-end="14:00" onclick="selectModalShiftTemplate(this)" style="background: rgba(255,215,0,0.2); border: 2px solid rgba(255,215,0,0.5); color: #ffd700; padding: 12px; border-radius: 8px; cursor: pointer; text-align: center; font-weight: bold; transition: all 0.3s ease;">
+                                    Morning<br><small style="font-weight: normal;">6AM - 2PM</small>
+                                </button>
+                                <button class="modal-shift-template" data-start="14:00" data-end="22:00" onclick="selectModalShiftTemplate(this)" style="background: rgba(0,255,255,0.2); border: 2px solid rgba(0,255,255,0.5); color: #00ffff; padding: 12px; border-radius: 8px; cursor: pointer; text-align: center; font-weight: bold; transition: all 0.3s ease;">
+                                    Afternoon<br><small style="font-weight: normal;">2PM - 10PM</small>
+                                </button>
+                                <button class="modal-shift-template" data-start="22:00" data-end="06:00" onclick="selectModalShiftTemplate(this)" style="background: rgba(255,107,157,0.2); border: 2px solid rgba(255,107,157,0.5); color: #ff6b9d; padding: 12px; border-radius: 8px; cursor: pointer; text-align: center; font-weight: bold; transition: all 0.3s ease;">
+                                    Night<br><small style="font-weight: normal;">10PM - 6AM</small>
+                                </button>
+                                <button class="modal-shift-template" data-start="09:00" data-end="17:00" onclick="selectModalShiftTemplate(this)" style="background: rgba(0,255,136,0.2); border: 2px solid rgba(0,255,136,0.5); color: #00ff88; padding: 12px; border-radius: 8px; cursor: pointer; text-align: center; font-weight: bold; transition: all 0.3s ease;">
+                                    Day<br><small style="font-weight: normal;">9AM - 5PM</small>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Custom Time Selection -->
+                        <div style="margin-bottom: 24px;">
+                            <h4 style="color: #94a3b8; margin-bottom: 12px; font-size: 16px;">Custom Times</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div>
+                                    <label style="display: block; color: #94a3b8; margin-bottom: 6px; font-size: 14px;">Start Time</label>
+                                    <input type="time" id="modalCustomStartTime" style="width: 100%; padding: 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; background: rgba(0,0,0,0.3); color: white;" onchange="updateCustomShiftTemplate()">
+                                </div>
+                                <div>
+                                    <label style="display: block; color: #94a3b8; margin-bottom: 6px; font-size: 14px;">End Time</label>
+                                    <input type="time" id="modalCustomEndTime" style="width: 100%; padding: 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; background: rgba(0,0,0,0.3); color: white;" onchange="updateCustomShiftTemplate()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Selected Shift Display -->
+                        <div style="padding: 16px; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <h4 style="color: #00ffff; margin: 0 0 8px 0; font-size: 16px;">Selected Shift Template</h4>
+                            <div id="selectedShiftDisplay" style="color: #94a3b8; font-style: italic;">No shift template selected</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Section: Multi-Day Calendar -->
+                <div style="background: rgba(0,0,0,0.4); border-radius: 16px; padding: 24px; border: 2px solid rgba(138,43,226,0.3); margin-bottom: 32px;">
+                    <h3 style="color: #8a2be2; margin-bottom: 20px; font-size: 20px; display: flex; align-items: center; gap: 12px;">
+                        <span style="width: 32px; height: 32px; border-radius: 50%; background: #8a2be2; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">3</span>
+                        Multi-Day Calendar Selection
+                    </h3>
+                    
+                    <!-- Quick Day Selection Buttons -->
+                    <div style="display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; justify-content: center;">
+                        <button onclick="selectModalCalendarRange('thisWeek')" style="background: rgba(255,215,0,0.2); border: 2px solid rgba(255,215,0,0.5); color: #ffd700; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease;">This Week</button>
+                        <button onclick="selectModalCalendarRange('nextWeek')" style="background: rgba(0,255,255,0.2); border: 2px solid rgba(0,255,255,0.5); color: #00ffff; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease;">Next Week</button>
+                        <button onclick="selectModalCalendarRange('weekends')" style="background: rgba(255,107,157,0.2); border: 2px solid rgba(255,107,157,0.5); color: #ff6b9d; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease;">Weekends Only</button>
+                        <button onclick="clearModalCalendarSelection()" style="background: rgba(255,0,0,0.2); border: 2px solid rgba(255,0,0,0.5); color: #ff4444; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease;">Clear Selection</button>
+                    </div>
+
+                    <!-- Calendar Grid -->
+                    <div id="multiDayCalendar" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; padding: 20px; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                        <!-- Calendar will be populated by JavaScript -->
+                    </div>
+                    
+                    <!-- Selected Days Display -->
+                    <div style="margin-top: 20px;">
+                        <h4 style="color: #00ffff; margin-bottom: 12px;">Selected Days (<span id="selectedDaysCount">0</span>)</h4>
+                        <div id="selectedDaysList" style="display: flex; flex-wrap: wrap; gap: 8px; min-height: 40px; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <span style="color: #94a3b8; font-style: italic;">No days selected</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="closeComprehensiveSchedulingModal()" style="background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; padding: 16px 32px; border-radius: 8px; cursor: pointer; font-weight: bold;">Cancel</button>
+                    <button id="bulkScheduleBtn" onclick="executeBulkScheduling()" disabled style="background: linear-gradient(135deg, #00ffff, #8a2be2); border: none; color: white; padding: 16px 32px; border-radius: 8px; cursor: pointer; font-weight: bold; opacity: 0.5; transition: all 0.3s ease;">
+                        Schedule Selected Employees
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Volunteers Tab -->
         <div id="volunteers" class="tab-content">
             <!-- Volunteer Management Section - MOVED TO TOP -->
@@ -4136,7 +4290,17 @@
         }
 
         function showCreateShiftTemplates() {
-            document.getElementById('shiftTemplateModal').style.display = 'block';
+            // Show the comprehensive shift template and employee scheduling modal
+            const modal = document.getElementById('comprehensiveSchedulingModal');
+            if (modal) {
+                modal.style.display = 'block';
+                generateMultiDayCalendar();
+                generateShiftTemplateSelection();
+                generateEmployeeSelectionGrid();
+            } else {
+                // Fallback to existing template modal
+                document.getElementById('shiftTemplateModal').style.display = 'block';
+            }
         }
 
         function closeShiftTemplateModal() {
@@ -4223,6 +4387,491 @@
             const g = parseInt(hex.slice(3, 5), 16);
             const b = parseInt(hex.slice(5, 7), 16);
             return `${r}, ${g}, ${b}`;
+        }
+
+        // Comprehensive Scheduling Modal Functions
+        let modalSelectedEmployees = [];
+        let modalSelectedShift = null;
+        let modalSelectedDays = [];
+
+        function closeComprehensiveSchedulingModal() {
+            document.getElementById('comprehensiveSchedulingModal').style.display = 'none';
+            
+            // Reset all selections
+            modalSelectedEmployees = [];
+            modalSelectedShift = null;
+            modalSelectedDays = [];
+            
+            // Reset visual states
+            updateModalEmployeeSelection();
+            updateModalShiftSelection();
+            updateModalCalendarSelection();
+            updateBulkScheduleButton();
+        }
+
+        function generateEmployeeSelectionGrid() {
+            const modalEmployees = [
+                { id: 1, name: 'Sarah Johnson', role: 'Manager', status: 'Available', avatar: 'S', color: '#8B4513' },
+                { id: 2, name: 'Mike Chen', role: 'Cashier', status: 'Available', avatar: 'M', color: '#228B22' },
+                { id: 3, name: 'Jessica Martinez', role: 'Sales', status: 'Scheduled', avatar: 'J', color: '#FF8C00' },
+                { id: 4, name: 'David Wilson', role: 'Stock', status: 'Available', avatar: 'D', color: '#4682B4' },
+                { id: 5, name: 'Emma Davis', role: 'Assistant', status: 'Off', avatar: 'E', color: '#9370DB' },
+                { id: 6, name: 'Carlos Rodriguez', role: 'Security', status: 'Available', avatar: 'C', color: '#DC143C' },
+                { id: 7, name: 'Riley Thompson', role: 'Cashier', status: 'Available', avatar: 'R', color: '#228B22' },
+                { id: 8, name: 'Morgan Casey', role: 'Cashier', status: 'Available', avatar: 'M', color: '#228B22' },
+                { id: 9, name: 'Jordan Kim', role: 'Cashier', status: 'Available', avatar: 'J', color: '#228B22' },
+                { id: 10, name: 'Alex Rivera', role: 'Cashier', status: 'Available', avatar: 'A', color: '#228B22' },
+                { id: 11, name: 'Casey Morgan', role: 'Cashier', status: 'Available', avatar: 'C', color: '#228B22' }
+            ];
+
+            const grid = document.getElementById('modalEmployeeGrid');
+            grid.innerHTML = '';
+
+            modalEmployees.forEach(employee => {
+                const card = document.createElement('div');
+                card.className = 'modal-employee-card';
+                card.dataset.employeeId = employee.id;
+                card.dataset.role = employee.role;
+                card.dataset.status = employee.status;
+                
+                const isSelected = modalSelectedEmployees.some(emp => emp.id === employee.id);
+                
+                card.style.cssText = `
+                    background: ${isSelected ? 'rgba(255,215,0,0.2)' : 'rgba(255,255,255,0.1)'};
+                    border: 2px solid ${isSelected ? '#ffd700' : 'rgba(255,255,255,0.2)'};
+                    border-radius: 12px;
+                    padding: 16px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    transform: ${isSelected ? 'translateY(-2px)' : 'translateY(0)'};
+                `;
+
+                let statusColor = '#00ff88'; // Available
+                if (employee.status === 'Scheduled') statusColor = '#ffd700';
+                if (employee.status === 'Off') statusColor = '#ff6b9d';
+
+                card.innerHTML = `
+                    <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: ${employee.color}; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; margin-right: 12px;">${employee.avatar}</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; color: white; font-size: 14px;">${employee.name}</div>
+                            <div style="color: #94a3b8; font-size: 12px;">${employee.role}</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: ${statusColor}; font-size: 12px; font-weight: bold;">${employee.status}</span>
+                        ${isSelected ? '<span style="color: #ffd700; font-size: 12px;">✓ Selected</span>' : ''}
+                    </div>
+                `;
+
+                card.onclick = function() {
+                    toggleModalEmployeeSelection(employee);
+                };
+
+                card.onmouseenter = function() {
+                    if (!isSelected) {
+                        this.style.background = 'rgba(255,255,255,0.15)';
+                        this.style.borderColor = '#00ffff';
+                        this.style.transform = 'translateY(-2px)';
+                    }
+                };
+
+                card.onmouseleave = function() {
+                    if (!isSelected) {
+                        this.style.background = 'rgba(255,255,255,0.1)';
+                        this.style.borderColor = 'rgba(255,255,255,0.2)';
+                        this.style.transform = 'translateY(0)';
+                    }
+                };
+
+                grid.appendChild(card);
+            });
+        }
+
+        function toggleModalEmployeeSelection(employee) {
+            const index = modalSelectedEmployees.findIndex(emp => emp.id === employee.id);
+            
+            if (index === -1) {
+                // Add employee
+                modalSelectedEmployees.push(employee);
+            } else {
+                // Remove employee
+                modalSelectedEmployees.splice(index, 1);
+            }
+            
+            updateModalEmployeeSelection();
+            updateBulkScheduleButton();
+            showNotification(`${employee.name} ${index === -1 ? 'added to' : 'removed from'} selection`, 'success');
+        }
+
+        function updateModalEmployeeSelection() {
+            // Update employee cards
+            const cards = document.querySelectorAll('.modal-employee-card');
+            cards.forEach(card => {
+                const employeeId = parseInt(card.dataset.employeeId);
+                const isSelected = modalSelectedEmployees.some(emp => emp.id === employeeId);
+                
+                if (isSelected) {
+                    card.style.background = 'rgba(255,215,0,0.2)';
+                    card.style.borderColor = '#ffd700';
+                    card.style.transform = 'translateY(-2px)';
+                    card.querySelector('div:last-child').innerHTML = card.querySelector('div:last-child').innerHTML.replace('✓ Selected', '') + '<span style="color: #ffd700; font-size: 12px;">✓ Selected</span>';
+                } else {
+                    card.style.background = 'rgba(255,255,255,0.1)';
+                    card.style.borderColor = 'rgba(255,255,255,0.2)';
+                    card.style.transform = 'translateY(0)';
+                    card.querySelector('div:last-child').innerHTML = card.querySelector('div:last-child').innerHTML.replace('<span style="color: #ffd700; font-size: 12px;">✓ Selected</span>', '');
+                }
+            });
+
+            // Update selected employees list
+            const selectedList = document.getElementById('selectedEmployeesList');
+            const selectedCount = document.getElementById('selectedEmployeeCount');
+            
+            selectedCount.textContent = modalSelectedEmployees.length;
+            
+            if (modalSelectedEmployees.length === 0) {
+                selectedList.innerHTML = '<span style="color: #94a3b8; font-style: italic;">No employees selected</span>';
+            } else {
+                selectedList.innerHTML = modalSelectedEmployees.map(emp => 
+                    `<span style="background: rgba(255,215,0,0.2); border: 1px solid #ffd700; color: #ffd700; padding: 4px 8px; border-radius: 6px; font-size: 12px; display: flex; align-items: center; gap: 6px;">
+                        <span style="width: 16px; height: 16px; border-radius: 50%; background: ${emp.color}; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white;">${emp.avatar}</span>
+                        ${emp.name}
+                        <button onclick="removeModalEmployee(${emp.id})" style="background: none; border: none; color: #ff6b9d; cursor: pointer; font-size: 12px; padding: 0;">✕</button>
+                    </span>`
+                ).join('');
+            }
+        }
+
+        function removeModalEmployee(employeeId) {
+            modalSelectedEmployees = modalSelectedEmployees.filter(emp => emp.id !== employeeId);
+            updateModalEmployeeSelection();
+            updateBulkScheduleButton();
+        }
+
+        function filterModalEmployees() {
+            const searchTerm = document.getElementById('modalEmployeeSearch').value.toLowerCase();
+            const roleFilter = document.getElementById('modalRoleFilter').value;
+            
+            const cards = document.querySelectorAll('.modal-employee-card');
+            cards.forEach(card => {
+                const employeeName = card.querySelector('div:first-child div:nth-child(2) div:first-child').textContent.toLowerCase();
+                const employeeRole = card.dataset.role;
+                
+                const matchesSearch = employeeName.includes(searchTerm);
+                const matchesRole = !roleFilter || employeeRole === roleFilter;
+                
+                if (matchesSearch && matchesRole) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function generateShiftTemplateSelection() {
+            // Reset shift selection
+            modalSelectedShift = null;
+            updateModalShiftSelection();
+        }
+
+        function selectModalShiftTemplate(button) {
+            modalSelectedShift = {
+                start: button.dataset.start,
+                end: button.dataset.end,
+                name: button.textContent.split('\n')[0].trim()
+            };
+            updateModalShiftSelection();
+            updateBulkScheduleButton();
+            showNotification(`Selected ${modalSelectedShift.name} shift template`, 'success');
+        }
+
+        function updateCustomShiftTemplate() {
+            const startTime = document.getElementById('modalCustomStartTime').value;
+            const endTime = document.getElementById('modalCustomEndTime').value;
+            
+            if (startTime && endTime) {
+                modalSelectedShift = {
+                    start: startTime,
+                    end: endTime,
+                    name: 'Custom Shift'
+                };
+                
+                // Clear preset selections
+                document.querySelectorAll('.modal-shift-template').forEach(btn => {
+                    btn.style.background = btn.style.background.replace('0.4', '0.2');
+                    btn.style.transform = 'scale(1)';
+                });
+                
+                updateModalShiftSelection();
+                updateBulkScheduleButton();
+                showNotification('Custom shift template created', 'success');
+            }
+        }
+
+        function updateModalShiftSelection() {
+            // Update shift template buttons
+            document.querySelectorAll('.modal-shift-template').forEach(btn => {
+                if (modalSelectedShift && btn.dataset.start === modalSelectedShift.start && btn.dataset.end === modalSelectedShift.end) {
+                    btn.style.background = btn.style.background.replace('0.2', '0.4');
+                    btn.style.transform = 'scale(1.05)';
+                } else {
+                    btn.style.background = btn.style.background.replace('0.4', '0.2');
+                    btn.style.transform = 'scale(1)';
+                }
+            });
+
+            // Update selected shift display
+            const shiftDisplay = document.getElementById('selectedShiftDisplay');
+            if (modalSelectedShift) {
+                const startFormatted = formatTime24To12(modalSelectedShift.start);
+                const endFormatted = formatTime24To12(modalSelectedShift.end);
+                shiftDisplay.innerHTML = `<span style="color: #00ffff; font-weight: bold;">${modalSelectedShift.name}</span><br><small style="color: #94a3b8;">${startFormatted} - ${endFormatted}</small>`;
+            } else {
+                shiftDisplay.innerHTML = '<span style="color: #94a3b8; font-style: italic;">No shift template selected</span>';
+            }
+        }
+
+        function formatTime24To12(time24) {
+            const [hours, minutes] = time24.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const hour12 = hour % 12 || 12;
+            return `${hour12}:${minutes} ${ampm}`;
+        }
+
+        function generateMultiDayCalendar() {
+            const calendar = document.getElementById('multiDayCalendar');
+            calendar.innerHTML = '';
+            
+            const today = new Date();
+            const firstDay = new Date(today);
+            firstDay.setDate(today.getDate() - today.getDay()); // Start of current week
+
+            // Day headers
+            const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            dayHeaders.forEach(day => {
+                const header = document.createElement('div');
+                header.style.cssText = 'text-align: center; color: #94a3b8; font-weight: bold; padding: 8px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.1);';
+                header.textContent = day;
+                calendar.appendChild(header);
+            });
+
+            // Generate 4 weeks of calendar days
+            for (let week = 0; week < 4; week++) {
+                for (let day = 0; day < 7; day++) {
+                    const currentDate = new Date(firstDay);
+                    currentDate.setDate(firstDay.getDate() + (week * 7) + day);
+                    
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'modal-calendar-day';
+                    dayElement.dataset.date = currentDate.toISOString().split('T')[0];
+                    
+                    const isToday = currentDate.toDateString() === today.toDateString();
+                    const isPast = currentDate < today;
+                    const isSelected = modalSelectedDays.includes(dayElement.dataset.date);
+                    
+                    dayElement.style.cssText = `
+                        text-align: center;
+                        padding: 16px 8px;
+                        border-radius: 8px;
+                        cursor: ${isPast ? 'not-allowed' : 'pointer'};
+                        border: 2px solid ${isSelected ? '#ffd700' : (isToday ? '#00ffff' : 'rgba(255,255,255,0.1)')};
+                        transition: all 0.3s ease;
+                        background: ${isSelected ? 'rgba(255,215,0,0.3)' : (isPast ? 'rgba(255,255,255,0.05)' : (isToday ? 'rgba(0,255,255,0.1)' : 'rgba(255,255,255,0.08)'))};
+                        color: ${isPast ? '#666' : 'white'};
+                        opacity: ${isPast ? '0.5' : '1'};
+                        transform: ${isSelected ? 'scale(1.05)' : 'scale(1)'};
+                    `;
+                    
+                    dayElement.innerHTML = `
+                        <div style="font-size: 18px; font-weight: bold; margin-bottom: 4px;">${currentDate.getDate()}</div>
+                        <div style="font-size: 12px; opacity: 0.8;">${currentDate.toLocaleDateString('en', {month: 'short'})}</div>
+                        ${isSelected ? '<div style="color: #ffd700; font-size: 10px; margin-top: 4px;">✓ SELECTED</div>' : ''}
+                    `;
+                    
+                    if (!isPast) {
+                        dayElement.addEventListener('click', () => toggleModalCalendarDay(dayElement));
+                        dayElement.addEventListener('mouseenter', () => {
+                            if (!isSelected) {
+                                dayElement.style.background = 'rgba(0,255,255,0.2)';
+                                dayElement.style.borderColor = '#00ffff';
+                                dayElement.style.transform = 'scale(1.05)';
+                            }
+                        });
+                        dayElement.addEventListener('mouseleave', () => {
+                            if (!isSelected) {
+                                dayElement.style.background = isToday ? 'rgba(0,255,255,0.1)' : 'rgba(255,255,255,0.08)';
+                                dayElement.style.borderColor = isToday ? '#00ffff' : 'rgba(255,255,255,0.1)';
+                                dayElement.style.transform = 'scale(1)';
+                            }
+                        });
+                    }
+                    
+                    calendar.appendChild(dayElement);
+                }
+            }
+        }
+
+        function toggleModalCalendarDay(dayElement) {
+            const date = dayElement.dataset.date;
+            const index = modalSelectedDays.indexOf(date);
+            
+            if (index === -1) {
+                modalSelectedDays.push(date);
+            } else {
+                modalSelectedDays.splice(index, 1);
+            }
+            
+            updateModalCalendarSelection();
+            updateBulkScheduleButton();
+        }
+
+        function selectModalCalendarRange(range) {
+            const today = new Date();
+            modalSelectedDays = [];
+            
+            if (range === 'thisWeek') {
+                for (let i = 0; i < 7; i++) {
+                    const date = new Date(today);
+                    date.setDate(today.getDate() - today.getDay() + i);
+                    if (date >= today) {
+                        modalSelectedDays.push(date.toISOString().split('T')[0]);
+                    }
+                }
+            } else if (range === 'nextWeek') {
+                for (let i = 7; i < 14; i++) {
+                    const date = new Date(today);
+                    date.setDate(today.getDate() - today.getDay() + i);
+                    modalSelectedDays.push(date.toISOString().split('T')[0]);
+                }
+            } else if (range === 'weekends') {
+                for (let week = 0; week < 4; week++) {
+                    // Saturday
+                    const saturday = new Date(today);
+                    saturday.setDate(today.getDate() - today.getDay() + 6 + (week * 7));
+                    if (saturday >= today) {
+                        modalSelectedDays.push(saturday.toISOString().split('T')[0]);
+                    }
+                    
+                    // Sunday
+                    const sunday = new Date(today);
+                    sunday.setDate(today.getDate() - today.getDay() + 7 + (week * 7));
+                    if (sunday >= today) {
+                        modalSelectedDays.push(sunday.toISOString().split('T')[0]);
+                    }
+                }
+            }
+            
+            updateModalCalendarSelection();
+            updateBulkScheduleButton();
+            showNotification(`Selected ${modalSelectedDays.length} days for ${range}`, 'success');
+        }
+
+        function clearModalCalendarSelection() {
+            modalSelectedDays = [];
+            updateModalCalendarSelection();
+            updateBulkScheduleButton();
+            showNotification('Calendar selection cleared', 'success');
+        }
+
+        function updateModalCalendarSelection() {
+            // Update calendar days
+            const calendarDays = document.querySelectorAll('.modal-calendar-day');
+            calendarDays.forEach(day => {
+                const date = day.dataset.date;
+                const isSelected = modalSelectedDays.includes(date);
+                const isToday = new Date(date).toDateString() === new Date().toDateString();
+                
+                if (isSelected) {
+                    day.style.background = 'rgba(255,215,0,0.3)';
+                    day.style.borderColor = '#ffd700';
+                    day.style.transform = 'scale(1.05)';
+                    if (!day.innerHTML.includes('✓ SELECTED')) {
+                        day.innerHTML += '<div style="color: #ffd700; font-size: 10px; margin-top: 4px;">✓ SELECTED</div>';
+                    }
+                } else {
+                    day.style.background = isToday ? 'rgba(0,255,255,0.1)' : 'rgba(255,255,255,0.08)';
+                    day.style.borderColor = isToday ? '#00ffff' : 'rgba(255,255,255,0.1)';
+                    day.style.transform = 'scale(1)';
+                    day.innerHTML = day.innerHTML.replace('<div style="color: #ffd700; font-size: 10px; margin-top: 4px;">✓ SELECTED</div>', '');
+                }
+            });
+
+            // Update selected days list
+            const selectedDaysList = document.getElementById('selectedDaysList');
+            const selectedDaysCount = document.getElementById('selectedDaysCount');
+            
+            selectedDaysCount.textContent = modalSelectedDays.length;
+            
+            if (modalSelectedDays.length === 0) {
+                selectedDaysList.innerHTML = '<span style="color: #94a3b8; font-style: italic;">No days selected</span>';
+            } else {
+                selectedDaysList.innerHTML = modalSelectedDays.map(dateStr => {
+                    const date = new Date(dateStr);
+                    const dayName = date.toLocaleDateString('en', { weekday: 'short' });
+                    const dateFormatted = date.toLocaleDateString('en', { month: 'short', day: 'numeric' });
+                    return `<span style="background: rgba(138,43,226,0.2); border: 1px solid #8a2be2; color: #8a2be2; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold;">
+                        ${dayName}, ${dateFormatted}
+                        <button onclick="removeModalDay('${dateStr}')" style="background: none; border: none; color: #ff6b9d; cursor: pointer; font-size: 12px; padding: 0; margin-left: 6px;">✕</button>
+                    </span>`;
+                }).join('');
+            }
+        }
+
+        function removeModalDay(dateStr) {
+            modalSelectedDays = modalSelectedDays.filter(date => date !== dateStr);
+            updateModalCalendarSelection();
+            updateBulkScheduleButton();
+        }
+
+        function updateBulkScheduleButton() {
+            const btn = document.getElementById('bulkScheduleBtn');
+            const canSchedule = modalSelectedEmployees.length > 0 && modalSelectedShift && modalSelectedDays.length > 0;
+            
+            if (canSchedule) {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.textContent = `Schedule ${modalSelectedEmployees.length} Employee${modalSelectedEmployees.length > 1 ? 's' : ''} for ${modalSelectedDays.length} Day${modalSelectedDays.length > 1 ? 's' : ''}`;
+            } else {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.textContent = 'Complete All Steps to Schedule';
+            }
+        }
+
+        function executeBulkScheduling() {
+            if (!modalSelectedEmployees.length || !modalSelectedShift || !modalSelectedDays.length) {
+                showNotification('Please complete all steps before scheduling', 'error');
+                return;
+            }
+
+            const employeeNames = modalSelectedEmployees.map(emp => emp.name).join(', ');
+            const shiftInfo = `${modalSelectedShift.name} (${formatTime24To12(modalSelectedShift.start)} - ${formatTime24To12(modalSelectedShift.end)})`;
+            const dayCount = modalSelectedDays.length;
+            const totalSchedules = modalSelectedEmployees.length * modalSelectedDays.length;
+
+            // Show success notification
+            showNotification(`Successfully scheduled ${modalSelectedEmployees.length} employee${modalSelectedEmployees.length > 1 ? 's' : ''} for ${dayCount} day${dayCount > 1 ? 's' : ''} (${totalSchedules} total shifts)`, 'success');
+
+            // Update voice console with detailed information
+            updateVoiceConsole(`🎯 BULK SCHEDULING COMPLETED
+📋 Employees: ${employeeNames}
+⏰ Shift: ${shiftInfo}
+📅 Days: ${dayCount} selected
+✅ Total Shifts Created: ${totalSchedules}
+💡 All shifts have been added to the main schedule`);
+
+            // Simulate updating the main schedule (in real app, this would save to database)
+            console.log('Bulk scheduling executed:', {
+                employees: modalSelectedEmployees,
+                shift: modalSelectedShift,
+                days: modalSelectedDays,
+                totalSchedules: totalSchedules
+            });
+
+            // Close modal
+            closeComprehensiveSchedulingModal();
         }
 
         function showAddEmployeeModal() {
