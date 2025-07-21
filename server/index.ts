@@ -205,7 +205,9 @@ app.post('/api/maps/geocode', async (req, res) => {
 
     const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
     
-    const response = await fetch(geocodeUrl);
+    // Apply URL signing for enhanced security
+    const signedUrl = signGoogleMapsUrl(geocodeUrl);
+    const response = await fetch(signedUrl);
     
     // Check if response is successful
     if (!response.ok) {
