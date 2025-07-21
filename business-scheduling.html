@@ -4918,14 +4918,27 @@
                 <div id="addEmployeeModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center;">
                     <div style="background: linear-gradient(135deg, #1a1a2e 0%, #2d1b69 100%); border: 2px solid #00ffff; border-radius: 16px; padding: 32px; width: 90%; max-width: 500px; color: white;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                            <h2 style="color: #00ffff; margin: 0; font-size: 24px;">Add New Employee</h2>
+                            <h2 id="modalTitle" style="color: #00ffff; margin: 0; font-size: 24px;">Add New Team Member</h2>
                             <button onclick="closeAddEmployeeModal()" style="background: transparent; border: none; color: #00ffff; font-size: 24px; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">×</button>
                         </div>
                         
                         <form id="addEmployeeForm" onsubmit="submitNewEmployee(event)">
                             <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 500;">Position Category</label>
+                                <select id="positionCategory" required onchange="updateModalTitle(); togglePaymentVisibility();" style="width: 100%; padding: 12px; border: 2px solid rgba(255,215,0,0.4); border-radius: 8px; background: rgba(0,0,0,0.3); color: white; font-size: 16px;">
+                                    <option value="">Select Category</option>
+                                    <option value="employee">Employee (W-2 Worker)</option>
+                                    <option value="volunteer">Volunteer (Unpaid Helper)</option>
+                                    <option value="independent_contractor">Independent Contractor (1099 Worker)</option>
+                                </select>
+                                <div style="margin-top: 8px; padding: 8px; border-radius: 6px; background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3);">
+                                    <span style="color: #ffd700; font-size: 12px; font-weight: 500;">💡 This determines how they appear in schedules and tax classification</span>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-bottom: 20px;">
                                 <label style="display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 500;">Full Name</label>
-                                <input type="text" id="employeeName" required style="width: 100%; padding: 12px; border: 2px solid rgba(0,255,255,0.3); border-radius: 8px; background: rgba(0,0,0,0.3); color: white; font-size: 16px;" placeholder="Enter employee name">
+                                <input type="text" id="employeeName" required style="width: 100%; padding: 12px; border: 2px solid rgba(0,255,255,0.3); border-radius: 8px; background: rgba(0,0,0,0.3); color: white; font-size: 16px;" placeholder="Enter name">
                             </div>
                             
                             <div style="margin-bottom: 20px;">
@@ -4951,9 +4964,9 @@
                                 <input type="tel" id="employeePhone" required style="width: 100%; padding: 12px; border: 2px solid rgba(0,255,255,0.3); border-radius: 8px; background: rgba(0,0,0,0.3); color: white; font-size: 16px;" placeholder="(555) 123-4567">
                             </div>
                             
-                            <div style="margin-bottom: 20px;">
+                            <div id="paymentTypeSection" style="margin-bottom: 20px;">
                                 <label style="display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 500;">Payment Type</label>
-                                <select id="paymentType" required onchange="togglePaymentFields()" style="width: 100%; padding: 12px; border: 2px solid rgba(0,255,255,0.3); border-radius: 8px; background: rgba(0,0,0,0.3); color: white; font-size: 16px;">
+                                <select id="paymentType" onchange="togglePaymentFields()" style="width: 100%; padding: 12px; border: 2px solid rgba(0,255,255,0.3); border-radius: 8px; background: rgba(0,0,0,0.3); color: white; font-size: 16px;">
                                     <option value="">Select Payment Type</option>
                                     <option value="hourly">Hourly Rate</option>
                                     <option value="per_job">Per Job Base Pay</option>
@@ -4981,7 +4994,7 @@
                             
                             <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin-top: 32px;">
                                 <button type="button" onclick="closeAddEmployeeModal()" style="background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold;">Cancel</button>
-                                <button type="button" onclick="submitNewEmployee(event)" style="background: linear-gradient(135deg, #00ffff, #0066ff); border: none; color: white; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold;">Add Employee</button>
+                                <button type="button" id="submitButton" onclick="submitNewEmployee(event)" style="background: linear-gradient(135deg, #00ffff, #0066ff); border: none; color: white; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold;">Add Team Member</button>
                             </div>
                         </form>
                     </div>
@@ -4998,6 +5011,55 @@
             }
         }
         
+        function updateModalTitle() {
+            const category = document.getElementById('positionCategory').value;
+            const titleElement = document.getElementById('modalTitle');
+            const submitButton = document.getElementById('submitButton');
+            
+            switch(category) {
+                case 'employee':
+                    titleElement.textContent = 'Add New Employee';
+                    titleElement.style.color = '#00ffff';
+                    if (submitButton) submitButton.textContent = 'Add Employee';
+                    break;
+                case 'volunteer':
+                    titleElement.textContent = 'Add New Volunteer';
+                    titleElement.style.color = '#ffd700';
+                    if (submitButton) submitButton.textContent = 'Add Volunteer';
+                    break;
+                case 'independent_contractor':
+                    titleElement.textContent = 'Add New Independent Contractor';
+                    titleElement.style.color = '#ff6b9d';
+                    if (submitButton) submitButton.textContent = 'Add Contractor';
+                    break;
+                default:
+                    titleElement.textContent = 'Add New Team Member';
+                    titleElement.style.color = '#00ffff';
+                    if (submitButton) submitButton.textContent = 'Add Team Member';
+            }
+        }
+
+        function togglePaymentVisibility() {
+            const category = document.getElementById('positionCategory').value;
+            const paymentSection = document.getElementById('paymentTypeSection');
+            const hourlyField = document.getElementById('hourlyRateField');
+            const perJobField = document.getElementById('perJobField');
+            const paymentTypeSelect = document.getElementById('paymentType');
+            
+            if (category === 'volunteer') {
+                paymentSection.style.display = 'none';
+                hourlyField.style.display = 'none';
+                perJobField.style.display = 'none';
+                paymentTypeSelect.required = false;
+                document.getElementById('employeeHourlyRate').required = false;
+                document.getElementById('employeeJobPay').required = false;
+            } else {
+                paymentSection.style.display = 'block';
+                paymentTypeSelect.required = true;
+                togglePaymentFields();
+            }
+        }
+
         function togglePaymentFields() {
             const paymentType = document.getElementById('paymentType').value;
             const hourlyField = document.getElementById('hourlyRateField');
@@ -5025,6 +5087,7 @@
             event.preventDefault();
             event.stopPropagation();
             
+            const positionCategory = document.getElementById('positionCategory').value;
             const name = document.getElementById('employeeName').value.trim();
             const role = document.getElementById('employeeRole').value;
             const email = document.getElementById('employeeEmail').value.trim();
@@ -5035,7 +5098,9 @@
             let rate = 0;
             let paymentInfo = '';
             
-            if (paymentType === 'hourly') {
+            if (positionCategory === 'volunteer') {
+                paymentInfo = 'Volunteer (Unpaid)';
+            } else if (paymentType === 'hourly') {
                 rate = document.getElementById('employeeHourlyRate').value;
                 paymentInfo = `$${rate}/hour`;
             } else if (paymentType === 'per_job') {
@@ -5043,12 +5108,17 @@
                 paymentInfo = `$${rate}/job`;
             }
             
-            if (!name || !role || !email || !phone || !paymentType || !rate) {
+            if (!positionCategory || !name || !role || !email || !phone) {
                 showNotification('Please fill in all required fields', 'error');
                 return;
             }
             
-            // Create new employee object
+            if (positionCategory !== 'volunteer' && (!paymentType || !rate)) {
+                showNotification('Please set payment information for paid positions', 'error');
+                return;
+            }
+            
+            // Create new team member object
             const newEmployee = {
                 id: Date.now().toString(),
                 name: name,
@@ -5061,6 +5131,8 @@
                 status: status,
                 avatar: name.charAt(0).toUpperCase(),
                 color: getRoleColor(role),
+                positionCategory: positionCategory,
+                categoryDisplay: getCategoryDisplay(positionCategory),
                 dateAdded: new Date().toISOString()
             };
             
@@ -5083,7 +5155,8 @@
             sendEmployeeInvitation(newEmployee);
             
             // Show success message
-            showNotification(`Employee ${name} added successfully! Invitation sent via SMS and email.`, 'success');
+            const categoryDisplay = getCategoryDisplay(positionCategory);
+            showNotification(`${categoryDisplay} ${name} added successfully! Invitation sent via SMS and email.`, 'success');
             
             console.log('New employee added:', newEmployee);
         }
@@ -5098,6 +5171,15 @@
                 'Security': 'security'
             };
             return roleColors[role] || 'cashier';
+        }
+        
+        function getCategoryDisplay(category) {
+            const categoryDisplays = {
+                'employee': 'Employee',
+                'volunteer': 'Volunteer', 
+                'independent_contractor': 'Independent Contractor'
+            };
+            return categoryDisplays[category] || 'Team Member';
         }
         
         async function sendEmployeeInvitation(employee) {
@@ -5159,12 +5241,12 @@
             // If no saved employees, use default demo employees
             if (employees.length === 0) {
                 employees = [
-                    { id: 'sarah', name: 'Sarah Johnson', role: 'Manager', status: 'Available', avatar: 'S', color: 'manager', email: 'sarah@example.com', phone: '(555) 123-4567', rate: 25.00, paymentType: 'hourly', paymentInfo: '$25.00/hour' },
-                    { id: 'mike', name: 'Mike Chen', role: 'Cashier', status: 'Available', avatar: 'M', color: 'cashier', email: 'mike@example.com', phone: '(555) 234-5678', rate: 15.00, paymentType: 'hourly', paymentInfo: '$15.00/hour' },
-                    { id: 'jessica', name: 'Jessica Martinez', role: 'Sales', status: 'Scheduled', avatar: 'J', color: 'sales', email: 'jessica@example.com', phone: '(555) 345-6789', rate: 75.00, paymentType: 'per_job', paymentInfo: '$75.00/job' },
-                    { id: 'david', name: 'David Wilson', role: 'Stock', status: 'Available', avatar: 'D', color: 'stock', email: 'david@example.com', phone: '(555) 456-7890', rate: 16.00, paymentType: 'hourly', paymentInfo: '$16.00/hour' },
-                    { id: 'emma', name: 'Emma Davis', role: 'Assistant', status: 'Off', avatar: 'E', color: 'assistant', email: 'emma@example.com', phone: '(555) 567-8901', rate: 50.00, paymentType: 'per_job', paymentInfo: '$50.00/job' },
-                    { id: 'carlos', name: 'Carlos Rodriguez', role: 'Security', status: 'Available', avatar: 'C', color: 'security', email: 'carlos@example.com', phone: '(555) 678-9012', rate: 20.00, paymentType: 'hourly', paymentInfo: '$20.00/hour' }
+                    { id: 'sarah', name: 'Sarah Johnson', role: 'Manager', status: 'Available', avatar: 'S', color: 'manager', email: 'sarah@example.com', phone: '(555) 123-4567', rate: 25.00, paymentType: 'hourly', paymentInfo: '$25.00/hour', positionCategory: 'employee', categoryDisplay: 'Employee' },
+                    { id: 'mike', name: 'Mike Chen', role: 'Cashier', status: 'Available', avatar: 'M', color: 'cashier', email: 'mike@example.com', phone: '(555) 234-5678', rate: 15.00, paymentType: 'hourly', paymentInfo: '$15.00/hour', positionCategory: 'employee', categoryDisplay: 'Employee' },
+                    { id: 'jessica', name: 'Jessica Martinez', role: 'Sales', status: 'Scheduled', avatar: 'J', color: 'sales', email: 'jessica@example.com', phone: '(555) 345-6789', rate: 75.00, paymentType: 'per_job', paymentInfo: '$75.00/job', positionCategory: 'independent_contractor', categoryDisplay: 'Independent Contractor' },
+                    { id: 'david', name: 'David Wilson', role: 'Stock', status: 'Available', avatar: 'D', color: 'stock', email: 'david@example.com', phone: '(555) 456-7890', rate: 16.00, paymentType: 'hourly', paymentInfo: '$16.00/hour', positionCategory: 'employee', categoryDisplay: 'Employee' },
+                    { id: 'emma', name: 'Emma Davis', role: 'Assistant', status: 'Off', avatar: 'E', color: 'assistant', email: 'emma@example.com', phone: '(555) 567-8901', rate: 50.00, paymentType: 'per_job', paymentInfo: '$50.00/job', positionCategory: 'volunteer', categoryDisplay: 'Volunteer' },
+                    { id: 'carlos', name: 'Carlos Rodriguez', role: 'Security', status: 'Available', avatar: 'C', color: 'security', email: 'carlos@example.com', phone: '(555) 678-9012', rate: 20.00, paymentType: 'hourly', paymentInfo: '$20.00/hour', positionCategory: 'employee', categoryDisplay: 'Employee' }
                 ];
                 // Save default employees to localStorage
                 localStorage.setItem('marketpace_employees', JSON.stringify(employees));
@@ -5197,11 +5279,12 @@
                         <div style="flex: 1;">
                             <div style="font-weight: bold; color: white; font-size: 16px;">${employee.name}</div>
                             <div style="color: #94a3b8; font-size: 14px;">${employee.role}</div>
+                            <div style="color: #ffd700; font-size: 12px; margin-top: 2px;">${employee.categoryDisplay || employee.positionCategory || 'Employee'}</div>
                         </div>
                     </div>
                     <div style="margin-bottom: 12px;">
                         <div style="color: #00ffff; font-size: 12px; margin-bottom: 4px;">
-                            ${employee.paymentInfo || `$${employee.rate}/hour`}
+                            ${employee.paymentInfo || (employee.positionCategory === 'volunteer' ? 'Volunteer (Unpaid)' : `$${employee.rate}/hour`)}
                         </div>
                         <div style="color: #888; font-size: 12px;">
                             ${employee.phone}
