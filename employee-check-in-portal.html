@@ -292,8 +292,8 @@
             </button>
 
             <div style="text-align: center; margin-top: 15px;">
-                <button onclick="manualCheckIn()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #94a3b8; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer;">
-                    Manual Check-In (GPS Issues?)
+                <button onclick="manualCheckIn()" style="background: linear-gradient(135deg, #ffd700, #ffb347); color: #000; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.3s ease;">
+                    Quick Check-In (Skip GPS)
                 </button>
             </div>
         </div>
@@ -392,9 +392,21 @@
             console.log('Check-in initiated - requesting GPS location');
             showLoading();
             
+            // Add timeout fallback for GPS request
+            const gpsTimeout = setTimeout(() => {
+                console.log('GPS timeout - proceeding with fallback location');
+                currentLocation = {
+                    latitude: 30.2672,
+                    longitude: -87.7431,
+                    accuracy: 'timeout-fallback'
+                };
+                processCheckIn();
+            }, 3000); // 3-second timeout
+            
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
+                        clearTimeout(gpsTimeout);
                         currentLocation = {
                             latitude: position.coords.latitude,
                             longitude: position.coords.longitude,
@@ -405,28 +417,28 @@
                         processCheckIn();
                     },
                     (error) => {
-                        console.log('GPS error:', error.message);
-                        // Allow check-in even if GPS fails (with warning)
+                        clearTimeout(gpsTimeout);
+                        console.log('GPS error:', error.message, error.code);
                         currentLocation = {
-                            latitude: 30.2672, // Default Gulf Coast area
-                            longitude: -97.7431,
-                            accuracy: 100
+                            latitude: 30.2672,
+                            longitude: -87.7431,
+                            accuracy: 'gps-error'
                         };
                         console.log('Using fallback location due to GPS error');
                         processCheckIn();
                     },
                     {
-                        enableHighAccuracy: false, // Reduced accuracy for faster response
-                        timeout: 5000, // Shorter timeout
-                        maximumAge: 60000 // Allow cached location
+                        enableHighAccuracy: false,
+                        timeout: 2500,
+                        maximumAge: 300000 // 5 minutes
                     }
                 );
             } else {
-                // Allow check-in without GPS on unsupported devices
+                clearTimeout(gpsTimeout);
                 currentLocation = {
                     latitude: 30.2672,
-                    longitude: -97.7431,
-                    accuracy: 100
+                    longitude: -87.7431,
+                    accuracy: 'no-gps'
                 };
                 console.log('GPS not available, using default location');
                 processCheckIn();
