@@ -1490,46 +1490,66 @@
             initializeGooglePlacesAutocomplete();
         };
 
-        function initializeGooglePlacesAutocomplete() {
+        async function initializeGooglePlacesAutocomplete() {
             const businessInput = document.getElementById('businessName');
             
-            if (typeof google !== 'undefined' && google.maps && google.maps.places) {
-                console.log('✅ Initializing NEW Google Places AutocompleteElement (2025 API)');
+            if (typeof google !== 'undefined' && google.maps) {
+                console.log('✅ Initializing Google Places integration (2025 optimized)');
                 
                 try {
-                    // Use the NEW PlaceAutocompleteElement API (March 2025+)
-                    if (google.maps.places.PlaceAutocompleteElement) {
-                        const autocompleteElement = new google.maps.places.PlaceAutocompleteElement({
-                            types: ['establishment', 'geocode', 'address'],
-                            fields: ['name', 'formatted_address', 'geometry', 'place_id', 'types', 'address_components']
+                    // Try the NEW PlaceAutocompleteElement API (beta channel)
+                    console.log('🔄 Attempting to load Places library...');
+                    const { PlaceAutocompleteElement } = await google.maps.importLibrary("places");
+                    
+                    if (PlaceAutocompleteElement) {
+                        console.log('✅ NEW Google Places AutocompleteElement available!');
+                        
+                        const autocompleteElement = new PlaceAutocompleteElement({
+                            locationBias: { radius: 50000, center: { lat: 30.6943, lng: -88.0431 } }, // Gulf Coast area
+                            locationRestriction: { 
+                                north: 35, south: 25, 
+                                east: -80, west: -95 
+                            } // Southeastern US
                         });
+                        
+                        // Style the element to match our design
+                        autocompleteElement.style.width = '100%';
+                        autocompleteElement.style.padding = '16px';
+                        autocompleteElement.style.border = '2px solid #4169e1';
+                        autocompleteElement.style.borderRadius = '15px';
+                        autocompleteElement.style.fontSize = '16px';
+                        autocompleteElement.style.backgroundColor = 'white';
                         
                         // Replace the input with the new element
                         businessInput.parentNode.replaceChild(autocompleteElement, businessInput);
                         autocompleteElement.id = 'businessName';
-                        autocompleteElement.className = businessInput.className;
-                        autocompleteElement.placeholder = 'Enter business name or address...';
                         
-                        autocompleteElement.addEventListener('gmp-placeselect', (event) => {
-                            const place = event.detail.place;
-                            if (place.geometry) {
-                                selectedPlace = place;
-                                const displayName = place.name || place.formatted_address;
-                                showNotification(`Location selected: ${displayName}`, 'success');
-                                console.log('✅ NEW Google Places location selected:', place);
-                            }
+                        autocompleteElement.addEventListener('gmp-placeselect', async (event) => {
+                            const place = event.placePrediction.toPlace();
+                            await place.fetchFields({ 
+                                fields: ['displayName', 'formattedAddress', 'location', 'id']
+                            });
+                            
+                            selectedPlace = {
+                                name: place.displayName,
+                                formatted_address: place.formattedAddress,
+                                geometry: { location: place.location },
+                                place_id: place.id
+                            };
+                            
+                            showNotification(`Location selected: ${place.displayName || place.formattedAddress}`, 'success');
+                            console.log('✅ NEW Google Places location selected:', selectedPlace);
                         });
                         
                         console.log('✅ NEW Google Places AutocompleteElement initialized successfully');
-                    } else {
-                        // Fallback to old API if new one isn't available
-                        console.log('⚠️ New API not available, trying legacy Autocomplete');
-                        initializeLegacyAutocomplete(businessInput);
+                        return;
                     }
                 } catch (error) {
-                    console.log('❌ Error with new Google Places API:', error);
-                    initializeLegacyAutocomplete(businessInput);
+                    console.log('⚠️ New API not available, falling back to legacy Autocomplete:', error);
                 }
+                
+                // Fallback to legacy API
+                initializeLegacyAutocomplete(businessInput);
             } else {
                 console.log('⚠️ Google Maps not available, using enhanced manual search');
                 initializeGlobalSearch();
@@ -1539,7 +1559,7 @@
         function initializeLegacyAutocomplete(businessInput) {
             try {
                 const autocomplete = new google.maps.places.Autocomplete(businessInput, {
-                    types: ['establishment', 'geocode', 'address'],
+                    types: ['geocode'],
                     fields: ['name', 'formatted_address', 'geometry', 'place_id', 'types', 'address_components']
                 });
 
@@ -1618,6 +1638,6 @@
             checkGoogleMapsLoaded();
         };
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCWbTrWVh2m4Vwv99jo5Ff3-gVwn5mLB18&libraries=places&loading=async&callback=initGoogleMaps" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCWbTrWVh2m4Vwv99jo5Ff3-gVwn5mLB18&libraries=places&loading=async&callback=initGoogleMaps&v=beta" async defer></script>
 </body>
 </html>
