@@ -1494,9 +1494,50 @@
             const businessInput = document.getElementById('businessName');
             
             if (typeof google !== 'undefined' && google.maps && google.maps.places) {
-                console.log('✅ Initializing Google Places Autocomplete for address predictions');
+                console.log('✅ Initializing NEW Google Places AutocompleteElement (2025 API)');
                 
-                // Initialize Google Places Autocomplete for full address predictions
+                try {
+                    // Use the NEW PlaceAutocompleteElement API (March 2025+)
+                    if (google.maps.places.PlaceAutocompleteElement) {
+                        const autocompleteElement = new google.maps.places.PlaceAutocompleteElement({
+                            types: ['establishment', 'geocode', 'address'],
+                            fields: ['name', 'formatted_address', 'geometry', 'place_id', 'types', 'address_components']
+                        });
+                        
+                        // Replace the input with the new element
+                        businessInput.parentNode.replaceChild(autocompleteElement, businessInput);
+                        autocompleteElement.id = 'businessName';
+                        autocompleteElement.className = businessInput.className;
+                        autocompleteElement.placeholder = 'Enter business name or address...';
+                        
+                        autocompleteElement.addEventListener('gmp-placeselect', (event) => {
+                            const place = event.detail.place;
+                            if (place.geometry) {
+                                selectedPlace = place;
+                                const displayName = place.name || place.formatted_address;
+                                showNotification(`Location selected: ${displayName}`, 'success');
+                                console.log('✅ NEW Google Places location selected:', place);
+                            }
+                        });
+                        
+                        console.log('✅ NEW Google Places AutocompleteElement initialized successfully');
+                    } else {
+                        // Fallback to old API if new one isn't available
+                        console.log('⚠️ New API not available, trying legacy Autocomplete');
+                        initializeLegacyAutocomplete(businessInput);
+                    }
+                } catch (error) {
+                    console.log('❌ Error with new Google Places API:', error);
+                    initializeLegacyAutocomplete(businessInput);
+                }
+            } else {
+                console.log('⚠️ Google Maps not available, using enhanced manual search');
+                initializeGlobalSearch();
+            }
+        }
+
+        function initializeLegacyAutocomplete(businessInput) {
+            try {
                 const autocomplete = new google.maps.places.Autocomplete(businessInput, {
                     types: ['establishment', 'geocode', 'address'],
                     fields: ['name', 'formatted_address', 'geometry', 'place_id', 'types', 'address_components']
@@ -1509,16 +1550,13 @@
                         const displayName = place.name || place.formatted_address;
                         businessInput.value = displayName;
                         showNotification(`Location selected: ${displayName}`, 'success');
-                        console.log('✅ Google Places location selected:', place);
+                        console.log('✅ Legacy Google Places location selected:', place);
                     }
                 });
 
-                // Also add Places service for manual search
-                const map = new google.maps.Map(document.createElement('div'));
-                placesService = new google.maps.places.PlacesService(map);
-                console.log('✅ Google Places Autocomplete and search initialized successfully');
-            } else {
-                console.log('⚠️ Google Maps not available, using enhanced manual search');
+                console.log('✅ Legacy Google Places Autocomplete initialized as fallback');
+            } catch (error) {
+                console.log('❌ Legacy autocomplete also failed:', error);
                 initializeGlobalSearch();
             }
         }
@@ -1580,6 +1618,6 @@
             checkGoogleMapsLoaded();
         };
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCWbTrWVh2m4Vwv99jo5Ff3-gVwn5mLB18&libraries=places&callback=initGoogleMaps" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCWbTrWVh2m4Vwv99jo5Ff3-gVwn5mLB18&libraries=places&loading=async&callback=initGoogleMaps" async defer></script>
 </body>
 </html>
