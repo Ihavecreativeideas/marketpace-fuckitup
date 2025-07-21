@@ -306,6 +306,9 @@
                     Enable Location Access
                 </button>
             </div>
+            <div id="locationInstructions" style="font-size: 11px; color: #94a3b8; text-align: center; margin-top: 8px; line-height: 1.4; display: none;">
+                If location is blocked: Look for the location icon (📍) in your browser's address bar, click it, and select "Allow"
+            </div>
         </div>
 
         <div class="shift-info">
@@ -393,8 +396,10 @@
                         
                         if (result.state === 'granted') {
                             document.getElementById('locationAddress').textContent = 'GPS location access granted - ready for check-in';
+                            document.getElementById('locationPermissionBtn').style.display = 'none';
                         } else if (result.state === 'denied') {
                             document.getElementById('locationAddress').textContent = 'GPS location denied - please enable location permissions in browser settings';
+                            document.getElementById('locationInstructions').style.display = 'block';
                         } else {
                             document.getElementById('locationAddress').textContent = 'GPS location will be requested during check-in';
                         }
@@ -513,42 +518,50 @@
         }
 
         function requestLocationPermission() {
-            console.log('🔐 Requesting location permission...');
+            console.log('Requesting location permission...');
             
             if (!navigator.geolocation) {
                 showNotification('GPS not available on this device', 'error');
                 return;
             }
             
-            // Request location access to trigger permission dialog
+            // Show loading state
+            const btn = document.getElementById('locationPermissionBtn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Requesting Permission...';
+            btn.disabled = true;
+            
+            // Request location with simpler settings to trigger permission
             navigator.geolocation.getCurrentPosition(
                 (position) => {
-                    console.log('✅ Location permission granted');
-                    document.getElementById('locationAddress').textContent = 'GPS location access granted - ready for check-in';
-                    document.getElementById('locationPermissionBtn').style.display = 'none';
-                    showNotification('Location access enabled! You can now check in.', 'success');
+                    console.log('Location permission granted successfully');
+                    document.getElementById('locationAddress').textContent = `Location access granted - Coordinates: ${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`;
+                    btn.style.display = 'none';
+                    showNotification('Location access enabled! You can now check in with GPS.', 'success');
                 },
                 (error) => {
-                    console.log('❌ Location permission error:', error.message);
-                    let message = 'Location access required. ';
+                    console.log('Location permission denied or failed:', error.message, 'Code:', error.code);
                     
-                    switch(error.code) {
-                        case error.PERMISSION_DENIED:
-                            message += 'Please click the location icon in your browser\'s address bar and allow location access.';
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            message += 'Please check your device\'s location settings.';
-                            break;
-                        default:
-                            message += 'Please try again or use Quick Check-In option.';
+                    // Reset button
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                    
+                    let message = '';
+                    if (error.code === 1) { // PERMISSION_DENIED
+                        message = 'Location permission denied. Please enable location in your browser settings and reload the page.';
+                        document.getElementById('locationAddress').textContent = 'Location blocked - Enable in browser settings';
+                    } else if (error.code === 2) { // POSITION_UNAVAILABLE
+                        message = 'Location unavailable. Please check your device GPS settings.';
+                    } else { // TIMEOUT or other
+                        message = 'Location request failed. Use Quick Check-In or try again.';
                     }
                     
                     showNotification(message, 'error');
                 },
                 {
-                    enableHighAccuracy: true,
-                    timeout: 5000,
-                    maximumAge: 60000
+                    enableHighAccuracy: false, // Reduce requirements to get permission faster
+                    timeout: 10000,
+                    maximumAge: 0 // Force fresh location request
                 }
             );
         }
