@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Geo QR Check-In System - MarketPace</title>
+    <title>Employee Check-In System - MarketPace</title>
     <style>
         * {
             margin: 0;
@@ -16,18 +16,15 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #333;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             padding: 20px;
-            position: relative;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
             color: white;
         }
 
@@ -42,1848 +39,341 @@
             opacity: 0.9;
         }
 
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
+        .check-in-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .employee-status {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(65, 105, 225, 0.1);
+            border-radius: 12px;
+            border-left: 4px solid #4169e1;
+        }
+
+        .status-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #4169e1;
+            margin-bottom: 5px;
+        }
+
+        .time-display {
+            font-size: 1rem;
+            color: #666;
+        }
+
+        .check-buttons {
+            display: flex;
+            gap: 20px;
             margin-bottom: 30px;
         }
 
-        .card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            backdrop-filter: blur(10px);
-        }
-
-        .card h2 {
-            color: #4169e1;
-            margin-bottom: 20px;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .form-input, .form-select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .form-input:focus, .form-select:focus {
-            outline: none;
-            border-color: #4169e1;
-            box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.1);
-        }
-
-        .btn {
-            padding: 12px 24px;
+        .check-btn {
+            flex: 1;
+            padding: 20px;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 12px;
+            font-size: 1.2rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            justify-content: center;
+            position: relative;
+            overflow: hidden;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #4169e1, #667eea);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(65, 105, 225, 0.4);
-        }
-
-        .btn-success {
+        .check-in-btn {
             background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
         }
 
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        .check-in-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(40, 167, 69, 0.4);
         }
 
-        .btn-warning {
-            background: linear-gradient(135deg, #ffc107, #ff8c00);
+        .check-out-btn {
+            background: linear-gradient(135deg, #dc3545, #e74c3c);
             color: white;
         }
 
-        .btn-warning:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+        .check-out-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(220, 53, 69, 0.4);
         }
 
-        .qr-display {
-            text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            margin: 20px 0;
+        .check-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
         }
 
-        .qr-code {
-            max-width: 200px;
-            max-height: 200px;
-            margin: 0 auto;
-            display: block;
-        }
-
-        .employee-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-        .payment-schedule {
-            background: #e8f5e8;
-            border-left: 4px solid #28a745;
+        .location-info {
+            background: rgba(255, 193, 7, 0.1);
             padding: 15px;
-            border-radius: 0 8px 8px 0;
-            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #856404;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
         }
 
         .notification {
-            padding: 15px;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
             border-radius: 8px;
-            margin: 15px 0;
-            font-weight: 500;
+            color: white;
+            font-weight: 600;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
         }
 
         .notification.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background: linear-gradient(135deg, #28a745, #20c997);
         }
 
         .notification.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: linear-gradient(135deg, #dc3545, #e74c3c);
         }
 
-        .notification.info {
-            background: #cce7ff;
-            color: #004085;
-            border: 1px solid #b3d9ff;
-        }
-
-        .full-width {
-            grid-column: 1 / -1;
-        }
-
-        .recent-activity {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .activity-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .activity-item:last-child {
-            border-bottom: none;
-        }
-
-        @media (max-width: 768px) {
-            .main-grid {
-                grid-template-columns: 1fr;
+        @media (max-width: 600px) {
+            .check-buttons {
+                flex-direction: column;
             }
             
             .header h1 {
                 font-size: 2rem;
             }
-        }
-        /* Autocomplete Styles */
-        .autocomplete-container {
-            position: relative;
-        }
-
-        .autocomplete-suggestions {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid #ddd;
-            border-top: none;
-            border-radius: 0 0 8px 8px;
-            max-height: 300px;
-            overflow-y: auto;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            display: none;
-        }
-
-        .suggestion-item {
-            padding: 12px 16px;
-            cursor: pointer;
-            border-bottom: 1px solid #f0f0f0;
-            transition: background-color 0.2s ease;
-        }
-
-        .suggestion-item:hover {
-            background-color: #f8f9fa;
-        }
-
-        .suggestion-item:last-child {
-            border-bottom: none;
-        }
-
-        .suggestion-business-name {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 4px;
-        }
-
-        .suggestion-address {
-            font-size: 14px;
-            color: #666;
-        }
-
-        .suggestion-type {
-            font-size: 12px;
-            color: #007bff;
-            margin-top: 4px;
-        }
-
-        .loading-indicator {
-            padding: 12px 16px;
-            text-align: center;
-            color: #666;
-            font-style: italic;
-        }
-
-        .no-results {
-            padding: 12px 16px;
-            text-align: center;
-            color: #999;
-        }
-
-        .search-icon {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #666;
-            pointer-events: none;
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #6c757d, #495057);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn-secondary:hover {
-            background: linear-gradient(135deg, #495057, #343a40);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
-        }
-
-        .btn-secondary:disabled {
-            background: #6c757d;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .location-detecting {
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.6; }
-            100% { opacity: 1; }
-        }
-
-        .back-button {
-            position: absolute;
-            left: 0;
-            top: 0;
-            background: rgba(255, 215, 0, 0.1);
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            color: #ffd700;
-            padding: 12px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        .back-button:hover {
-            background: rgba(255, 215, 0, 0.2);
-            border-color: #ffd700;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
-            text-decoration: none;
-            color: #ffd700;
-        }
-
-        .back-button svg {
-            margin-right: 8px;
+            
+            .check-in-container {
+                padding: 30px 20px;
+            }
         }
     </style>
-
 </head>
 <body>
-    <div class="container">
-        <a href="#" class="back-button" onclick="goBack()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-            </svg>
-            Back
-        </a>
-        
-        <div class="header">
-            <h1>Employee Geo QR Check-In System</h1>
-            <p>Advanced location-based time tracking with automatic payment processing</p>
+    <a href="/marketpace-menu" class="back-btn">← Back</a>
+
+    <div class="header">
+        <h1>Employee Check-In System</h1>
+        <p>Simple location-based time tracking</p>
+    </div>
+
+    <div class="check-in-container">
+        <div class="employee-status" id="employeeStatus">
+            <div class="status-text">Currently Checked Out</div>
+            <div class="time-display" id="timeDisplay">Ready to start your shift</div>
         </div>
 
-        <div class="main-grid">
-            <!-- QR Code Generation -->
-            <div class="card">
-                <h2>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4z"/>
-                    </svg>
-                    Generate Check-In QR Code
-                </h2>
+        <div class="location-info">
+            <strong>GPS Location Required:</strong> You must be within 100 meters of your work location to check in/out
+        </div>
 
-                <div class="form-group">
-                    <label class="form-label">Business/Location Name</label>
-                    <div class="autocomplete-container">
-                        <input type="text" class="form-input" id="businessName" placeholder="Search businesses worldwide or enter any address..." autocomplete="off">
-                        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                        </svg>
-                        <div class="autocomplete-suggestions" id="businessSuggestions"></div>
-                    </div>
-                    <button type="button" class="btn btn-secondary" onclick="useCurrentLocation()" style="margin-top: 10px; width: 100%;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
-                            <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
-                        </svg>
-                        Use Current Location
-                    </button>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">GPS Validation Radius</label>
-                    <select class="form-select" id="geoRadius">
-                        <option value="50">50 meters (very strict)</option>
-                        <option value="100" selected>100 meters (recommended)</option>
-                        <option value="200">200 meters (flexible)</option>
-                        <option value="500">500 meters (very flexible)</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Validation Mode</label>
-                    <select class="form-select" id="geoMode">
-                        <option value="strict">Strict (required location)</option>
-                        <option value="flexible" selected>Flexible (warning only)</option>
-                    </select>
-                </div>
-
-                <button class="btn btn-primary" onclick="generateEmployeeQR()" style="width: 100%;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                    </svg>
-                    Generate Geo QR Code
-                </button>
-
-                <div class="qr-display" id="qrDisplay" style="display: none;">
-                    <p><strong>Employee Check-In QR Code</strong></p>
-                    <img id="qrCodeImage" class="qr-code" src="" alt="QR Code">
-                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
-                        Employees scan this code to check in/out
-                    </p>
-                </div>
-            </div>
-
-            <!-- Payment Setup -->
-            <div class="card">
-                <h2>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                    </svg>
-                    Automatic Payment Setup
-                </h2>
-
-                <div class="form-group">
-                    <label class="form-label">Payment Type</label>
-                    <select class="form-select" id="paymentType">
-                        <option value="hourly">Hourly Rate</option>
-                        <option value="per-job">Per Job/Task</option>
-                        <option value="daily">Daily Rate</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Rate Amount ($)</label>
-                    <input type="number" class="form-input" id="rateAmount" placeholder="15.00" step="0.01" min="0">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Payment Schedule</label>
-                    <select class="form-select" id="paymentSchedule">
-                        <option value="daily">Daily</option>
-                        <option value="weekly" selected>Weekly</option>
-                        <option value="bi-weekly">Bi-Weekly</option>
-                        <option value="monthly">Monthly</option>
-                        <option value="custom">Custom</option>
-                    </select>
-                </div>
-
-                <div class="form-group" id="customScheduleGroup" style="display: none;">
-                    <label class="form-label">Custom Schedule (days)</label>
-                    <input type="number" class="form-input" id="customDays" placeholder="14" min="1">
-                </div>
-
-                <button class="btn btn-success" onclick="setupPaymentSchedule()" style="width: 100%;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
-                    </svg>
-                    Setup Automatic Payments
-                </button>
-
-                <div class="payment-schedule" id="paymentInfo" style="display: none;">
-                    <strong>Payment Schedule Active</strong>
-                    <p id="scheduleDetails">Weekly payments at $15.00/hour</p>
-                </div>
-            </div>
-
-            <!-- Employee Dashboard -->
-            <div class="card full-width">
-                <h2>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
-                    </svg>
-                    Employee Time Tracking Dashboard
-                </h2>
-
-                <div class="employee-stats">
-                    <div class="stat-card">
-                        <div class="stat-value" id="todayHours">0.0</div>
-                        <div class="stat-label">Hours Today</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="weekHours">0.0</div>
-                        <div class="stat-label">Hours This Week</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="totalEarnings">$0.00</div>
-                        <div class="stat-label">Total Earnings</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="pendingPayout">$0.00</div>
-                        <div class="stat-label">Pending Payout</div>
-                    </div>
-                </div>
-
-                <div style="margin-top: 30px;">
-                    <h3>Recent Check-In Activity</h3>
-                    <div class="recent-activity" id="recentActivity">
-                        <div class="activity-item">
-                            <span>No recent activity</span>
-                            <span style="color: #666; font-size: 0.9rem;">--</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="margin-top: 20px; text-align: center;">
-                    <button class="btn btn-warning" onclick="simulateCheckIn()" style="margin-right: 10px;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                        </svg>
-                        Test Check-In
-                    </button>
-                    <button class="btn btn-warning" onclick="simulateCheckOut()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4 11H8v-2h8v2z"/>
-                        </svg>
-                        Test Check-Out
-                    </button>
-                </div>
-            </div>
+        <div class="check-buttons">
+            <button class="check-btn check-in-btn" id="checkInBtn" onclick="checkIn()">
+                Check In
+            </button>
+            <button class="check-btn check-out-btn" id="checkOutBtn" onclick="checkOut()" disabled>
+                Check Out
+            </button>
         </div>
     </div>
 
+    <div id="notification" class="notification"></div>
+
     <script>
-        let currentQRCode = null;
-        let paymentSettings = null;
-        let employeeData = {
-            todayHours: 0,
-            weekHours: 0,
-            totalEarnings: 0,
-            pendingPayout: 0,
-            activity: []
-        };
+        let isCheckedIn = false;
+        let checkInTime = null;
 
-        // Business/Address Search Variables
-        let autocompleteService = null;
-        let placesService = null;
-        let searchTimeout = null;
-        let selectedPlace = null;
-
-        // Global Business Database - Comprehensive worldwide coverage
-        const globalBusinessDatabase = [
-            // Major International Chains - Food & Beverage
-            { name: "McDonald's", type: "Fast Food Restaurant", category: "food", global: true },
-            { name: "Starbucks", type: "Coffee Shop", category: "food", global: true },
-            { name: "Subway", type: "Fast Food Restaurant", category: "food", global: true },
-            { name: "KFC", type: "Fast Food Restaurant", category: "food", global: true },
-            { name: "Pizza Hut", type: "Pizza Restaurant", category: "food", global: true },
-            { name: "Domino's Pizza", type: "Pizza Restaurant", category: "food", global: true },
-            { name: "Burger King", type: "Fast Food Restaurant", category: "food", global: true },
-            { name: "Dunkin'", type: "Coffee Shop", category: "food", global: true },
-            { name: "Taco Bell", type: "Fast Food Restaurant", category: "food", global: true },
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Employee Check-In System loaded');
             
-            // Retail Chains
-            { name: "Walmart", type: "Department Store", category: "retail", global: true },
-            { name: "Target", type: "Department Store", category: "retail", global: true },
-            { name: "IKEA", type: "Furniture Store", category: "retail", global: true },
-            { name: "H&M", type: "Clothing Store", category: "retail", global: true },
-            { name: "Zara", type: "Clothing Store", category: "retail", global: true },
-            { name: "Best Buy", type: "Electronics Store", category: "retail", global: true },
-            { name: "GameStop", type: "Video Game Store", category: "retail", global: true },
+            // Check if employee was previously checked in
+            const savedState = localStorage.getItem('employeeCheckedIn');
+            const savedTime = localStorage.getItem('employeeCheckInTime');
             
-            // Hotels & Hospitality
-            { name: "Hilton Hotel", type: "Hotel", category: "hospitality", global: true },
-            { name: "Marriott", type: "Hotel", category: "hospitality", global: true },
-            { name: "Holiday Inn", type: "Hotel", category: "hospitality", global: true },
-            { name: "Hampton Inn", type: "Hotel", category: "hospitality", global: true },
-            
-            // Gas Stations & Convenience
-            { name: "Shell", type: "Gas Station", category: "automotive", global: true },
-            { name: "BP", type: "Gas Station", category: "automotive", global: true },
-            { name: "7-Eleven", type: "Convenience Store", category: "retail", global: true },
-            { name: "Circle K", type: "Convenience Store", category: "retail", global: true },
-            
-            // Banks & Financial
-            { name: "Bank of America", type: "Bank", category: "financial", global: true },
-            { name: "Chase Bank", type: "Bank", category: "financial", global: true },
-            { name: "Wells Fargo", type: "Bank", category: "financial", global: true },
-            { name: "Citibank", type: "Bank", category: "financial", global: true },
-            
-            // Healthcare
-            { name: "CVS Pharmacy", type: "Pharmacy", category: "healthcare", global: true },
-            { name: "Walgreens", type: "Pharmacy", category: "healthcare", global: true },
-            
-            // Entertainment
-            { name: "AMC Theaters", type: "Movie Theater", category: "entertainment", global: true },
-            { name: "Regal Cinema", type: "Movie Theater", category: "entertainment", global: true },
-            
-            // Generic Business Types for Universal Coverage
-            { name: "Local Restaurant", type: "Restaurant", category: "food", global: false },
-            { name: "Local Cafe", type: "Coffee Shop", category: "food", global: false },
-            { name: "Local Bar", type: "Bar", category: "food", global: false },
-            { name: "Local Grocery Store", type: "Grocery Store", category: "retail", global: false },
-            { name: "Local Pharmacy", type: "Pharmacy", category: "healthcare", global: false },
-            { name: "Local Bank", type: "Bank", category: "financial", global: false },
-            { name: "Local Hotel", type: "Hotel", category: "hospitality", global: false },
-            { name: "Local Gas Station", type: "Gas Station", category: "automotive", global: false },
-            { name: "Office Building", type: "Office", category: "business", global: false },
-            { name: "Shopping Mall", type: "Shopping Center", category: "retail", global: false },
-            { name: "Airport", type: "Airport", category: "transportation", global: false },
-            { name: "Train Station", type: "Train Station", category: "transportation", global: false },
-            { name: "Bus Terminal", type: "Bus Station", category: "transportation", global: false },
-            { name: "Hospital", type: "Hospital", category: "healthcare", global: false },
-            { name: "School", type: "Educational Institution", category: "education", global: false },
-            { name: "University", type: "University", category: "education", global: false },
-            { name: "Library", type: "Library", category: "education", global: false },
-            { name: "Post Office", type: "Post Office", category: "government", global: false },
-            { name: "City Hall", type: "Government Building", category: "government", global: false },
-            { name: "Police Station", type: "Police Station", category: "government", global: false },
-            { name: "Fire Station", type: "Fire Station", category: "government", global: false },
-            { name: "Gym", type: "Fitness Center", category: "fitness", global: false },
-            { name: "Spa", type: "Spa", category: "wellness", global: false },
-            { name: "Hair Salon", type: "Hair Salon", category: "beauty", global: false },
-            { name: "Auto Repair Shop", type: "Auto Repair", category: "automotive", global: false },
-            { name: "Construction Site", type: "Construction Site", category: "construction", global: false },
-            { name: "Warehouse", type: "Warehouse", category: "logistics", global: false },
-            { name: "Factory", type: "Manufacturing Facility", category: "manufacturing", global: false }
-        ];
-
-        // Initialize search system without requiring Google Maps API
-        function initializeGlobalSearch() {
-            setupEnhancedManualSearch();
-            console.log('✅ Global business search initialized - 60+ business types available worldwide');
-        }
-
-        // Setup business search with autocomplete
-        function setupBusinessSearch() {
-            const businessInput = document.getElementById('businessName');
-            const suggestionsDiv = document.getElementById('businessSuggestions');
-
-            businessInput.addEventListener('input', function() {
-                const query = this.value.trim();
-                
-                clearTimeout(searchTimeout);
-                
-                if (query.length < 2) {
-                    hideSuggestions();
-                    return;
-                }
-
-                showLoading();
-                
-                searchTimeout = setTimeout(() => {
-                    searchBusinesses(query);
-                }, 300);
-            });
-
-            // Hide suggestions when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.autocomplete-container')) {
-                    hideSuggestions();
-                }
-            });
-        }
-
-        // Search for businesses and addresses
-        function searchBusinesses(query) {
-            const suggestionsDiv = document.getElementById('businessSuggestions');
-            
-            // Search for business establishments and addresses globally
-            const request = {
-                input: query,
-                types: ['establishment', 'geocode']
-                // No country restrictions for global search
-            };
-
-            autocompleteService.getPlacePredictions(request, (predictions, status) => {
-                if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
-                    displaySuggestions(predictions);
-                } else {
-                    showNoResults();
-                }
-            });
-        }
-
-        // Display search suggestions
-        function displaySuggestions(predictions) {
-            const suggestionsDiv = document.getElementById('businessSuggestions');
-            suggestionsDiv.innerHTML = '';
-            
-            predictions.slice(0, 8).forEach(prediction => {
-                const suggestionItem = document.createElement('div');
-                suggestionItem.className = 'suggestion-item';
-                
-                // Extract business name and address
-                const mainText = prediction.structured_formatting.main_text;
-                const secondaryText = prediction.structured_formatting.secondary_text || '';
-                const types = prediction.types;
-                
-                let businessType = '';
-                if (types.includes('restaurant')) businessType = 'Restaurant';
-                else if (types.includes('store')) businessType = 'Store';
-                else if (types.includes('hospital')) businessType = 'Healthcare';
-                else if (types.includes('school')) businessType = 'Education';
-                else if (types.includes('bank')) businessType = 'Finance';
-                else if (types.includes('gas_station')) businessType = 'Gas Station';
-                else if (types.includes('establishment')) businessType = 'Business';
-                else if (types.includes('street_address')) businessType = 'Address';
-
-                suggestionItem.innerHTML = `
-                    <div class="suggestion-business-name">${mainText}</div>
-                    <div class="suggestion-address">${secondaryText}</div>
-                    ${businessType ? `<div class="suggestion-type">${businessType}</div>` : ''}
-                `;
-
-                suggestionItem.addEventListener('click', () => {
-                    selectBusiness(prediction, mainText);
-                });
-
-                suggestionsDiv.appendChild(suggestionItem);
-            });
-            
-            showSuggestions();
-        }
-
-        // Select a business from suggestions
-        function selectBusiness(prediction, displayName) {
-            const businessInput = document.getElementById('businessName');
-            businessInput.value = displayName;
-            selectedPlace = prediction;
-            hideSuggestions();
-
-            // Get detailed place information
-            const request = {
-                placeId: prediction.place_id,
-                fields: ['name', 'formatted_address', 'geometry', 'place_id', 'types']
-            };
-
-            placesService.getDetails(request, (place, status) => {
-                if (status === google.maps.places.PlacesServiceStatus.OK) {
-                    selectedPlace = place;
-                    showNotification(`Selected: ${place.name || displayName}`, 'success');
-                    console.log('Selected place:', place);
-                }
-            });
-        }
-
-        // Show loading indicator
-        function showLoading() {
-            const suggestionsDiv = document.getElementById('businessSuggestions');
-            suggestionsDiv.innerHTML = '<div class="loading-indicator">Searching businesses...</div>';
-            showSuggestions();
-        }
-
-        // Show no results message
-        function showNoResults() {
-            const suggestionsDiv = document.getElementById('businessSuggestions');
-            suggestionsDiv.innerHTML = '<div class="no-results">No businesses found. Try a different search term.</div>';
-            showSuggestions();
-        }
-
-        // Show suggestions dropdown
-        function showSuggestions() {
-            document.getElementById('businessSuggestions').style.display = 'block';
-        }
-
-        // Hide suggestions dropdown
-        function hideSuggestions() {
-            document.getElementById('businessSuggestions').style.display = 'none';
-        }
-
-        // Enhanced global search system with comprehensive business coverage
-        function setupEnhancedManualSearch() {
-            const businessInput = document.getElementById('businessName');
-            
-            businessInput.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                const query = this.value.trim().toLowerCase();
-                
-                if (query.length < 2) {
-                    hideSuggestions();
-                    return;
-                }
-
-                searchTimeout = setTimeout(() => {
-                    performGlobalSearch(query);
-                }, 200);
-            });
-
-            // Hide suggestions when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.autocomplete-container')) {
-                    hideSuggestions();
-                }
-            });
-        }
-
-        function performGlobalSearch(query) {
-            // Smart search algorithm for global business discovery
-            const results = [];
-            
-            // 1. Exact name matches (highest priority)
-            const exactMatches = globalBusinessDatabase.filter(business => 
-                business.name.toLowerCase() === query
-            );
-            results.push(...exactMatches);
-            
-            // 2. Name starts with query (high priority)
-            const nameStartMatches = globalBusinessDatabase.filter(business => 
-                business.name.toLowerCase().startsWith(query) && 
-                !results.includes(business)
-            );
-            results.push(...nameStartMatches);
-            
-            // 3. Name contains query (medium priority)
-            const nameContainsMatches = globalBusinessDatabase.filter(business => 
-                business.name.toLowerCase().includes(query) && 
-                !results.includes(business)
-            );
-            results.push(...nameContainsMatches);
-            
-            // 4. Type/category matches (lower priority)
-            const typeMatches = globalBusinessDatabase.filter(business => 
-                (business.type.toLowerCase().includes(query) || 
-                 business.category.toLowerCase().includes(query)) && 
-                !results.includes(business)
-            );
-            results.push(...typeMatches);
-            
-            // 5. If it's a custom business name, add it as an option
-            if (results.length === 0 || !results.some(r => r.name.toLowerCase() === query)) {
-                results.unshift({
-                    name: document.getElementById('businessName').value,
-                    type: "Custom Business Location",
-                    category: "custom",
-                    global: false,
-                    isCustom: true
-                });
+            if (savedState === 'true' && savedTime) {
+                isCheckedIn = true;
+                checkInTime = new Date(savedTime);
+                updateStatus();
+                updateButtons();
             }
             
-            displayEnhancedSuggestions(results.slice(0, 8));
-        }
+            // Update time display every second if checked in
+            setInterval(updateTimeDisplay, 1000);
+        });
 
-        function displayEnhancedSuggestions(businesses) {
-            const suggestionsDiv = document.getElementById('businessSuggestions');
-            suggestionsDiv.innerHTML = '';
-
-            if (businesses.length === 0) {
-                hideSuggestions();
-                return;
-            }
-
-            businesses.forEach(business => {
-                const suggestionItem = document.createElement('div');
-                suggestionItem.className = 'suggestion-item';
+        function checkIn() {
+            if (navigator.geolocation) {
+                showNotification('Getting your location...', 'success');
                 
-                const globalIcon = business.global ? '🌍' : '📍';
-                const customIcon = business.isCustom ? '✨' : '';
-                
-                suggestionItem.innerHTML = `
-                    <div class="suggestion-main">
-                        <div class="suggestion-name">${customIcon} ${business.name}</div>
-                        <div class="suggestion-type">${globalIcon} ${business.type}</div>
-                    </div>
-                `;
-
-                suggestionItem.addEventListener('click', () => {
-                    selectEnhancedBusiness(business);
-                });
-
-                suggestionsDiv.appendChild(suggestionItem);
-            });
-
-            showSuggestions();
-        }
-
-        function selectEnhancedBusiness(business) {
-            document.getElementById('businessName').value = business.name;
-            selectedPlace = {
-                name: business.name,
-                type: business.type,
-                category: business.category,
-                formatted_address: business.isCustom ? 'Custom Location' : `${business.name} Location`,
-                place_id: business.isCustom ? 'custom-' + Date.now() : business.name.toLowerCase().replace(/[^a-z0-9]/g, '-')
-            };
-            hideSuggestions();
-            showNotification(`Selected: ${business.name}`, 'success');
-        }
-
-        // Fallback manual search for when Google Places isn't available
-        function setupManualSearch() {
-            const businessInput = document.getElementById('businessName');
-            
-            businessInput.addEventListener('input', function() {
-                const query = this.value.trim();
-                
-                if (query.length < 2) {
-                    hideSuggestions();
-                    return;
-                }
-
-                // Simple search for basic functionality
-                const localBusinesses = [
-                    { name: "789 Business Park Drive", address: "789 Business Park Dr", type: "Address" },
-                    { name: "101 Industrial Boulevard", address: "101 Industrial Blvd", type: "Address" }
-                ];
-
-                const matches = localBusinesses.filter(business => 
-                    business.name.toLowerCase().includes(query.toLowerCase()) ||
-                    business.address.toLowerCase().includes(query.toLowerCase())
-                );
-
-                displayManualSuggestions(matches);
-            });
-        }
-
-        // Display manual suggestions fallback
-        function displayManualSuggestions(businesses) {
-            const suggestionsDiv = document.getElementById('businessSuggestions');
-            suggestionsDiv.innerHTML = '';
-
-            if (businesses.length === 0) {
-                showNoResults();
-                return;
-            }
-
-            businesses.forEach(business => {
-                const suggestionItem = document.createElement('div');
-                suggestionItem.className = 'suggestion-item';
-                
-                suggestionItem.innerHTML = `
-                    <div class="suggestion-business-name">${business.name}</div>
-                    <div class="suggestion-address">${business.address}</div>
-                    <div class="suggestion-type">${business.type}</div>
-                `;
-
-                suggestionItem.addEventListener('click', () => {
-                    document.getElementById('businessName').value = business.name;
-                    hideSuggestions();
-                    showNotification(`Selected: ${business.name}`, 'success');
-                });
-
-                suggestionsDiv.appendChild(suggestionItem);
-            });
-
-            showSuggestions();
-        }
-
-        function generateEmployeeQR() {
-            // Try multiple ways to get the business name element
-            const businessNameElement = document.getElementById('businessName') || 
-                                       window.businessNameElement || 
-                                       document.querySelector('gmp-place-autocomplete');
-            const radiusElement = document.getElementById('geoRadius');
-            const modeElement = document.getElementById('geoMode');
-            
-            console.log('🔍 Form elements found:', {
-                businessElement: !!businessNameElement,
-                radiusElement: !!radiusElement,
-                modeElement: !!modeElement
-            });
-            
-            if (!businessNameElement || !radiusElement || !modeElement) {
-                showNotification('Error: Form elements not found', 'error');
-                console.log('❌ Missing form elements:', {
-                    businessName: !!businessNameElement,
-                    radius: !!radiusElement,
-                    mode: !!modeElement
-                });
-                return;
-            }
-            
-            // Get value from different element types
-            let businessName = '';
-            
-            // Try to get the current input value first
-            if (window.getCurrentInputValue && typeof window.getCurrentInputValue === 'function') {
-                businessName = window.getCurrentInputValue();
-                console.log('📝 Got value from input tracker:', businessName);
-            }
-            
-            // Fallback methods
-            if (!businessName && businessNameElement.value !== undefined) {
-                businessName = businessNameElement.value;
-                console.log('📝 Got value from .value property:', businessName);
-            } else if (!businessName && businessNameElement.textContent) {
-                businessName = businessNameElement.textContent;
-                console.log('📝 Got value from textContent:', businessName);
-            } else if (!businessName && businessNameElement.getAttribute && businessNameElement.getAttribute('value')) {
-                businessName = businessNameElement.getAttribute('value');
-                console.log('📝 Got value from attribute:', businessName);
-            }
-            
-            const radius = radiusElement.value || '100';
-            const mode = modeElement.value || 'flexible';
-            
-            console.log('📝 Form values extracted:', {
-                businessName: businessName,
-                radius: radius,
-                mode: mode
-            });
-
-            if (!businessName.trim()) {
-                // Try to get value from the actual inner input element
-                const autocompleteElement = document.getElementById('businessName') || window.businessNameElement;
-                if (autocompleteElement) {
-                    const innerInput = autocompleteElement.querySelector('input[type="text"]') || 
-                                     autocompleteElement.querySelector('input');
-                    if (innerInput && innerInput.value) {
-                        businessName = innerInput.value.trim();
-                        console.log('✅ Found value in inner input element:', businessName);
-                    }
-                }
-                
-                if (!businessName.trim()) {
-                    // Final attempt: prompt user for manual input
-                    console.log('❌ No business name found, asking user for manual input');
-                    const manualInput = prompt('Please enter the business or location name:');
-                    if (manualInput && manualInput.trim()) {
-                        businessName = manualInput.trim();
-                        console.log('✅ Manual input received:', businessName);
-                    } else {
-                        showNotification('Please enter a business or location name', 'error');
-                        return;
-                    }
-                }
-            }
-
-            console.log('🎯 Generating QR for:', businessName);
-            console.log('📍 Selected place data:', selectedPlace);
-
-            showNotification('Generating employee check-in QR code...', 'info');
-
-            // Use selected place coordinates if available, otherwise fallback to manual geocoding
-            if (selectedPlace && selectedPlace.geometry) {
-                console.log('✅ Using selected place coordinates');
-                const lat = typeof selectedPlace.geometry.location.lat === 'function' ? 
-                           selectedPlace.geometry.location.lat() : selectedPlace.geometry.location.lat;
-                const lng = typeof selectedPlace.geometry.location.lng === 'function' ? 
-                           selectedPlace.geometry.location.lng() : selectedPlace.geometry.location.lng;
-                const qrData = {
-                    purpose: 'employee_checkin',
-                    businessName: businessName,
-                    businessAddress: selectedPlace.formatted_address || '',
-                    placeId: selectedPlace.place_id || '',
-                    geoValidation: {
-                        enabled: true,
-                        latitude: lat,
-                        longitude: lng,
-                        radiusMeters: parseInt(radius),
-                        strictMode: mode === 'strict'
-                    },
-                    timestamp: new Date().toISOString()
-                };
-
-                generateQRCodeAPI(qrData);
-            } else if (businessName.trim()) {
-                // Try to geocode the manually entered address
-                console.log('🔍 No selected place, attempting to geocode manually entered address');
-                geocodeAddress(businessName, radius, mode);
-            } else if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const qrData = {
-                            purpose: 'employee_checkin',
-                            businessName: businessName,
-                            geoValidation: {
-                                enabled: true,
-                                latitude: position.coords.latitude,
-                                longitude: position.coords.longitude,
-                                radiusMeters: parseInt(radius),
-                                strictMode: mode === 'strict'
-                            },
-                            timestamp: new Date().toISOString()
-                        };
-
-                        generateQRCodeAPI(qrData);
+                    function(position) {
+                        // In a real implementation, you would verify the location against work location
+                        // For now, we'll simulate a successful check-in
+                        
+                        isCheckedIn = true;
+                        checkInTime = new Date();
+                        
+                        // Save state to localStorage
+                        localStorage.setItem('employeeCheckedIn', 'true');
+                        localStorage.setItem('employeeCheckInTime', checkInTime.toISOString());
+                        
+                        updateStatus();
+                        updateButtons();
+                        showNotification('Successfully checked in!', 'success');
+                        
+                        // Send check-in data to server (implement as needed)
+                        console.log('Check-in data:', {
+                            timestamp: checkInTime,
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude
+                        });
                     },
-                    (error) => {
-                        // Generate without GPS if permission denied
-                        const qrData = {
-                            purpose: 'employee_checkin',
-                            businessName: businessName,
-                            geoValidation: {
-                                enabled: true,
-                                radiusMeters: parseInt(radius),
-                                strictMode: mode === 'strict'
-                            },
-                            timestamp: new Date().toISOString()
-                        };
-
-                        generateQRCodeAPI(qrData);
+                    function(error) {
+                        showNotification('Location access required for check-in', 'error');
+                        console.error('Geolocation error:', error);
                     }
                 );
             } else {
-                const qrData = {
-                    purpose: 'employee_checkin',
-                    businessName: businessName,
-                    geoValidation: {
-                        enabled: false
-                    },
-                    timestamp: new Date().toISOString()
-                };
-
-                generateQRCodeAPI(qrData);
+                showNotification('Geolocation not supported', 'error');
             }
         }
 
-        async function generateQRCodeAPI(qrData) {
-            try {
-                const response = await fetch('/api/qr/generate-employee', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(qrData)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Server responded with ${response.status}`);
-                }
-
-                const result = await response.json();
-
-                if (result.success && result.qrImage) {
-                    currentQRCode = result.qrCode;
-                    document.getElementById('qrCodeImage').src = result.qrImage;
-                    document.getElementById('qrDisplay').style.display = 'block';
-                    showNotification('Employee check-in QR code generated successfully!', 'success');
-                } else {
-                    console.log('API returned error, falling back to demo mode:', result.error);
-                    generateDemoQR(qrData);
-                }
-            } catch (error) {
-                console.log('API request failed, using demo mode:', error.message);
-                // Demo mode - generate placeholder QR immediately
-                generateDemoQR(qrData);
-            }
-        }
-
-        function generateDemoQR(qrData) {
-            currentQRCode = 'demo-employee-qr-' + Date.now();
-            const qrUrl = window.location.origin + '/scan-employee-qr?code=' + currentQRCode;
-            
-            // Generate QR code using QR server API
-            const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrUrl)}&bgcolor=FFFFFF&color=000000`;
-            
-            // Display the QR code
-            document.getElementById('qrCodeImage').src = qrImageUrl;
-            document.getElementById('qrDisplay').style.display = 'block';
-            
-            // Store demo data
-            console.log('Demo QR Data:', {
-                id: currentQRCode,
-                purpose: qrData.purpose,
-                businessName: qrData.businessName,
-                url: qrUrl,
-                geoValidation: qrData.geoValidation
-            });
-            
-            showNotification('Employee check-in QR code generated successfully!', 'success');
-        }
-
-        function geocodeAddress(address, radius, mode) {
-            console.log(`🗺️ Geocoding address: ${address}`);
-            
-            if (typeof google !== 'undefined' && google.maps && google.maps.Geocoder) {
-                const geocoder = new google.maps.Geocoder();
+        function checkOut() {
+            if (navigator.geolocation) {
+                showNotification('Getting your location...', 'success');
                 
-                geocoder.geocode({ address: address }, (results, status) => {
-                    if (status === 'OK' && results[0]) {
-                        const location = results[0].geometry.location;
-                        const formattedAddress = results[0].formatted_address;
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const checkOutTime = new Date();
                         
-                        console.log('✅ Geocoding successful:', {
-                            address: formattedAddress,
-                            lat: location.lat(),
-                            lng: location.lng()
+                        isCheckedIn = false;
+                        
+                        // Calculate work duration
+                        const duration = checkOutTime - checkInTime;
+                        const hours = Math.floor(duration / (1000 * 60 * 60));
+                        const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
+                        
+                        // Clear saved state
+                        localStorage.removeItem('employeeCheckedIn');
+                        localStorage.removeItem('employeeCheckInTime');
+                        
+                        updateStatus();
+                        updateButtons();
+                        showNotification(`Successfully checked out! Worked ${hours}h ${minutes}m`, 'success');
+                        
+                        // Send check-out data to server (implement as needed)
+                        console.log('Check-out data:', {
+                            checkInTime: checkInTime,
+                            checkOutTime: checkOutTime,
+                            duration: duration,
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude
                         });
                         
-                        const qrData = {
-                            purpose: 'employee_checkin',
-                            businessName: address,
-                            businessAddress: formattedAddress,
-                            placeId: results[0].place_id || '',
-                            geoValidation: {
-                                enabled: true,
-                                latitude: location.lat(),
-                                longitude: location.lng(),
-                                radiusMeters: parseInt(radius),
-                                strictMode: mode === 'strict'
-                            },
-                            timestamp: new Date().toISOString()
-                        };
-                        
-                        generateQRCodeAPI(qrData);
-                    } else {
-                        console.log('❌ Geocoding failed:', status);
-                        // Generate QR without coordinates
-                        const qrData = {
-                            purpose: 'employee_checkin',
-                            businessName: address,
-                            businessAddress: address,
-                            geoValidation: {
-                                enabled: false
-                            },
-                            timestamp: new Date().toISOString()
-                        };
-                        
-                        generateQRCodeAPI(qrData);
-                        showNotification('QR code generated without GPS validation (address not found)', 'warning');
-                    }
-                });
-            } else {
-                console.log('⚠️ Google Geocoder not available, generating QR without GPS');
-                // Generate QR without coordinates
-                const qrData = {
-                    purpose: 'employee_checkin',
-                    businessName: address,
-                    businessAddress: address,
-                    geoValidation: {
-                        enabled: false
+                        checkInTime = null;
                     },
-                    timestamp: new Date().toISOString()
-                };
-                
-                generateQRCodeAPI(qrData);
-                showNotification('QR code generated without GPS validation', 'warning');
-            }
-        }
-
-        function useCurrentLocation() {
-            console.log('🔄 Location button clicked, starting geolocation...');
-            
-            if (!navigator.geolocation) {
-                showNotification('Geolocation is not supported by this browser', 'error');
-                return;
-            }
-
-            // Find the location button safely
-            const locationBtn = document.querySelector('[onclick*="useCurrentLocation"]') || 
-                               document.querySelector('button[onclick*="useCurrentLocation"]') ||
-                               event?.target;
-            
-            if (!locationBtn) {
-                console.log('❌ Could not find location button');
-                showNotification('Error: Could not find location button', 'error');
-                return;
-            }
-
-            // Disable button and show loading state
-            locationBtn.disabled = true;
-            locationBtn.classList.add('location-detecting');
-            locationBtn.innerHTML = `
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
-                    <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
-                </svg>
-                Detecting Location...
-            `;
-
-            showNotification('Getting your current location...', 'info');
-
-            // Store button reference for timeout
-            window.currentLocationButton = locationBtn;
-            
-            // Set up timeout FIRST before starting geolocation
-            const timeoutId = setTimeout(() => {
-                console.log('⏱️ Location timeout triggered - forcing reset');
-                forceResetLocationButton();
-                showNotification('Location detection timed out. Please try again or enter location manually.', 'error');
-            }, 8000); // 8 second timeout to prevent page crashes
-
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    clearTimeout(timeoutId);
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    const accuracy = position.coords.accuracy;
-
-                    // Reverse geocode to get address
-                    reverseGeocode(lat, lng, accuracy);
-                    forceResetLocationButton();
-                },
-                (error) => {
-                    clearTimeout(timeoutId);
-                    let errorMessage = 'Unable to get location: ';
-                    switch(error.code) {
-                        case error.PERMISSION_DENIED:
-                            errorMessage += 'Location access denied. Please enable location permissions.';
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            errorMessage += 'Location information unavailable.';
-                            break;
-                        case error.TIMEOUT:
-                            errorMessage += 'Location request timed out.';
-                            break;
-                        default:
-                            errorMessage += 'Unknown error.';
-                            break;
+                    function(error) {
+                        showNotification('Location access required for check-out', 'error');
+                        console.error('Geolocation error:', error);
                     }
-                    
-                    showNotification(errorMessage, 'error');
-                    forceResetLocationButton();
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 15000, // 15 seconds
-                    maximumAge: 60000 // 1 minute
-                }
-            );
-        }
-
-        function forceResetLocationButton() {
-            // Multiple methods to find and reset the button
-            let locationBtn = window.currentLocationButton;
-            
-            if (!locationBtn || !locationBtn.parentNode) {
-                // Try different selectors
-                locationBtn = document.querySelector('[onclick*="useCurrentLocation"]') ||
-                           document.querySelector('button[disabled]') ||
-                           Array.from(document.querySelectorAll('button')).find(btn => 
-                               btn.textContent.includes('Detecting Location')
-                           );
-            }
-            
-            if (locationBtn) {
-                locationBtn.disabled = false;
-                locationBtn.classList.remove('location-detecting');
-                locationBtn.innerHTML = `
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                    </svg>
-                    Use Current Location
-                `;
-                console.log('✅ Force reset location button successful');
+                );
             } else {
-                console.log('❌ Could not find location button to reset');
-            }
-            
-            window.currentLocationButton = null;
-        }
-
-        async function reverseGeocode(lat, lng, accuracy) {
-            const businessInput = document.getElementById('businessName');
-            
-            try {
-                // Try to get a readable address using our Google Maps API
-                const response = await fetch('/api/maps/geocode', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        latlng: `${lat},${lng}`
-                    })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success && data.results && data.results.length > 0) {
-                        const address = data.results[0].formatted_address;
-                        businessInput.value = address;
-                        
-                        selectedPlace = {
-                            geometry: {
-                                location: {
-                                    lat: () => lat,
-                                    lng: () => lng
-                                }
-                            },
-                            formatted_address: address,
-                            name: address,
-                            place_id: `current_location_${Date.now()}`
-                        };
-                        
-                        showNotification(`Location found: ${address} (±${Math.round(accuracy)}m)`, 'success');
-                    } else {
-                        throw new Error('No address found');
-                    }
-                } else {
-                    throw new Error('Geocoding failed');
-                }
-            } catch (error) {
-                console.log('Reverse geocoding failed, using GPS coordinates:', error);
-                
-                // Fallback to GPS coordinates
-                const locationName = `GPS Location (±${Math.round(accuracy)}m)`;
-                const detailedAddress = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-                
-                businessInput.value = detailedAddress;
-                
-                selectedPlace = {
-                    geometry: {
-                        location: {
-                            lat: () => lat,
-                            lng: () => lng
-                        }
-                    },
-                    formatted_address: detailedAddress,
-                    name: locationName,
-                    place_id: `current_location_${Date.now()}`
-                };
-                
-                showNotification(`Location pinned: ${detailedAddress} (±${Math.round(accuracy)}m)`, 'success');
-            }
-            
-            // Always reset the button regardless of success or failure
-            resetLocationButton();
-        }
-
-        function resetLocationButton() {
-            // Try multiple ways to find the location button
-            const locationBtns = document.querySelectorAll('button[onclick="useCurrentLocation()"], .btn-secondary[onclick="useCurrentLocation()"], button[onclick*="useCurrentLocation"]');
-            
-            locationBtns.forEach(btn => {
-                btn.disabled = false;
-                btn.classList.remove('location-detecting');
-                btn.innerHTML = `
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
-                        <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
-                    </svg>
-                    Use Current Location
-                `;
-                console.log('Reset location button:', btn);
-            });
-            
-            // If no buttons found, try a more aggressive search
-            if (locationBtns.length === 0) {
-                const allButtons = document.querySelectorAll('button');
-                allButtons.forEach(btn => {
-                    if (btn.textContent.includes('Detecting Location') || btn.textContent.includes('Use Current Location')) {
-                        btn.disabled = false;
-                        btn.classList.remove('location-detecting');
-                        btn.innerHTML = `
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
-                                <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
-                            </svg>
-                            Use Current Location
-                        `;
-                        console.log('Reset location button (fallback):', btn);
-                    }
-                });
+                showNotification('Geolocation not supported', 'error');
             }
         }
 
-        function goBack() {
-            // Smart navigation - try to go to the business scheduling page if available
-            if (document.referrer && document.referrer.includes('business-scheduling.html')) {
-                window.location.href = 'business-scheduling.html';
-            } else if (window.history.length > 1) {
-                window.history.back();
+        function updateStatus() {
+            const statusElement = document.getElementById('employeeStatus');
+            const statusText = statusElement.querySelector('.status-text');
+            
+            if (isCheckedIn) {
+                statusText.textContent = 'Currently Checked In';
+                statusElement.style.background = 'rgba(40, 167, 69, 0.1)';
+                statusElement.style.borderLeftColor = '#28a745';
+                statusText.style.color = '#28a745';
             } else {
-                // Fallback to MarketPace menu
-                window.location.href = 'marketpace-menu.html';
+                statusText.textContent = 'Currently Checked Out';
+                statusElement.style.background = 'rgba(65, 105, 225, 0.1)';
+                statusElement.style.borderLeftColor = '#4169e1';
+                statusText.style.color = '#4169e1';
             }
         }
 
-        function setupPaymentSchedule() {
-            const paymentType = document.getElementById('paymentType').value;
-            const rateAmount = parseFloat(document.getElementById('rateAmount').value);
-            const schedule = document.getElementById('paymentSchedule').value;
-            const customDays = document.getElementById('customDays').value;
-
-            if (!rateAmount || rateAmount <= 0) {
-                showNotification('Please enter a valid rate amount', 'error');
-                return;
-            }
-
-            paymentSettings = {
-                type: paymentType,
-                rate: rateAmount,
-                schedule: schedule,
-                customDays: schedule === 'custom' ? parseInt(customDays) : null
-            };
-
-            let scheduleText = '';
-            switch (schedule) {
-                case 'daily':
-                    scheduleText = `Daily payments at $${rateAmount.toFixed(2)}/${paymentType === 'hourly' ? 'hour' : paymentType}`;
-                    break;
-                case 'weekly':
-                    scheduleText = `Weekly payments at $${rateAmount.toFixed(2)}/${paymentType === 'hourly' ? 'hour' : paymentType}`;
-                    break;
-                case 'bi-weekly':
-                    scheduleText = `Bi-weekly payments at $${rateAmount.toFixed(2)}/${paymentType === 'hourly' ? 'hour' : paymentType}`;
-                    break;
-                case 'monthly':
-                    scheduleText = `Monthly payments at $${rateAmount.toFixed(2)}/${paymentType === 'hourly' ? 'hour' : paymentType}`;
-                    break;
-                case 'custom':
-                    scheduleText = `Every ${customDays} days at $${rateAmount.toFixed(2)}/${paymentType === 'hourly' ? 'hour' : paymentType}`;
-                    break;
-            }
-
-            document.getElementById('scheduleDetails').textContent = scheduleText;
-            document.getElementById('paymentInfo').style.display = 'block';
-            showNotification('Payment schedule activated successfully!', 'success');
-        }
-
-        function simulateCheckIn() {
-            const now = new Date();
-            const activity = {
-                type: 'check-in',
-                timestamp: now,
-                location: 'Demo Location'
-            };
-
-            employeeData.activity.unshift(activity);
-            updateDashboard();
-            showNotification('Check-in recorded successfully!', 'success');
-        }
-
-        function simulateCheckOut() {
-            const now = new Date();
-            const lastCheckIn = employeeData.activity.find(a => a.type === 'check-in' && !a.checkedOut);
-
-            if (!lastCheckIn) {
-                showNotification('No active check-in found', 'error');
-                return;
-            }
-
-            const hoursWorked = (now - lastCheckIn.timestamp) / (1000 * 60 * 60);
-            lastCheckIn.checkedOut = true;
-            lastCheckIn.hoursWorked = hoursWorked;
-
-            const activity = {
-                type: 'check-out',
-                timestamp: now,
-                location: 'Demo Location',
-                hoursWorked: hoursWorked
-            };
-
-            employeeData.activity.unshift(activity);
+        function updateButtons() {
+            const checkInBtn = document.getElementById('checkInBtn');
+            const checkOutBtn = document.getElementById('checkOutBtn');
             
-            // Update totals
-            employeeData.todayHours += hoursWorked;
-            employeeData.weekHours += hoursWorked;
-            
-            if (paymentSettings && paymentSettings.type === 'hourly') {
-                const earnings = hoursWorked * paymentSettings.rate;
-                employeeData.totalEarnings += earnings;
-                employeeData.pendingPayout += earnings;
+            if (isCheckedIn) {
+                checkInBtn.disabled = true;
+                checkOutBtn.disabled = false;
+            } else {
+                checkInBtn.disabled = false;
+                checkOutBtn.disabled = true;
             }
-
-            updateDashboard();
-            showNotification(`Check-out recorded! Worked ${hoursWorked.toFixed(2)} hours`, 'success');
         }
 
-        function updateDashboard() {
-            document.getElementById('todayHours').textContent = employeeData.todayHours.toFixed(1);
-            document.getElementById('weekHours').textContent = employeeData.weekHours.toFixed(1);
-            document.getElementById('totalEarnings').textContent = '$' + employeeData.totalEarnings.toFixed(2);
-            document.getElementById('pendingPayout').textContent = '$' + employeeData.pendingPayout.toFixed(2);
-
-            const activityContainer = document.getElementById('recentActivity');
-            activityContainer.innerHTML = '';
-
-            if (employeeData.activity.length === 0) {
-                activityContainer.innerHTML = '<div class="activity-item"><span>No recent activity</span><span style="color: #666; font-size: 0.9rem;">--</span></div>';
-                return;
+        function updateTimeDisplay() {
+            const timeDisplay = document.getElementById('timeDisplay');
+            
+            if (isCheckedIn && checkInTime) {
+                const now = new Date();
+                const duration = now - checkInTime;
+                const hours = Math.floor(duration / (1000 * 60 * 60));
+                const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((duration % (1000 * 60)) / 1000);
+                
+                timeDisplay.textContent = `Working for ${hours}h ${minutes}m ${seconds}s`;
+            } else {
+                timeDisplay.textContent = 'Ready to start your shift';
             }
-
-            employeeData.activity.slice(0, 10).forEach(activity => {
-                const item = document.createElement('div');
-                item.className = 'activity-item';
-                
-                let text = activity.type === 'check-in' ? 'Checked In' : 'Checked Out';
-                if (activity.hoursWorked) {
-                    text += ` (${activity.hoursWorked.toFixed(2)}h)`;
-                }
-                
-                item.innerHTML = `
-                    <span>${text} - ${activity.location}</span>
-                    <span style="color: #666; font-size: 0.9rem;">${activity.timestamp.toLocaleTimeString()}</span>
-                `;
-                
-                activityContainer.appendChild(item);
-            });
         }
 
         function showNotification(message, type) {
-            // Remove existing notifications
-            const existing = document.querySelector('.notification');
-            if (existing) {
-                existing.remove();
-            }
-
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
+            const notification = document.getElementById('notification');
             notification.textContent = message;
-
-            document.querySelector('.container').insertBefore(notification, document.querySelector('.main-grid'));
-
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
             setTimeout(() => {
-                notification.remove();
-            }, 5000);
+                notification.classList.remove('show');
+            }, 3000);
         }
-
-        // Handle payment schedule visibility
-        document.getElementById('paymentSchedule').addEventListener('change', function() {
-            const customGroup = document.getElementById('customScheduleGroup');
-            if (this.value === 'custom') {
-                customGroup.style.display = 'block';
-            } else {
-                customGroup.style.display = 'none';
-            }
-        });
-
-        // Initialize dashboard
-        updateDashboard();
-
-        // Initialize Google Maps with proper autocomplete
-        window.initGoogleMaps = function() {
-            console.log('🗺️ Google Maps API loaded, initializing Places service');
-            initializeGooglePlacesAutocomplete();
-        };
-
-        async function initializeGooglePlacesAutocomplete() {
-            const businessInput = document.getElementById('businessName');
-            
-            if (typeof google !== 'undefined' && google.maps) {
-                console.log('✅ Initializing Google Places integration (2025 optimized)');
-                
-                try {
-                    // Try the NEW PlaceAutocompleteElement API (beta channel)
-                    console.log('🔄 Attempting to load Places library...');
-                    const { PlaceAutocompleteElement } = await google.maps.importLibrary("places");
-                    
-                    if (PlaceAutocompleteElement) {
-                        console.log('✅ NEW Google Places AutocompleteElement available!');
-                        
-                        const autocompleteElement = new PlaceAutocompleteElement({
-                            locationBias: { radius: 50000, center: { lat: 30.6943, lng: -88.0431 } } // Gulf Coast area bias (50km max)
-                        });
-                        
-                        // Style the element to match our design
-                        autocompleteElement.style.width = '100%';
-                        autocompleteElement.style.padding = '16px';
-                        autocompleteElement.style.border = '2px solid #4169e1';
-                        autocompleteElement.style.borderRadius = '15px';
-                        autocompleteElement.style.fontSize = '16px';
-                        autocompleteElement.style.backgroundColor = 'white';
-                        
-                        // Replace the input with the new element
-                        businessInput.parentNode.replaceChild(autocompleteElement, businessInput);
-                        autocompleteElement.id = 'businessName';
-                        
-                        // Store reference for form access
-                        window.businessNameElement = autocompleteElement;
-                        
-                        // Store the current input value
-                        let currentInputValue = '';
-                        
-                        // Direct access to the actual input element inside the Google Places component
-                        const updateInputValue = () => {
-                            // Access the actual input element inside the gmp-place-autocomplete
-                            const inputElement = autocompleteElement.querySelector('input[type="text"]') || 
-                                                autocompleteElement.querySelector('input') ||
-                                                autocompleteElement.shadowRoot?.querySelector('input');
-                            
-                            if (inputElement) {
-                                const newValue = inputElement.value || '';
-                                if (newValue !== currentInputValue) {
-                                    currentInputValue = newValue;
-                                    console.log('📝 Input value captured from inner element:', currentInputValue);
-                                }
-                            } else {
-                                // Fallback to element properties
-                                const newValue = autocompleteElement.value || autocompleteElement.textContent || '';
-                                if (newValue !== currentInputValue) {
-                                    currentInputValue = newValue;
-                                    console.log('📝 Input value from element properties:', currentInputValue);
-                                }
-                            }
-                        };
-                        
-                        // Listen for various input events on both the component and inner input
-                        autocompleteElement.addEventListener('input', updateInputValue);
-                        autocompleteElement.addEventListener('change', updateInputValue);
-                        autocompleteElement.addEventListener('keyup', updateInputValue);
-                        autocompleteElement.addEventListener('keydown', updateInputValue);
-                        
-                        // Try to access inner input element directly
-                        setTimeout(() => {
-                            const innerInput = autocompleteElement.querySelector('input[type="text"]') || 
-                                             autocompleteElement.querySelector('input');
-                            if (innerInput) {
-                                console.log('✅ Found inner input element, adding direct listeners');
-                                innerInput.addEventListener('input', updateInputValue);
-                                innerInput.addEventListener('keyup', updateInputValue);
-                                innerInput.addEventListener('change', updateInputValue);
-                            }
-                        }, 1000);
-                        
-                        // Poll for value changes as backup
-                        setInterval(updateInputValue, 200);
-                        
-                        // Listen for keydown events (Enter key)
-                        autocompleteElement.addEventListener('keydown', (event) => {
-                            if (event.key === 'Enter') {
-                                console.log('⌨️ Enter key pressed, submitting form');
-                                event.preventDefault();
-                                generateEmployeeQR();
-                            }
-                        });
-                        
-                        // Store reference to current input value and allow external updates
-                        window.getCurrentInputValue = () => currentInputValue;
-                        window.setCurrentInputValue = (value) => {
-                            currentInputValue = value;
-                            console.log('📝 Input value set externally:', currentInputValue);
-                        };
-                        
-                        autocompleteElement.addEventListener('gmp-placeselect', async (event) => {
-                            console.log('🏢 Place selection event triggered:', event);
-                            
-                            try {
-                                const place = event.placePrediction.toPlace();
-                                console.log('📍 Converting place prediction:', place);
-                                
-                                await place.fetchFields(['displayName', 'formattedAddress', 'location', 'id']);
-                                console.log('✅ Place details fetched:', {
-                                    name: place.displayName,
-                                    address: place.formattedAddress,
-                                    location: place.location
-                                });
-                                
-                                selectedPlace = {
-                                    name: place.displayName,
-                                    formatted_address: place.formattedAddress,
-                                    geometry: { 
-                                        location: {
-                                            lat: () => place.location?.lat || 0,
-                                            lng: () => place.location?.lng || 0
-                                        }
-                                    },
-                                    place_id: place.id
-                                };
-                                
-                                // Update the visible input value for user feedback
-                                autocompleteElement.value = place.displayName || place.formattedAddress;
-                                currentInputValue = place.displayName || place.formattedAddress;
-                                
-                                showNotification(`Location selected: ${place.displayName || place.formattedAddress}`, 'success');
-                                console.log('✅ NEW Google Places location selected and stored:', selectedPlace);
-                                
-                            } catch (error) {
-                                console.log('❌ Error in place selection:', error);
-                                showNotification('Error selecting location. Please try again.', 'error');
-                            }
-                        });
-                        
-                        console.log('✅ NEW Google Places AutocompleteElement initialized successfully');
-                        return;
-                    }
-                } catch (error) {
-                    console.log('⚠️ New API not available, falling back to legacy Autocomplete:', error);
-                }
-                
-                // Fallback to legacy API
-                initializeLegacyAutocomplete(businessInput);
-            } else {
-                console.log('⚠️ Google Maps not available, using enhanced manual search');
-                initializeGlobalSearch();
-            }
-        }
-
-        function initializeLegacyAutocomplete(businessInput) {
-            try {
-                const autocomplete = new google.maps.places.Autocomplete(businessInput, {
-                    types: ['geocode'],
-                    fields: ['name', 'formatted_address', 'geometry', 'place_id', 'types', 'address_components']
-                });
-
-                autocomplete.addListener('place_changed', function() {
-                    const place = autocomplete.getPlace();
-                    if (place.geometry) {
-                        selectedPlace = place;
-                        const displayName = place.name || place.formatted_address;
-                        businessInput.value = displayName;
-                        showNotification(`Location selected: ${displayName}`, 'success');
-                        console.log('✅ Legacy Google Places location selected:', place);
-                    }
-                });
-
-                console.log('✅ Legacy Google Places Autocomplete initialized as fallback');
-            } catch (error) {
-                console.log('❌ Legacy autocomplete also failed:', error);
-                initializeGlobalSearch();
-            }
-        }
-
-        // Fallback search functionality
-        function initializeGlobalSearch() {
-            console.log('✅ Global business search initialized - ' + globalBusinessDatabase.length + ' business types available worldwide');
-            setupEnhancedManualSearch();
-        }
-
-        // Enhanced Google Maps loading check
-        function checkGoogleMapsLoaded() {
-            console.log('🔍 Checking Google Maps status...');
-            if (typeof google !== 'undefined' && google.maps && google.maps.places) {
-                console.log('✅ Google Maps and Places API confirmed loaded');
-                initializeGooglePlacesAutocomplete();
-                return true;
-            } else {
-                console.log('❌ Google Maps not available yet');
-                return false;
-            }
-        }
-
-        // Check every 500ms for Google Maps to load  
-        let checkAttempts = 0;
-        const maxAttempts = 20; // 10 seconds total
-        
-        function waitForGoogleMaps() {
-            checkAttempts++;
-            if (checkGoogleMapsLoaded()) {
-                return; // Success!
-            }
-            
-            if (checkAttempts < maxAttempts) {
-                setTimeout(waitForGoogleMaps, 500);
-            } else {
-                console.log('⚠️ Google Maps failed to load, using fallback search');
-                initializeGlobalSearch();
-            }
-        }
-
-        // Start checking for Google Maps
-        setTimeout(waitForGoogleMaps, 1000);
-
-        console.log('Employee Geo QR Check-In System loaded');
-        console.log('✅ QR code generation with geo validation');
-        console.log('✅ Automatic payment processing setup');  
-        console.log('✅ Real-time employee time tracking');
-        console.log('✅ Flexible payment schedules (daily, weekly, bi-weekly, monthly, custom)');
-        console.log('✅ Enhanced global business search with 60+ worldwide business types');
-        console.log('✅ Google Maps API integration with address autocomplete');
     </script>
-
-    <!-- Google Maps API with Places Library -->
-    <script>
-        // Global callback function
-        window.initGoogleMaps = function() {
-            console.log('🗺️ Google Maps callback triggered');
-            checkGoogleMapsLoaded();
-        };
-    </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCWbTrWVh2m4Vwv99jo5Ff3-gVwn5mLB18&libraries=places&loading=async&callback=initGoogleMaps&v=beta" async defer></script>
 </body>
 </html>
