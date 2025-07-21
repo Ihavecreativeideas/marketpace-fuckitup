@@ -858,6 +858,21 @@
             font-weight: 500;
             text-align: center;
         }
+
+        .custom-button {
+            background: linear-gradient(135deg, #7c3aed, #8b5cf6) !important;
+            border-color: #7c3aed !important;
+        }
+
+        .custom-button:hover {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7) !important;
+            border-color: #8b5cf6 !important;
+            box-shadow: 0 0 10px rgba(124, 58, 237, 0.4) !important;
+        }
+
+        .custom-amount-section {
+            margin-top: 12px;
+        }
     </style>
 </head>
 <body>
@@ -1357,6 +1372,9 @@
                     <label class="form-label" id="paymentAmountLabel">Amount ($) *</label>
                     <div class="payment-amount-selector" id="paymentAmountSelector">
                         <!-- Payment amount buttons will be dynamically generated -->
+                    </div>
+                    <div class="custom-amount-section" id="customAmountSection" style="display: none;">
+                        <input type="number" class="form-input" id="customAmountInput" placeholder="Enter custom amount" step="0.01" min="0">
                     </div>
                     <input type="hidden" id="newEmployeePaymentAmount" required>
                     <div class="selected-amount-display" id="selectedAmountDisplay" style="display: none;">
@@ -2008,10 +2026,14 @@
                         break;
                 }
                 
-                // Generate payment amount buttons
-                amountSelector.innerHTML = buttons.map(amount => 
+                // Generate payment amount buttons with custom option
+                const buttonHTML = buttons.map(amount => 
                     `<button type="button" class="payment-amount-button" onclick="selectPaymentAmount('${amount}', '${paymentType}')">${paymentType === 'commission' ? amount + '%' : '$' + amount}</button>`
                 ).join('');
+                
+                const customButton = `<button type="button" class="payment-amount-button custom-button" onclick="showCustomAmount('${paymentType}')">Custom Amount</button>`;
+                
+                amountSelector.innerHTML = buttonHTML + customButton;
                 
                 console.log('Payment field shown for type:', paymentType, 'with buttons:', buttons);
             } else {
@@ -2053,6 +2075,60 @@
             
             document.getElementById('newEmployeePaymentAmount').value = '';
             document.getElementById('selectedAmountDisplay').style.display = 'none';
+            document.getElementById('customAmountSection').style.display = 'none';
+            document.getElementById('customAmountInput').value = '';
+        }
+
+        function showCustomAmount(paymentType) {
+            // Clear previous selections
+            clearPaymentSelection();
+            
+            // Highlight custom button
+            event.target.classList.add('selected');
+            
+            // Show custom input field
+            const customSection = document.getElementById('customAmountSection');
+            const customInput = document.getElementById('customAmountInput');
+            
+            customSection.style.display = 'block';
+            customInput.focus();
+            
+            // Update placeholder based on payment type
+            switch(paymentType) {
+                case 'hourly':
+                    customInput.placeholder = 'Enter hourly rate (e.g. 15.00)';
+                    break;
+                case 'per_job':
+                    customInput.placeholder = 'Enter per job amount (e.g. 150.00)';
+                    break;
+                case 'salary':
+                    customInput.placeholder = 'Enter annual salary (e.g. 45000.00)';
+                    break;
+                case 'commission':
+                    customInput.placeholder = 'Enter commission rate (e.g. 5.0)';
+                    break;
+            }
+            
+            // Add input event listener to update hidden field
+            customInput.oninput = function() {
+                const value = this.value;
+                if (value && value > 0) {
+                    document.getElementById('newEmployeePaymentAmount').value = value;
+                    
+                    // Show selection display
+                    const display = document.getElementById('selectedAmountDisplay');
+                    const displayText = document.getElementById('selectedAmountText');
+                    
+                    const formattedAmount = paymentType === 'commission' ? value + '%' : '$' + value;
+                    displayText.textContent = formattedAmount + ' (Custom)';
+                    display.style.display = 'block';
+                } else {
+                    document.getElementById('newEmployeePaymentAmount').value = '';
+                    document.getElementById('selectedAmountDisplay').style.display = 'none';
+                }
+            };
+            
+            console.log('Custom amount input shown for type:', paymentType);
         }
 
         // QR System Functions
