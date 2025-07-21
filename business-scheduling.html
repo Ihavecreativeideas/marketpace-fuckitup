@@ -1534,8 +1534,8 @@
                 </div>
             </div>
 
-            <!-- Pro Business Account Setup -->
-            <div id="proUpgradeSection" class="pro-upgrade-section">
+            <!-- Pro Business Account Setup (Hidden - auto-activated during launch campaign) -->
+            <div id="proUpgradeSection" class="pro-upgrade-section" style="display: none;">
                 <h2 class="pro-upgrade-title">Professional Business Account Required</h2>
                 <div class="pro-upgrade-card">
                     <div class="pro-badge">PRO</div>
@@ -1655,11 +1655,11 @@
                 </div>
             </div>
 
-            <!-- Calendar Section (Hidden until Pro) -->
-            <div id="mainCalendarSection" style="display: none;">
+            <!-- Calendar Section -->
+            <div id="mainCalendarSection">
 
-            <!-- Business Profile Configuration (Hidden until Pro) -->
-            <div id="businessProfileSection" class="business-profile-section" style="display: none;">
+            <!-- Business Profile Configuration -->
+            <div id="businessProfileSection" class="business-profile-section">
                 <h2 class="business-profile-title">Business Profile</h2>
                 <div class="business-profile-card">
                     <div class="pro-badge-small">PRO</div>
@@ -1911,8 +1911,8 @@
 
         </div> <!-- End mainCalendarSection -->
 
-        <!-- Employees Tab (Hidden until Pro) -->
-        <div id="employees" class="tab-content" style="display: none;">
+        <!-- Employees Tab -->
+        <div id="employees" class="tab-content">
             <div class="tab-title">Workforce Management</div>
             
             <!-- Workforce Category Selector -->
@@ -4179,11 +4179,16 @@
         }
         
         function checkProStatus() {
-            const proStatus = localStorage.getItem('proAccountStatus');
-            if (proStatus === 'active') {
-                isProAccount = true;
-                activateProAccount();
+            // All Pro features are free until Jan 1 2026 - auto-activate
+            isProAccount = true;
+            localStorage.setItem('proAccountStatus', 'active');
+            
+            // Set default business name if not set
+            if (!localStorage.getItem('businessName')) {
+                localStorage.setItem('businessName', 'Brown Barnes');
             }
+            
+            activateProAccount();
         }
 
         // Initialize page
