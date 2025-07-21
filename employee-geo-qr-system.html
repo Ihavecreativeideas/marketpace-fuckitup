@@ -22,6 +22,7 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+            position: relative;
         }
 
         .header {
@@ -351,11 +352,48 @@
             50% { opacity: 0.6; }
             100% { opacity: 1; }
         }
+
+        .back-button {
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            color: #ffd700;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-button:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #ffd700;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+            text-decoration: none;
+            color: #ffd700;
+        }
+
+        .back-button svg {
+            margin-right: 8px;
+        }
     </style>
 
 </head>
 <body>
     <div class="container">
+        <a href="#" class="back-button" onclick="goBack()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            </svg>
+            Back
+        </a>
+        
         <div class="header">
             <h1>Employee Geo QR Check-In System</h1>
             <p>Advanced location-based time tracking with automatic payment processing</p>
@@ -1172,6 +1210,18 @@
                     Use Current Location
                 `;
             });
+        }
+
+        function goBack() {
+            // Smart navigation - try to go to the business scheduling page if available
+            if (document.referrer && document.referrer.includes('business-scheduling.html')) {
+                window.location.href = 'business-scheduling.html';
+            } else if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                // Fallback to MarketPace menu
+                window.location.href = 'marketpace-menu.html';
+            }
         }
 
         function setupPaymentSchedule() {
