@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPace Employee Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            padding: 20px;
+            border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .header h1 {
+            color: #00ffff;
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .employee-info {
+            text-align: center;
+            color: #94a3b8;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            border-color: #00ffff;
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            color: #00ffff;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-content {
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+
+        .schedule-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #00ffff;
+        }
+
+        .schedule-date {
+            font-weight: bold;
+            color: #00ffff;
+            font-size: 14px;
+        }
+
+        .schedule-time {
+            color: #94a3b8;
+            font-size: 16px;
+            margin: 5px 0;
+        }
+
+        .checkin-button {
+            background: linear-gradient(135deg, #00ffff, #0066ff);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .checkin-button:hover {
+            background: linear-gradient(135deg, #0066ff, #00ffff);
+            transform: scale(1.05);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ffff;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .qr-scanner {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px dashed rgba(0, 255, 255, 0.5);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .qr-scanner:hover {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .qr-icon {
+            font-size: 48px;
+            color: #00ffff;
+            margin-bottom: 15px;
+        }
+
+        .welcome-banner {
+            background: linear-gradient(135deg, #00ffff, #4169e1);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .welcome-banner h2 {
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .welcome-banner p {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>MarketPace Employee Dashboard</h1>
+        <div class="employee-info">
+            <span id="employeeName">Loading...</span> • <span id="employeeRole">Employee</span>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="welcome-banner">
+            <h2>Welcome to Your Dashboard!</h2>
+            <p>Manage your schedule, check in/out, and track your earnings all in one place.</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Schedule Card -->
+            <div class="dashboard-card">
+                <div class="card-title">
+                    📅 Your Schedule
+                </div>
+                <div class="card-content">
+                    <div id="scheduleContainer">
+                        <div class="schedule-item">
+                            <div class="schedule-date">Today - January 21, 2025</div>
+                            <div class="schedule-time">9:00 AM - 5:00 PM</div>
+                            <button class="checkin-button" onclick="openQRScanner('checkin')">
+                                Check In with QR Code
+                            </button>
+                        </div>
+                        
+                        <div class="schedule-item">
+                            <div class="schedule-date">Tomorrow - January 22, 2025</div>
+                            <div class="schedule-time">10:00 AM - 6:00 PM</div>
+                            <div style="color: #94a3b8; font-size: 14px; margin-top: 10px;">
+                                Scheduled shift
+                            </div>
+                        </div>
+
+                        <div class="schedule-item">
+                            <div class="schedule-date">Thursday - January 23, 2025</div>
+                            <div class="schedule-time">9:00 AM - 3:00 PM</div>
+                            <div style="color: #94a3b8; font-size: 14px; margin-top: 10px;">
+                                Scheduled shift
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QR Check-In/Out Card -->
+            <div class="dashboard-card">
+                <div class="card-title">
+                    📍 QR Check-In/Out
+                </div>
+                <div class="card-content">
+                    <div class="qr-scanner" onclick="openQRScanner('general')">
+                        <div class="qr-icon">📱</div>
+                        <h3 style="color: #00ffff; margin-bottom: 10px;">Scan Location QR Code</h3>
+                        <p>Check in and out of your work location using geo-verified QR codes</p>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 6px;">
+                            <span>Current Status:</span>
+                            <span id="checkStatus" style="color: #ff6b9d; font-weight: bold;">Checked Out</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Earnings Card -->
+            <div class="dashboard-card">
+                <div class="card-title">
+                    💰 Your Earnings
+                </div>
+                <div class="card-content">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="todayEarnings">$120.00</div>
+                            <div class="stat-label">Today</div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-value" id="weekEarnings">$450.00</div>
+                            <div class="stat-label">This Week</div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-value" id="hoursWorked">32.5</div>
+                            <div class="stat-label">Hours</div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-value" id="payRate">$15.00</div>
+                            <div class="stat-label">Per Hour</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions Card -->
+            <div class="dashboard-card">
+                <div class="card-title">
+                    ⚡ Quick Actions
+                </div>
+                <div class="card-content">
+                    <button class="checkin-button" onclick="viewFullSchedule()" style="margin-bottom: 15px;">
+                        View Full Schedule
+                    </button>
+                    
+                    <button class="checkin-button" onclick="requestTimeOff()" style="margin-bottom: 15px;">
+                        Request Time Off
+                    </button>
+                    
+                    <button class="checkin-button" onclick="viewPayStubs()">
+                        View Pay Stubs
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get employee ID from URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        const employeeId = urlParams.get('id');
+
+        // Load employee data
+        function loadEmployeeData() {
+            // In a real app, this would fetch from server using employeeId
+            // For demo, we'll use sample data
+            document.getElementById('employeeName').textContent = 'Employee Dashboard';
+            document.getElementById('employeeRole').textContent = 'Team Member';
+            
+            console.log('Employee Dashboard loaded for ID:', employeeId);
+        }
+
+        function openQRScanner(type) {
+            // Navigate to QR scanner page
+            window.location.href = `/employee-geo-qr-system?type=${type}&employeeId=${employeeId}`;
+        }
+
+        function viewFullSchedule() {
+            alert('Full schedule view coming soon! You can view your complete work schedule here.');
+        }
+
+        function requestTimeOff() {
+            alert('Time off request feature coming soon! You can submit time off requests here.');
+        }
+
+        function viewPayStubs() {
+            alert('Pay stub view coming soon! You can view and download your pay stubs here.');
+        }
+
+        // Load employee data when page loads
+        document.addEventListener('DOMContentLoaded', loadEmployeeData);
+
+        // Update check status periodically
+        setInterval(() => {
+            // In real app, this would check current status from server
+            const status = Math.random() > 0.5 ? 'Checked In' : 'Checked Out';
+            const statusElement = document.getElementById('checkStatus');
+            statusElement.textContent = status;
+            statusElement.style.color = status === 'Checked In' ? '#00ff88' : '#ff6b9d';
+        }, 30000); // Update every 30 seconds
+
+        console.log('Employee Dashboard initialized');
+    </script>
+</body>
+</html>

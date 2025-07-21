@@ -4942,6 +4942,11 @@
                             </div>
                             
                             <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 500;">Email Address</label>
+                                <input type="email" id="employeeEmail" required style="width: 100%; padding: 12px; border: 2px solid rgba(0,255,255,0.3); border-radius: 8px; background: rgba(0,0,0,0.3); color: white; font-size: 16px;" placeholder="employee@example.com">
+                            </div>
+                            
+                            <div style="margin-bottom: 20px;">
                                 <label style="display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 500;">Phone Number</label>
                                 <input type="tel" id="employeePhone" required style="width: 100%; padding: 12px; border: 2px solid rgba(0,255,255,0.3); border-radius: 8px; background: rgba(0,0,0,0.3); color: white; font-size: 16px;" placeholder="(555) 123-4567">
                             </div>
@@ -4976,7 +4981,7 @@
                             
                             <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin-top: 32px;">
                                 <button type="button" onclick="closeAddEmployeeModal()" style="background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold;">Cancel</button>
-                                <button type="submit" onclick="submitNewEmployee(event)" style="background: linear-gradient(135deg, #00ffff, #0066ff); border: none; color: white; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold;">Add Employee</button>
+                                <button type="button" onclick="submitNewEmployee(event)" style="background: linear-gradient(135deg, #00ffff, #0066ff); border: none; color: white; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold;">Add Employee</button>
                             </div>
                         </form>
                     </div>
@@ -5022,6 +5027,7 @@
             
             const name = document.getElementById('employeeName').value.trim();
             const role = document.getElementById('employeeRole').value;
+            const email = document.getElementById('employeeEmail').value.trim();
             const phone = document.getElementById('employeePhone').value.trim();
             const paymentType = document.getElementById('paymentType').value;
             const status = document.getElementById('employeeStatus').value;
@@ -5037,7 +5043,7 @@
                 paymentInfo = `$${rate}/job`;
             }
             
-            if (!name || !role || !phone || !paymentType || !rate) {
+            if (!name || !role || !email || !phone || !paymentType || !rate) {
                 showNotification('Please fill in all required fields', 'error');
                 return;
             }
@@ -5047,6 +5053,7 @@
                 id: Date.now().toString(),
                 name: name,
                 role: role,
+                email: email,
                 phone: phone,
                 rate: parseFloat(rate),
                 paymentType: paymentType,
@@ -5072,8 +5079,11 @@
             // Close modal
             closeAddEmployeeModal();
             
+            // Send invitation via SMS and email
+            sendEmployeeInvitation(newEmployee);
+            
             // Show success message
-            showNotification(`Employee ${name} added successfully!`, 'success');
+            showNotification(`Employee ${name} added successfully! Invitation sent via SMS and email.`, 'success');
             
             console.log('New employee added:', newEmployee);
         }
@@ -5088,6 +5098,42 @@
                 'Security': 'security'
             };
             return roleColors[role] || 'cashier';
+        }
+        
+        async function sendEmployeeInvitation(employee) {
+            try {
+                console.log('Sending invitation to:', employee.name);
+                
+                const invitationData = {
+                    name: employee.name,
+                    role: employee.role,
+                    email: employee.email,
+                    phone: employee.phone,
+                    paymentInfo: employee.paymentInfo,
+                    employeeId: employee.id
+                };
+                
+                const response = await fetch('/api/employee/send-invitation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(invitationData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    console.log('✅ Invitation sent successfully:', result);
+                } else {
+                    console.error('❌ Failed to send invitation:', result.error);
+                    showNotification('Employee added but invitation failed to send', 'warning');
+                }
+                
+            } catch (error) {
+                console.error('❌ Error sending invitation:', error);
+                showNotification('Employee added but invitation failed to send', 'warning');
+            }
         }
 
         function showCustomTimeModal() {
@@ -5113,12 +5159,12 @@
             // If no saved employees, use default demo employees
             if (employees.length === 0) {
                 employees = [
-                    { id: 'sarah', name: 'Sarah Johnson', role: 'Manager', status: 'Available', avatar: 'S', color: 'manager', phone: '(555) 123-4567', rate: 25.00, paymentType: 'hourly', paymentInfo: '$25.00/hour' },
-                    { id: 'mike', name: 'Mike Chen', role: 'Cashier', status: 'Available', avatar: 'M', color: 'cashier', phone: '(555) 234-5678', rate: 15.00, paymentType: 'hourly', paymentInfo: '$15.00/hour' },
-                    { id: 'jessica', name: 'Jessica Martinez', role: 'Sales', status: 'Scheduled', avatar: 'J', color: 'sales', phone: '(555) 345-6789', rate: 75.00, paymentType: 'per_job', paymentInfo: '$75.00/job' },
-                    { id: 'david', name: 'David Wilson', role: 'Stock', status: 'Available', avatar: 'D', color: 'stock', phone: '(555) 456-7890', rate: 16.00, paymentType: 'hourly', paymentInfo: '$16.00/hour' },
-                    { id: 'emma', name: 'Emma Davis', role: 'Assistant', status: 'Off', avatar: 'E', color: 'assistant', phone: '(555) 567-8901', rate: 50.00, paymentType: 'per_job', paymentInfo: '$50.00/job' },
-                    { id: 'carlos', name: 'Carlos Rodriguez', role: 'Security', status: 'Available', avatar: 'C', color: 'security', phone: '(555) 678-9012', rate: 20.00, paymentType: 'hourly', paymentInfo: '$20.00/hour' }
+                    { id: 'sarah', name: 'Sarah Johnson', role: 'Manager', status: 'Available', avatar: 'S', color: 'manager', email: 'sarah@example.com', phone: '(555) 123-4567', rate: 25.00, paymentType: 'hourly', paymentInfo: '$25.00/hour' },
+                    { id: 'mike', name: 'Mike Chen', role: 'Cashier', status: 'Available', avatar: 'M', color: 'cashier', email: 'mike@example.com', phone: '(555) 234-5678', rate: 15.00, paymentType: 'hourly', paymentInfo: '$15.00/hour' },
+                    { id: 'jessica', name: 'Jessica Martinez', role: 'Sales', status: 'Scheduled', avatar: 'J', color: 'sales', email: 'jessica@example.com', phone: '(555) 345-6789', rate: 75.00, paymentType: 'per_job', paymentInfo: '$75.00/job' },
+                    { id: 'david', name: 'David Wilson', role: 'Stock', status: 'Available', avatar: 'D', color: 'stock', email: 'david@example.com', phone: '(555) 456-7890', rate: 16.00, paymentType: 'hourly', paymentInfo: '$16.00/hour' },
+                    { id: 'emma', name: 'Emma Davis', role: 'Assistant', status: 'Off', avatar: 'E', color: 'assistant', email: 'emma@example.com', phone: '(555) 567-8901', rate: 50.00, paymentType: 'per_job', paymentInfo: '$50.00/job' },
+                    { id: 'carlos', name: 'Carlos Rodriguez', role: 'Security', status: 'Available', avatar: 'C', color: 'security', email: 'carlos@example.com', phone: '(555) 678-9012', rate: 20.00, paymentType: 'hourly', paymentInfo: '$20.00/hour' }
                 ];
                 // Save default employees to localStorage
                 localStorage.setItem('marketpace_employees', JSON.stringify(employees));

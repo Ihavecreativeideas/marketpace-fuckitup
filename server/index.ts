@@ -27,6 +27,7 @@ import { subscriptionRoutes } from './subscriptionManager';
 import { subscriptionScheduler } from './subscriptionScheduler';
 import { sponsorManagementRoutes } from './sponsorManagement';
 import { zapierRouter } from './zapier-integration';
+const { sendEmployeeInvitation } = require('./employeeInvitation.js');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -1970,6 +1971,37 @@ app.post('/api/qr/generate', async (req, res) => {
     res.status(500).json({
       success: false,
       error: error.message
+    });
+  }
+});
+
+// Employee Invitation API
+app.post('/api/employee/send-invitation', async (req, res) => {
+  try {
+    const { name, role, email, phone, paymentInfo, employeeId } = req.body;
+    
+    if (!name || !email || !phone) {
+      return res.status(400).json({
+        success: false,
+        error: 'Name, email, and phone are required'
+      });
+    }
+    
+    const result = await sendEmployeeInvitation({
+      name,
+      role,
+      email,
+      phone,
+      paymentInfo,
+      employeeId
+    });
+    
+    res.json(result);
+  } catch (error: any) {
+    console.error('Employee invitation error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to send employee invitation'
     });
   }
 });
