@@ -6982,26 +6982,40 @@ ${selectedCustomTitle ? `📝 Custom Title: ${scheduleTitle}` : ''}
             }, 3000);
         }
 
-        // Initialize page
+        // Initialize page with essential functions first
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Business Scheduling page loaded successfully');
-            initializeVoiceRecognition();
-            initializeDragAndDrop();
-            initializeSmartEmployeeManagement();
-            loadCustomTitles();
-            loadCustomRoles();
-            updateCustomTitleColorSelection();
-            updateRoleFilters();
             
-            // Initialize with small scale
-            setEventScale('small');
+            // Ensure essential functions are available
+            window.showTab = showTab;
+            window.switchToView = switchToView;
+            window.showAddEmployeeModal = showAddEmployeeModal;
+            window.closeAddEmployeeModal = closeAddEmployeeModal;
             
-            showNotification('Festival-scale scheduling system ready', 'success');
-            
-            // Welcome message
-            setTimeout(() => {
-                updateVoiceConsole('🚀 Sleek voice assistant ready - click "Command" to begin');
-            }, 1000);
+            try {
+                initializeVoiceRecognition();
+                initializeDragAndDrop();
+                initializeSmartEmployeeManagement();
+                loadCustomTitles();
+                loadCustomRoles();
+                updateCustomTitleColorSelection();
+                updateRoleFilters();
+                
+                // Initialize with small scale
+                setEventScale('small');
+                
+                showNotification('Festival-scale scheduling system ready', 'success');
+                
+                // Welcome message
+                setTimeout(() => {
+                    if (typeof updateVoiceConsole === 'function') {
+                        updateVoiceConsole('Voice assistant ready - click "Command" to begin');
+                    }
+                }, 1000);
+            } catch (error) {
+                console.log('Some initialization functions not available:', error);
+                showNotification('Basic scheduling interface ready', 'info');
+            }
         });
     </script>
 
