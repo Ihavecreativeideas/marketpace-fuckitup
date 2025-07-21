@@ -14,16 +14,17 @@ const emailTransporter = nodemailer.createTransport({
 });
 
 async function sendEmployeeInvitation(employeeData) {
-    const { name, role, email, phone, paymentInfo, employeeId } = employeeData;
+    const { name, role, email, phone, paymentInfo, employeeId, businessName } = employeeData;
     
     // Create employee dashboard URL
     const dashboardUrl = `${process.env.BASE_URL || 'https://workspace.ihavecreativeid.repl.co'}/employee-dashboard?id=${employeeId}`;
     const qrSystemUrl = `${process.env.BASE_URL || 'https://workspace.ihavecreativeid.repl.co'}/employee-geo-qr-system`;
     
-    // SMS Message
+    // SMS Message with business name integration
+    const businessNameText = businessName && businessName !== 'Your Business' ? businessName : 'MarketPace';
     const smsMessage = `🎉 Welcome to MarketPace, ${name}!
 
-You've been added as a ${role} with ${paymentInfo} pay.
+You've been invited to join ${businessNameText} as a ${role} with ${paymentInfo} pay.
 
 Your MarketPace Job Portal:
 ${dashboardUrl}
@@ -71,7 +72,7 @@ Questions? Reply to this message.`;
             <div class="content">
                 <div class="welcome-box">
                     <h2 style="margin: 0 0 10px 0;">Hi ${name}! 👋</h2>
-                    <p style="margin: 0;">You've been added to the MarketPace team as a ${role}</p>
+                    <p style="margin: 0;">You've been invited to join ${businessNameText} as a ${role}</p>
                 </div>
                 
                 <div class="info-grid">

@@ -2119,7 +2119,8 @@ app.post('/api/employee/send-invitation', async (req, res) => {
       email,
       phone,
       paymentInfo,
-      employeeId
+      employeeId,
+      businessName: req.body.businessName || 'Your Business'
     });
     
     res.json(result);
