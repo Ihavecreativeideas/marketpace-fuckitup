@@ -813,6 +813,51 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Payment Amount Selector Styles */
+        .payment-amount-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .payment-amount-button {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: #e2e8f0;
+            border: 2px solid #475569;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .payment-amount-button:hover {
+            border-color: #00ffff;
+            background: linear-gradient(135deg, #334155, #475569);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .payment-amount-button.selected {
+            background: linear-gradient(135deg, #00ffff, #0ea5e9);
+            color: #1e293b;
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            font-weight: 600;
+        }
+
+        .selected-amount-display {
+            margin-top: 12px;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, #065f46, #047857);
+            color: #d1fae5;
+            border-radius: 6px;
+            font-weight: 500;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -1310,7 +1355,13 @@
 
                 <div class="form-group" id="paymentAmountGroup" style="display: none;">
                     <label class="form-label" id="paymentAmountLabel">Amount ($) *</label>
-                    <input type="number" class="form-input" id="newEmployeePaymentAmount" placeholder="0.00" step="0.01" min="0" required>
+                    <div class="payment-amount-selector" id="paymentAmountSelector">
+                        <!-- Payment amount buttons will be dynamically generated -->
+                    </div>
+                    <input type="hidden" id="newEmployeePaymentAmount" required>
+                    <div class="selected-amount-display" id="selectedAmountDisplay" style="display: none;">
+                        Selected: <span id="selectedAmountText"></span>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -1537,6 +1588,15 @@
             const form = document.getElementById('addEmployeeForm');
             if (form) {
                 form.reset();
+            }
+            
+            // Clear payment selection
+            clearPaymentSelection();
+            
+            // Hide payment amount group
+            const amountGroup = document.getElementById('paymentAmountGroup');
+            if (amountGroup) {
+                amountGroup.style.display = 'none';
             }
         }
 
@@ -1918,6 +1978,7 @@
             const paymentType = document.getElementById('newEmployeePaymentType').value;
             const amountGroup = document.getElementById('paymentAmountGroup');
             const amountLabel = document.getElementById('paymentAmountLabel');
+            const amountSelector = document.getElementById('paymentAmountSelector');
             const amountInput = document.getElementById('newEmployeePaymentAmount');
             
             console.log('Payment type changed to:', paymentType);
@@ -1926,31 +1987,72 @@
                 amountGroup.style.display = 'block';
                 amountInput.required = true;
                 
+                let buttons = [];
+                
                 switch(paymentType) {
                     case 'hourly':
                         amountLabel.textContent = 'Hourly Rate ($) *';
-                        amountInput.placeholder = '15.00';
+                        buttons = ['12', '15', '18', '20', '25', '30', '35', '40'];
                         break;
                     case 'per_job':
                         amountLabel.textContent = 'Per Job Base Pay ($) *';
-                        amountInput.placeholder = '150.00';
+                        buttons = ['50', '75', '100', '125', '150', '200', '250', '300'];
                         break;
                     case 'salary':
                         amountLabel.textContent = 'Annual Salary ($) *';
-                        amountInput.placeholder = '45000.00';
+                        buttons = ['25000', '30000', '35000', '40000', '45000', '50000', '60000', '75000'];
                         break;
                     case 'commission':
                         amountLabel.textContent = 'Commission Rate (%) *';
-                        amountInput.placeholder = '5.0';
+                        buttons = ['3', '5', '7', '10', '12', '15', '20', '25'];
                         break;
                 }
                 
-                console.log('Payment field shown for type:', paymentType);
+                // Generate payment amount buttons
+                amountSelector.innerHTML = buttons.map(amount => 
+                    `<button type="button" class="payment-amount-button" onclick="selectPaymentAmount('${amount}', '${paymentType}')">${paymentType === 'commission' ? amount + '%' : '$' + amount}</button>`
+                ).join('');
+                
+                console.log('Payment field shown for type:', paymentType, 'with buttons:', buttons);
             } else {
                 amountGroup.style.display = 'none';
                 amountInput.required = false;
+                amountSelector.innerHTML = '';
                 console.log('Payment field hidden');
             }
+            
+            // Reset selection
+            clearPaymentSelection();
+        }
+
+        function selectPaymentAmount(amount, paymentType) {
+            // Clear previous selection
+            const buttons = document.querySelectorAll('.payment-amount-button');
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            
+            // Select clicked button
+            event.target.classList.add('selected');
+            
+            // Set hidden input value
+            document.getElementById('newEmployeePaymentAmount').value = amount;
+            
+            // Show selection display
+            const display = document.getElementById('selectedAmountDisplay');
+            const displayText = document.getElementById('selectedAmountText');
+            
+            const formattedAmount = paymentType === 'commission' ? amount + '%' : '$' + amount;
+            displayText.textContent = formattedAmount;
+            display.style.display = 'block';
+            
+            console.log('Payment amount selected:', amount, 'for type:', paymentType);
+        }
+
+        function clearPaymentSelection() {
+            const buttons = document.querySelectorAll('.payment-amount-button');
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            
+            document.getElementById('newEmployeePaymentAmount').value = '';
+            document.getElementById('selectedAmountDisplay').style.display = 'none';
         }
 
         // QR System Functions
