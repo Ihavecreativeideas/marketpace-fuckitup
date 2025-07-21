@@ -1529,22 +1529,57 @@
             setupEnhancedManualSearch();
         }
 
-        // Initialize search system
-        setTimeout(() => {
+        // Enhanced Google Maps loading check
+        function checkGoogleMapsLoaded() {
+            console.log('🔍 Checking Google Maps status...');
             if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+                console.log('✅ Google Maps and Places API confirmed loaded');
                 initializeGooglePlacesAutocomplete();
+                return true;
             } else {
+                console.log('❌ Google Maps not available yet');
+                return false;
+            }
+        }
+
+        // Check every 500ms for Google Maps to load  
+        let checkAttempts = 0;
+        const maxAttempts = 20; // 10 seconds total
+        
+        function waitForGoogleMaps() {
+            checkAttempts++;
+            if (checkGoogleMapsLoaded()) {
+                return; // Success!
+            }
+            
+            if (checkAttempts < maxAttempts) {
+                setTimeout(waitForGoogleMaps, 500);
+            } else {
+                console.log('⚠️ Google Maps failed to load, using fallback search');
                 initializeGlobalSearch();
             }
-        }, 2000);
+        }
+
+        // Start checking for Google Maps
+        setTimeout(waitForGoogleMaps, 1000);
 
         console.log('Employee Geo QR Check-In System loaded');
         console.log('✅ QR code generation with geo validation');
-        console.log('✅ Automatic payment processing setup');
+        console.log('✅ Automatic payment processing setup');  
         console.log('✅ Real-time employee time tracking');
         console.log('✅ Flexible payment schedules (daily, weekly, bi-weekly, monthly, custom)');
         console.log('✅ Enhanced global business search with 60+ worldwide business types');
-        console.log('✅ No Google Maps API dependency - works globally without restrictions');
+        console.log('✅ Google Maps API integration with address autocomplete');
     </script>
+
+    <!-- Google Maps API with Places Library -->
+    <script>
+        // Global callback function
+        window.initGoogleMaps = function() {
+            console.log('🗺️ Google Maps callback triggered');
+            checkGoogleMapsLoaded();
+        };
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCWbTrWVh2m4Vwv99jo5Ff3-gVwn5mLB18&libraries=places&callback=initGoogleMaps" async defer></script>
 </body>
 </html>
