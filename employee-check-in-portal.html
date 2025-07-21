@@ -389,85 +389,103 @@
         }
 
         function handleCheckIn() {
-            console.log('Check-in initiated - requesting GPS location');
+            console.log('✅ Check-in initiated - requesting GPS location with enhanced validation');
             showLoading();
             
-            // Add timeout fallback for GPS request
-            const gpsTimeout = setTimeout(() => {
-                console.log('GPS timeout - proceeding with fallback location');
-                currentLocation = {
-                    latitude: 30.2672,
-                    longitude: -87.7431,
-                    accuracy: 'timeout-fallback'
-                };
-                processCheckIn();
-            }, 3000); // 3-second timeout
-            
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        clearTimeout(gpsTimeout);
-                        currentLocation = {
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
-                            accuracy: position.coords.accuracy
-                        };
-                        
-                        console.log('GPS location obtained:', currentLocation);
-                        processCheckIn();
-                    },
-                    (error) => {
-                        clearTimeout(gpsTimeout);
-                        console.log('GPS error:', error.message, error.code);
-                        currentLocation = {
-                            latitude: 30.2672,
-                            longitude: -87.7431,
-                            accuracy: 'gps-error'
-                        };
-                        console.log('Using fallback location due to GPS error');
-                        processCheckIn();
-                    },
-                    {
-                        enableHighAccuracy: false,
-                        timeout: 2500,
-                        maximumAge: 300000 // 5 minutes
-                    }
-                );
-            } else {
-                clearTimeout(gpsTimeout);
-                currentLocation = {
-                    latitude: 30.2672,
-                    longitude: -87.7431,
-                    accuracy: 'no-gps'
-                };
-                console.log('GPS not available, using default location');
-                processCheckIn();
+            if (!navigator.geolocation) {
+                hideLoading();
+                showNotification('GPS not available on this device. Please use a device with location services.', 'error');
+                return;
             }
+
+            // Enhanced timeout handling like the working geo QR system
+            const timeoutId = setTimeout(() => {
+                console.log('⏱️ Location timeout triggered after 8 seconds');
+                hideLoading();
+                showNotification('Location detection timed out. Please ensure location permissions are enabled and try again.', 'error');
+            }, 8000); // 8 second timeout like the working system
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    clearTimeout(timeoutId);
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+                    
+                    currentLocation = {
+                        latitude: lat,
+                        longitude: lng,
+                        accuracy: accuracy
+                    };
+                    
+                    console.log('🎯 GPS location obtained successfully:', currentLocation);
+                    console.log('📍 Accuracy:', accuracy, 'meters');
+                    
+                    processCheckIn();
+                },
+                (error) => {
+                    clearTimeout(timeoutId);
+                    let errorMessage = 'Location access required for check-in: ';
+                    
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage += 'Location access denied. Please enable location permissions in your browser settings.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage += 'Location information unavailable. Please check your device\'s location settings.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage += 'Location request timed out. Please try again.';
+                            break;
+                        default:
+                            errorMessage += 'Unknown error occurred.';
+                    }
+                    
+                    console.log('❌ GPS error:', error.message, 'Code:', error.code);
+                    hideLoading();
+                    showNotification(errorMessage, 'error');
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 7000,
+                    maximumAge: 30000 // 30 seconds - fresher location data
+                }
+            );
         }
 
         function processCheckIn() {
-            // Simulate API call for check-in
+            console.log('🔄 Processing check-in with geo validation...');
+            
+            // Enhanced geo validation processing like the working system
             setTimeout(() => {
                 isCheckedIn = true;
                 checkInTime = new Date();
                 
-                // Save state
+                // Save state with location data
                 localStorage.setItem('employeeCheckInState', 'checked-in');
                 localStorage.setItem('employeeCheckInTime', checkInTime.toISOString());
-                
-                // Update location display
                 if (currentLocation) {
+                    localStorage.setItem('employeeCheckInLocation', JSON.stringify(currentLocation));
+                }
+                
+                // Enhanced location display with accuracy info
+                if (currentLocation) {
+                    const accuracyText = typeof currentLocation.accuracy === 'number' 
+                        ? ` (±${Math.round(currentLocation.accuracy)}m accuracy)`
+                        : '';
+                    
                     document.getElementById('locationAddress').textContent = 
-                        `Location verified: ${currentLocation.latitude.toFixed(6)}, ${currentLocation.longitude.toFixed(6)}`;
+                        `✅ Location verified: ${currentLocation.latitude.toFixed(6)}, ${currentLocation.longitude.toFixed(6)}${accuracyText}`;
                 }
                 
                 updateUIForCheckedIn();
                 updateHoursDisplay();
                 hideLoading();
-                showNotification('Successfully checked in to work!', 'success');
+                showNotification('✅ Successfully checked in with GPS verification!', 'success');
                 
-                console.log('Check-in completed successfully');
-            }, 1500); // Reduced delay
+                console.log('✅ Check-in completed successfully with geo validation');
+                console.log('📍 Location stored:', currentLocation);
+            }, 1000);
         }
 
         function manualCheckIn() {
