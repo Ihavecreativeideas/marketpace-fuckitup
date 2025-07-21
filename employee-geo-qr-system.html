@@ -196,13 +196,14 @@
         }
 
         .check-btn:disabled {
-            opacity: 0.5;
+            opacity: 0.6;
             cursor: not-allowed;
             transform: none !important;
-            background: rgba(60, 60, 60, 0.6) !important;
-            border: 2px solid rgba(80, 80, 80, 0.6) !important;
-            box-shadow: 0 0 10px rgba(60, 60, 60, 0.3) !important;
-            color: #999 !important;
+            background: linear-gradient(135deg, #666, #555) !important;
+            border: 2px solid rgba(120, 120, 120, 0.8) !important;
+            box-shadow: 0 0 15px rgba(100, 100, 100, 0.4) !important;
+            color: #ccc !important;
+            font-weight: 600 !important;
         }
 
         /* Add radar sweep effect */
@@ -340,6 +341,12 @@
                 Check Out
             </button>
         </div>
+        
+        <div style="margin-top: 20px; text-align: center;">
+            <button onclick="resetCheckInState()" style="background: rgba(255,193,7,0.2); border: 1px solid #ffc107; color: #ffd54f; padding: 8px 16px; border-radius: 6px; font-size: 0.9rem;">
+                Reset State (Debug)
+            </button>
+        </div>
     </div>
 
     <div id="notification" class="notification"></div>
@@ -355,9 +362,16 @@
             const savedState = localStorage.getItem('employeeCheckedIn');
             const savedTime = localStorage.getItem('employeeCheckInTime');
             
+            console.log('Saved state:', savedState, 'Saved time:', savedTime);
+            
             if (savedState === 'true' && savedTime) {
                 isCheckedIn = true;
                 checkInTime = new Date(savedTime);
+                console.log('Restoring checked-in state from:', checkInTime);
+                updateStatus();
+                updateButtons();
+            } else {
+                console.log('No previous check-in found, starting fresh');
                 updateStatus();
                 updateButtons();
             }
@@ -375,12 +389,16 @@
                         // In a real implementation, you would verify the location against work location
                         // For now, we'll simulate a successful check-in
                         
+                        console.log('Check-in location obtained:', position.coords.latitude, position.coords.longitude);
+                        
                         isCheckedIn = true;
                         checkInTime = new Date();
                         
                         // Save state to localStorage
                         localStorage.setItem('employeeCheckedIn', 'true');
                         localStorage.setItem('employeeCheckInTime', checkInTime.toISOString());
+                        
+                        console.log('Checking in at:', checkInTime);
                         
                         updateStatus();
                         updateButtons();
@@ -506,6 +524,17 @@
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 3000);
+        }
+
+        function resetCheckInState() {
+            console.log('Resetting check-in state...');
+            isCheckedIn = false;
+            checkInTime = null;
+            localStorage.removeItem('employeeCheckedIn');
+            localStorage.removeItem('employeeCheckInTime');
+            updateStatus();
+            updateButtons();
+            showNotification('State reset successfully', 'success');
         }
     </script>
 </body>
