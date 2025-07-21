@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Business Account Setup - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 30%, #4c2885 60%, #6b46c1 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .header p {
+            color: #94a3b8;
+            font-size: 18px;
+        }
+
+        .setup-form {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(0, 0, 0, 0.4) 100%);
+            border: 2px solid #ffd700;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+        }
+
+        .form-section {
+            margin-bottom: 32px;
+        }
+
+        .form-section h3 {
+            color: #ffd700;
+            font-size: 20px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #e2e8f0;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .subscription-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .subscription-option {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .subscription-option:hover {
+            border-color: #ffd700;
+            transform: translateY(-2px);
+        }
+
+        .subscription-option.selected {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .subscription-option.recommended {
+            border-color: #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .recommended-badge {
+            position: absolute;
+            top: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #1a1a1a;
+            padding: 4px 12px;
+            border-radius: 0 0 6px 6px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .subscription-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .subscription-title {
+            color: #ffd700;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .subscription-price {
+            color: #00ffff;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .subscription-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .subscription-features li {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 6px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .subscription-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .setup-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 32px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            padding: 16px 32px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(0, 255, 255, 0.1);
+            color: #00ffff;
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            padding: 14px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .campaign-notice {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(65, 105, 225, 0.1));
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .campaign-notice h3 {
+            color: #00ffff;
+            margin-bottom: 8px;
+        }
+
+        .campaign-notice p {
+            color: #94a3b8;
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .subscription-selector {
+                grid-template-columns: 1fr;
+            }
+            
+            .setup-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Setup Your Pro Business Account</h1>
+            <p>Unlock advanced workforce management and scheduling features</p>
+        </div>
+
+        <div class="campaign-notice">
+            <h3>🎉 Launch Campaign Special</h3>
+            <p>All Pro features are <strong>FREE</strong> during our launch campaign until January 1, 2026!</p>
+        </div>
+
+        <form class="setup-form" id="proSetupForm">
+            <div class="form-section">
+                <h3>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 4.5C14.8 4.4 14.6 4.4 14.4 4.5L12 5.5L9.6 4.5C9.4 4.4 9.2 4.4 9 4.5L3 7V9L8.5 6.5L11 7.5V22H13V7.5L15.5 6.5L21 9Z"/>
+                    </svg>
+                    Business Information
+                </h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="businessName">Business Name *</label>
+                        <input type="text" id="businessName" name="businessName" required placeholder="Enter your business name">
+                    </div>
+                    <div class="form-group">
+                        <label for="businessType">Business Type</label>
+                        <select id="businessType" name="businessType">
+                            <option value="restaurant">Restaurant/Food Service</option>
+                            <option value="retail">Retail Store</option>
+                            <option value="office">Office/Corporate</option>
+                            <option value="healthcare">Healthcare</option>
+                            <option value="construction">Construction</option>
+                            <option value="hospitality">Hospitality</option>
+                            <option value="manufacturing">Manufacturing</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="contactName">Contact Person *</label>
+                        <input type="text" id="contactName" name="contactName" required placeholder="Your name">
+                    </div>
+                    <div class="form-group">
+                        <label for="contactEmail">Email Address *</label>
+                        <input type="email" id="contactEmail" name="contactEmail" required placeholder="business@example.com">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="contactPhone">Phone Number</label>
+                        <input type="tel" id="contactPhone" name="contactPhone" placeholder="+1 (555) 123-4567">
+                    </div>
+                    <div class="form-group">
+                        <label for="employeeCount">Approximate Staff Size</label>
+                        <select id="employeeCount" name="employeeCount">
+                            <option value="1-5">1-5 people</option>
+                            <option value="6-15">6-15 people</option>
+                            <option value="16-50">16-50 people</option>
+                            <option value="51-100">51-100 people</option>
+                            <option value="100+">100+ people</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22 22 17.52 22 12 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z"/>
+                    </svg>
+                    Choose Your Pro Plan
+                </h3>
+
+                <div class="subscription-selector">
+                    <div class="subscription-option" onclick="selectPlan('silver')" data-plan="silver">
+                        <div class="subscription-header">
+                            <div class="subscription-title">Silver Pro</div>
+                            <div class="subscription-price">$15/month</div>
+                        </div>
+                        <ul class="subscription-features">
+                            <li>Basic workforce management</li>
+                            <li>Employee scheduling calendar</li>
+                            <li>Standard QR check-ins</li>
+                            <li>Email notifications</li>
+                            <li>Up to 15 employees</li>
+                        </ul>
+                    </div>
+
+                    <div class="subscription-option recommended selected" onclick="selectPlan('gold')" data-plan="gold">
+                        <div class="recommended-badge">MOST POPULAR</div>
+                        <div class="subscription-header">
+                            <div class="subscription-title">Gold Pro</div>
+                            <div class="subscription-price">$25/month</div>
+                        </div>
+                        <ul class="subscription-features">
+                            <li>Everything in Silver</li>
+                            <li>Voice-activated scheduling</li>
+                            <li>Bulk scheduling actions</li>
+                            <li>Advanced geo QR features</li>
+                            <li>SMS + Email notifications</li>
+                            <li>Up to 50 employees</li>
+                        </ul>
+                    </div>
+
+                    <div class="subscription-option" onclick="selectPlan('platinum')" data-plan="platinum">
+                        <div class="subscription-header">
+                            <div class="subscription-title">Platinum Pro</div>
+                            <div class="subscription-price">$50/month</div>
+                        </div>
+                        <ul class="subscription-features">
+                            <li>Everything in Gold</li>
+                            <li>Multi-location support</li>
+                            <li>Advanced analytics</li>
+                            <li>Custom business branding</li>
+                            <li>Priority support</li>
+                            <li>Unlimited employees</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setup-buttons">
+                <button type="submit" class="btn-primary">
+                    Create Pro Business Account
+                </button>
+                <button type="button" class="btn-secondary" onclick="startFreeTrial()">
+                    Start Free Trial Instead
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let selectedPlan = 'gold';
+
+        function selectPlan(plan) {
+            selectedPlan = plan;
+            
+            // Update visual selection
+            document.querySelectorAll('.subscription-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            document.querySelector(`[data-plan="${plan}"]`).classList.add('selected');
+            console.log('Selected plan:', plan);
+        }
+
+        function startFreeTrial() {
+            // Simulate starting free trial and redirect to business scheduling
+            localStorage.setItem('proAccountStatus', 'trial');
+            localStorage.setItem('proAccountPlan', selectedPlan);
+            localStorage.setItem('trialStartDate', new Date().toISOString());
+            
+            alert('Free trial started! Redirecting to your business scheduling dashboard...');
+            window.location.href = '/business-scheduling';
+        }
+
+        document.getElementById('proSetupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Collect form data
+            const formData = new FormData(this);
+            const businessData = {
+                name: formData.get('businessName'),
+                type: formData.get('businessType'),
+                contactName: formData.get('contactName'),
+                contactEmail: formData.get('contactEmail'),
+                contactPhone: formData.get('contactPhone'),
+                employeeCount: formData.get('employeeCount'),
+                plan: selectedPlan
+            };
+            
+            // Save business profile
+            localStorage.setItem('businessProfile', JSON.stringify(businessData));
+            localStorage.setItem('businessName', businessData.name);
+            
+            // For launch campaign, activate immediately
+            localStorage.setItem('proAccountStatus', 'active');
+            localStorage.setItem('proAccountPlan', selectedPlan);
+            localStorage.setItem('campaignMember', 'true');
+            
+            alert(`Congratulations! Your ${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} Pro Business Account has been created successfully!`);
+            window.location.href = '/business-scheduling';
+        });
+    </script>
+</body>
+</html>

@@ -2137,6 +2137,11 @@ app.get('/employee-dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, '../employee-dashboard.html'));
 });
 
+// Pro Business Setup Route
+app.get('/pro-business-setup', (req, res) => {
+  res.sendFile(path.join(__dirname, '../pro-business-setup.html'));
+});
+
 // Driver Application Approval and Invitation API
 app.post('/api/driver/approve-and-invite', async (req, res) => {
   try {
