@@ -1756,21 +1756,26 @@
 
         function renderEmployeeGrid() {
             const grid = document.getElementById('employeeGrid');
+            if (!grid) {
+                console.log('Employee grid not found on current tab, skipping render');
+                return;
+            }
+            
             const placeholder = grid.querySelector('.employee-placeholder');
             const managementControls = document.getElementById('managementControls');
             const employeeStats = document.getElementById('employeeStats');
             
             if (employees.length === 0) {
                 if (placeholder) placeholder.style.display = 'block';
-                managementControls.style.display = 'none';
-                employeeStats.style.display = 'none';
+                if (managementControls) managementControls.style.display = 'none';
+                if (employeeStats) employeeStats.style.display = 'none';
                 return;
             }
             
             // Hide placeholder and show controls
             if (placeholder) placeholder.style.display = 'none';
-            managementControls.style.display = 'block';
-            employeeStats.style.display = 'block';
+            if (managementControls) managementControls.style.display = 'block';
+            if (employeeStats) employeeStats.style.display = 'block';
             
             // Create employee cards
             const employeeCards = employees.map(employee => `
@@ -1790,6 +1795,7 @@
             `).join('');
             
             grid.innerHTML = employeeCards;
+            console.log('Employee grid updated with', employees.length, 'employees');
         }
 
         function updateEmployeeStats() {
@@ -1813,16 +1819,47 @@
         function sendEmployeeInvitation(employee) {
             console.log('Sending invitation to:', employee);
             
-            // Simulate API call to send SMS and Email
-            const inviteMessage = `Welcome to MarketPace! You've been added as ${employee.role}. Check your email for setup instructions.`;
+            // Send both SMS and Email invitations
+            const invitationData = {
+                name: employee.name,
+                phone: employee.phone,
+                email: employee.email,
+                role: employee.role,
+                category: employee.category,
+                paymentType: employee.paymentType,
+                paymentAmount: employee.paymentAmount,
+                businessName: 'Your Business' // This could be dynamic
+            };
             
-            setTimeout(() => {
-                showNotification(`Invitation sent to ${employee.name}`, 'success');
-                
-                // In a real implementation, this would make an API call to:
-                // - Send SMS to employee.phone
-                // - Send email to employee.email
-                // - Include MarketPace employee portal login details
+            // Make API call to send employee invitation
+            fetch('/api/employees/send-invitation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(invitationData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(`Invitation sent to ${employee.name} via SMS and email`, 'success');
+                    updateVoiceOutput(`Employee invitation sent successfully to ${employee.name}`);
+                    
+                    // Update employee status to pending
+                    const emp = employees.find(e => e.id === employee.id);
+                    if (emp) {
+                        emp.status = 'pending';
+                        renderEmployeeGrid();
+                        updateEmployeeStats();
+                    }
+                } else {
+                    console.error('Invitation failed:', data.message);
+                    showNotification(`Failed to send invitation: ${data.message}`, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error sending invitation:', error);
+                showNotification('Error sending invitation. Please try again.', 'error');
             }, 1000);
         }
 

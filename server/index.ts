@@ -21,6 +21,7 @@ import { notificationService, PurchaseNotificationData } from './notificationSer
 import { driverNotificationService } from './driverNotificationService';
 import { socialMediaRoutes } from './socialMediaRoutes';
 import { sendSMS } from './smsService';
+import { sendEmail } from './emailService';
 import { qrCodeService, QRCodeService } from './qrCodeService';
 import { tipRoutes } from './tipRoutes';
 import { subscriptionRoutes } from './subscriptionManager';
@@ -308,6 +309,129 @@ app.post('/api/maps/directions', async (req, res) => {
     res.status(500).json({ 
       error: 'Failed to get directions', 
       message: error.message 
+    });
+  }
+});
+
+// Employee invitation API
+app.post('/api/employees/send-invitation', async (req, res) => {
+  try {
+    const { name, phone, email, role, category, paymentType, paymentAmount, businessName } = req.body;
+    
+    // Validate required fields
+    if (!name || !phone || !email || !role) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Missing required fields: name, phone, email, role' 
+      });
+    }
+    
+    // Format payment information for messages
+    let paymentText = '';
+    switch (paymentType) {
+      case 'hourly':
+        paymentText = `$${paymentAmount}/hour`;
+        break;
+      case 'per_job':
+        paymentText = `$${paymentAmount} per job`;
+        break;
+      case 'salary':
+        paymentText = `$${paymentAmount.toLocaleString()} annually`;
+        break;
+      case 'commission':
+        paymentText = `${paymentAmount}% commission`;
+        break;
+      default:
+        paymentText = 'Payment terms to be discussed';
+    }
+    
+    // Create invitation messages
+    const smsMessage = `Welcome to MarketPace! You've been invited to join as ${role} (${category}) at ${businessName || 'our business'}. Payment: ${paymentText}. Sign up at www.marketpace.shop and access your Employee Portal in the menu. Text STOP to opt out.`;
+    
+    const emailSubject = `MarketPace Employee Invitation - ${role} Position`;
+    const emailBody = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #1a1a1a; color: white; padding: 20px; border-radius: 12px;">
+        <h2 style="color: #00ffff; text-align: center;">Welcome to MarketPace!</h2>
+        
+        <p>Hi ${name},</p>
+        
+        <p>You've been invited to join <strong>${businessName || 'our business'}</strong> as a <strong>${role}</strong> (${category}).</p>
+        
+        <div style="background: rgba(0, 255, 255, 0.1); padding: 15px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #00ffff; margin-top: 0;">Position Details:</h3>
+          <ul>
+            <li><strong>Role:</strong> ${role}</li>
+            <li><strong>Category:</strong> ${category}</li>
+            <li><strong>Payment:</strong> ${paymentText}</li>
+          </ul>
+        </div>
+        
+        <h3 style="color: #00ffff;">Next Steps:</h3>
+        <ol>
+          <li>Sign up at <a href="https://www.marketpace.shop" style="color: #00ffff;">www.marketpace.shop</a></li>
+          <li>Complete your profile setup</li>
+          <li>Access your Employee Portal from the menu</li>
+          <li>View your schedule and check-in options</li>
+        </ol>
+        
+        <p>Once you join MarketPace, you'll have access to:</p>
+        <ul>
+          <li>Your work schedule and shifts</li>
+          <li>QR check-in system for work locations</li>
+          <li>Direct communication with management</li>
+          <li>Earnings tracking and payment history</li>
+        </ul>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="https://www.marketpace.shop" style="background: linear-gradient(135deg, #4169e1, #00ffff); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold;">Join MarketPace Now</a>
+        </div>
+        
+        <p style="font-size: 12px; color: #888; text-align: center;">
+          This invitation was sent by ${businessName || 'your employer'} through MarketPace's employee management system.
+        </p>
+      </div>
+    `;
+    
+    // Send SMS invitation
+    try {
+      await sendSMS(phone, smsMessage);
+      console.log(`Employee invitation SMS sent to ${phone}`);
+    } catch (smsError) {
+      console.error('SMS invitation failed:', smsError);
+    }
+    
+    // Send email invitation
+    try {
+      await sendEmail({
+        to: email,
+        subject: emailSubject,
+        html: emailBody
+      });
+      console.log(`Employee invitation email sent to ${email}`);
+    } catch (emailError) {
+      console.error('Email invitation failed:', emailError);
+    }
+    
+    res.json({
+      success: true,
+      message: `Invitation sent to ${name} via SMS and email`,
+      employee: {
+        name,
+        phone,
+        email,
+        role,
+        category,
+        paymentType,
+        paymentAmount
+      }
+    });
+    
+  } catch (error) {
+    console.error('Employee invitation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send employee invitation',
+      error: error.message
     });
   }
 });
