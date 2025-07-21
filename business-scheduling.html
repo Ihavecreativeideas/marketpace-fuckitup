@@ -48,7 +48,13 @@
             padding: 0 20px;
         }
 
-        /* Old tab navigation styles removed - replaced with compact nav chips */
+        /* Employee Avatar Colors */
+        .employee-avatar.manager { background: linear-gradient(135deg, #8B4513, #A0522D); color: white; }
+        .employee-avatar.cashier { background: linear-gradient(135deg, #00ff88, #00cc6a); color: black; }
+        .employee-avatar.sales { background: linear-gradient(135deg, #ff6b9d, #ff4757); color: white; }
+        .employee-avatar.stock { background: linear-gradient(135deg, #4169e1, #0066ff); color: white; }
+        .employee-avatar.assistant { background: linear-gradient(135deg, #8a2be2, #6a1b9a); color: white; }
+        .employee-avatar.security { background: linear-gradient(135deg, #ff4444, #cc0000); color: white; }
 
         .tab-content {
             display: none;
@@ -4072,6 +4078,106 @@
         function showCustomTimeModal() {
             showNotification('Opening custom time selector', 'success');
             // In a real app, this would open a modal for custom time selection
+        }
+
+        // Initialize smart employee management
+        function initializeSmartEmployeeManagement() {
+            console.log('Smart Employee Management positioned at top of Employees tab');
+            
+            // Generate employee cards
+            const smartEmployeeGrid = document.getElementById('smartEmployeeGrid');
+            if (smartEmployeeGrid) {
+                generateEmployeeCards();
+            }
+        }
+
+        function generateEmployeeCards() {
+            const employees = [
+                { id: 'sarah', name: 'Sarah Johnson', role: 'Manager', status: 'Available', avatar: 'S', color: 'manager' },
+                { id: 'mike', name: 'Mike Chen', role: 'Cashier', status: 'Available', avatar: 'M', color: 'cashier' },
+                { id: 'jessica', name: 'Jessica Martinez', role: 'Sales', status: 'Scheduled', avatar: 'J', color: 'sales' },
+                { id: 'david', name: 'David Wilson', role: 'Stock', status: 'Available', avatar: 'D', color: 'stock' },
+                { id: 'emma', name: 'Emma Davis', role: 'Assistant', status: 'Off', avatar: 'E', color: 'assistant' },
+                { id: 'carlos', name: 'Carlos Rodriguez', role: 'Security', status: 'Available', avatar: 'C', color: 'security' }
+            ];
+
+            const smartEmployeeGrid = document.getElementById('smartEmployeeGrid');
+            smartEmployeeGrid.innerHTML = '';
+
+            employees.forEach(employee => {
+                const card = document.createElement('div');
+                card.className = 'employee-card';
+                card.style.cssText = `
+                    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+                    border: 1px solid rgba(255,255,255,0.2);
+                    border-radius: 12px;
+                    padding: 16px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    position: relative;
+                `;
+
+                // Add status indicator colors
+                let statusColor = '#00ff88'; // Available
+                if (employee.status === 'Scheduled') statusColor = '#ffd700';
+                if (employee.status === 'Off') statusColor = '#ff6b9d';
+
+                card.innerHTML = `
+                    <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                        <div class="employee-avatar ${employee.color}" style="width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; margin-right: 12px;">${employee.avatar}</div>
+                        <div>
+                            <div style="font-weight: bold; color: white; font-size: 16px;">${employee.name}</div>
+                            <div style="color: #94a3b8; font-size: 14px;">${employee.role}</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="color: ${statusColor}; font-size: 12px; font-weight: bold;">${employee.status}</div>
+                        <button style="background: linear-gradient(135deg, #00ffff, #4169e1); border: none; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">Schedule</button>
+                    </div>
+                `;
+
+                // Add click handler to open scheduling interface
+                card.onclick = function() {
+                    openEmployeeScheduling(employee);
+                };
+
+                // Add hover effects
+                card.onmouseenter = function() {
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 8px 25px rgba(0,255,255,0.3)';
+                    this.style.borderColor = '#00ffff';
+                };
+
+                card.onmouseleave = function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = 'none';
+                    this.style.borderColor = 'rgba(255,255,255,0.2)';
+                };
+
+                smartEmployeeGrid.appendChild(card);
+            });
+        }
+
+        function openEmployeeScheduling(employee) {
+            // Set employee details in the scheduling interface
+            document.getElementById('selectedEmployeeName').textContent = employee.name;
+            document.getElementById('selectedEmployeeRole').textContent = employee.role;
+            
+            // Show the scheduling interface
+            document.getElementById('selectedEmployeeScheduling').style.display = 'block';
+            
+            // Scroll to the scheduling interface
+            document.getElementById('selectedEmployeeScheduling').scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+
+            showNotification(`Opening schedule for ${employee.name}`, 'success');
+        }
+
+        function closeEmployeeScheduling() {
+            document.getElementById('selectedEmployeeScheduling').style.display = 'none';
+            showNotification('Closed employee scheduling interface', 'success');
         }
 
         // Initialize smart employee management when the tab is loaded
