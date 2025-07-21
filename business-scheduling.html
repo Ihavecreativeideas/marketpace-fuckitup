@@ -57,35 +57,24 @@
         .employee-avatar.security { background: linear-gradient(135deg, #ff4444, #cc0000); color: white; }
 
         .tab-content {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            display: none;
             opacity: 0;
-            visibility: hidden;
-            transform: translateY(20px);
-            transition: all 0.3s ease-in-out;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
             background: transparent;
-            min-height: 100vh;
-            z-index: 1;
         }
 
         .tab-content.active {
-            position: relative;
+            display: block;
             opacity: 1;
-            visibility: visible;
             transform: translateY(0);
-            z-index: 2;
         }
 
         /* Tab Container */
         .tab-container {
             position: relative;
             min-height: 80vh;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            padding: 20px;
-            border-radius: 16px;
-            margin-top: 20px;
+            background: transparent;
         }
 
         /* Ensure body and container have dark background */
@@ -4223,7 +4212,7 @@
             showNotification('Closed employee scheduling interface', 'success');
         }
 
-        // Smooth Tab Switching Function with No Flash
+        // Smooth Tab Switching Function - Simple and Effective
         function showTab(tabId) {
             // Remove active class from all nav chips
             document.querySelectorAll('.nav-chip').forEach(chip => {
@@ -4236,24 +4225,26 @@
                 activeChip.classList.add('active');
             }
 
-            // Remove active class from all tabs immediately
+            // Hide all tabs immediately
             document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
                 content.classList.remove('active');
             });
 
-            // Show the selected tab immediately with smooth transition
+            // Show the selected tab
             const targetTab = document.getElementById(tabId);
             if (targetTab) {
-                // Force a reflow to ensure the CSS takes effect
-                targetTab.offsetHeight;
+                targetTab.style.display = 'block';
+                targetTab.classList.add('active');
                 
-                // Add active class to trigger smooth transition
-                requestAnimationFrame(() => {
-                    targetTab.classList.add('active');
-                });
+                // Smooth fade in effect
+                setTimeout(() => {
+                    targetTab.style.opacity = '1';
+                    targetTab.style.transform = 'translateY(0)';
+                }, 50);
             }
 
-            // Initialize tab-specific functionality after transition
+            // Initialize tab-specific functionality
             setTimeout(() => {
                 if (tabId === 'employees') {
                     initializeSmartEmployeeManagement();
