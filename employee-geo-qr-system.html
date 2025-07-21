@@ -240,7 +240,84 @@
                 font-size: 2rem;
             }
         }
+        /* Autocomplete Styles */
+        .autocomplete-container {
+            position: relative;
+        }
+
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s ease;
+        }
+
+        .suggestion-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-business-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .suggestion-address {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .suggestion-type {
+            font-size: 12px;
+            color: #007bff;
+            margin-top: 4px;
+        }
+
+        .loading-indicator {
+            padding: 12px 16px;
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+
+        .no-results {
+            padding: 12px 16px;
+            text-align: center;
+            color: #999;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            pointer-events: none;
+        }
     </style>
+
+    <!-- Google Places API -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD9J3aQa6G2F3_HQK1_6J4P0oQ4Y7_wX2k&libraries=places&callback=initGooglePlaces"></script>
 </head>
 <body>
     <div class="container">
@@ -261,7 +338,13 @@
 
                 <div class="form-group">
                     <label class="form-label">Business/Location Name</label>
-                    <input type="text" class="form-input" id="businessName" placeholder="Enter business or location name">
+                    <div class="autocomplete-container">
+                        <input type="text" class="form-input" id="businessName" placeholder="Search for business or enter address..." autocomplete="off">
+                        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                        </svg>
+                        <div class="autocomplete-suggestions" id="businessSuggestions"></div>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -417,6 +500,256 @@
             activity: []
         };
 
+        // Business/Address Search Variables
+        let autocompleteService = null;
+        let placesService = null;
+        let searchTimeout = null;
+        let selectedPlace = null;
+
+        // Initialize Google Places API
+        function initializeGooglePlaces() {
+            if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+                autocompleteService = new google.maps.places.AutocompleteService();
+                placesService = new google.maps.places.PlacesService(document.createElement('div'));
+                setupBusinessSearch();
+                console.log('✅ Google Places API initialized');
+            } else {
+                // Fallback to manual search if Google Places isn't available
+                setupManualSearch();
+                console.log('⚠️ Google Places API not available, using manual search');
+            }
+        }
+
+        // Setup business search with autocomplete
+        function setupBusinessSearch() {
+            const businessInput = document.getElementById('businessName');
+            const suggestionsDiv = document.getElementById('businessSuggestions');
+
+            businessInput.addEventListener('input', function() {
+                const query = this.value.trim();
+                
+                clearTimeout(searchTimeout);
+                
+                if (query.length < 2) {
+                    hideSuggestions();
+                    return;
+                }
+
+                showLoading();
+                
+                searchTimeout = setTimeout(() => {
+                    searchBusinesses(query);
+                }, 300);
+            });
+
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.autocomplete-container')) {
+                    hideSuggestions();
+                }
+            });
+        }
+
+        // Search for businesses and addresses
+        function searchBusinesses(query) {
+            const suggestionsDiv = document.getElementById('businessSuggestions');
+            
+            // Search for business establishments and addresses
+            const request = {
+                input: query,
+                types: ['establishment', 'geocode'],
+                componentRestrictions: { country: 'us' }
+            };
+
+            autocompleteService.getPlacePredictions(request, (predictions, status) => {
+                if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
+                    displaySuggestions(predictions);
+                } else {
+                    showNoResults();
+                }
+            });
+        }
+
+        // Display search suggestions
+        function displaySuggestions(predictions) {
+            const suggestionsDiv = document.getElementById('businessSuggestions');
+            suggestionsDiv.innerHTML = '';
+            
+            predictions.slice(0, 8).forEach(prediction => {
+                const suggestionItem = document.createElement('div');
+                suggestionItem.className = 'suggestion-item';
+                
+                // Extract business name and address
+                const mainText = prediction.structured_formatting.main_text;
+                const secondaryText = prediction.structured_formatting.secondary_text || '';
+                const types = prediction.types;
+                
+                let businessType = '';
+                if (types.includes('restaurant')) businessType = 'Restaurant';
+                else if (types.includes('store')) businessType = 'Store';
+                else if (types.includes('hospital')) businessType = 'Healthcare';
+                else if (types.includes('school')) businessType = 'Education';
+                else if (types.includes('bank')) businessType = 'Finance';
+                else if (types.includes('gas_station')) businessType = 'Gas Station';
+                else if (types.includes('establishment')) businessType = 'Business';
+                else if (types.includes('street_address')) businessType = 'Address';
+
+                suggestionItem.innerHTML = `
+                    <div class="suggestion-business-name">${mainText}</div>
+                    <div class="suggestion-address">${secondaryText}</div>
+                    ${businessType ? `<div class="suggestion-type">${businessType}</div>` : ''}
+                `;
+
+                suggestionItem.addEventListener('click', () => {
+                    selectBusiness(prediction, mainText);
+                });
+
+                suggestionsDiv.appendChild(suggestionItem);
+            });
+            
+            showSuggestions();
+        }
+
+        // Select a business from suggestions
+        function selectBusiness(prediction, displayName) {
+            const businessInput = document.getElementById('businessName');
+            businessInput.value = displayName;
+            selectedPlace = prediction;
+            hideSuggestions();
+
+            // Get detailed place information
+            const request = {
+                placeId: prediction.place_id,
+                fields: ['name', 'formatted_address', 'geometry', 'place_id', 'types']
+            };
+
+            placesService.getDetails(request, (place, status) => {
+                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    selectedPlace = place;
+                    showNotification(`Selected: ${place.name || displayName}`, 'success');
+                    console.log('Selected place:', place);
+                }
+            });
+        }
+
+        // Show loading indicator
+        function showLoading() {
+            const suggestionsDiv = document.getElementById('businessSuggestions');
+            suggestionsDiv.innerHTML = '<div class="loading-indicator">Searching businesses...</div>';
+            showSuggestions();
+        }
+
+        // Show no results message
+        function showNoResults() {
+            const suggestionsDiv = document.getElementById('businessSuggestions');
+            suggestionsDiv.innerHTML = '<div class="no-results">No businesses found. Try a different search term.</div>';
+            showSuggestions();
+        }
+
+        // Show suggestions dropdown
+        function showSuggestions() {
+            document.getElementById('businessSuggestions').style.display = 'block';
+        }
+
+        // Hide suggestions dropdown
+        function hideSuggestions() {
+            document.getElementById('businessSuggestions').style.display = 'none';
+        }
+
+        // Fallback manual search for when Google Places isn't available
+        function setupManualSearch() {
+            const businessInput = document.getElementById('businessName');
+            
+            businessInput.addEventListener('input', function() {
+                const query = this.value.trim();
+                
+                if (query.length < 2) {
+                    hideSuggestions();
+                    return;
+                }
+
+                // Comprehensive Gulf Coast business database
+                const localBusinesses = [
+                    // Mobile Area
+                    { name: "McDonald's", address: "3371 Airport Blvd, Mobile, AL", type: "Restaurant" },
+                    { name: "Walmart Supercenter", address: "2500 Airport Blvd, Mobile, AL", type: "Store" },
+                    { name: "CVS Pharmacy", address: "1208 Government St, Mobile, AL", type: "Pharmacy" },
+                    { name: "Home Depot", address: "951 Rangeline Service Rd, Mobile, AL", type: "Hardware Store" },
+                    { name: "Publix Super Market", address: "6350 Old Shell Rd, Mobile, AL", type: "Grocery Store" },
+                    { name: "Mobile Bay", address: "Mobile Bay, Mobile, AL", type: "Waterfront" },
+                    { name: "University of South Alabama", address: "307 University Blvd, Mobile, AL", type: "University" },
+                    { name: "Spring Hill Medical Center", address: "3719 Dauphin St, Mobile, AL", type: "Hospital" },
+                    
+                    // Gulf Shores Area
+                    { name: "Gulf Shores Beach", address: "Gulf Shores Public Beach, Gulf Shores, AL", type: "Beach" },
+                    { name: "The Hangout", address: "101 E Beach Blvd, Gulf Shores, AL", type: "Restaurant" },
+                    { name: "Flora-Bama", address: "17401 Perdido Key Dr, Pensacola, FL", type: "Bar & Restaurant" },
+                    { name: "Gulf State Park", address: "22050 Campground Rd, Gulf Shores, AL", type: "State Park" },
+                    { name: "The Track", address: "3200 Gulf Shores Pkwy, Gulf Shores, AL", type: "Entertainment" },
+                    
+                    // Orange Beach Area  
+                    { name: "The Wharf", address: "23101 Canal Rd, Orange Beach, AL", type: "Entertainment Complex" },
+                    { name: "The Ferris Wheel", address: "4851 Wharf Pkwy, Orange Beach, AL", type: "Attraction" },
+                    { name: "Adventure Island", address: "24559 Perdido Beach Blvd, Orange Beach, AL", type: "Mini Golf" },
+                    { name: "Orange Beach Marina", address: "27075 Marina Rd, Orange Beach, AL", type: "Marina" },
+                    
+                    // Spanish Fort/Eastern Shore
+                    { name: "Bass Pro Shops", address: "6450 Spanish Fort Town Center, Spanish Fort, AL", type: "Outdoor Store" },
+                    { name: "Spanish Fort Town Center", address: "6450 Spanish Fort Blvd, Spanish Fort, AL", type: "Shopping Center" },
+                    { name: "Eastern Shore Centre", address: "30500 State Hwy 181, Spanish Fort, AL", type: "Shopping Mall" },
+                    
+                    // Pensacola Area (nearby)
+                    { name: "Pensacola Beach", address: "Pensacola Beach, FL", type: "Beach" },
+                    { name: "Naval Aviation Museum", address: "1750 Radford Blvd, Pensacola, FL", type: "Museum" },
+                    
+                    // Common Address Patterns
+                    { name: "26145 Carondelette Dr", address: "26145 Carondelette Dr, Orange Beach, AL", type: "Address" },
+                    { name: "123 Main Street", address: "123 Main St, Mobile, AL", type: "Address" },
+                    { name: "456 Government Street", address: "456 Government St, Mobile, AL", type: "Address" },
+                    { name: "789 Airport Boulevard", address: "789 Airport Blvd, Mobile, AL", type: "Address" }
+                ];
+
+                const matches = localBusinesses.filter(business => 
+                    business.name.toLowerCase().includes(query.toLowerCase()) ||
+                    business.address.toLowerCase().includes(query.toLowerCase())
+                );
+
+                displayManualSuggestions(matches);
+            });
+        }
+
+        // Display manual suggestions fallback
+        function displayManualSuggestions(businesses) {
+            const suggestionsDiv = document.getElementById('businessSuggestions');
+            suggestionsDiv.innerHTML = '';
+
+            if (businesses.length === 0) {
+                showNoResults();
+                return;
+            }
+
+            businesses.forEach(business => {
+                const suggestionItem = document.createElement('div');
+                suggestionItem.className = 'suggestion-item';
+                
+                suggestionItem.innerHTML = `
+                    <div class="suggestion-business-name">${business.name}</div>
+                    <div class="suggestion-address">${business.address}</div>
+                    <div class="suggestion-type">${business.type}</div>
+                `;
+
+                suggestionItem.addEventListener('click', () => {
+                    document.getElementById('businessName').value = business.name;
+                    hideSuggestions();
+                    showNotification(`Selected: ${business.name}`, 'success');
+                });
+
+                suggestionsDiv.appendChild(suggestionItem);
+            });
+
+            showSuggestions();
+        }
+
         function generateEmployeeQR() {
             const businessName = document.getElementById('businessName').value;
             const radius = document.getElementById('geoRadius').value;
@@ -429,8 +762,25 @@
 
             showNotification('Generating employee check-in QR code...', 'info');
 
-            // Get current location for geo validation
-            if (navigator.geolocation) {
+            // Use selected place coordinates if available, otherwise get current location
+            if (selectedPlace && selectedPlace.geometry) {
+                const qrData = {
+                    purpose: 'employee_checkin',
+                    businessName: businessName,
+                    businessAddress: selectedPlace.formatted_address || '',
+                    placeId: selectedPlace.place_id || '',
+                    geoValidation: {
+                        enabled: true,
+                        latitude: selectedPlace.geometry.location.lat(),
+                        longitude: selectedPlace.geometry.location.lng(),
+                        radiusMeters: parseInt(radius),
+                        strictMode: mode === 'strict'
+                    },
+                    timestamp: new Date().toISOString()
+                };
+
+                generateQRCodeAPI(qrData);
+            } else if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         const qrData = {
@@ -662,11 +1012,27 @@
         // Initialize dashboard
         updateDashboard();
 
+        // Initialize search functionality 
+        window.initGooglePlaces = function() {
+            initializeGooglePlaces();
+        };
+
+        // Initialize search with fallback
+        setTimeout(() => {
+            if (typeof google === 'undefined' || !google.maps || !google.maps.places) {
+                setupManualSearch();
+                console.log('✅ Manual business search initialized (Google Places unavailable)');
+            } else {
+                initializeGooglePlaces();
+            }
+        }, 1000);
+
         console.log('Employee Geo QR Check-In System loaded');
         console.log('✅ QR code generation with geo validation');
         console.log('✅ Automatic payment processing setup');
         console.log('✅ Real-time employee time tracking');
         console.log('✅ Flexible payment schedules (daily, weekly, bi-weekly, monthly, custom)');
+        console.log('✅ Predictive business search and address autocomplete');
     </script>
 </body>
 </html>
