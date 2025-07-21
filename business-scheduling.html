@@ -58,6 +58,27 @@
 
         .tab-content {
             display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            animation: smoothFadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes smoothFadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(15px) scale(0.98);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         .tab-content.active {
@@ -4180,8 +4201,68 @@
             showNotification('Closed employee scheduling interface', 'success');
         }
 
+        // Smooth Tab Switching Function
+        function showTab(tabId) {
+            // Remove active class from all nav chips
+            document.querySelectorAll('.nav-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+
+            // Add active class to clicked nav chip
+            const activeChip = document.querySelector(`[data-tab="${tabId}"]`);
+            if (activeChip) {
+                activeChip.classList.add('active');
+            }
+
+            // Hide all tab content with smooth fade out
+            document.querySelectorAll('.tab-content').forEach(content => {
+                if (content.style.display !== 'none') {
+                    content.style.opacity = '0';
+                    content.style.transform = 'translateY(10px)';
+                    
+                    setTimeout(() => {
+                        content.style.display = 'none';
+                        content.classList.remove('active');
+                    }, 200);
+                }
+            });
+
+            // Show the selected tab with smooth fade in
+            setTimeout(() => {
+                const targetTab = document.getElementById(tabId);
+                if (targetTab) {
+                    targetTab.style.display = 'block';
+                    targetTab.classList.add('active');
+                    
+                    // Trigger smooth animation
+                    setTimeout(() => {
+                        targetTab.style.opacity = '1';
+                        targetTab.style.transform = 'translateY(0)';
+                    }, 50);
+                }
+            }, 250);
+
+            // Initialize tab-specific functionality
+            if (tabId === 'employees') {
+                setTimeout(() => {
+                    initializeSmartEmployeeManagement();
+                }, 300);
+            } else if (tabId === 'volunteers') {
+                setTimeout(() => {
+                    console.log('Volunteer Management positioned at top of Volunteers tab');
+                }, 300);
+            } else if (tabId === 'qr-system') {
+                setTimeout(() => {
+                    console.log('Employee QR System positioned at top of QR System tab');
+                }, 300);
+            }
+        }
+
         // Initialize smart employee management when the tab is loaded
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the first tab
+            showTab('schedule');
+            
             // Small delay to ensure DOM is fully loaded
             setTimeout(initializeSmartEmployeeManagement, 100);
         });
