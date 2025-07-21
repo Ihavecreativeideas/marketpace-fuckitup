@@ -272,6 +272,15 @@ All features are designed to strengthen local communities by keeping commerce lo
 
 ## Recent Changes
 
+✓ **COMPREHENSIVE INDEPENDENT CONTRACTOR TERMINOLOGY & TAX-FOCUSED EARNINGS SYSTEM COMPLETED** (January 21, 2025)
+✓ **INDEPENDENT CONTRACTOR DISTINCTION**: Updated all driver-related components to properly distinguish independent contractors from MarketPace employees with accurate terminology throughout platform
+✓ **COMPREHENSIVE TAX-FOCUSED EARNINGS TRACKER**: Created dedicated independent-contractor-earnings-tracker.html with detailed tax reporting capabilities, mileage tracking, expense deductions, and 1099 preparation features
+✓ **EARNINGS EXPORT & PRINT FUNCTIONALITY**: Implemented full earnings export/print system with monthly, quarterly, and yearly tax documentation breakdowns for independent contractor tax filing
+✓ **PORTAL INTEGRATION UPDATED**: Unified menu system now displays "Independent Contractor Portal" with direct access to tax-focused earnings tracker instead of basic payment tracking
+✓ **API ENDPOINTS FOR TAX REPORTING**: Added comprehensive backend support for earnings data retrieval, tax report generation, and independent contractor status management
+✓ **THREE DISTINCT PATHWAYS MAINTAINED**: System supports regular driver applications with background checks, employee invitations, and independent contractor invitations for personally known drivers
+✓ **TERMINOLOGY CONSISTENCY**: All contractor-specific files now use proper "independent contractor" terminology while maintaining clear distinction from MarketPace employee systems
+
 ✓ **COMPREHENSIVE EMPLOYEE INVITATION SYSTEM WITH PERSONALIZED MENU PORTAL COMPLETED** (January 21, 2025)
 ✓ **AUTOMATIC EMPLOYEE INVITATION SYSTEM**: Complete SMS and email invitation system sends personalized welcome messages to new employees with dashboard links and setup instructions
 ✓ **EMPLOYEE DASHBOARD CREATED**: Dedicated employee dashboard showing schedule, QR check-in access, earnings tracking, and quick actions for work-related tasks

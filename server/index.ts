@@ -2089,6 +2089,11 @@ app.get('/independent-contractor-application', (req, res) => {
   res.sendFile(path.join(__dirname, '../independent-contractor-application.html'));
 });
 
+// Independent Contractor Earnings Tracker Route
+app.get('/independent-contractor-earnings-tracker', (req, res) => {
+  res.sendFile(path.join(process.cwd(), 'independent-contractor-earnings-tracker.html'));
+});
+
 // Independent Contractor Invitation API
 app.post('/api/admin/send-contractor-invitation', async (req, res) => {
   try {
@@ -2274,7 +2279,7 @@ app.post('/api/driver/submit-independent-contractor-application', async (req, re
       applicationSource,
       status: 'submitted',
       submittedAt: new Date().toISOString(),
-      adminNotes: 'Independent contractor - no background check required'
+      adminNotes: 'Independent contractor (NOT MarketPace employee) - no background check required'
     };
     
     // Store application (in production, save to database)
