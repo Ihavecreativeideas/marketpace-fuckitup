@@ -1038,15 +1038,28 @@
             });
 
             if (!businessName.trim()) {
-                // Final attempt: prompt user for manual input
-                console.log('❌ No business name found, asking user for manual input');
-                const manualInput = prompt('Please enter the business or location name:');
-                if (manualInput && manualInput.trim()) {
-                    businessName = manualInput.trim();
-                    console.log('✅ Manual input received:', businessName);
-                } else {
-                    showNotification('Please enter a business or location name', 'error');
-                    return;
+                // Try to get value from the actual inner input element
+                const autocompleteElement = document.getElementById('businessName') || window.businessNameElement;
+                if (autocompleteElement) {
+                    const innerInput = autocompleteElement.querySelector('input[type="text"]') || 
+                                     autocompleteElement.querySelector('input');
+                    if (innerInput && innerInput.value) {
+                        businessName = innerInput.value.trim();
+                        console.log('✅ Found value in inner input element:', businessName);
+                    }
+                }
+                
+                if (!businessName.trim()) {
+                    // Final attempt: prompt user for manual input
+                    console.log('❌ No business name found, asking user for manual input');
+                    const manualInput = prompt('Please enter the business or location name:');
+                    if (manualInput && manualInput.trim()) {
+                        businessName = manualInput.trim();
+                        console.log('✅ Manual input received:', businessName);
+                    } else {
+                        showNotification('Please enter a business or location name', 'error');
+                        return;
+                    }
                 }
             }
 
@@ -1675,27 +1688,49 @@
                         // Store the current input value
                         let currentInputValue = '';
                         
-                        // Listen for multiple types of input events
+                        // Direct access to the actual input element inside the Google Places component
                         const updateInputValue = () => {
-                            // Try multiple ways to get the current value
-                            const inputElement = autocompleteElement.querySelector('input') || autocompleteElement;
-                            const newValue = inputElement.value || inputElement.textContent || '';
-                            if (newValue !== currentInputValue) {
-                                currentInputValue = newValue;
-                                console.log('📝 Input value updated:', currentInputValue);
+                            // Access the actual input element inside the gmp-place-autocomplete
+                            const inputElement = autocompleteElement.querySelector('input[type="text"]') || 
+                                                autocompleteElement.querySelector('input') ||
+                                                autocompleteElement.shadowRoot?.querySelector('input');
+                            
+                            if (inputElement) {
+                                const newValue = inputElement.value || '';
+                                if (newValue !== currentInputValue) {
+                                    currentInputValue = newValue;
+                                    console.log('📝 Input value captured from inner element:', currentInputValue);
+                                }
+                            } else {
+                                // Fallback to element properties
+                                const newValue = autocompleteElement.value || autocompleteElement.textContent || '';
+                                if (newValue !== currentInputValue) {
+                                    currentInputValue = newValue;
+                                    console.log('📝 Input value from element properties:', currentInputValue);
+                                }
                             }
                         };
                         
-                        // Listen for various input events
+                        // Listen for various input events on both the component and inner input
                         autocompleteElement.addEventListener('input', updateInputValue);
                         autocompleteElement.addEventListener('change', updateInputValue);
                         autocompleteElement.addEventListener('keyup', updateInputValue);
-                        autocompleteElement.addEventListener('paste', () => {
-                            setTimeout(updateInputValue, 10); // Delay for paste content
-                        });
+                        autocompleteElement.addEventListener('keydown', updateInputValue);
+                        
+                        // Try to access inner input element directly
+                        setTimeout(() => {
+                            const innerInput = autocompleteElement.querySelector('input[type="text"]') || 
+                                             autocompleteElement.querySelector('input');
+                            if (innerInput) {
+                                console.log('✅ Found inner input element, adding direct listeners');
+                                innerInput.addEventListener('input', updateInputValue);
+                                innerInput.addEventListener('keyup', updateInputValue);
+                                innerInput.addEventListener('change', updateInputValue);
+                            }
+                        }, 1000);
                         
                         // Poll for value changes as backup
-                        setInterval(updateInputValue, 500);
+                        setInterval(updateInputValue, 200);
                         
                         // Listen for keydown events (Enter key)
                         autocompleteElement.addEventListener('keydown', (event) => {
