@@ -1734,22 +1734,25 @@
             
             // Add to employees array
             employees.push(employee);
+            console.log('Employee added to array:', employee);
             
             // Update display
             renderEmployeeGrid();
             updateEmployeeStats();
-            
-            // Send invitation if requested
-            if (sendInvitation) {
-                sendEmployeeInvitation(employee);
-            }
             
             const paymentText = paymentType === 'hourly' ? `$${paymentAmount}/hr` :
                               paymentType === 'per_job' ? `$${paymentAmount}/job` :
                               paymentType === 'salary' ? `$${paymentAmount}/year` :
                               paymentType === 'commission' ? `${paymentAmount}% commission` : '';
             
-            showNotification(`Employee ${name} added as ${role} (${paymentText})`, 'success');
+            // Send invitation if requested
+            if (sendInvitation) {
+                showNotification(`Employee ${name} added! Sending invitation...`, 'info');
+                sendEmployeeInvitation(employee);
+            } else {
+                showNotification(`Employee ${name} added as ${role} (${paymentText})`, 'success');
+            }
+            
             updateVoiceOutput(`Successfully added ${name} as ${role} with ${paymentText} payment structure`);
             closeAddEmployeeModal();
         }
@@ -1803,9 +1806,16 @@
             const active = employees.filter(e => e.status === 'active').length;
             const pending = employees.filter(e => e.status === 'pending').length;
             
-            document.getElementById('totalEmployees').textContent = total;
-            document.getElementById('activeEmployees').textContent = active;
-            document.getElementById('pendingInvites').textContent = pending;
+            // Only update if elements exist on current tab
+            const totalElement = document.getElementById('totalEmployees');
+            const activeElement = document.getElementById('activeEmployees');
+            const pendingElement = document.getElementById('pendingInvites');
+            
+            if (totalElement) totalElement.textContent = total;
+            if (activeElement) activeElement.textContent = active;
+            if (pendingElement) pendingElement.textContent = pending;
+            
+            console.log('Employee stats updated:', { total, active, pending });
         }
 
         function selectEmployee(employeeId) {
@@ -1839,10 +1849,14 @@
                 },
                 body: JSON.stringify(invitationData)
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Invitation response status:', response.status);
+                return response.json();
+            })
             .then(data => {
+                console.log('Invitation response data:', data);
                 if (data.success) {
-                    showNotification(`Invitation sent to ${employee.name} via SMS and email`, 'success');
+                    showNotification(`Invitation sent to ${employee.name} via SMS and email! They can now sign up at MarketPace.`, 'success');
                     updateVoiceOutput(`Employee invitation sent successfully to ${employee.name}`);
                     
                     // Update employee status to pending
@@ -1860,6 +1874,7 @@
             .catch(error => {
                 console.error('Error sending invitation:', error);
                 showNotification('Error sending invitation. Please try again.', 'error');
+            });
             }, 1000);
         }
 
