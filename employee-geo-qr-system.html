@@ -339,7 +339,7 @@
                 <div class="form-group">
                     <label class="form-label">Business/Location Name</label>
                     <div class="autocomplete-container">
-                        <input type="text" class="form-input" id="businessName" placeholder="Search for business or enter address..." autocomplete="off">
+                        <input type="text" class="form-input" id="businessName" placeholder="Search businesses worldwide or enter any address..." autocomplete="off">
                         <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
                         </svg>
@@ -554,11 +554,11 @@
         function searchBusinesses(query) {
             const suggestionsDiv = document.getElementById('businessSuggestions');
             
-            // Search for business establishments and addresses
+            // Search for business establishments and addresses globally
             const request = {
                 input: query,
-                types: ['establishment', 'geocode'],
-                componentRestrictions: { country: 'us' }
+                types: ['establishment', 'geocode']
+                // No country restrictions for global search
             };
 
             autocompleteService.getPlacePredictions(request, (predictions, status) => {
@@ -668,45 +668,42 @@
                     return;
                 }
 
-                // Comprehensive Gulf Coast business database
+                // Global business examples for fallback search
                 const localBusinesses = [
-                    // Mobile Area
-                    { name: "McDonald's", address: "3371 Airport Blvd, Mobile, AL", type: "Restaurant" },
-                    { name: "Walmart Supercenter", address: "2500 Airport Blvd, Mobile, AL", type: "Store" },
-                    { name: "CVS Pharmacy", address: "1208 Government St, Mobile, AL", type: "Pharmacy" },
-                    { name: "Home Depot", address: "951 Rangeline Service Rd, Mobile, AL", type: "Hardware Store" },
-                    { name: "Publix Super Market", address: "6350 Old Shell Rd, Mobile, AL", type: "Grocery Store" },
-                    { name: "Mobile Bay", address: "Mobile Bay, Mobile, AL", type: "Waterfront" },
-                    { name: "University of South Alabama", address: "307 University Blvd, Mobile, AL", type: "University" },
-                    { name: "Spring Hill Medical Center", address: "3719 Dauphin St, Mobile, AL", type: "Hospital" },
+                    // Global Chain Restaurants
+                    { name: "McDonald's", address: "Various locations worldwide", type: "Restaurant" },
+                    { name: "Starbucks", address: "Various locations worldwide", type: "Coffee Shop" },
+                    { name: "KFC", address: "Various locations worldwide", type: "Restaurant" },
+                    { name: "Subway", address: "Various locations worldwide", type: "Restaurant" },
+                    { name: "Pizza Hut", address: "Various locations worldwide", type: "Restaurant" },
+                    { name: "Burger King", address: "Various locations worldwide", type: "Restaurant" },
                     
-                    // Gulf Shores Area
-                    { name: "Gulf Shores Beach", address: "Gulf Shores Public Beach, Gulf Shores, AL", type: "Beach" },
-                    { name: "The Hangout", address: "101 E Beach Blvd, Gulf Shores, AL", type: "Restaurant" },
-                    { name: "Flora-Bama", address: "17401 Perdido Key Dr, Pensacola, FL", type: "Bar & Restaurant" },
-                    { name: "Gulf State Park", address: "22050 Campground Rd, Gulf Shores, AL", type: "State Park" },
-                    { name: "The Track", address: "3200 Gulf Shores Pkwy, Gulf Shores, AL", type: "Entertainment" },
+                    // Global Retail Chains
+                    { name: "Walmart", address: "Various locations worldwide", type: "Store" },
+                    { name: "Target", address: "Various locations worldwide", type: "Store" },
+                    { name: "Best Buy", address: "Various locations worldwide", type: "Electronics Store" },
+                    { name: "Home Depot", address: "Various locations worldwide", type: "Hardware Store" },
+                    { name: "IKEA", address: "Various locations worldwide", type: "Furniture Store" },
                     
-                    // Orange Beach Area  
-                    { name: "The Wharf", address: "23101 Canal Rd, Orange Beach, AL", type: "Entertainment Complex" },
-                    { name: "The Ferris Wheel", address: "4851 Wharf Pkwy, Orange Beach, AL", type: "Attraction" },
-                    { name: "Adventure Island", address: "24559 Perdido Beach Blvd, Orange Beach, AL", type: "Mini Golf" },
-                    { name: "Orange Beach Marina", address: "27075 Marina Rd, Orange Beach, AL", type: "Marina" },
+                    // Global Services
+                    { name: "FedEx Office", address: "Various locations worldwide", type: "Shipping Service" },
+                    { name: "UPS Store", address: "Various locations worldwide", type: "Shipping Service" },
+                    { name: "7-Eleven", address: "Various locations worldwide", type: "Convenience Store" },
                     
-                    // Spanish Fort/Eastern Shore
-                    { name: "Bass Pro Shops", address: "6450 Spanish Fort Town Center, Spanish Fort, AL", type: "Outdoor Store" },
-                    { name: "Spanish Fort Town Center", address: "6450 Spanish Fort Blvd, Spanish Fort, AL", type: "Shopping Center" },
-                    { name: "Eastern Shore Centre", address: "30500 State Hwy 181, Spanish Fort, AL", type: "Shopping Mall" },
-                    
-                    // Pensacola Area (nearby)
-                    { name: "Pensacola Beach", address: "Pensacola Beach, FL", type: "Beach" },
-                    { name: "Naval Aviation Museum", address: "1750 Radford Blvd, Pensacola, FL", type: "Museum" },
+                    // Common Business Types
+                    { name: "Local Office Building", address: "Enter your address", type: "Office" },
+                    { name: "Shopping Mall", address: "Enter your address", type: "Shopping Center" },
+                    { name: "Hospital", address: "Enter your address", type: "Hospital" },
+                    { name: "University", address: "Enter your address", type: "University" },
+                    { name: "Airport", address: "Enter your address", type: "Airport" },
+                    { name: "Train Station", address: "Enter your address", type: "Transportation" },
+                    { name: "City Hall", address: "Enter your address", type: "Government" },
                     
                     // Common Address Patterns
-                    { name: "26145 Carondelette Dr", address: "26145 Carondelette Dr, Orange Beach, AL", type: "Address" },
-                    { name: "123 Main Street", address: "123 Main St, Mobile, AL", type: "Address" },
-                    { name: "456 Government Street", address: "456 Government St, Mobile, AL", type: "Address" },
-                    { name: "789 Airport Boulevard", address: "789 Airport Blvd, Mobile, AL", type: "Address" }
+                    { name: "123 Main Street", address: "123 Main St", type: "Address" },
+                    { name: "456 First Avenue", address: "456 First Ave", type: "Address" },
+                    { name: "789 Business Park Drive", address: "789 Business Park Dr", type: "Address" },
+                    { name: "101 Industrial Boulevard", address: "101 Industrial Blvd", type: "Address" }
                 ];
 
                 const matches = localBusinesses.filter(business => 
@@ -1021,7 +1018,7 @@
         setTimeout(() => {
             if (typeof google === 'undefined' || !google.maps || !google.maps.places) {
                 setupManualSearch();
-                console.log('✅ Manual business search initialized (Google Places unavailable)');
+                console.log('✅ Global manual business search initialized (Google Places unavailable)');
             } else {
                 initializeGooglePlaces();
             }
@@ -1032,7 +1029,7 @@
         console.log('✅ Automatic payment processing setup');
         console.log('✅ Real-time employee time tracking');
         console.log('✅ Flexible payment schedules (daily, weekly, bi-weekly, monthly, custom)');
-        console.log('✅ Predictive business search and address autocomplete');
+        console.log('✅ Global predictive business search and address autocomplete');
     </script>
 </body>
 </html>
