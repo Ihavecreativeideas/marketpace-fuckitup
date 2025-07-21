@@ -291,15 +291,6 @@ All features are designed to strengthen local communities by keeping commerce lo
 ✓ **QR CHECK-IN INTEGRATION**: Employee portal links directly to geo QR system for location-verified work check-ins and attendance tracking
 ✓ **EMPLOYEE API ENDPOINTS**: Complete backend support for employee invitation processing, dashboard data, and status management
 
-✓ **PERMANENT CUSTOM ROLE SYSTEM WITH AUTO-INTEGRATION COMPLETED** (January 21, 2025)
-✓ **PERMANENT CUSTOM ROLE STORAGE**: Custom roles automatically save and become permanent options in all role dropdowns across the system
-✓ **AUTO-REFRESHING ROLE DROPDOWNS**: All role selection areas automatically update when custom roles are created or deleted
-✓ **VISUAL NEW ROLE INDICATORS**: Newly created custom roles marked with "⭐ NEW" for 5 minutes, then become standard permanent options
-✓ **SYNCHRONIZED ROLE MANAGEMENT**: Creating or deleting custom roles instantly updates employee filters, add employee modals, and all role selections
-✓ **ROLE DROPDOWN SEPARATION**: Custom roles appear below a "── Custom Roles ──" separator with color coding and visual distinction
-✓ **FESTIVAL-READY ROLE SYSTEM**: Perfect for events needing specialized roles like Artist, Band Member, Vendor, Food Truck beyond standard retail roles
-✓ **COMPREHENSIVE ROLE PERSISTENCE**: Custom roles persist between sessions with creation timestamps and automatic integration into employee management
-
 ✓ **COMPLETE DRIVER PORTAL UNIFIED SYSTEM IMPLEMENTED** (January 21, 2025)
 ✓ **DRIVER APPLICATION APPROVAL WORKFLOW**: Admin reviews applications, approves drivers, and automatic invitation system sends SMS/email with MarketPace signup links
 ✓ **DRIVER PORTAL IN PERSONALIZED MENU**: Approved drivers who join MarketPace get dedicated "Driver Portal" section showing routes, earnings, QR scanner access
