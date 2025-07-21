@@ -6840,7 +6840,82 @@ ${selectedCustomTitle ? `📝 Custom Title: ${scheduleTitle}` : ''}
             });
         }
 
+        // Missing essential functions
+        function setEventScale(scale) {
+            console.log(`Setting event scale to: ${scale}`);
+            // Implementation for event scaling
+        }
 
+        function editShift(shiftId) {
+            console.log(`Editing shift: ${shiftId}`);
+            showNotification('Shift editing feature - click to modify shift details', 'info');
+        }
+
+        function showCreateShiftTemplates() {
+            console.log('Showing shift templates');
+            showNotification('Shift template creator - select templates to create shifts', 'info');
+        }
+
+        function switchToView(viewType) {
+            console.log(`Switching to ${viewType} view`);
+            const calendarBtn = document.querySelector('.view-toggle button:first-child');
+            const listBtn = document.querySelector('.view-toggle button:last-child');
+            
+            if (viewType === 'calendar') {
+                calendarBtn.style.background = 'rgba(65, 105, 225, 0.3)';
+                calendarBtn.style.color = '#4169e1';
+                listBtn.style.background = 'rgba(255, 255, 255, 0.1)';
+                listBtn.style.color = 'white';
+                showNotification('Calendar view active', 'info');
+            } else if (viewType === 'list') {
+                listBtn.style.background = 'rgba(65, 105, 225, 0.3)';
+                listBtn.style.color = '#4169e1';
+                calendarBtn.style.background = 'rgba(255, 255, 255, 0.1)';
+                calendarBtn.style.color = 'white';
+                showNotification('List view active', 'info');
+            }
+        }
+
+        function showTab(tabName) {
+            console.log(`Showing tab: ${tabName}`);
+            
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.style.display = 'none');
+            
+            // Remove active class from all nav chips
+            const navChips = document.querySelectorAll('.nav-chip');
+            navChips.forEach(chip => {
+                chip.style.background = 'rgba(255, 255, 255, 0.1)';
+                chip.style.color = 'white';
+            });
+            
+            // Show the selected tab content
+            const selectedTab = document.getElementById(`${tabName}-tab`);
+            if (selectedTab) {
+                selectedTab.style.display = 'block';
+            }
+            
+            // Highlight the active nav chip
+            const activeChip = document.querySelector(`[onclick="showTab('${tabName}')"]`);
+            if (activeChip) {
+                if (tabName === 'employees') {
+                    activeChip.style.background = 'rgba(255, 215, 0, 0.3)';
+                    activeChip.style.color = '#ffd700';
+                } else if (tabName === 'volunteers') {
+                    activeChip.style.background = 'rgba(138, 43, 226, 0.3)';
+                    activeChip.style.color = '#8a2be2';
+                } else if (tabName === 'qr-system') {
+                    activeChip.style.background = 'rgba(0, 255, 255, 0.3)';
+                    activeChip.style.color = '#00ffff';
+                } else {
+                    activeChip.style.background = 'rgba(65, 105, 225, 0.3)';
+                    activeChip.style.color = '#4169e1';
+                }
+            }
+            
+            showNotification(`${tabName.charAt(0).toUpperCase() + tabName.slice(1)} section active`, 'success');
+        }
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
