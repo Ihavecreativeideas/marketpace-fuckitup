@@ -1309,8 +1309,8 @@
                 </div>
 
                 <div class="form-group" id="paymentAmountGroup" style="display: none;">
-                    <label class="form-label" id="paymentAmountLabel">Amount ($)</label>
-                    <input type="number" class="form-input" id="newEmployeePaymentAmount" placeholder="0.00" step="0.01" min="0">
+                    <label class="form-label" id="paymentAmountLabel">Amount ($) *</label>
+                    <input type="number" class="form-input" id="newEmployeePaymentAmount" placeholder="0.00" step="0.01" min="0" required>
                 </div>
 
                 <div class="form-group">
@@ -1560,7 +1560,23 @@
             const status = document.getElementById('newEmployeeStatus').value;
             const sendInvitation = document.getElementById('sendInvitation').checked;
             
+            console.log('Form submission started');
             console.log('Adding new employee with payment info:', { name, phone, email, role, category, paymentType, paymentAmount, status, sendInvitation });
+            
+            // Validation checks
+            if (!name || !phone || !email || !role || !category || !paymentType) {
+                showNotification('Please fill in all required fields', 'error');
+                console.log('Validation failed - missing required fields');
+                return;
+            }
+            
+            if (paymentType !== 'commission' && (!paymentAmount || paymentAmount <= 0)) {
+                showNotification('Please enter a valid payment amount', 'error');
+                console.log('Validation failed - invalid payment amount:', paymentAmount);
+                return;
+            }
+            
+            console.log('All validation passed, proceeding with employee creation');
             
             // Create employee object with enhanced payment information
             const employee = {
@@ -1902,26 +1918,38 @@
             const paymentType = document.getElementById('newEmployeePaymentType').value;
             const amountGroup = document.getElementById('paymentAmountGroup');
             const amountLabel = document.getElementById('paymentAmountLabel');
+            const amountInput = document.getElementById('newEmployeePaymentAmount');
+            
+            console.log('Payment type changed to:', paymentType);
             
             if (paymentType) {
                 amountGroup.style.display = 'block';
+                amountInput.required = true;
                 
                 switch(paymentType) {
                     case 'hourly':
-                        amountLabel.textContent = 'Hourly Rate ($)';
+                        amountLabel.textContent = 'Hourly Rate ($) *';
+                        amountInput.placeholder = '15.00';
                         break;
                     case 'per_job':
-                        amountLabel.textContent = 'Per Job Base Pay ($)';
+                        amountLabel.textContent = 'Per Job Base Pay ($) *';
+                        amountInput.placeholder = '150.00';
                         break;
                     case 'salary':
-                        amountLabel.textContent = 'Annual Salary ($)';
+                        amountLabel.textContent = 'Annual Salary ($) *';
+                        amountInput.placeholder = '45000.00';
                         break;
                     case 'commission':
-                        amountLabel.textContent = 'Commission Rate (%)';
+                        amountLabel.textContent = 'Commission Rate (%) *';
+                        amountInput.placeholder = '5.0';
                         break;
                 }
+                
+                console.log('Payment field shown for type:', paymentType);
             } else {
                 amountGroup.style.display = 'none';
+                amountInput.required = false;
+                console.log('Payment field hidden');
             }
         }
 
