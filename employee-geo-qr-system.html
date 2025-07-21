@@ -358,8 +358,8 @@
             <div class="time-display" id="timeDisplay">Ready to start your shift</div>
         </div>
 
-        <div class="location-info">
-            <strong>GPS Location Required:</strong> You must be within 100 meters of your work location to check in/out
+        <div class="location-info" id="locationInfo">
+            <strong>GPS Status:</strong> <span id="gpsStatus">Waiting for location access...</span>
         </div>
 
         <div class="check-buttons">
@@ -395,6 +395,9 @@
             // Set up event listeners
             setupEventListeners();
             
+            // Check GPS availability
+            checkGPSAvailability();
+            
             // Update UI
             updateStatus();
             updateButtons();
@@ -404,6 +407,21 @@
             
             console.log('System ready for use');
         });
+
+        function checkGPSAvailability() {
+            const gpsStatus = document.getElementById('gpsStatus');
+            
+            if (!navigator.geolocation) {
+                gpsStatus.textContent = 'GPS not supported by this browser';
+                gpsStatus.style.color = '#ff6b6b';
+                console.log('Geolocation not supported');
+                return;
+            }
+            
+            gpsStatus.textContent = 'GPS ready - Click Check In to start';
+            gpsStatus.style.color = '#90ee90';
+            console.log('GPS available and ready');
+        }
 
         function loadSavedState() {
             const savedState = localStorage.getItem('employeeCheckedIn');
@@ -427,7 +445,7 @@
         }
 
         function handleCheckIn() {
-            console.log('Check-in initiated - requesting high-accuracy GPS location');
+            console.log('Check-in initiated - requesting GPS location');
             
             if (!navigator.geolocation) {
                 console.error('Geolocation not supported by this browser');
@@ -435,40 +453,42 @@
                 return;
             }
             
-            showNotification('Accessing GPS location...', 'success');
+            const gpsStatus = document.getElementById('gpsStatus');
+            gpsStatus.textContent = 'Getting GPS location...';
+            gpsStatus.style.color = '#ffd54f';
             
-            // High-accuracy GPS options for workplace verification
+            showNotification('Getting your location...', 'success');
+            
+            // Simplified GPS options for better compatibility
             const options = {
                 enableHighAccuracy: true,
-                timeout: 20000,
-                maximumAge: 30000
+                timeout: 10000,
+                maximumAge: 60000
             };
             
             navigator.geolocation.getCurrentPosition(
                 function(position) {
-                    const accuracy = position.coords.accuracy;
-                    const coords = {
+                    const accuracy = Math.round(position.coords.accuracy);
+                    
+                    console.log('GPS location obtained:', {
                         lat: position.coords.latitude,
                         lng: position.coords.longitude,
-                        accuracy: accuracy,
-                        timestamp: new Date(position.timestamp).toISOString()
-                    };
+                        accuracy: accuracy
+                    });
                     
-                    console.log('High-accuracy GPS location obtained:', coords);
+                    gpsStatus.textContent = `Location confirmed - ${accuracy}m accuracy`;
+                    gpsStatus.style.color = '#90ee90';
                     
-                    // Verify location accuracy for workplace check-in
-                    if (accuracy > 50) {
-                        console.warn('GPS accuracy warning:', accuracy, 'meters');
-                        showNotification(`GPS accuracy: ${Math.round(accuracy)}m - Checking in with current location`, 'success');
-                    } else {
-                        console.log('Excellent GPS accuracy:', accuracy, 'meters');
-                        showNotification(`GPS lock confirmed (${Math.round(accuracy)}m accuracy)`, 'success');
-                    }
+                    showNotification(`Location confirmed! Checking in...`, 'success');
                     
-                    performCheckIn(position);
+                    setTimeout(() => {
+                        performCheckIn(position);
+                    }, 500);
                 },
                 function(error) {
                     console.error('GPS location error:', error);
+                    gpsStatus.textContent = 'GPS error - check permissions';
+                    gpsStatus.style.color = '#ff6b6b';
                     handleLocationError(error);
                 },
                 options
@@ -535,47 +555,50 @@
         }
 
         function handleCheckOut() {
-            console.log('Check-out initiated - verifying GPS location for workplace departure');
+            console.log('Check-out initiated - getting GPS location');
             
             if (!navigator.geolocation) {
                 console.error('GPS location services not available');
-                showNotification('GPS location services required for check-out verification', 'error');
+                showNotification('GPS location services required for check-out', 'error');
                 return;
             }
             
-            showNotification('Verifying departure location...', 'success');
+            const gpsStatus = document.getElementById('gpsStatus');
+            gpsStatus.textContent = 'Verifying checkout location...';
+            gpsStatus.style.color = '#ffd54f';
             
-            // High-accuracy GPS options for workplace departure verification
+            showNotification('Getting checkout location...', 'success');
+            
+            // Same GPS options as check-in for consistency
             const options = {
                 enableHighAccuracy: true,
-                timeout: 20000,
-                maximumAge: 30000
+                timeout: 10000,
+                maximumAge: 60000
             };
             
             navigator.geolocation.getCurrentPosition(
                 function(position) {
-                    const accuracy = position.coords.accuracy;
-                    const coords = {
+                    const accuracy = Math.round(position.coords.accuracy);
+                    
+                    console.log('Checkout GPS location obtained:', {
                         lat: position.coords.latitude,
                         lng: position.coords.longitude,
-                        accuracy: accuracy,
-                        timestamp: new Date(position.timestamp).toISOString()
-                    };
+                        accuracy: accuracy
+                    });
                     
-                    console.log('Check-out GPS location verified:', coords);
+                    gpsStatus.textContent = `Checkout location confirmed - ${accuracy}m accuracy`;
+                    gpsStatus.style.color = '#90ee90';
                     
-                    if (accuracy > 50) {
-                        console.warn('Check-out GPS accuracy warning:', accuracy, 'meters');
-                        showNotification(`Location verified (${Math.round(accuracy)}m accuracy) - Processing check-out`, 'success');
-                    } else {
-                        console.log('Excellent check-out GPS accuracy:', accuracy, 'meters');
-                        showNotification(`Departure location confirmed (${Math.round(accuracy)}m)`, 'success');
-                    }
+                    showNotification(`Location confirmed! Processing checkout...`, 'success');
                     
-                    performCheckOut(position);
+                    setTimeout(() => {
+                        performCheckOut(position);
+                    }, 500);
                 },
                 function(error) {
-                    console.error('Check-out GPS verification failed:', error);
+                    console.error('Checkout GPS error:', error);
+                    gpsStatus.textContent = 'GPS error - check permissions';
+                    gpsStatus.style.color = '#ff6b6b';
                     handleLocationError(error);
                 },
                 options
@@ -650,22 +673,28 @@
             
             switch(error.code) {
                 case error.PERMISSION_DENIED:
-                    message = 'Location permission denied. Please enable location access and try again.';
-                    console.log('User denied location permission');
+                    message = 'Please allow location access in your browser and try again. Check the location icon in your address bar.';
+                    console.log('Location permission denied - user needs to enable location access');
                     break;
                 case error.POSITION_UNAVAILABLE:
-                    message = 'Location unavailable. Please check your GPS signal and try again.';
-                    console.log('Location information unavailable');
+                    message = 'GPS signal unavailable. Move to an area with better signal and try again.';
+                    console.log('GPS position unavailable - poor signal or indoor location');
                     break;
                 case error.TIMEOUT:
-                    message = 'Location request timed out. Please try again.';
-                    console.log('Location request timeout');
+                    message = 'GPS timeout. Please wait a moment and try again.';
+                    console.log('GPS request timed out - will retry automatically');
                     break;
                 default:
-                    message = 'Unknown location error. Please try again.';
-                    console.log('Unknown geolocation error');
+                    message = `GPS error (code ${error.code}). Please try again.`;
+                    console.log('GPS error:', error);
                     break;
             }
+            
+            console.error('Complete location error details:', {
+                code: error.code,
+                message: error.message,
+                timestamp: new Date().toISOString()
+            });
             
             showNotification(message, 'error');
         }
