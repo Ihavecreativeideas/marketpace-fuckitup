@@ -456,17 +456,34 @@
                 <div class="badge" style="background: #22c55e; color: white; font-size: 9px; padding: 2px 6px; border-radius: 8px;">ON</div>
                 <div class="menu-arrow">›</div>
             </div>
+            
+            <!-- Accept Employee Invitation Button -->
+            <div class="menu-item" onclick="acceptEmployeeInvitation()" id="acceptInviteButton" style="display: none;">
+                <div class="menu-icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                        <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(0, 255, 255, 0.2)"/>
+                        <path d="M9 12l2 2 4-4" stroke="#00ffff" stroke-width="2"/>
+                        <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                </div>
+                <div class="menu-content">
+                    <div class="menu-title">Accept Job Invitation</div>
+                    <div class="menu-description">Activate your Job Portal access</div>
+                </div>
+                <div class="badge" style="background: #00ffff; color: black; font-size: 9px; padding: 2px 6px; border-radius: 8px;">NEW</div>
+                <div class="menu-arrow">›</div>
+            </div>
         </div>
 
-        <!-- Employee Portal Section (appears for employees only) -->
+        <!-- Job Portal Section (appears for employees only) -->
         <div class="menu-section" id="employeeSection" style="display: none;">
-            <div class="section-title">Employee Portal</div>
+            <div class="section-title">Job Portal</div>
             
             <!-- Employee Info Card -->
             <div style="background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(65, 105, 225, 0.1)); border: 2px solid rgba(0, 255, 255, 0.4); border-radius: 12px; padding: 15px; margin-bottom: 15px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <div>
-                        <h3 style="color: #00ffff; margin: 0; font-size: 16px;" id="employeeNameDisplay">Employee Portal</h3>
+                        <h3 style="color: #00ffff; margin: 0; font-size: 16px;" id="employeeNameDisplay">Job Portal</h3>
                         <p style="color: rgba(255,255,255,0.7); margin: 4px 0 0 0; font-size: 12px;" id="employeeRoleDisplay">Team Member</p>
                     </div>
                     <div style="background: linear-gradient(135deg, #00ffff, #4169e1); color: white; padding: 4px 12px; border-radius: 15px; font-size: 10px; font-weight: bold;">ACTIVE</div>
@@ -3024,6 +3041,70 @@ Let's keep our money circulating locally and support each other! 💪
         function viewTipHistory() {
             showNotification('Tip history tracking coming soon! View all received tips and earnings.', '#8b5cf6');
         }
+        
+        function acceptEmployeeInvitation() {
+            // Function to accept employee invitation for existing users
+            const inviteData = {
+                name: 'Brooke Brown',
+                email: 'bb.music93@gmail.com',
+                role: 'Singer Songwriter',
+                category: 'Employee',
+                paymentType: 'per_job',
+                paymentAmount: 150,
+                businessName: 'Your Business'
+            };
+            
+            // Store employee data in user profile
+            const currentUser = JSON.parse(localStorage.getItem('marketpaceUser') || '{}');
+            currentUser.employeeInfo = inviteData;
+            localStorage.setItem('marketpaceUser', JSON.stringify(currentUser));
+            
+            // Show Employee Portal section
+            const employeeSection = document.getElementById('employeeSection');
+            if (employeeSection) {
+                employeeSection.style.display = 'block';
+                updateEmployeeInfo(inviteData);
+                showNotification('Job invitation accepted! You now have access to the Job Portal.', 'success');
+                console.log('Job invitation accepted - Job Portal is now active');
+            }
+            
+            // Hide the accept invitation button
+            const acceptButton = document.getElementById('acceptInviteButton');
+            if (acceptButton) {
+                acceptButton.style.display = 'none';
+            }
+        }
+        
+        function enableEmployeePortalDemo() {
+            // Check URL for invitation acceptance
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('acceptInvite') === 'employee') {
+                acceptEmployeeInvitation();
+                return;
+            }
+            
+            // Check if user already has employee status
+            const currentUser = JSON.parse(localStorage.getItem('marketpaceUser') || '{}');
+            if (currentUser.employeeInfo) {
+                // User is already an employee, hide accept button and show portal
+                const acceptButton = document.getElementById('acceptInviteButton');
+                if (acceptButton) acceptButton.style.display = 'none';
+                
+                const employeeSection = document.getElementById('employeeSection');
+                if (employeeSection) {
+                    employeeSection.style.display = 'block';
+                    updateEmployeeInfo(currentUser.employeeInfo);
+                }
+                return;
+            }
+            
+            // Show the accept invitation button for users who haven't accepted yet
+            const acceptButton = document.getElementById('acceptInviteButton');
+            if (acceptButton) {
+                acceptButton.style.display = 'block';
+                console.log('Accept Job Invitation button is now visible');
+            }
+        }
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
@@ -3035,6 +3116,7 @@ Let's keep our money circulating locally and support each other! 💪
             updateBusinessDashboard();
             checkEmployeeStatus(); // Check if user is an employee
             checkDriverStatus(); // Check if user is an approved driver
+            enableEmployeePortalDemo(); // Demo mode for testing
             
             // Update current account and accounts from localStorage
             currentAccount = localStorage.getItem('currentAccount') || 'personal';

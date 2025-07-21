@@ -25,7 +25,7 @@ async function sendEmployeeInvitation(employeeData) {
 
 You've been added as a ${role} with ${paymentInfo} pay.
 
-Your MarketPace Employee Dashboard:
+Your MarketPace Job Portal:
 ${dashboardUrl}
 
 Features:
@@ -65,7 +65,7 @@ Questions? Reply to this message.`;
         <div class="container">
             <div class="header">
                 <h1>Welcome to MarketPace!</h1>
-                <p>Your Employee Dashboard is Ready</p>
+                <p>Your Job Portal is Ready</p>
             </div>
             
             <div class="content">
@@ -94,7 +94,7 @@ Questions? Reply to this message.`;
                 </div>
                 
                 <div style="text-align: center;">
-                    <a href="${dashboardUrl}" class="cta-button">Access Your Employee Dashboard</a>
+                    <a href="${dashboardUrl}" class="cta-button">Access Your Job Portal</a>
                 </div>
                 
                 <div class="features">
@@ -135,7 +135,7 @@ Questions? Reply to this message.`;
                 
                 <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
                     <h4 style="color: #1976d2; margin-top: 0;">Getting Started:</h4>
-                    <p style="margin: 10px 0;">1. <strong>Click the dashboard link above</strong> to access your employee portal</p>
+                    <p style="margin: 10px 0;">1. <strong>Click the dashboard link above</strong> to access your job portal</p>
                     <p style="margin: 10px 0;">2. <strong>Download MarketPace app</strong> for mobile access (coming soon)</p>
                     <p style="margin: 10px 0;">3. <strong>Set up QR check-ins</strong> at your work location</p>
                 </div>

@@ -272,6 +272,13 @@ All features are designed to strengthen local communities by keeping commerce lo
 
 ## Recent Changes
 
+✓ **JOB PORTAL TERMINOLOGY STANDARDIZATION COMPLETED** (January 21, 2025)
+✓ **UNIVERSAL "JOB PORTAL" TERMINOLOGY**: Changed all instances of "Employee Portal" to "Job Portal" throughout the system to reduce confusion between employees, volunteers, and contractors
+✓ **MENU SYSTEM UPDATED**: MarketPace menu now displays "Job Portal" for all workforce members regardless of their categorization (W-2 employee, 1099 contractor, volunteer)
+✓ **EMAIL AND SMS TEMPLATES UPDATED**: All invitation emails and SMS messages now use "Job Portal" terminology for consistency and clarity
+✓ **ACCEPT INVITATION FUNCTIONALITY**: Existing users can now accept job invitations through dedicated "Accept Job Invitation" button in menu system
+✓ **REDUCED TERMINOLOGY CONFUSION**: Single portal name eliminates confusion about different workforce categories while maintaining proper tax categorization behind the scenes
+
 ✓ **TAX-COMPLIANT WORKFORCE CATEGORIZATION SYSTEM WITH CLEAR ROLE TITLES FULLY IMPLEMENTED** (January 21, 2025)
 ✓ **SEPARATE WORKFORCE SECTIONS**: Complete workforce management with distinct sections for W-2 Employees, 1099 Independent Contractors, and Volunteers with proper tax status labeling
 ✓ **CLEAR ROLE TITLES & TAX STATUS**: Each person displays appropriate title badge (EMPLOYEE, CONTRACTOR, VOLUNTEER) with tax implications clearly stated (W-2 Status, 1099 Status, No Income)
@@ -290,14 +297,14 @@ All features are designed to strengthen local communities by keeping commerce lo
 ✓ **THREE DISTINCT PATHWAYS MAINTAINED**: System supports regular driver applications with background checks, employee invitations, and independent contractor invitations for personally known drivers
 ✓ **TERMINOLOGY CONSISTENCY**: All contractor-specific files now use proper "independent contractor" terminology while maintaining clear distinction from MarketPace employee systems
 
-✓ **COMPREHENSIVE EMPLOYEE INVITATION SYSTEM WITH PERSONALIZED MENU PORTAL COMPLETED** (January 21, 2025)
-✓ **AUTOMATIC EMPLOYEE INVITATION SYSTEM**: Complete SMS and email invitation system sends personalized welcome messages to new employees with dashboard links and setup instructions
+✓ **COMPREHENSIVE EMPLOYEE INVITATION SYSTEM WITH PERSONALIZED MENU JOB PORTAL COMPLETED** (January 21, 2025)
+✓ **AUTOMATIC EMPLOYEE INVITATION SYSTEM**: Complete SMS and email invitation system sends personalized welcome messages to new employees with job portal links and setup instructions
 ✓ **EMPLOYEE DASHBOARD CREATED**: Dedicated employee dashboard showing schedule, QR check-in access, earnings tracking, and quick actions for work-related tasks
-✓ **PERSONALIZED EMPLOYEE PORTAL IN MENU**: Employees who sign up through employer invitations get dedicated "Employee Portal" section in MarketPace menu with work-focused features
+✓ **PERSONALIZED JOB PORTAL IN MENU**: Employees who sign up through employer invitations get dedicated "Job Portal" section in MarketPace menu with work-focused features
 ✓ **EMPLOYEE STATUS DETECTION**: System automatically detects employee status from invitation signup and displays appropriate menu sections and features
 ✓ **PAYMENT INFO DISPLAY**: Employee cards in business scheduling show hourly rates or per-job payment information for clear compensation tracking
-✓ **SEAMLESS INVITATION WORKFLOW**: Employers add employees with email field, system sends automatic invitations, employees sign up and get personalized employee features
-✓ **QR CHECK-IN INTEGRATION**: Employee portal links directly to geo QR system for location-verified work check-ins and attendance tracking
+✓ **SEAMLESS INVITATION WORKFLOW**: Employers add employees with email field, system sends automatic invitations, employees sign up and get personalized job portal features
+✓ **QR CHECK-IN INTEGRATION**: Job portal links directly to geo QR system for location-verified work check-ins and attendance tracking
 ✓ **EMPLOYEE API ENDPOINTS**: Complete backend support for employee invitation processing, dashboard data, and status management
 
 ✓ **COMPLETE DRIVER PORTAL UNIFIED SYSTEM IMPLEMENTED** (January 21, 2025)
