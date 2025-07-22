@@ -619,7 +619,7 @@
     <div class="main-content">
         <h1 class="hub-title">Eats - Local Food Network</h1>
         <p style="text-align: center; margin: 0 20px 20px; opacity: 0.9;">
-            For Restaurants • Cafes • Food Trucks • Catering • Bars • Chefs
+            For Restaurants • Coffee Shops • Bakeries • Food Trucks • Catering • Bars • Chefs
         </p>
 
         <!-- Tab Navigation -->
@@ -628,8 +628,8 @@
             <button class="tab-btn" onclick="switchTab('restaurants')">Restaurants</button>
             <button class="tab-btn" onclick="switchTab('fast-food')">Fast Food</button>
             <button class="tab-btn" onclick="switchTab('bars')">Bars & Pubs</button>
-            <button class="tab-btn" onclick="switchTab('cafes')">Cafes</button>
-            <button class="tab-btn" onclick="switchTab('fine-dining')">Fine Dining</button>
+            <button class="tab-btn" onclick="switchTab('cafes')">Coffee Shops</button>
+            <button class="tab-btn" onclick="switchTab('bakeries')">Bakeries</button>
         </div>
 
         <!-- Feed Section -->
@@ -763,11 +763,11 @@
             </div>
         </div>
 
-        <!-- Cafes Section -->
+        <!-- Coffee Shops Section -->
         <div id="cafes" class="content-section">
             <div class="create-post">
-                <button class="create-btn" onclick="createEatsPost('cafe')">
-                    List Your Cafe
+                <button class="create-btn" onclick="createEatsPost('coffee-shop')">
+                    List Your Coffee Shop
                 </button>
             </div>
 
@@ -793,37 +793,83 @@
                         <button class="action-btn" onclick="checkHours()">Hours</button>
                     </div>
                 </div>
+
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="profile-pic">MB</div>
+                        <div class="post-info">
+                            <h4>Morning Brew Cafe</h4>
+                            <span>3 hours ago • Coffee Shop</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <h4>New Espresso Blend Available</h4>
+                        <p>Our signature Gulf Coast roast is now available! Perfect for morning pick-me-ups.</p>
+                        <div class="delivery-options">
+                            <span class="delivery-badge">☕ Fresh Roasted</span>
+                            <span class="delivery-badge">🥐 Fresh Pastries</span>
+                            <span class="delivery-badge">📶 Free WiFi</span>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="orderCoffee()">Order</button>
+                        <button class="action-btn" onclick="viewCafeMenu()">Menu</button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Fine Dining Section -->
-        <div id="fine-dining" class="content-section">
+        <!-- Bakeries Section -->
+        <div id="bakeries" class="content-section">
             <div class="create-post">
-                <button class="create-btn" onclick="createEatsPost('fine-dining')">
-                    List Fine Dining Restaurant
+                <button class="create-btn" onclick="createEatsPost('bakery')">
+                    List Your Bakery
                 </button>
             </div>
 
             <div class="posts-grid">
                 <div class="post-card">
                     <div class="post-header">
-                        <div class="profile-pic">LE</div>
+                        <div class="profile-pic">SB</div>
                         <div class="post-info">
-                            <h4>Le Emeraude</h4>
-                            <span>6 hours ago • Fine Dining</span>
+                            <h4>Sweet Dreams Bakery</h4>
+                            <span>1 hour ago • Bakery</span>
+                        </div>
+                    </div>
+                    <div class="gear-item">
+                        <div class="gear-info">
+                            <h5>Fresh Baked Goods Daily</h5>
+                            <p>Artisan breads, custom cakes, and Gulf Coast specialties</p>
+                        </div>
+                        <div class="gear-price">$-$$</div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="orderBaked()">Order</button>
+                        <button class="action-btn" onclick="viewBakeryMenu()">Menu</button>
+                        <button class="action-btn" onclick="customOrders()">Custom Orders</button>
+                    </div>
+                </div>
+
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="profile-pic">GB</div>
+                        <div class="post-info">
+                            <h4>Gulf Coast Bakehouse</h4>
+                            <span>4 hours ago • Artisan Bakery</span>
                         </div>
                     </div>
                     <div class="post-content">
-                        <h4>Wine Pairing Dinner - Saturday</h4>
-                        <p>Five-course tasting menu featuring Gulf Coast cuisine paired with French wines.</p>
-                        <div class="reservation-info">
-                            <span class="price-badge">$125 per person</span>
-                            <span class="time-badge">7:00 PM seating</span>
+                        <h4>Weekend Wedding Cake Special</h4>
+                        <p>Custom wedding cakes with Gulf Coast flavors. Book your consultation today!</p>
+                        <div class="event-info">
+                            <span class="event-badge">🎂 Custom Cakes</span>
+                            <span class="event-badge">🥖 Fresh Bread</span>
+                            <span class="event-badge">🧁 Cupcakes</span>
                         </div>
                     </div>
                     <div class="action-buttons">
-                        <button class="action-btn" onclick="makeFineDiningReservation()">Reserve</button>
-                        <button class="action-btn" onclick="viewTastingMenu()">Menu</button>
+                        <button class="action-btn" onclick="bookConsultation()">Book Consultation</button>
+                        <button class="action-btn" onclick="viewBakeryMenu()">Menu</button>
                     </div>
                 </div>
             </div>
@@ -1098,44 +1144,7 @@
             `).join('');
         }
 
-        function setupFilters() {
-            // Town filter
-            document.getElementById('townFilter').addEventListener('change', (e) => {
-                currentTown = e.target.value;
-                renderBusinesses();
-            });
 
-            // Radius filter
-            document.getElementById('radiusFilter').addEventListener('change', (e) => {
-                currentRadius = parseInt(e.target.value);
-                renderBusinesses();
-            });
-
-            // Category filters
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    currentCategory = btn.dataset.category;
-                    renderBusinesses();
-                });
-            });
-        }
-
-        function viewBusiness(id) {
-            const business = foodBusinesses.find(b => b.id === id);
-            alert(`Viewing ${business.name} - would open detailed business page`);
-        }
-
-        function callBusiness(id) {
-            const business = foodBusinesses.find(b => b.id === id);
-            window.open(`tel:${business.phone}`, '_self');
-        }
-
-        function getDirections(id) {
-            const business = foodBusinesses.find(b => b.id === id);
-            alert(`Getting directions to ${business.name} - would open maps app`);
-        }
 
         // Tab switching function (copied from Hub)
         function switchTab(tabName) {
@@ -1268,8 +1277,6 @@
 
         // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
-            setupFilters();
-            renderBusinesses();
             console.log('Eats page initialized');
         });
 
