@@ -103,9 +103,13 @@
         }
 
         .header-utils {
+            position: absolute;
+            top: 10px;
+            right: 10px;
             display: flex;
-            gap: 8px;
+            gap: 6px;
             align-items: center;
+            z-index: 10;
         }
 
         .header-utility-btn {
@@ -1516,17 +1520,21 @@
                 </div>
             </div>
             <div class="header-utils">
+                <button class="header-utility-btn category-search-btn" onclick="toggleCategorySearch()" title="Browse Categories">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="9" cy="9" r="7" stroke="#00ffff" stroke-width="2"/>
+                        <circle cx="15" cy="9" r="7" stroke="#00ffff" stroke-width="2"/>
+                        <path d="m21 21-4.35-4.35" stroke="#00ffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M10 9h8" stroke="#00ffff" stroke-width="1.5" stroke-linecap="round"/>
+                        <circle cx="12" cy="9" r="1" fill="#00ffff"/>
+                    </svg>
+                </button>
                 <button class="header-utility-btn account-switcher-btn" onclick="toggleAccountMode()" title="Switch Personal/Professional Mode" id="accountSwitcher">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M7 14l5-5 5 5" stroke="#00ffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <circle cx="12" cy="12" r="1" fill="#00ffff"/>
                     </svg>
                     <span id="mode-indicator" style="font-size: 9px; margin-left: 2px; color: #00ffff;">P</span>
-                </button>
-                <button class="header-utility-btn" onclick="openQuickMessage()" title="Quick Message">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="#00ffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
                 </button>
             </div>
         </div>
@@ -5682,6 +5690,116 @@
                 switcher.style.borderColor = 'rgba(0, 255, 255, 0.3)';
                 document.body.classList.remove('business-mode');
             }
+        }
+
+        // Category search functionality
+        let categorySearchOpen = false;
+        
+        function toggleCategorySearch() {
+            const existingPanel = document.getElementById('categorySearchPanel');
+            
+            if (existingPanel) {
+                existingPanel.remove();
+                categorySearchOpen = false;
+                return;
+            }
+            
+            const categories = [
+                { name: 'General', description: 'All services available' },
+                { name: 'Home Services', description: 'Cleaning, repair, maintenance' },
+                { name: 'Professional Services', description: 'Legal, accounting, consulting' },
+                { name: 'Creative Services', description: 'Design, writing, photography' },
+                { name: 'Tech Services', description: 'IT support, web development' },
+                { name: 'Personal Services', description: 'Fitness, beauty, tutoring' },
+                { name: 'Transportation', description: 'Moving, delivery, rides' },
+                { name: 'Event Services', description: 'Catering, entertainment, planning' }
+            ];
+            
+            const panel = document.createElement('div');
+            panel.id = 'categorySearchPanel';
+            panel.style.cssText = `
+                position: fixed;
+                top: 60px;
+                right: 20px;
+                background: rgba(0, 20, 40, 0.95);
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(0, 255, 255, 0.3);
+                border-radius: 15px;
+                padding: 20px;
+                width: 320px;
+                max-height: 400px;
+                overflow-y: auto;
+                z-index: 1000;
+                box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+            `;
+            
+            panel.innerHTML = `
+                <h3 style="color: #00ffff; margin: 0 0 15px 0; font-size: 18px; text-align: center;">Service Categories</h3>
+                <div style="display: grid; gap: 10px;">
+                    ${categories.map(cat => `
+                        <div class="category-item" onclick="selectCategory('${cat.name}')" style="
+                            background: rgba(0, 255, 255, 0.1);
+                            border: 1px solid rgba(0, 255, 255, 0.2);
+                            border-radius: 8px;
+                            padding: 12px;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                        ">
+                            <div style="color: #00ffff; font-weight: bold; margin-bottom: 2px;">${cat.name}</div>
+                            <div style="color: rgba(0, 255, 255, 0.7); font-size: 12px;">${cat.description}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            document.body.appendChild(panel);
+            categorySearchOpen = true;
+            
+            // Add hover effects and close functionality
+            panel.querySelectorAll('.category-item').forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.background = 'rgba(0, 255, 255, 0.2)';
+                    this.style.borderColor = '#00ffff';
+                    this.style.transform = 'translateY(-2px)';
+                });
+                item.addEventListener('mouseleave', function() {
+                    this.style.background = 'rgba(0, 255, 255, 0.1)';
+                    this.style.borderColor = 'rgba(0, 255, 255, 0.2)';
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+            
+            setTimeout(() => {
+                document.addEventListener('click', function closePanel(e) {
+                    if (!panel.contains(e.target) && !e.target.closest('.category-search-btn')) {
+                        panel.remove();
+                        categorySearchOpen = false;
+                        document.removeEventListener('click', closePanel);
+                    }
+                });
+            }, 100);
+        }
+        
+        function selectCategory(category) {
+            showNotification(`Filtering services by ${category}`, 'info');
+            
+            const posts = document.querySelectorAll('.feed-post');
+            posts.forEach(post => {
+                const postCategory = post.dataset.category || 'General';
+                if (category === 'General' || postCategory === category) {
+                    post.style.display = 'block';
+                } else {
+                    post.style.display = 'none';
+                }
+            });
+            
+            const panel = document.getElementById('categorySearchPanel');
+            if (panel) {
+                panel.remove();
+                categorySearchOpen = false;
+            }
+            
+            showNotification(`Showing ${category} services`, 'success');
         }
 
         function openQuickMessage() {
