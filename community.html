@@ -4812,6 +4812,15 @@
         function toggleMainPostingMode() {
             currentPostingMode = currentPostingMode === 'personal' ? 'business' : 'personal';
             updateMainComposerMode(currentPostingMode);
+            
+            // Update header mode indicator to match
+            updateHeaderModeIndicator(currentPostingMode);
+            
+            // Update modal mode if it's open
+            if (document.getElementById('postModal').style.display !== 'none') {
+                switchPostingMode(currentPostingMode);
+            }
+            
             console.log('Main posting mode switched to:', currentPostingMode);
         }
 
@@ -4988,6 +4997,55 @@
             
             // Update main composer to match
             updateMainComposerMode(mode);
+            
+            // Update header mode indicator to match
+            updateHeaderModeIndicator(mode);
+            
+            // Update form fields if needed
+            updateFormFields();
+        }
+
+        // Add missing updateFormFields function
+        function updateFormFields() {
+            // Update any form fields that depend on the posting mode
+            const priceGroup = document.getElementById('priceGroup');
+            if (priceGroup) {
+                // Show/hide price fields based on category and mode
+                const selectedCategory = document.querySelector('.category-btn.active')?.dataset?.category;
+                if (selectedCategory && ['sale', 'rent', 'service'].includes(selectedCategory)) {
+                    priceGroup.style.display = 'block';
+                } else {
+                    priceGroup.style.display = 'none';
+                }
+            }
+        }
+
+        // Function to update header mode indicator
+        function updateHeaderModeIndicator(mode) {
+            const modeIndicator = document.getElementById('mode-indicator');
+            const switcher = document.getElementById('accountSwitcher');
+            
+            if (mode === 'business') {
+                if (modeIndicator) {
+                    modeIndicator.textContent = 'B';
+                    modeIndicator.style.color = '#ffd700';
+                }
+                if (switcher) {
+                    switcher.style.borderColor = 'rgba(255, 215, 0, 0.5)';
+                }
+                currentAccountMode = 'professional';
+            } else {
+                if (modeIndicator) {
+                    modeIndicator.textContent = 'P';
+                    modeIndicator.style.color = '#00ffff';
+                }
+                if (switcher) {
+                    switcher.style.borderColor = 'rgba(0, 255, 255, 0.3)';
+                }
+                currentAccountMode = 'personal';
+            }
+            
+            localStorage.setItem('currentAccountMode', currentAccountMode);
         }
 
         // Post creation
@@ -5917,6 +5975,9 @@
                 // Initialize post types
                 initializePostTypes();
                 
+                // Initialize account mode and posting mode synchronization
+                initializeAccountMode();
+                
                 // Ensure Community button is highlighted (since this is the community page)
                 document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
                 document.querySelector('.nav-item[onclick="goToPage(\'home\')"]').classList.add('active');
@@ -6465,6 +6526,7 @@
             
             if (currentAccountMode === 'personal') {
                 currentAccountMode = 'professional';
+                currentPostingMode = 'business';
                 modeIndicator.textContent = 'B';
                 modeIndicator.style.color = '#ffd700';
                 switcher.style.borderColor = 'rgba(255, 215, 0, 0.5)';
@@ -6480,6 +6542,7 @@
                 
             } else {
                 currentAccountMode = 'personal';
+                currentPostingMode = 'personal';
                 modeIndicator.textContent = 'P';
                 modeIndicator.style.color = '#00ffff';
                 switcher.style.borderColor = 'rgba(0, 255, 255, 0.3)';
@@ -6494,6 +6557,14 @@
                 });
             }
             
+            // Update main composer to match
+            updateMainComposerMode(currentPostingMode);
+            
+            // Update modal mode if it's open
+            if (document.getElementById('postModal').style.display !== 'none') {
+                switchPostingMode(currentPostingMode);
+            }
+            
             localStorage.setItem('currentAccountMode', currentAccountMode);
         }
         
@@ -6503,16 +6574,22 @@
             const switcher = document.getElementById('accountSwitcher');
             
             if (currentAccountMode === 'professional') {
+                currentPostingMode = 'business';
                 modeIndicator.textContent = 'B';
                 modeIndicator.style.color = '#ffd700';
                 switcher.style.borderColor = 'rgba(255, 215, 0, 0.5)';
                 document.body.classList.add('business-mode');
             } else {
+                currentPostingMode = 'personal';
                 modeIndicator.textContent = 'P';
                 modeIndicator.style.color = '#00ffff';
                 switcher.style.borderColor = 'rgba(0, 255, 255, 0.3)';
                 document.body.classList.remove('business-mode');
             }
+            
+            // Initialize main composer mode
+            updateMainComposerMode(currentPostingMode);
+        }
         }
 
         // Category search functionality
