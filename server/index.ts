@@ -2224,6 +2224,11 @@ app.get('/independent-contractor-earnings-tracker', (req, res) => {
   res.sendFile(path.join(process.cwd(), 'independent-contractor-earnings-tracker.html'));
 });
 
+// Messages Route
+app.get('/messages', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'messages.html'));
+});
+
 // Independent Contractor Invitation API
 app.post('/api/admin/send-contractor-invitation', async (req, res) => {
   try {
