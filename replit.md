@@ -274,7 +274,9 @@ All features are designed to strengthen local communities by keeping commerce lo
 
 ✓ **CALENDAR PAGE PARTICLE EFFECTS SIMPLIFIED AND BACKGROUND OPACITY IMPROVED** (January 22, 2025)
 ✓ **REDUCED PARTICLE COUNT**: Decreased floating particles from 50 to 15 for cleaner, less overwhelming visual experience
-✓ **ENHANCED BACKGROUND OPACITY**: Made filter controls, calendar grid, and navigation backgrounds more opaque (0.85 alpha) to hide particles behind interface elements
+✓ **ENHANCED BACKGROUND OPACITY**: Made filter controls, calendar grid, navigation, event details, and event cards more opaque (0.8-0.85 alpha) to hide particles behind interface elements
+✓ **UPCOMING EVENTS SECTION FIXED**: Made "Upcoming Events This Week" section and event cards solid black with slight transparency like community page
+✓ **CONSISTENT DARK THEME**: All calendar elements now have consistent black backgrounds with slight transparency matching community page design
 ✓ **IMPROVED READABILITY**: Calendar and feature elements now have solid backgrounds that prevent particle interference with text and functionality
 ✓ **MAINTAINED VISUAL THEME**: Preserved futuristic design while creating cleaner, more professional interface
 
