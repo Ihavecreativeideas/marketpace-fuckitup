@@ -1296,7 +1296,7 @@
             font-weight: bold;
         }
 
-        /* Bottom Navigation - Fixed like Community Page */
+        /* Bottom Navigation */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -1313,6 +1313,67 @@
 
         .bottom-nav.hidden {
             transform: translateY(100%);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .nav-item.active {
+            color: #00ffff;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-icon {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 2px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            border-radius: 6px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            padding: 4px;
+        }
+
+        .nav-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: #93c5fd;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item.active .nav-icon svg {
+            fill: #00ffff;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 500;
         }
 
         .nav-container {
@@ -3121,57 +3182,35 @@
             }
         }
 
-        // Floating Navigation Scroll Behavior
+        // Bottom Navigation Scroll Behavior - Copied from Community Page
         let lastScrollTop = 0;
-        let navHideTimeout;
-        const floatingNav = document.getElementById('floatingBottomNav');
+        let ticking = false;
 
-        function handleNavigationScroll() {
+        function updateNavigation() {
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const bottomNav = document.getElementById('bottomNav');
             
             if (scrollTop > lastScrollTop && scrollTop > 100) {
-                // Scrolling down - hide navigation
-                floatingNav.classList.add('hidden');
-                floatingNav.classList.remove('show');
+                // Scrolling down
+                bottomNav.classList.add('hidden');
             } else {
-                // Scrolling up - show navigation
-                floatingNav.classList.remove('hidden');
-                floatingNav.classList.add('show');
+                // Scrolling up
+                bottomNav.classList.remove('hidden');
             }
             
-            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+            lastScrollTop = scrollTop;
+            ticking = false;
         }
 
-        // Add scroll event listener with throttling
-        let ticking = false;
         function requestTick() {
             if (!ticking) {
-                requestAnimationFrame(handleNavigationScroll);
+                requestAnimationFrame(updateNavigation);
                 ticking = true;
-                setTimeout(() => { ticking = false; }, 10);
             }
         }
 
+        // Add scroll listener
         window.addEventListener('scroll', requestTick);
-
-        // Initialize navigation as visible immediately
-        document.addEventListener('DOMContentLoaded', function() {
-            const nav = document.getElementById('floatingBottomNav');
-            if (nav) {
-                nav.classList.add('show');
-                nav.style.display = 'block';
-                console.log('Navigation initialized and shown');
-            }
-        });
-
-        // Also try to show it immediately when script loads
-        setTimeout(() => {
-            const nav = document.getElementById('floatingBottomNav');
-            if (nav) {
-                nav.classList.add('show');
-                nav.style.display = 'block';
-            }
-        }, 100);
 
     </script>
 
