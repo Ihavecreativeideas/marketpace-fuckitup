@@ -2767,12 +2767,31 @@
                 checkLoginStatus();
                 initializeAccountMode();
                 
-                // Initialize scroll listener for bottom navigation
-                window.addEventListener('scroll', requestTick);
-                
-                console.log('Shops page loaded with bottom navigation scroll effect');
+                console.log('Shops page loaded');
             } catch (error) {
                 console.error('Error initializing page:', error);
+            }
+        });
+
+        // Initialize scroll listener after page fully loads
+        window.addEventListener('load', function() {
+            console.log('Window loaded, setting up scroll listener for navigation...');
+            const navElement = document.getElementById('bottomNav');
+            if (navElement) {
+                console.log('Bottom navigation element found, attaching scroll listener');
+                window.addEventListener('scroll', requestTick);
+                
+                // Test the scroll functionality
+                setTimeout(() => {
+                    console.log('Testing scroll functionality...');
+                    navElement.classList.add('hidden');
+                    setTimeout(() => {
+                        navElement.classList.remove('hidden');
+                        console.log('Scroll test complete - navigation should be visible');
+                    }, 1000);
+                }, 2000);
+            } else {
+                console.error('Bottom navigation element not found!');
             }
         });
         // Remove duplicate goToPage function - already defined above
@@ -2968,15 +2987,22 @@
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
             const bottomNav = document.getElementById('bottomNav');
             
+            if (!bottomNav) {
+                console.error('Bottom navigation element not found in updateNavigation');
+                return;
+            }
+            
             if (scrollTop > lastScrollTop && scrollTop > 100) {
-                // Scrolling down
+                // Scrolling down - hide navigation
+                console.log('Hiding navigation (scroll down)');
                 bottomNav.classList.add('hidden');
             } else {
-                // Scrolling up
+                // Scrolling up - show navigation
+                console.log('Showing navigation (scroll up)');
                 bottomNav.classList.remove('hidden');
             }
             
-            lastScrollTop = scrollTop;
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // For Mobile or negative scrolling
             ticking = false;
         }
 
