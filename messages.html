@@ -621,6 +621,7 @@
             currentConversation.lastTime = new Date();
             
             messageInput.value = '';
+            saveConversations(); // Save to localStorage
             openConversation(currentConversation.id);
             updateConversationsList();
             
@@ -721,7 +722,7 @@
 
         function showNotification(title, message) {
             // Show browser notification if permission granted
-            if (Notification.permission === 'granted') {
+            if ('Notification' in window && Notification.permission === 'granted') {
                 new Notification(title, {
                     body: message,
                     icon: '/favicon.ico'
@@ -795,6 +796,97 @@
 
         function goBack() {
             window.history.back();
+        }
+
+        // Load conversations from localStorage (compatible with demo format)
+        function loadStoredConversations() {
+            const stored = localStorage.getItem('marketpace_conversations');
+            if (stored) {
+                try {
+                    const storedConversations = JSON.parse(stored);
+                    conversations.clear();
+                    
+                    // Convert from demo format to messages format
+                    storedConversations.forEach((demoConv, index) => {
+                        const member = {
+                            id: index + 100,
+                            name: demoConv.participants.find(p => p !== 'You') || 'Unknown',
+                            avatar: (demoConv.participants.find(p => p !== 'You') || 'U').charAt(0),
+                            online: Math.random() > 0.5,
+                            lastSeen: 'recently'
+                        };
+                        
+                        const conversation = {
+                            id: Date.now() + index,
+                            member: member,
+                            messages: demoConv.messages ? demoConv.messages.map(msg => ({
+                                id: Date.now() + Math.random(),
+                                text: msg.message,
+                                sent: msg.sender === 'You',
+                                timestamp: new Date(msg.timestamp)
+                            })) : [],
+                            lastMessage: demoConv.lastMessage || 'No messages yet',
+                            lastTime: new Date(demoConv.timestamp),
+                            unread: 0
+                        };
+                        
+                        conversations.set(conversation.id, conversation);
+                    });
+                    
+                    console.log(`Loaded ${conversations.size} conversations from storage`);
+                } catch (e) {
+                    console.log('Error loading stored conversations:', e);
+                }
+            }
+        }
+
+        // Save conversations to localStorage (compatible with demo format)
+        function saveConversations() {
+            try {
+                const demoFormat = Array.from(conversations.values()).map(conv => ({
+                    id: 'conv_' + conv.id,
+                    participants: ['You', conv.member.name],
+                    lastMessage: conv.lastMessage,
+                    timestamp: conv.lastTime.toISOString(),
+                    itemContext: {
+                        name: 'Item',
+                        seller: conv.member.name
+                    },
+                    messages: conv.messages.map(msg => ({
+                        sender: msg.sent ? 'You' : conv.member.name,
+                        message: msg.text,
+                        timestamp: msg.timestamp.toISOString()
+                    }))
+                }));
+                
+                localStorage.setItem('marketpace_conversations', JSON.stringify(demoFormat));
+            } catch (e) {
+                console.log('Error saving conversations:', e);
+            }
+        }
+
+        // Enhanced initialize function
+        function initializeMessaging() {
+            console.log('Messages page loaded');
+            loadStoredConversations();
+            updateActiveMembers();
+            updateConversationsList();
+            updateOnlineCount();
+            
+            // Auto-create some conversations for demo if none exist
+            if (conversations.size === 0) {
+                setTimeout(() => {
+                    startNewConversation(1); // Sarah's Boutique
+                    startNewConversation(3); // DJ Mike
+                }, 500);
+            }
+            
+            // Simulate incoming messages periodically
+            setInterval(simulateIncomingMessage, 30000);
+            setInterval(updateOnlineStatus, 10000);
+            
+            // Setup search
+            document.getElementById('searchInput').addEventListener('input', handleSearch);
         }
 
         // Request notification permission
