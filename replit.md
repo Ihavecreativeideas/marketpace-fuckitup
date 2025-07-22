@@ -294,6 +294,13 @@ All features are designed to strengthen local communities by keeping commerce lo
 ✓ **INTELLIGENT SCROLL DETECTION**: Navigation only hides after scrolling down 100px from top and immediately shows when scrolling up
 ✓ **ENHANCED USER EXPERIENCE**: Provides more screen space for content reading while keeping navigation easily accessible
 
+✓ **BOTTOM NAVIGATION VISIBILITY FIXED ON SHOPS PAGE** (January 22, 2025)
+✓ **NAVIGATION STRUCTURE CORRECTED**: Fixed shops page bottom navigation to match community page structure with all 6 navigation items (Community, Shops, Services, @Hub, Eats, Rentals, Menu)
+✓ **PROPER ROUTING**: Updated first navigation button to use 'home' route instead of 'community' for consistency across all pages
+✓ **VISIBILITY ENSURED**: Added initialization code to ensure bottom navigation is visible on page load and not hidden by scroll effects
+✓ **ACTIVE STATE FIXED**: Shops button properly displays active state with cyan highlighting when on shops page
+✓ **CONSISTENT USER EXPERIENCE**: Shops page now has identical bottom navigation behavior as all other marketplace pages
+
 ✓ **BROWSE CATEGORIES SECTION REMOVED FROM MARKETPACE MENU** (January 22, 2025)
 ✓ **COMPLETE SECTION REMOVAL**: Successfully removed entire "Browse Categories" section from marketpace-menu.html as requested by user (lines 779-875)
 ✓ **MENU SIMPLIFICATION**: Streamlined menu interface by removing category browsing functionality that was causing interface clutter
