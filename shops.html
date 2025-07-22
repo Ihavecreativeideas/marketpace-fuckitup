@@ -1297,7 +1297,7 @@
         }
 
         /* Facebook-style Floating Bottom Navigation */
-        .bottom-nav {
+        .floating-bottom-nav {
             position: fixed;
             bottom: 20px;
             left: 50%;
@@ -1314,12 +1314,12 @@
             width: auto;
         }
 
-        .bottom-nav.hidden {
+        .floating-bottom-nav.hidden {
             transform: translateX(-50%) translateY(120%);
             opacity: 0;
         }
 
-        .bottom-nav.show {
+        .floating-bottom-nav.show {
             transform: translateX(-50%) translateY(0);
             opacity: 1;
         }
@@ -1850,8 +1850,8 @@
         </div>
     </div>
 
-    <!-- Bottom Navigation -->
-    <div class="bottom-nav" id="bottomNav">
+    <!-- Floating Bottom Navigation -->
+    <div class="floating-bottom-nav" id="floatingBottomNav">
         <div class="nav-container">
             <button class="nav-item" onclick="goToPage('community')">
                 <div class="nav-icon">
@@ -3115,10 +3115,10 @@
                 case 'services':
                     window.location.href = '/services';
                     break;
-                case 'hub':
+                case 'the-hub':
                     window.location.href = '/local-event-calendar';
                     break;
-                case 'eats':
+                case 'food-drinks':
                     window.location.href = '/food-and-drinks';
                     break;
                 case 'rentals':
@@ -3129,6 +3129,44 @@
                     break;
             }
         }
+
+        // Floating Navigation Scroll Behavior
+        let lastScrollTop = 0;
+        let navHideTimeout;
+        const floatingNav = document.getElementById('floatingBottomNav');
+
+        function handleNavigationScroll() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                // Scrolling down - hide navigation
+                floatingNav.classList.add('hidden');
+                floatingNav.classList.remove('show');
+            } else {
+                // Scrolling up - show navigation
+                floatingNav.classList.remove('hidden');
+                floatingNav.classList.add('show');
+            }
+            
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        }
+
+        // Add scroll event listener with throttling
+        let ticking = false;
+        function requestTick() {
+            if (!ticking) {
+                requestAnimationFrame(handleNavigationScroll);
+                ticking = true;
+                setTimeout(() => { ticking = false; }, 10);
+            }
+        }
+
+        window.addEventListener('scroll', requestTick);
+
+        // Initialize navigation as visible
+        document.addEventListener('DOMContentLoaded', function() {
+            floatingNav.classList.add('show');
+        });
 
     </script>
 
