@@ -118,20 +118,38 @@
             background: rgba(0, 255, 255, 0.1);
             border: 1px solid rgba(0, 255, 255, 0.3);
             color: #00ffff;
-            width: 32px;
-            height: 32px;
+            width: 34px;
+            height: 28px;
             border-radius: 6px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
+            font-size: 12px;
         }
 
         .header-utility-btn:hover {
             background: rgba(0, 255, 255, 0.2);
             transform: translateY(-1px);
             box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .account-switcher-btn {
+            gap: 1px;
+            width: 36px !important;
+        }
+
+        /* Business mode styling for switcher */
+        .business-mode .account-switcher-btn {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: rgba(255, 215, 0, 0.5);
+        }
+
+        .business-mode .account-switcher-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #ffd700;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
         }
 
         .logo {
@@ -1496,10 +1514,12 @@
                 </div>
             </div>
             <div class="header-utils">
-                <button class="header-utility-btn" onclick="toggleViewMode()" title="Switch View">
+                <button class="header-utility-btn account-switcher-btn" onclick="toggleAccountMode()" title="Switch Personal/Professional Mode" id="accountSwitcher">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4 6H20M4 12H20M4 18H20" stroke="#00ffff" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M7 14l5-5 5 5" stroke="#00ffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="12" cy="12" r="1" fill="#00ffff"/>
                     </svg>
+                    <span id="mode-indicator" style="font-size: 9px; margin-left: 2px; color: #00ffff;">P</span>
                 </button>
                 <button class="header-utility-btn" onclick="openQuickMessage()" title="Quick Message">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -5010,6 +5030,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             checkLoginStatus();
             createParticles();
+            initializeAccountMode();
         });
         
         // Initialize cart badge on page load
@@ -5493,27 +5514,53 @@
             }
         }
 
-        // Header utility functions
-        function toggleViewMode() {
-            showNotification('Switching rentals view mode', 'info');
-            // Toggle between different view modes for the rentals page
-            const currentView = localStorage.getItem('rentalsViewMode') || 'grid';
-            const newView = currentView === 'grid' ? 'list' : 'grid';
-            localStorage.setItem('rentalsViewMode', newView);
+        // Account switching functionality
+        let currentAccountMode = localStorage.getItem('currentAccountMode') || 'personal';
+        
+        function toggleAccountMode() {
+            const modeIndicator = document.getElementById('mode-indicator');
+            const switcher = document.getElementById('accountSwitcher');
             
-            // Apply view mode changes
-            const posts = document.querySelectorAll('.feed-post');
-            posts.forEach(post => {
-                if (newView === 'list') {
-                    post.style.maxWidth = '100%';
-                    post.style.margin = '0 0 15px 0';
-                } else {
-                    post.style.maxWidth = '';
-                    post.style.margin = '';
-                }
-            });
+            if (currentAccountMode === 'personal') {
+                currentAccountMode = 'professional';
+                modeIndicator.textContent = 'B';
+                modeIndicator.style.color = '#ffd700';
+                switcher.style.borderColor = 'rgba(255, 215, 0, 0.5)';
+                showNotification('Switched to Professional Mode - Pro features enabled!', 'success');
+                
+                // Add business mode styling
+                document.body.classList.add('business-mode');
+                
+            } else {
+                currentAccountMode = 'personal';
+                modeIndicator.textContent = 'P';
+                modeIndicator.style.color = '#00ffff';
+                switcher.style.borderColor = 'rgba(0, 255, 255, 0.3)';
+                showNotification('Switched to Personal Mode', 'info');
+                
+                // Remove business mode styling
+                document.body.classList.remove('business-mode');
+            }
             
-            showNotification(`Switched to ${newView} view`, 'success');
+            localStorage.setItem('currentAccountMode', currentAccountMode);
+        }
+        
+        // Initialize account mode on page load
+        function initializeAccountMode() {
+            const modeIndicator = document.getElementById('mode-indicator');
+            const switcher = document.getElementById('accountSwitcher');
+            
+            if (currentAccountMode === 'professional') {
+                modeIndicator.textContent = 'B';
+                modeIndicator.style.color = '#ffd700';
+                switcher.style.borderColor = 'rgba(255, 215, 0, 0.5)';
+                document.body.classList.add('business-mode');
+            } else {
+                modeIndicator.textContent = 'P';
+                modeIndicator.style.color = '#00ffff';
+                switcher.style.borderColor = 'rgba(0, 255, 255, 0.3)';
+                document.body.classList.remove('business-mode');
+            }
         }
 
         function openQuickMessage() {
