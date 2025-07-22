@@ -37,7 +37,7 @@
             background: rgba(0, 20, 40, 0.95);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(0, 255, 255, 0.3);
-            padding: 15px 20px;
+            padding: 10px 15px;
             z-index: 100;
         }
 
@@ -67,7 +67,7 @@
 
         .messages-title {
             color: #00ffff;
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
         }
 
@@ -78,15 +78,15 @@
 
         /* Sidebar */
         .messages-sidebar {
-            width: 350px;
+            width: 300px;
             border-right: 1px solid rgba(0, 255, 255, 0.3);
             display: flex;
             flex-direction: column;
-            margin-top: 70px;
+            margin-top: 55px;
         }
 
         .search-bar {
-            padding: 20px;
+            padding: 15px;
             border-bottom: 1px solid rgba(0, 255, 255, 0.1);
         }
 
@@ -111,7 +111,7 @@
 
         .conversation-item {
             display: flex;
-            padding: 15px 20px;
+            padding: 12px 15px;
             cursor: pointer;
             border-bottom: 1px solid rgba(0, 255, 255, 0.1);
             transition: all 0.3s ease;
@@ -128,16 +128,16 @@
         }
 
         .conversation-avatar {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: linear-gradient(135deg, #00ffff, #0066ff);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 18px;
-            margin-right: 15px;
+            font-size: 16px;
+            margin-right: 12px;
         }
 
         .conversation-info {
@@ -187,11 +187,11 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            margin-top: 70px;
+            margin-top: 55px;
         }
 
         .chat-header {
-            padding: 20px;
+            padding: 15px;
             border-bottom: 1px solid rgba(0, 255, 255, 0.3);
             display: flex;
             align-items: center;
@@ -221,11 +221,11 @@
 
         .chat-messages {
             flex: 1;
-            padding: 20px;
+            padding: 15px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px;
         }
 
         .message {
@@ -254,7 +254,7 @@
         }
 
         .chat-input-area {
-            padding: 20px;
+            padding: 15px;
             border-top: 1px solid rgba(0, 255, 255, 0.3);
             display: flex;
             gap: 10px;
@@ -314,15 +314,37 @@
         @media (max-width: 768px) {
             .messages-container {
                 flex-direction: column;
+                height: calc(100vh - 55px);
             }
             
             .messages-sidebar {
                 width: 100%;
-                max-height: 300px;
+                height: 40vh;
+                min-height: 250px;
+                margin-top: 0;
             }
             
             .chat-area {
                 margin-top: 0;
+                height: 60vh;
+            }
+            
+            .messages-header {
+                padding: 8px 15px;
+            }
+            
+            .messages-title {
+                font-size: 18px;
+            }
+            
+            .conversation-item {
+                padding: 10px 15px;
+            }
+            
+            .conversation-avatar {
+                width: 35px;
+                height: 35px;
+                font-size: 14px;
             }
         }
     </style>
@@ -411,9 +433,11 @@
         }
 
         function createNewConversationFromPost(sellerName, itemName, itemId) {
-            // Check if conversation with this seller already exists
+            // Check if conversation with this seller about this specific item already exists
             const existingConv = Array.from(conversations.values()).find(conv => 
-                conv.member.name === sellerName
+                conv.member.name === sellerName && 
+                conv.itemContext && 
+                conv.itemContext.name === itemName
             );
             
             if (existingConv) {
@@ -480,8 +504,26 @@
                     const storedConversations = JSON.parse(stored);
                     conversations.clear();
                     
-                    // Convert from stored format
+                    // Remove duplicates by seller name and item context
+                    const uniqueConversations = new Map();
+                    
+                    // Convert from stored format and deduplicate
                     storedConversations.forEach((demoConv, index) => {
+                        const otherParticipant = demoConv.participants ? 
+                            demoConv.participants.find(p => p !== 'You') : 'Unknown';
+                        
+                        const itemName = demoConv.itemContext ? demoConv.itemContext.name : 'Unknown Item';
+                        const key = `${otherParticipant}_${itemName}`;
+                        
+                        // Only keep the most recent conversation for each seller-item combination
+                        if (!uniqueConversations.has(key) || 
+                            new Date(demoConv.timestamp) > new Date(uniqueConversations.get(key).timestamp)) {
+                            uniqueConversations.set(key, demoConv);
+                        }
+                    });
+                    
+                    // Convert unique conversations to internal format
+                    Array.from(uniqueConversations.values()).forEach((demoConv, index) => {
                         const otherParticipant = demoConv.participants ? 
                             demoConv.participants.find(p => p !== 'You') : 'Unknown';
                         
@@ -504,13 +546,17 @@
                             })) : [],
                             lastMessage: demoConv.lastMessage || 'No messages yet',
                             lastTime: new Date(demoConv.timestamp),
-                            unread: 0
+                            unread: 0,
+                            itemContext: demoConv.itemContext || {
+                                name: 'Unknown Item',
+                                seller: otherParticipant
+                            }
                         };
                         
                         conversations.set(conversation.id, conversation);
                     });
                     
-                    console.log(`Loaded ${conversations.size} conversations from storage`);
+                    console.log(`Loaded ${conversations.size} unique conversations from storage`);
                 } catch (e) {
                     console.log('Error loading stored conversations:', e);
                 }
