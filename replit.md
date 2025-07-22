@@ -284,6 +284,9 @@ All features are designed to strengthen local communities by keeping commerce lo
 ✓ **SLEEK FILTER DROPDOWN**: Transformed bulky location controls and categories into collapsible dropdown interface with smooth animations and outside-click closing
 ✓ **MANDATORY CATEGORY SELECTION**: Food/drink post creation now requires category selection from establishment types or cuisine types before posting
 ✓ **COMPREHENSIVE POSTING MODAL**: Enhanced food posting with business name, description, and delivery restriction warnings with validation
+✓ **RESTAURANT ORDERING LINKS INTEGRATION**: Added website and delivery app link fields (DoorDash, Uber Eats, Grubhub) to food posting modal
+✓ **ONLINE ORDERING BUTTONS**: Food/restaurant posts now display branded ordering buttons linking to external delivery platforms
+✓ **SEAMLESS THIRD-PARTY INTEGRATION**: Restaurants can share direct links to their ordering platforms while maintaining MarketPace delivery compliance
 
 ✓ **FACEBOOK-STYLE FLOATING HEADER WITH SCROLL BEHAVIOR FULLY IMPLEMENTED** (January 22, 2025)
 ✓ **COMPLETE TOP NAVIGATION REDESIGN**: Created Facebook-style floating header that disappears on scroll down and reappears on scroll up for enhanced user experience
