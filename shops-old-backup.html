@@ -1,0 +1,3018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPace Community - Shops</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        window.STRIPE_PUBLISHABLE_KEY = 'pk_test_51QdKBBP4Kf1KzNu82bVjA4Hqs0kOmLN1oKYGJfvt8kzM8UQ8jQGnQI7LHJNZj7F5tOJRJ8s6Vmu2sKQa2Xy9zNV900BOWc7iAz';
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 30%, #4c2885 60%, #6b46c1 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding-top: 180px;
+            padding-bottom: 80px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(147, 197, 253, 0.8);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0px) translateX(0px) rotate(0deg); 
+                opacity: 0.4; 
+            }
+            25% { 
+                transform: translateY(-30px) translateX(10px) rotate(90deg); 
+                opacity: 0.8; 
+            }
+            50% { 
+                transform: translateY(-15px) translateX(-10px) rotate(180deg); 
+                opacity: 1; 
+            }
+            75% { 
+                transform: translateY(-25px) translateX(5px) rotate(270deg); 
+                opacity: 0.6; 
+            }
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 12px 8px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 500px;
+            margin: 0 auto;
+            gap: 15px;
+            padding: 0 10px;
+        }
+
+        .header-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .header-utils {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .header-utility-btn {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            width: 34px;
+            height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 12px;
+        }
+
+        .header-utility-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .account-switcher-btn {
+            gap: 1px;
+            width: 36px !important;
+        }
+
+        /* Business mode styling for switcher */
+        .business-mode .account-switcher-btn {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: rgba(255, 215, 0, 0.5);
+        }
+
+        .business-mode .account-switcher-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #ffd700;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .logo {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .header-right {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            gap: 8px;
+        }
+
+        .top-section {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .search-section {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .profile-main-button {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #00ffff;
+            border-radius: 6px;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .profile-main-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.2) 0%, transparent 70%);
+            animation: rotate 3s linear infinite;
+            pointer-events: none;
+        }
+
+        .profile-main-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+
+        .profile-main-picture {
+            width: 100%;
+            height: 100%;
+            border-radius: 6px;
+            object-fit: cover;
+            z-index: 1;
+            position: relative;
+        }
+
+        .profile-main-initials {
+            color: #00ffff;
+            font-weight: bold;
+            font-size: 18px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            z-index: 1;
+            position: relative;
+        }
+
+        .search-categories {
+            display: flex;
+            justify-content: space-between;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        .search-cat-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 2px 6px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 9px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1;
+            text-align: center;
+        }
+
+        .search-cat-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #00ffff;
+        }
+
+        .profile-categories {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-top: 4px;
+            width: 60px;
+        }
+
+        .profile-cat-row {
+            display: flex;
+            gap: 2px;
+        }
+
+        .profile-cat-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            padding: 1px 2px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1;
+            text-align: center;
+            min-height: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-cat-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #00ffff;
+        }
+
+        /* BL Style Button (Smaller header size) */
+        .bl-style-button {
+            width: 120px;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .bl-style-button:hover {
+            border-color: rgba(0, 255, 255, 0.6);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .bl-profile-picture {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .bl-profile-initials {
+            color: #00ffff;
+            font-weight: bold;
+            font-size: 32px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+
+        
+        .logo-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .logo-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+            filter: drop-shadow(0 0 15px rgba(138, 43, 226, 0.5));
+            transition: transform 0.3s ease;
+            position: relative;
+            z-index: 5;
+        }
+        
+        .logo-particles {
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            width: calc(100% + 30px);
+            height: calc(100% + 30px);
+            pointer-events: none;
+            z-index: 3;
+        }
+        
+        .logo-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(0, 255, 255, 0.8);
+            border-radius: 50%;
+            box-shadow: 0 0 12px rgba(0, 255, 255, 0.9);
+            animation: logoFloat 4s infinite linear;
+        }
+        
+        .logo-particle:nth-child(odd) {
+            background: rgba(138, 43, 226, 0.8);
+            box-shadow: 0 0 6px rgba(138, 43, 226, 0.9);
+            animation-duration: 6s;
+        }
+        
+        .logo-particle:nth-child(3n) {
+            background: rgba(0, 191, 255, 0.7);
+            box-shadow: 0 0 4px rgba(0, 191, 255, 0.8);
+            animation-duration: 3s;
+        }
+        
+        @keyframes logoFloat {
+            0% { 
+                transform: rotate(0deg) translateX(75px) rotate(0deg);
+                opacity: 0.8; 
+            }
+            25% { 
+                transform: rotate(90deg) translateX(75px) rotate(-90deg);
+                opacity: 1; 
+            }
+            50% { 
+                transform: rotate(180deg) translateX(75px) rotate(-180deg);
+                opacity: 0.9; 
+            }
+            75% { 
+                transform: rotate(270deg) translateX(75px) rotate(-270deg);
+                opacity: 1; 
+            }
+            100% { 
+                transform: rotate(360deg) translateX(75px) rotate(-360deg);
+                opacity: 0.8; 
+            }
+        }
+
+        .search-container {
+            position: relative;
+            width: 100%;
+            z-index: 100;
+        }
+
+        .search-wrapper {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2px 8px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+            height: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.4;
+            transform: scale(0.9);
+        }
+        
+        .search-wrapper:hover {
+            opacity: 0.8;
+            transform: scale(1);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .search-wrapper.hidden {
+            opacity: 0;
+            transform: scale(0.8) translateY(-10px);
+            pointer-events: none;
+        }
+
+        .search-input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 9px;
+            outline: none;
+            padding: 0;
+            height: 12px;
+            cursor: pointer;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .filter-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            margin-left: 8px;
+            font-size: 16px;
+        }
+
+        .radius-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            margin-left: 8px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .radius-btn:hover {
+            color: #00ffff;
+        }
+        
+        .reset-live-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 8px;
+            animation: pulse-red 2s infinite;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+        }
+        
+        .reset-live-btn:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: scale(1.05);
+        }
+        
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.6); }
+        }
+            position: relative;
+        }
+
+        .filter-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 8px 0;
+            min-width: 150px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .filter-dropdown.show {
+            display: block;
+        }
+
+        .filter-option {
+            padding: 8px 16px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .filter-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 8px 0;
+            min-width: 180px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .menu-dropdown.show {
+            display: block;
+        }
+
+        .menu-option {
+            padding: 12px 16px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-option:last-child {
+            border-bottom: none;
+        }
+
+        .menu-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .cart-badge {
+            background: linear-gradient(135deg, #ff4757, #ff3742);
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 8px;
+            min-width: 16px;
+            text-align: center;
+            display: inline-block;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px 16px;
+        }
+
+        /* Status Composer */
+        .status-composer {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .composer-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .profile-pic {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .header .profile-pic {
+            width: 32px;
+            height: 32px;
+            font-size: 12px;
+        }
+
+        .status-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .status-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .composer-actions {
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 12px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+
+
+        /* Hide non-shop posts on shops page */
+        .post-rental, .post-service, .post-event, .post-poll, .post-iso, .post-announcement, .post-hiring {
+            display: none !important;
+        }
+        
+        /* Feed Posts */
+        .feed-post {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .post-header {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .post-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .author-info h4 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .author-info p {
+            margin: 0;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .post-content {
+            padding: 0 16px 16px;
+        }
+
+        .post-text {
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .post-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        /* Commerce Features */
+        .commerce-info {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .price-tag {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00ffff;
+            margin-bottom: 8px;
+        }
+
+        .commerce-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .commerce-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .commerce-btn.primary {
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
+            border: none;
+        }
+
+        .commerce-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Post Interactions */
+        .post-interactions {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 16px;
+        }
+
+        .interaction-buttons {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .interaction-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .interaction-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Profile Button */
+        .profile-button {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            width: 90px;
+            height: 90px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(0, 255, 255, 0.4);
+            border-radius: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(15px);
+            transition: all 0.2s ease;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .profile-button:hover {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.2);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .profile-avatar {
+            width: 82px;
+            height: 82px;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .profile-initials {
+            color: #00ffff;
+            font-weight: bold;
+            font-size: 28px;
+        }
+
+        /* Search Popup Gadget */
+        .search-popup {
+            position: absolute;
+            top: 50px;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #1a0b3d, #2d1b69);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .search-popup.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInDown {
+            from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        .search-popup h3 {
+            color: #00ffff;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .search-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .search-option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            color: white;
+            font-size: 10px;
+        }
+
+        .search-option:hover {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+        }
+
+        /* Profile Modal */
+        .profile-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .profile-modal-content {
+            background: linear-gradient(135deg, #1a0b3d, #2d1b69);
+            border-radius: 20px;
+            max-width: 400px;
+            width: 90%;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            padding: 30px;
+            text-align: center;
+        }
+
+        .profile-pic-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 12px;
+            margin: 0 auto 20px;
+            border: 3px solid rgba(0, 255, 255, 0.3);
+            overflow: hidden;
+        }
+
+        .profile-pic-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-pic-placeholder {
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #00ffff;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #00ffff, #6b46c1);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: bold;
+        }
+
+        /* Advanced Post Modal */
+        .post-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .post-modal-content {
+            background: linear-gradient(135deg, #1a0b3d, #2d1b69);
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .post-modal-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .post-modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00ffff;
+        }
+
+        /* Message Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a0b3d, #2d1b69);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            padding: 25px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .post-modal-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #93c5fd;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .category-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .category-btn {
+            padding: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .category-btn.selected {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.2);
+            color: #00ffff;
+        }
+
+        .action-buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .action-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+        }
+
+        .action-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        .image-upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .image-upload-area:hover {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.05);
+        }
+
+        .post-submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #00ffff, #6b46c1);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .post-submit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
+        }
+
+        .poll-options {
+            display: none;
+        }
+
+        .poll-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .poll-option input {
+            flex: 1;
+        }
+
+        .remove-option {
+            background: #ef4444;
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .add-option-btn {
+            background: rgba(0, 255, 255, 0.2);
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        /* Comment Section Styles */
+        .comment-section {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 0 0 15px 15px;
+            margin-top: -15px;
+        }
+
+        .comment-input-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .comment-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            color: white;
+            resize: none;
+            font-family: inherit;
+        }
+
+        .comment-input:focus {
+            outline: none;
+            border-color: #00ffff;
+        }
+
+        .comment-send-btn {
+            background: linear-gradient(135deg, #00ffff, #0ea5e9);
+            color: #1a0b3d;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .comment-send-btn:hover {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+        }
+
+        .comments-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .comment {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .comment:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .comment-author {
+            display: flex;
+            gap: 10px;
+        }
+
+        .comment-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #00ffff, #9d4edd);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a0b3d;
+            font-weight: bold;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .comment-content {
+            flex: 1;
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .comment-name {
+            color: #00ffff;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .comment-time {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+        }
+
+        .comment-text {
+            color: #e2e8f0;
+            margin: 0 0 8px 0;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+
+        .comment-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .comment-action-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            font-size: 12px;
+            padding: 0;
+        }
+
+        .comment-action-btn:hover {
+            color: #00ffff;
+        }
+
+        .comment-action-btn.liked {
+            color: #00ffff;
+            font-weight: bold;
+        }
+
+
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 0;
+            z-index: 1000;
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .bottom-nav.hidden {
+            transform: translateY(100%);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .nav-item.active {
+            color: #00ffff;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-icon {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 2px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            border-radius: 6px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            padding: 4px;
+        }
+
+        .nav-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: #93c5fd;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item.active .nav-icon svg {
+            fill: #00ffff;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        /* Post Filtering for Shops Page - Hide non-shop posts */
+        .post-rental,
+        .post-service {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="header-center">
+                <div class="logo">
+                    <div class="logo-container bl-style-button" onclick="goToProfile()" style="cursor: pointer;">
+                        <img src="marketpace-logo-optimized.jpeg" alt="MarketPace" class="logo-image marketpace-text" style="max-height: 120px; width: auto;">
+                        <div class="logo-particles" id="logoParticles"></div>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="top-section">
+                    
+                    <!-- Futuristic Local Event Calendar Button -->
+                    <div class="futuristic-calendar-button" onclick="openLocalEventCalendar()" style="
+                        width: 120px; 
+                        height: 120px; 
+                        background: rgba(0, 0, 0, 0.6); 
+                        backdrop-filter: blur(15px); 
+                        border: 2px solid rgba(255, 215, 0, 0.5); 
+                        border-radius: 12px; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        cursor: pointer; 
+                        position: relative; 
+                        overflow: hidden;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+                        margin-right: 15px;
+                    " onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 0 30px rgba(255, 215, 0, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 0 20px rgba(255, 215, 0, 0.3)'">
+                        <!-- Advanced Calendar Icon SVG -->
+                        <svg width="90" height="90" viewBox="0 0 120 120" fill="none">
+                            <!-- Futuristic grid background -->
+                            <defs>
+                                <pattern id="calendarGrid" width="10" height="10" patternUnits="userSpaceOnUse">
+                                    <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#ffd700" stroke-width="0.5" opacity="0.3"/>
+                                </pattern>
+                                <radialGradient id="calendarGlow" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" style="stop-color:#ffd700;stop-opacity:0.8"/>
+                                    <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0.2"/>
+                                </radialGradient>
+                            </defs>
+                            <rect width="120" height="120" fill="url(#calendarGrid)" rx="12"/>
+                            <!-- Calendar base -->
+                            <rect x="15" y="25" width="90" height="70" rx="8" fill="rgba(255, 215, 0, 0.1)" stroke="#ffd700" stroke-width="2"/>
+                            <!-- Calendar header -->
+                            <rect x="15" y="25" width="90" height="15" rx="8" fill="rgba(255, 215, 0, 0.3)"/>
+                            <!-- Binding rings -->
+                            <circle cx="30" cy="15" r="3" fill="#ffd700"/>
+                            <circle cx="60" cy="15" r="3" fill="#ffd700"/>
+                            <circle cx="90" cy="15" r="3" fill="#ffd700"/>
+                            <!-- Calendar grid -->
+                            <line x1="30" y1="45" x2="30" y2="85" stroke="#ffd700" stroke-width="1" opacity="0.6"/>
+                            <line x1="45" y1="45" x2="45" y2="85" stroke="#ffd700" stroke-width="1" opacity="0.6"/>
+                            <line x1="60" y1="45" x2="60" y2="85" stroke="#ffd700" stroke-width="1" opacity="0.6"/>
+                            <line x1="75" y1="45" x2="75" y2="85" stroke="#ffd700" stroke-width="1" opacity="0.6"/>
+                            <line x1="90" y1="45" x2="90" y2="85" stroke="#ffd700" stroke-width="1" opacity="0.6"/>
+                            <line x1="20" y1="55" x2="100" y2="55" stroke="#ffd700" stroke-width="1" opacity="0.6"/>
+                            <line x1="20" y1="65" x2="100" y2="65" stroke="#ffd700" stroke-width="1" opacity="0.6"/>
+                            <line x1="20" y1="75" x2="100" y2="75" stroke="#ffd700" stroke-width="1" opacity="0.6"/>
+                            <!-- Event indicators -->
+                            <circle cx="25" cy="50" r="2" fill="#00ff88"/>
+                            <circle cx="40" cy="60" r="2" fill="#8b5cf6"/>
+                            <circle cx="55" cy="50" r="2" fill="#ef4444"/>
+                            <circle cx="70" cy="70" r="2" fill="#00ffff"/>
+                            <circle cx="85" cy="60" r="2" fill="#f59e0b"/>
+                            <!-- Today highlight -->
+                            <rect x="52" y="57" width="8" height="8" rx="2" fill="rgba(255, 215, 0, 0.8)"/>
+                            <!-- Connection lines for events -->
+                            <path d="M25 50 Q60 40 85 60" stroke="#ffd700" stroke-width="1" opacity="0.4" stroke-dasharray="2,2"/>
+                            <!-- Glow effect -->
+                            <rect x="15" y="25" width="90" height="70" rx="8" fill="url(#calendarGlow)" opacity="0.2"/>
+                        </svg>
+                        <!-- Floating particles inside button -->
+                        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                            <div style="position: absolute; top: 25%; left: 20%; width: 3px; height: 3px; background: #ffd700; border-radius: 50%; animation: logoFloat 3s infinite ease-in-out;"></div>
+                            <div style="position: absolute; top: 75%; left: 75%; width: 3px; height: 3px; background: #8b5cf6; border-radius: 50%; animation: logoFloat 4s infinite ease-in-out 1s;"></div>
+                            <div style="position: absolute; top: 60%; left: 40%; width: 2px; height: 2px; background: #00ff88; border-radius: 50%; animation: logoFloat 5s infinite ease-in-out 2s;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Futuristic Interactive Map Button -->
+                    <div class="futuristic-map-button" onclick="showInteractiveMap('all')" style="
+                        width: 120px; 
+                        height: 120px; 
+                        background: rgba(0, 0, 0, 0.6); 
+                        backdrop-filter: blur(15px); 
+                        border: 2px solid rgba(0, 255, 255, 0.5); 
+                        border-radius: 12px; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        cursor: pointer; 
+                        position: relative; 
+                        overflow: hidden;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+                    " onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 0 30px rgba(0, 255, 255, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 0 20px rgba(0, 255, 255, 0.3)'">
+                        <!-- Advanced Map Icon SVG -->
+                        <svg width="90" height="90" viewBox="0 0 120 120" fill="none">
+                            <!-- Futuristic grid background -->
+                            <defs>
+                                <pattern id="mapGrid" width="12" height="12" patternUnits="userSpaceOnUse">
+                                    <path d="M 12 0 L 0 0 0 12" fill="none" stroke="#00ffff" stroke-width="0.5" opacity="0.3"/>
+                                </pattern>
+                                <radialGradient id="radarGlow" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" style="stop-color:#00ffff;stop-opacity:0.8"/>
+                                    <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0.2"/>
+                                </radialGradient>
+                            </defs>
+                            <rect width="120" height="120" fill="url(#mapGrid)" rx="12"/>
+                            <!-- Radar sweep circle -->
+                            <circle cx="60" cy="60" r="50" fill="url(#radarGlow)" opacity="0.3"/>
+                            <!-- Location pins with glow effects -->
+                            <circle cx="35" cy="30" r="8" fill="#00ff88" opacity="0.9"/>
+                            <circle cx="35" cy="30" r="4" fill="#ffffff"/>
+                            <circle cx="85" cy="45" r="8" fill="#8b5cf6" opacity="0.9"/>
+                            <circle cx="85" cy="45" r="4" fill="#ffffff"/>
+                            <circle cx="60" cy="85" r="8" fill="#f59e0b" opacity="0.9"/>
+                            <circle cx="60" cy="85" r="4" fill="#ffffff"/>
+                            <circle cx="20" cy="75" r="6" fill="#ef4444" opacity="0.9"/>
+                            <circle cx="20" cy="75" r="3" fill="#ffffff"/>
+                            <circle cx="95" cy="85" r="6" fill="#06b6d4" opacity="0.9"/>
+                            <circle cx="95" cy="85" r="3" fill="#ffffff"/>
+                            <!-- Connection network lines -->
+                            <path d="M35 30 L60 85 L85 45 L35 30" stroke="#00ffff" stroke-width="2" opacity="0.6" stroke-dasharray="3,3"/>
+                            <path d="M20 75 L95 85" stroke="#00ffff" stroke-width="1" opacity="0.4" stroke-dasharray="2,2"/>
+                            <!-- Radar sweep rings -->
+                            <circle cx="60" cy="60" r="35" fill="none" stroke="#00ffff" stroke-width="1" opacity="0.4"/>
+                            <circle cx="60" cy="60" r="25" fill="none" stroke="#00ffff" stroke-width="1" opacity="0.6"/>
+                            <circle cx="60" cy="60" r="15" fill="none" stroke="#00ffff" stroke-width="1" opacity="0.8"/>
+                            <!-- Distance markers -->
+                            <text x="60" y="35" text-anchor="middle" fill="#00ffff" font-size="6" opacity="0.8">10mi</text>
+                            <text x="60" y="45" text-anchor="middle" fill="#00ffff" font-size="6" opacity="0.6">25mi</text>
+                            <text x="60" y="55" text-anchor="middle" fill="#00ffff" font-size="6" opacity="0.4">50mi</text>
+                        </svg>
+                        <!-- Floating particles inside button -->
+                        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                            <div style="position: absolute; top: 20%; left: 30%; width: 3px; height: 3px; background: #00ffff; border-radius: 50%; animation: logoFloat 3s infinite ease-in-out;"></div>
+                            <div style="position: absolute; top: 70%; left: 80%; width: 3px; height: 3px; background: #8b5cf6; border-radius: 50%; animation: logoFloat 4s infinite ease-in-out 1s;"></div>
+                            <div style="position: absolute; top: 50%; left: 15%; width: 2px; height: 2px; background: #00ff88; border-radius: 50%; animation: logoFloat 5s infinite ease-in-out 2s;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-utils">
+                <button class="header-utility-btn category-search-btn" onclick="toggleCategorySearch()" title="Browse Categories">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="9" cy="9" r="7" stroke="#00ffff" stroke-width="2"/>
+                        <circle cx="15" cy="9" r="7" stroke="#00ffff" stroke-width="2"/>
+                        <path d="m21 21-4.35-4.35" stroke="#00ffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M10 9h8" stroke="#00ffff" stroke-width="1.5" stroke-linecap="round"/>
+                        <circle cx="12" cy="9" r="1" fill="#00ffff"/>
+                    </svg>
+                </button>
+                <button class="header-utility-btn account-switcher-btn" onclick="toggleAccountMode()" title="Switch Personal/Professional Mode" id="accountSwitcher">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 14l5-5 5 5" stroke="#00ffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="12" cy="12" r="1" fill="#00ffff"/>
+                    </svg>
+                    <span id="mode-indicator" style="font-size: 9px; margin-left: 2px; color: #00ffff;">P</span>
+                </button>
+                <button class="header-utility-btn" onclick="openQuickMessage()" title="Quick Message">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="#00ffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <!-- Floating Particles -->
+    <div class="particles"></div>
+
+
+    <div class="main-content" style="position: relative; z-index: 2;">
+
+
+        <!-- Status Composer - Standardized Header Layout -->
+        <div class="status-composer" style="opacity: 0.8; padding: 10px 15px; margin-bottom: 10px;">
+            <div class="composer-header">
+                <div class="profile-pic" style="width: 35px; height: 35px; border-radius: 6px;">
+                    <span id="userInitials2" style="font-size: 14px;">DU</span>
+                </div>
+                <input type="text" id="statusInput" name="status" class="status-input" placeholder="Share with your community!" onclick="openAdvancedPostModal()" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); font-size: 14px; padding: 8px 12px;">
+            </div>
+            <div class="composer-actions">
+                <button class="action-btn" onclick="openAdvancedPostModal('sale')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(34, 197, 94, 0.2)"/><path d="M21 12a9 9 0 1 1-6.219-8.56" stroke="currentColor" stroke-width="1.5"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.5"/></svg> Sell
+                </button>
+                <button class="action-btn" onclick="openAdvancedPostModal('rental')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(34, 197, 94, 0.2)"/><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/><path d="M9 22V12h6v10" stroke="currentColor" stroke-width="1.5"/></svg> Rent
+                </button>
+                <button class="action-btn" onclick="openAdvancedPostModal('service')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(245, 158, 11, 0.2)"/><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="currentColor" stroke-width="1.5"/></svg> Service
+                </button>
+                <button class="action-btn" onclick="openAdvancedPostModal('event')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(236, 72, 153, 0.2)"/><path d="M12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2Z" stroke="currentColor" stroke-width="1.5" fill="rgba(236, 72, 153, 0.3)"/></svg> Event
+                </button>
+            </div>
+        </div>
+
+        <!-- Community Feed -->
+        <div class="community-feed">
+            <div class="feed-post post-sale" data-category="fashion" data-type="sale">
+                <div class="post-header">
+                    <div class="post-author">
+                        <div class="profile-pic">
+                            <span>SM</span>
+                        </div>
+                        <div class="author-info">
+                            <h4>Sarah's Boutique</h4>
+                            <p>2 hours ago • Orange Beach, AL</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <div class="post-text">Beautiful summer dress collection! Perfect for beach days and evening dinners. High quality fabrics, sizes XS-XL available.</div>
+                    <img src="https://via.placeholder.com/500x300/6b46c1/ffffff?text=Summer+Dresses" alt="Summer dresses" class="post-image">
+                    <div class="commerce-info">
+                        <div class="price-tag">$45 - $85</div>
+                        <div class="commerce-actions">
+                            <button class="commerce-btn primary" onclick="deliverNow('Summer Dresses', 35, 'Sarah\'s Boutique', 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(34, 197, 94, 0.2)"/>
+                                    <path d="M7 13l3 3 7-7" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                Deliver Now
+                            </button>
+                            <button class="commerce-btn" onclick="addToCart('Summer Dresses')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.2)"/>
+                                    <path d="M9 22C9.55228 22 10 21.5523 10 21C10 20.4477 9.55228 20 9 20C8.44772 20 8 20.4477 8 21C8 21.5523 8.44772 22 9 22Z" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M1 1H5L7.68 14.39C7.77144 14.8504 8.02191 15.264 8.38755 15.5583C8.75318 15.8526 9.2107 16.009 9.68 16H19.4C19.8693 16.009 20.3268 15.8526 20.6925 15.5583C21.0581 15.264 21.3086 14.8504 21.4 14.39L23 6H6" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                Add to Cart
+                            </button>
+                            <button class="commerce-btn" onclick="counterOffer('Summer Dresses', '35')">Counter Offer</button>
+                            <button class="commerce-btn" onclick="messageOwner('Sarah\'s Boutique', 'Summer Dresses', 'item_001')">Message</button>
+                            <button class="commerce-btn tip-btn" onclick="showTipModal({name: 'Sarah\'s Boutique', type: 'Shop', id: 'shop_001', ownerId: 'user_001'})" style="background: linear-gradient(135deg, #FFD700, #FFA500); color: #1a0b3d; border: 2px solid #FFD700;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+                                </svg>
+                                Tip Shop
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-interactions">
+                    <div class="interaction-buttons">
+                        <button class="interaction-btn" onclick="likePost(this)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(236, 72, 153, 0.1)"/>
+                                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7z" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            Like
+                        </button>
+                        <button class="interaction-btn" onclick="commentPost()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.2)"/>
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            Comment
+                        </button>
+                        <button class="interaction-btn" onclick="favoritePost(this)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(245, 158, 11, 0.2)"/>
+                                <path d="M12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2Z" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            Favorite
+                        </button>
+                        <button class="interaction-btn" onclick="sharePost()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(168, 85, 247, 0.2)"/>
+                                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" stroke="currentColor" stroke-width="1.5"/>
+                                <polyline points="16,6 12,2 8,6" stroke="currentColor" stroke-width="1.5"/>
+                                <line x1="12" y1="2" x2="12" y2="15" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feed-post post-sale" data-category="electronics" data-type="sale">
+                <div class="post-header">
+                    <div class="post-author">
+                        <div class="profile-pic">
+                            <span>TG</span>
+                        </div>
+                        <div class="author-info">
+                            <h4>Tech Gadgets Store</h4>
+                            <p>4 hours ago • Gulf Shores, AL</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <div class="post-text">Brand new iPhone 15 Pro Max! Unlocked, all colors available. 1TB storage, comes with case and screen protector.</div>
+                    <img src="https://via.placeholder.com/500x300/4c2885/ffffff?text=iPhone+15+Pro+Max" alt="iPhone 15 Pro Max" class="post-image">
+                    <div class="commerce-info">
+                        <div class="price-tag">$1,199</div>
+                        <div class="commerce-actions">
+                            <button class="commerce-btn primary" onclick="deliverNow('iPhone 15 Pro Max', 999, 'TechGadgets', 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(34, 197, 94, 0.2)"/>
+                                    <path d="M7 13l3 3 7-7" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                Deliver Now
+                            </button>
+                            <button class="commerce-btn" onclick="addToCart('iPhone 15 Pro Max')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.2)"/>
+                                    <path d="M9 22C9.55228 22 10 21.5523 10 21C10 20.4477 9.55228 20 9 20C8.44772 20 8 20.4477 8 21C8 21.5523 8.44772 22 9 22Z" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M1 1H5L7.68 14.39C7.77144 14.8504 8.02191 15.264 8.38755 15.5583C8.75318 15.8526 9.2107 16.009 9.68 16H19.4C19.8693 16.009 20.3268 15.8526 20.6925 15.5583C21.0581 15.264 21.3086 14.8504 21.4 14.39L23 6H6" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                Add to Cart
+                            </button>
+                            <button class="commerce-btn" onclick="counterOffer('iPhone 15 Pro Max', '899')">Counter Offer</button>
+                            <button class="commerce-btn" onclick="messageOwner('TechGadgets', 'iPhone 15 Pro Max', 'item_002')">Message</button>
+                            <button class="commerce-btn tip-btn" onclick="showTipModal({name: 'Tech Gadgets Store', type: 'Electronics Shop', id: 'shop_002', ownerId: 'user_002'})" style="background: linear-gradient(135deg, #FFD700, #FFA500); color: #1a0b3d; border: 2px solid #FFD700;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+                                </svg>
+                                Tip Shop
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-interactions">
+                    <div class="interaction-buttons">
+                        <button class="interaction-btn" onclick="likePost(this)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(236, 72, 153, 0.1)"/>
+                                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7z" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            Like
+                        </button>
+                        <button class="interaction-btn" onclick="commentPost()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.2)"/>
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            Comment
+                        </button>
+                        <button class="interaction-btn" onclick="favoritePost(this)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(245, 158, 11, 0.2)"/>
+                                <path d="M12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2Z" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            Favorite
+                        </button>
+                        <button class="interaction-btn" onclick="sharePost()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(168, 85, 247, 0.2)"/>
+                                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" stroke="currentColor" stroke-width="1.5"/>
+                                <polyline points="16,6 12,2 8,6" stroke="currentColor" stroke-width="1.5"/>
+                                <line x1="12" y1="2" x2="12" y2="15" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav" id="bottomNav">
+        <div class="nav-container">
+            <button class="nav-item" onclick="goToPage('home')">
+                <div class="nav-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <!-- Futuristic Community Icon -->
+                        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <circle cx="12" cy="8" r="2" fill="currentColor"/>
+                        <circle cx="8" cy="16" r="1.5" fill="currentColor"/>
+                        <circle cx="16" cy="16" r="1.5" fill="currentColor"/>
+                        <path d="M12 10V14M10 14H14" stroke="currentColor" stroke-width="1.5"/>
+                        <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1" opacity="0.3" stroke-dasharray="2,1"/>
+                    </svg>
+                </div>
+                <div class="nav-label">Community</div>
+            </button>
+            <button class="nav-item active" onclick="goToPage('shops')">
+                <div class="nav-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <!-- Futuristic Shop Icon -->
+                        <rect x="3" y="6" width="18" height="13" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M3 6L12 2L21 6" stroke="currentColor" stroke-width="2"/>
+                        <circle cx="8" cy="12" r="2" fill="currentColor" opacity="0.6"/>
+                        <circle cx="16" cy="12" r="2" fill="currentColor" opacity="0.6"/>
+                        <path d="M6 15H18" stroke="currentColor" stroke-width="1" opacity="0.5"/>
+                        <circle cx="12" cy="9" r="1" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="nav-label">Shops</div>
+            </button>
+            <button class="nav-item" onclick="goToPage('services')">
+                <div class="nav-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <!-- Futuristic Services Icon -->
+                        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <polygon points="12,7 16,14 8,14" fill="currentColor" opacity="0.6"/>
+                        <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1" opacity="0.4" stroke-dasharray="3,1"/>
+                        <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="nav-label">Services</div>
+            </button>
+            <button class="nav-item" onclick="goToPage('the-hub')">
+                <div class="nav-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <!-- Star Icon for @Hub -->
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+                    </svg>
+                </div>
+                <div class="nav-label">@Hub</div>
+            </button>
+            <button class="nav-item" onclick="goToPage('food-drinks')">
+                <div class="nav-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <!-- Food & Drinks Icon -->
+                        <path d="M12.5 2C13.3 2 14 2.7 14 3.5V9.5C14 11.7 12.2 13.5 10 13.5H8.5V22H7V13.5H6.5C4.3 13.5 2.5 11.7 2.5 9.5V3.5C2.5 2.7 3.2 2 4 2H12.5Z" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 165, 0, 0.3)"/>
+                        <path d="M16.5 8V6H18V8H20.5V9.5H18V22H16.5V9.5H14V8H16.5Z" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 165, 0, 0.3)"/>
+                        <circle cx="8" cy="6" r="1" fill="currentColor" opacity="0.7"/>
+                        <circle cx="18" cy="6" r="1" fill="currentColor" opacity="0.7"/>
+                    </svg>
+                </div>
+                <div class="nav-label">Eats</div>
+            </button>
+            <button class="nav-item" onclick="goToPage('rentals')">
+                <div class="nav-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <!-- Futuristic Rentals Icon -->
+                        <rect x="4" y="6" width="16" height="12" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M8 4V6M16 4V6" stroke="currentColor" stroke-width="2"/>
+                        <circle cx="9" cy="11" r="1.5" fill="currentColor"/>
+                        <circle cx="15" cy="11" r="1.5" fill="currentColor"/>
+                        <circle cx="12" cy="15" r="1.5" fill="currentColor"/>
+                        <path d="M9 11L12 15L15 11" stroke="currentColor" stroke-width="1" opacity="0.4"/>
+                    </svg>
+                </div>
+                <div class="nav-label">Rentals</div>
+            </button>
+            <button class="nav-item" onclick="goToPage('menu')">
+                <div class="nav-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <!-- Futuristic Menu Icon -->
+                        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <circle cx="12" cy="8" r="1.5" fill="currentColor"/>
+                        <circle cx="8" cy="16" r="1.5" fill="currentColor"/>
+                        <circle cx="16" cy="16" r="1.5" fill="currentColor"/>
+                        <path d="M12 10L8 14M12 10L16 14" stroke="currentColor" stroke-width="1.5" opacity="0.6"/>
+                        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1" opacity="0.3" stroke-dasharray="2,1"/>
+                    </svg>
+                </div>
+                <div class="nav-label">Menu</div>
+            </button>
+        </div>
+    </div>
+
+    <script src="counter-offer-system.js"></script>
+    <script src="messaging-system.js"></script>
+    <script>
+        // Navigation functions
+        function goToPage(page) {
+            console.log('Navigating to:', page);
+            
+            switch(page) {
+                case 'community':
+                case 'home':
+                    window.location.href = '/community';
+                    break;
+                case 'shops':
+                    console.log('Already on Shops page');
+                    break;
+                case 'services':
+                    window.location.href = '/services';
+                    break;
+                case 'the-hub':
+                    window.location.href = '/the-hub';
+                    break;
+                case 'food-drinks':
+                    window.location.href = '/food-and-drinks';
+                    break;
+                case 'food-drinks':
+                    window.location.href = '/food-and-drinks';
+                    break;
+                case 'rentals':
+                    window.location.href = '/rentals';
+                    break;
+                case 'menu':
+                    window.location.href = '/marketpace-menu';
+                    break;
+                default:
+                    console.log('Unknown page:', page);
+            }
+        }
+
+        // Commerce functions
+        function deliverNow(item, price, seller, imageUrl) {
+            // Add item to cart and navigate directly to cart
+            addToCartAndNavigate(item, price, seller, imageUrl, 'marketplace-delivery');
+        }
+
+        function addToCart(item) {
+            // Check if it's self-pickup to avoid delivery fees
+            const deliveryMethod = 'self-pickup'; // Default to self-pickup
+            const deliveryFee = calculateDeliveryFee(deliveryMethod);
+            
+            showPopupNotification(`"${item}" added to cart! Delivery fee: $${deliveryFee.toFixed(2)}`, 'success', 3000);
+        }
+
+        function counterOffer(item, price) {
+            const originalPrice = parseFloat(price);
+            const discount15 = (originalPrice * 0.85).toFixed(2);
+            const discount25 = (originalPrice * 0.75).toFixed(2);
+            const discount35 = (originalPrice * 0.65).toFixed(2);
+            const discount45 = (originalPrice * 0.55).toFixed(2);
+            const discount55 = (originalPrice * 0.45).toFixed(2);
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                backdrop-filter: blur(10px);
+            `;
+            
+            modal.innerHTML = `
+                <div class="modal-content" style="
+                    background: linear-gradient(135deg, #1a0b3d, #2d1b69);
+                    border-radius: 20px;
+                    max-width: 400px;
+                    width: 90%;
+                    border: 2px solid rgba(0, 255, 255, 0.3);
+                    padding: 30px;
+                    text-align: center;
+                    max-height: 90vh;
+                    overflow-y: auto;
+                ">
+                    <h3 style="color: #00ffff; margin-bottom: 20px;">Make Counter Offer</h3>
+                    <p style="color: white; margin-bottom: 15px;">${item}</p>
+                    <p style="color: #ffd93d; margin-bottom: 20px;">Original Price: $${price}</p>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <p style="color: white; margin-bottom: 15px;">Select your discounted offer:</p>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <button onclick="selectCounterOffer('${item}', '${discount15}', '15%')" style="
+                                background: linear-gradient(135deg, #10b981, #059669);
+                                color: white;
+                                border: none;
+                                padding: 12px 20px;
+                                border-radius: 8px;
+                                cursor: pointer;
+                                width: 100%;
+                            ">15% OFF - $${discount15}</button>
+                            <button onclick="selectCounterOffer('${item}', '${discount25}', '25%')" style="
+                                background: linear-gradient(135deg, #3b82f6, #2563eb);
+                                color: white;
+                                border: none;
+                                padding: 12px 20px;
+                                border-radius: 8px;
+                                cursor: pointer;
+                                width: 100%;
+                            ">25% OFF - $${discount25}</button>
+                            <button onclick="selectCounterOffer('${item}', '${discount35}', '35%')" style="
+                                background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+                                color: white;
+                                border: none;
+                                padding: 12px 20px;
+                                border-radius: 8px;
+                                cursor: pointer;
+                                width: 100%;
+                            ">35% OFF - $${discount35}</button>
+                            <button onclick="selectCounterOffer('${item}', '${discount45}', '45%')" style="
+                                background: linear-gradient(135deg, #f59e0b, #d97706);
+                                color: white;
+                                border: none;
+                                padding: 12px 20px;
+                                border-radius: 8px;
+                                cursor: pointer;
+                                width: 100%;
+                            ">45% OFF - $${discount45}</button>
+                            <button onclick="selectCounterOffer('${item}', '${discount55}', '55%')" style="
+                                background: linear-gradient(135deg, #ef4444, #dc2626);
+                                color: white;
+                                border: none;
+                                padding: 12px 20px;
+                                border-radius: 8px;
+                                cursor: pointer;
+                                width: 100%;
+                            ">55% OFF - $${discount55}</button>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button onclick="closeCounterOfferModal()" style="
+                            background: rgba(107, 114, 128, 0.6);
+                            color: white;
+                            border: none;
+                            padding: 10px 20px;
+                            border-radius: 8px;
+                            cursor: pointer;
+                        ">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        function selectCounterOffer(item, offerPrice, discountPercent) {
+            closeCounterOfferModal();
+            showNotification(`Counter offer of $${offerPrice} (${discountPercent} off) submitted for ${item}!`, 'success');
+        }
+        
+        function closeCounterOfferModal() {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+                document.body.removeChild(modal);
+            }
+        }
+
+        function messageOwner(sellerName, itemName, itemId) {
+            // Redirect to messaging page with seller info
+            window.location.href = `/messages?seller=${encodeURIComponent(sellerName)}&item=${encodeURIComponent(itemName)}&id=${itemId || ''}`;
+        }
+
+        function closeMessageModal() {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+                document.body.removeChild(modal);
+            }
+        }
+
+        function sendMessage(itemName, sellerName) {
+            const textarea = document.querySelector('.modal-overlay textarea');
+            const message = textarea ? textarea.value.trim() : '';
+            
+            if (message) {
+                showNotification(`Message sent to ${sellerName} about ${itemName}!`, 'success');
+                closeMessageModal();
+            } else {
+                showNotification('Please enter a message', 'error');
+            }
+        }
+
+        // Social interaction functions
+        function likePost(button) {
+            const isLiked = button.classList.contains('liked');
+            if (isLiked) {
+                button.classList.remove('liked');
+                button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(236, 72, 153, 0.1)"/><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7z" stroke="currentColor" stroke-width="1.5"/></svg>Like';
+                button.style.color = 'rgba(255, 255, 255, 0.8)';
+                showNotification('Post unliked!', 'info');
+            } else {
+                button.classList.add('liked');
+                button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="#ff6b6b" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="#ff6b6b" stroke-width="1.5" fill="rgba(255, 107, 107, 0.3)"/><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7z" stroke="#ff6b6b" stroke-width="1.5" fill="#ff6b6b"/></svg>Liked';
+                button.style.color = '#ff6b6b';
+                showNotification('Post liked!', 'success');
+            }
+        }
+
+        function favoritePost(button) {
+            const isFavorited = button.classList.contains('favorited');
+            if (isFavorited) {
+                button.classList.remove('favorited');
+                button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="1.5"/></svg>Favorite';
+                button.style.color = 'rgba(255, 255, 255, 0.8)';
+                showNotification('Removed from favorites!', 'info');
+            } else {
+                button.classList.add('favorited');
+                button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="#fbbf24" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="#fbbf24" stroke-width="1.5" fill="#fbbf24"/></svg>Favorited';
+                button.style.color = '#fbbf24';
+                showNotification('Added to favorites!', 'success');
+            }
+        }
+
+        function commentPost(postElement) {
+            const post = postElement ? postElement.closest('.feed-post') : event.target.closest('.feed-post');
+            
+            // Check if comment section already exists
+            let commentSection = post.querySelector('.comments-section');
+            if (commentSection) {
+                // Toggle visibility
+                commentSection.style.display = commentSection.style.display === 'none' ? 'block' : 'none';
+                return;
+            }
+            
+            // Create comment section
+            commentSection = document.createElement('div');
+            commentSection.className = 'comments-section';
+            commentSection.innerHTML = `
+                <div class="comment-input-area">
+                    <textarea class="comment-input" placeholder="Write a comment..." rows="2"></textarea>
+                    <button class="comment-send-btn" onclick="postComment(this)">Post</button>
+                </div>
+                <div class="comments-list">
+                    <div class="comment">
+                        <div class="comment-author">
+                            <div class="comment-avatar">JD</div>
+                            <div class="comment-content">
+                                <div class="comment-header">
+                                    <span class="comment-name">John Doe</span>
+                                    <span class="comment-time">5 minutes ago</span>
+                                </div>
+                                <p class="comment-text">This looks amazing! Is it available in size M?</p>
+                                <div class="comment-actions">
+                                    <button class="comment-action-btn" onclick="likeComment(this)">Like</button>
+                                    <button class="comment-action-btn" onclick="replyComment(this)">Reply</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="comment">
+                        <div class="comment-author">
+                            <div class="comment-avatar">SM</div>
+                            <div class="comment-content">
+                                <div class="comment-header">
+                                    <span class="comment-name">Sarah's Boutique</span>
+                                    <span class="comment-time">3 minutes ago</span>
+                                </div>
+                                <p class="comment-text">Yes! We have sizes XS through XL available. What color are you interested in?</p>
+                                <div class="comment-actions">
+                                    <button class="comment-action-btn" onclick="likeComment(this)">Like</button>
+                                    <button class="comment-action-btn" onclick="replyComment(this)">Reply</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            post.appendChild(commentSection);
+            showPopupNotification('Comment section opened!', 'info', 2000);
+        }
+        
+        function postComment(button) {
+            const commentInput = button.parentElement.querySelector('.comment-input');
+            const commentText = commentInput.value.trim();
+            
+            if (!commentText) {
+                showPopupNotification('Please write a comment first', 'error', 2000);
+                return;
+            }
+            
+            const commentsList = button.closest('.comment-section').querySelector('.comments-list');
+            const newComment = document.createElement('div');
+            newComment.className = 'comment';
+            newComment.innerHTML = `
+                <div class="comment-author">
+                    <div class="comment-avatar">ME</div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <span class="comment-name">You</span>
+                            <span class="comment-time">Just now</span>
+                        </div>
+                        <p class="comment-text">${commentText}</p>
+                        <div class="comment-actions">
+                            <button class="comment-action-btn" onclick="likeComment(this)">Like</button>
+                            <button class="comment-action-btn" onclick="replyComment(this)">Reply</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            commentsList.appendChild(newComment);
+            commentInput.value = '';
+            showPopupNotification('Comment posted!', 'success', 2000);
+        }
+        
+        function likeComment(button) {
+            const liked = button.classList.contains('liked');
+            if (liked) {
+                button.classList.remove('liked');
+                button.textContent = 'Like';
+            } else {
+                button.classList.add('liked');
+                button.textContent = 'Liked';
+            }
+        }
+        
+        function replyComment(button) {
+            const comment = button.closest('.comment');
+            const commentName = comment.querySelector('.comment-name').textContent;
+            const commentInput = comment.closest('.comment-section').querySelector('.comment-input');
+            commentInput.value = `@${commentName} `;
+            commentInput.focus();
+        }
+
+        function sharePost() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'MarketPace Shops',
+                    text: 'Check out this shop on MarketPace!',
+                    url: window.location.href
+                });
+            } else {
+                const url = window.location.href;
+                navigator.clipboard.writeText(url).then(() => {
+                    showNotification('Shop link copied to clipboard!', 'success');
+                }).catch(() => {
+                    showNotification('Share feature - link: ' + url, 'info');
+                });
+            }
+        }
+
+        // Notification function for consistent UI feedback
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 24px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 500;
+                z-index: 10000;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            `;
+            
+            switch(type) {
+                case 'success':
+                    notification.style.background = 'rgba(34, 197, 94, 0.9)';
+                    break;
+                case 'error':
+                    notification.style.background = 'rgba(239, 68, 68, 0.9)';
+                    break;
+                case 'warning':
+                    notification.style.background = 'rgba(251, 191, 36, 0.9)';
+                    break;
+                default:
+                    notification.style.background = 'rgba(59, 130, 246, 0.9)';
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 3000);
+        }
+
+        // Profile functions
+        function goToProfile() {
+            window.location.href = '/profile';
+        }
+        
+        function showInteractiveMap() {
+            window.location.href = '/interactive-map';
+        }
+
+        // Facebook Marketplace-style posting modal
+        function openAdvancedPostModal(type = 'sale') {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+            `;
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: #1a0b3d;
+                border: 2px solid #00ffff;
+                border-radius: 15px;
+                padding: 30px;
+                width: 90%;
+                max-width: 600px;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+            `;
+            
+            modalContent.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="color: #00ffff; margin: 0;">Create ${type.charAt(0).toUpperCase() + type.slice(1)} Post</h2>
+                    <button onclick="this.closest('.posting-modal').remove()" style="background: none; border: none; color: #00ffff; font-size: 24px; cursor: pointer;">&times;</button>
+                </div>
+                
+                <form id="postForm" style="color: #e2e8f0;">
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Post Category:</label>
+                        <select id="postCategory" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                            <option value="general">General</option>
+                            <option value="sale">For Sale</option>
+                            <option value="rent">For Rent</option>
+                            <option value="service">Service</option>
+                            <option value="event">Event</option>
+                        </select>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Title:</label>
+                        <input type="text" id="postTitle" placeholder="What are you selling?" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;" required>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Description:</label>
+                        <textarea id="postDescription" placeholder="Describe your item..." style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0; min-height: 100px;" required></textarea>
+                    </div>
+                    
+                    <div id="priceField" style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Price:</label>
+                        <input type="text" id="postPrice" placeholder="$0.00" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Images:</label>
+                        <input type="file" id="postImages" multiple accept="image/*" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button type="button" onclick="this.closest('.posting-modal').remove()" style="padding: 10px 20px; background: #666; color: white; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
+                        <button type="submit" style="padding: 10px 20px; background: #00ffff; color: #1a0b3d; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Create Post</button>
+                    </div>
+                </form>
+            `;
+            
+            modal.className = 'posting-modal';
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Set initial category
+            document.getElementById('postCategory').value = type;
+            
+            // Add event listeners
+            document.getElementById('postForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    category: document.getElementById('postCategory').value,
+                    title: document.getElementById('postTitle').value,
+                    description: document.getElementById('postDescription').value,
+                    price: document.getElementById('postPrice').value,
+                    created: new Date().toISOString(),
+                    author: 'Shop Owner'
+                };
+                
+                // Save to localStorage
+                const existingPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+                existingPosts.unshift(formData);
+                localStorage.setItem('communityPosts', JSON.stringify(existingPosts));
+                
+                // Close modal
+                modal.remove();
+                
+                // Show success message
+                showNotification(`${formData.category.charAt(0).toUpperCase() + formData.category.slice(1)} post "${formData.title}" created successfully!`, 'success');
+                
+                // Refresh page to show new post
+                setTimeout(() => location.reload(), 1000);
+            });
+        }
+
+        // Update cart counter
+        function updateCartCounter() {
+            const cart = JSON.parse(localStorage.getItem('marketpace_cart') || '[]');
+            const badge = document.getElementById('cartBadge');
+            if (badge) {
+                badge.textContent = cart.length;
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Shops page loaded');
+            updateCartCounter();
+            
+            // Generate floating particles
+            const particlesContainer = document.querySelector('.particles');
+            if (particlesContainer) {
+                for (let i = 0; i < 50; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = Math.random() * 100 + '%';
+                    particle.style.animationDelay = Math.random() * 8 + 's';
+                    particle.style.animationDuration = (Math.random() * 3 + 5) + 's';
+                    particlesContainer.appendChild(particle);
+                }
+            }
+        });
+    </script>
+    
+    <!-- Load Tip Modal Component -->
+    <script>
+        // Tip Modal Component for Pro Members
+        class TipModal {
+            constructor() {
+                this.stripe = null;
+                this.elements = null;
+                this.paymentElement = null;
+                this.selectedAmount = 0;
+                this.businessData = {};
+                this.initStripe();
+            }
+
+            async initStripe() {
+                if (!window.Stripe) {
+                    console.error('Stripe.js not loaded');
+                    return;
+                }
+                this.stripe = Stripe(window.STRIPE_PUBLISHABLE_KEY);
+            }
+
+            show(businessData) {
+                this.businessData = businessData;
+                this.createModal();
+                this.bindEvents();
+            }
+
+            createModal() {
+                const modalHTML = `
+                    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 10000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);" id="tipModalOverlay">
+                        <div style="background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 50%, #4c2885 100%); border: 2px solid rgba(255, 215, 0, 0.5); border-radius: 20px; padding: 30px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);">
+                            <button style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: #FFD700; font-size: 1.5rem; cursor: pointer; padding: 5px; border-radius: 50%; transition: all 0.3s ease;" id="closeTipModal">&times;</button>
+                            
+                            <h2 style="color: #FFD700; text-align: center; margin-bottom: 20px; font-size: 1.8rem; background: linear-gradient(135deg, #FFD700, #FFA500); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Send a Tip</h2>
+                            
+                            <div style="text-align: center; margin-bottom: 25px; padding: 15px; background: rgba(255, 255, 255, 0.1); border-radius: 12px; backdrop-filter: blur(10px);">
+                                <div style="color: #FFD700; font-size: 1.2rem; font-weight: bold; margin-bottom: 5px;">${this.businessData.name || 'Business'}</div>
+                                <div style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem;">${this.businessData.type || 'Pro Member'}</div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;" id="tipAmounts">
+                                <button style="background: rgba(255, 215, 0, 0.1); border: 2px solid rgba(255, 215, 0, 0.5); border-radius: 12px; color: #FFD700; padding: 15px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: all 0.3s ease; text-align: center;" class="tip-amount-btn" data-amount="5">$5</button>
+                                <button style="background: rgba(255, 215, 0, 0.1); border: 2px solid rgba(255, 215, 0, 0.5); border-radius: 12px; color: #FFD700; padding: 15px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: all 0.3s ease; text-align: center;" class="tip-amount-btn" data-amount="10">$10</button>
+                                <button style="background: rgba(255, 215, 0, 0.1); border: 2px solid rgba(255, 215, 0, 0.5); border-radius: 12px; color: #FFD700; padding: 15px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: all 0.3s ease; text-align: center;" class="tip-amount-btn" data-amount="20">$20</button>
+                                <button style="background: rgba(255, 215, 0, 0.1); border: 2px solid rgba(255, 215, 0, 0.5); border-radius: 12px; color: #FFD700; padding: 15px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: all 0.3s ease; text-align: center;" class="tip-amount-btn" data-amount="50">$50</button>
+                            </div>
+
+                            <div style="margin-bottom: 20px;">
+                                <input type="number" id="customAmount" placeholder="Custom amount ($)" min="1" max="500" style="width: 100%; padding: 15px; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 215, 0, 0.5); border-radius: 12px; color: white; font-size: 1.1rem; text-align: center;">
+                            </div>
+
+                            <div style="margin-bottom: 20px;">
+                                <textarea id="tipMessage" placeholder="Add a message (optional)" style="width: 100%; padding: 15px; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 215, 0, 0.5); border-radius: 12px; color: white; font-size: 1rem; resize: vertical; min-height: 80px;"></textarea>
+                            </div>
+
+                            <div style="text-align: center; margin-bottom: 20px; padding: 15px; background: rgba(255, 215, 0, 0.1); border-radius: 12px; border: 2px solid rgba(255, 215, 0, 0.3);">
+                                <div style="color: #FFD700; font-size: 2rem; font-weight: bold; margin-bottom: 5px;" id="tipTotalAmount">$0</div>
+                                <div style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem;">Total tip amount</div>
+                            </div>
+
+                            <div id="payment-element" style="margin-bottom: 20px;"></div>
+                            
+                            <div style="display: none; text-align: center; color: #FFD700; margin: 20px 0;" id="loadingSpinner">
+                                <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid rgba(255, 215, 0, 0.3); border-radius: 50%; border-top-color: #FFD700; animation: spin 1s ease-in-out infinite; margin-right: 10px;"></div>
+                                Processing payment...
+                            </div>
+
+                            <div style="display: none; text-align: center; color: #00ff88; background: rgba(0, 255, 136, 0.1); border: 2px solid rgba(0, 255, 136, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 20px;" id="successMessage">
+                                <h3>Thank you for your tip!</h3>
+                                <p>Your tip has been sent successfully.</p>
+                            </div>
+
+                            <button style="width: 100%; padding: 18px; background: linear-gradient(135deg, #FFD700, #FFA500); border: none; border-radius: 12px; color: #1a0b3d; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: all 0.3s ease; margin-bottom: 15px;" id="payTipBtn" disabled>Select an amount to continue</button>
+                        </div>
+                    </div>
+                `;
+
+                // Remove existing modal if any
+                const existingModal = document.getElementById('tipModalOverlay');
+                if (existingModal) {
+                    existingModal.remove();
+                }
+
+                // Add modal to body
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+            }
+
+            bindEvents() {
+                // Close modal
+                document.getElementById('closeTipModal').addEventListener('click', () => {
+                    this.close();
+                });
+
+                document.getElementById('tipModalOverlay').addEventListener('click', (e) => {
+                    if (e.target.id === 'tipModalOverlay') {
+                        this.close();
+                    }
+                });
+
+                // Tip amount selection
+                document.querySelectorAll('.tip-amount-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const amount = parseInt(e.target.dataset.amount);
+                        this.selectAmount(amount);
+                    });
+                });
+
+                // Custom amount input
+                document.getElementById('customAmount').addEventListener('input', (e) => {
+                    const amount = parseFloat(e.target.value) || 0;
+                    this.selectAmount(amount);
+                });
+
+                // Pay button
+                document.getElementById('payTipBtn').addEventListener('click', () => {
+                    this.processPayment();
+                });
+            }
+
+            selectAmount(amount) {
+                this.selectedAmount = amount;
+                
+                // Update UI
+                document.querySelectorAll('.tip-amount-btn').forEach(btn => {
+                    btn.style.background = 'rgba(255, 215, 0, 0.1)';
+                    btn.style.borderColor = 'rgba(255, 215, 0, 0.5)';
+                    btn.style.color = '#FFD700';
+                });
+
+                if (amount === 5 || amount === 10 || amount === 20 || amount === 50) {
+                    const selectedBtn = document.querySelector(`[data-amount="${amount}"]`);
+                    if (selectedBtn) {
+                        selectedBtn.style.background = 'rgba(255, 215, 0, 0.3)';
+                        selectedBtn.style.borderColor = '#FFD700';
+                        selectedBtn.style.color = '#1a0b3d';
+                    }
+                    document.getElementById('customAmount').value = '';
+                } else {
+                    document.getElementById('customAmount').value = amount;
+                }
+
+                document.getElementById('tipTotalAmount').textContent = `$${amount}`;
+                
+                const payBtn = document.getElementById('payTipBtn');
+                if (amount > 0) {
+                    payBtn.disabled = false;
+                    payBtn.textContent = `Send Tip - $${amount}`;
+                    this.createPaymentIntent();
+                } else {
+                    payBtn.disabled = true;
+                    payBtn.textContent = 'Select an amount to continue';
+                }
+            }
+
+            async createPaymentIntent() {
+                try {
+                    const response = await fetch('/api/tips/create-payment-intent', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            amount: this.selectedAmount,
+                            businessId: this.businessData.id,
+                            toUserId: this.businessData.ownerId,
+                            message: document.getElementById('tipMessage').value
+                        })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.clientSecret) {
+                        this.setupPaymentElement(data.clientSecret);
+                    } else {
+                        throw new Error(data.error || 'Failed to create payment intent');
+                    }
+
+                } catch (error) {
+                    console.error('Error creating payment intent:', error);
+                    alert('Error setting up payment. Please try again.');
+                }
+            }
+
+            setupPaymentElement(clientSecret) {
+                if (!this.stripe) {
+                    console.error('Stripe not initialized');
+                    return;
+                }
+
+                const options = {
+                    clientSecret: clientSecret,
+                    appearance: {
+                        theme: 'night',
+                        variables: {
+                            colorPrimary: '#FFD700',
+                            colorBackground: 'rgba(255, 255, 255, 0.1)',
+                            colorText: '#ffffff',
+                            colorDanger: '#ff6b6b',
+                            borderRadius: '12px'
+                        }
+                    }
+                };
+
+                this.elements = this.stripe.elements(options);
+                this.paymentElement = this.elements.create('payment');
+                this.paymentElement.mount('#payment-element');
+            }
+
+            async processPayment() {
+                if (!this.stripe || !this.elements) {
+                    alert('Payment system not ready. Please try again.');
+                    return;
+                }
+
+                const loadingSpinner = document.getElementById('loadingSpinner');
+                const payBtn = document.getElementById('payTipBtn');
+                
+                loadingSpinner.style.display = 'block';
+                payBtn.disabled = true;
+
+                try {
+                    const { error } = await this.stripe.confirmPayment({
+                        elements: this.elements,
+                        confirmParams: {
+                            return_url: window.location.href,
+                        },
+                    });
+
+                    if (error) {
+                        throw error;
+                    } else {
+                        // Payment succeeded
+                        this.showSuccess();
+                    }
+
+                } catch (error) {
+                    console.error('Payment error:', error);
+                    alert(`Payment failed: ${error.message}`);
+                    loadingSpinner.style.display = 'none';
+                    payBtn.disabled = false;
+                }
+            }
+
+            showSuccess() {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+                document.getElementById('payTipBtn').style.display = 'none';
+                
+                setTimeout(() => {
+                    this.close();
+                }, 3000);
+            }
+
+            close() {
+                const modal = document.getElementById('tipModalOverlay');
+                if (modal) {
+                    modal.remove();
+                }
+            }
+        }
+
+        // Global tip modal instance
+        window.tipModal = new TipModal();
+
+        // Global function to show tip modal
+        window.showTipModal = function(businessData) {
+            window.tipModal.show(businessData);
+        };
+
+        // Logo dropdown toggle function
+        function toggleLogoDropdown() {
+            const dropdown = document.querySelector('.dropdown-menu');
+            if (dropdown) {
+                const isVisible = dropdown.style.display === 'block';
+                dropdown.style.display = isVisible ? 'none' : 'block';
+            }
+        }
+
+        // Additional button functionality
+        function showEvents() {
+            window.location.href = '/enhanced-community-feed.html';
+        }
+
+        function showServices() {
+            window.location.href = '/services.html';
+        }
+
+        function showRentals() {
+            window.location.href = '/rentals.html';
+        }
+
+        function showShops() {
+            window.location.href = '/shops.html';
+        }
+
+        function goToLogin() {
+            window.location.href = '/login.html';
+        }
+
+        // Logo navigation function - navigates to user profile
+        function goToProfile() {
+            console.log('Logo clicked - navigating to profile...');
+            window.location.href = '/profile';
+        }
+
+        // Calendar navigation function  
+        function openLocalEventCalendar() {
+            console.log('Opening local event calendar...');
+            window.location.href = '/local-event-calendar';
+        }
+
+        function goToAdminDashboard() {
+            window.location.href = '/admin-dashboard.html';
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUserData');
+            localStorage.removeItem('currentUserEmail');
+            window.location.href = '/pitch-page.html';
+        }
+
+        // Fix syntax errors in existing functions
+        if (typeof createParticles === 'undefined') {
+            function createParticles() {
+                const particlesContainer = document.querySelector('.particles');
+                if (!particlesContainer) return;
+                
+                const particleCount = 40;
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = Math.random() * 100 + '%';
+                    particle.style.animationDelay = Math.random() * 8 + 's';
+                    particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                    particlesContainer.appendChild(particle);
+                }
+            }
+        }
+
+        if (typeof updateCartBadge === 'undefined') {
+            function updateCartBadge() {
+                const badge = document.querySelector('.cart-badge');
+                if (badge) {
+                    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                    badge.textContent = cart.length;
+                    badge.style.display = cart.length > 0 ? 'block' : 'none';
+                }
+            }
+        }
+
+        if (typeof checkLoginStatus === 'undefined') {
+            function checkLoginStatus() {
+                const userData = localStorage.getItem('currentUserData');
+                const loginBtn = document.querySelector('.login-btn');
+                if (userData && loginBtn) {
+                    const user = JSON.parse(userData);
+                    loginBtn.textContent = user.name || 'Profile';
+                    loginBtn.onclick = goToProfile;
+                }
+            }
+        }
+
+
+
+        // Make sure functions are called when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                createParticles();
+                updateCartBadge();
+                checkLoginStatus();
+                initializeAccountMode();
+                
+                console.log('Shops page loaded');
+            } catch (error) {
+                console.error('Error initializing page:', error);
+            }
+        });
+
+        // Initialize scroll listener after page fully loads
+        window.addEventListener('load', function() {
+            console.log('Window loaded, setting up scroll listener for navigation...');
+            const navElement = document.getElementById('bottomNav');
+            if (navElement) {
+                console.log('Bottom navigation element found, attaching scroll listener');
+                window.addEventListener('scroll', requestTick);
+                
+                // Test the scroll functionality
+                setTimeout(() => {
+                    console.log('Testing scroll functionality...');
+                    navElement.classList.add('hidden');
+                    setTimeout(() => {
+                        navElement.classList.remove('hidden');
+                        console.log('Scroll test complete - navigation should be visible');
+                    }, 1000);
+                }, 2000);
+            } else {
+                console.error('Bottom navigation element not found!');
+            }
+        });
+        // Remove duplicate goToPage function - already defined above
+
+        // Account switching functionality
+        let currentAccountMode = localStorage.getItem('currentAccountMode') || 'personal';
+        
+        function toggleAccountMode() {
+            const modeIndicator = document.getElementById('mode-indicator');
+            const switcher = document.getElementById('accountSwitcher');
+            
+            if (currentAccountMode === 'personal') {
+                currentAccountMode = 'professional';
+                modeIndicator.textContent = 'B';
+                modeIndicator.style.color = '#ffd700';
+                switcher.style.borderColor = 'rgba(255, 215, 0, 0.5)';
+                showNotification('Switched to Professional Mode - Pro features enabled!', 'success');
+                
+                // Add business mode styling
+                document.body.classList.add('business-mode');
+                
+            } else {
+                currentAccountMode = 'personal';
+                modeIndicator.textContent = 'P';
+                modeIndicator.style.color = '#00ffff';
+                switcher.style.borderColor = 'rgba(0, 255, 255, 0.3)';
+                showNotification('Switched to Personal Mode', 'info');
+                
+                // Remove business mode styling
+                document.body.classList.remove('business-mode');
+            }
+            
+            localStorage.setItem('currentAccountMode', currentAccountMode);
+        }
+        
+        // Initialize account mode on page load
+        function initializeAccountMode() {
+            const modeIndicator = document.getElementById('mode-indicator');
+            const switcher = document.getElementById('accountSwitcher');
+            
+            if (currentAccountMode === 'professional') {
+                modeIndicator.textContent = 'B';
+                modeIndicator.style.color = '#ffd700';
+                switcher.style.borderColor = 'rgba(255, 215, 0, 0.5)';
+                document.body.classList.add('business-mode');
+            } else {
+                modeIndicator.textContent = 'P';
+                modeIndicator.style.color = '#00ffff';
+                switcher.style.borderColor = 'rgba(0, 255, 255, 0.3)';
+                document.body.classList.remove('business-mode');
+            }
+        }
+
+        // Category search functionality
+        let categorySearchOpen = false;
+        
+        function toggleCategorySearch() {
+            const existingPanel = document.getElementById('categorySearchPanel');
+            
+            if (existingPanel) {
+                existingPanel.remove();
+                categorySearchOpen = false;
+                return;
+            }
+            
+            const categories = [
+                { name: 'General', description: 'All shop items and products' },
+                { name: 'Electronics', description: 'Phones, computers, gadgets, tech' },
+                { name: 'Fashion & Beauty', description: 'Clothing, accessories, cosmetics, jewelry' },
+                { name: 'Home & Garden', description: 'Furniture, decor, appliances, tools' },
+                { name: 'Vehicles', description: 'Cars, bikes, boats, auto parts' },
+                { name: 'Sports & Recreation', description: 'Sports gear, outdoor, fitness equipment' },
+                { name: 'Books & Media', description: 'Books, movies, music, games' },
+                { name: 'Baby & Kids', description: 'Children items, toys, clothes, gear' },
+                { name: 'Art & Collectibles', description: 'Artwork, antiques, rare collectibles' },
+                { name: 'Health & Wellness', description: 'Supplements, skincare, medical supplies' },
+                { name: 'Musical Instruments', description: 'Guitars, keyboards, drums, audio' },
+                { name: 'Pet Supplies', description: 'Pet food, toys, accessories, care' },
+                { name: 'Tools & Hardware', description: 'Power tools, hand tools, construction' },
+                { name: 'Office Supplies', description: 'Office furniture, supplies, equipment' },
+                { name: 'Jewelry & Watches', description: 'Fine jewelry, vintage watches' },
+                { name: 'Crafts & DIY', description: 'Crafting supplies, hobby materials' },
+                { name: 'Furniture', description: 'Living room, bedroom, dining furniture' },
+                { name: 'Kitchen & Dining', description: 'Cookware, appliances, dining sets' },
+                { name: 'Travel Gear', description: 'Luggage, travel accessories, camping' },
+                { name: 'Photography', description: 'Cameras, lenses, photo equipment' },
+                { name: 'Outdoor Living', description: 'Patio furniture, grills, garden tools' },
+                { name: 'Gaming', description: 'Video games, consoles, PC gaming gear' },
+                { name: 'Exercise Equipment', description: 'Gym equipment, weights, fitness gear' },
+                { name: 'Seasonal & Holiday', description: 'Holiday decorations, seasonal items' },
+                { name: 'Vintage & Retro', description: 'Vintage items, retro collectibles' },
+                { name: 'Local Artisan', description: 'Handmade, local crafted items' },
+                { name: 'Clearance Sale', description: 'Discounted items, clearance deals' },
+                { name: 'New Arrivals', description: 'Recently added shop inventory' }
+            ];
+            
+            const panel = document.createElement('div');
+            panel.id = 'categorySearchPanel';
+            panel.style.cssText = `
+                position: fixed;
+                top: 60px;
+                right: 20px;
+                background: rgba(0, 20, 40, 0.95);
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(0, 255, 255, 0.3);
+                border-radius: 15px;
+                padding: 20px;
+                width: 320px;
+                max-height: 400px;
+                overflow-y: auto;
+                z-index: 1000;
+                box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+            `;
+            
+            panel.innerHTML = `
+                <h3 style="color: #00ffff; margin: 0 0 15px 0; font-size: 18px; text-align: center;">Shop Categories</h3>
+                <div style="display: grid; gap: 10px;">
+                    ${categories.map(cat => `
+                        <div class="category-item" onclick="selectCategory('${cat.name}')" style="
+                            background: rgba(0, 255, 255, 0.1);
+                            border: 1px solid rgba(0, 255, 255, 0.2);
+                            border-radius: 8px;
+                            padding: 12px;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                        ">
+                            <div style="color: #00ffff; font-weight: bold; margin-bottom: 2px;">${cat.name}</div>
+                            <div style="color: rgba(0, 255, 255, 0.7); font-size: 12px;">${cat.description}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            document.body.appendChild(panel);
+            categorySearchOpen = true;
+            
+            // Add hover effects and close functionality
+            panel.querySelectorAll('.category-item').forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.background = 'rgba(0, 255, 255, 0.2)';
+                    this.style.borderColor = '#00ffff';
+                    this.style.transform = 'translateY(-2px)';
+                });
+                item.addEventListener('mouseleave', function() {
+                    this.style.background = 'rgba(0, 255, 255, 0.1)';
+                    this.style.borderColor = 'rgba(0, 255, 255, 0.2)';
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+            
+            setTimeout(() => {
+                document.addEventListener('click', function closePanel(e) {
+                    if (!panel.contains(e.target) && !e.target.closest('.category-search-btn')) {
+                        panel.remove();
+                        categorySearchOpen = false;
+                        document.removeEventListener('click', closePanel);
+                    }
+                });
+            }, 100);
+        }
+        
+        function selectCategory(category) {
+            showNotification(`Filtering shops by ${category}`, 'info');
+            
+            const posts = document.querySelectorAll('.feed-post');
+            posts.forEach(post => {
+                const postCategory = post.dataset.category || 'General';
+                if (category === 'General' || postCategory === category) {
+                    post.style.display = 'block';
+                } else {
+                    post.style.display = 'none';
+                }
+            });
+            
+            const panel = document.getElementById('categorySearchPanel');
+            if (panel) {
+                panel.remove();
+                categorySearchOpen = false;
+            }
+            
+            showNotification(`Showing ${category} shops`, 'success');
+        }
+
+        function openQuickMessage() {
+            window.location.href = '/messages';
+        }
+
+        // Facebook-style scroll effect for bottom navigation
+        let lastScrollTop = 0;
+        let ticking = false;
+
+        function updateNavigation() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const bottomNav = document.getElementById('bottomNav');
+            
+            if (!bottomNav) {
+                console.error('Bottom navigation element not found in updateNavigation');
+                return;
+            }
+            
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                // Scrolling down - hide navigation
+                console.log('Hiding navigation (scroll down)');
+                bottomNav.classList.add('hidden');
+            } else {
+                // Scrolling up - show navigation
+                console.log('Showing navigation (scroll up)');
+                bottomNav.classList.remove('hidden');
+            }
+            
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // For Mobile or negative scrolling
+            ticking = false;
+        }
+
+        function requestTick() {
+            if (!ticking) {
+                requestAnimationFrame(updateNavigation);
+                ticking = true;
+            }
+        }
+
+    </script>
+</body>
+</html>
