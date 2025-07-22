@@ -272,6 +272,12 @@ All features are designed to strengthen local communities by keeping commerce lo
 
 ## Recent Changes
 
+✓ **CALENDAR PAGE PARTICLE EFFECTS SIMPLIFIED AND BACKGROUND OPACITY IMPROVED** (January 22, 2025)
+✓ **REDUCED PARTICLE COUNT**: Decreased floating particles from 50 to 15 for cleaner, less overwhelming visual experience
+✓ **ENHANCED BACKGROUND OPACITY**: Made filter controls, calendar grid, and navigation backgrounds more opaque (0.85 alpha) to hide particles behind interface elements
+✓ **IMPROVED READABILITY**: Calendar and feature elements now have solid backgrounds that prevent particle interference with text and functionality
+✓ **MAINTAINED VISUAL THEME**: Preserved futuristic design while creating cleaner, more professional interface
+
 ✓ **BROWSE CATEGORIES SECTION REMOVED FROM MARKETPACE MENU** (January 22, 2025)
 ✓ **COMPLETE SECTION REMOVAL**: Successfully removed entire "Browse Categories" section from marketpace-menu.html as requested by user (lines 779-875)
 ✓ **MENU SIMPLIFICATION**: Streamlined menu interface by removing category browsing functionality that was causing interface clutter
