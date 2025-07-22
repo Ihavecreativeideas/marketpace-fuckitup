@@ -20,7 +20,7 @@
             background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 30%, #4c2885 60%, #6b46c1 100%);
             color: #e2e8f0;
             min-height: 100vh;
-            padding-top: 180px;
+            padding-top: 50px;
             padding-bottom: 80px;
             position: relative;
             overflow-x: hidden;
@@ -71,13 +71,120 @@
             100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
         }
 
+        /* Facebook-Style Floating Header */
+        .floating-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(25px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            z-index: 1001;
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 15px rgba(0, 255, 255, 0.1);
+        }
+
+        .floating-header.hidden {
+            transform: translateY(-100%);
+        }
+
+        .floating-header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 8px 16px;
+            gap: 20px;
+        }
+
+        .floating-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .tiny-nav-btn {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 6px;
+            padding: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tiny-nav-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .floating-center {
+            display: flex;
+            justify-content: center;
+            max-width: 300px;
+        }
+
+        .floating-search {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .floating-search:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(0, 255, 255, 0.5);
+        }
+
+        .floating-search span {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+
+        .floating-action-btn {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            min-width: 36px;
+            height: 36px;
+        }
+
+        .floating-action-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* Main Header Buttons - Positioned Right Below Floating Header */
+        .main-header-buttons {
+            margin-top: 50px;
+            position: relative;
+            z-index: 1000;
+        }
+
         /* Header */
         .header {
             background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(0, 255, 255, 0.2);
             padding: 12px 8px;
-            position: absolute;
+            position: relative;
             top: 0;
             left: 0;
             right: 0;
@@ -1376,7 +1483,53 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
+    <!-- Facebook-Style Floating Header -->
+    <div id="floating-header" class="floating-header">
+        <div class="floating-header-content">
+            <!-- Left Side: Logo + Switcher + Add Post -->
+            <div class="floating-left">
+                <button class="tiny-nav-btn" onclick="navigateTo('profile')" title="Profile">
+                    <span style="
+                        font-size: 12px; 
+                        font-weight: 900; 
+                        background: linear-gradient(135deg, #4a0080 0%, #1a0b3d 50%, #4a0080 100%);
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                        background-clip: text;
+                        filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.6));
+                    ">MP</span>
+                </button>
+                <button class="floating-action-btn account-switcher" onclick="toggleAccountMode()" title="Switch Mode" id="floatingAccountSwitcher">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <path d="M15 18l-6-6 6-6" stroke="#00ffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9 18l6-6-6-6" stroke="#00ffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span id="floating-mode-indicator" style="font-size: 8px; margin-left: 2px; color: #00ffff;">P</span>
+                </button>
+                <button class="floating-action-btn" onclick="showPostingModal()" title="Create Post">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <line x1="12" y1="5" x2="12" y2="19" stroke="#00ffff" stroke-width="2"/>
+                        <line x1="5" y1="12" x2="19" y2="12" stroke="#00ffff" stroke-width="2"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Center: Search Bar -->
+            <div class="floating-center">
+                <div class="floating-search" onclick="toggleCategorySearch()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <circle cx="11" cy="11" r="8" stroke="#00ffff" stroke-width="2"/>
+                        <path d="m21 21-4.35-4.35" stroke="#00ffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>Search MarketPace</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header Buttons (Moved Down) -->
+    <div class="main-header-buttons" style="margin-top: 0px; padding-top: 0px; position: relative; z-index: 999;">
+        <!-- Header -->
     <div class="header">
         <div class="header-content">
             <div class="header-center">
@@ -5793,6 +5946,39 @@
 
         function openQuickMessage() {
             window.location.href = '/messages';
+        }
+
+        function navigateTo(page) {
+            if (page === 'profile') {
+                window.location.href = '/unified-pro-page';
+            } else if (page === 'calendar') {
+                window.location.href = '/local-event-calendar';
+            }
+        }
+
+        function toggleAccountMode() {
+            const currentMode = localStorage.getItem('accountMode') || 'personal';
+            const newMode = currentMode === 'personal' ? 'business' : 'personal';
+            localStorage.setItem('accountMode', newMode);
+            
+            // Update indicators
+            const indicators = document.querySelectorAll('#floating-mode-indicator, #mode-indicator');
+            indicators.forEach(indicator => {
+                indicator.textContent = newMode === 'personal' ? 'P' : 'B';
+                indicator.style.color = newMode === 'personal' ? '#8b5cf6' : '#f59e0b';
+            });
+            
+            showNotification(`Switched to ${newMode} mode`, 'success');
+        }
+
+        function toggleCategorySearch() {
+            console.log('Opening category search...');
+            // Category search functionality can be added here
+        }
+
+        function showPostingModal() {
+            console.log('Opening posting modal...');
+            openAdvancedPostModal();
         }
     </script>
 </body>
