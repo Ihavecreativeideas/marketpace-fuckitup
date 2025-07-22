@@ -1296,7 +1296,7 @@
             font-weight: bold;
         }
 
-        /* Bottom Navigation */
+        /* Facebook-style Bottom Navigation with Scroll Behavior */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -1308,11 +1308,16 @@
             padding: 8px 0;
             z-index: 1000;
             transform: translateY(0);
-            transition: transform 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
         }
 
         .bottom-nav.hidden {
             transform: translateY(100%);
+        }
+
+        .bottom-nav.show {
+            transform: translateY(0);
         }
 
         .nav-container {
@@ -3182,23 +3187,37 @@
             }
         }
 
-        // Bottom Navigation Scroll Behavior - Copied from Community Page
+        // Facebook-style Navigation Scroll Behavior
         let lastScrollTop = 0;
         let ticking = false;
+        let scrollTimeout;
 
         function updateNavigation() {
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
             const bottomNav = document.getElementById('bottomNav');
             
+            if (!bottomNav) return;
+
+            // Clear any existing timeout
+            clearTimeout(scrollTimeout);
+            
             if (scrollTop > lastScrollTop && scrollTop > 100) {
-                // Scrolling down
+                // Scrolling down - hide navigation
                 bottomNav.classList.add('hidden');
-            } else {
-                // Scrolling up
+                bottomNav.classList.remove('show');
+            } else if (scrollTop < lastScrollTop) {
+                // Scrolling up - show navigation
                 bottomNav.classList.remove('hidden');
+                bottomNav.classList.add('show');
             }
             
-            lastScrollTop = scrollTop;
+            // Always show navigation when at top
+            if (scrollTop <= 50) {
+                bottomNav.classList.remove('hidden');
+                bottomNav.classList.add('show');
+            }
+            
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
             ticking = false;
         }
 
@@ -3208,6 +3227,16 @@
                 ticking = true;
             }
         }
+
+        // Initialize navigation and scroll listener
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Shops page loaded');
+            const bottomNav = document.getElementById('bottomNav');
+            if (bottomNav) {
+                bottomNav.classList.add('show');
+                console.log('Navigation initialized');
+            }
+        });
 
         // Add scroll listener
         window.addEventListener('scroll', requestTick);
