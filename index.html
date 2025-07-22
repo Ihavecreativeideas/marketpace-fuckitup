@@ -4,13 +4,126 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MarketPace - Local Community Marketplace</title>
-    <meta http-equiv="refresh" content="0; url=/pitch-page.html">
+    <meta http-equiv="refresh" content="2; url=/pitch-page.html">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0d0221, #1a0633, #2d1b4e, #1e0b3d);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(0, 255, 255, 0.3);
+            border-top: 3px solid #00FFFF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-text {
+            font-size: 24px;
+            color: #00FFFF;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+        .nav-links {
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+        .nav-links a {
+            color: #00FFFF;
+            text-decoration: none;
+            padding: 12px 24px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            font-weight: 600;
+            min-width: 200px;
+        }
+        .nav-links a:hover {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: rgba(0, 255, 255, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
+        }
+        .debug-info {
+            margin-top: 40px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            max-width: 600px;
+        }
+    </style>
     <script>
-        window.location.replace('/pitch-page.html');
+        let redirectCount = 0;
+        const maxRedirects = 3;
+        
+        function performRedirect() {
+            redirectCount++;
+            console.log('Attempting redirect #' + redirectCount + ' to pitch-page.html');
+            
+            if (redirectCount <= maxRedirects) {
+                try {
+                    window.location.href = '/pitch-page.html';
+                } catch (e) {
+                    console.error('Redirect failed:', e);
+                    showManualNavigation();
+                }
+            } else {
+                console.log('Max redirects reached, showing manual navigation');
+                showManualNavigation();
+            }
+        }
+        
+        function showManualNavigation() {
+            document.querySelector('.loading-text').textContent = 'Please choose where to go:';
+            document.querySelector('.loader').style.display = 'none';
+            document.querySelector('.nav-links').style.display = 'flex';
+        }
+        
+        // Try immediate redirect
+        window.addEventListener('load', function() {
+            setTimeout(performRedirect, 500);
+        });
+        
+        // Fallback redirect after 3 seconds
+        setTimeout(function() {
+            if (!document.hidden && window.location.pathname === '/') {
+                performRedirect();
+            }
+        }, 3000);
     </script>
 </head>
 <body>
-    <p>Loading MarketPace...</p>
-    <p><a href="/pitch-page.html">Click here if you are not redirected automatically</a></p>
+    <div class="loader"></div>
+    <div class="loading-text">Loading MarketPace...</div>
+    
+    <div class="nav-links" style="display: none;">
+        <a href="/pitch-page.html">🏠 Main Pitch Page</a>
+        <a href="/community.html">👥 Community Page</a>
+        <a href="/signup-login.html">🔐 Sign Up / Login</a>
+        <a href="/admin-login.html">👨‍💼 Admin Login</a>
+    </div>
+    
+    <div class="debug-info">
+        <p>If the page doesn't redirect automatically, please click one of the links above.</p>
+        <p>This may happen due to browser caching or security settings.</p>
+    </div>
 </body>
 </html>
