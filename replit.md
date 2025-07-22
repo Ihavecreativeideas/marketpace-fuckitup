@@ -272,6 +272,11 @@ All features are designed to strengthen local communities by keeping commerce lo
 
 ## Recent Changes
 
+✓ **POSTING CENTRALIZED TO COMMUNITY PAGE ONLY** (January 22, 2025)
+✓ **REMOVED POSTING COMPOSERS FROM SHOPS, SERVICES, AND RENTALS PAGES**: Eliminated all posting buttons and composer sections from marketplace filter pages while keeping navigation bar and all other features intact
+✓ **SIMPLIFIED MARKETPLACE EXPERIENCE**: Shops, services, and rentals pages now focus solely on shopping and browsing, with all posting functionality centralized to the community page
+✓ **ENHANCED MOBILE MODAL OPTIMIZATION**: Fixed mobile posting modal issues with subtle animations, proper positioning, and responsive breakpoints to prevent zoom and content displacement
+
 ✓ **CALENDAR PAGE PARTICLE EFFECTS SIMPLIFIED AND BACKGROUND OPACITY IMPROVED** (January 22, 2025)
 ✓ **REDUCED PARTICLE COUNT**: Decreased floating particles from 50 to 15 for cleaner, less overwhelming visual experience
 ✓ **ENHANCED BACKGROUND OPACITY**: Made filter controls, calendar grid, navigation, event details, and event cards more opaque (0.8-0.85 alpha) to hide particles behind interface elements
