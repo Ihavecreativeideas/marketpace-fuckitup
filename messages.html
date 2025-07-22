@@ -880,6 +880,12 @@
         function initializeMessaging() {
             console.log('Messages page loaded');
             
+            // Check for URL parameters to create new conversation
+            const urlParams = new URLSearchParams(window.location.search);
+            const seller = urlParams.get('seller');
+            const item = urlParams.get('item');
+            const itemId = urlParams.get('id');
+            
             // Debug localStorage
             const stored = localStorage.getItem('marketpace_conversations');
             if (stored) {
@@ -896,12 +902,23 @@
             }
             
             loadStoredConversations();
+            
+            // Handle URL parameters for new conversation
+            if (seller && item) {
+                console.log(`Creating new conversation with ${seller} about ${item}`);
+                createNewConversationFromPost(seller, item, itemId);
+                
+                // Clear URL parameters to prevent duplicate conversations on refresh
+                const newUrl = window.location.origin + window.location.pathname;
+                window.history.replaceState({}, '', newUrl);
+            }
+            
             updateActiveMembers();
             updateConversationsList();
             updateOnlineCount();
             
-            // Auto-create some conversations for demo if none exist
-            if (conversations.size === 0) {
+            // Auto-create some conversations for demo if none exist and no URL params
+            if (conversations.size === 0 && !seller) {
                 console.log('No conversations loaded, creating demo conversations');
                 setTimeout(() => {
                     startNewConversation(1); // Sarah's Boutique
@@ -917,6 +934,60 @@
             
             // Setup search
             document.getElementById('searchInput').addEventListener('input', handleSearch);
+        }
+
+        // Function to create new conversation from post message button
+        function createNewConversationFromPost(sellerName, itemName, itemId) {
+            const conversationId = Date.now();
+            const initialMessage = `Hi! I'm interested in ${itemName}`;
+            
+            const member = {
+                id: conversationId,
+                name: sellerName,
+                avatar: sellerName.charAt(0).toUpperCase(),
+                online: Math.random() > 0.5,
+                lastSeen: 'recently'
+            };
+            
+            const conversation = {
+                id: conversationId,
+                member: member,
+                messages: [{
+                    id: Date.now(),
+                    text: initialMessage,
+                    sent: true,
+                    timestamp: new Date()
+                }],
+                lastMessage: initialMessage,
+                lastTime: new Date(),
+                unread: 0,
+                itemContext: {
+                    name: itemName,
+                    id: itemId,
+                    seller: sellerName
+                }
+            };
+            
+            conversations.set(conversationId, conversation);
+            saveConversations();
+            
+            // Show the new conversation
+            currentConversation = conversation;
+            updateConversationsList();
+            updateChatArea();
+            
+            // Simulate seller response after 3 seconds
+            setTimeout(() => {
+                const responses = [
+                    `Hi! Yes, ${itemName} is available. What would you like to know?`,
+                    `Hello! I can help you with ${itemName}. When do you need it?`,
+                    `Thanks for your interest in ${itemName}! I'd be happy to discuss details.`,
+                    `Hi there! ${itemName} is ready. Let me know your schedule!`
+                ];
+                
+                const response = responses[Math.floor(Math.random() * responses.length)];
+                addMessageToConversation(conversationId, response, false);
+            }, 3000);
         }
 
         // Request notification permission
