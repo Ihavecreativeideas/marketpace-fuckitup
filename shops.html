@@ -2754,6 +2754,43 @@
             }
         }
 
+        // Facebook-style bottom navigation scroll effect
+        let lastScrollTop = 0;
+        let isScrolling = false;
+        
+        function handleNavScroll() {
+            const bottomNav = document.getElementById('bottomNav');
+            if (!bottomNav) return;
+            
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollDifference = Math.abs(scrollTop - lastScrollTop);
+            
+            // Only trigger if scrolled more than 5 pixels to prevent jitter
+            if (scrollDifference > 5) {
+                if (scrollTop > lastScrollTop && scrollTop > 100) {
+                    // Scrolling down - hide navigation
+                    bottomNav.classList.add('hidden');
+                } else {
+                    // Scrolling up - show navigation
+                    bottomNav.classList.remove('hidden');
+                }
+                lastScrollTop = scrollTop;
+            }
+        }
+        
+        function throttle(func, limit) {
+            let inThrottle;
+            return function() {
+                const args = arguments;
+                const context = this;
+                if (!inThrottle) {
+                    func.apply(context, args);
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, limit);
+                }
+            }
+        }
+
         // Make sure functions are called when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
             try {
@@ -2761,6 +2798,10 @@
                 updateCartBadge();
                 checkLoginStatus();
                 initializeAccountMode();
+                
+                // Initialize scroll listener for bottom navigation
+                window.addEventListener('scroll', throttle(handleNavScroll, 16));
+                console.log('Shops page loaded with bottom navigation scroll effect');
             } catch (error) {
                 console.error('Error initializing page:', error);
             }

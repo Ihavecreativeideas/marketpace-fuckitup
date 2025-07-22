@@ -287,6 +287,13 @@ All features are designed to strengthen local communities by keeping commerce lo
 ✓ **MODAL POSITIONING FIXED**: Added relative positioning and proper margins to accommodate top-positioned mode label
 ✓ **EXACT DESIGN MATCH**: Posting modal now matches user's provided screenshot with proper purple/gold theming and toggle functionality
 
+✓ **FACEBOOK-STYLE BOTTOM NAVIGATION SCROLL EFFECT IMPLEMENTED** (January 22, 2025)
+✓ **SCROLL-RESPONSIVE NAVIGATION**: Added Facebook-style scroll effect to shops page where bottom navigation disappears when scrolling down and reappears when scrolling up
+✓ **SMOOTH ANIMATION**: Uses existing CSS transitions (0.3s ease) with translateY transform for seamless show/hide behavior
+✓ **PERFORMANCE OPTIMIZED**: Throttled scroll listener (16ms) with 5px scroll threshold to prevent jitter and ensure smooth performance
+✓ **INTELLIGENT SCROLL DETECTION**: Navigation only hides after scrolling down 100px from top and immediately shows when scrolling up
+✓ **ENHANCED USER EXPERIENCE**: Provides more screen space for content reading while keeping navigation easily accessible
+
 ✓ **BROWSE CATEGORIES SECTION REMOVED FROM MARKETPACE MENU** (January 22, 2025)
 ✓ **COMPLETE SECTION REMOVAL**: Successfully removed entire "Browse Categories" section from marketpace-menu.html as requested by user (lines 779-875)
 ✓ **MENU SIMPLIFICATION**: Streamlined menu interface by removing category browsing functionality that was causing interface clutter
