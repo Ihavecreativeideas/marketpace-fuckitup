@@ -20,7 +20,131 @@
             background: linear-gradient(135deg, #0d0221 0%, #1a0233 50%, #2d1b69 100%);
             color: white;
             min-height: 100vh;
+            padding-top: 40px;
             padding-bottom: 80px;
+        }
+
+        /* Facebook-Style Floating Header */
+        .floating-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(25px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            z-index: 1001;
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 15px rgba(0, 255, 255, 0.1);
+        }
+
+        .floating-header.hidden {
+            transform: translateY(-100%);
+        }
+
+        .floating-header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 8px 16px;
+            gap: 20px;
+        }
+
+        .floating-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .tiny-nav-btn {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 6px;
+            padding: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tiny-nav-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .floating-center {
+            display: flex;
+            justify-content: center;
+            max-width: 300px;
+        }
+
+        .floating-search {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .floating-search:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(0, 255, 255, 0.5);
+        }
+
+        .floating-search span {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+
+        .floating-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .floating-action-btn {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            min-width: 36px;
+            height: 36px;
+        }
+
+        .floating-action-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .notification-dot {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 0, 0, 0.9);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
         /* Floating Particles */
@@ -406,6 +530,73 @@
     </style>
 </head>
 <body>
+    <!-- Facebook-Style Floating Header -->
+    <div id="floating-header" class="floating-header">
+        <div class="floating-header-content">
+            <!-- Left Side: Logo + Switcher + Add Post -->
+            <div class="floating-left">
+                <button class="tiny-nav-btn" onclick="window.location.href='unified-pro-page.html'" title="Profile">
+                    <span style="
+                        font-size: 12px; 
+                        font-weight: 900; 
+                        background: linear-gradient(135deg, #4a0080 0%, #1a0b3d 50%, #4a0080 100%);
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                        background-clip: text;
+                        filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.6));
+                    ">MP</span>
+                </button>
+                <button class="floating-action-btn account-switcher" onclick="toggleAccountMode()" title="Switch Mode" id="floatingAccountSwitcher">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <path d="M15 18l-6-6 6-6" stroke="#00ffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9 18l6-6-6-6" stroke="#00ffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span id="floating-mode-indicator" style="font-size: 8px; margin-left: 2px; color: #00ffff;">P</span>
+                </button>
+                <button class="floating-action-btn" onclick="window.location.href='community.html'" title="Create Post">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <line x1="12" y1="5" x2="12" y2="19" stroke="#00ffff" stroke-width="2"/>
+                        <line x1="5" y1="12" x2="19" y2="12" stroke="#00ffff" stroke-width="2"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Center: Search Bar -->
+            <div class="floating-center">
+                <div class="floating-search" onclick="toggleCategorySearch()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <circle cx="11" cy="11" r="8" stroke="#00ffff" stroke-width="2"/>
+                        <path d="m21 21-4.35-4.35" stroke="#00ffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>Search MarketPace</span>
+                </div>
+            </div>
+
+            <!-- Right Side: Map + Calendar + Message -->
+            <div class="floating-right">
+                <button class="tiny-nav-btn" onclick="showInteractiveMap('all')" title="Map">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M21 10C21 17 12 23 12 23S3 17 3 10C3 5.6 7.6 1 12 1S21 5.6 21 10Z" stroke="#00ffff" stroke-width="2"/>
+                        <circle cx="12" cy="10" r="3" stroke="#00ffff" stroke-width="2"/>
+                    </svg>
+                </button>
+                <button class="tiny-nav-btn" onclick="window.location.href='local-event-calendar.html'" title="Calendar">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="4" width="18" height="18" rx="2" stroke="#00ffff" stroke-width="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6" stroke="#00ffff" stroke-width="2"/>
+                        <line x1="8" y1="2" x2="8" y2="6" stroke="#00ffff" stroke-width="2"/>
+                        <line x1="3" y1="10" x2="21" y2="10" stroke="#00ffff" stroke-width="2"/>
+                    </svg>
+                </button>
+                <button class="floating-action-btn" onclick="window.location.href='messages.html'" title="Messages">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="#00ffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <div class="notification-dot"></div>
+                </button>
+            </div>
+        </div>
+    </div>
     <!-- Floating Particles -->
     <div class="particles" id="particles"></div>
 
