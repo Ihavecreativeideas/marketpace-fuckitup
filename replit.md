@@ -272,6 +272,11 @@ All features are designed to strengthen local communities by keeping commerce lo
 
 ## Recent Changes
 
+✓ **BOTTOM NAVIGATION REORDERED WITH RENTALS BETWEEN SERVICES AND @HUB** (January 22, 2025)
+✓ **CONSISTENT NAVIGATION ORDER ACROSS ALL PAGES**: Updated community.html, shops.html, services.html, and rentals.html to have standardized navigation order: Community, Shops, Services, Rentals, @Hub, Eats, Menu
+✓ **IMPROVED NAVIGATION FLOW**: Rentals tab now positioned between Services and @Hub for better user experience and logical grouping of marketplace categories
+✓ **SYNCHRONIZED ACTIVE STATES**: Each page correctly highlights its respective navigation button with proper cyan active state styling
+
 ✓ **POSTING CENTRALIZED TO COMMUNITY PAGE ONLY** (January 22, 2025)
 ✓ **REMOVED POSTING COMPOSERS FROM SHOPS, SERVICES, AND RENTALS PAGES**: Eliminated all posting buttons and composer sections from marketplace filter pages while keeping navigation bar and all other features intact
 ✓ **SIMPLIFIED MARKETPLACE EXPERIENCE**: Shops, services, and rentals pages now focus solely on shopping and browsing, with all posting functionality centralized to the community page
