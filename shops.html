@@ -2757,25 +2757,36 @@
         // Facebook-style bottom navigation scroll effect
         let lastScrollTop = 0;
         let isScrolling = false;
+        let scrollTimer = null;
         
         function handleNavScroll() {
             const bottomNav = document.getElementById('bottomNav');
             if (!bottomNav) return;
             
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            const scrollDifference = Math.abs(scrollTop - lastScrollTop);
             
-            // Only trigger if scrolled more than 5 pixels to prevent jitter
-            if (scrollDifference > 5) {
-                if (scrollTop > lastScrollTop && scrollTop > 100) {
-                    // Scrolling down - hide navigation
-                    bottomNav.classList.add('hidden');
-                } else {
-                    // Scrolling up - show navigation
-                    bottomNav.classList.remove('hidden');
-                }
-                lastScrollTop = scrollTop;
+            // Clear any existing timer
+            if (scrollTimer) {
+                clearTimeout(scrollTimer);
             }
+            
+            // Show navigation immediately when scrolling up
+            if (scrollTop < lastScrollTop) {
+                // Scrolling up - show navigation immediately
+                bottomNav.classList.remove('hidden');
+            } else if (scrollTop > lastScrollTop && scrollTop > 50) {
+                // Scrolling down - hide navigation after brief delay
+                scrollTimer = setTimeout(() => {
+                    bottomNav.classList.add('hidden');
+                }, 150);
+            }
+            
+            // Always show at top of page
+            if (scrollTop <= 50) {
+                bottomNav.classList.remove('hidden');
+            }
+            
+            lastScrollTop = scrollTop;
         }
         
         function throttle(func, limit) {
@@ -2800,7 +2811,7 @@
                 initializeAccountMode();
                 
                 // Initialize scroll listener for bottom navigation
-                window.addEventListener('scroll', throttle(handleNavScroll, 16));
+                window.addEventListener('scroll', throttle(handleNavScroll, 8));
                 
                 // Ensure bottom navigation is visible on page load
                 const bottomNav = document.getElementById('bottomNav');
