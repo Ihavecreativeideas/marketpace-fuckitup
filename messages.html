@@ -806,22 +806,29 @@
                     const storedConversations = JSON.parse(stored);
                     conversations.clear();
                     
+                    console.log('Processing stored conversations:', storedConversations);
+                    
                     // Convert from demo format to messages format
                     storedConversations.forEach((demoConv, index) => {
+                        console.log(`Processing conversation ${index}:`, demoConv);
+                        
+                        const otherParticipant = demoConv.participants ? 
+                            demoConv.participants.find(p => p !== 'You') : 'Unknown';
+                        
                         const member = {
                             id: index + 100,
-                            name: demoConv.participants.find(p => p !== 'You') || 'Unknown',
-                            avatar: (demoConv.participants.find(p => p !== 'You') || 'U').charAt(0),
+                            name: otherParticipant || 'Unknown',
+                            avatar: (otherParticipant || 'U').charAt(0),
                             online: Math.random() > 0.5,
                             lastSeen: 'recently'
                         };
                         
                         const conversation = {
-                            id: Date.now() + index,
+                            id: parseInt(demoConv.id.replace('conv_', '')) || (Date.now() + index),
                             member: member,
-                            messages: demoConv.messages ? demoConv.messages.map(msg => ({
-                                id: Date.now() + Math.random(),
-                                text: msg.message,
+                            messages: demoConv.messages ? demoConv.messages.map((msg, msgIndex) => ({
+                                id: Date.now() + msgIndex,
+                                text: msg.message || msg.text || 'No message',
                                 sent: msg.sender === 'You',
                                 timestamp: new Date(msg.timestamp)
                             })) : [],
@@ -830,13 +837,17 @@
                             unread: 0
                         };
                         
+                        console.log(`Created conversation:`, conversation);
                         conversations.set(conversation.id, conversation);
                     });
                     
                     console.log(`Loaded ${conversations.size} conversations from storage`);
                 } catch (e) {
                     console.log('Error loading stored conversations:', e);
+                    console.error(e);
                 }
+            } else {
+                console.log('No stored conversations found');
             }
         }
 
@@ -868,6 +879,22 @@
         // Enhanced initialize function
         function initializeMessaging() {
             console.log('Messages page loaded');
+            
+            // Debug localStorage
+            const stored = localStorage.getItem('marketpace_conversations');
+            if (stored) {
+                console.log('Raw localStorage data:', stored);
+                try {
+                    const parsed = JSON.parse(stored);
+                    console.log('Parsed conversations:', parsed);
+                    console.log('Number of conversations:', parsed.length);
+                } catch (e) {
+                    console.log('Error parsing localStorage:', e);
+                }
+            } else {
+                console.log('No localStorage data found');
+            }
+            
             loadStoredConversations();
             updateActiveMembers();
             updateConversationsList();
@@ -875,10 +902,13 @@
             
             // Auto-create some conversations for demo if none exist
             if (conversations.size === 0) {
+                console.log('No conversations loaded, creating demo conversations');
                 setTimeout(() => {
                     startNewConversation(1); // Sarah's Boutique
                     startNewConversation(3); // DJ Mike
                 }, 500);
+            } else {
+                console.log(`Successfully loaded ${conversations.size} conversations`);
             }
             
             // Simulate incoming messages periodically
