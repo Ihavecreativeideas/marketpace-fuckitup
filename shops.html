@@ -1299,20 +1299,24 @@
         /* Bottom Navigation */
         .bottom-nav {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.9);
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 600px;
+            background: rgba(0, 0, 0, 0.95);
             backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
             padding: 8px 0;
             z-index: 1000;
-            transform: translateY(0);
-            transition: transform 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+            transition: all 0.3s ease;
         }
 
         .bottom-nav.hidden {
-            transform: translateY(100%);
+            transform: translateX(-50%) translateY(120px);
+            opacity: 0;
         }
 
         .nav-container {
@@ -2754,9 +2758,8 @@
             }
         }
 
-        // Facebook-style bottom navigation scroll effect
+        // Facebook-style floating navigation scroll effect
         let lastScrollTop = 0;
-        let isScrolling = false;
         let scrollTimer = null;
         
         function handleNavScroll() {
@@ -2770,20 +2773,24 @@
                 clearTimeout(scrollTimer);
             }
             
-            // Show navigation immediately when scrolling up
+            // Show navigation immediately when scrolling up (anywhere on page)
             if (scrollTop < lastScrollTop) {
-                // Scrolling up - show navigation immediately
                 bottomNav.classList.remove('hidden');
-            } else if (scrollTop > lastScrollTop && scrollTop > 50) {
-                // Scrolling down - hide navigation after brief delay
+                // Auto-hide after 3 seconds of no interaction when scrolling up
                 scrollTimer = setTimeout(() => {
-                    bottomNav.classList.add('hidden');
-                }, 150);
+                    if (window.pageYOffset > 100) { // Only auto-hide if not at top
+                        bottomNav.classList.add('hidden');
+                    }
+                }, 3000);
+            } else if (scrollTop > lastScrollTop && scrollTop > 100) {
+                // Hide when scrolling down past 100px
+                bottomNav.classList.add('hidden');
             }
             
-            // Always show at top of page
-            if (scrollTop <= 50) {
+            // Always show when near top of page
+            if (scrollTop <= 100) {
                 bottomNav.classList.remove('hidden');
+                if (scrollTimer) clearTimeout(scrollTimer);
             }
             
             lastScrollTop = scrollTop;
