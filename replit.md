@@ -272,6 +272,16 @@ All features are designed to strengthen local communities by keeping commerce lo
 
 ## Recent Changes
 
+✓ **CALENDAR PAGE THEME SYNCHRONIZED WITH COMMUNITY PAGE** (January 22, 2025)
+✓ **COMPLETE THEME CONSISTENCY**: Updated local-event-calendar.html to match community.html's exact purple gradient background (#1a0b3d to #6b46c1)
+✓ **FLOATING PARTICLES INTEGRATION**: Added same floating particle system as community page with blue particle effects and smooth animations
+✓ **HEADER STYLING MATCHED**: Updated title styling with dark galaxy purple gradient, blue backlight effects, and proper text shadows
+✓ **FILTER CONTROLS UPDATED**: Changed filter section background to match community page's dark theme with cyan accents
+✓ **CONSISTENT USER EXPERIENCE**: Both calendar and community pages now share identical visual theme and particle effects
+✓ **MESSAGING SYSTEM OPTIMIZATION**: Fixed "undefined" item names by adding proper parameters to messageOwner calls across all marketplace pages
+✓ **DUPLICATE CONVERSATION PREVENTION**: Enhanced conversation creation to prevent duplicates based on seller + item combination
+✓ **IMPROVED MOBILE LAYOUT**: Optimized messaging interface with better height calculations, smaller elements, and reduced padding for better screen fit
+
 ✓ **COMPREHENSIVE FACEBOOK-STYLE MESSAGING SYSTEM FULLY IMPLEMENTED** (January 22, 2025)
 ✓ **COMPLETE MESSAGING OVERHAUL**: Replaced simple "quick message" modals across all marketplace pages (community.html, shops.html, services.html, rentals.html) with comprehensive Facebook-style messaging system
 ✓ **DEDICATED MESSAGING INTERFACE**: Added dedicated /messages route with full messaging page featuring conversation management, active member status, search functionality, and real-time chat capabilities
