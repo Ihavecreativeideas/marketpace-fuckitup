@@ -4325,9 +4325,35 @@
                 </div>
                 
                 <form id="postForm" style="color: #e2e8f0;">
+                    <!-- Upload Type Selection -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Upload Type:</label>
+                        <select id="uploadType" onchange="updateUploadFields()" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                            <option value="single">Single Item</option>
+                            <option value="bulk">Bulk Upload</option>
+                        </select>
+                    </div>
+
+                    <!-- Collection Label (for bulk uploads only) -->
+                    <div id="collectionLabelField" style="margin-bottom: 20px; display: none;">
+                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Collection Label:</label>
+                        <select id="collectionLabel" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                            <option value="">Choose a label (optional)</option>
+                            <option value="closet-clean-out">🧹 Closet Clean Out</option>
+                            <option value="garage-sale">🏠 Garage Sale</option>
+                            <option value="moving-sale">📦 Moving Sale</option>
+                            <option value="estate-sale">🏛️ Estate Sale</option>
+                            <option value="vintage-collection">💎 Vintage Collection</option>
+                            <option value="craft-sale">🎨 Craft Sale</option>
+                            <option value="book-collection">📚 Book Collection</option>
+                            <option value="custom">🏷️ Custom Label</option>
+                        </select>
+                        <input type="text" id="customLabelInput" placeholder="Enter custom label..." style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0; margin-top: 10px; display: none;">
+                    </div>
+                
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; margin-bottom: 5px; color: #00ffff;">Post Category:</label>
-                        <select id="postCategory" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                        <select id="postCategory" onchange="updateFormFields()" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
                             <option value="general">General</option>
                             <option value="sale">For Sale</option>
                             <option value="rent">For Rent</option>
@@ -4340,14 +4366,27 @@
                         </select>
                     </div>
                     
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Title:</label>
-                        <input type="text" id="postTitle" placeholder="What are you posting about?" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;" required>
+                    <!-- Single Item Fields -->
+                    <div id="singleItemFields">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 5px; color: #00ffff;">Title:</label>
+                            <input type="text" id="postTitle" placeholder="What are you posting about?" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;" required>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 5px; color: #00ffff;">Description:</label>
+                            <textarea id="postDescription" placeholder="Tell us more about your post..." style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0; min-height: 100px;" required></textarea>
+                        </div>
                     </div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Description:</label>
-                        <textarea id="postDescription" placeholder="Tell us more about your post..." style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0; min-height: 100px;" required></textarea>
+
+                    <!-- Bulk Upload Fields -->
+                    <div id="bulkItemFields" style="display: none;">
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; color: #00ffff;">Number of Items:</label>
+                            <input type="number" id="itemCount" min="2" max="20" value="2" onchange="generateBulkItemFields()" style="width: 100px; padding: 8px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                            <small style="color: #94a3b8; margin-left: 10px;">Maximum 20 items</small>
+                        </div>
+                        <div id="bulkItemContainer"></div>
                     </div>
                     
                     <div id="priceField" style="margin-bottom: 20px; display: block;">
@@ -4508,9 +4547,10 @@
                 switchPostingMode(currentPostingMode);
             }, 50);
             
-            // Set initial category
+            // Set initial category and update fields
             document.getElementById('postCategory').value = type;
             updateFormFields();
+            updateUploadFields();
             
             // Add event listeners
             document.getElementById('postCategory').addEventListener('change', updateFormFields);
@@ -4578,17 +4618,29 @@
             function handlePostSubmit(e) {
                 e.preventDefault();
                 
+                const uploadType = document.getElementById('uploadType').value;
+                
+                if (uploadType === 'bulk') {
+                    submitBulkPost();
+                } else {
+                    submitSinglePost();
+                }
+            }
+
+            // Submit single item post
+            function submitSinglePost() {
                 const formData = {
+                    uploadType: 'single',
+                    postingMode: currentPostingMode,
                     category: document.getElementById('postCategory').value,
                     title: document.getElementById('postTitle').value,
                     description: document.getElementById('postDescription').value,
-                    price: document.getElementById('postPrice').value,
-                    eventDate: document.getElementById('eventDate').value,
-                    eventTime: document.getElementById('eventTime').value,
-                    eventLocation: document.getElementById('eventLocation').value,
-                    pollOption1: document.getElementById('pollOption1').value,
-                    pollOption2: document.getElementById('pollOption2').value,
-                    // New rental fields
+                    price: document.getElementById('postPrice')?.value,
+                    eventDate: document.getElementById('eventDate')?.value,
+                    eventTime: document.getElementById('eventTime')?.value,
+                    eventLocation: document.getElementById('eventLocation')?.value,
+                    pollOption1: document.getElementById('pollOption1')?.value,
+                    pollOption2: document.getElementById('pollOption2')?.value,
                     rentalRate: document.querySelector('input[name="rentalRate"]:checked')?.value,
                     deliveryMethod: {
                         marketpace: document.getElementById('marketpaceDelivery')?.checked,
@@ -4596,26 +4648,131 @@
                         privateFee: document.getElementById('privateDeliveryFee')?.value
                     },
                     actionButtons: {
-                        deliverNow: document.getElementById('deliverNow').checked,
-                        selfPickup: document.getElementById('selfPickup').checked,
-                        bookNow: document.getElementById('bookNow').checked,
-                        callNow: document.getElementById('callNow').checked,
-                        messageNow: document.getElementById('messageNow').checked
+                        deliverNow: document.getElementById('deliverNow')?.checked,
+                        selfPickup: document.getElementById('selfPickup')?.checked,
+                        bookNow: document.getElementById('bookNow')?.checked,
+                        callNow: document.getElementById('callNow')?.checked,
+                        messageNow: document.getElementById('messageNow')?.checked
                     },
-                    created: new Date().toISOString(),
-                    author: 'Community Member'
+                    timestamp: new Date().toISOString(),
+                    author: currentPostingMode === 'business' ? "MarketPace Pro Business" : "Community Member",
+                    location: "Orange Beach, AL",
+                    id: Date.now()
                 };
+                
+                if (!formData.title || !formData.description) {
+                    showNotification('Please fill in all required fields.', 'error');
+                    return;
+                }
                 
                 // Save to localStorage
                 const existingPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
                 existingPosts.unshift(formData);
                 localStorage.setItem('communityPosts', JSON.stringify(existingPosts));
+
+                // Add to profile based on posting mode
+                addPostToProfile(formData, currentPostingMode);
                 
-                // Close modal
+                // Close modal and show success
+                closeModalAndShowSuccess(formData.category, formData.title);
+            }
+
+            // Submit bulk upload post
+            function submitBulkPost() {
+                const itemCount = parseInt(document.getElementById('itemCount').value);
+                const category = document.getElementById('postCategory').value;
+                const collectionLabel = getCollectionLabel();
+                
+                const bulkItems = [];
+                let hasErrors = false;
+                
+                // Validate and collect all bulk items
+                for (let i = 1; i <= itemCount; i++) {
+                    const nameEl = document.getElementById(`bulkItemName${i}`);
+                    const descEl = document.getElementById(`bulkItemDesc${i}`);
+                    const priceEl = document.getElementById(`bulkItemPrice${i}`);
+                    
+                    if (!nameEl || !descEl || !nameEl.value || !descEl.value) {
+                        showNotification(`Please fill in all fields for Item ${i}`, 'error');
+                        hasErrors = true;
+                        break;
+                    }
+                    
+                    const itemData = {
+                        name: nameEl.value,
+                        description: descEl.value,
+                        price: priceEl.value,
+                        rateType: getRateType(category, i),
+                        photos: [] // Would handle file uploads here
+                    };
+                    
+                    bulkItems.push(itemData);
+                }
+                
+                if (hasErrors) return;
+                
+                // Create the bulk post
+                const bulkPostData = {
+                    uploadType: 'bulk',
+                    postingMode: currentPostingMode,
+                    category: category,
+                    collectionLabel: collectionLabel,
+                    title: collectionLabel || `${category.charAt(0).toUpperCase() + category.slice(1)} Collection`,
+                    description: `Bulk collection of ${itemCount} ${category} items`,
+                    items: bulkItems,
+                    itemCount: itemCount,
+                    timestamp: new Date().toISOString(),
+                    author: currentPostingMode === 'business' ? "MarketPace Pro Business" : "Community Member",
+                    location: "Orange Beach, AL",
+                    id: Date.now()
+                };
+                
+                // Store in localStorage
+                const existingPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+                existingPosts.unshift(bulkPostData);
+                localStorage.setItem('communityPosts', JSON.stringify(existingPosts));
+
+                // Add to profile based on posting mode
+                addPostToProfile(bulkPostData, currentPostingMode);
+                
+                // Close modal and show success
+                closeModalAndShowSuccess(category, `${itemCount}-item collection`);
+            }
+
+            // Helper functions
+            function getCollectionLabel() {
+                const labelSelect = document.getElementById('collectionLabel');
+                if (labelSelect.value === 'custom') {
+                    return document.getElementById('customLabelInput').value;
+                }
+                return labelSelect.options[labelSelect.selectedIndex].text.replace(/^\S+\s/, ''); // Remove emoji
+            }
+
+            function getRateType(category, itemNumber) {
+                if (category === 'rent') {
+                    const rateSelect = document.getElementById(`bulkRentalRate${itemNumber}`);
+                    return rateSelect ? rateSelect.value : 'day';
+                } else if (category === 'service') {
+                    const rateSelect = document.getElementById(`bulkServiceRate${itemNumber}`);
+                    return rateSelect ? rateSelect.value : 'job';
+                }
+                return null;
+            }
+
+            function addPostToProfile(postData, mode) {
+                // Add post to appropriate profile storage
+                const storageKey = mode === 'business' ? 'businessProfilePosts' : 'personalProfilePosts';
+                const existingProfilePosts = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                existingProfilePosts.unshift(postData);
+                localStorage.setItem(storageKey, JSON.stringify(existingProfilePosts));
+                
+                console.log(`Post added to ${mode} profile:`, postData);
+            }
+
+            function closeModalAndShowSuccess(category, title) {
                 modal.remove();
                 
-                // Show success message
-                showNotification(`${formData.category.charAt(0).toUpperCase() + formData.category.slice(1)} post "${formData.title}" created successfully!`, 'success');
+                showNotification(`${category.charAt(0).toUpperCase() + category.slice(1)} post "${title}" created successfully!`, 'success');
                 
                 // Refresh page to show new post
                 setTimeout(() => location.reload(), 1000);
@@ -4652,6 +4809,126 @@
                 mainModeLabel.textContent = 'POSTING AS BUSINESS - MARKETPLACE PRO';
                 mainModeLabel.style.background = '#f59e0b';
                 statusInput.style.border = '1px solid rgba(245, 158, 11, 0.3)';
+            }
+        }
+
+        // Handle upload type changes
+        function updateUploadFields() {
+            const uploadType = document.getElementById('uploadType').value;
+            const singleFields = document.getElementById('singleItemFields');
+            const bulkFields = document.getElementById('bulkItemFields');
+            const collectionField = document.getElementById('collectionLabelField');
+            const priceField = document.getElementById('priceField');
+            
+            if (uploadType === 'bulk') {
+                singleFields.style.display = 'none';
+                bulkFields.style.display = 'block';
+                collectionField.style.display = 'block';
+                priceField.style.display = 'none';
+                generateBulkItemFields();
+            } else {
+                singleFields.style.display = 'block';
+                bulkFields.style.display = 'none';
+                collectionField.style.display = 'none';
+                priceField.style.display = 'block';
+            }
+        }
+
+        // Handle collection label changes
+        document.addEventListener('change', function(e) {
+            if (e.target.id === 'collectionLabel') {
+                const customInput = document.getElementById('customLabelInput');
+                if (e.target.value === 'custom') {
+                    customInput.style.display = 'block';
+                    customInput.required = true;
+                } else {
+                    customInput.style.display = 'none';
+                    customInput.required = false;
+                }
+            }
+        });
+
+        // Generate bulk item input fields
+        function generateBulkItemFields() {
+            const count = parseInt(document.getElementById('itemCount').value) || 2;
+            const container = document.getElementById('bulkItemContainer');
+            const category = document.getElementById('postCategory').value;
+            
+            let html = '';
+            for (let i = 1; i <= count; i++) {
+                html += `
+                    <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(0,255,255,0.3); border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                        <h4 style="color: #00ffff; margin: 0 0 10px 0;">Item ${i}</h4>
+                        
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; margin-bottom: 3px; color: #00ffff; font-size: 12px;">Item Name:</label>
+                            <input type="text" id="bulkItemName${i}" placeholder="Enter item name..." style="width: 100%; padding: 8px; border: 1px solid #00ffff; border-radius: 4px; background: #2d1b69; color: #e2e8f0; font-size: 13px;" required>
+                        </div>
+                        
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; margin-bottom: 3px; color: #00ffff; font-size: 12px;">Description:</label>
+                            <textarea id="bulkItemDesc${i}" placeholder="Describe this item..." style="width: 100%; padding: 8px; border: 1px solid #00ffff; border-radius: 4px; background: #2d1b69; color: #e2e8f0; min-height: 60px; font-size: 13px;" required></textarea>
+                        </div>
+                        
+                        ${generatePriceFields(category, i)}
+                        
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; margin-bottom: 3px; color: #00ffff; font-size: 12px;">Photos:</label>
+                            <input type="file" id="bulkItemPhotos${i}" multiple accept="image/*" style="width: 100%; padding: 6px; border: 1px solid #00ffff; border-radius: 4px; background: #2d1b69; color: #e2e8f0; font-size: 12px;">
+                            <small style="color: #94a3b8;">Upload up to 5 photos per item</small>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // Generate appropriate price fields based on category
+        function generatePriceFields(category, itemNumber) {
+            if (category === 'rent') {
+                return `
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 3px; color: #00ffff; font-size: 12px;">Rental Rate:</label>
+                        <div style="display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center;">
+                            <input type="text" id="bulkItemPrice${itemNumber}" placeholder="$0.00" style="padding: 8px; border: 1px solid #00ffff; border-radius: 4px; background: #2d1b69; color: #e2e8f0; font-size: 13px;" required>
+                            <select id="bulkRentalRate${itemNumber}" style="padding: 8px; border: 1px solid #00ffff; border-radius: 4px; background: #2d1b69; color: #e2e8f0; font-size: 12px;">
+                                <option value="hour">per hour</option>
+                                <option value="day" selected>per day</option>
+                                <option value="week">per week</option>
+                                <option value="month">per month</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            } else if (category === 'service') {
+                return `
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 3px; color: #00ffff; font-size: 12px;">Service Rate:</label>
+                        <div style="display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center;">
+                            <input type="text" id="bulkItemPrice${itemNumber}" placeholder="$0.00" style="padding: 8px; border: 1px solid #00ffff; border-radius: 4px; background: #2d1b69; color: #e2e8f0; font-size: 13px;" required>
+                            <select id="bulkServiceRate${itemNumber}" style="padding: 8px; border: 1px solid #00ffff; border-radius: 4px; background: #2d1b69; color: #e2e8f0; font-size: 12px;">
+                                <option value="hour">per hour</option>
+                                <option value="job" selected>per job</option>
+                                <option value="day">per day</option>
+                                <option value="project">per project</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            } else if (category === 'sale') {
+                return `
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 3px; color: #00ffff; font-size: 12px;">Price:</label>
+                        <input type="text" id="bulkItemPrice${itemNumber}" placeholder="$0.00" style="width: 100%; padding: 8px; border: 1px solid #00ffff; border-radius: 4px; background: #2d1b69; color: #e2e8f0; font-size: 13px;" required>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 3px; color: #00ffff; font-size: 12px;">Price (optional):</label>
+                        <input type="text" id="bulkItemPrice${itemNumber}" placeholder="$0.00 or leave blank" style="width: 100%; padding: 8px; border: 1px solid #00ffff; border-radius: 4px; background: #2d1b69; color: #e2e8f0; font-size: 13px;">
+                    </div>
+                `;
             }
         }
 
