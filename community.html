@@ -1661,13 +1661,23 @@
     <div class="main-content" style="position: relative; z-index: 2;">
 
 
-        <!-- Status Composer - Standardized Header Layout -->
-        <div class="status-composer" style="opacity: 0.8; padding: 10px 15px; margin-bottom: 10px;">
+        <!-- Status Composer - Enhanced with Posting Mode Indicators -->
+        <div id="mainStatusComposer" class="status-composer" style="opacity: 0.8; padding: 12px 15px; margin-bottom: 10px; border: 2px solid #8b5cf6; border-radius: 12px; background: rgba(139, 92, 246, 0.05);">
+            <!-- Posting Mode Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <div id="mainPostingModeLabel" style="background: #8b5cf6; color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                    POSTING AS PERSONAL
+                </div>
+                <button onclick="toggleMainPostingMode()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 6px; color: #8b5cf6; font-size: 11px; padding: 4px 8px; cursor: pointer; font-weight: 500;">
+                    SWITCH MODE
+                </button>
+            </div>
+            
             <div class="composer-header">
                 <div class="profile-pic" style="width: 35px; height: 35px; border-radius: 6px;">
                     <span id="userInitials2" style="font-size: 14px;">DU</span>
                 </div>
-                <input type="text" id="statusInput" name="status" class="status-input" placeholder="Share with your community!" onclick="openAdvancedPostModal()" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); font-size: 14px; padding: 8px 12px;">
+                <input type="text" id="statusInput" name="status" class="status-input" placeholder="Share with your community!" onclick="openAdvancedPostModal()" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(139, 92, 246, 0.3); font-size: 14px; padding: 8px 12px;">
             </div>
             <div class="composer-actions">
                 <button class="action-btn" onclick="openAdvancedPostModal('sale')">
@@ -4493,6 +4503,11 @@
             modal.appendChild(modalContent);
             document.body.appendChild(modal);
             
+            // Initialize modal with current posting mode
+            setTimeout(() => {
+                switchPostingMode(currentPostingMode);
+            }, 50);
+            
             // Set initial category
             document.getElementById('postCategory').value = type;
             updateFormFields();
@@ -4607,12 +4622,49 @@
             }
         }
 
-        // Posting mode switcher function (global scope)
+        // Global posting mode state
+        let currentPostingMode = 'personal';
+
+        // Main page posting mode toggle function
+        function toggleMainPostingMode() {
+            currentPostingMode = currentPostingMode === 'personal' ? 'business' : 'personal';
+            updateMainComposerMode(currentPostingMode);
+            console.log('Main posting mode switched to:', currentPostingMode);
+        }
+
+        // Update main composer visual indicators
+        function updateMainComposerMode(mode) {
+            const mainComposer = document.getElementById('mainStatusComposer');
+            const mainModeLabel = document.getElementById('mainPostingModeLabel');
+            const statusInput = document.getElementById('statusInput');
+            
+            if (mode === 'personal') {
+                // Personal mode styling (purple)
+                mainComposer.style.border = '2px solid #8b5cf6';
+                mainComposer.style.background = 'rgba(139, 92, 246, 0.05)';
+                mainModeLabel.textContent = 'POSTING AS PERSONAL';
+                mainModeLabel.style.background = '#8b5cf6';
+                statusInput.style.border = '1px solid rgba(139, 92, 246, 0.3)';
+            } else if (mode === 'business') {
+                // Business mode styling (gold)
+                mainComposer.style.border = '2px solid #f59e0b';
+                mainComposer.style.background = 'rgba(245, 158, 11, 0.05)';
+                mainModeLabel.textContent = 'POSTING AS BUSINESS - MARKETPLACE PRO';
+                mainModeLabel.style.background = '#f59e0b';
+                statusInput.style.border = '1px solid rgba(245, 158, 11, 0.3)';
+            }
+        }
+
+        // Posting mode switcher function for modal (global scope)
         function switchPostingMode(mode) {
             const modeLabel = document.getElementById('postingModeLabel');
             const personalBtn = document.getElementById('personalModeBtn');
             const businessBtn = document.getElementById('businessModeBtn');
             
+            // Update global state
+            currentPostingMode = mode;
+            
+            // Update modal
             if (mode === 'personal') {
                 modeLabel.textContent = 'POSTING AS PERSONAL';
                 modeLabel.style.background = '#8b5cf6'; // Purple theme
@@ -4630,6 +4682,9 @@
                 personalBtn.style.color = '#ccc';
                 console.log('Switched to business posting mode');
             }
+            
+            // Update main composer to match
+            updateMainComposerMode(mode);
         }
 
         // Post creation
