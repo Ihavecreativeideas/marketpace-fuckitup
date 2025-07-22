@@ -3929,9 +3929,22 @@
                 max-height: 80vh;
                 overflow-y: auto;
                 box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+                position: relative;
+                margin-top: 20px;
             `;
             
             modalContent.innerHTML = `
+                <!-- Posting Mode Label -->
+                <div id="postingModeLabel" style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #8b5cf6; color: #fff; padding: 6px 16px; border-radius: 12px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; z-index: 1;">
+                    POSTING AS PERSONAL
+                </div>
+                
+                <!-- Mode Toggle Buttons -->
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; justify-content: center;">
+                    <button id="personalModeBtn" onclick="switchPostingMode('personal')" style="background: #8b5cf6; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer;">Personal</button>
+                    <button id="businessModeBtn" onclick="switchPostingMode('business')" style="background: rgba(255,255,255,0.2); color: #ccc; border: none; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer;">Business</button>
+                </div>
+                
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2 style="color: #00ffff; margin: 0;">Create ${type.charAt(0).toUpperCase() + type.slice(1)} Post</h2>
                     <button onclick="this.closest('.posting-modal').remove()" style="background: none; border: none; color: #00ffff; font-size: 24px; cursor: pointer;">&times;</button>
@@ -4098,6 +4111,29 @@
                 
                 // Refresh page to show new post
                 setTimeout(() => location.reload(), 1000);
+            }
+            
+            // Add switchPostingMode function
+            window.switchPostingMode = function(mode) {
+                const modeLabel = document.getElementById('postingModeLabel');
+                const personalBtn = document.getElementById('personalModeBtn');
+                const businessBtn = document.getElementById('businessModeBtn');
+                
+                if (mode === 'personal') {
+                    modeLabel.textContent = 'POSTING AS PERSONAL';
+                    modeLabel.style.background = '#8b5cf6'; // Purple theme
+                    personalBtn.style.background = '#8b5cf6';
+                    personalBtn.style.color = 'white';
+                    businessBtn.style.background = 'rgba(255,255,255,0.2)';
+                    businessBtn.style.color = '#ccc';
+                } else if (mode === 'business') {
+                    modeLabel.textContent = 'POSTING AS BUSINESS - MarketPace Pro';
+                    modeLabel.style.background = '#f59e0b'; // Gold theme
+                    businessBtn.style.background = '#f59e0b';
+                    businessBtn.style.color = 'white';
+                    personalBtn.style.background = 'rgba(255,255,255,0.2)';
+                    personalBtn.style.color = '#ccc';
+                }
             }
         }
 

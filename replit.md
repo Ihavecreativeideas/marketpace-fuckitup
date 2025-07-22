@@ -280,6 +280,13 @@ All features are designed to strengthen local communities by keeping commerce lo
 ✓ **IMPROVED READABILITY**: Calendar and feature elements now have solid backgrounds that prevent particle interference with text and functionality
 ✓ **MAINTAINED VISUAL THEME**: Preserved futuristic design while creating cleaner, more professional interface
 
+✓ **POSTING MODAL LAYOUT RESTORED WITH PERSONAL/BUSINESS MODE SWITCHING** (January 22, 2025)
+✓ **"POSTING AS PERSONAL" LABEL RESTORED**: Added purple-themed (#8b5cf6) posting mode label at top of modal matching original design
+✓ **BUSINESS MODE TOGGLE**: Added toggle buttons to switch between "POSTING AS PERSONAL" (purple) and "POSTING AS BUSINESS - MarketPace Pro" (gold #f59e0b)
+✓ **COMPLETE THEME SWITCHING**: Mode switching changes both label text/color and button active states with proper visual feedback
+✓ **MODAL POSITIONING FIXED**: Added relative positioning and proper margins to accommodate top-positioned mode label
+✓ **EXACT DESIGN MATCH**: Posting modal now matches user's provided screenshot with proper purple/gold theming and toggle functionality
+
 ✓ **BROWSE CATEGORIES SECTION REMOVED FROM MARKETPACE MENU** (January 22, 2025)
 ✓ **COMPLETE SECTION REMOVAL**: Successfully removed entire "Browse Categories" section from marketpace-menu.html as requested by user (lines 779-875)
 ✓ **MENU SIMPLIFICATION**: Streamlined menu interface by removing category browsing functionality that was causing interface clutter
