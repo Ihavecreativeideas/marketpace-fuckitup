@@ -3873,7 +3873,27 @@ app.post('/api/qr/generate-employee', async (req, res) => {
   }
 });
 
-// Employee Check-In/Check-Out Processing endpoint
+// In-memory worker tracking system (in production, this would be a database)
+const workerTimeTracking = new Map();
+const employerQRSystems = new Map();
+
+// Helper function to calculate distance between two coordinates
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371e3; // Earth's radius in meters
+  const φ1 = lat1 * Math.PI / 180; // φ, λ in radians
+  const φ2 = lat2 * Math.PI / 180;
+  const Δφ = (lat2 - lat1) * Math.PI / 180;
+  const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+  const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c; // Distance in meters
+}
+
+// Employee Check-In/Check-Out Processing endpoint with comprehensive worker tracking
 app.post('/api/employee/checkin', async (req, res) => {
   try {
     const { 
@@ -3884,67 +3904,207 @@ app.post('/api/employee/checkin', async (req, res) => {
       geoLat, 
       geoLng, 
       location,
-      paymentSettings 
+      paymentSettings,
+      employerId // Required to identify which employer's QR system
     } = req.body;
 
-    // Verify QR code and location if geo validation enabled
-    let geoValidationResult = { valid: true, message: 'Location validation passed' };
-    
-    if (geoLat && geoLng) {
-      // In real app, this would verify against stored QR location data
-      geoValidationResult = {
-        valid: true,
-        distance: Math.floor(Math.random() * 100), // Simulated distance
-        message: 'Within validation radius'
-      };
+    if (!employeeId || !employeeName || !action || !employerId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: employeeId, employeeName, action, employerId'
+      });
     }
 
-    // Process time tracking
+    // Verify this is a valid employer QR system
+    const qrSystem = employerQRSystems.get(employerId);
+    if (!qrSystem && qrCodeId !== 'universal_qr_' + employerId) {
+      return res.status(404).json({
+        success: false,
+        error: 'Invalid QR code or employer system not found'
+      });
+    }
+
+    // Verify geo location if provided
+    let geoValidationResult = { valid: true, message: 'Location validation passed', detectedLocation: null };
+    
+    if (geoLat && geoLng && qrSystem && qrSystem.locations) {
+      let closestLocation = null;
+      let minDistance = Infinity;
+      
+      // Find closest location from employer's registered locations
+      for (const loc of qrSystem.locations) {
+        if (loc.coordinates && loc.coordinates.lat && loc.coordinates.lng) {
+          const distance = calculateDistance(
+            parseFloat(geoLat), 
+            parseFloat(geoLng), 
+            loc.coordinates.lat, 
+            loc.coordinates.lng
+          );
+          
+          if (distance < minDistance && distance <= (loc.validationRadius || 100)) {
+            minDistance = distance;
+            closestLocation = loc;
+          }
+        }
+      }
+      
+      if (closestLocation) {
+        geoValidationResult = {
+          valid: true,
+          distance: Math.round(minDistance),
+          detectedLocation: closestLocation.name,
+          message: `Checked in at ${closestLocation.name} (${Math.round(minDistance)}m away)`
+        };
+      } else {
+        geoValidationResult = {
+          valid: false,
+          distance: null,
+          detectedLocation: null,
+          message: 'Not within range of any registered work location'
+        };
+      }
+    }
+
+    // Get or create worker time tracking record
+    const workerKey = `${employerId}_${employeeId}`;
+    if (!workerTimeTracking.has(workerKey)) {
+      workerTimeTracking.set(workerKey, {
+        employerId,
+        employeeId,
+        employeeName,
+        sessions: [],
+        totalHours: 0,
+        totalEarnings: 0,
+        lastActivity: null
+      });
+    }
+
+    const workerRecord = workerTimeTracking.get(workerKey);
     const timestamp = new Date().toISOString();
     let hoursWorked = 0;
     let earnings = 0;
+    let sessionUpdate = null;
 
-    if (action === 'checkout' && paymentSettings) {
-      // Calculate hours worked (simulated - in real app would check last check-in)
-      hoursWorked = Math.random() * 8 + 1; // 1-9 hours
+    if (action === 'checkin') {
+      // Start new work session
+      const newSession = {
+        sessionId: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        checkinTime: timestamp,
+        checkinLocation: geoValidationResult.detectedLocation || location || 'Unknown',
+        checkoutTime: null,
+        checkoutLocation: null,
+        hoursWorked: 0,
+        earnings: 0,
+        qrCodeId,
+        geoValidation: geoValidationResult
+      };
       
-      if (paymentSettings.type === 'hourly') {
-        earnings = hoursWorked * paymentSettings.rate;
-      } else if (paymentSettings.type === 'per-job') {
-        earnings = paymentSettings.rate;
-      } else if (paymentSettings.type === 'daily') {
-        earnings = paymentSettings.rate;
+      workerRecord.sessions.push(newSession);
+      workerRecord.lastActivity = timestamp;
+      sessionUpdate = newSession;
+      
+    } else if (action === 'checkout') {
+      // End current work session
+      const activeSession = workerRecord.sessions.find(s => s.checkoutTime === null);
+      
+      if (activeSession) {
+        activeSession.checkoutTime = timestamp;
+        activeSession.checkoutLocation = geoValidationResult.detectedLocation || location || 'Unknown';
+        
+        // Calculate hours worked for this session
+        const checkinTime = new Date(activeSession.checkinTime);
+        const checkoutTime = new Date(timestamp);
+        hoursWorked = (checkoutTime.getTime() - checkinTime.getTime()) / (1000 * 60 * 60); // Convert to hours
+        
+        activeSession.hoursWorked = hoursWorked;
+        
+        // Calculate earnings based on payment settings
+        if (paymentSettings) {
+          switch (paymentSettings.type) {
+            case 'hourly':
+              earnings = hoursWorked * (paymentSettings.rate || 15);
+              break;
+            case 'per-job':
+              earnings = paymentSettings.rate || 50;
+              break;
+            case 'daily':
+              earnings = paymentSettings.rate || 120;
+              break;
+            case 'fixed':
+              earnings = paymentSettings.rate || 100;
+              break;
+            default:
+              earnings = hoursWorked * 15; // Default $15/hour
+          }
+        } else {
+          earnings = hoursWorked * 15; // Default $15/hour if no payment settings
+        }
+        
+        activeSession.earnings = earnings;
+        
+        // Update worker totals
+        workerRecord.totalHours += hoursWorked;
+        workerRecord.totalEarnings += earnings;
+        workerRecord.lastActivity = timestamp;
+        
+        sessionUpdate = activeSession;
+      } else {
+        return res.status(400).json({
+          success: false,
+          error: 'No active check-in session found for this worker'
+        });
       }
     }
+
+    // Update the tracking system
+    workerTimeTracking.set(workerKey, workerRecord);
 
     const result = {
       success: true,
       qrCodeId,
       employeeId,
       employeeName,
+      employerId,
       action,
       timestamp,
-      location,
+      location: geoValidationResult.detectedLocation || location,
+      sessionData: sessionUpdate,
       hoursWorked: action === 'checkout' ? hoursWorked : null,
       earnings: action === 'checkout' ? earnings : null,
+      workerTotals: {
+        totalHours: workerRecord.totalHours,
+        totalEarnings: workerRecord.totalEarnings,
+        totalSessions: workerRecord.sessions.length
+      },
       geoValidationResult,
       message: action === 'checkin' ? 
-        `${employeeName} checked in successfully` : 
+        `${employeeName} checked in successfully${geoValidationResult.detectedLocation ? ' at ' + geoValidationResult.detectedLocation : ''}` : 
         `${employeeName} checked out - ${hoursWorked.toFixed(2)} hours worked, $${earnings.toFixed(2)} earned`
     };
 
-    // Send SMS notification if enabled
-    if (process.env.TWILIO_ACCOUNT_SID) {
+    // Send comprehensive SMS notification
+    if (process.env.TWILIO_ACCOUNT_SID && paymentSettings && paymentSettings.enableNotifications) {
       try {
-        // SMS notification logic would go here
-        console.log(`SMS notification: ${result.message}`);
+        const smsMessage = action === 'checkin' 
+          ? `✅ Checked in: ${employeeName} at ${geoValidationResult.detectedLocation || 'work location'} - ${new Date().toLocaleTimeString()}`
+          : `🕐 Checked out: ${employeeName} - ${hoursWorked.toFixed(2)} hrs, $${earnings.toFixed(2)} earned - Total: ${workerRecord.totalHours.toFixed(2)} hrs, $${workerRecord.totalEarnings.toFixed(2)}`;
+        
+        // In production, send to employer's phone number
+        console.log(`SMS notification: ${smsMessage}`);
       } catch (smsError) {
         console.error('SMS notification failed:', smsError);
       }
     }
 
-    // Store check-in/out record (in real app, this would go to database)
-    console.log('Employee check-in/out processed:', result);
+    // Store comprehensive check-in/out record
+    console.log('Employee check-in/out processed:', {
+      worker: employeeName,
+      action,
+      location: geoValidationResult.detectedLocation || location,
+      timestamp,
+      sessionData: sessionUpdate,
+      workerTotals: result.workerTotals
+    });
 
     res.json(result);
 
@@ -3953,6 +4113,215 @@ app.post('/api/employee/checkin', async (req, res) => {
     res.json({
       success: false,
       error: 'Failed to process employee check-in: ' + error.message
+    });
+  }
+});
+
+// QR System Registration endpoint - Register employer QR system with locations
+app.post('/api/qr-systems/register', async (req, res) => {
+  try {
+    const { employerId, businessName, locations } = req.body;
+    
+    if (!employerId || !businessName) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: employerId, businessName'
+      });
+    }
+
+    const qrSystem = {
+      id: employerId,
+      businessName,
+      locations: locations || [],
+      createdAt: new Date().toISOString(),
+      universalQRCode: `universal_qr_${employerId}`,
+      workersRegistered: 0
+    };
+
+    employerQRSystems.set(employerId, qrSystem);
+
+    res.json({
+      success: true,
+      qrSystem,
+      message: `QR system registered for ${businessName}`
+    });
+
+  } catch (error) {
+    console.error('QR system registration error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to register QR system: ' + error.message
+    });
+  }
+});
+
+// Add location to existing QR system
+app.post('/api/qr-systems/:employerId/locations', async (req, res) => {
+  try {
+    const { employerId } = req.params;
+    const { name, address, coordinates, validationRadius } = req.body;
+    
+    const qrSystem = employerQRSystems.get(employerId);
+    if (!qrSystem) {
+      return res.status(404).json({
+        success: false,
+        error: 'QR system not found for this employer'
+      });
+    }
+
+    const newLocation = {
+      id: `loc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      name: name || 'Work Location',
+      address,
+      coordinates: coordinates || { lat: 0, lng: 0 },
+      validationRadius: validationRadius || 100,
+      addedAt: new Date().toISOString()
+    };
+
+    qrSystem.locations.push(newLocation);
+    employerQRSystems.set(employerId, qrSystem);
+
+    res.json({
+      success: true,
+      location: newLocation,
+      totalLocations: qrSystem.locations.length,
+      message: `Location "${name}" added to QR system`
+    });
+
+  } catch (error) {
+    console.error('Location addition error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to add location: ' + error.message
+    });
+  }
+});
+
+// Get worker time tracking data
+app.get('/api/workers/:employerId/:employeeId/tracking', async (req, res) => {
+  try {
+    const { employerId, employeeId } = req.params;
+    const workerKey = `${employerId}_${employeeId}`;
+    
+    const workerRecord = workerTimeTracking.get(workerKey);
+    
+    if (!workerRecord) {
+      return res.status(404).json({
+        success: false,
+        error: 'Worker tracking record not found'
+      });
+    }
+
+    // Calculate additional statistics
+    const activeSessions = workerRecord.sessions.filter(s => s.checkoutTime === null).length;
+    const completedSessions = workerRecord.sessions.filter(s => s.checkoutTime !== null).length;
+    const averageSessionLength = completedSessions > 0 
+      ? workerRecord.totalHours / completedSessions 
+      : 0;
+    const averageHourlyRate = workerRecord.totalHours > 0 
+      ? workerRecord.totalEarnings / workerRecord.totalHours 
+      : 0;
+
+    res.json({
+      success: true,
+      workerData: {
+        ...workerRecord,
+        statistics: {
+          activeSessions,
+          completedSessions,
+          averageSessionLength: Math.round(averageSessionLength * 100) / 100,
+          averageHourlyRate: Math.round(averageHourlyRate * 100) / 100,
+          totalSessions: workerRecord.sessions.length
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Worker tracking retrieval error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve worker tracking data: ' + error.message
+    });
+  }
+});
+
+// Get all workers for an employer
+app.get('/api/workers/:employerId', async (req, res) => {
+  try {
+    const { employerId } = req.params;
+    const workersList = [];
+    
+    // Filter workers by employerId
+    for (const [workerKey, workerRecord] of workerTimeTracking.entries()) {
+      if (workerRecord.employerId === employerId) {
+        const activeSessions = workerRecord.sessions.filter(s => s.checkoutTime === null).length;
+        const completedSessions = workerRecord.sessions.filter(s => s.checkoutTime !== null).length;
+        
+        workersList.push({
+          employeeId: workerRecord.employeeId,
+          employeeName: workerRecord.employeeName,
+          totalHours: workerRecord.totalHours,
+          totalEarnings: workerRecord.totalEarnings,
+          lastActivity: workerRecord.lastActivity,
+          activeSessions,
+          completedSessions,
+          totalSessions: workerRecord.sessions.length,
+          status: activeSessions > 0 ? 'checked_in' : 'checked_out'
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      employerId,
+      workers: workersList,
+      totalWorkers: workersList.length,
+      activeWorkers: workersList.filter(w => w.status === 'checked_in').length
+    });
+
+  } catch (error) {
+    console.error('Workers list retrieval error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve workers list: ' + error.message
+    });
+  }
+});
+
+// Get QR system info
+app.get('/api/qr-systems/:employerId', async (req, res) => {
+  try {
+    const { employerId } = req.params;
+    const qrSystem = employerQRSystems.get(employerId);
+    
+    if (!qrSystem) {
+      return res.status(404).json({
+        success: false,
+        error: 'QR system not found for this employer'
+      });
+    }
+
+    // Count registered workers
+    let registeredWorkers = 0;
+    for (const [workerKey, workerRecord] of workerTimeTracking.entries()) {
+      if (workerRecord.employerId === employerId) {
+        registeredWorkers++;
+      }
+    }
+
+    res.json({
+      success: true,
+      qrSystem: {
+        ...qrSystem,
+        workersRegistered: registeredWorkers
+      }
+    });
+
+  } catch (error) {
+    console.error('QR system retrieval error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve QR system data: ' + error.message
     });
   }
 });

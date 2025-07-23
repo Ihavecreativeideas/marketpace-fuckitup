@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Worker Tracking System - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            background: linear-gradient(135deg, #2a0845, #1a0033);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+        }
+
+        .header p {
+            color: #00ffff;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            padding: 12px 24px;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(0, 255, 255, 0.5);
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            color: #00ffff;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .worker-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .section-title {
+            color: #00ffff;
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .workers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .worker-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .worker-card:hover {
+            border-color: rgba(0, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .worker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .worker-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .worker-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status-checked-in {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+        }
+
+        .status-checked-out {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            color: #fff;
+        }
+
+        .worker-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .worker-stat {
+            text-align: center;
+        }
+
+        .worker-stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00ffff;
+        }
+
+        .worker-stat-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        .session-info {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+
+        .session-title {
+            color: #00ffff;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .session-details {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00ffff, #4169e1);
+            color: #000;
+        }
+
+        .btn-secondary {
+            background: rgba(0, 255, 255, 0.1);
+            color: #00ffff;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
+        }
+
+        .demo-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .demo-title {
+            color: #ffc107;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .demo-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-demo {
+            background: linear-gradient(135deg, #ffc107, #ff8f00);
+            color: #000;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-demo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: bold;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .workers-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .demo-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="javascript:history.back()" class="back-btn">
+            ← Back to Business Scheduling
+        </a>
+
+        <div class="header">
+            <h1>Enhanced Worker Tracking System</h1>
+            <p>Comprehensive individual worker management with detailed time tracking and geo-location validation</p>
+        </div>
+
+        <!-- Statistics Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Workers</h3>
+                <div class="stat-number" id="totalWorkers">6</div>
+                <div class="stat-label">Registered Employees</div>
+            </div>
+            <div class="stat-card">
+                <h3>Active Now</h3>
+                <div class="stat-number" id="activeWorkers">3</div>
+                <div class="stat-label">Currently Checked In</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Hours Today</h3>
+                <div class="stat-number" id="totalHours">24.5</div>
+                <div class="stat-label">Across All Workers</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Earnings</h3>
+                <div class="stat-number" id="totalEarnings">$367.50</div>
+                <div class="stat-label">Today's Payroll</div>
+            </div>
+        </div>
+
+        <!-- Individual Worker Tracking -->
+        <div class="worker-section">
+            <h2 class="section-title">
+                👥 Individual Worker Tracking
+            </h2>
+            <div class="workers-grid" id="workersGrid">
+                <!-- Workers will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Demo Section -->
+        <div class="demo-section">
+            <h3 class="demo-title">🧪 Live Demo: Test Worker Check-In/Out System</h3>
+            <div class="demo-buttons">
+                <button class="btn-demo" onclick="simulateCheckIn('sarah', 'Main Office')">
+                    Sarah Check-In (Main Office)
+                </button>
+                <button class="btn-demo" onclick="simulateCheckOut('mike')">
+                    Mike Check-Out
+                </button>
+                <button class="btn-demo" onclick="simulateCheckIn('jessica', 'Warehouse')">
+                    Jessica Check-In (Warehouse)
+                </button>
+                <button class="btn-demo" onclick="testGeoValidation()">
+                    Test Geo-Location Validation
+                </button>
+                <button class="btn-demo" onclick="generateTimeReport()">
+                    Generate Time Report
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Enhanced worker tracking data with detailed session information
+        let workersData = [
+            {
+                employeeId: 'emp_001',
+                employeeName: 'Sarah Johnson',
+                status: 'checked_in',
+                totalHours: 6.5,
+                totalEarnings: 97.50,
+                totalSessions: 3,
+                activeSessions: 1,
+                lastActivity: new Date(Date.now() - 30 * 60000).toISOString(), // 30 mins ago
+                currentSession: {
+                    sessionId: 'session_001',
+                    checkinTime: new Date(Date.now() - 2.5 * 60 * 60000).toISOString(), // 2.5 hours ago
+                    checkinLocation: 'Main Office',
+                    qrCodeId: 'universal_qr_employer_001'
+                },
+                averageHourlyRate: 15.00,
+                averageSessionLength: 4.2
+            },
+            {
+                employeeId: 'emp_002',
+                employeeName: 'Mike Chen',
+                status: 'checked_in',
+                totalHours: 8.0,
+                totalEarnings: 120.00,
+                totalSessions: 2,
+                activeSessions: 1,
+                lastActivity: new Date(Date.now() - 15 * 60000).toISOString(), // 15 mins ago
+                currentSession: {
+                    sessionId: 'session_002',
+                    checkinTime: new Date(Date.now() - 4 * 60 * 60000).toISOString(), // 4 hours ago
+                    checkinLocation: 'Warehouse',
+                    qrCodeId: 'universal_qr_employer_001'
+                },
+                averageHourlyRate: 15.00,
+                averageSessionLength: 4.0
+            },
+            {
+                employeeId: 'emp_003',
+                employeeName: 'Jessica Williams',
+                status: 'checked_out',
+                totalHours: 7.5,
+                totalEarnings: 112.50,
+                totalSessions: 2,
+                activeSessions: 0,
+                lastActivity: new Date(Date.now() - 2 * 60 * 60000).toISOString(), // 2 hours ago
+                lastSession: {
+                    sessionId: 'session_003',
+                    checkinTime: new Date(Date.now() - 9 * 60 * 60000).toISOString(),
+                    checkoutTime: new Date(Date.now() - 2 * 60 * 60000).toISOString(),
+                    checkinLocation: 'Main Office',
+                    checkoutLocation: 'Main Office',
+                    hoursWorked: 7.0,
+                    earnings: 105.00
+                },
+                averageHourlyRate: 15.00,
+                averageSessionLength: 3.75
+            },
+            {
+                employeeId: 'emp_004',
+                employeeName: 'David Rodriguez',
+                status: 'checked_in',
+                totalHours: 2.5,
+                totalEarnings: 37.50,
+                totalSessions: 1,
+                activeSessions: 1,
+                lastActivity: new Date(Date.now() - 45 * 60000).toISOString(), // 45 mins ago
+                currentSession: {
+                    sessionId: 'session_004',
+                    checkinTime: new Date(Date.now() - 2.5 * 60 * 60000).toISOString(),
+                    checkinLocation: 'Customer Site',
+                    qrCodeId: 'universal_qr_employer_001'
+                },
+                averageHourlyRate: 15.00,
+                averageSessionLength: 2.5
+            },
+            {
+                employeeId: 'emp_005',
+                employeeName: 'Lisa Thompson',
+                status: 'checked_out',
+                totalHours: 0,
+                totalEarnings: 0,
+                totalSessions: 0,
+                activeSessions: 0,
+                lastActivity: null,
+                averageHourlyRate: 15.00,
+                averageSessionLength: 0
+            },
+            {
+                employeeId: 'emp_006',
+                employeeName: 'Alex Kumar',
+                status: 'checked_out',
+                totalHours: 0,
+                totalEarnings: 0,
+                totalSessions: 0,
+                activeSessions: 0,
+                lastActivity: null,
+                averageHourlyRate: 15.00,
+                averageSessionLength: 0
+            }
+        ];
+
+        // Initialize the dashboard
+        function initializeDashboard() {
+            updateStatistics();
+            renderWorkers();
+        }
+
+        // Update overall statistics
+        function updateStatistics() {
+            const totalWorkers = workersData.length;
+            const activeWorkers = workersData.filter(w => w.status === 'checked_in').length;
+            const totalHours = workersData.reduce((sum, w) => sum + w.totalHours, 0);
+            const totalEarnings = workersData.reduce((sum, w) => sum + w.totalEarnings, 0);
+
+            document.getElementById('totalWorkers').textContent = totalWorkers;
+            document.getElementById('activeWorkers').textContent = activeWorkers;
+            document.getElementById('totalHours').textContent = totalHours.toFixed(1);
+            document.getElementById('totalEarnings').textContent = `$${totalEarnings.toFixed(2)}`;
+        }
+
+        // Render worker cards
+        function renderWorkers() {
+            const workersGrid = document.getElementById('workersGrid');
+            workersGrid.innerHTML = '';
+
+            workersData.forEach(worker => {
+                const workerCard = createWorkerCard(worker);
+                workersGrid.appendChild(workerCard);
+            });
+        }
+
+        // Create individual worker card
+        function createWorkerCard(worker) {
+            const card = document.createElement('div');
+            card.className = 'worker-card';
+            card.innerHTML = `
+                <div class="worker-header">
+                    <div class="worker-name">${worker.employeeName}</div>
+                    <div class="worker-status ${worker.status === 'checked_in' ? 'status-checked-in' : 'status-checked-out'}">
+                        ${worker.status === 'checked_in' ? '🟢 Checked In' : '🔴 Checked Out'}
+                    </div>
+                </div>
+                
+                <div class="worker-stats">
+                    <div class="worker-stat">
+                        <div class="worker-stat-value">${worker.totalHours.toFixed(1)}</div>
+                        <div class="worker-stat-label">Total Hours</div>
+                    </div>
+                    <div class="worker-stat">
+                        <div class="worker-stat-value">$${worker.totalEarnings.toFixed(2)}</div>
+                        <div class="worker-stat-label">Earnings</div>
+                    </div>
+                    <div class="worker-stat">
+                        <div class="worker-stat-value">${worker.totalSessions}</div>
+                        <div class="worker-stat-label">Sessions</div>
+                    </div>
+                    <div class="worker-stat">
+                        <div class="worker-stat-value">$${worker.averageHourlyRate.toFixed(2)}</div>
+                        <div class="worker-stat-label">Hourly Rate</div>
+                    </div>
+                </div>
+
+                ${worker.status === 'checked_in' && worker.currentSession ? `
+                    <div class="session-info">
+                        <div class="session-title">Current Session</div>
+                        <div class="session-details">
+                            • Location: ${worker.currentSession.checkinLocation}<br>
+                            • Started: ${new Date(worker.currentSession.checkinTime).toLocaleTimeString()}<br>
+                            • Duration: ${calculateCurrentSessionDuration(worker.currentSession.checkinTime)}<br>
+                            • QR Code: ${worker.currentSession.qrCodeId}
+                        </div>
+                    </div>
+                ` : ''}
+
+                ${worker.status === 'checked_out' && worker.lastSession ? `
+                    <div class="session-info">
+                        <div class="session-title">Last Session</div>
+                        <div class="session-details">
+                            • Location: ${worker.lastSession.checkinLocation}<br>
+                            • Duration: ${worker.lastSession.hoursWorked ? worker.lastSession.hoursWorked.toFixed(2) : 'N/A'} hours<br>
+                            • Earned: $${worker.lastSession.earnings ? worker.lastSession.earnings.toFixed(2) : '0.00'}<br>
+                            • Ended: ${worker.lastSession.checkoutTime ? new Date(worker.lastSession.checkoutTime).toLocaleTimeString() : 'N/A'}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div class="action-buttons">
+                    <a href="#" class="btn btn-primary" onclick="viewWorkerDetails('${worker.employeeId}')">
+                        View Details
+                    </a>
+                    <a href="#" class="btn btn-secondary" onclick="viewTimeReport('${worker.employeeId}')">
+                        Time Report
+                    </a>
+                </div>
+            `;
+            return card;
+        }
+
+        // Calculate current session duration
+        function calculateCurrentSessionDuration(checkinTime) {
+            const now = new Date();
+            const checkin = new Date(checkinTime);
+            const diffMs = now - checkin;
+            const diffHours = diffMs / (1000 * 60 * 60);
+            
+            if (diffHours < 1) {
+                const diffMinutes = Math.floor(diffMs / (1000 * 60));
+                return `${diffMinutes} minutes`;
+            } else {
+                return `${diffHours.toFixed(1)} hours`;
+            }
+        }
+
+        // Demo functions
+        function simulateCheckIn(workerName, location) {
+            const worker = workersData.find(w => w.employeeName.toLowerCase().includes(workerName.toLowerCase()));
+            if (worker) {
+                if (worker.status === 'checked_out') {
+                    worker.status = 'checked_in';
+                    worker.activeSessions = 1;
+                    worker.lastActivity = new Date().toISOString();
+                    worker.currentSession = {
+                        sessionId: `session_${Date.now()}`,
+                        checkinTime: new Date().toISOString(),
+                        checkinLocation: location,
+                        qrCodeId: 'universal_qr_employer_001'
+                    };
+                    
+                    showNotification(`✅ ${worker.employeeName} checked in at ${location}`, 'success');
+                    updateStatistics();
+                    renderWorkers();
+                } else {
+                    showNotification(`⚠️ ${worker.employeeName} is already checked in`, 'error');
+                }
+            }
+        }
+
+        function simulateCheckOut(workerName) {
+            const worker = workersData.find(w => w.employeeName.toLowerCase().includes(workerName.toLowerCase()));
+            if (worker && worker.status === 'checked_in' && worker.currentSession) {
+                const sessionDuration = (new Date() - new Date(worker.currentSession.checkinTime)) / (1000 * 60 * 60);
+                const earnings = sessionDuration * worker.averageHourlyRate;
+                
+                worker.status = 'checked_out';
+                worker.activeSessions = 0;
+                worker.totalHours += sessionDuration;
+                worker.totalEarnings += earnings;
+                worker.totalSessions += 1;
+                worker.lastActivity = new Date().toISOString();
+                
+                worker.lastSession = {
+                    ...worker.currentSession,
+                    checkoutTime: new Date().toISOString(),
+                    checkoutLocation: worker.currentSession.checkinLocation,
+                    hoursWorked: sessionDuration,
+                    earnings: earnings
+                };
+                
+                delete worker.currentSession;
+                
+                showNotification(`🕐 ${worker.employeeName} checked out - ${sessionDuration.toFixed(2)} hours, $${earnings.toFixed(2)} earned`, 'success');
+                updateStatistics();
+                renderWorkers();
+            } else {
+                showNotification(`⚠️ ${workerName} is not currently checked in`, 'error');
+            }
+        }
+
+        function testGeoValidation() {
+            showNotification('🗺️ Geo-location validation: Worker within 50m of registered location ✅', 'success');
+        }
+
+        function generateTimeReport() {
+            const activeWorkers = workersData.filter(w => w.status === 'checked_in').length;
+            const totalHours = workersData.reduce((sum, w) => sum + w.totalHours, 0);
+            const totalEarnings = workersData.reduce((sum, w) => sum + w.totalEarnings, 0);
+            
+            showNotification(`📊 Report: ${activeWorkers} active, ${totalHours.toFixed(1)} total hours, $${totalEarnings.toFixed(2)} total earnings`, 'success');
+        }
+
+        function viewWorkerDetails(employeeId) {
+            const worker = workersData.find(w => w.employeeId === employeeId);
+            if (worker) {
+                showNotification(`👤 Viewing detailed analytics for ${worker.employeeName}`, 'success');
+            }
+        }
+
+        function viewTimeReport(employeeId) {
+            const worker = workersData.find(w => w.employeeId === employeeId);
+            if (worker) {
+                showNotification(`📈 Generating comprehensive time report for ${worker.employeeName}`, 'success');
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        // Initialize dashboard on load
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
+
+        // Auto-refresh data every 30 seconds
+        setInterval(() => {
+            updateStatistics();
+        }, 30000);
+    </script>
+</body>
+</html>
