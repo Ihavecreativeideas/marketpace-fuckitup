@@ -137,6 +137,30 @@
             color: white;
         }
 
+        .date-selector {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 165, 0, 0.3);
+            border-radius: 8px;
+            color: white;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            min-width: 140px;
+            margin-left: 8px;
+        }
+
+        .date-selector:focus {
+            outline: none;
+            border-color: #ffa500;
+            box-shadow: 0 0 10px rgba(255, 165, 0, 0.3);
+        }
+
+        .date-selector option {
+            background: #1a0b3d;
+            color: white;
+        }
+
         /* Schedule Grid Layout */
         .schedule-container {
             max-width: 1400px;
@@ -393,6 +417,16 @@
                 gap: 6px;
             }
 
+            .view-toggle {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .date-selector {
+                margin-left: 0;
+                width: 100%;
+            }
+
             .schedule-container {
                 padding: 12px;
             }
@@ -506,6 +540,23 @@
             <div class="view-toggle">
                 <button class="view-btn active" onclick="switchView('schedule')" id="scheduleBtn">Schedule View</button>
                 <button class="view-btn" onclick="switchView('list')" id="listBtn">Artist List</button>
+                <select class="date-selector" onchange="searchByDate(this.value)" id="dateSelector">
+                    <option value="">Search by Date</option>
+                    <option value="2025-01-27">Jan 27 - Monday</option>
+                    <option value="2025-01-28">Jan 28 - Tuesday</option>
+                    <option value="2025-01-29">Jan 29 - Wednesday</option>
+                    <option value="2025-01-30">Jan 30 - Thursday</option>
+                    <option value="2025-01-31">Jan 31 - Friday</option>
+                    <option value="2025-02-01">Feb 1 - Saturday</option>
+                    <option value="2025-02-02">Feb 2 - Sunday</option>
+                    <option value="2025-02-03">Feb 3 - Monday</option>
+                    <option value="2025-02-04">Feb 4 - Tuesday</option>
+                    <option value="2025-02-05">Feb 5 - Wednesday</option>
+                    <option value="2025-02-06">Feb 6 - Thursday</option>
+                    <option value="2025-02-07">Feb 7 - Friday</option>
+                    <option value="2025-02-08">Feb 8 - Saturday</option>
+                    <option value="2025-02-09">Feb 9 - Sunday</option>
+                </select>
             </div>
         </div>
     </div>
@@ -635,7 +686,7 @@
             
             // Setup search functionality
             document.getElementById('searchInput').addEventListener('input', handleSearch);
-            document.getElementById('venueFilter').addEventListener('change', handleVenueFilter);
+            document.getElementById('venueFilter').addEventListener('change', handleSearch);
             
             console.log('Festival schedule initialized successfully');
         });
@@ -814,6 +865,7 @@
         function handleSearch() {
             const query = document.getElementById('searchInput').value.toLowerCase();
             const venueFilter = document.getElementById('venueFilter').value;
+            const dateFilter = document.getElementById('dateSelector').value;
             
             filteredData = festivalData.songwriters.filter(songwriter => {
                 const matchesSearch = query === '' || 
@@ -824,7 +876,15 @@
                 const matchesVenue = venueFilter === '' || 
                     songwriter.performances.some(p => p.venue === venueFilter);
                 
-                return matchesSearch && matchesVenue;
+                let matchesDate = true;
+                if (dateFilter) {
+                    const festivalStart = new Date('2025-01-27');
+                    const selectedDateObj = new Date(dateFilter);
+                    const daysDiff = Math.floor((selectedDateObj - festivalStart) / (1000 * 60 * 60 * 24));
+                    matchesDate = songwriter.performances.some(performance => performance.day === daysDiff);
+                }
+                
+                return matchesSearch && matchesVenue && matchesDate;
             });
             
             // Reload views with filtered data
@@ -832,9 +892,7 @@
             loadListView();
         }
 
-        function handleVenueFilter() {
-            handleSearch(); // Reuse search logic
-        }
+
 
         function openArtistProfile(artistId) {
             const artist = festivalData.songwriters.find(s => s.id === artistId);
@@ -842,6 +900,12 @@
                 // Open in new tab to view artist's MarketPace profile
                 window.open(artist.profileUrl, '_blank');
             }
+        }
+
+        function searchByDate(selectedDate) {
+            console.log(`Date selected: ${selectedDate}`);
+            // Use the combined search function to apply all filters together
+            handleSearch();
         }
 
         // Add some visual effects
