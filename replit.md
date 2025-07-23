@@ -272,6 +272,13 @@ All features are designed to strengthen local communities by keeping commerce lo
 
 ## Recent Changes
 
+✓ **SIMPLIFIED ACCOUNT ACCESS WITH DIRECT PERSONAL AND BUSINESS BUTTONS** (January 23, 2025)
+✓ **ACCOUNT SWITCHER MODAL REMOVED**: Completely removed complex account switcher modal from main menu per user request for simplified navigation
+✓ **DIRECT NAVIGATION BUTTONS**: Replaced with direct "Personal Account" and "Business Account" buttons that navigate immediately to respective profile pages
+✓ **ENHANCED USER EXPERIENCE**: Users now get instant access to their profiles without modal interactions or complex switching workflows
+✓ **CLEAN MENU DESIGN**: Simplified menu interface with purple-themed personal account button and gold-themed business account button with PRO badge
+✓ **STREAMLINED PROFILE ACCESS**: Direct navigation to profile.html for personal accounts and unified-pro-page.html for business accounts
+
 ✓ **BACK ARROW NAVIGATION ADDED TO BOTH PROFILE PAGES** (January 23, 2025)
 ✓ **SMART BACK NAVIGATION**: Added functional back arrow buttons to both profile.html and unified-pro-page.html headers for intuitive navigation
 ✓ **INTELLIGENT ROUTING**: Back arrow uses browser history when available, or defaults to community page for seamless user experience
@@ -283,7 +290,6 @@ All features are designed to strengthen local communities by keeping commerce lo
 ✓ **BOTTOM NAVIGATION MAINTAINED**: Kept consistent bottom navigation with Local Pace, Shops, Services, Rentals, @Hub, Eats, and Menu tabs for seamless marketplace access
 ✓ **SCROLL BEHAVIOR UPDATED**: Modified scroll behavior to only affect bottom navigation - hides when scrolling down and reappears when scrolling up
 ✓ **SIMPLIFIED PROFILE EXPERIENCE**: Profile pages now focus on content without floating header distractions while maintaining navigation consistency
-✓ **ENHANCED PROFILE ACCESS**: Business profile pages retain dedicated "Business Profile" menu item accessible through account switcher for seamless profile management
 
 ✓ **COMPREHENSIVE UI CLEANUP BY REMOVING ALL TINY UTILITY ICONS FROM MARKETPLACE PAGES COMPLETED** (January 22, 2025)
 ✓ **COMPLETE ICON REMOVAL**: Successfully removed ALL tiny utility icons (profile MP logo, search, message buttons) from floating headers across community.html, shops.html, services.html, rentals.html, food-and-drinks.html, the-hub.html
