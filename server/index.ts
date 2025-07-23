@@ -839,6 +839,140 @@ async function generateQuarterlyEstimates(yearData, businessId) {
 // Initialize expense categories on startup
 initializeExpenseCategories();
 
+// ========== MEMBER TAX EXPENSE TRACKING SYSTEM ==========
+
+// In-memory storage for member tax expenses (replace with database in production)
+const memberTaxExpenses: Record<string, any[]> = {};
+
+// Track private party delivery mileage for tax deductions
+app.post('/api/member-tax/track-delivery', (req: any, res: any) => {
+  try {
+    const { memberId, miles, destination, deliveryType = 'private_party' } = req.body;
+    
+    if (!memberId || !miles || miles <= 0) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Member ID and valid mileage required' 
+      });
+    }
+
+    const mileageRate = 0.67; // 2024 IRS standard mileage rate
+    const deduction = miles * mileageRate;
+    const currentYear = new Date().getFullYear();
+
+    const expenseData = {
+      id: Date.now(),
+      memberId,
+      type: 'mileage',
+      amount: deduction,
+      miles: miles,
+      rate: mileageRate,
+      description: `Private party delivery to ${destination || 'customer'} (${miles} miles @ $${mileageRate}/mile)`,
+      category: 'travel',
+      deliveryType,
+      date: new Date().toISOString().split('T')[0],
+      timestamp: new Date().toISOString(),
+      year: currentYear,
+      autoTracked: true
+    };
+
+    // Store in member tax expenses
+    if (!memberTaxExpenses[memberId]) {
+      memberTaxExpenses[memberId] = [];
+    }
+    memberTaxExpenses[memberId].push(expenseData);
+
+    res.json({
+      success: true,
+      expense: expenseData,
+      message: `Tracked ${miles} business miles ($${deduction.toFixed(2)} tax deduction)`
+    });
+
+  } catch (error) {
+    console.error('Error tracking delivery mileage:', error);
+    res.status(500).json({ success: false, error: 'Failed to track delivery mileage' });
+  }
+});
+
+// Track advertising spend for tax deductions
+app.post('/api/member-tax/track-ad-spend', (req: any, res: any) => {
+  try {
+    const { memberId, amount, platform, description, campaignType } = req.body;
+    
+    if (!memberId || !amount || amount <= 0) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Member ID and valid amount required' 
+      });
+    }
+
+    const currentYear = new Date().getFullYear();
+
+    const expenseData = {
+      id: Date.now(),
+      memberId,
+      type: 'advertising',
+      amount: parseFloat(amount),
+      description: `${platform} advertising: ${description || 'MarketPace promotion'}`,
+      category: 'advertising',
+      platform: platform || 'marketpace',
+      campaignType,
+      date: new Date().toISOString().split('T')[0],
+      timestamp: new Date().toISOString(),
+      year: currentYear,
+      autoTracked: true
+    };
+
+    // Store in member tax expenses
+    if (!memberTaxExpenses[memberId]) {
+      memberTaxExpenses[memberId] = [];
+    }
+    memberTaxExpenses[memberId].push(expenseData);
+
+    res.json({
+      success: true,
+      expense: expenseData,
+      message: `Tracked $${amount} advertising expense`
+    });
+
+  } catch (error) {
+    console.error('Error tracking ad spend:', error);
+    res.status(500).json({ success: false, error: 'Failed to track ad spend' });
+  }
+});
+
+// Get member tax expenses for a year  
+app.get('/api/member-tax/expenses/:memberId/:year', (req: any, res: any) => {
+  try {
+    const { memberId, year } = req.params;
+    const targetYear = year ? parseInt(year) : new Date().getFullYear();
+    
+    const memberExpenses = memberTaxExpenses[memberId] || [];
+    const yearExpenses = memberExpenses.filter(expense => expense.year === targetYear);
+    
+    const summary = {
+      totalExpenses: yearExpenses.reduce((sum, exp) => sum + exp.amount, 0),
+      adSpend: yearExpenses.filter(exp => exp.type === 'advertising').reduce((sum, exp) => sum + exp.amount, 0),
+      mileage: {
+        totalMiles: yearExpenses.filter(exp => exp.type === 'mileage').reduce((sum, exp) => sum + (exp.miles || 0), 0),
+        deduction: yearExpenses.filter(exp => exp.type === 'mileage').reduce((sum, exp) => sum + exp.amount, 0)
+      },
+      expenseCount: yearExpenses.length,
+      year: targetYear
+    };
+
+    res.json({
+      success: true,
+      expenses: yearExpenses,
+      summary
+    });
+
+  } catch (error) {
+    console.error('Error retrieving member tax expenses:', error);
+    res.status(500).json({ success: false, error: 'Failed to retrieve tax expenses' });
+  }
+});
+
 // ========== 1099-K PAYMENT PROCESSOR TRACKING SYSTEM ==========
 
 // Track PayPal transactions for 1099-K compliance
