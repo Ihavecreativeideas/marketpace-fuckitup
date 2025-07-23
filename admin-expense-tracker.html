@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Development Expense Tracker - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a0b3d 0%, #6b46c1 100%);
+            font-family: 'Arial', sans-serif;
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ef4444, #ff9800);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .expense-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #ef4444;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stats-card {
+            background: rgba(239, 68, 68, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .stats-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ef4444;
+            margin-bottom: 5px;
+        }
+
+        .stats-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .tax-benefit {
+            color: #10b981;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            color: #ef4444;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input, .form-group select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ef4444, #dc2626);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #10b981, #059669);
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, #ffc107, #f59e0b);
+        }
+
+        .expense-log {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .deduction-categories {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .category-item {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .category-title {
+            color: #ef4444;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .category-description {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .category-example {
+            color: #10b981;
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: rgba(16, 185, 129, 0.9);
+        }
+
+        .annual-summary {
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid #10b981;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .tax-year-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .year-btn {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #ef4444;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .year-btn.active {
+            background: #ef4444;
+            color: white;
+        }
+
+        .tax-tips {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1));
+            border: 2px solid rgba(255, 193, 7, 0.4);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">💰 Admin Development Expense Tracker</h1>
+            <p class="subtitle">Track Replit Development Costs & Business Expenses for Tax Write-offs</p>
+        </div>
+
+        <!-- Tax Year Selector -->
+        <div class="tax-year-selector">
+            <button class="year-btn" onclick="switchTaxYear(2023)">2023</button>
+            <button class="year-btn active" onclick="switchTaxYear(2024)">2024</button>
+            <button class="year-btn" onclick="switchTaxYear(2025)">2025</button>
+        </div>
+
+        <!-- Annual Summary -->
+        <div class="annual-summary">
+            <h2 style="color: #10b981; margin-bottom: 15px;">📊 <span id="currentTaxYear">2024</span> Tax Year Summary</h2>
+            
+            <div class="stats-grid">
+                <div class="stats-card">
+                    <div class="stats-value" id="totalExpenses">$0.00</div>
+                    <div class="stats-label">Total Deductible Expenses</div>
+                    <div class="tax-benefit">Est. Tax Savings: <span id="taxSavings">$0.00</span></div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-value" id="replitCosts">$0.00</div>
+                    <div class="stats-label">Replit Development Costs</div>
+                    <div class="tax-benefit">100% Business Use</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-value" id="totalCategories">0</div>
+                    <div class="stats-label">Expense Categories</div>
+                    <div class="tax-benefit">Organized for Tax Filing</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-value" id="quarterlyExpenses">Q4: $0.00</div>
+                    <div class="stats-label">Current Quarter</div>
+                    <div class="tax-benefit">Ready for Estimated Taxes</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Expense Section -->
+        <div class="expense-section">
+            <h2 class="section-title">💸 Record Development Expense</h2>
+            
+            <form onsubmit="recordExpense(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Expense Amount</label>
+                        <input type="number" id="expenseAmount" step="0.01" placeholder="89.99" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Expense Description</label>
+                        <input type="text" id="expenseDescription" placeholder="Replit Pro Subscription - MarketPace Development" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Expense Category</label>
+                        <select id="expenseCategory" required>
+                            <option value="">Select Category</option>
+                            <option value="software_subscriptions">Software Subscriptions</option>
+                            <option value="development_tools">Development Tools</option>
+                            <option value="hosting_services">Hosting & Cloud Services</option>
+                            <option value="business_software">Business Software</option>
+                            <option value="professional_services">Professional Services</option>
+                            <option value="marketing_advertising">Marketing & Advertising</option>
+                            <option value="office_supplies">Office Supplies</option>
+                            <option value="internet_phone">Internet & Phone</option>
+                            <option value="education_training">Education & Training</option>
+                            <option value="travel_business">Business Travel</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Method</label>
+                        <select id="paymentMethod" required>
+                            <option value="credit_card">Business Credit Card</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                            <option value="paypal">PayPal</option>
+                            <option value="cash">Cash</option>
+                            <option value="check">Check</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Expense Date</label>
+                        <input type="date" id="expenseDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Business Use %</label>
+                        <select id="businessUse">
+                            <option value="100">100% - Exclusively Business</option>
+                            <option value="75">75% - Mostly Business</option>
+                            <option value="50">50% - Mixed Use</option>
+                            <option value="25">25% - Limited Business</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn">Record Expense</button>
+            </form>
+
+            <div style="margin-top: 20px;">
+                <h3 style="color: #ef4444; margin-bottom: 10px;">Quick Replit Expense Presets</h3>
+                <button class="btn" onclick="addReplitSubscription()">Replit Pro ($20/month)</button>
+                <button class="btn" onclick="addReplitCycles()">Replit Cycles ($50)</button>
+                <button class="btn" onclick="addDomainCosts()">Domain Registration ($15)</button>
+                <button class="btn btn-warning" onclick="exportTaxReport()">Export Tax Report</button>
+            </div>
+        </div>
+
+        <!-- Tax-Deductible Categories Guide -->
+        <div class="expense-section">
+            <h2 class="section-title">📋 Tax-Deductible Business Expense Categories</h2>
+            
+            <div class="deduction-categories">
+                <div class="category-item">
+                    <div class="category-title">Software Subscriptions & Development Tools</div>
+                    <div class="category-description">100% deductible software used exclusively for business development</div>
+                    <div class="category-example">Examples: Replit Pro, GitHub Pro, AWS services, domain hosting</div>
+                </div>
+                
+                <div class="category-item">
+                    <div class="category-title">Internet & Communication Expenses</div>
+                    <div class="category-description">Business portion of internet, phone, and communication services</div>
+                    <div class="category-example">Examples: Business internet (100%), business phone line, video conferencing tools</div>
+                </div>
+                
+                <div class="category-item">
+                    <div class="category-title">Home Office Expenses (Simplified Method)</div>
+                    <div class="category-description">$5 per square foot of home used exclusively for business (max 300 sq ft = $1,500/year)</div>
+                    <div class="category-example">Examples: Dedicated office space for MarketPace development</div>
+                </div>
+                
+                <div class="category-item">
+                    <div class="category-title">Business Equipment & Supplies</div>
+                    <div class="category-description">Computers, monitors, keyboards, office supplies used for business</div>
+                    <div class="category-example">Examples: Development laptops, monitors, external drives, office supplies</div>
+                </div>
+                
+                <div class="category-item">
+                    <div class="category-title">Marketing & Advertising Costs</div>
+                    <div class="category-description">Expenses to promote MarketPace and acquire customers</div>
+                    <div class="category-example">Examples: Facebook ads, Google ads, website design, business cards</div>
+                </div>
+                
+                <div class="category-item">
+                    <div class="category-title">Professional Services & Consulting</div>
+                    <div class="category-description">Legal, accounting, consulting fees related to business operations</div>
+                    <div class="category-example">Examples: Tax preparation, legal consultation, business consulting</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tax Tips Section -->
+        <div class="tax-tips">
+            <h3 style="color: #ffc107; margin-bottom: 15px;">💡 Important Tax Tips for MarketPace Development</h3>
+            <ul style="color: rgba(255,255,255,0.9); line-height: 1.6; padding-left: 20px;">
+                <li><strong>Keep Detailed Records:</strong> Save all receipts, invoices, and documentation for every business expense</li>
+                <li><strong>Separate Business & Personal:</strong> Use dedicated business bank account and credit card for clear financial records</li>
+                <li><strong>Replit Development Costs:</strong> 100% deductible as software development expenses for MarketPace business</li>
+                <li><strong>Home Office Deduction:</strong> Use simplified method ($5/sq ft, max 300 sq ft) for easier calculation</li>
+                <li><strong>Quarterly Estimated Taxes:</strong> If you owe $1,000+ in taxes, pay quarterly using Form 1040-ES</li>
+                <li><strong>Business vs Hobby:</strong> Show profit intent and regular business activity to qualify for deductions</li>
+                <li><strong>Professional Consultation:</strong> Consult with a CPA for personalized tax advice and optimization</li>
+            </ul>
+        </div>
+
+        <!-- Expense Log -->
+        <div class="expense-section">
+            <h2 class="section-title">📜 Recent Expenses Log</h2>
+            <div id="expenseLog" class="expense-log">
+                Loading recent expenses...
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        let currentTaxYear = 2024;
+        let expenses = JSON.parse(localStorage.getItem('adminExpenses')) || {};
+
+        function switchTaxYear(year) {
+            currentTaxYear = year;
+            document.getElementById('currentTaxYear').textContent = year;
+            
+            // Update active button
+            document.querySelectorAll('.year-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            updateExpenseSummary();
+            updateExpenseLog();
+        }
+
+        function recordExpense(event) {
+            event.preventDefault();
+            
+            const expenseData = {
+                amount: parseFloat(document.getElementById('expenseAmount').value),
+                description: document.getElementById('expenseDescription').value,
+                category: document.getElementById('expenseCategory').value,
+                paymentMethod: document.getElementById('paymentMethod').value,
+                date: document.getElementById('expenseDate').value,
+                businessUse: parseInt(document.getElementById('businessUse').value),
+                timestamp: new Date().toISOString(),
+                taxYear: currentTaxYear,
+                deductibleAmount: parseFloat(document.getElementById('expenseAmount').value) * (parseInt(document.getElementById('businessUse').value) / 100)
+            };
+
+            // Add to expenses
+            if (!expenses[currentTaxYear]) {
+                expenses[currentTaxYear] = [];
+            }
+            expenses[currentTaxYear].push(expenseData);
+            
+            // Save to localStorage
+            localStorage.setItem('adminExpenses', JSON.stringify(expenses));
+            
+            // Update display
+            updateExpenseSummary();
+            updateExpenseLog();
+            
+            // Clear form
+            document.querySelector('form').reset();
+            document.getElementById('expenseDate').value = new Date().toISOString().split('T')[0];
+            
+            showNotification(`✅ Expense recorded: $${expenseData.amount.toFixed(2)} (${expenseData.category})`, 'success');
+        }
+
+        function addReplitSubscription() {
+            document.getElementById('expenseAmount').value = '20.00';
+            document.getElementById('expenseDescription').value = 'Replit Pro Subscription - MarketPace Development';
+            document.getElementById('expenseCategory').value = 'software_subscriptions';
+            document.getElementById('paymentMethod').value = 'credit_card';
+            document.getElementById('businessUse').value = '100';
+            document.getElementById('expenseDate').value = new Date().toISOString().split('T')[0];
+        }
+
+        function addReplitCycles() {
+            document.getElementById('expenseAmount').value = '50.00';
+            document.getElementById('expenseDescription').value = 'Replit Cycles - MarketPace Development Resources';
+            document.getElementById('expenseCategory').value = 'development_tools';
+            document.getElementById('paymentMethod').value = 'credit_card';
+            document.getElementById('businessUse').value = '100';
+            document.getElementById('expenseDate').value = new Date().toISOString().split('T')[0];
+        }
+
+        function addDomainCosts() {
+            document.getElementById('expenseAmount').value = '15.00';
+            document.getElementById('expenseDescription').value = 'Domain Registration - MarketPace.shop';
+            document.getElementById('expenseCategory').value = 'hosting_services';
+            document.getElementById('paymentMethod').value = 'credit_card';
+            document.getElementById('businessUse').value = '100';
+            document.getElementById('expenseDate').value = new Date().toISOString().split('T')[0];
+        }
+
+        function updateExpenseSummary() {
+            const yearExpenses = expenses[currentTaxYear] || [];
+            
+            const totalExpenses = yearExpenses.reduce((sum, exp) => sum + exp.deductibleAmount, 0);
+            const replitCosts = yearExpenses
+                .filter(exp => exp.description.toLowerCase().includes('replit'))
+                .reduce((sum, exp) => sum + exp.deductibleAmount, 0);
+            const categories = [...new Set(yearExpenses.map(exp => exp.category))].length;
+            
+            // Calculate current quarter expenses
+            const currentQuarter = Math.ceil((new Date().getMonth() + 1) / 3);
+            const quarterStart = new Date(currentTaxYear, (currentQuarter - 1) * 3, 1);
+            const quarterEnd = new Date(currentTaxYear, currentQuarter * 3, 0);
+            
+            const quarterlyExpenses = yearExpenses
+                .filter(exp => {
+                    const expDate = new Date(exp.date);
+                    return expDate >= quarterStart && expDate <= quarterEnd;
+                })
+                .reduce((sum, exp) => sum + exp.deductibleAmount, 0);
+            
+            // Estimated tax savings (25% tax bracket)
+            const taxSavings = totalExpenses * 0.25;
+            
+            document.getElementById('totalExpenses').textContent = `$${totalExpenses.toFixed(2)}`;
+            document.getElementById('replitCosts').textContent = `$${replitCosts.toFixed(2)}`;
+            document.getElementById('totalCategories').textContent = categories;
+            document.getElementById('quarterlyExpenses').textContent = `Q${currentQuarter}: $${quarterlyExpenses.toFixed(2)}`;
+            document.getElementById('taxSavings').textContent = `$${taxSavings.toFixed(2)}`;
+        }
+
+        function updateExpenseLog() {
+            const yearExpenses = expenses[currentTaxYear] || [];
+            
+            let logText = `📊 ${currentTaxYear} ADMIN DEVELOPMENT EXPENSES (${yearExpenses.length} total)\n\n`;
+            
+            if (yearExpenses.length === 0) {
+                logText += 'No expenses recorded for this tax year.\n';
+                logText += 'Start recording your Replit development costs and business expenses.\n';
+            } else {
+                const recentExpenses = yearExpenses.slice(-15).reverse();
+                
+                // Group by category
+                const categoryTotals = {};
+                yearExpenses.forEach(exp => {
+                    if (!categoryTotals[exp.category]) {
+                        categoryTotals[exp.category] = 0;
+                    }
+                    categoryTotals[exp.category] += exp.deductibleAmount;
+                });
+                
+                logText += '📋 CATEGORY BREAKDOWN:\n';
+                Object.entries(categoryTotals).forEach(([category, total]) => {
+                    const categoryName = category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    logText += `   ${categoryName}: $${total.toFixed(2)}\n`;
+                });
+                
+                logText += '\n📜 RECENT EXPENSES:\n';
+                recentExpenses.forEach((exp, index) => {
+                    logText += `${index + 1}. $${exp.amount.toFixed(2)} - ${exp.description}\n`;
+                    logText += `   Date: ${new Date(exp.date).toLocaleDateString()}\n`;
+                    logText += `   Category: ${exp.category.replace(/_/g, ' ')}\n`;
+                    logText += `   Business Use: ${exp.businessUse}% (Deductible: $${exp.deductibleAmount.toFixed(2)})\n`;
+                    logText += `   Payment: ${exp.paymentMethod.replace(/_/g, ' ')}\n\n`;
+                });
+                
+                if (yearExpenses.length > 15) {
+                    logText += `... and ${yearExpenses.length - 15} more expenses\n`;
+                }
+                
+                // Add tax filing reminder
+                logText += '\n💡 TAX FILING REMINDERS:\n';
+                logText += '• Keep all receipts and documentation\n';
+                logText += '• Separate business and personal expenses\n';
+                logText += '• Consider quarterly estimated tax payments\n';
+                logText += '• Consult with a tax professional for guidance\n';
+            }
+            
+            document.getElementById('expenseLog').textContent = logText;
+        }
+
+        function exportTaxReport() {
+            const yearExpenses = expenses[currentTaxYear] || [];
+            
+            if (yearExpenses.length === 0) {
+                showNotification('No expenses to export for ' + currentTaxYear, 'error');
+                return;
+            }
+            
+            let reportText = `MARKETPACE ADMIN DEVELOPMENT EXPENSE REPORT - ${currentTaxYear}\n`;
+            reportText += '═══════════════════════════════════════════════════════════════\n\n';
+            
+            const totalExpenses = yearExpenses.reduce((sum, exp) => sum + exp.deductibleAmount, 0);
+            const taxSavings = totalExpenses * 0.25;
+            
+            reportText += `SUMMARY:\n`;
+            reportText += `Total Deductible Expenses: $${totalExpenses.toFixed(2)}\n`;
+            reportText += `Estimated Tax Savings (25%): $${taxSavings.toFixed(2)}\n\n`;
+            
+            // Group by category
+            const categoryTotals = {};
+            yearExpenses.forEach(exp => {
+                if (!categoryTotals[exp.category]) {
+                    categoryTotals[exp.category] = { total: 0, count: 0 };
+                }
+                categoryTotals[exp.category].total += exp.deductibleAmount;
+                categoryTotals[exp.category].count++;
+            });
+            
+            reportText += 'EXPENSE BREAKDOWN BY CATEGORY:\n';
+            Object.entries(categoryTotals).forEach(([category, data]) => {
+                const categoryName = category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                reportText += `${categoryName}: $${data.total.toFixed(2)} (${data.count} expenses)\n`;
+            });
+            
+            reportText += '\nDETAILED EXPENSE LIST:\n';
+            yearExpenses.forEach((exp, index) => {
+                reportText += `${index + 1}. ${new Date(exp.date).toLocaleDateString()} - $${exp.amount.toFixed(2)}\n`;
+                reportText += `   Description: ${exp.description}\n`;
+                reportText += `   Category: ${exp.category.replace(/_/g, ' ')}\n`;
+                reportText += `   Business Use: ${exp.businessUse}% (Deductible: $${exp.deductibleAmount.toFixed(2)})\n`;
+                reportText += `   Payment Method: ${exp.paymentMethod.replace(/_/g, ' ')}\n\n`;
+            });
+            
+            reportText += 'IMPORTANT NOTES:\n';
+            reportText += '• Keep all receipts and supporting documentation\n';
+            reportText += '• Verify business use percentages are accurate\n';
+            reportText += '• Consult with a tax professional for guidance\n';
+            reportText += '• This report is for reference only, not official tax advice\n';
+            
+            // Create and download file
+            const blob = new Blob([reportText], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `MarketPace_Admin_Expenses_${currentTaxYear}.txt`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            showNotification(`📄 Tax report exported for ${currentTaxYear}`, 'success');
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        // Initialize
+        document.getElementById('expenseDate').value = new Date().toISOString().split('T')[0];
+        updateExpenseSummary();
+        updateExpenseLog();
+    </script>
+</body>
+</html>
