@@ -287,11 +287,12 @@ All features are designed to strengthen local communities by keeping commerce lo
 ✓ **CLEAN MENU DESIGN**: Simplified menu interface with purple-themed personal account button and gold-themed business account button with PRO badge
 ✓ **STREAMLINED PROFILE ACCESS**: Direct navigation to profile.html for personal accounts and unified-pro-page.html for business accounts
 
-✓ **BACK ARROW NAVIGATION ADDED TO BOTH PROFILE PAGES** (January 23, 2025)
-✓ **SMART BACK NAVIGATION**: Added functional back arrow buttons to both profile.html and unified-pro-page.html headers for intuitive navigation
-✓ **INTELLIGENT ROUTING**: Back arrow uses browser history when available, or defaults to community page for seamless user experience
-✓ **FUTURISTIC BUTTON DESIGN**: Circular teal-themed back arrow buttons with hover effects matching platform's visual design language
-✓ **ENHANCED USER EXPERIENCE**: Users can now easily navigate back from profile pages without relying solely on bottom navigation
+✓ **BACK ARROW NAVIGATION FIXED WITH DIRECT MENU NAVIGATION** (January 23, 2025)
+✓ **DIRECT NAVIGATION IMPLEMENTATION**: Fixed circular navigation issue by implementing direct navigation to MarketPace menu instead of browser history
+✓ **SIMPLIFIED ONCLICK HANDLERS**: Both profile pages now use `window.location.href='/marketpace-menu.html'` for reliable back button functionality
+✓ **CIRCULAR NAVIGATION ELIMINATED**: Replaced problematic `history.back()` and complex goBack functions with simple direct navigation approach
+✓ **CONSISTENT BACK BUTTON BEHAVIOR**: Both personal (profile.html) and business (unified-pro-page.html) profiles now reliably navigate to main menu
+✓ **ENHANCED USER EXPERIENCE**: Users can now successfully exit profile pages and return to the MarketPace menu without navigation loops
 
 ✓ **FLOATING HEADER REMOVED FROM PROFILE PAGES PER USER REQUEST** (January 23, 2025)
 ✓ **CLEAN PROFILE DESIGN**: Removed floating header (top bar) from both profile.html and unified-pro-page.html for cleaner, less cluttered interface
