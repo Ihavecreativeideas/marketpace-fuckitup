@@ -32,6 +32,18 @@ const { sendEmployeeInvitation } = require('./employeeInvitation.js');
 // Import driver invitation module
 const { sendDriverInvitation } = require('./driverInvitation.js');
 
+// Initialize data storage Maps early to prevent initialization errors
+const workerTimeTracking = new Map();
+const employerQRSystems = new Map();
+const deliveryTracking = new Map();
+const rentalVerification = new Map();
+const purchaseVerification = new Map();
+const businessOperations = new Map();
+const taxRecords = new Map();
+const expenseCategories = new Map();
+const incomeTracking = new Map();
+const taxDocuments = new Map();
+
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -371,6 +383,459 @@ function calculateAverageDeliveryTime(deliveries) {
   const completedDeliveries = deliveries.filter(d => d.status === 'delivered');
   return completedDeliveries.length > 0 ? 25 : 0; // Average 25 minutes
 }
+
+// ========== TAX MANAGEMENT SYSTEM (QuickBooks-Style) ==========
+
+// Initialize standard expense categories
+const initializeExpenseCategories = () => {
+  const categories = [
+    { id: 'office_supplies', name: 'Office Supplies', deductible: true, category: 'business' },
+    { id: 'vehicle_expenses', name: 'Vehicle & Travel', deductible: true, category: 'business' },
+    { id: 'marketing', name: 'Advertising & Marketing', deductible: true, category: 'business' },
+    { id: 'equipment', name: 'Equipment & Software', deductible: true, category: 'business' },
+    { id: 'utilities', name: 'Utilities', deductible: true, category: 'business' },
+    { id: 'rent', name: 'Rent & Facilities', deductible: true, category: 'business' },
+    { id: 'professional_services', name: 'Professional Services', deductible: true, category: 'business' },
+    { id: 'meals', name: 'Meals & Entertainment', deductible: true, category: 'business', deductionRate: 0.5 },
+    { id: 'insurance', name: 'Business Insurance', deductible: true, category: 'business' },
+    { id: 'bank_fees', name: 'Bank & Credit Card Fees', deductible: true, category: 'business' }
+  ];
+  
+  categories.forEach(cat => expenseCategories.set(cat.id, cat));
+};
+
+// Tax Record Management
+app.post('/api/tax/record-transaction', async (req, res) => {
+  try {
+    const { 
+      businessId, 
+      type, // 'income', 'expense', 'payment'
+      amount, 
+      description, 
+      category, 
+      date, 
+      receiptUrl,
+      taxYear,
+      paymentMethod,
+      vendorInfo 
+    } = req.body;
+
+    const transactionId = `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    const taxRecord = {
+      transactionId,
+      businessId,
+      type,
+      amount: parseFloat(amount),
+      description,
+      category,
+      date: date || new Date().toISOString(),
+      receiptUrl,
+      taxYear: taxYear || new Date().getFullYear(),
+      paymentMethod,
+      vendorInfo,
+      timestamp: new Date().toISOString(),
+      deductible: type === 'expense' ? calculateDeductible(category, amount) : null,
+      quarterlyPeriod: Math.ceil(new Date(date || Date.now()).getMonth() / 3)
+    };
+
+    // Store transaction
+    taxRecords.set(transactionId, taxRecord);
+    
+    // Update income/expense tracking
+    const trackingKey = `${businessId}_${taxYear}`;
+    if (!incomeTracking.has(trackingKey)) {
+      incomeTracking.set(trackingKey, {
+        businessId,
+        taxYear,
+        totalIncome: 0,
+        totalExpenses: 0,
+        deductibleExpenses: 0,
+        quarterlyBreakdown: { Q1: 0, Q2: 0, Q3: 0, Q4: 0 },
+        transactions: []
+      });
+    }
+    
+    const tracking = incomeTracking.get(trackingKey);
+    tracking.transactions.push(transactionId);
+    
+    if (type === 'income') {
+      tracking.totalIncome += parseFloat(amount);
+      tracking.quarterlyBreakdown[`Q${taxRecord.quarterlyPeriod}`] += parseFloat(amount);
+    } else if (type === 'expense') {
+      tracking.totalExpenses += parseFloat(amount);
+      tracking.deductibleExpenses += taxRecord.deductible || 0;
+    }
+
+    res.json({ 
+      success: true, 
+      transactionId, 
+      taxRecord,
+      yearlyTotals: tracking,
+      message: 'Transaction recorded for tax purposes' 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Generate Tax Reports (Similar to QuickBooks Reports)
+app.get('/api/tax/reports/:businessId/:taxYear', async (req, res) => {
+  try {
+    const { businessId, taxYear } = req.params;
+    const { reportType } = req.query; // 'profit_loss', 'expense_summary', 'quarterly', '1099_prep'
+    
+    const trackingKey = `${businessId}_${taxYear}`;
+    const yearData = incomeTracking.get(trackingKey);
+    
+    if (!yearData) {
+      return res.status(404).json({ success: false, error: 'No tax data found for this year' });
+    }
+
+    // Get all transactions for this business/year
+    const transactions = yearData.transactions.map(txId => taxRecords.get(txId)).filter(Boolean);
+    
+    let report = {};
+    
+    switch (reportType) {
+      case 'profit_loss':
+        report = generateProfitLossReport(transactions, yearData);
+        break;
+      case 'expense_summary':
+        report = generateExpenseSummaryReport(transactions);
+        break;
+      case 'quarterly':
+        report = generateQuarterlyReport(transactions, yearData);
+        break;
+      case '1099_prep':
+        report = generate1099PrepReport(transactions, yearData);
+        break;
+      default:
+        report = generateComprehensiveReport(transactions, yearData);
+    }
+
+    res.json({ 
+      success: true, 
+      reportType: reportType || 'comprehensive',
+      taxYear: parseInt(taxYear),
+      businessId,
+      report 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Mileage Tracking for Tax Deductions
+app.post('/api/tax/mileage', async (req, res) => {
+  try {
+    const { 
+      businessId, 
+      startLocation, 
+      endLocation, 
+      miles, 
+      purpose, 
+      date,
+      odometer 
+    } = req.body;
+
+    const mileageId = `mile_${Date.now()}`;
+    const taxYear = new Date(date).getFullYear();
+    const mileageRate = 0.655; // 2024 IRS standard mileage rate
+    
+    const mileageRecord = {
+      mileageId,
+      businessId,
+      startLocation,
+      endLocation,
+      miles: parseFloat(miles),
+      purpose,
+      date,
+      odometer,
+      taxYear,
+      deductionAmount: parseFloat(miles) * mileageRate,
+      timestamp: new Date().toISOString()
+    };
+
+    // Also record as tax expense
+    await recordMileageAsExpense(mileageRecord);
+    
+    res.json({ 
+      success: true, 
+      mileageRecord,
+      deductionAmount: mileageRecord.deductionAmount,
+      message: 'Mileage recorded for tax deduction' 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Expense Receipt Upload and OCR Processing
+app.post('/api/tax/upload-receipt', async (req, res) => {
+  try {
+    const { businessId, receiptImage, notes, category } = req.body;
+    
+    // In production, this would use OCR service like AWS Textract
+    const ocrData = await processReceiptOCR(receiptImage);
+    
+    const receiptRecord = {
+      receiptId: `receipt_${Date.now()}`,
+      businessId,
+      receiptImage,
+      extractedData: ocrData,
+      notes,
+      category,
+      verificationStatus: 'pending_review',
+      uploadDate: new Date().toISOString()
+    };
+
+    // Auto-create tax transaction if OCR confidence is high
+    if (ocrData.confidence > 0.8) {
+      const autoTransaction = {
+        businessId,
+        type: 'expense',
+        amount: ocrData.total,
+        description: ocrData.vendor || 'Expense from receipt',
+        category: category || 'office_supplies',
+        date: ocrData.date || new Date().toISOString(),
+        receiptUrl: receiptRecord.receiptId,
+        taxYear: new Date().getFullYear(),
+        paymentMethod: ocrData.paymentMethod,
+        vendorInfo: ocrData.vendor
+      };
+      
+      // Automatically record the transaction
+      const autoTxResponse = await fetch('/api/tax/record-transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(autoTransaction)
+      });
+    }
+
+    res.json({ 
+      success: true, 
+      receiptRecord,
+      autoProcessed: ocrData.confidence > 0.8,
+      message: 'Receipt uploaded and processed' 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Tax Document Generation (1099, Schedule C, etc.)
+app.post('/api/tax/generate-forms', async (req, res) => {
+  try {
+    const { businessId, taxYear, formTypes } = req.body; // ['1099', 'schedule_c', 'quarterly_es']
+    
+    const trackingKey = `${businessId}_${taxYear}`;
+    const yearData = incomeTracking.get(trackingKey);
+    
+    if (!yearData) {
+      return res.status(404).json({ success: false, error: 'No tax data available' });
+    }
+
+    const generatedForms = {};
+    
+    for (const formType of formTypes) {
+      switch (formType) {
+        case '1099':
+          generatedForms.form1099 = await generate1099Form(yearData, businessId);
+          break;
+        case 'schedule_c':
+          generatedForms.scheduleC = await generateScheduleC(yearData, businessId);
+          break;
+        case 'quarterly_es':
+          generatedForms.quarterlyES = await generateQuarterlyEstimates(yearData, businessId);
+          break;
+      }
+    }
+
+    // Store generated documents
+    const documentPackage = {
+      packageId: `forms_${businessId}_${taxYear}_${Date.now()}`,
+      businessId,
+      taxYear,
+      generatedForms,
+      generationDate: new Date().toISOString(),
+      status: 'ready_for_review'
+    };
+    
+    taxDocuments.set(documentPackage.packageId, documentPackage);
+
+    res.json({ 
+      success: true, 
+      documentPackage,
+      downloadUrl: `/api/tax/download-forms/${documentPackage.packageId}`,
+      message: 'Tax forms generated successfully' 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Helper Functions for Tax Calculations
+function calculateDeductible(category, amount) {
+  const categoryInfo = expenseCategories.get(category);
+  if (!categoryInfo || !categoryInfo.deductible) return 0;
+  
+  const deductionRate = categoryInfo.deductionRate || 1.0;
+  return parseFloat(amount) * deductionRate;
+}
+
+function generateProfitLossReport(transactions, yearData) {
+  const incomeTransactions = transactions.filter(tx => tx.type === 'income');
+  const expenseTransactions = transactions.filter(tx => tx.type === 'expense');
+  
+  return {
+    totalIncome: yearData.totalIncome,
+    totalExpenses: yearData.totalExpenses,
+    netProfit: yearData.totalIncome - yearData.totalExpenses,
+    incomeBreakdown: groupByCategory(incomeTransactions),
+    expenseBreakdown: groupByCategory(expenseTransactions),
+    quarterlyTrends: yearData.quarterlyBreakdown
+  };
+}
+
+function generateExpenseSummaryReport(transactions) {
+  const expenses = transactions.filter(tx => tx.type === 'expense');
+  const categorized = {};
+  
+  expenses.forEach(expense => {
+    if (!categorized[expense.category]) {
+      categorized[expense.category] = {
+        total: 0,
+        deductible: 0,
+        transactions: []
+      };
+    }
+    categorized[expense.category].total += expense.amount;
+    categorized[expense.category].deductible += expense.deductible || 0;
+    categorized[expense.category].transactions.push(expense);
+  });
+  
+  return { categorizedExpenses: categorized };
+}
+
+function generateQuarterlyReport(transactions, yearData) {
+  const quarters = { Q1: [], Q2: [], Q3: [], Q4: [] };
+  
+  transactions.forEach(tx => {
+    quarters[`Q${tx.quarterlyPeriod}`].push(tx);
+  });
+  
+  return { quarterlyBreakdown: quarters, totals: yearData.quarterlyBreakdown };
+}
+
+function generate1099PrepReport(transactions, yearData) {
+  const contractorPayments = transactions.filter(tx => 
+    tx.type === 'payment' && tx.category === 'contractor_payment'
+  );
+  
+  return {
+    totalContractorPayments: contractorPayments.reduce((sum, tx) => sum + tx.amount, 0),
+    contractorBreakdown: groupByVendor(contractorPayments),
+    requires1099: contractorPayments.filter(tx => tx.amount >= 600)
+  };
+}
+
+function generateComprehensiveReport(transactions, yearData) {
+  return {
+    profitLoss: generateProfitLossReport(transactions, yearData),
+    expenseSummary: generateExpenseSummaryReport(transactions),
+    quarterly: generateQuarterlyReport(transactions, yearData),
+    prep1099: generate1099PrepReport(transactions, yearData),
+    taxProjections: {
+      estimatedTaxOwed: (yearData.totalIncome - yearData.deductibleExpenses) * 0.25,
+      quarterlyPayments: (yearData.totalIncome - yearData.deductibleExpenses) * 0.25 / 4
+    }
+  };
+}
+
+function groupByCategory(transactions) {
+  return transactions.reduce((acc, tx) => {
+    acc[tx.category] = (acc[tx.category] || 0) + tx.amount;
+    return acc;
+  }, {});
+}
+
+function groupByVendor(transactions) {
+  return transactions.reduce((acc, tx) => {
+    const vendor = tx.vendorInfo || 'Unknown';
+    if (!acc[vendor]) acc[vendor] = [];
+    acc[vendor].push(tx);
+    return acc;
+  }, {});
+}
+
+async function processReceiptOCR(receiptImage) {
+  // Simplified OCR simulation - in production would use real OCR service
+  return {
+    vendor: 'Office Depot',
+    total: 45.67,
+    date: new Date().toISOString(),
+    items: ['Paper', 'Pens', 'Stapler'],
+    paymentMethod: 'Credit Card',
+    confidence: 0.92
+  };
+}
+
+async function recordMileageAsExpense(mileageRecord) {
+  const expenseData = {
+    businessId: mileageRecord.businessId,
+    type: 'expense',
+    amount: mileageRecord.deductionAmount,
+    description: `Mileage: ${mileageRecord.startLocation} to ${mileageRecord.endLocation}`,
+    category: 'vehicle_expenses',
+    date: mileageRecord.date,
+    taxYear: mileageRecord.taxYear,
+    paymentMethod: 'mileage_deduction',
+    vendorInfo: 'IRS Standard Mileage Rate'
+  };
+  
+  // Record as tax transaction
+  const response = await fetch('/api/tax/record-transaction', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(expenseData)
+  });
+  
+  return response;
+}
+
+async function generate1099Form(yearData, businessId) {
+  return {
+    formType: '1099-NEC',
+    taxYear: yearData.taxYear,
+    businessId,
+    totalIncome: yearData.totalIncome,
+    federalTaxWithheld: 0,
+    status: 'draft'
+  };
+}
+
+async function generateScheduleC(yearData, businessId) {
+  return {
+    formType: 'Schedule C',
+    businessIncome: yearData.totalIncome,
+    businessExpenses: yearData.deductibleExpenses,
+    netProfit: yearData.totalIncome - yearData.deductibleExpenses,
+    estimatedTax: (yearData.totalIncome - yearData.deductibleExpenses) * 0.15
+  };
+}
+
+async function generateQuarterlyEstimates(yearData, businessId) {
+  const annualTax = (yearData.totalIncome - yearData.deductibleExpenses) * 0.25;
+  return {
+    quarterlyAmount: annualTax / 4,
+    dueDates: ['2024-04-15', '2024-06-15', '2024-09-15', '2024-01-15'],
+    annualProjection: annualTax
+  };
+}
+
+// Initialize expense categories on startup
+initializeExpenseCategories();
 
 // Session configuration
 app.use(session({
@@ -4118,8 +4583,7 @@ app.post('/api/qr/generate-employee', async (req, res) => {
 });
 
 // In-memory worker tracking system (in production, this would be a database)
-const workerTimeTracking = new Map();
-const employerQRSystems = new Map();
+// Maps already declared at top of file
 
 // Helper function to calculate distance between two coordinates
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -4137,11 +4601,7 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c; // Distance in meters
 }
 
-// Enhanced MarketPace Integration Systems
-const deliveryTracking = new Map(); // Track delivery drivers in real-time
-const rentalVerification = new Map(); // Track rental pickups/returns
-const purchaseVerification = new Map(); // Track purchase pickups
-const businessOperations = new Map(); // Track business operating hours
+// Enhanced MarketPace Integration Systems - Maps already declared at top of file
 
 // Employee Check-In/Check-Out Processing endpoint with comprehensive worker tracking
 app.post('/api/employee/checkin', async (req, res) => {
