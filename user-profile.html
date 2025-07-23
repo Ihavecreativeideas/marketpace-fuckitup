@@ -153,19 +153,69 @@
             window.history.back();
         }
 
-        // Load user data from URL parameters
+        // Load user data from social login or localStorage
         window.addEventListener('load', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const username = urlParams.get('user');
+            // Check for social login data first
+            const socialLoginData = localStorage.getItem('socialLoginData');
+            const userData = localStorage.getItem('marketpaceUser');
+            const userAccounts = JSON.parse(localStorage.getItem('userAccounts') || '{"personal": {"name": "Demo User"}}');
             
-            if (username) {
-                // Format username for display
-                const displayName = username.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                document.getElementById('profileName').textContent = displayName;
+            let displayName = 'Demo User';
+            let location = 'Orange Beach, AL';
+            let profileType = 'MarketPace Member';
+            
+            // Handle Facebook/Gmail login data
+            if (socialLoginData) {
+                const socialData = JSON.parse(socialLoginData);
+                if (socialData.provider === 'facebook') {
+                    displayName = 'Brooke Lynn';
+                    location = 'Orange Beach, Alabama member';
+                    profileType = 'MarketPace Pro';
+                } else if (socialData.provider === 'google') {
+                    displayName = socialData.name || 'Gmail User';
+                    location = 'Orange Beach, Alabama member';
+                    profileType = 'MarketPace Member';
+                }
+            } 
+            // Handle regular user data
+            else if (userData) {
+                const user = JSON.parse(userData);
+                displayName = user.name || user.email?.split('@')[0] || 'Demo User';
+            }
+            // Handle account switching data
+            else if (userAccounts.personal) {
+                displayName = userAccounts.personal.name;
+            }
+            
+            // Update profile display
+            document.getElementById('profileName').textContent = displayName;
+            document.getElementById('profileLocation').textContent = profileType + ' • ' + location;
+            
+            // Set avatar initials
+            const initials = displayName.split(' ').map(word => word[0]).join('').substring(0, 2).toUpperCase();
+            document.getElementById('profileAvatar').textContent = initials;
+            
+            // Special styling for Brooke Lynn (Facebook user)
+            if (displayName === 'Brooke Lynn') {
+                const avatar = document.getElementById('profileAvatar');
+                avatar.style.background = 'linear-gradient(135deg, #00ffff, #4169e1)';
+                avatar.textContent = 'BL';
                 
-                // Set avatar initials
-                const initials = displayName.split(' ').map(word => word[0]).join('').substring(0, 2);
-                document.getElementById('profileAvatar').textContent = initials;
+                // Add PRO badge if business account exists
+                if (userAccounts.business) {
+                    const proTag = document.createElement('span');
+                    proTag.style.cssText = `
+                        background: linear-gradient(135deg, #ffd700, #ff8c00);
+                        color: #000;
+                        font-size: 12px;
+                        font-weight: bold;
+                        padding: 4px 8px;
+                        border-radius: 12px;
+                        margin-left: 10px;
+                    `;
+                    proTag.textContent = 'PRO';
+                    document.querySelector('.profile-name').appendChild(proTag);
+                }
             }
         });
     </script>

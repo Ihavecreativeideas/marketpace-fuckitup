@@ -2039,7 +2039,7 @@ app.post('/api/booking/submit-review', async (req, res) => {
 const htmlRoutes = [
   '/', '/community', '/shops', '/services', '/rentals', '/the-hub', 
   '/menu', '/profile', '/cart', '/settings', '/delivery', '/deliveries', '/messages',
-  '/business-scheduling', '/interactive-map', '/item-verification',
+  '/mobile-profile', '/user-profile', '/business-scheduling', '/interactive-map', '/item-verification',
   '/signup-login', '/message-owner', '/rental-delivery', '/support',
   '/platform-integrations', '/supabase-integration', '/driver-dashboard',
   '/facebook-shop-integration', '/facebook-shop-setup', '/facebook-delivery',
