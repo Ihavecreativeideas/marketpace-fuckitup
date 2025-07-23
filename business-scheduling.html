@@ -5072,29 +5072,164 @@
             });
             document.querySelector(`[data-size="${size}"]`).classList.add('selected');
             
-            // Show/hide bulk actions based on size
-            const bulkActionsSection = document.getElementById('bulkActionsSection');
-            const bulkActionStatus = document.getElementById('bulkActionStatus');
-            
-            if (size === 'small') {
-                bulkActionsSection.style.display = 'none';
-                showNotification('Small Business mode selected - Basic scheduling enabled', 'info');
-            } else {
-                bulkActionsSection.style.display = 'block';
-                let statusMessage = '';
-                switch(size) {
-                    case 'medium':
-                        statusMessage = 'Medium Event (20-100 people) - Bulk scheduling actions enabled';
-                        break;
-                    case 'large':
-                        statusMessage = 'Large Festival (100-500+ people) - Enterprise scheduling actions enabled';
-                        break;
-                }
-                bulkActionStatus.textContent = statusMessage;
-                showNotification(`${size.charAt(0).toUpperCase() + size.slice(1)} business size selected`, 'success');
-            }
+            // Completely transform interface based on business size
+            transformSchedulingInterface(size);
             
             updateVoiceOutput(`Business size set to ${size} - ${getBusinessSizeCapacity(size)}`);
+        }
+
+        function transformSchedulingInterface(size) {
+            const calendarView = document.getElementById('calendar-view');
+            const bulkActionsSection = document.getElementById('bulkActionsSection');
+            
+            // Hide business size selector after selection
+            const businessSizeSection = document.querySelector('.business-size-section');
+            if (businessSizeSection) {
+                businessSizeSection.style.display = 'none';
+            }
+            
+            switch(size) {
+                case 'small':
+                    setupSmallBusinessInterface();
+                    break;
+                case 'medium':
+                    setupMediumEventInterface();
+                    break;
+                case 'large':
+                    setupLargeFestivalInterface();
+                    break;
+            }
+        }
+
+        function setupSmallBusinessInterface() {
+            showNotification('Small Business mode - Simplified scheduling interface', 'info');
+            
+            // Hide bulk actions
+            const bulkActionsSection = document.getElementById('bulkActionsSection');
+            bulkActionsSection.style.display = 'none';
+            
+            // Simple calendar view with basic features
+            const calendarContainer = document.querySelector('.calendar-container');
+            calendarContainer.insertAdjacentHTML('afterbegin', `
+                <div class="small-business-features" style="background: rgba(0, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                    <h3 style="color: #00ffff; margin: 0 0 12px 0; font-size: 16px;">Small Business Features Active</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                        <button onclick="quickScheduleEmployee()" style="background: linear-gradient(135deg, #00ffff, #4169e1); border: none; color: white; padding: 8px; border-radius: 6px; font-size: 12px; cursor: pointer;">Quick Schedule</button>
+                        <button onclick="viewWeeklyReport()" style="background: linear-gradient(135deg, #22c55e, #16a34a); border: none; color: white; padding: 8px; border-radius: 6px; font-size: 12px; cursor: pointer;">Weekly Report</button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function setupMediumEventInterface() {
+            showNotification('Medium Event mode - Advanced department management', 'success');
+            
+            // Show bulk actions
+            const bulkActionsSection = document.getElementById('bulkActionsSection');
+            bulkActionsSection.style.display = 'block';
+            
+            // Add medium event specific features
+            const calendarContainer = document.querySelector('.calendar-container');
+            calendarContainer.insertAdjacentHTML('afterbegin', `
+                <div class="medium-event-features" style="background: rgba(255, 165, 0, 0.1); border: 1px solid rgba(255, 165, 0, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                    <h3 style="color: #ffa500; margin: 0 0 12px 0; font-size: 16px;">Medium Event Management</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
+                        <button onclick="manageDepartments()" style="background: linear-gradient(135deg, #ffa500, #ff8c00); border: none; color: white; padding: 8px; border-radius: 6px; font-size: 11px; cursor: pointer;">Departments</button>
+                        <button onclick="shiftRotations()" style="background: linear-gradient(135deg, #8a2be2, #6d28d9); border: none; color: white; padding: 8px; border-radius: 6px; font-size: 11px; cursor: pointer;">Rotations</button>
+                        <button onclick="breakScheduler()" style="background: linear-gradient(135deg, #22c55e, #16a34a); border: none; color: white; padding: 8px; border-radius: 6px; font-size: 11px; cursor: pointer;">Breaks</button>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 8px; border-radius: 6px;">
+                        <div style="color: #ffa500; font-size: 12px; font-weight: bold;">Event Capacity: 20-100 people</div>
+                        <div style="color: #94a3b8; font-size: 10px;">Department-based scheduling, shift rotations, break management</div>
+                    </div>
+                </div>
+            `);
+        }
+
+        function setupLargeFestivalInterface() {
+            showNotification('Large Festival mode - Enterprise-level management activated', 'success');
+            
+            // Show all bulk actions
+            const bulkActionsSection = document.getElementById('bulkActionsSection');
+            bulkActionsSection.style.display = 'block';
+            
+            // Replace standard calendar with complex festival management
+            const calendarContainer = document.querySelector('.calendar-container');
+            calendarContainer.insertAdjacentHTML('afterbegin', `
+                <div class="festival-command-center" style="background: linear-gradient(135deg, rgba(255, 0, 100, 0.1), rgba(138, 43, 226, 0.1)); border: 2px solid rgba(255, 0, 100, 0.4); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                    <h2 style="color: #ff0064; margin: 0 0 16px 0; font-size: 20px; text-align: center; text-shadow: 0 0 10px rgba(255, 0, 100, 0.5);">🎪 FESTIVAL COMMAND CENTER 🎪</h2>
+                    
+                    <!-- Festival Management Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px;">
+                        <!-- Multi-Stage Management -->
+                        <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 0, 100, 0.3); border-radius: 8px; padding: 16px;">
+                            <h4 style="color: #ff0064; margin: 0 0 12px 0;">Multi-Stage Management</h4>
+                            <button onclick="manageStages()" style="background: linear-gradient(135deg, #ff0064, #8a2be2); border: none; color: white; padding: 10px 16px; border-radius: 6px; cursor: pointer; width: 100%; margin-bottom: 8px;">Manage 5 Stages</button>
+                            <div style="color: #94a3b8; font-size: 10px;">Main Stage, Side Stage, Acoustic, DJ Booth, Workshop</div>
+                        </div>
+                        
+                        <!-- Security Operations -->
+                        <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 165, 0, 0.3); border-radius: 8px; padding: 16px;">
+                            <h4 style="color: #ffa500; margin: 0 0 12px 0;">Security Operations</h4>
+                            <button onclick="securityCommand()" style="background: linear-gradient(135deg, #ffa500, #ff8c00); border: none; color: white; padding: 10px 16px; border-radius: 6px; cursor: pointer; width: 100%; margin-bottom: 8px;">Security Central</button>
+                            <div style="color: #94a3b8; font-size: 10px;">50+ Security, VIP, Crowd Control, Emergency</div>
+                        </div>
+                        
+                        <!-- Vendor Coordination -->
+                        <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 16px;">
+                            <h4 style="color: #22c55e; margin: 0 0 12px 0;">Vendor Coordination</h4>
+                            <button onclick="vendorManagement()" style="background: linear-gradient(135deg, #22c55e, #16a34a); border: none; color: white; padding: 10px 16px; border-radius: 6px; cursor: pointer; width: 100%; margin-bottom: 8px;">100+ Vendors</button>
+                            <div style="color: #94a3b8; font-size: 10px;">Food, Merch, Sponsors, Setup Crews</div>
+                        </div>
+                        
+                        <!-- Performance Scheduling -->
+                        <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(139, 69, 19, 0.3); border-radius: 8px; padding: 16px;">
+                            <h4 style="color: #8b4513; margin: 0 0 12px 0;">Performance Scheduling</h4>
+                            <button onclick="performanceScheduler()" style="background: linear-gradient(135deg, #8b4513, #654321); border: none; color: white; padding: 10px 16px; border-radius: 6px; cursor: pointer; width: 100%; margin-bottom: 8px;">Artist Timeline</button>
+                            <div style="color: #94a3b8; font-size: 10px;">50+ Artists, Sound Check, Changeovers</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Festival Operations Dashboard -->
+                    <div style="background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; padding: 16px;">
+                        <h4 style="color: #00ffff; margin: 0 0 12px 0; text-align: center;">Festival Operations Dashboard</h4>
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; text-align: center;">
+                            <div>
+                                <div style="color: #ff0064; font-size: 18px; font-weight: bold;">500+</div>
+                                <div style="color: #94a3b8; font-size: 10px;">Total Staff</div>
+                            </div>
+                            <div>
+                                <div style="color: #ffa500; font-size: 18px; font-weight: bold;">72h</div>
+                                <div style="color: #94a3b8; font-size: 10px;">Event Duration</div>
+                            </div>
+                            <div>
+                                <div style="color: #22c55e; font-size: 18px; font-weight: bold;">50K</div>
+                                <div style="color: #94a3b8; font-size: 10px;">Expected Attendance</div>
+                            </div>
+                            <div>
+                                <div style="color: #8a2be2; font-size: 18px; font-weight: bold;">15</div>
+                                <div style="color: #94a3b8; font-size: 10px;">Departments</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Emergency Protocols -->
+                    <div style="background: rgba(220, 38, 38, 0.1); border: 2px solid rgba(220, 38, 38, 0.4); border-radius: 8px; padding: 12px; margin-top: 16px;">
+                        <h4 style="color: #dc2626; margin: 0 0 8px 0;">🚨 Emergency Protocols Active</h4>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                            <button onclick="emergencyEvacuation()" style="background: linear-gradient(135deg, #dc2626, #b91c1c); border: none; color: white; padding: 8px; border-radius: 6px; font-size: 10px; cursor: pointer;">Evacuation</button>
+                            <button onclick="medicalResponse()" style="background: linear-gradient(135deg, #dc2626, #b91c1c); border: none; color: white; padding: 8px; border-radius: 6px; font-size: 10px; cursor: pointer;">Medical</button>
+                            <button onclick="weatherAlert()" style="background: linear-gradient(135deg, #dc2626, #b91c1c); border: none; color: white; padding: 8px; border-radius: 6px; font-size: 10px; cursor: pointer;">Weather</button>
+                        </div>
+                    </div>
+                </div>
+            `);
+            
+            // Hide standard calendar for festival mode
+            const standardCalendar = document.querySelector('.calendar-grid');
+            if (standardCalendar) {
+                standardCalendar.style.display = 'none';
+            }
         }
         
         function getBusinessSizeCapacity(size) {
@@ -5826,6 +5961,59 @@
                 showNotification('Shift deleted successfully', 'success');
                 btn.closest('.modal').remove();
             }
+        }
+
+        // Business Size Specific Functions
+
+        // Small Business Functions
+        function quickScheduleEmployee() {
+            showNotification('Quick Schedule: Assign employee to next available shift', 'info');
+        }
+
+        function viewWeeklyReport() {
+            showNotification('Weekly Report: Hours, wages, productivity summary', 'info');
+        }
+
+        // Medium Event Functions
+        function manageDepartments() {
+            showNotification('Department Management: Sales, Kitchen, Security, Cleaning', 'info');
+        }
+
+        function shiftRotations() {
+            showNotification('Shift Rotations: Auto-rotate staff between departments', 'info');
+        }
+
+        function breakScheduler() {
+            showNotification('Break Scheduler: Manage 15-min and lunch breaks', 'info');
+        }
+
+        // Large Festival Functions
+        function manageStages() {
+            showNotification('🎪 Multi-Stage Management: Coordinate 5 performance stages', 'success');
+        }
+
+        function securityCommand() {
+            showNotification('🛡️ Security Central: 50+ security staff coordination', 'warning');
+        }
+
+        function vendorManagement() {
+            showNotification('🏪 Vendor Coordination: 100+ food, merch, sponsor vendors', 'info');
+        }
+
+        function performanceScheduler() {
+            showNotification('🎵 Artist Timeline: 50+ performers, sound checks, changeovers', 'info');
+        }
+
+        function emergencyEvacuation() {
+            showNotification('🚨 EMERGENCY: Evacuation protocols activated', 'error');
+        }
+
+        function medicalResponse() {
+            showNotification('🚑 Medical Response: Emergency medical team dispatch', 'error');
+        }
+
+        function weatherAlert() {
+            showNotification('⛈️ Weather Alert: Storm monitoring and contingency plans', 'warning');
         }
     </script>
 </body>
