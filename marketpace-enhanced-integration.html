@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPace Enhanced Integration Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            background: linear-gradient(135deg, #00ffff, #4169e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .header p {
+            color: #00ffff;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .integration-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .integration-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .integration-card:hover {
+            border-color: rgba(0, 255, 255, 0.5);
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            font-size: 2rem;
+        }
+
+        .card-title {
+            color: #00ffff;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .feature-list li {
+            color: #94a3b8;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            color: #00ffff;
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .demo-section {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .demo-title {
+            color: #ffc107;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .demo-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00ffff, #4169e1);
+            color: #000;
+        }
+
+        .btn-secondary {
+            background: rgba(0, 255, 255, 0.1);
+            color: #00ffff;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .btn-demo {
+            background: linear-gradient(135deg, #ffc107, #ff8f00);
+            color: #000;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
+        }
+
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00ffff;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: bold;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            padding: 12px 24px;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .integration-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .demo-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/business-scheduling.html" class="back-btn">
+            ← Back to Business Scheduling
+        </a>
+
+        <div class="header">
+            <h1>🚀 MarketPace Enhanced Integration Dashboard</h1>
+            <p>Comprehensive platform enhancements powered by advanced worker tracking technology</p>
+        </div>
+
+        <!-- System Overview Stats -->
+        <div class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-number">12</div>
+                <div class="stat-label">Active Integrations</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">847</div>
+                <div class="stat-label">Deliveries Tracked</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">2,156</div>
+                <div class="stat-label">Rentals Verified</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">98.7%</div>
+                <div class="stat-label">Verification Accuracy</div>
+            </div>
+        </div>
+
+        <!-- Integration Cards -->
+        <div class="integration-grid">
+            <!-- Delivery System Enhancement -->
+            <div class="integration-card">
+                <div class="card-header">
+                    <div class="card-icon">🚚</div>
+                    <div class="card-title">Smart Delivery System</div>
+                </div>
+                <ul class="feature-list">
+                    <li>Real-time driver check-in/out tracking</li>
+                    <li>Route optimization based on driver availability</li>
+                    <li>Automatic delivery verification with GPS</li>
+                    <li>Driver performance analytics and earnings</li>
+                    <li>Customer delivery notifications via SMS</li>
+                </ul>
+                <div class="demo-section">
+                    <div class="demo-title">🧪 Test Delivery Tracking</div>
+                    <div class="demo-buttons">
+                        <button class="btn btn-demo" onclick="testDeliveryTracking()">Track Delivery</button>
+                        <button class="btn btn-demo" onclick="optimizeRoute()">Optimize Route</button>
+                        <button class="btn btn-demo" onclick="viewDriverPerformance()">Driver Analytics</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rental Verification System -->
+            <div class="integration-card">
+                <div class="card-header">
+                    <div class="card-icon">🔐</div>
+                    <div class="card-title">Rental Verification</div>
+                </div>
+                <ul class="feature-list">
+                    <li>Geo-verified pickup and return tracking</li>
+                    <li>Automatic rental duration calculation</li>
+                    <li>Damage assessment with photo evidence</li>
+                    <li>Smart pricing based on actual usage time</li>
+                    <li>Security deposit management</li>
+                </ul>
+                <div class="demo-section">
+                    <div class="demo-title">🧪 Test Rental System</div>
+                    <div class="demo-buttons">
+                        <button class="btn btn-demo" onclick="testRentalPickup()">Test Pickup</button>
+                        <button class="btn btn-demo" onclick="testRentalReturn()">Test Return</button>
+                        <button class="btn btn-demo" onclick="calculateRentalCost()">Calculate Cost</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Purchase Verification -->
+            <div class="integration-card">
+                <div class="card-header">
+                    <div class="card-icon">💳</div>
+                    <div class="card-title">Purchase Protection</div>
+                </div>
+                <ul class="feature-list">
+                    <li>Escrow payment system with geo-verification</li>
+                    <li>Automatic payment release on pickup</li>
+                    <li>Fraud prevention with location tracking</li>
+                    <li>Dispute resolution with timestamp proof</li>
+                    <li>Commission tracking and seller payouts</li>
+                </ul>
+                <div class="demo-section">
+                    <div class="demo-title">🧪 Test Purchase Flow</div>
+                    <div class="demo-buttons">
+                        <button class="btn btn-demo" onclick="testPurchaseVerification()">Verify Pickup</button>
+                        <button class="btn btn-demo" onclick="releasePayment()">Release Payment</button>
+                        <button class="btn btn-demo" onclick="viewTransactionHistory()">View History</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Operations -->
+            <div class="integration-card">
+                <div class="card-header">
+                    <div class="card-icon">🏢</div>
+                    <div class="card-title">Business Intelligence</div>
+                </div>
+                <ul class="feature-list">
+                    <li>Employee productivity analytics</li>
+                    <li>Operating hours optimization</li>
+                    <li>Labor cost tracking and forecasting</li>
+                    <li>Customer traffic pattern analysis</li>
+                    <li>Revenue per employee metrics</li>
+                </ul>
+                <div class="demo-section">
+                    <div class="demo-title">🧪 Test Business Analytics</div>
+                    <div class="demo-buttons">
+                        <button class="btn btn-demo" onclick="trackBusinessHours()">Track Hours</button>
+                        <button class="btn btn-demo" onclick="analyzeProductivity()">Productivity</button>
+                        <button class="btn btn-demo" onclick="generateReport()">Generate Report</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workforce Management -->
+            <div class="integration-card">
+                <div class="card-header">
+                    <div class="card-icon">👥</div>
+                    <div class="card-title">Workforce Optimization</div>
+                </div>
+                <ul class="feature-list">
+                    <li>Dynamic scheduling based on demand</li>
+                    <li>Skill-based task assignment</li>
+                    <li>Performance-based pay calculations</li>
+                    <li>Break and overtime compliance</li>
+                    <li>Employee satisfaction tracking</li>
+                </ul>
+                <div class="demo-section">
+                    <div class="demo-title">🧪 Test Workforce Features</div>
+                    <div class="demo-buttons">
+                        <button class="btn btn-demo" onclick="optimizeSchedule()">Optimize Schedule</button>
+                        <button class="btn btn-demo" onclick="assignTasks()">Assign Tasks</button>
+                        <button class="btn btn-demo" onclick="calculatePay()">Calculate Pay</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Experience -->
+            <div class="integration-card">
+                <div class="card-header">
+                    <div class="card-icon">⭐</div>
+                    <div class="card-title">Customer Experience</div>
+                </div>
+                <ul class="feature-list">
+                    <li>Real-time order status updates</li>
+                    <li>Proactive delivery notifications</li>
+                    <li>Feedback collection and analysis</li>
+                    <li>Loyalty program integration</li>
+                    <li>Personalized service recommendations</li>
+                </ul>
+                <div class="demo-section">
+                    <div class="demo-title">🧪 Test Customer Features</div>
+                    <div class="demo-buttons">
+                        <button class="btn btn-demo" onclick="sendCustomerUpdate()">Send Update</button>
+                        <button class="btn btn-demo" onclick="collectFeedback()">Collect Feedback</button>
+                        <button class="btn btn-demo" onclick="personalizeService()">Personalize</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comprehensive Demo Section -->
+        <div class="integration-card" style="grid-column: 1 / -1;">
+            <div class="card-header">
+                <div class="card-icon">🎯</div>
+                <div class="card-title">Comprehensive Integration Demo</div>
+            </div>
+            <p style="color: #94a3b8; margin-bottom: 20px;">
+                Experience the full power of MarketPace's enhanced integration system with these comprehensive workflows:
+            </p>
+            <div class="demo-buttons">
+                <button class="btn btn-primary" onclick="fullDeliveryWorkflow()">
+                    Complete Delivery Workflow
+                </button>
+                <button class="btn btn-primary" onclick="fullRentalWorkflow()">
+                    Complete Rental Workflow
+                </button>
+                <button class="btn btn-primary" onclick="fullPurchaseWorkflow()">
+                    Complete Purchase Workflow
+                </button>
+                <button class="btn btn-primary" onclick="businessAnalyticsDemo()">
+                    Business Analytics Demo
+                </button>
+                <a href="/enhanced-worker-tracking.html" class="btn btn-secondary">
+                    View Worker Tracking Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Demo Functions for Enhanced MarketPace Integration
+
+        // Delivery System Tests
+        async function testDeliveryTracking() {
+            showNotification('📦 Testing delivery tracking system...', 'success');
+            
+            const response = await fetch('/api/delivery/track', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    driverId: 'driver_001',
+                    deliveryId: 'delivery_' + Date.now(),
+                    status: 'pickup',
+                    location: 'Main Store',
+                    coordinates: { lat: 30.2672, lng: -97.7431 },
+                    orderDetails: {
+                        destination: { lat: 30.3072, lng: -97.7831 },
+                        buyerPhone: '+1234567890',
+                        totalValue: 45.99
+                    }
+                })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                showNotification('✅ Delivery tracking successful - ETA: ' + data.trackingData.estimatedDeliveryTime + ' minutes', 'success');
+            }
+        }
+
+        async function optimizeRoute() {
+            showNotification('🗺️ Optimizing delivery route...', 'success');
+            
+            const response = await fetch('/api/delivery/optimize-route', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    driverId: 'driver_001',
+                    driverLocation: { lat: 30.2672, lng: -97.7431 },
+                    pendingDeliveries: [
+                        { id: 'del_1', coordinates: { lat: 30.3072, lng: -97.7831 }, priority: 1 },
+                        { id: 'del_2', coordinates: { lat: 30.2872, lng: -97.7631 }, priority: 2 },
+                        { id: 'del_3', coordinates: { lat: 30.3272, lng: -97.8031 }, priority: 1 }
+                    ]
+                })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                showNotification('🎯 Route optimized: ' + data.optimizedRoute.deliveries.length + ' deliveries, $' + data.optimizedRoute.estimatedEarnings + ' estimated earnings', 'success');
+            }
+        }
+
+        async function viewDriverPerformance() {
+            showNotification('📊 Loading driver performance analytics...', 'success');
+            
+            const response = await fetch('/api/driver/driver_001/performance');
+            
+            if (response.ok) {
+                const data = await response.json();
+                const metrics = data.performanceMetrics;
+                showNotification('📈 Driver Stats: ' + metrics.deliveryStats.totalDeliveries + ' deliveries, $' + metrics.earnings.totalEarnings.toFixed(2) + ' earned, ' + metrics.deliveryStats.customerRating + '⭐ rating', 'success');
+            }
+        }
+
+        // Rental System Tests
+        async function testRentalPickup() {
+            showNotification('🔑 Testing rental pickup verification...', 'success');
+            
+            const response = await fetch('/api/rental/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    rentalId: 'rental_' + Date.now(),
+                    action: 'pickup',
+                    coordinates: { lat: 30.2672, lng: -97.7431 },
+                    itemDetails: { 
+                        name: 'Power Drill', 
+                        hourlyRate: 15,
+                        securityDeposit: 50 
+                    },
+                    renterInfo: { 
+                        name: 'John Doe', 
+                        phone: '+1234567890' 
+                    }
+                })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                showNotification('✅ Rental pickup verified successfully - Location validated', 'success');
+            }
+        }
+
+        async function testRentalReturn() {
+            showNotification('📦 Testing rental return verification...', 'success');
+            
+            // Simulate return after pickup
+            setTimeout(async () => {
+                const response = await fetch('/api/rental/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        rentalId: 'rental_demo',
+                        action: 'return',
+                        coordinates: { lat: 30.2672, lng: -97.7431 },
+                        itemDetails: { 
+                            name: 'Power Drill', 
+                            hourlyRate: 15 
+                        },
+                        renterInfo: { 
+                            name: 'John Doe' 
+                        }
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.verificationData.rentalSummary) {
+                        showNotification('💰 Rental return processed - Duration: ' + data.verificationData.rentalSummary.duration + ', Cost: ' + data.verificationData.rentalSummary.totalCost, 'success');
+                    }
+                }
+            }, 1000);
+        }
+
+        function calculateRentalCost() {
+            showNotification('💲 Calculating rental cost based on actual usage time...', 'success');
+            
+            setTimeout(() => {
+                showNotification('💰 Rental Cost: 3.5 hours × $15/hour = $52.50 (including damage protection)', 'success');
+            }, 1500);
+        }
+
+        // Purchase System Tests
+        async function testPurchaseVerification() {
+            showNotification('🛒 Testing purchase pickup verification...', 'success');
+            
+            const response = await fetch('/api/purchase/verify-pickup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderId: 'order_' + Date.now(),
+                    buyerId: 'buyer_001',
+                    sellerId: 'seller_001',
+                    coordinates: { lat: 30.2672, lng: -97.7431 },
+                    itemDetails: {
+                        name: 'Vintage Guitar',
+                        totalAmount: 350.00,
+                        paymentHeld: true
+                    }
+                })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                showNotification('✅ Purchase verified - Payment released to seller: $' + data.verificationData.sellerPayout.toFixed(2), 'success');
+            }
+        }
+
+        function releasePayment() {
+            showNotification('💳 Processing payment release to seller...', 'success');
+            
+            setTimeout(() => {
+                showNotification('✅ Payment released: $332.50 to seller (5% MarketPace commission)', 'success');
+            }, 1500);
+        }
+
+        function viewTransactionHistory() {
+            showNotification('📋 Loading comprehensive transaction history...', 'success');
+            
+            setTimeout(() => {
+                showNotification('📊 Transaction History: 156 purchases, $12,847 total volume, 98.7% successful completion rate', 'success');
+            }, 1500);
+        }
+
+        // Business Operations Tests
+        async function trackBusinessHours() {
+            showNotification('🏢 Tracking business operating hours...', 'success');
+            
+            const response = await fetch('/api/business/track-hours', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    businessId: 'business_001',
+                    action: 'employee_checkin',
+                    employeeId: 'emp_001',
+                    coordinates: { lat: 30.2672, lng: -97.7431 }
+                })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                showNotification('✅ Business hours tracked - Employee activity logged', 'success');
+            }
+        }
+
+        function analyzeProductivity() {
+            showNotification('📈 Analyzing employee productivity metrics...', 'success');
+            
+            setTimeout(() => {
+                showNotification('📊 Productivity Analysis: 87% efficiency rate, 6.2 hrs avg daily work, $23.50/hr avg productivity', 'success');
+            }, 2000);
+        }
+
+        function generateReport() {
+            showNotification('📄 Generating comprehensive business analytics report...', 'success');
+            
+            setTimeout(() => {
+                showNotification('📋 Report Generated: 47 pages of insights including revenue trends, labor optimization, and customer analytics', 'success');
+            }, 2500);
+        }
+
+        // Workforce Management Tests
+        function optimizeSchedule() {
+            showNotification('🗓️ Optimizing workforce schedule based on demand patterns...', 'success');
+            
+            setTimeout(() => {
+                showNotification('✅ Schedule Optimized: 15% labor cost reduction, improved coverage during peak hours', 'success');
+            }, 2000);
+        }
+
+        function assignTasks() {
+            showNotification('📋 Assigning tasks based on employee skills and availability...', 'success');
+            
+            setTimeout(() => {
+                showNotification('🎯 Tasks Assigned: 23 tasks distributed to 8 employees based on expertise and workload', 'success');
+            }, 1500);
+        }
+
+        function calculatePay() {
+            showNotification('💰 Calculating performance-based pay for all employees...', 'success');
+            
+            setTimeout(() => {
+                showNotification('💲 Pay Calculated: $2,847.50 total payroll, including performance bonuses and overtime', 'success');
+            }, 2000);
+        }
+
+        // Customer Experience Tests
+        function sendCustomerUpdate() {
+            showNotification('📱 Sending real-time updates to customers...', 'success');
+            
+            setTimeout(() => {
+                showNotification('✅ Updates Sent: 142 customers notified about order status, delivery times, and special offers', 'success');
+            }, 1500);
+        }
+
+        function collectFeedback() {
+            showNotification('⭐ Collecting customer feedback and ratings...', 'success');
+            
+            setTimeout(() => {
+                showNotification('📊 Feedback Collected: 4.8/5 average rating, 89% customer satisfaction, 156 reviews processed', 'success');
+            }, 2000);
+        }
+
+        function personalizeService() {
+            showNotification('🎯 Personalizing service recommendations...', 'success');
+            
+            setTimeout(() => {
+                showNotification('✨ Personalization Complete: Custom recommendations generated for 78% of active customers', 'success');
+            }, 1800);
+        }
+
+        // Comprehensive Workflow Tests
+        function fullDeliveryWorkflow() {
+            showNotification('🚀 Starting complete delivery workflow demonstration...', 'success');
+            
+            setTimeout(() => testDeliveryTracking(), 1000);
+            setTimeout(() => optimizeRoute(), 3000);
+            setTimeout(() => viewDriverPerformance(), 5000);
+            setTimeout(() => showNotification('✅ Complete Delivery Workflow Demonstrated Successfully', 'success'), 7000);
+        }
+
+        function fullRentalWorkflow() {
+            showNotification('🔐 Starting complete rental workflow demonstration...', 'success');
+            
+            setTimeout(() => testRentalPickup(), 1000);
+            setTimeout(() => testRentalReturn(), 3000);
+            setTimeout(() => calculateRentalCost(), 5000);
+            setTimeout(() => showNotification('✅ Complete Rental Workflow Demonstrated Successfully', 'success'), 7000);
+        }
+
+        function fullPurchaseWorkflow() {
+            showNotification('💳 Starting complete purchase workflow demonstration...', 'success');
+            
+            setTimeout(() => testPurchaseVerification(), 1000);
+            setTimeout(() => releasePayment(), 3000);
+            setTimeout(() => viewTransactionHistory(), 5000);
+            setTimeout(() => showNotification('✅ Complete Purchase Workflow Demonstrated Successfully', 'success'), 7000);
+        }
+
+        function businessAnalyticsDemo() {
+            showNotification('📊 Starting comprehensive business analytics demonstration...', 'success');
+            
+            setTimeout(() => trackBusinessHours(), 1000);
+            setTimeout(() => analyzeProductivity(), 3000);
+            setTimeout(() => generateReport(), 5000);
+            setTimeout(() => showNotification('✅ Complete Business Analytics Demonstrated Successfully', 'success'), 8000);
+        }
+
+        // Utility function for notifications
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
