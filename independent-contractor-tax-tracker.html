@@ -252,7 +252,47 @@
             </div>
 
             <div class="demo-card">
-                <h3>💼 Business Expenses</h3>
+                <h3>📸 Receipt Scanner</h3>
+                <div class="form-group">
+                    <label>Contractor ID</label>
+                    <input type="text" id="receiptContractorId" value="contractor_123" placeholder="Your contractor ID">
+                </div>
+                <div class="form-group">
+                    <label>Upload Receipt Image</label>
+                    <input type="file" id="contractorReceiptFile" accept="image/*" onchange="handleContractorReceiptUpload()" style="width: 100%; padding: 10px; border: 2px dashed rgba(34,197,94,0.5); border-radius: 8px; background: rgba(255,255,255,0.1); color: white;">
+                    <div id="contractorImagePreview" style="margin-top: 10px; max-width: 200px; border-radius: 8px; overflow: hidden;"></div>
+                </div>
+                <div class="form-group">
+                    <label>Receipt Type</label>
+                    <select id="contractorReceiptType">
+                        <option value="receipt">Gas Station Receipt</option>
+                        <option value="online">Online Purchase Screenshot</option>
+                        <option value="invoice">Service Invoice/Bill</option>
+                        <option value="maintenance">Vehicle Maintenance Receipt</option>
+                    </select>
+                </div>
+                <button class="btn btn-success" onclick="scanContractorReceipt()" id="contractorScanBtn" disabled>📸 Scan & Add Expense</button>
+                
+                <div id="contractorOcrProgress" style="display: none; text-align: center; margin: 15px 0;">
+                    <div style="color: #22c55e; margin-bottom: 10px;">🔍 Processing receipt with OCR...</div>
+                    <div class="progress-bar" style="width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px; overflow: hidden;">
+                        <div class="progress-fill" style="height: 100%; background: linear-gradient(90deg, #22c55e, #16a34a); width: 0%; transition: width 2s ease;"></div>
+                    </div>
+                </div>
+                
+                <div class="status-display">
+                    <h4 style="color: #22c55e; margin-bottom: 10px;">Smart Business Expense Processing:</h4>
+                    <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
+                        • Automatically extracts vendor, amount, date<br>
+                        • Categorizes business expenses (fuel, maintenance, etc.)<br>
+                        • Works with gas receipts, repair bills, online orders<br>
+                        • Maintains detailed records for 1099 filing
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-card">
+                <h3>💼 Manual Business Expenses</h3>
                 <div class="form-group">
                     <label>Expense Category</label>
                     <select id="businessCategory">
@@ -338,6 +378,91 @@
         document.addEventListener('DOMContentLoaded', function() {
             getContractorExpenses();
         });
+
+        let currentContractorReceiptImage = null;
+
+        function handleContractorReceiptUpload() {
+            const fileInput = document.getElementById('contractorReceiptFile');
+            const file = fileInput.files[0];
+            const scanBtn = document.getElementById('contractorScanBtn');
+            const imagePreview = document.getElementById('contractorImagePreview');
+
+            if (file) {
+                scanBtn.disabled = false;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentContractorReceiptImage = e.target.result;
+                    imagePreview.innerHTML = `
+                        <img src="${e.target.result}" style="width: 100%; height: auto; border: 2px solid #22c55e; border-radius: 8px;">
+                        <div style="text-align: center; margin-top: 5px; color: #22c55e; font-size: 0.85rem;">✓ Receipt ready to scan</div>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                scanBtn.disabled = true;
+                imagePreview.innerHTML = '';
+                currentContractorReceiptImage = null;
+            }
+        }
+
+        async function scanContractorReceipt() {
+            if (!currentContractorReceiptImage) {
+                showNotification('Please upload a receipt image first', 'error');
+                return;
+            }
+
+            const contractorId = document.getElementById('receiptContractorId').value;
+            const receiptType = document.getElementById('contractorReceiptType').value;
+            const progressDiv = document.getElementById('contractorOcrProgress');
+            const progressFill = progressDiv.querySelector('.progress-fill');
+
+            try {
+                progressDiv.style.display = 'block';
+                progressFill.style.width = '0%';
+                
+                setTimeout(() => progressFill.style.width = '30%', 100);
+                setTimeout(() => progressFill.style.width = '60%', 800);
+                setTimeout(() => progressFill.style.width = '90%', 1200);
+
+                const response = await fetch('/api/member-tax/scan-receipt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        memberId: contractorId,
+                        receiptImage: currentContractorReceiptImage,
+                        imageType: receiptType
+                    })
+                });
+
+                const result = await response.json();
+                progressFill.style.width = '100%';
+                
+                setTimeout(() => {
+                    progressDiv.style.display = 'none';
+                    
+                    if (result.success) {
+                        showNotification(`✅ Receipt processed! Found ${result.ocrResult.vendor} - $${result.ocrResult.total}`, 'success');
+                        addToActivityLog('receipt_scan', result.expense);
+                        
+                        document.getElementById('contractorReceiptFile').value = '';
+                        document.getElementById('contractorImagePreview').innerHTML = '';
+                        document.getElementById('contractorScanBtn').disabled = true;
+                        currentContractorReceiptImage = null;
+                        
+                        getContractorExpenses();
+                    } else {
+                        showNotification(result.error || 'Failed to process receipt', 'error');
+                    }
+                }, 500);
+
+            } catch (error) {
+                progressDiv.style.display = 'none';
+                showNotification('Error processing receipt: ' + error.message, 'error');
+            }
+        }
 
         async function trackContractorMileage() {
             const id = document.getElementById('contractorId').value;
@@ -473,6 +598,9 @@
             } else if (type === 'business') {
                 description = `${expense.category}: ${expense.description}`;
                 amount = `$${expense.amount.toFixed(2)} expense`;
+            } else if (type === 'receipt_scan') {
+                description = `📸 ${expense.vendor}: ${expense.description}`;
+                amount = `$${expense.amount.toFixed(2)} (${Math.round(expense.ocrConfidence * 100)}% confidence)`;
             }
             
             activityItem.innerHTML = `

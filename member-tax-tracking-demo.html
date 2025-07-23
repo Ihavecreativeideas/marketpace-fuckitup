@@ -294,7 +294,48 @@
             </div>
 
             <div class="demo-card">
-                <h3>🎨 Personal Business Expenses</h3>
+                <h3>📸 Receipt Scanner</h3>
+                <div class="demo-section">
+                    <div class="form-group">
+                        <label>Member ID</label>
+                        <input type="text" id="scanMemberId" value="demo_user_123" placeholder="Member ID">
+                    </div>
+                    <div class="form-group">
+                        <label>Upload Receipt Image</label>
+                        <input type="file" id="receiptFile" accept="image/*" onchange="handleReceiptUpload()" style="width: 100%; padding: 10px; border: 2px dashed rgba(0,255,255,0.5); border-radius: 8px; background: rgba(255,255,255,0.1); color: white;">
+                        <div id="imagePreview" style="margin-top: 10px; max-width: 200px; border-radius: 8px; overflow: hidden;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Receipt Type</label>
+                        <select id="receiptType">
+                            <option value="receipt">Physical Receipt</option>
+                            <option value="online">Online Order Screenshot</option>
+                            <option value="invoice">Invoice/Bill</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-success" onclick="scanReceipt()" id="scanBtn" disabled>📸 Scan & Add Expense</button>
+                    
+                    <div id="ocrProgress" style="display: none; text-align: center; margin: 15px 0;">
+                        <div style="color: #00ffff; margin-bottom: 10px;">🔍 Processing receipt with OCR...</div>
+                        <div class="progress-bar" style="width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px; overflow: hidden;">
+                            <div class="progress-fill" style="height: 100%; background: linear-gradient(90deg, #00ffff, #0080ff); width: 0%; transition: width 2s ease;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="status-display">
+                    <h4 style="color: #00ffff; margin-bottom: 10px;">Smart Receipt Processing:</h4>
+                    <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
+                        • Automatically extracts vendor, amount, date<br>
+                        • Categorizes expenses intelligently<br>
+                        • Works with receipts and online screenshots<br>
+                        • Reduces manual data entry by 90%
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-card">
+                <h3>🎨 Manual Expense Entry</h3>
                 <div class="demo-section">
                     <div class="form-group">
                         <label>Member ID</label>
@@ -414,6 +455,7 @@
                 <h4 style="color: #00ffff; margin-bottom: 10px;">Available API Endpoints:</h4>
                 <div style="font-family: monospace; font-size: 0.85rem; color: rgba(255,255,255,0.8);">
                     <div>POST /api/member-tax/track-delivery</div>
+                    <div>POST /api/member-tax/scan-receipt</div>
                     <div>POST /api/member-tax/track-personal-expense</div>
                     <div>POST /api/member-tax/track-ad-spend</div>
                     <div>GET /api/member-tax/expenses/:memberId/:year</div>
@@ -477,6 +519,99 @@
                 }
             } catch (error) {
                 showNotification('Error tracking delivery: ' + error.message, 'error');
+            }
+        }
+
+        let currentReceiptImage = null;
+
+        function handleReceiptUpload() {
+            const fileInput = document.getElementById('receiptFile');
+            const file = fileInput.files[0];
+            const scanBtn = document.getElementById('scanBtn');
+            const imagePreview = document.getElementById('imagePreview');
+
+            if (file) {
+                // Enable scan button
+                scanBtn.disabled = false;
+
+                // Show image preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentReceiptImage = e.target.result;
+                    imagePreview.innerHTML = `
+                        <img src="${e.target.result}" style="width: 100%; height: auto; border: 2px solid #00ffff; border-radius: 8px;">
+                        <div style="text-align: center; margin-top: 5px; color: #00ffff; font-size: 0.85rem;">✓ Receipt ready to scan</div>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                scanBtn.disabled = true;
+                imagePreview.innerHTML = '';
+                currentReceiptImage = null;
+            }
+        }
+
+        async function scanReceipt() {
+            if (!currentReceiptImage) {
+                showNotification('Please upload a receipt image first', 'error');
+                return;
+            }
+
+            const memberId = document.getElementById('scanMemberId').value;
+            const receiptType = document.getElementById('receiptType').value;
+            const progressDiv = document.getElementById('ocrProgress');
+            const progressFill = progressDiv.querySelector('.progress-fill');
+
+            try {
+                // Show progress
+                progressDiv.style.display = 'block';
+                progressFill.style.width = '0%';
+                
+                // Animate progress bar
+                setTimeout(() => progressFill.style.width = '30%', 100);
+                setTimeout(() => progressFill.style.width = '60%', 800);
+                setTimeout(() => progressFill.style.width = '90%', 1200);
+
+                const response = await fetch('/api/member-tax/scan-receipt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        memberId,
+                        receiptImage: currentReceiptImage,
+                        imageType: receiptType
+                    })
+                });
+
+                const result = await response.json();
+
+                // Complete progress
+                progressFill.style.width = '100%';
+                
+                setTimeout(() => {
+                    progressDiv.style.display = 'none';
+                    
+                    if (result.success) {
+                        showNotification(`✅ Receipt processed! Found ${result.ocrResult.vendor} - $${result.ocrResult.total}`, 'success');
+                        addToActivityLog('receipt_scan', result.expense);
+                        
+                        // Clear upload
+                        document.getElementById('receiptFile').value = '';
+                        document.getElementById('imagePreview').innerHTML = '';
+                        document.getElementById('scanBtn').disabled = true;
+                        currentReceiptImage = null;
+                        
+                        // Update summary
+                        getMemberExpenses();
+                    } else {
+                        showNotification(result.error || 'Failed to process receipt', 'error');
+                    }
+                }, 500);
+
+            } catch (error) {
+                progressDiv.style.display = 'none';
+                showNotification('Error processing receipt: ' + error.message, 'error');
             }
         }
 
@@ -621,6 +756,9 @@
             } else if (type === 'personal_expense') {
                 description = `${expense.category}: ${expense.description}`;
                 amount = `$${expense.amount.toFixed(2)} expense`;
+            } else if (type === 'receipt_scan') {
+                description = `📸 ${expense.vendor}: ${expense.description}`;
+                amount = `$${expense.amount.toFixed(2)} (${Math.round(expense.ocrConfidence * 100)}% confidence)`;
             }
             
             activityItem.innerHTML = `

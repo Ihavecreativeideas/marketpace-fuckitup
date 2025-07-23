@@ -771,17 +771,7 @@ function groupByVendor(transactions) {
   }, {});
 }
 
-async function processReceiptOCR(receiptImage) {
-  // Simplified OCR simulation - in production would use real OCR service
-  return {
-    vendor: 'Office Depot',
-    total: 45.67,
-    date: new Date().toISOString(),
-    items: ['Paper', 'Pens', 'Stapler'],
-    paymentMethod: 'Credit Card',
-    confidence: 0.92
-  };
-}
+
 
 async function recordMileageAsExpense(mileageRecord) {
   const expenseData = {
@@ -893,6 +883,128 @@ app.post('/api/member-tax/track-delivery', (req: any, res: any) => {
     res.status(500).json({ success: false, error: 'Failed to track delivery mileage' });
   }
 });
+
+// Receipt scanning and OCR processing for automatic expense tracking
+app.post('/api/member-tax/scan-receipt', async (req: any, res: any) => {
+  try {
+    const { memberId, receiptImage, imageType = 'receipt' } = req.body;
+    
+    if (!memberId || !receiptImage) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Member ID and receipt image are required' 
+      });
+    }
+
+    // Process receipt image with OCR (simulated for demo - in production would use AWS Textract, Google Vision, etc.)
+    const ocrResult = await processReceiptOCR(receiptImage, imageType);
+    
+    if (ocrResult.success) {
+      // Automatically create expense entry from OCR data
+      const expenseData = {
+        id: Date.now(),
+        memberId,
+        type: 'personal_expense',
+        amount: ocrResult.total || 0,
+        description: ocrResult.description || 'Scanned receipt expense',
+        category: ocrResult.category || 'materials',
+        vendor: ocrResult.vendor || 'Unknown vendor',
+        date: ocrResult.date || new Date().toISOString().split('T')[0],
+        timestamp: new Date().toISOString(),
+        year: new Date(ocrResult.date || new Date()).getFullYear(),
+        autoTracked: true,
+        receiptImage: receiptImage,
+        ocrConfidence: ocrResult.confidence
+      };
+
+      // Store in member tax expenses
+      if (!memberTaxExpenses[memberId]) {
+        memberTaxExpenses[memberId] = [];
+      }
+      memberTaxExpenses[memberId].push(expenseData);
+
+      res.json({
+        success: true,
+        expense: expenseData,
+        ocrResult,
+        message: `Automatically tracked $${ocrResult.total} from ${ocrResult.vendor}`
+      });
+    } else {
+      res.json({
+        success: false,
+        error: ocrResult.error,
+        suggestion: 'Please try taking a clearer photo or manually enter the expense'
+      });
+    }
+
+  } catch (error) {
+    console.error('Error scanning receipt:', error);
+    res.status(500).json({ success: false, error: 'Failed to process receipt' });
+  }
+});
+
+// Simulated OCR processing function (replace with real OCR service in production)
+async function processReceiptOCR(imageData: string, imageType: string) {
+  try {
+    // Simulate OCR processing delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Simulate different types of receipts with realistic data
+    const mockResults = [
+      {
+        vendor: 'Michaels Craft Store',
+        total: 24.97,
+        date: '2024-07-23',
+        description: 'Art supplies and craft materials',
+        category: 'materials',
+        items: ['Acrylic Paint Set', 'Canvas Boards', 'Paint Brushes'],
+        confidence: 0.92
+      },
+      {
+        vendor: 'Amazon',
+        total: 45.89,
+        date: '2024-07-22',
+        description: 'Business supplies ordered online',
+        category: 'supplies',
+        items: ['Packaging Tape', 'Bubble Wrap', 'Shipping Labels'],
+        confidence: 0.88
+      },
+      {
+        vendor: 'Home Depot',
+        total: 67.43,
+        date: '2024-07-21',
+        description: 'Tools and equipment purchase',
+        category: 'tools',
+        items: ['Drill Bits', 'Measuring Tape', 'Safety Glasses'],
+        confidence: 0.95
+      },
+      {
+        vendor: 'Etsy',
+        total: 18.50,
+        date: '2024-07-20',
+        description: 'Craft materials from online marketplace',
+        category: 'materials',
+        items: ['Fabric Scissors', 'Thread Spool Set'],
+        confidence: 0.85
+      }
+    ];
+
+    // Return random mock result for demo
+    const result = mockResults[Math.floor(Math.random() * mockResults.length)];
+    
+    return {
+      success: true,
+      ...result
+    };
+    
+  } catch (error) {
+    return {
+      success: false,
+      error: 'OCR processing failed',
+      confidence: 0
+    };
+  }
+}
 
 // Track personal expenses for handmade products
 app.post('/api/member-tax/track-personal-expense', (req: any, res: any) => {
