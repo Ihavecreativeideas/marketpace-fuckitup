@@ -29,6 +29,7 @@ import { subscriptionScheduler } from './subscriptionScheduler';
 import { sponsorManagementRoutes } from './sponsorManagement';
 import { zapierRouter } from './zapier-integration';
 const { sendEmployeeInvitation } = require('./employeeInvitation.js');
+const facebookAdsRouter = require('./routes/facebook-ads');
 // Import driver invitation module
 const { sendDriverInvitation } = require('./driverInvitation.js');
 
@@ -4373,6 +4374,7 @@ registerDriverRoutes(app);
 registerDriverApplicationRoutes(app);
 app.use(socialMediaRoutes);
 app.use('/api/zapier', zapierRouter);
+app.use('/api/facebook-ads', facebookAdsRouter);
 
 // Add missing admin routes for driver applications
 app.get('/api/admin/driver-applications', async (req, res) => {

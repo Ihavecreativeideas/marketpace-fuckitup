@@ -339,6 +339,51 @@
 
             <div class="card">
                 <h3>💳 Ad Spend Tracker</h3>
+                
+                <!-- Meta Business API Integration -->
+                <div style="background: linear-gradient(135deg, rgba(24, 119, 242, 0.1), rgba(66, 103, 178, 0.1)); border: 1px solid rgba(24, 119, 242, 0.3); border-radius: 8px; padding: 12px; margin-bottom: 15px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                        <div style="display: flex; align-items: center;">
+                            <div style="width: 20px; height: 20px; background: #1877f2; border-radius: 4px; margin-right: 8px; display: flex; align-items: center; justify-content: center;">
+                                <span style="color: white; font-size: 12px; font-weight: bold;">f</span>
+                            </div>
+                            <span style="color: #1877f2; font-weight: 600; font-size: 14px;">Meta Business Integration</span>
+                        </div>
+                        <div id="fbConnectionStatus" style="font-size: 12px; color: #ffd700;">Disconnected</div>
+                    </div>
+                    <div id="fbNotConnected">
+                        <p style="color: rgba(255,255,255,0.8); font-size: 13px; margin-bottom: 10px;">
+                            Connect your Facebook Business account to automatically import ad spend data for tax tracking.
+                        </p>
+                        <button class="btn" onclick="connectFacebookBusiness()" style="background: #1877f2; color: white; border: none; font-size: 13px; padding: 8px 16px;">
+                            Connect Facebook Business
+                        </button>
+                    </div>
+                    <div id="fbConnected" style="display: none;">
+                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                            <select id="fbAdAccount" style="flex: 1; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white;">
+                                <option value="">Select Ad Account</option>
+                            </select>
+                            <select id="fbDateRange" style="padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white;">
+                                <option value="last_7_days">Last 7 Days</option>
+                                <option value="last_30_days">Last 30 Days</option>
+                                <option value="last_90_days">Last 90 Days</option>
+                                <option value="this_month">This Month</option>
+                                <option value="last_month">Last Month</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-success" onclick="importFacebookAdSpend()" style="font-size: 13px; padding: 8px 16px;">
+                                Import Ad Spend
+                            </button>
+                            <button class="btn" onclick="disconnectFacebook()" style="background: rgba(255,255,255,0.1); font-size: 13px; padding: 8px 16px;">
+                                Disconnect
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manual Ad Spend Entry -->
                 <div class="form-group">
                     <label>Ad Platform</label>
                     <select id="adPlatform">
@@ -553,11 +598,166 @@
             }
         }
 
+        // Meta Business API Integration Functions
+        async function connectFacebookBusiness() {
+            try {
+                const response = await fetch('/api/facebook-ads/auth/login-url');
+                const data = await response.json();
+                
+                if (data.loginUrl) {
+                    // Open Facebook login in popup
+                    window.open(data.loginUrl, 'facebook-login', 'width=600,height=600');
+                    
+                    // Listen for completion
+                    window.addEventListener('message', handleFacebookAuth);
+                } else {
+                    showNotification('Error connecting to Facebook', 'error');
+                }
+            } catch (error) {
+                console.error('Facebook connection error:', error);
+                showNotification('Failed to connect to Facebook', 'error');
+            }
+        }
+
+        function handleFacebookAuth(event) {
+            if (event.data.type === 'facebook-auth-success') {
+                checkFacebookConnection();
+                showNotification('Successfully connected to Facebook Business', 'success');
+            }
+        }
+
+        async function checkFacebookConnection() {
+            try {
+                const response = await fetch('/api/facebook-ads/status');
+                const data = await response.json();
+                
+                const statusElement = document.getElementById('fbConnectionStatus');
+                const notConnectedDiv = document.getElementById('fbNotConnected');
+                const connectedDiv = document.getElementById('fbConnected');
+                
+                if (data.connected) {
+                    statusElement.textContent = 'Connected';
+                    statusElement.style.color = '#10b981';
+                    notConnectedDiv.style.display = 'none';
+                    connectedDiv.style.display = 'block';
+                    
+                    // Load ad accounts
+                    loadFacebookAdAccounts();
+                } else {
+                    statusElement.textContent = 'Disconnected';
+                    statusElement.style.color = '#ffd700';
+                    notConnectedDiv.style.display = 'block';
+                    connectedDiv.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error checking Facebook connection:', error);
+            }
+        }
+
+        async function loadFacebookAdAccounts() {
+            try {
+                const response = await fetch('/api/facebook-ads/accounts');
+                const data = await response.json();
+                
+                const accountSelect = document.getElementById('fbAdAccount');
+                accountSelect.innerHTML = '<option value="">Select Ad Account</option>';
+                
+                data.accounts.forEach(account => {
+                    const option = document.createElement('option');
+                    option.value = account.id;
+                    option.textContent = `${account.name} (${account.id})`;
+                    accountSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading ad accounts:', error);
+                showNotification('Failed to load ad accounts', 'error');
+            }
+        }
+
+        async function importFacebookAdSpend() {
+            const accountId = document.getElementById('fbAdAccount').value;
+            const dateRange = document.getElementById('fbDateRange').value;
+            
+            if (!accountId) {
+                showNotification('Please select an ad account', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/facebook-ads/spend/${accountId}?dateRange=${dateRange}`);
+                const data = await response.json();
+                
+                if (data.totalSpend && data.totalSpend.length > 0) {
+                    const spendData = data.totalSpend[0];
+                    const totalAmount = parseFloat(spendData.spend || 0);
+                    
+                    if (totalAmount > 0) {
+                        // Import spend as tax expense
+                        const importResponse = await fetch('/api/facebook-ads/import-spend', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                accountId,
+                                dateRange,
+                                campaigns: data.campaigns
+                            })
+                        });
+                        
+                        const importResult = await importResponse.json();
+                        
+                        if (importResult.success) {
+                            // Add to local storage for display
+                            importResult.records.forEach(record => {
+                                memberExpenses.push(record);
+                            });
+                            localStorage.setItem('memberTaxExpenses', JSON.stringify(memberExpenses));
+                            
+                            updateDashboard();
+                            loadExpenseLog();
+                            
+                            showNotification(
+                                `Imported $${importResult.totalAmount.toFixed(2)} in Facebook ad spend`,
+                                'success'
+                            );
+                        } else {
+                            showNotification('Failed to import ad spend data', 'error');
+                        }
+                    } else {
+                        showNotification('No ad spend found for selected period', 'info');
+                    }
+                } else {
+                    showNotification('No ad spend data available', 'info');
+                }
+            } catch (error) {
+                console.error('Error importing Facebook ad spend:', error);
+                showNotification('Failed to import ad spend', 'error');
+            }
+        }
+
+        async function disconnectFacebook() {
+            try {
+                const response = await fetch('/api/facebook-ads/disconnect', {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    checkFacebookConnection();
+                    showNotification('Disconnected from Facebook Business', 'success');
+                } else {
+                    showNotification('Failed to disconnect', 'error');
+                }
+            } catch (error) {
+                console.error('Error disconnecting Facebook:', error);
+                showNotification('Failed to disconnect', 'error');
+            }
+        }
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('customDate').value = new Date().toISOString().split('T')[0];
             updateDashboard();
             loadExpenseLog();
+            checkFacebookConnection(); // Check Facebook connection status
         });
 
         function addMileage() {

@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meta Business API Integration Demo - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 30%, #4c2885 60%, #6b46c1 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #1877f2, #42a5f5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .integration-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, rgba(24, 119, 242, 0.1), rgba(66, 103, 178, 0.1));
+            border: 1px solid rgba(24, 119, 242, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .facebook-logo {
+            width: 30px;
+            height: 30px;
+            background: #1877f2;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #1877f2, #42a5f5);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(24, 119, 242, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00ffff;
+            font-weight: 600;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+
+        .ad-spend-display {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .spend-amount {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #10b981;
+            margin-bottom: 10px;
+        }
+
+        .campaign-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .campaign-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #1877f2;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            background: #ef4444;
+        }
+
+        .demo-controls {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .integration-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Meta Business API Integration</h1>
+            <p>Automatically track Facebook & Instagram ad spending for tax deductions</p>
+        </div>
+
+        <!-- Demo Controls -->
+        <div class="demo-controls">
+            <h3 style="color: #ffd700; margin-bottom: 15px;">🚀 Demo Mode</h3>
+            <p style="margin-bottom: 15px;">This demo simulates Meta Business API integration for MarketPace tax tracking.</p>
+            <button class="btn btn-secondary" onclick="simulateConnection()">Simulate Facebook Connection</button>
+            <button class="btn btn-secondary" onclick="simulateAdData()">Load Demo Ad Data</button>
+            <button class="btn btn-secondary" onclick="resetDemo()">Reset Demo</button>
+        </div>
+
+        <!-- Connection Status -->
+        <div class="card">
+            <div class="connection-status">
+                <div style="display: flex; align-items: center;">
+                    <div class="facebook-logo">f</div>
+                    <div style="margin-left: 15px;">
+                        <div style="font-weight: 600; font-size: 18px;">Meta Business Manager</div>
+                        <div id="connectionStatus" style="font-size: 14px; color: #ffd700;">Disconnected</div>
+                    </div>
+                </div>
+                <div id="connectionControls">
+                    <button class="btn" onclick="connectFacebook()" id="connectBtn">Connect Account</button>
+                    <button class="btn btn-secondary" onclick="disconnectFacebook()" id="disconnectBtn" style="display: none;">Disconnect</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="integration-grid">
+            <!-- Ad Account Selection -->
+            <div class="card">
+                <h3 style="color: #1877f2; margin-bottom: 20px;">📊 Ad Account Selection</h3>
+                <div class="form-group">
+                    <label>Select Ad Account</label>
+                    <select id="adAccountSelect" disabled>
+                        <option value="">Connect Facebook first</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date Range</label>
+                    <select id="dateRangeSelect" disabled>
+                        <option value="last_7_days">Last 7 Days</option>
+                        <option value="last_30_days">Last 30 Days</option>
+                        <option value="last_90_days">Last 90 Days</option>
+                        <option value="this_month">This Month</option>
+                        <option value="last_month">Last Month</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="fetchAdSpend()" id="fetchBtn" disabled>Fetch Ad Spend Data</button>
+            </div>
+
+            <!-- API Status -->
+            <div class="card">
+                <h3 style="color: #00ffff; margin-bottom: 20px;">🔧 API Status</h3>
+                <div id="apiStatus">
+                    <div style="margin-bottom: 10px;">
+                        <span style="color: #ffd700;">Facebook Graph API:</span>
+                        <span id="graphApiStatus" style="color: #ef4444;">Disconnected</span>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="color: #ffd700;">Ads Management API:</span>
+                        <span id="adsApiStatus" style="color: #ef4444;">Disconnected</span>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="color: #ffd700;">Permissions:</span>
+                        <span id="permissionStatus" style="color: #ef4444;">Not Granted</span>
+                    </div>
+                    <div>
+                        <span style="color: #ffd700;">Last Sync:</span>
+                        <span id="lastSyncStatus" style="color: #94a3b8;">Never</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ad Spend Data Display -->
+        <div class="card" id="adSpendCard" style="display: none;">
+            <h3 style="color: #10b981; margin-bottom: 20px;">💰 Ad Spend Data</h3>
+            
+            <div class="ad-spend-display">
+                <div class="spend-amount" id="totalSpendAmount">$0.00</div>
+                <div style="color: rgba(255,255,255,0.8);">Total Ad Spend for Selected Period</div>
+                <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+                    <div style="text-align: center;">
+                        <div id="impressionsCount" style="font-size: 1.5rem; font-weight: bold; color: #42a5f5;">0</div>
+                        <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">Impressions</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div id="clicksCount" style="font-size: 1.5rem; font-weight: bold; color: #42a5f5;">0</div>
+                        <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">Clicks</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div id="cpcAmount" style="font-size: 1.5rem; font-weight: bold; color: #42a5f5;">$0.00</div>
+                        <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">Avg CPC</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campaign Breakdown -->
+            <div id="campaignBreakdown" style="margin-top: 25px;">
+                <h4 style="color: #00ffff; margin-bottom: 15px;">Campaign Breakdown</h4>
+                <div id="campaignList" class="campaign-list">
+                    <!-- Campaign data will be populated here -->
+                </div>
+            </div>
+
+            <div style="margin-top: 25px; text-align: center;">
+                <button class="btn" onclick="importToTaxRecords()">Import to Tax Records</button>
+                <button class="btn btn-secondary" onclick="exportTaxData()">Export for Tax Filing</button>
+            </div>
+        </div>
+
+        <!-- Tax Integration Summary -->
+        <div class="card">
+            <h3 style="color: #ffd700; margin-bottom: 20px;">📋 Tax Integration Summary</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <div style="text-align: center;">
+                    <div id="totalImported" style="font-size: 1.8rem; font-weight: bold; color: #10b981;">$0.00</div>
+                    <div style="color: rgba(255,255,255,0.7);">Total Imported</div>
+                </div>
+                <div style="text-align: center;">
+                    <div id="taxDeduction" style="font-size: 1.8rem; font-weight: bold; color: #10b981;">$0.00</div>
+                    <div style="color: rgba(255,255,255,0.7);">Tax Deduction</div>
+                </div>
+                <div style="text-align: center;">
+                    <div id="estimatedSavings" style="font-size: 1.8rem; font-weight: bold; color: #10b981;">$0.00</div>
+                    <div style="color: rgba(255,255,255,0.7);">Estimated Savings</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Element -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        let isConnected = false;
+        let adAccountData = [];
+        let currentAdSpend = 0;
+        let totalImportedAmount = 0;
+
+        // Demo data
+        const demoAdAccounts = [
+            { id: 'act_123456789', name: 'MarketPace Main Account' },
+            { id: 'act_987654321', name: 'Local Business Promotions' },
+            { id: 'act_456789123', name: 'E-commerce Ads' }
+        ];
+
+        const demoCampaigns = [
+            { name: 'MarketPace App Downloads', spend: 245.67, status: 'ACTIVE' },
+            { name: 'Local Shop Promotion', spend: 89.23, status: 'ACTIVE' },
+            { name: 'Holiday Sales Campaign', spend: 156.78, status: 'PAUSED' },
+            { name: 'Rental Marketplace Ads', spend: 67.45, status: 'ACTIVE' }
+        ];
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        function simulateConnection() {
+            isConnected = true;
+            updateConnectionStatus();
+            loadAdAccounts();
+            showNotification('Facebook Business Manager connected successfully');
+        }
+
+        function connectFacebook() {
+            // In real implementation, this would open Facebook OAuth
+            showNotification('Opening Facebook Business Manager authentication...');
+            setTimeout(() => {
+                simulateConnection();
+            }, 2000);
+        }
+
+        function disconnectFacebook() {
+            isConnected = false;
+            updateConnectionStatus();
+            document.getElementById('adAccountSelect').innerHTML = '<option value="">Connect Facebook first</option>';
+            document.getElementById('adSpendCard').style.display = 'none';
+            showNotification('Disconnected from Facebook Business Manager');
+        }
+
+        function updateConnectionStatus() {
+            const statusElement = document.getElementById('connectionStatus');
+            const connectBtn = document.getElementById('connectBtn');
+            const disconnectBtn = document.getElementById('disconnectBtn');
+            const adAccountSelect = document.getElementById('adAccountSelect');
+            const dateRangeSelect = document.getElementById('dateRangeSelect');
+            const fetchBtn = document.getElementById('fetchBtn');
+
+            if (isConnected) {
+                statusElement.textContent = 'Connected';
+                statusElement.style.color = '#10b981';
+                connectBtn.style.display = 'none';
+                disconnectBtn.style.display = 'inline-block';
+                adAccountSelect.disabled = false;
+                dateRangeSelect.disabled = false;
+                fetchBtn.disabled = false;
+                
+                // Update API status
+                document.getElementById('graphApiStatus').textContent = 'Connected';
+                document.getElementById('graphApiStatus').style.color = '#10b981';
+                document.getElementById('adsApiStatus').textContent = 'Connected';
+                document.getElementById('adsApiStatus').style.color = '#10b981';
+                document.getElementById('permissionStatus').textContent = 'ads_read, ads_management';
+                document.getElementById('permissionStatus').style.color = '#10b981';
+                document.getElementById('lastSyncStatus').textContent = new Date().toLocaleString();
+                document.getElementById('lastSyncStatus').style.color = '#10b981';
+            } else {
+                statusElement.textContent = 'Disconnected';
+                statusElement.style.color = '#ffd700';
+                connectBtn.style.display = 'inline-block';
+                disconnectBtn.style.display = 'none';
+                adAccountSelect.disabled = true;
+                dateRangeSelect.disabled = true;
+                fetchBtn.disabled = true;
+                
+                // Reset API status
+                document.getElementById('graphApiStatus').textContent = 'Disconnected';
+                document.getElementById('graphApiStatus').style.color = '#ef4444';
+                document.getElementById('adsApiStatus').textContent = 'Disconnected';
+                document.getElementById('adsApiStatus').style.color = '#ef4444';
+                document.getElementById('permissionStatus').textContent = 'Not Granted';
+                document.getElementById('permissionStatus').style.color = '#ef4444';
+                document.getElementById('lastSyncStatus').textContent = 'Never';
+                document.getElementById('lastSyncStatus').style.color = '#94a3b8';
+            }
+        }
+
+        function loadAdAccounts() {
+            const select = document.getElementById('adAccountSelect');
+            select.innerHTML = '<option value="">Select Ad Account</option>';
+            
+            demoAdAccounts.forEach(account => {
+                const option = document.createElement('option');
+                option.value = account.id;
+                option.textContent = account.name;
+                select.appendChild(option);
+            });
+        }
+
+        function simulateAdData() {
+            if (!isConnected) {
+                showNotification('Please connect to Facebook first', 'error');
+                return;
+            }
+            
+            fetchAdSpend();
+        }
+
+        function fetchAdSpend() {
+            const accountId = document.getElementById('adAccountSelect').value;
+            const dateRange = document.getElementById('dateRangeSelect').value;
+            
+            if (!accountId) {
+                showNotification('Please select an ad account', 'error');
+                return;
+            }
+            
+            showNotification('Fetching ad spend data...');
+            
+            // Simulate API delay
+            setTimeout(() => {
+                const totalSpend = demoCampaigns.reduce((sum, campaign) => sum + campaign.spend, 0);
+                const totalImpressions = Math.floor(Math.random() * 50000) + 10000;
+                const totalClicks = Math.floor(Math.random() * 2000) + 500;
+                const avgCpc = totalSpend / totalClicks;
+                
+                currentAdSpend = totalSpend;
+                
+                // Update display
+                document.getElementById('totalSpendAmount').textContent = `$${totalSpend.toFixed(2)}`;
+                document.getElementById('impressionsCount').textContent = totalImpressions.toLocaleString();
+                document.getElementById('clicksCount').textContent = totalClicks.toLocaleString();
+                document.getElementById('cpcAmount').textContent = `$${avgCpc.toFixed(2)}`;
+                
+                // Show campaign breakdown
+                const campaignList = document.getElementById('campaignList');
+                campaignList.innerHTML = '';
+                
+                demoCampaigns.forEach(campaign => {
+                    const campaignDiv = document.createElement('div');
+                    campaignDiv.className = 'campaign-item';
+                    campaignDiv.innerHTML = `
+                        <div style="display: flex; justify-content: between; align-items: center;">
+                            <div>
+                                <div style="font-weight: 600; margin-bottom: 5px;">${campaign.name}</div>
+                                <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Status: ${campaign.status}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 1.2rem; font-weight: bold; color: #10b981;">$${campaign.spend.toFixed(2)}</div>
+                            </div>
+                        </div>
+                    `;
+                    campaignList.appendChild(campaignDiv);
+                });
+                
+                document.getElementById('adSpendCard').style.display = 'block';
+                showNotification(`Loaded $${totalSpend.toFixed(2)} in ad spend data`);
+            }, 1500);
+        }
+
+        function importToTaxRecords() {
+            if (currentAdSpend === 0) {
+                showNotification('No ad spend data to import', 'error');
+                return;
+            }
+            
+            totalImportedAmount += currentAdSpend;
+            
+            // Update tax summary
+            document.getElementById('totalImported').textContent = `$${totalImportedAmount.toFixed(2)}`;
+            document.getElementById('taxDeduction').textContent = `$${totalImportedAmount.toFixed(2)}`;
+            document.getElementById('estimatedSavings').textContent = `$${(totalImportedAmount * 0.22).toFixed(2)}`;
+            
+            showNotification(`Imported $${currentAdSpend.toFixed(2)} to tax records`);
+        }
+
+        function exportTaxData() {
+            if (totalImportedAmount === 0) {
+                showNotification('No tax data to export', 'error');
+                return;
+            }
+            
+            // Create CSV data
+            const csvData = [
+                ['Date', 'Description', 'Amount', 'Category', 'Platform'],
+                [new Date().toISOString().split('T')[0], 'Facebook/Instagram Advertising', totalImportedAmount.toFixed(2), 'Marketing/Advertising', 'Meta Business']
+            ];
+            
+            const csvContent = csvData.map(row => row.join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'facebook-ad-spend-tax-export.csv';
+            a.click();
+            
+            window.URL.revokeObjectURL(url);
+            showNotification('Tax data exported to CSV file');
+        }
+
+        function resetDemo() {
+            isConnected = false;
+            currentAdSpend = 0;
+            totalImportedAmount = 0;
+            
+            updateConnectionStatus();
+            document.getElementById('adSpendCard').style.display = 'none';
+            document.getElementById('totalImported').textContent = '$0.00';
+            document.getElementById('taxDeduction').textContent = '$0.00';
+            document.getElementById('estimatedSavings').textContent = '$0.00';
+            
+            showNotification('Demo reset successfully');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateConnectionStatus();
+        });
+    </script>
+</body>
+</html>
