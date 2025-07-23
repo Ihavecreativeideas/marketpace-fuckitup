@@ -5222,6 +5222,14 @@
                             <button onclick="weatherAlert()" style="background: linear-gradient(135deg, #dc2626, #b91c1c); border: none; color: white; padding: 8px; border-radius: 6px; font-size: 10px; cursor: pointer;">Weather</button>
                         </div>
                     </div>
+                    
+                    <!-- Public Festival Schedule Access -->
+                    <div style="background: rgba(0, 255, 255, 0.1); border: 2px solid rgba(0, 255, 255, 0.4); border-radius: 8px; padding: 16px; margin-top: 16px; text-align: center;">
+                        <h4 style="color: #00ffff; margin: 0 0 12px 0;">📅 Public Festival Schedule</h4>
+                        <p style="color: #94a3b8; font-size: 12px; margin-bottom: 12px;">Share the public schedule link with festival attendees to view performer schedules and venue information</p>
+                        <button onclick="openPublicSchedule()" style="background: linear-gradient(135deg, #00ffff, #4169e1); border: none; color: white; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-right: 8px;">View Public Schedule</button>
+                        <button onclick="copyScheduleLink()" style="background: linear-gradient(135deg, #8a2be2, #6d28d9); border: none; color: white; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer;">Copy Link</button>
+                    </div>
                 </div>
             `);
             
@@ -6014,6 +6022,27 @@
 
         function weatherAlert() {
             showNotification('⛈️ Weather Alert: Storm monitoring and contingency plans', 'warning');
+        }
+
+        function openPublicSchedule() {
+            window.open('/public-festival-schedule', '_blank');
+            showNotification('📅 Public festival schedule opened in new tab', 'success');
+        }
+
+        function copyScheduleLink() {
+            const scheduleUrl = window.location.origin + '/public-festival-schedule';
+            navigator.clipboard.writeText(scheduleUrl).then(() => {
+                showNotification('🔗 Public schedule link copied to clipboard', 'success');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = scheduleUrl;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showNotification('🔗 Public schedule link copied to clipboard', 'success');
+            });
         }
     </script>
 </body>

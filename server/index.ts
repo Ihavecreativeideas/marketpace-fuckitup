@@ -4426,6 +4426,9 @@ app.get("/notification-settings.html", (req, res) => {
 app.get("/messages", (req, res) => { 
   res.sendFile(path.join(__dirname, "..", "messages.html")); 
 });
+app.get("/public-festival-schedule", (req, res) => { 
+  res.sendFile(path.join(__dirname, "..", "public-festival-schedule.html")); 
+});
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`✅ MarketPace Full Server running on port ${port}`);

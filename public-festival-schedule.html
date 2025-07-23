@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gulf Coast Songwriter Festival 2025 - Public Schedule</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Festival Header */
+        .festival-header {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 20, 147, 0.1));
+            border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+        }
+
+        .festival-title {
+            color: #00ffff;
+            font-size: 28px;
+            font-weight: 900;
+            margin-bottom: 8px;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+        }
+
+        .festival-dates {
+            color: #ff1493;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .festival-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .stat-number {
+            color: #00ffff;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        /* Search and Filter Controls */
+        .controls-section {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .search-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .search-input {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            color: white;
+            padding: 16px 20px;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .filter-select {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 20, 147, 0.3);
+            border-radius: 12px;
+            color: white;
+            padding: 16px 20px;
+            font-size: 14px;
+            min-width: 150px;
+        }
+
+        .view-toggle {
+            display: flex;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(138, 43, 226, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .view-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .view-btn.active {
+            background: linear-gradient(135deg, #8a2be2, #6d28d9);
+            color: white;
+        }
+
+        /* Schedule Grid Layout */
+        .schedule-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .day-section {
+            margin-bottom: 40px;
+        }
+
+        .day-header {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 20, 147, 0.1));
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .day-title {
+            color: #00ffff;
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .day-date {
+            color: #ff1493;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .locations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+
+        .location-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .location-header {
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.2), rgba(255, 20, 147, 0.2));
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .location-title {
+            color: #8a2be2;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .location-address {
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .performances-list {
+            padding: 16px;
+        }
+
+        .performance-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .performance-item:hover {
+            background: rgba(0, 255, 255, 0.05);
+            border-color: rgba(0, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .performance-time {
+            background: linear-gradient(135deg, #00ffff, #4169e1);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 12px;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .performer-info {
+            flex: 1;
+        }
+
+        .performer-name {
+            color: #00ffff;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .performer-bio {
+            color: #94a3b8;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .performer-tags {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        .tag {
+            background: rgba(255, 20, 147, 0.2);
+            color: #ff1493;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+        }
+
+        /* List View */
+        .list-view {
+            display: none;
+        }
+
+        .list-view.active {
+            display: block;
+        }
+
+        .performer-list-item {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .performer-list-item:hover {
+            border-color: rgba(0, 255, 255, 0.3);
+            background: rgba(0, 255, 255, 0.05);
+        }
+
+        .performer-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .performer-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ffff, #8a2be2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .performer-details h3 {
+            color: #00ffff;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .performer-genre {
+            color: #ff1493;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .performer-schedule {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+
+        .schedule-title {
+            color: #8a2be2;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .schedule-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .schedule-location {
+            color: #00ffff;
+            font-weight: 600;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .search-container {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .locations-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .festival-stats {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .festival-title {
+                font-size: 24px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #00ffff;
+        }
+
+        .spinner {
+            border: 3px solid rgba(0, 255, 255, 0.3);
+            border-top: 3px solid #00ffff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Festival Header -->
+    <div class="festival-header">
+        <h1 class="festival-title">🎵 Gulf Coast Songwriter Festival 2025 🎵</h1>
+        <div class="festival-dates">January 27 - February 9, 2025</div>
+        <div class="festival-stats">
+            <div class="stat-box">
+                <div class="stat-number">300</div>
+                <div class="stat-label">Songwriters</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">20</div>
+                <div class="stat-label">Venues</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">14</div>
+                <div class="stat-label">Days</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="controls-section">
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Search songwriters, venues, or songs..." id="searchInput">
+            <select class="filter-select" id="venueFilter">
+                <option value="">All Venues</option>
+                <option value="main-stage">Main Stage</option>
+                <option value="acoustic-corner">Acoustic Corner</option>
+                <option value="sunset-pavilion">Sunset Pavilion</option>
+                <option value="harbor-deck">Harbor Deck</option>
+                <option value="beachside-bar">Beachside Bar</option>
+            </select>
+            <div class="view-toggle">
+                <button class="view-btn active" onclick="switchView('schedule')" id="scheduleBtn">Schedule View</button>
+                <button class="view-btn" onclick="switchView('list')" id="listBtn">Artist List</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Container -->
+    <div class="schedule-container">
+        <!-- Schedule View -->
+        <div id="scheduleView" class="schedule-view active">
+            <div class="loading" id="loadingSchedule">
+                <div class="spinner"></div>
+                Loading festival schedule...
+            </div>
+            <div id="scheduleContent" style="display: none;"></div>
+        </div>
+
+        <!-- List View -->
+        <div id="listView" class="list-view">
+            <div class="loading" id="loadingList">
+                <div class="spinner"></div>
+                Loading artist profiles...
+            </div>
+            <div id="listContent" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Festival Data Structure
+        const festivalData = {
+            venues: [
+                { id: 'main-stage', name: 'Main Stage', address: '100 Festival Way, Orange Beach, AL' },
+                { id: 'acoustic-corner', name: 'Acoustic Corner', address: '200 Sunset Blvd, Gulf Shores, AL' },
+                { id: 'sunset-pavilion', name: 'Sunset Pavilion', address: '300 Harbor Dr, Orange Beach, AL' },
+                { id: 'harbor-deck', name: 'Harbor Deck', address: '400 Marina Rd, Gulf Shores, AL' },
+                { id: 'beachside-bar', name: 'Beachside Bar', address: '500 Beach Blvd, Orange Beach, AL' },
+                { id: 'driftwood-cafe', name: 'Driftwood Cafe', address: '600 Coastal Hwy, Gulf Shores, AL' },
+                { id: 'pier-point', name: 'Pier Point', address: '700 Fishing Pier Rd, Orange Beach, AL' },
+                { id: 'sand-castle', name: 'Sand Castle Venue', address: '800 Dune Dr, Gulf Shores, AL' },
+                { id: 'wave-rider', name: 'Wave Rider Lounge', address: '900 Surf Ave, Orange Beach, AL' },
+                { id: 'coastal-corner', name: 'Coastal Corner', address: '1000 Bay St, Gulf Shores, AL' },
+                { id: 'lighthouse-lounge', name: 'Lighthouse Lounge', address: '1100 Beacon Rd, Orange Beach, AL' },
+                { id: 'seashell-stage', name: 'Seashell Stage', address: '1200 Ocean View Dr, Gulf Shores, AL' },
+                { id: 'boardwalk-bistro', name: 'Boardwalk Bistro', address: '1300 Walkway Ln, Orange Beach, AL' },
+                { id: 'tide-pool', name: 'Tide Pool Theater', address: '1400 Low Tide Rd, Gulf Shores, AL' },
+                { id: 'sand-bar', name: 'The Sand Bar', address: '1500 Beach Access Rd, Orange Beach, AL' },
+                { id: 'gulf-grille', name: 'Gulf Grille', address: '1600 Seafood Way, Gulf Shores, AL' },
+                { id: 'marina-music', name: 'Marina Music Hall', address: '1700 Boat Launch Dr, Orange Beach, AL' },
+                { id: 'sunset-sounds', name: 'Sunset Sounds', address: '1800 Evening Rd, Gulf Shores, AL' },
+                { id: 'dunes-deck', name: 'Dunes Deck', address: '1900 Sand Hill Rd, Orange Beach, AL' },
+                { id: 'coastal-cafe', name: 'Coastal Cafe', address: '2000 Shore Dr, Gulf Shores, AL' }
+            ],
+            
+            songwriters: generateSongwriterData()
+        };
+
+        function generateSongwriterData() {
+            const genres = ['Country', 'Folk', 'Indie', 'Acoustic', 'Americana', 'Blues', 'Rock', 'Pop'];
+            const firstNames = ['Sarah', 'Mike', 'Emma', 'Jake', 'Lily', 'Connor', 'Maya', 'Austin', 'Grace', 'Tyler', 'Zoe', 'Blake', 'Ava', 'Cole', 'Ruby'];
+            const lastNames = ['Johnson', 'Williams', 'Brown', 'Davis', 'Miller', 'Wilson', 'Moore', 'Taylor', 'Anderson', 'Thomas', 'Jackson', 'White', 'Harris', 'Martin', 'Garcia'];
+            
+            const songwriters = [];
+            
+            for (let i = 0; i < 300; i++) {
+                const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+                const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+                const name = `${firstName} ${lastName}`;
+                const genre = genres[Math.floor(Math.random() * genres.length)];
+                
+                songwriters.push({
+                    id: `songwriter-${i + 1}`,
+                    name: name,
+                    genre: genre,
+                    bio: `${genre} songwriter from the Gulf Coast with a passion for storytelling through music.`,
+                    profileUrl: `/unified-pro-page.html?artist=${encodeURIComponent(name)}`,
+                    performances: generatePerformancesForArtist(i + 1),
+                    socialMedia: {
+                        spotify: `https://spotify.com/artist/${name.replace(' ', '-').toLowerCase()}`,
+                        instagram: `https://instagram.com/${name.replace(' ', '').toLowerCase()}`,
+                        facebook: `https://facebook.com/${name.replace(' ', '-').toLowerCase()}`
+                    }
+                });
+            }
+            
+            return songwriters;
+        }
+
+        function generatePerformancesForArtist(artistIndex) {
+            const performances = [];
+            const numPerformances = Math.floor(Math.random() * 4) + 2; // 2-5 performances per artist
+            
+            for (let i = 0; i < numPerformances; i++) {
+                const dayIndex = Math.floor(Math.random() * 14); // Random day in 14-day festival
+                const venueIndex = Math.floor(Math.random() * 20); // Random venue
+                const hour = Math.floor(Math.random() * 12) + 10; // 10 AM to 9 PM
+                const minute = Math.random() > 0.5 ? '00' : '30';
+                
+                performances.push({
+                    day: dayIndex,
+                    venue: festivalData.venues[venueIndex].id,
+                    time: `${hour}:${minute}`,
+                    duration: 45 // 45 minute sets
+                });
+            }
+            
+            return performances.sort((a, b) => a.day - b.day);
+        }
+
+        // Current view state
+        let currentView = 'schedule';
+        let filteredData = festivalData.songwriters;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadScheduleView();
+            loadListView();
+            
+            // Setup search functionality
+            document.getElementById('searchInput').addEventListener('input', handleSearch);
+            document.getElementById('venueFilter').addEventListener('change', handleVenueFilter);
+        });
+
+        function switchView(view) {
+            currentView = view;
+            
+            // Update button states
+            document.getElementById('scheduleBtn').classList.toggle('active', view === 'schedule');
+            document.getElementById('listBtn').classList.toggle('active', view === 'list');
+            
+            // Show/hide views
+            document.getElementById('scheduleView').style.display = view === 'schedule' ? 'block' : 'none';
+            document.getElementById('listView').style.display = view === 'list' ? 'block' : 'none';
+        }
+
+        function loadScheduleView() {
+            setTimeout(() => {
+                const scheduleContent = document.getElementById('scheduleContent');
+                scheduleContent.innerHTML = generateScheduleHTML();
+                
+                document.getElementById('loadingSchedule').style.display = 'none';
+                scheduleContent.style.display = 'block';
+            }, 1000);
+        }
+
+        function loadListView() {
+            setTimeout(() => {
+                const listContent = document.getElementById('listContent');
+                listContent.innerHTML = generateListHTML();
+                
+                document.getElementById('loadingList').style.display = 'none';
+                listContent.style.display = 'block';
+            }, 1200);
+        }
+
+        function generateScheduleHTML() {
+            let html = '';
+            
+            for (let day = 0; day < 14; day++) {
+                const date = new Date(2025, 0, 27 + day); // Starting January 27, 2025
+                const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+                const dayDate = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+                
+                html += `
+                    <div class="day-section">
+                        <div class="day-header">
+                            <div class="day-title">${dayName}</div>
+                            <div class="day-date">${dayDate}</div>
+                        </div>
+                        <div class="locations-grid">
+                `;
+                
+                // Group performances by venue for this day
+                const venuesWithPerformances = {};
+                
+                filteredData.forEach(songwriter => {
+                    songwriter.performances.forEach(performance => {
+                        if (performance.day === day) {
+                            if (!venuesWithPerformances[performance.venue]) {
+                                venuesWithPerformances[performance.venue] = [];
+                            }
+                            venuesWithPerformances[performance.venue].push({
+                                ...performance,
+                                songwriter: songwriter
+                            });
+                        }
+                    });
+                });
+                
+                // Sort venues and performances
+                Object.keys(venuesWithPerformances).forEach(venueId => {
+                    venuesWithPerformances[venueId].sort((a, b) => a.time.localeCompare(b.time));
+                });
+                
+                // Generate venue cards
+                Object.keys(venuesWithPerformances).forEach(venueId => {
+                    const venue = festivalData.venues.find(v => v.id === venueId);
+                    const performances = venuesWithPerformances[venueId];
+                    
+                    html += `
+                        <div class="location-card">
+                            <div class="location-header">
+                                <div class="location-title">${venue.name}</div>
+                                <div class="location-address">${venue.address}</div>
+                            </div>
+                            <div class="performances-list">
+                    `;
+                    
+                    performances.forEach(performance => {
+                        html += `
+                            <div class="performance-item" onclick="openArtistProfile('${performance.songwriter.id}')">
+                                <div class="performance-time">${formatTime(performance.time)}</div>
+                                <div class="performer-info">
+                                    <div class="performer-name">${performance.songwriter.name}</div>
+                                    <div class="performer-bio">${performance.songwriter.bio}</div>
+                                    <div class="performer-tags">
+                                        <span class="tag">${performance.songwriter.genre}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+            
+            return html;
+        }
+
+        function generateListHTML() {
+            let html = '';
+            
+            filteredData.forEach(songwriter => {
+                html += `
+                    <div class="performer-list-item" onclick="openArtistProfile('${songwriter.id}')">
+                        <div class="performer-header">
+                            <div class="performer-avatar">${songwriter.name.charAt(0)}</div>
+                            <div class="performer-details">
+                                <h3>${songwriter.name}</h3>
+                                <div class="performer-genre">${songwriter.genre}</div>
+                            </div>
+                        </div>
+                        <div class="performer-bio">${songwriter.bio}</div>
+                        <div class="performer-schedule">
+                            <div class="schedule-title">Upcoming Performances</div>
+                `;
+                
+                songwriter.performances.slice(0, 3).forEach(performance => {
+                    const venue = festivalData.venues.find(v => v.id === performance.venue);
+                    const date = new Date(2025, 0, 27 + performance.day);
+                    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    
+                    html += `
+                        <div class="schedule-item">
+                            <span>${dateStr} at ${formatTime(performance.time)}</span>
+                            <span class="schedule-location">${venue.name}</span>
+                        </div>
+                    `;
+                });
+                
+                if (songwriter.performances.length > 3) {
+                    html += `
+                        <div class="schedule-item">
+                            <span style="color: #8a2be2; font-style: italic;">+ ${songwriter.performances.length - 3} more performances</span>
+                        </div>
+                    `;
+                }
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+            
+            return html;
+        }
+
+        function formatTime(time24) {
+            const [hours, minutes] = time24.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const hour12 = hour % 12 || 12;
+            return `${hour12}:${minutes} ${ampm}`;
+        }
+
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const venueFilter = document.getElementById('venueFilter').value;
+            
+            filteredData = festivalData.songwriters.filter(songwriter => {
+                const matchesSearch = query === '' || 
+                    songwriter.name.toLowerCase().includes(query) ||
+                    songwriter.genre.toLowerCase().includes(query) ||
+                    songwriter.bio.toLowerCase().includes(query);
+                
+                const matchesVenue = venueFilter === '' || 
+                    songwriter.performances.some(p => p.venue === venueFilter);
+                
+                return matchesSearch && matchesVenue;
+            });
+            
+            // Reload views with filtered data
+            loadScheduleView();
+            loadListView();
+        }
+
+        function handleVenueFilter() {
+            handleSearch(); // Reuse search logic
+        }
+
+        function openArtistProfile(artistId) {
+            const artist = festivalData.songwriters.find(s => s.id === artistId);
+            if (artist) {
+                // Open in new tab to view artist's MarketPace profile
+                window.open(artist.profileUrl, '_blank');
+            }
+        }
+
+        // Add some visual effects
+        document.addEventListener('mousemove', function(e) {
+            const cursor = document.querySelector('.cursor-glow');
+            if (!cursor) {
+                const glow = document.createElement('div');
+                glow.className = 'cursor-glow';
+                glow.style.cssText = `
+                    position: fixed;
+                    width: 20px;
+                    height: 20px;
+                    background: radial-gradient(circle, rgba(0,255,255,0.3) 0%, transparent 70%);
+                    border-radius: 50%;
+                    pointer-events: none;
+                    z-index: 1000;
+                    transition: all 0.1s ease;
+                `;
+                document.body.appendChild(glow);
+            }
+            
+            document.querySelector('.cursor-glow').style.left = (e.clientX - 10) + 'px';
+            document.querySelector('.cursor-glow').style.top = (e.clientY - 10) + 'px';
+        });
+    </script>
+</body>
+</html>
