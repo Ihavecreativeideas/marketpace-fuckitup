@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Address Setup - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #1a0b3d 0%, #6b46c1 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Floating particles background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(0, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.6; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ffff, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 16px;
+        }
+
+        .form-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: #64748b;
+        }
+
+        .address-row {
+            display: grid;
+            grid-template-columns: 1fr 100px;
+            gap: 12px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(45deg, #00ffff, #0ea5e9);
+            border: none;
+            border-radius: 12px;
+            color: #0f172a;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 255, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .qr-status {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .qr-status.show {
+            display: block;
+        }
+
+        .qr-status h3 {
+            color: #00ffff;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .qr-usage {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .qr-usage h4 {
+            color: #00ffff;
+            font-size: 16px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .usage-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .usage-item {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 255, 255, 0.2);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #00ffff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 16px;
+            }
+            
+            .address-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .usage-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 16px 20px;
+            color: white;
+            font-size: 14px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-color: rgba(34, 197, 94, 0.5);
+        }
+
+        .notification.error {
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <a href="/marketpace-menu.html" class="back-btn">
+        ←
+    </a>
+
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Add Your Address</h1>
+            <p class="subtitle">We'll automatically generate a Geo QR code for marketplace activities</p>
+        </div>
+
+        <div class="form-card">
+            <form id="addressForm">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-input" id="memberName" placeholder="Your full name" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Street Address</label>
+                    <input type="text" class="form-input" id="address" placeholder="123 Main Street" required>
+                </div>
+
+                <div class="form-group">
+                    <div class="address-row">
+                        <div>
+                            <label class="form-label">City</label>
+                            <input type="text" class="form-input" id="city" placeholder="Orange Beach" required>
+                        </div>
+                        <div>
+                            <label class="form-label">State</label>
+                            <input type="text" class="form-input" id="state" placeholder="AL" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">ZIP Code</label>
+                    <input type="text" class="form-input" id="zipCode" placeholder="36561" required>
+                </div>
+
+                <button type="submit" class="btn" id="setupBtn">
+                    Generate Address QR Code
+                </button>
+            </form>
+        </div>
+
+        <div class="qr-status" id="qrStatus">
+            <h3>✅ Geo QR Code Generated!</h3>
+            <p id="qrAddress"></p>
+            <p style="color: #94a3b8; font-size: 14px; margin-top: 10px;">
+                Your universal QR code can be used for all marketplace activities
+            </p>
+        </div>
+
+        <div class="qr-usage">
+            <h4>🎯 Your Geo QR Code Can Be Used For:</h4>
+            <div class="usage-grid">
+                <div class="usage-item">
+                    🛒 <strong>Buying</strong><br>Verify pickup location
+                </div>
+                <div class="usage-item">
+                    💰 <strong>Selling</strong><br>Confirm item handoff
+                </div>
+                <div class="usage-item">
+                    🏠 <strong>Renting</strong><br>Location verification
+                </div>
+                <div class="usage-item">
+                    🔧 <strong>Services</strong><br>Service area validation
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particles = document.getElementById('particles');
+            const particleCount = 15;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particles.appendChild(particle);
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        // Generate member Geo QR code
+        async function generateMemberGeoQR(formData) {
+            try {
+                const memberId = 'member_' + Math.random().toString(36).substr(2, 9);
+                
+                const response = await fetch('/api/members/generate-address-qr', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        memberId: memberId,
+                        address: formData.address,
+                        city: formData.city,
+                        state: formData.state,
+                        zipCode: formData.zipCode,
+                        memberName: formData.memberName
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Store QR data locally
+                    localStorage.setItem('memberGeoQR', JSON.stringify(data.qrData));
+                    
+                    // Show success status
+                    document.getElementById('qrAddress').textContent = data.address;
+                    document.getElementById('qrStatus').classList.add('show');
+                    
+                    showNotification('✅ Geo QR code generated! Ready for marketplace activities.', 'success');
+                    
+                    console.log('Member Geo QR generated:', data.qrData);
+                    return data.qrData;
+                } else {
+                    throw new Error(data.message || 'Failed to generate QR code');
+                }
+            } catch (error) {
+                console.error('Geo QR generation error:', error);
+                showNotification('❌ Failed to generate Geo QR code. Please try again.', 'error');
+                throw error;
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('addressForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                memberName: document.getElementById('memberName').value,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                state: document.getElementById('state').value,
+                zipCode: document.getElementById('zipCode').value
+            };
+
+            // Validate form
+            if (!formData.memberName || !formData.address || !formData.city || !formData.state || !formData.zipCode) {
+                showNotification('❌ Please fill in all address fields', 'error');
+                return;
+            }
+
+            const setupBtn = document.getElementById('setupBtn');
+            const originalText = setupBtn.textContent;
+            
+            try {
+                setupBtn.disabled = true;
+                setupBtn.textContent = 'Generating QR Code...';
+                
+                // Generate the Geo QR code
+                await generateMemberGeoQR(formData);
+                
+                setupBtn.textContent = '✅ QR Code Generated';
+                
+                // Redirect to profile or community after success
+                setTimeout(() => {
+                    window.location.href = '/community.html';
+                }, 2000);
+                
+            } catch (error) {
+                setupBtn.disabled = false;
+                setupBtn.textContent = originalText;
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            console.log('Member Address Setup page loaded');
+        });
+    </script>
+</body>
+</html>

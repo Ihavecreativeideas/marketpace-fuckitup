@@ -263,6 +263,91 @@ app.post('/api/maps/geocode', async (req, res) => {
   }
 });
 
+// Automatic Geo QR Generation for Member Address
+app.post('/api/members/generate-address-qr', async (req, res) => {
+  try {
+    const { memberId, address, city, state, zipCode, memberName } = req.body;
+    
+    if (!memberId || !address) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Member ID and address are required' 
+      });
+    }
+
+    const fullAddress = `${address}, ${city}, ${state} ${zipCode}`.trim();
+    const apiKey = GOOGLE_MAPS_API_KEYS.web;
+
+    // Geocode the member's address
+    let coordinates = null;
+    let formattedAddress = fullAddress;
+
+    if (apiKey) {
+      try {
+        const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=${apiKey}`;
+        const response = await fetchWithSigningFallback(geocodeUrl);
+        const data = await response.json();
+
+        if (data.status === 'OK' && data.results[0]) {
+          const location = data.results[0].geometry.location;
+          coordinates = {
+            lat: location.lat,
+            lng: location.lng
+          };
+          formattedAddress = data.results[0].formatted_address;
+        }
+      } catch (geocodeError) {
+        console.warn('Geocoding failed, proceeding without coordinates:', geocodeError.message);
+      }
+    }
+
+    // Generate universal Geo QR code for this member
+    const memberGeoQR = {
+      id: `member_qr_${memberId}`,
+      memberId: memberId,
+      memberName: memberName || 'MarketPace Member',
+      type: 'member_universal_qr',
+      address: formattedAddress,
+      coordinates: coordinates,
+      validationRadius: 150, // 150 meters for member activities
+      createdAt: new Date().toISOString(),
+      usageTypes: ['buying', 'selling', 'renting', 'service_booking'],
+      qrCode: generateMemberQRCode(memberId, formattedAddress)
+    };
+
+    // In a real app, save to database
+    // For now, return the QR data for client-side storage
+    res.json({
+      success: true,
+      message: 'Geo QR code generated successfully for member address',
+      qrData: memberGeoQR,
+      address: formattedAddress,
+      coordinates: coordinates
+    });
+
+  } catch (error) {
+    console.error('Member Geo QR generation error:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to generate Geo QR code for address',
+      message: error.message 
+    });
+  }
+});
+
+// Generate QR code data for member
+function generateMemberQRCode(memberId: string, address: string): string {
+  const qrContent = {
+    type: 'member_universal_qr',
+    memberId: memberId,
+    address: address,
+    version: 'v2_universal_member',
+    created: Date.now(),
+    validation: 'geo_proximity_member_activities'
+  };
+  return Buffer.from(JSON.stringify(qrContent)).toString('base64');
+}
+
 // Directions API for driver routing
 app.post('/api/maps/directions', async (req, res) => {
   try {

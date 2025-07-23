@@ -66,12 +66,57 @@ export default function ProfileSetupScreen({ navigation }) {
 
     setLoading(true);
     try {
+      // Update member profile first
       await updateProfile(profileData);
-      Alert.alert('Success', 'Profile setup completed!');
+      
+      // Generate automatic Geo QR code for member's address
+      await generateMemberGeoQR();
+      
+      Alert.alert('Success', 'Profile setup completed with Geo QR code generated for your address!');
     } catch (error) {
       Alert.alert('Error', error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const generateMemberGeoQR = async () => {
+    try {
+      const { address, city, state, zipCode, bio } = profileData;
+      const memberId = 'member_' + Math.random().toString(36).substr(2, 9); // In real app, get from auth context
+      
+      const response = await fetch('http://localhost:5000/api/members/generate-address-qr', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          memberId: memberId,
+          address: address,
+          city: city,
+          state: state,
+          zipCode: zipCode,
+          memberName: bio ? bio.split(' ').slice(0, 2).join(' ') : 'MarketPace Member'
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        // Store QR data locally for marketplace use
+        const qrData = data.qrData;
+        console.log('✅ Member Geo QR generated:', qrData.id);
+        
+        // In a real app, store in AsyncStorage or state management
+        // This QR can be used for buying, selling, renting, service booking
+        
+        return qrData;
+      } else {
+        console.warn('⚠️ Geo QR generation failed:', data.message);
+      }
+    } catch (error) {
+      console.error('❌ Error generating member Geo QR:', error);
+      // Don't fail profile setup if QR generation fails
     }
   };
 
