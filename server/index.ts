@@ -894,6 +894,52 @@ app.post('/api/member-tax/track-delivery', (req: any, res: any) => {
   }
 });
 
+// Track personal expenses for handmade products
+app.post('/api/member-tax/track-personal-expense', (req: any, res: any) => {
+  try {
+    const { memberId, amount, description, category = 'materials', expenseType = 'personal' } = req.body;
+    
+    if (!memberId || !amount || amount <= 0) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Member ID and valid amount required' 
+      });
+    }
+
+    const currentYear = new Date().getFullYear();
+
+    const expenseData = {
+      id: Date.now(),
+      memberId,
+      type: 'personal_expense',
+      amount: parseFloat(amount),
+      description: description || 'Personal business expense',
+      category: category, // materials, supplies, tools, etc.
+      expenseType,
+      date: new Date().toISOString().split('T')[0],
+      timestamp: new Date().toISOString(),
+      year: currentYear,
+      autoTracked: false
+    };
+
+    // Store in member tax expenses
+    if (!memberTaxExpenses[memberId]) {
+      memberTaxExpenses[memberId] = [];
+    }
+    memberTaxExpenses[memberId].push(expenseData);
+
+    res.json({
+      success: true,
+      expense: expenseData,
+      message: `Tracked $${amount} personal business expense`
+    });
+
+  } catch (error) {
+    console.error('Error tracking personal expense:', error);
+    res.status(500).json({ success: false, error: 'Failed to track personal expense' });
+  }
+});
+
 // Track advertising spend for tax deductions
 app.post('/api/member-tax/track-ad-spend', (req: any, res: any) => {
   try {
@@ -953,6 +999,7 @@ app.get('/api/member-tax/expenses/:memberId/:year', (req: any, res: any) => {
     const summary = {
       totalExpenses: yearExpenses.reduce((sum, exp) => sum + exp.amount, 0),
       adSpend: yearExpenses.filter(exp => exp.type === 'advertising').reduce((sum, exp) => sum + exp.amount, 0),
+      personalExpenses: yearExpenses.filter(exp => exp.type === 'personal_expense').reduce((sum, exp) => sum + exp.amount, 0),
       mileage: {
         totalMiles: yearExpenses.filter(exp => exp.type === 'mileage').reduce((sum, exp) => sum + (exp.miles || 0), 0),
         deduction: yearExpenses.filter(exp => exp.type === 'mileage').reduce((sum, exp) => sum + exp.amount, 0)
@@ -5944,3 +5991,6 @@ app.listen(port, '0.0.0.0', () => {
 });
 
 export default app;
+app.get("/independent-contractor-tax-tracker", (req: any, res: any) => {
+  res.sendFile(path.join(__dirname, "../independent-contractor-tax-tracker.html"));
+});

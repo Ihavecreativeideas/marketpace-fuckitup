@@ -294,6 +294,46 @@
             </div>
 
             <div class="demo-card">
+                <h3>🎨 Personal Business Expenses</h3>
+                <div class="demo-section">
+                    <div class="form-group">
+                        <label>Member ID</label>
+                        <input type="text" id="personalMemberId" value="demo_user_123" placeholder="Member ID">
+                    </div>
+                    <div class="form-group">
+                        <label>Expense Category</label>
+                        <select id="personalCategory">
+                            <option value="materials">Craft Materials</option>
+                            <option value="supplies">Art Supplies</option>
+                            <option value="tools">Tools & Equipment</option>
+                            <option value="packaging">Packaging & Shipping</option>
+                            <option value="storage">Storage & Organization</option>
+                            <option value="other">Other Business Expense</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Amount Spent</label>
+                        <input type="number" id="personalAmount" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" id="personalDescription" placeholder="Fabric for handmade bags, yarn for scarves, etc.">
+                    </div>
+                    <button class="btn btn-success" onclick="trackPersonalExpense()">Track Expense</button>
+                </div>
+                
+                <div class="status-display">
+                    <h4 style="color: #00ffff; margin-bottom: 10px;">Handmade Business Benefits:</h4>
+                    <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
+                        • All materials and supplies are tax deductible<br>
+                        • Track costs to determine true profit margins<br>
+                        • Essential for Schedule C business filing<br>
+                        • Proper expense tracking maximizes deductions
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-card">
                 <h3>📈 Ad Spend Tracking</h3>
                 <div class="demo-section">
                     <div class="form-group">
@@ -341,6 +381,10 @@
                         <span class="stat-value" id="adExpenses">$0.00</span>
                     </div>
                     <div class="stat-row">
+                        <span class="stat-label">Personal Business Expenses</span>
+                        <span class="stat-value" id="personalExpenses">$0.00</span>
+                    </div>
+                    <div class="stat-row">
                         <span class="stat-label">Est. Tax Savings (25%)</span>
                         <span class="stat-value" id="taxSavings">$0.00</span>
                     </div>
@@ -370,6 +414,7 @@
                 <h4 style="color: #00ffff; margin-bottom: 10px;">Available API Endpoints:</h4>
                 <div style="font-family: monospace; font-size: 0.85rem; color: rgba(255,255,255,0.8);">
                     <div>POST /api/member-tax/track-delivery</div>
+                    <div>POST /api/member-tax/track-personal-expense</div>
                     <div>POST /api/member-tax/track-ad-spend</div>
                     <div>GET /api/member-tax/expenses/:memberId/:year</div>
                 </div>
@@ -432,6 +477,52 @@
                 }
             } catch (error) {
                 showNotification('Error tracking delivery: ' + error.message, 'error');
+            }
+        }
+
+        async function trackPersonalExpense() {
+            const memberId = document.getElementById('personalMemberId').value;
+            const category = document.getElementById('personalCategory').value;
+            const amount = parseFloat(document.getElementById('personalAmount').value);
+            const description = document.getElementById('personalDescription').value;
+
+            if (!amount || amount <= 0) {
+                showNotification('Please enter valid expense amount', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/member-tax/track-personal-expense', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        memberId,
+                        amount,
+                        category,
+                        description,
+                        expenseType: 'personal'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification(result.message, 'success');
+                    addToActivityLog('personal_expense', result.expense);
+                    
+                    // Clear form
+                    document.getElementById('personalAmount').value = '';
+                    document.getElementById('personalDescription').value = '';
+                    
+                    // Update summary
+                    getMemberExpenses();
+                } else {
+                    showNotification(result.error, 'error');
+                }
+            } catch (error) {
+                showNotification('Error tracking personal expense: ' + error.message, 'error');
             }
         }
 
@@ -498,6 +589,7 @@
                 updateSummaryDisplay({
                     totalExpenses: 0,
                     adSpend: 0,
+                    personalExpenses: 0,
                     mileage: { totalMiles: 0, deduction: 0 },
                     expenseCount: 0
                 });
@@ -509,6 +601,7 @@
             document.getElementById('totalMiles').textContent = `${summary.mileage.totalMiles.toFixed(1)} miles`;
             document.getElementById('mileageDeductions').textContent = `$${summary.mileage.deduction.toFixed(2)}`;
             document.getElementById('adExpenses').textContent = `$${summary.adSpend.toFixed(2)}`;
+            document.getElementById('personalExpenses').textContent = `$${summary.personalExpenses.toFixed(2)}`;
             document.getElementById('taxSavings').textContent = `$${(summary.totalExpenses * 0.25).toFixed(2)}`;
         }
 
@@ -524,6 +617,9 @@
                 amount = `$${expense.amount.toFixed(2)} deduction`;
             } else if (type === 'advertising') {
                 description = `${expense.platform} advertising: ${expense.description}`;
+                amount = `$${expense.amount.toFixed(2)} expense`;
+            } else if (type === 'personal_expense') {
+                description = `${expense.category}: ${expense.description}`;
                 amount = `$${expense.amount.toFixed(2)} expense`;
             }
             

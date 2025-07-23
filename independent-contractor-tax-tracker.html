@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Independent Contractor Tax Tracker - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a0b3d, #6b46c1);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #00ffff;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .contractor-badge {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 10px 0;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .demo-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .demo-card h3 {
+            color: #00ffff;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .contractor-highlight {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(22, 163, 74, 0.2));
+            border: 2px solid rgba(34, 197, 94, 0.4);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .contractor-highlight h4 {
+            color: #22c55e;
+            margin-bottom: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #00ffff;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #00ffff, #0080ff);
+            color: #1a0b3d;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 255, 255, 0.2);
+            border: 2px solid #00ffff;
+            color: #00ffff;
+            padding: 10px 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .status-display {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .stat-value {
+            color: #22c55e;
+            font-weight: bold;
+        }
+
+        .activity-log {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 3px solid #22c55e;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #22c55e;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="location.href='/marketpace-menu.html'">←</button>
+
+    <div class="container">
+        <div class="header">
+            <h1>🚚 Independent Contractor Tax Tracker</h1>
+            <div class="contractor-badge">MarketPace Driver Portal</div>
+            <p>Comprehensive tax tracking for independent contractors and drivers</p>
+        </div>
+
+        <div class="contractor-highlight">
+            <h4>💰 1099 Tax Benefits for Independent Contractors</h4>
+            <p><strong>As an independent contractor, ALL business expenses are tax deductible!</strong> 
+            Track your driving miles, vehicle expenses, phone bills, and equipment costs. 
+            Every mile driven for MarketPace deliveries can be written off at the IRS standard rate.</p>
+        </div>
+
+        <div class="demo-grid">
+            <div class="demo-card">
+                <h3>🚗 Delivery Mileage Tracking</h3>
+                <div class="form-group">
+                    <label>Contractor ID</label>
+                    <input type="text" id="contractorId" value="contractor_123" placeholder="Your contractor ID">
+                </div>
+                <div class="form-group">
+                    <label>Miles Driven</label>
+                    <input type="number" id="deliveryMiles" placeholder="Enter miles" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Route Description</label>
+                    <input type="text" id="routeDescription" placeholder="Route details or delivery locations">
+                </div>
+                <button class="btn btn-success" onclick="trackContractorMileage()">Track Business Miles</button>
+                
+                <div class="status-display">
+                    <h4 style="color: #22c55e;">IRS Mileage Benefits:</h4>
+                    <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
+                        • 2024 IRS rate: $0.67 per business mile<br>
+                        • Covers gas, maintenance, insurance, depreciation<br>
+                        • Alternative to actual expense method<br>
+                        • Must maintain detailed mileage log
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-card">
+                <h3>💼 Business Expenses</h3>
+                <div class="form-group">
+                    <label>Expense Category</label>
+                    <select id="businessCategory">
+                        <option value="vehicle">Vehicle Maintenance</option>
+                        <option value="fuel">Fuel & Gas</option>
+                        <option value="phone">Phone & Communication</option>
+                        <option value="equipment">Equipment & Supplies</option>
+                        <option value="insurance">Business Insurance</option>
+                        <option value="other">Other Business Expense</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Amount Spent</label>
+                    <input type="number" id="businessAmount" placeholder="0.00" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" id="businessDescription" placeholder="Oil change, phone bill, equipment purchase, etc.">
+                </div>
+                <button class="btn btn-success" onclick="trackBusinessExpense()">Track Business Expense</button>
+            </div>
+
+            <div class="demo-card">
+                <h3>📊 1099 Tax Summary</h3>
+                <div class="status-display">
+                    <div class="stat-row">
+                        <span class="stat-label">Total Business Deductions</span>
+                        <span class="stat-value" id="totalDeductions">$0.00</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Business Miles</span>
+                        <span class="stat-value" id="totalMiles">0 miles</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Mileage Deductions</span>
+                        <span class="stat-value" id="mileageDeductions">$0.00</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Other Business Expenses</span>
+                        <span class="stat-value" id="businessExpenses">$0.00</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Est. Tax Savings (22%)</span>
+                        <span class="stat-value" id="taxSavings">$0.00</span>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="getContractorExpenses()">Refresh Summary</button>
+                <button class="btn" onclick="export1099Data()">Export 1099 Data</button>
+            </div>
+        </div>
+
+        <div class="demo-card">
+            <h3>📋 Contractor Activity Log</h3>
+            <div class="activity-log" id="activityLog">
+                <div style="color: rgba(255,255,255,0.6); text-align: center; padding: 20px;">
+                    No contractor expenses tracked yet. Start by logging your business miles or expenses above!
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-card">
+            <h3>📄 1099 Preparation Guide</h3>
+            <div style="color: rgba(255,255,255,0.9); line-height: 1.6;">
+                <h4 style="color: #22c55e; margin-bottom: 10px;">Important 1099 Tax Information:</h4>
+                <ul style="padding-left: 20px;">
+                    <li><strong>Schedule C Filing:</strong> Report business income and deductions</li>
+                    <li><strong>Self-Employment Tax:</strong> Pay both employer and employee portions of Social Security/Medicare</li>
+                    <li><strong>Quarterly Payments:</strong> Make estimated tax payments throughout the year</li>
+                    <li><strong>Record Keeping:</strong> Maintain detailed records of all business expenses</li>
+                    <li><strong>Professional Help:</strong> Consider consulting a tax professional for complex situations</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        let contractorExpenses = [];
+        const contractorId = 'contractor_123';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            getContractorExpenses();
+        });
+
+        async function trackContractorMileage() {
+            const id = document.getElementById('contractorId').value;
+            const miles = parseFloat(document.getElementById('deliveryMiles').value);
+            const description = document.getElementById('routeDescription').value;
+
+            if (!miles || miles <= 0) {
+                showNotification('Please enter valid mileage', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/member-tax/track-delivery', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        memberId: id,
+                        miles,
+                        destination: description,
+                        deliveryType: 'contractor'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification(`Tracked ${miles} business miles ($${(miles * 0.67).toFixed(2)} deduction)`, 'success');
+                    addToActivityLog('mileage', result.expense);
+                    
+                    document.getElementById('deliveryMiles').value = '';
+                    document.getElementById('routeDescription').value = '';
+                    
+                    getContractorExpenses();
+                } else {
+                    showNotification(result.error, 'error');
+                }
+            } catch (error) {
+                showNotification('Error tracking mileage: ' + error.message, 'error');
+            }
+        }
+
+        async function trackBusinessExpense() {
+            const id = document.getElementById('contractorId').value;
+            const category = document.getElementById('businessCategory').value;
+            const amount = parseFloat(document.getElementById('businessAmount').value);
+            const description = document.getElementById('businessDescription').value;
+
+            if (!amount || amount <= 0) {
+                showNotification('Please enter valid expense amount', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/member-tax/track-personal-expense', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        memberId: id,
+                        amount,
+                        category,
+                        description,
+                        expenseType: 'contractor'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification(`Tracked $${amount} business expense`, 'success');
+                    addToActivityLog('business', result.expense);
+                    
+                    document.getElementById('businessAmount').value = '';
+                    document.getElementById('businessDescription').value = '';
+                    
+                    getContractorExpenses();
+                } else {
+                    showNotification(result.error, 'error');
+                }
+            } catch (error) {
+                showNotification('Error tracking expense: ' + error.message, 'error');
+            }
+        }
+
+        async function getContractorExpenses() {
+            try {
+                const response = await fetch(`/api/member-tax/expenses/${contractorId}/2024`);
+                const result = await response.json();
+
+                if (result.success) {
+                    contractorExpenses = result.expenses;
+                    updateContractorSummary(result.summary);
+                } else {
+                    updateContractorSummary({
+                        totalExpenses: 0,
+                        personalExpenses: 0,
+                        mileage: { totalMiles: 0, deduction: 0 },
+                        expenseCount: 0
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching contractor expenses:', error);
+                updateContractorSummary({
+                    totalExpenses: 0,
+                    personalExpenses: 0,
+                    mileage: { totalMiles: 0, deduction: 0 },
+                    expenseCount: 0
+                });
+            }
+        }
+
+        function updateContractorSummary(summary) {
+            document.getElementById('totalDeductions').textContent = `$${summary.totalExpenses.toFixed(2)}`;
+            document.getElementById('totalMiles').textContent = `${summary.mileage.totalMiles.toFixed(1)} miles`;
+            document.getElementById('mileageDeductions').textContent = `$${summary.mileage.deduction.toFixed(2)}`;
+            document.getElementById('businessExpenses').textContent = `$${summary.personalExpenses.toFixed(2)}`;
+            document.getElementById('taxSavings').textContent = `$${(summary.totalExpenses * 0.22).toFixed(2)}`;
+        }
+
+        function addToActivityLog(type, expense) {
+            const activityLog = document.getElementById('activityLog');
+            
+            const activityItem = document.createElement('div');
+            activityItem.className = 'activity-item';
+            
+            let description, amount;
+            if (type === 'mileage') {
+                description = `Business miles: ${expense.miles} miles - ${expense.destination || 'delivery route'}`;
+                amount = `$${expense.amount.toFixed(2)} deduction`;
+            } else if (type === 'business') {
+                description = `${expense.category}: ${expense.description}`;
+                amount = `$${expense.amount.toFixed(2)} expense`;
+            }
+            
+            activityItem.innerHTML = `
+                <div style="color: #22c55e; font-size: 0.8rem;">${new Date().toLocaleTimeString()}</div>
+                <div style="color: white; margin: 3px 0;">${description}</div>
+                <div style="color: #22c55e; font-weight: bold;">${amount}</div>
+            `;
+            
+            const noActivities = activityLog.querySelector('[style*="text-align: center"]');
+            if (noActivities) {
+                noActivities.remove();
+            }
+            
+            activityLog.insertBefore(activityItem, activityLog.firstChild);
+            
+            while (activityLog.children.length > 10) {
+                activityLog.removeChild(activityLog.lastChild);
+            }
+        }
+
+        function export1099Data() {
+            if (contractorExpenses.length === 0) {
+                showNotification('No expenses to export', 'error');
+                return;
+            }
+
+            const csvData = [
+                ['Date', 'Description', 'Category', 'Amount', 'Type', 'Miles'],
+                ...contractorExpenses.map(exp => [
+                    exp.date,
+                    exp.description,
+                    exp.category,
+                    exp.amount.toFixed(2),
+                    exp.type,
+                    exp.miles || ''
+                ])
+            ];
+
+            const csvContent = csvData.map(row => row.join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Independent_Contractor_1099_Data_${new Date().getFullYear()}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            showNotification('1099 data exported successfully', 'success');
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
