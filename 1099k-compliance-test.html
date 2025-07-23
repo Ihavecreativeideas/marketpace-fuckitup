@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1099-K Compliance Testing - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a0b3d 0%, #6b46c1 100%);
+            font-family: 'Arial', sans-serif;
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #00ffff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .status-card {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .status-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00ffff;
+            margin-bottom: 5px;
+        }
+
+        .status-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .status-threshold {
+            color: #ffc107;
+            font-size: 0.8rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            color: #00ffff;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00ffff, #0088ff);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ff4444, #ff0066);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #00ff88, #00aa44);
+        }
+
+        .transaction-log {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .form-output {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 300px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 255, 255, 0.9);
+            color: black;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            background: rgba(255, 68, 68, 0.9);
+            color: white;
+        }
+
+        .notification.success {
+            background: rgba(16, 185, 129, 0.9);
+            color: white;
+        }
+
+        .threshold-warning {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .threshold-warning.danger {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+        }
+
+        .admin-section {
+            border: 2px solid #ff4444;
+            background: rgba(255, 68, 68, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">📋 1099-K Compliance Testing</h1>
+            <p class="subtitle">PayPal Transaction Tracking & Tax Form Generation • Facebook Marketplace Style</p>
+        </div>
+
+        <!-- Member Status Section -->
+        <div class="test-section">
+            <h2 class="section-title">👤 Member Tax Status</h2>
+            
+            <div class="status-grid">
+                <div class="status-card">
+                    <div class="status-value" id="totalAmount">$0.00</div>
+                    <div class="status-label">PayPal Sales (2024)</div>
+                    <div class="status-threshold">Threshold: $20,000</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-value" id="transactionCount">0</div>
+                    <div class="status-label">Total Transactions</div>
+                    <div class="status-threshold">Threshold: 200</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-value" id="complianceStatus">🔒 Safe</div>
+                    <div class="status-label">1099-K Status</div>
+                    <div class="status-threshold" id="statusMessage">Below thresholds</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-value" id="remainingAmount">$20,000</div>
+                    <div class="status-label">Amount Remaining</div>
+                    <div class="status-threshold">Until 1099-K required</div>
+                </div>
+            </div>
+
+            <div id="thresholdWarning" class="threshold-warning" style="display: none;">
+                <strong>⚠️ APPROACHING 1099-K THRESHOLD:</strong>
+                <p id="warningMessage">You are approaching the IRS 1099-K reporting thresholds.</p>
+            </div>
+
+            <div class="form-grid">
+                <button class="btn" onclick="checkMemberStatus()">Refresh Status</button>
+                <button class="btn btn-success" onclick="generateMember1099K()">Generate 1099-K</button>
+            </div>
+        </div>
+
+        <!-- Transaction Recording Section -->
+        <div class="test-section">
+            <h2 class="section-title">💳 Record PayPal Transaction</h2>
+            
+            <form onsubmit="recordTransaction(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Transaction Amount</label>
+                        <input type="number" id="amount" step="0.01" placeholder="89.50" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" id="description" placeholder="iPhone Case Sale" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="category" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; padding: 12px; color: white;">
+                            <option value="marketplace_sales">Marketplace Sales</option>
+                            <option value="services">Services</option>
+                            <option value="rentals">Rentals</option>
+                            <option value="digital_goods">Digital Goods</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn">Record Transaction</button>
+            </form>
+
+            <div style="margin-top: 20px;">
+                <h3 style="color: #00ffff; margin-bottom: 10px;">Quick Test Scenarios</h3>
+                <button class="btn" onclick="simulateSmallSale()">Small Sale ($25)</button>
+                <button class="btn" onclick="simulateLargeSale()">Large Sale ($5,000)</button>
+                <button class="btn" onclick="simulateThresholdReach()">Reach Threshold (199 sales)</button>
+                <button class="btn btn-danger" onclick="clearAllTransactions()">Clear All Data</button>
+            </div>
+        </div>
+
+        <!-- Admin Section -->
+        <div class="test-section admin-section">
+            <h2 class="section-title">🔧 Admin: 1099-K Management</h2>
+            
+            <div class="form-grid">
+                <button class="btn" onclick="getAllMembersRequiring1099K()">Members Requiring 1099-K</button>
+                <button class="btn btn-success" onclick="generateAllRequired1099K()">Generate All Required</button>
+                <button class="btn" onclick="downloadTaxReports()">Download Tax Reports</button>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h3 style="color: #00ffff; margin-bottom: 10px;">Admin Summary</h3>
+                <div class="status-grid">
+                    <div class="status-card">
+                        <div class="status-value" id="totalMembers">0</div>
+                        <div class="status-label">Members Requiring 1099-K</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-value" id="totalPayments">$0.00</div>
+                        <div class="status-label">Total Payments Processed</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction Log -->
+        <div class="test-section">
+            <h2 class="section-title">📜 Transaction Log</h2>
+            <div id="transactionLog" class="transaction-log">
+                Loading recent transactions...
+            </div>
+        </div>
+
+        <!-- Form Output -->
+        <div class="test-section">
+            <h2 class="section-title">📄 Generated Forms</h2>
+            <div id="formOutput" class="form-output">
+                Generated 1099-K forms will appear here...
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        const testMemberId = 'member_demo_001';
+        const currentTaxYear = 2024;
+        let memberStatus = { totalAmount: 0, transactionCount: 0, needs1099K: false };
+
+        async function checkMemberStatus() {
+            try {
+                const response = await fetch(`/api/tax/1099k-status/${testMemberId}/${currentTaxYear}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    memberStatus = result;
+                    updateStatusDisplay(result);
+                    updateTransactionLog();
+                    showNotification('✅ Status updated successfully', 'success');
+                } else {
+                    showNotification('❌ Failed to check status', 'error');
+                }
+            } catch (error) {
+                showNotification('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function recordTransaction(event) {
+            event.preventDefault();
+            
+            const transactionData = {
+                memberId: testMemberId,
+                transactionId: `paypal_${Date.now()}`,
+                amount: parseFloat(document.getElementById('amount').value),
+                paypalTransactionId: `PP_${Math.random().toString(36).substr(2, 9)}`,
+                paymentDate: new Date().toISOString(),
+                description: document.getElementById('description').value,
+                category: document.getElementById('category').value
+            };
+
+            try {
+                const response = await fetch('/api/tax/track-paypal-transaction', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(transactionData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    memberStatus = result.memberThresholds;
+                    updateStatusDisplay(result.memberThresholds);
+                    updateTransactionLog();
+                    
+                    // Clear form
+                    document.getElementById('amount').value = '';
+                    document.getElementById('description').value = '';
+                    
+                    showNotification(`✅ Transaction recorded: $${transactionData.amount}`, 'success');
+                } else {
+                    showNotification('❌ Failed to record transaction', 'error');
+                }
+            } catch (error) {
+                showNotification('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function generateMember1099K() {
+            try {
+                const response = await fetch('/api/tax/generate-1099k', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        memberId: testMemberId,
+                        taxYear: currentTaxYear
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    displayForm1099K(result.form1099K);
+                    showNotification('📄 1099-K form generated successfully', 'success');
+                } else {
+                    const error = await response.json();
+                    showNotification('❌ ' + error.error, 'error');
+                }
+            } catch (error) {
+                showNotification('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function getAllMembersRequiring1099K() {
+            try {
+                const response = await fetch(`/api/tax/1099k-required/${currentTaxYear}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('totalMembers').textContent = result.totalMembersRequiring1099K;
+                    
+                    let adminOutput = `📊 ADMIN REPORT: MEMBERS REQUIRING 1099-K (${currentTaxYear})\n\n`;
+                    adminOutput += `Total Members: ${result.totalMembersRequiring1099K}\n\n`;
+                    
+                    result.members.forEach((member, index) => {
+                        adminOutput += `${index + 1}. Member ID: ${member.memberId}\n`;
+                        adminOutput += `   Total Amount: $${member.totalAmount.toFixed(2)}\n`;
+                        adminOutput += `   Transactions: ${member.transactionCount}\n`;
+                        adminOutput += `   Last Transaction: ${new Date(member.lastTransaction).toLocaleDateString()}\n\n`;
+                    });
+                    
+                    document.getElementById('formOutput').textContent = adminOutput;
+                    showNotification(`📊 Found ${result.totalMembersRequiring1099K} members requiring 1099-K`, 'success');
+                }
+            } catch (error) {
+                showNotification('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function simulateSmallSale() {
+            const amount = Math.floor(Math.random() * 50) + 10; // $10-$60
+            await simulateTransaction(amount, 'Small item sale');
+        }
+
+        async function simulateLargeSale() {
+            const amount = Math.floor(Math.random() * 8000) + 2000; // $2000-$10000
+            await simulateTransaction(amount, 'Large item sale');
+        }
+
+        async function simulateThresholdReach() {
+            showNotification('🚀 Simulating 199 transactions...', 'success');
+            
+            for (let i = 0; i < 199; i++) {
+                const amount = Math.floor(Math.random() * 50) + 10;
+                await simulateTransaction(amount, `Bulk sale ${i + 1}`, false);
+            }
+            
+            await checkMemberStatus();
+            showNotification('✅ Completed 199 transactions simulation', 'success');
+        }
+
+        async function simulateTransaction(amount, description, showStatus = true) {
+            const transactionData = {
+                memberId: testMemberId,
+                transactionId: `sim_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+                amount: amount,
+                paypalTransactionId: `PP_SIM_${Math.random().toString(36).substr(2, 9)}`,
+                paymentDate: new Date().toISOString(),
+                description: description,
+                category: 'marketplace_sales'
+            };
+
+            try {
+                const response = await fetch('/api/tax/track-paypal-transaction', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(transactionData)
+                });
+
+                if (response.ok && showStatus) {
+                    const result = await response.json();
+                    memberStatus = result.memberThresholds;
+                    updateStatusDisplay(result.memberThresholds);
+                    updateTransactionLog();
+                }
+            } catch (error) {
+                console.error('Simulation error:', error);
+            }
+        }
+
+        function updateStatusDisplay(status) {
+            document.getElementById('totalAmount').textContent = `$${status.totalAmount.toFixed(2)}`;
+            document.getElementById('transactionCount').textContent = status.transactionCount;
+            
+            const complianceElement = document.getElementById('complianceStatus');
+            const statusMessageElement = document.getElementById('statusMessage');
+            const warningElement = document.getElementById('thresholdWarning');
+            const warningMessageElement = document.getElementById('warningMessage');
+            
+            if (status.needs1099K) {
+                complianceElement.textContent = '📋 Required';
+                complianceElement.style.color = '#ef4444';
+                statusMessageElement.textContent = 'Must file 1099-K';
+                statusMessageElement.style.color = '#ef4444';
+                
+                warningElement.classList.add('danger');
+                warningElement.style.display = 'block';
+                warningMessageElement.textContent = 'CRITICAL: You have exceeded both 1099-K thresholds. You must file a 1099-K form.';
+            } else {
+                complianceElement.textContent = '🔒 Safe';
+                complianceElement.style.color = '#10b981';
+                statusMessageElement.style.color = '#10b981';
+                
+                const remaining = status.remainingToThreshold;
+                if (remaining) {
+                    document.getElementById('remainingAmount').textContent = `$${remaining.amount.toFixed(2)}`;
+                    
+                    if (remaining.amount <= 5000 || remaining.transactions <= 50) {
+                        warningElement.style.display = 'block';
+                        warningElement.classList.remove('danger');
+                        
+                        if (remaining.amount > 0 && remaining.transactions > 0) {
+                            statusMessageElement.textContent = `Need $${remaining.amount.toFixed(2)} more AND ${remaining.transactions} more transactions`;
+                            warningMessageElement.textContent = `You need $${remaining.amount.toFixed(2)} more AND ${remaining.transactions} more transactions to reach 1099-K thresholds.`;
+                        } else if (remaining.amount > 0) {
+                            statusMessageElement.textContent = `Need $${remaining.amount.toFixed(2)} more`;
+                            warningMessageElement.textContent = `You need $${remaining.amount.toFixed(2)} more to reach the $20,000 threshold.`;
+                        } else if (remaining.transactions > 0) {
+                            statusMessageElement.textContent = `Need ${remaining.transactions} more transactions`;
+                            warningMessageElement.textContent = `You need ${remaining.transactions} more transactions to reach the 200 transaction threshold.`;
+                        }
+                    } else {
+                        warningElement.style.display = 'none';
+                        statusMessageElement.textContent = 'Well below thresholds';
+                    }
+                }
+            }
+        }
+
+        function updateTransactionLog() {
+            if (memberStatus.transactionBreakdown) {
+                let logText = `📜 RECENT PAYPAL TRANSACTIONS (${memberStatus.transactionCount} total)\n\n`;
+                
+                const recent = memberStatus.transactionBreakdown.slice(-10).reverse();
+                recent.forEach((tx, index) => {
+                    logText += `${index + 1}. $${tx.amount.toFixed(2)} - ${tx.description}\n`;
+                    logText += `   PayPal ID: ${tx.paypalTransactionId}\n`;
+                    logText += `   Date: ${new Date(tx.paymentDate).toLocaleString()}\n`;
+                    logText += `   Category: ${tx.category}\n\n`;
+                });
+                
+                if (memberStatus.transactionCount > 10) {
+                    logText += `... and ${memberStatus.transactionCount - 10} more transactions\n`;
+                }
+                
+                document.getElementById('transactionLog').textContent = logText;
+            }
+        }
+
+        function displayForm1099K(form1099K) {
+            let formText = `📄 FORM 1099-K - PAYMENT CARD AND THIRD PARTY NETWORK TRANSACTIONS\n\n`;
+            formText += `═══════════════════════════════════════════════════════════════\n`;
+            formText += `Tax Year: ${form1099K.taxYear}\n`;
+            formText += `Generated: ${new Date(form1099K.generatedDate).toLocaleString()}\n`;
+            formText += `Status: ${form1099K.status.toUpperCase()}\n`;
+            formText += `═══════════════════════════════════════════════════════════════\n\n`;
+            
+            formText += `💳 PAYMENT SETTLEMENT ENTITY INFORMATION:\n`;
+            formText += `   ${form1099K.paymentSettlementEntity}\n\n`;
+            
+            formText += `👤 PAYEE INFORMATION:\n`;
+            formText += `   Member ID: ${form1099K.memberId}\n\n`;
+            
+            formText += `💰 PAYMENT INFORMATION:\n`;
+            formText += `   Box 1a - Gross Amount: $${form1099K.grossAmount.toFixed(2)}\n`;
+            formText += `   Box 3 - Number of Payment Transactions: ${form1099K.transactionCount}\n\n`;
+            
+            formText += `📊 MONTHLY BREAKDOWN:\n`;
+            Object.entries(form1099K.monthlyBreakdown).forEach(([month, data]) => {
+                const monthName = new Date(2024, month - 1, 1).toLocaleString('default', { month: 'long' });
+                formText += `   ${monthName}: $${data.amount.toFixed(2)} (${data.count} transactions)\n`;
+            });
+            
+            formText += `\n⚠️ IMPORTANT TAX NOTICE:\n`;
+            formText += `This form reports gross payment amounts received via PayPal through MarketPace.\n`;
+            formText += `You must report this income on your tax return and may owe taxes on these amounts.\n`;
+            formText += `The amounts shown may include non-taxable transactions.\n`;
+            formText += `Consult a qualified tax professional for guidance on reporting marketplace income.\n\n`;
+            
+            formText += `📋 IRS FILING REQUIREMENTS:\n`;
+            formText += `- File Form 1099-K with the IRS by January 31st\n`;
+            formText += `- Provide copy to payee by January 31st\n`;
+            formText += `- Keep records for at least 3 years\n`;
+
+            document.getElementById('formOutput').textContent = formText;
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        // Initialize
+        checkMemberStatus();
+    </script>
+</body>
+</html>

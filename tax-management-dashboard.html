@@ -330,6 +330,47 @@
             </div>
         </div>
 
+        <!-- 1099-K Compliance Section -->
+        <div class="tax-card" style="margin-bottom: 30px;">
+            <div class="card-header">
+                <h3 class="card-title">📋 1099-K Payment Processor Compliance</h3>
+                <span style="color: #ffc107; font-size: 0.9rem;">PayPal Integration • Facebook Marketplace Style</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div style="background: rgba(0, 255, 255, 0.1); padding: 15px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #00ffff;" id="paypalAmount">$0.00</div>
+                    <div style="color: #94a3b8; font-size: 0.9rem;">PayPal Sales (2024)</div>
+                    <div style="color: #ffc107; font-size: 0.8rem;">Need: $20,000</div>
+                </div>
+                <div style="background: rgba(0, 255, 255, 0.1); padding: 15px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #00ffff;" id="paypalCount">0</div>
+                    <div style="color: #94a3b8; font-size: 0.9rem;">Transactions</div>
+                    <div style="color: #ffc107; font-size: 0.8rem;">Need: 200</div>
+                </div>
+                <div style="background: rgba(0, 255, 255, 0.1); padding: 15px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.2rem; font-weight: bold;" id="requires1099K">🔒 Not Required</div>
+                    <div style="color: #94a3b8; font-size: 0.9rem;">1099-K Status</div>
+                    <div style="color: #10b981; font-size: 0.8rem;" id="statusMessage">Below thresholds</div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr auto; gap: 15px;">
+                <form style="display: flex; gap: 10px; align-items: end;" onsubmit="recordPayPalTransaction(event)">
+                    <div class="form-group" style="margin: 0;">
+                        <label>PayPal Transaction</label>
+                        <input type="number" id="paypalAmount" step="0.01" placeholder="Amount" required style="width: 120px;">
+                    </div>
+                    <div class="form-group" style="margin: 0;">
+                        <label>Description</label>
+                        <input type="text" id="paypalDescription" placeholder="Item sold" required style="width: 200px;">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Track PayPal Sale</button>
+                </form>
+                <button class="btn btn-secondary" onclick="check1099KStatus()">Check Status</button>
+            </div>
+        </div>
+
         <div class="dashboard-grid">
             <!-- Transaction Entry -->
             <div class="tax-card">
@@ -461,6 +502,9 @@
                     <button class="btn btn-success" onclick="generateTaxForms()">
                         Generate Tax Forms
                     </button>
+                    <button class="btn btn-primary" onclick="generate1099K()">
+                        Generate 1099-K
+                    </button>
                 </div>
 
                 <div class="report-output" id="reportOutput">
@@ -482,8 +526,10 @@
 
     <script>
         let currentBusinessId = 'business_demo_001';
+        let currentMemberId = 'member_demo_001';
         let currentTaxYear = 2024;
         let transactions = [];
+        let paypalThresholds = { totalAmount: 0, transactionCount: 0, needs1099K: false };
 
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
@@ -748,9 +794,147 @@
             }, 4000);
         }
 
+        async function recordPayPalTransaction(event) {
+            event.preventDefault();
+            
+            const paypalData = {
+                memberId: currentMemberId,
+                transactionId: `paypal_${Date.now()}`,
+                amount: parseFloat(document.getElementById('paypalAmount').value),
+                paypalTransactionId: `PP_${Math.random().toString(36).substr(2, 9)}`,
+                paymentDate: new Date().toISOString(),
+                description: document.getElementById('paypalDescription').value,
+                category: 'marketplace_sales'
+            };
+
+            try {
+                const response = await fetch('/api/tax/track-paypal-transaction', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(paypalData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showNotification('✅ PayPal transaction tracked successfully', 'success');
+                    
+                    // Update 1099-K displays
+                    updatePayPal1099KDisplay(result.memberThresholds);
+                    
+                    // Clear form
+                    document.getElementById('paypalAmount').value = '';
+                    document.getElementById('paypalDescription').value = '';
+                    
+                } else {
+                    showNotification('❌ Failed to track PayPal transaction', 'error');
+                }
+            } catch (error) {
+                showNotification('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function check1099KStatus() {
+            try {
+                const response = await fetch(`/api/tax/1099k-status/${currentMemberId}/${currentTaxYear}`);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    updatePayPal1099KDisplay(result);
+                    showNotification('📊 1099-K status updated', 'success');
+                } else {
+                    showNotification('❌ Failed to check 1099-K status', 'error');
+                }
+            } catch (error) {
+                showNotification('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function generate1099K() {
+            try {
+                const response = await fetch('/api/tax/generate-1099k', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        memberId: currentMemberId,
+                        taxYear: currentTaxYear
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    display1099K(result.form1099K);
+                    showNotification('📄 1099-K form generated successfully', 'success');
+                } else {
+                    const error = await response.json();
+                    showNotification('❌ ' + error.error, 'error');
+                }
+            } catch (error) {
+                showNotification('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        function updatePayPal1099KDisplay(thresholds) {
+            paypalThresholds = thresholds;
+            
+            document.getElementById('paypalAmount').textContent = `$${thresholds.totalAmount.toFixed(2)}`;
+            document.getElementById('paypalCount').textContent = thresholds.transactionCount;
+            
+            const statusElement = document.getElementById('requires1099K');
+            const messageElement = document.getElementById('statusMessage');
+            
+            if (thresholds.needs1099K) {
+                statusElement.textContent = '📋 Required';
+                statusElement.style.color = '#ef4444';
+                messageElement.textContent = 'Must file 1099-K';
+                messageElement.style.color = '#ef4444';
+            } else {
+                statusElement.textContent = '🔒 Not Required';
+                statusElement.style.color = '#10b981';
+                
+                const remaining = thresholds.remainingToThreshold;
+                if (remaining) {
+                    if (remaining.amount > 0 && remaining.transactions > 0) {
+                        messageElement.textContent = `Need $${remaining.amount.toFixed(2)} more AND ${remaining.transactions} more transactions`;
+                    } else if (remaining.amount > 0) {
+                        messageElement.textContent = `Need $${remaining.amount.toFixed(2)} more`;
+                    } else if (remaining.transactions > 0) {
+                        messageElement.textContent = `Need ${remaining.transactions} more transactions`;
+                    }
+                }
+                messageElement.style.color = '#10b981';
+            }
+        }
+
+        function display1099K(form1099K) {
+            const output = document.getElementById('reportOutput');
+            let formText = `📄 FORM 1099-K - PAYMENT CARD AND THIRD PARTY NETWORK TRANSACTIONS\n`;
+            formText += `Tax Year: ${form1099K.taxYear}\n`;
+            formText += `Generated: ${new Date(form1099K.generatedDate).toLocaleString()}\n\n`;
+            
+            formText += `💳 PAYMENT SETTLEMENT ENTITY: ${form1099K.paymentSettlementEntity}\n`;
+            formText += `👤 MEMBER ID: ${form1099K.memberId}\n\n`;
+            
+            formText += `💰 GROSS AMOUNT: $${form1099K.grossAmount.toFixed(2)}\n`;
+            formText += `🔢 NUMBER OF TRANSACTIONS: ${form1099K.transactionCount}\n\n`;
+            
+            formText += `📊 MONTHLY BREAKDOWN:\n`;
+            Object.entries(form1099K.monthlyBreakdown).forEach(([month, data]) => {
+                const monthName = new Date(2024, month - 1, 1).toLocaleString('default', { month: 'long' });
+                formText += `  ${monthName}: $${data.amount.toFixed(2)} (${data.count} transactions)\n`;
+            });
+            
+            formText += `\n⚠️ IMPORTANT TAX NOTICE:\n`;
+            formText += `This form reports gross payment amounts received via PayPal through MarketPace.\n`;
+            formText += `You must report this income on your tax return and may owe taxes on these amounts.\n`;
+            formText += `Consult a tax professional for guidance on reporting marketplace income.\n`;
+
+            output.textContent = formText;
+        }
+
         // Initialize demo data
         loadSummaryData();
         updateTransactionsList();
+        check1099KStatus();
     </script>
 </body>
 </html>

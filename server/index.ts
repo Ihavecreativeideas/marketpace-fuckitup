@@ -43,6 +43,8 @@ const taxRecords = new Map();
 const expenseCategories = new Map();
 const incomeTracking = new Map();
 const taxDocuments = new Map();
+const paymentProcessorTracking = new Map(); // Track PayPal transactions for 1099-K
+const memberTaxThresholds = new Map(); // Track member transaction thresholds for 1099-K
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -836,6 +838,206 @@ async function generateQuarterlyEstimates(yearData, businessId) {
 
 // Initialize expense categories on startup
 initializeExpenseCategories();
+
+// ========== 1099-K PAYMENT PROCESSOR TRACKING SYSTEM ==========
+
+// Track PayPal transactions for 1099-K compliance
+app.post('/api/tax/track-paypal-transaction', async (req, res) => {
+  try {
+    const { 
+      memberId, 
+      transactionId, 
+      amount, 
+      paypalTransactionId,
+      paymentDate,
+      description,
+      category 
+    } = req.body;
+
+    const paypalTransaction = {
+      memberId,
+      transactionId,
+      amount: parseFloat(amount),
+      paypalTransactionId,
+      paymentDate,
+      description,
+      category,
+      taxYear: new Date(paymentDate).getFullYear(),
+      timestamp: new Date().toISOString()
+    };
+
+    // Store PayPal transaction
+    paymentProcessorTracking.set(transactionId, paypalTransaction);
+
+    // Update member threshold tracking
+    const memberKey = `${memberId}_${paypalTransaction.taxYear}`;
+    if (!memberTaxThresholds.has(memberKey)) {
+      memberTaxThresholds.set(memberKey, {
+        memberId,
+        taxYear: paypalTransaction.taxYear,
+        totalAmount: 0,
+        transactionCount: 0,
+        paypalTransactions: [],
+        needs1099K: false
+      });
+    }
+
+    const memberThresholds = memberTaxThresholds.get(memberKey);
+    memberThresholds.totalAmount += parseFloat(amount);
+    memberThresholds.transactionCount += 1;
+    memberThresholds.paypalTransactions.push(transactionId);
+
+    // Check 1099-K thresholds: $20,000 AND 200+ transactions
+    memberThresholds.needs1099K = (
+      memberThresholds.totalAmount >= 20000 && 
+      memberThresholds.transactionCount >= 200
+    );
+
+    res.json({ 
+      success: true, 
+      paypalTransaction,
+      memberThresholds,
+      requires1099K: memberThresholds.needs1099K,
+      message: 'PayPal transaction tracked for 1099-K compliance' 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get member's 1099-K status and transaction summary
+app.get('/api/tax/1099k-status/:memberId/:taxYear', async (req, res) => {
+  try {
+    const { memberId, taxYear } = req.params;
+    const memberKey = `${memberId}_${taxYear}`;
+    
+    const thresholds = memberTaxThresholds.get(memberKey);
+    if (!thresholds) {
+      return res.json({
+        success: true,
+        memberId,
+        taxYear: parseInt(taxYear),
+        totalAmount: 0,
+        transactionCount: 0,
+        needs1099K: false,
+        remainingToThreshold: {
+          amount: 20000,
+          transactions: 200
+        }
+      });
+    }
+
+    const remainingAmount = Math.max(0, 20000 - thresholds.totalAmount);
+    const remainingTransactions = Math.max(0, 200 - thresholds.transactionCount);
+
+    res.json({
+      success: true,
+      memberId,
+      taxYear: parseInt(taxYear),
+      totalAmount: thresholds.totalAmount,
+      transactionCount: thresholds.transactionCount,
+      needs1099K: thresholds.needs1099K,
+      remainingToThreshold: {
+        amount: remainingAmount,
+        transactions: remainingTransactions
+      },
+      transactionBreakdown: thresholds.paypalTransactions.map(txId => 
+        paymentProcessorTracking.get(txId)
+      ).filter(Boolean)
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Generate 1099-K forms for eligible members
+app.post('/api/tax/generate-1099k', async (req, res) => {
+  try {
+    const { memberId, taxYear } = req.body;
+    const memberKey = `${memberId}_${taxYear}`;
+    
+    const thresholds = memberTaxThresholds.get(memberKey);
+    if (!thresholds || !thresholds.needs1099K) {
+      return res.status(400).json({
+        success: false,
+        error: 'Member does not meet 1099-K threshold requirements'
+      });
+    }
+
+    const form1099K = {
+      formType: '1099-K',
+      taxYear: parseInt(taxYear),
+      memberId,
+      paymentSettlementEntity: 'MarketPace via PayPal',
+      grossAmount: thresholds.totalAmount,
+      transactionCount: thresholds.transactionCount,
+      monthlyBreakdown: calculateMonthlyBreakdown(thresholds.paypalTransactions),
+      generatedDate: new Date().toISOString(),
+      status: 'ready_for_review'
+    };
+
+    const documentId = `1099k_${memberId}_${taxYear}_${Date.now()}`;
+    taxDocuments.set(documentId, form1099K);
+
+    res.json({
+      success: true,
+      form1099K,
+      documentId,
+      downloadUrl: `/api/tax/download-1099k/${documentId}`,
+      message: '1099-K form generated successfully'
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get all members requiring 1099-K for a tax year (Admin function)
+app.get('/api/tax/1099k-required/:taxYear', async (req, res) => {
+  try {
+    const { taxYear } = req.params;
+    
+    const membersRequiring1099K = [];
+    for (const [memberKey, thresholds] of memberTaxThresholds.entries()) {
+      if (thresholds.taxYear === parseInt(taxYear) && thresholds.needs1099K) {
+        membersRequiring1099K.push({
+          memberId: thresholds.memberId,
+          totalAmount: thresholds.totalAmount,
+          transactionCount: thresholds.transactionCount,
+          lastTransaction: Math.max(...thresholds.paypalTransactions.map(txId => 
+            new Date(paymentProcessorTracking.get(txId)?.paymentDate || 0).getTime()
+          ))
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      taxYear: parseInt(taxYear),
+      totalMembersRequiring1099K: membersRequiring1099K.length,
+      members: membersRequiring1099K
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+function calculateMonthlyBreakdown(transactionIds) {
+  const monthlyData = {};
+  
+  transactionIds.forEach(txId => {
+    const tx = paymentProcessorTracking.get(txId);
+    if (tx) {
+      const month = new Date(tx.paymentDate).getMonth() + 1; // 1-12
+      if (!monthlyData[month]) {
+        monthlyData[month] = { amount: 0, count: 0 };
+      }
+      monthlyData[month].amount += tx.amount;
+      monthlyData[month].count += 1;
+    }
+  });
+  
+  return monthlyData;
+}
 
 // Session configuration
 app.use(session({
