@@ -455,33 +455,34 @@
     </div>
 
     <script>
-        // Festival Data Structure
-        const festivalData = {
-            venues: [
-                { id: 'main-stage', name: 'Main Stage', address: '100 Festival Way, Orange Beach, AL' },
-                { id: 'acoustic-corner', name: 'Acoustic Corner', address: '200 Sunset Blvd, Gulf Shores, AL' },
-                { id: 'sunset-pavilion', name: 'Sunset Pavilion', address: '300 Harbor Dr, Orange Beach, AL' },
-                { id: 'harbor-deck', name: 'Harbor Deck', address: '400 Marina Rd, Gulf Shores, AL' },
-                { id: 'beachside-bar', name: 'Beachside Bar', address: '500 Beach Blvd, Orange Beach, AL' },
-                { id: 'driftwood-cafe', name: 'Driftwood Cafe', address: '600 Coastal Hwy, Gulf Shores, AL' },
-                { id: 'pier-point', name: 'Pier Point', address: '700 Fishing Pier Rd, Orange Beach, AL' },
-                { id: 'sand-castle', name: 'Sand Castle Venue', address: '800 Dune Dr, Gulf Shores, AL' },
-                { id: 'wave-rider', name: 'Wave Rider Lounge', address: '900 Surf Ave, Orange Beach, AL' },
-                { id: 'coastal-corner', name: 'Coastal Corner', address: '1000 Bay St, Gulf Shores, AL' },
-                { id: 'lighthouse-lounge', name: 'Lighthouse Lounge', address: '1100 Beacon Rd, Orange Beach, AL' },
-                { id: 'seashell-stage', name: 'Seashell Stage', address: '1200 Ocean View Dr, Gulf Shores, AL' },
-                { id: 'boardwalk-bistro', name: 'Boardwalk Bistro', address: '1300 Walkway Ln, Orange Beach, AL' },
-                { id: 'tide-pool', name: 'Tide Pool Theater', address: '1400 Low Tide Rd, Gulf Shores, AL' },
-                { id: 'sand-bar', name: 'The Sand Bar', address: '1500 Beach Access Rd, Orange Beach, AL' },
-                { id: 'gulf-grille', name: 'Gulf Grille', address: '1600 Seafood Way, Gulf Shores, AL' },
-                { id: 'marina-music', name: 'Marina Music Hall', address: '1700 Boat Launch Dr, Orange Beach, AL' },
-                { id: 'sunset-sounds', name: 'Sunset Sounds', address: '1800 Evening Rd, Gulf Shores, AL' },
-                { id: 'dunes-deck', name: 'Dunes Deck', address: '1900 Sand Hill Rd, Orange Beach, AL' },
-                { id: 'coastal-cafe', name: 'Coastal Cafe', address: '2000 Shore Dr, Gulf Shores, AL' }
-            ],
-            
-            songwriters: generateSongwriterData()
-        };
+        // Festival venue data
+        const festivalVenues = [
+            { id: 'main-stage', name: 'Main Stage', address: '100 Festival Way, Orange Beach, AL' },
+            { id: 'acoustic-corner', name: 'Acoustic Corner', address: '200 Sunset Blvd, Gulf Shores, AL' },
+            { id: 'sunset-pavilion', name: 'Sunset Pavilion', address: '300 Harbor Dr, Orange Beach, AL' },
+            { id: 'harbor-deck', name: 'Harbor Deck', address: '400 Marina Rd, Gulf Shores, AL' },
+            { id: 'beachside-bar', name: 'Beachside Bar', address: '500 Beach Blvd, Orange Beach, AL' },
+            { id: 'driftwood-cafe', name: 'Driftwood Cafe', address: '600 Coastal Hwy, Gulf Shores, AL' },
+            { id: 'pier-point', name: 'Pier Point', address: '700 Fishing Pier Rd, Orange Beach, AL' },
+            { id: 'sand-castle', name: 'Sand Castle Venue', address: '800 Dune Dr, Gulf Shores, AL' },
+            { id: 'wave-rider', name: 'Wave Rider Lounge', address: '900 Surf Ave, Orange Beach, AL' },
+            { id: 'coastal-corner', name: 'Coastal Corner', address: '1000 Bay St, Gulf Shores, AL' },
+            { id: 'lighthouse-lounge', name: 'Lighthouse Lounge', address: '1100 Beacon Rd, Orange Beach, AL' },
+            { id: 'seashell-stage', name: 'Seashell Stage', address: '1200 Ocean View Dr, Gulf Shores, AL' },
+            { id: 'boardwalk-bistro', name: 'Boardwalk Bistro', address: '1300 Walkway Ln, Orange Beach, AL' },
+            { id: 'tide-pool', name: 'Tide Pool Theater', address: '1400 Low Tide Rd, Gulf Shores, AL' },
+            { id: 'sand-bar', name: 'The Sand Bar', address: '1500 Beach Access Rd, Orange Beach, AL' },
+            { id: 'gulf-grille', name: 'Gulf Grille', address: '1600 Seafood Way, Gulf Shores, AL' },
+            { id: 'marina-music', name: 'Marina Music Hall', address: '1700 Boat Launch Dr, Orange Beach, AL' },
+            { id: 'sunset-sounds', name: 'Sunset Sounds', address: '1800 Evening Rd, Gulf Shores, AL' },
+            { id: 'dunes-deck', name: 'Dunes Deck', address: '1900 Sand Hill Rd, Orange Beach, AL' },
+            { id: 'coastal-cafe', name: 'Coastal Cafe', address: '2000 Shore Dr, Gulf Shores, AL' }
+        ];
+
+        // Global variables
+        let festivalData = {};
+        let currentView = 'schedule';
+        let filteredData = [];
 
         function generateSongwriterData() {
             const genres = ['Country', 'Folk', 'Indie', 'Acoustic', 'Americana', 'Blues', 'Rock', 'Pop'];
@@ -526,7 +527,7 @@
                 
                 performances.push({
                     day: dayIndex,
-                    venue: festivalData.venues[venueIndex].id,
+                    venue: festivalVenues[venueIndex].id,
                     time: `${hour}:${minute}`,
                     duration: 45 // 45 minute sets
                 });
@@ -535,18 +536,31 @@
             return performances.sort((a, b) => a.day - b.day);
         }
 
-        // Current view state
-        let currentView = 'schedule';
-        let filteredData = festivalData.songwriters;
+        // Initialize festival data after functions are defined
+        function initializeFestivalData() {
+            festivalData = {
+                venues: festivalVenues,
+                songwriters: generateSongwriterData()
+            };
+            filteredData = festivalData.songwriters;
+        }
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Initializing festival schedule...');
+            
+            // Initialize data first
+            initializeFestivalData();
+            
+            // Load views
             loadScheduleView();
             loadListView();
             
             // Setup search functionality
             document.getElementById('searchInput').addEventListener('input', handleSearch);
             document.getElementById('venueFilter').addEventListener('change', handleVenueFilter);
+            
+            console.log('Festival schedule initialized successfully');
         });
 
         function switchView(view) {
@@ -622,7 +636,7 @@
                 
                 // Generate venue cards
                 Object.keys(venuesWithPerformances).forEach(venueId => {
-                    const venue = festivalData.venues.find(v => v.id === venueId);
+                    const venue = festivalVenues.find(v => v.id === venueId);
                     const performances = venuesWithPerformances[venueId];
                     
                     html += `
@@ -683,7 +697,7 @@
                 `;
                 
                 songwriter.performances.slice(0, 3).forEach(performance => {
-                    const venue = festivalData.venues.find(v => v.id === performance.venue);
+                    const venue = festivalVenues.find(v => v.id === performance.venue);
                     const date = new Date(2025, 0, 27 + performance.day);
                     const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                     
