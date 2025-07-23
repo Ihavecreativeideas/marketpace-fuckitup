@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Deliveries - MarketPace</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Deliveries - MarketPace</title>
     <style>
         * {
             margin: 0;
@@ -16,194 +16,409 @@
             background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 30%, #4c2885 60%, #6b46c1 100%);
             color: #e2e8f0;
             min-height: 100vh;
-            padding-top: 50px;
-            padding-bottom: 80px;
+            padding: 20px;
             position: relative;
             overflow-x: hidden;
         }
 
-        .delivery-header {
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(147, 197, 253, 0.8);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0px) translateX(0px) rotate(0deg); 
+                opacity: 0.4; 
+            }
+            25% { 
+                transform: translateY(-30px) translateX(10px) rotate(90deg); 
+                opacity: 0.8; 
+            }
+            50% { 
+                transform: translateY(-15px) translateX(-10px) rotate(180deg); 
+                opacity: 1; 
+            }
+            75% { 
+                transform: translateY(-25px) translateX(5px) rotate(270deg); 
+                opacity: 0.6; 
+            }
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 15px;
+        }
+
+        .back-btn {
+            background: rgba(0, 0, 0, 0.6);
+            border: none;
+            color: #93c5fd;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(147, 197, 253, 0.3);
+        }
+
+        .back-btn:hover {
+            background: rgba(147, 197, 253, 0.1);
+            color: #ddd6fe;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
             text-align: center;
-            padding: 20px 16px;
-            background: rgba(0, 0, 0, 0.3);
-            margin: 20px;
-            border-radius: 20px;
-            border: 1px solid rgba(0, 255, 255, 0.2);
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 14px;
         }
 
-        .delivery-title {
-            font-size: 2rem;
-            font-weight: 800;
-            color: #00ffff;
-            margin-bottom: 10px;
+        .tab.active {
+            background: #93c5fd;
+            color: #1a0b3d;
+            font-weight: 600;
         }
 
-        .delivery-subtitle {
-            color: #94a3b8;
-            font-size: 1rem;
-        }
-
-        .delivery-content {
+        .delivery-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
             padding: 20px;
-            text-align: center;
+            margin-bottom: 15px;
+            backdrop-filter: blur(20px);
         }
 
-        .coming-soon {
-            background: rgba(0, 255, 255, 0.1);
-            border: 1px solid rgba(0, 255, 255, 0.3);
-            border-radius: 15px;
-            padding: 40px 20px;
-            margin: 20px 0;
-        }
-
-        .coming-soon h3 {
-            color: #00ffff;
-            font-size: 1.5rem;
+        .delivery-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
             margin-bottom: 15px;
         }
 
-        .coming-soon p {
-            color: #cbd5e1;
-            line-height: 1.6;
-        }
-
-        /* Bottom Navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(0, 255, 255, 0.2);
-            padding: 8px 0;
-            z-index: 1000;
-        }
-
-        .nav-container {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 0 16px;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            padding: 8px 4px;
-            border-radius: 8px;
-            min-width: 50px;
-            background: none;
-            border: none;
-            color: #94a3b8;
-        }
-
-        .nav-item:hover {
-            background: rgba(0, 255, 255, 0.1);
-        }
-
-        .nav-item.active {
-            color: #00ffff;
-        }
-
-        .nav-icon {
-            width: 20px;
-            height: 20px;
-        }
-
-        .nav-label {
-            font-size: 10px;
+        .delivery-id {
+            font-size: 14px;
+            color: #93c5fd;
             font-weight: 600;
-            color: inherit;
+        }
+
+        .delivery-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-in-transit {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid #fbbf24;
+        }
+
+        .status-delivered {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid #22c55e;
+        }
+
+        .status-pickup {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            border: 1px solid #3b82f6;
+        }
+
+        .item-info {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .item-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .item-seller {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+
+        .delivery-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .action-btn {
+            background: rgba(147, 197, 253, 0.1);
+            border: 1px solid #93c5fd;
+            color: #93c5fd;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .action-btn:hover {
+            background: rgba(147, 197, 253, 0.2);
+            color: #ddd6fe;
+        }
+
+        .action-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #e2e8f0;
         }
     </style>
 </head>
 <body>
-    <div class="delivery-header">
-        <h1 class="delivery-title">Deliveries</h1>
-        <p class="delivery-subtitle">Track and manage your deliveries</p>
-    </div>
-
-    <div class="delivery-content">
-        <div class="coming-soon">
-            <h3>Delivery System Coming Soon</h3>
-            <p>The comprehensive delivery tracking and management system is being developed. This will include real-time tracking, driver communication, and delivery scheduling.</p>
+    <!-- Floating Particles -->
+    <div class="particles"></div>
+    
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="window.history.back()">← Back</button>
+            <h1>My Deliveries</h1>
         </div>
-    </div>
 
-    <!-- Bottom Navigation -->
-    <div class="bottom-nav">
-        <div class="nav-container">
-            <button class="nav-item" onclick="navigate('community')">
-                <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="rgba(0, 255, 255, 0.1)"/>
-                    <circle cx="12" cy="8" r="2" fill="currentColor"/>
-                    <circle cx="8" cy="16" r="1.5" fill="currentColor"/>
-                    <circle cx="16" cy="16" r="1.5" fill="currentColor"/>
-                    <path d="M12 10V14M10 14H14" stroke="currentColor" stroke-width="1.5"/>
-                </svg>
-                <span class="nav-label">Local Pace</span>
-            </button>
-            <button class="nav-item" onclick="navigate('explore-market')">
-                <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
-                    <rect x="3" y="6" width="18" height="13" rx="2" stroke="currentColor" stroke-width="2" fill="rgba(0, 255, 255, 0.1)"/>
-                    <path d="M3 6L12 2L21 6" stroke="currentColor" stroke-width="2"/>
-                    <circle cx="8" cy="12" r="2" fill="currentColor" opacity="0.6"/>
-                    <circle cx="16" cy="12" r="2" fill="currentColor" opacity="0.6"/>
-                </svg>
-                <span class="nav-label">Market</span>
-            </button>
-            <button class="nav-item" onclick="navigate('the-hub')">
-                <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-                </svg>
-                <span class="nav-label">@Hub</span>
-            </button>
-            <button class="nav-item active" onclick="navigate('deliveries')">
-                <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
-                    <rect x="2" y="9" width="20" height="10" rx="2" stroke="currentColor" stroke-width="2" fill="rgba(0, 255, 255, 0.1)"/>
-                    <circle cx="7" cy="17" r="2" stroke="currentColor" stroke-width="2"/>
-                    <circle cx="17" cy="17" r="2" stroke="currentColor" stroke-width="2"/>
-                </svg>
-                <span class="nav-label">Deliveries</span>
-            </button>
-            <button class="nav-item" onclick="navigate('menu')">
-                <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="rgba(0, 255, 255, 0.1)"/>
-                    <circle cx="12" cy="8" r="1.5" fill="currentColor"/>
-                    <circle cx="8" cy="16" r="1.5" fill="currentColor"/>
-                    <circle cx="16" cy="16" r="1.5" fill="currentColor"/>
-                </svg>
-                <span class="nav-label">Menu</span>
-            </button>
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('current')">Current Deliveries</button>
+            <button class="tab" onclick="switchTab('past')">Past Deliveries</button>
+        </div>
+
+        <div id="current-tab" class="tab-content">
+            <div class="delivery-card">
+                <div class="delivery-header">
+                    <div class="delivery-id">Order #MP2025-001</div>
+                    <div class="delivery-status status-in-transit">In Transit</div>
+                </div>
+                <div class="item-info">
+                    <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=120" alt="Item" class="item-image">
+                    <div class="item-details">
+                        <div class="item-name">Vintage Coffee Table</div>
+                        <div class="item-seller">Sold by Sarah M.</div>
+                    </div>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <strong>Driver:</strong> Mike D. (4.9)
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <strong>Estimated Delivery:</strong> Today, 3:00 PM - 6:00 PM
+                </div>
+                <div class="delivery-actions">
+                    <button class="action-btn" onclick="trackDelivery('MP2025-001')">Track Live</button>
+                    <button class="action-btn secondary" onclick="messageDriver('MP2025-001')">Message Driver</button>
+                </div>
+            </div>
+
+            <div class="delivery-card">
+                <div class="delivery-header">
+                    <div class="delivery-id">Order #MP2025-002</div>
+                    <div class="delivery-status status-pickup">Ready for Pickup</div>
+                </div>
+                <div class="item-info">
+                    <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=120" alt="Item" class="item-image">
+                    <div class="item-details">
+                        <div class="item-name">Garden Tools Set</div>
+                        <div class="item-seller">Sold by Tom R.</div>
+                    </div>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <strong>Pickup Address:</strong> 123 Orange Beach Blvd
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <strong>Pickup Window:</strong> Today, 12:00 PM - 3:00 PM
+                </div>
+                <div class="delivery-actions">
+                    <button class="action-btn" onclick="acceptDelivery('MP2025-002')">Accept Delivery</button>
+                    <button class="action-btn secondary" onclick="declineDelivery('MP2025-002')">Decline</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="past-tab" class="tab-content" style="display: none;">
+            <div class="delivery-card">
+                <div class="delivery-header">
+                    <div class="delivery-id">Order #MP2024-089</div>
+                    <div class="delivery-status status-delivered">Delivered</div>
+                </div>
+                <div class="item-info">
+                    <img src="https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=120" alt="Item" class="item-image">
+                    <div class="item-details">
+                        <div class="item-name">Electric Drill</div>
+                        <div class="item-seller">Sold by Alex K.</div>
+                    </div>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <strong>Delivered:</strong> December 8, 2024 at 2:30 PM
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <strong>Driver:</strong> Lisa P. (4.8)
+                </div>
+                <div class="delivery-actions">
+                    <button class="action-btn" onclick="rateDelivery('MP2024-089')">Rate & Review</button>
+                    <button class="action-btn secondary" onclick="reorder('MP2024-089')">Buy Again</button>
+                </div>
+            </div>
+
+            <div class="delivery-card">
+                <div class="delivery-header">
+                    <div class="delivery-id">Order #MP2024-075</div>
+                    <div class="delivery-status status-delivered">Delivered</div>
+                </div>
+                <div class="item-info">
+                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=120" alt="Item" class="item-image">
+                    <div class="item-details">
+                        <div class="item-name">Running Shoes</div>
+                        <div class="item-seller">Sold by Jenny S.</div>
+                    </div>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <strong>Delivered:</strong> November 15, 2024 at 4:15 PM
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <strong>Driver:</strong> Carlos M. (5.0)
+                </div>
+                <div class="delivery-actions">
+                    <button class="action-btn" onclick="rateDelivery('MP2024-075')">Rate & Review</button>
+                    <button class="action-btn secondary" onclick="contactSeller('MP2024-075')">Contact Seller</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        function navigate(page) {
-            console.log('Navigating to:', page);
-            
-            const routes = {
-                'community': 'community.html',
-                'explore-market': 'explore-market.html',
-                'the-hub': 'the-hub.html',
-                'deliveries': 'deliveries.html',
-                'menu': 'marketpace-menu.html'
-            };
-            
-            if (routes[page]) {
-                window.location.href = routes[page];
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Show/hide content
+            document.getElementById('current-tab').style.display = tabName === 'current' ? 'block' : 'none';
+            document.getElementById('past-tab').style.display = tabName === 'past' ? 'block' : 'none';
+        }
+
+        function trackDelivery(orderId) {
+            alert(`Live tracking for order ${orderId}\n\nDriver location: 2.3 miles away\nEstimated arrival: 45 minutes\n\nYou will receive SMS updates when the driver is nearby.`);
+        }
+
+        function messageDriver(orderId) {
+            const message = prompt('Send a message to your driver:');
+            if (message) {
+                alert(`Message sent to driver: "${message}"\n\nThey will receive it immediately and can respond via SMS.`);
             }
         }
 
+        function acceptDelivery(orderId) {
+            if (confirm('Accept delivery for order ' + orderId + '?')) {
+                alert('Delivery accepted! A driver will be assigned within the next hour.');
+            }
+        }
+
+        function declineDelivery(orderId) {
+            const reason = prompt('Reason for declining delivery (optional):');
+            alert('Delivery declined. No charges applied. You can reschedule anytime.');
+        }
+
+        function rateDelivery(orderId) {
+            const rating = prompt('Rate this delivery (1-5 stars):');
+            if (rating) {
+                alert(`Thank you for rating this delivery ${rating} stars! Your feedback helps improve our service.`);
+            }
+        }
+
+        function reorder(orderId) {
+            alert('Item added to cart! You can modify quantities and checkout when ready.');
+        }
+
+        function contactSeller(orderId) {
+            alert('Opening message thread with seller...\n\nNote: MarketPace protects your privacy by not sharing personal contact information.');
+        }
+
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.querySelector('.particles');
+            if (!particlesContainer) return;
+            
+            const particleCount = 40;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Deliveries page loaded successfully');
+            createParticles();
         });
     </script>
 </body>
