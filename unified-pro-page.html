@@ -347,6 +347,102 @@
             font-weight: bold;
         }
 
+        /* Floating Header */
+        .floating-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            padding: 10px 16px;
+            z-index: 1001;
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .floating-header.hidden {
+            transform: translateY(-100%);
+        }
+
+        .floating-header .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header-left, .header-right {
+            flex: 1;
+        }
+
+        .header-center {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 2;
+            justify-content: center;
+        }
+
+        .epic-slogan {
+            background: linear-gradient(135deg, #00ffff, #0080ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            animation: sloganPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes sloganPulse {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .header-search {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            color: white;
+            font-size: 14px;
+            width: 200px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .header-search:focus {
+            border-color: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .header-search::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .tiny-nav-btn {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(59, 130, 246, 0.3));
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #00ffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tiny-nav-btn:hover {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(59, 130, 246, 0.5));
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+        }
+
         /* Bottom Navigation */
         .bottom-nav {
             position: fixed;
@@ -355,9 +451,15 @@
             right: 0;
             background: rgba(0, 0, 0, 0.9);
             backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(0, 255, 255, 0.3);
             padding: 10px 0;
             z-index: 1000;
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .bottom-nav.hidden {
+            transform: translateY(100%);
         }
 
         .nav-container {
@@ -375,21 +477,27 @@
             text-decoration: none;
             color: rgba(255, 255, 255, 0.6);
             transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         .nav-icon.active {
-            color: #ffd700;
+            color: #00ffff;
         }
 
         .nav-icon:hover {
-            color: #fff;
+            color: #00ffff;
             transform: translateY(-2px);
         }
 
         .nav-icon svg {
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             margin-bottom: 4px;
+        }
+
+        .nav-text {
+            font-size: 10px;
+            color: inherit;
         }
 
         .nav-text {
@@ -423,6 +531,28 @@
     </style>
 </head>
 <body>
+    <!-- Floating Header -->
+    <div id="floatingHeader" class="floating-header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="epic-slogan">"IN PACE WE POST"</div>
+            </div>
+            <div class="header-center">
+                <button onclick="goToPage('/community')" class="tiny-nav-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(0, 255, 255, 0.2)"/><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/></svg>
+                </button>
+                <input type="text" placeholder="Search MarketPace..." class="header-search" onclick="goToPage('/search')">
+                <button onclick="goToPage('/messages')" class="tiny-nav-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(0, 255, 255, 0.2)"/><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" stroke-width="1.5"/></svg>
+                </button>
+            </div>
+            <div class="header-right">
+                <button class="edit-toggle-btn" id="editToggle" onclick="toggleEditMode()">Edit Page</button>
+                <button class="view-public-btn" onclick="goToMenu()">Menu</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Header -->
     <div class="header">
         <div class="header-content">
@@ -628,22 +758,63 @@
     </div>
 
     <!-- Bottom Navigation -->
-    <div class="bottom-nav">
+    <!-- Bottom Navigation -->
+    <div id="bottomNav" class="bottom-nav">
         <div class="nav-container">
-            <a href="/community" class="nav-icon">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            <div class="nav-icon" onclick="goToPage('/community')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(0, 255, 255, 0.2)"/>
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.5"/>
+                    <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
                 </svg>
-                <span class="nav-text">Community</span>
-            </a>
-            <a href="/shops" class="nav-icon">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03L21.7 4H5.21l-.94-2H1zm16 16c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                <span class="nav-text">Local Pace</span>
+            </div>
+            <div class="nav-icon" onclick="goToPage('/shops')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(0, 255, 255, 0.2)"/>
+                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M3 6h18M16 10a4 4 0 0 1-8 0" stroke="currentColor" stroke-width="1.5"/>
                 </svg>
                 <span class="nav-text">Shops</span>
-            </a>
-            <a href="/services" class="nav-icon">
-                <svg viewBox="0 0 24 24" fill="currentColor">
+            </div>
+            <div class="nav-icon" onclick="goToPage('/services')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(0, 255, 255, 0.2)"/>
+                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                <span class="nav-text">Services</span>
+            </div>
+            <div class="nav-icon" onclick="goToPage('/rentals')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(0, 255, 255, 0.2)"/>
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M3.29 7 12 12l8.71-5M12 22V12" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                <span class="nav-text">Rentals</span>
+            </div>
+            <div class="nav-icon" onclick="goToPage('/the-hub')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(255, 215, 0, 0.2)"/>
+                    <path d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                <span class="nav-text">@Hub</span>
+            </div>
+            <div class="nav-icon" onclick="goToPage('/food-and-drinks')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(0, 255, 255, 0.2)"/>
+                    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Z" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                <span class="nav-text">Eats</span>
+            </div>
+            <div class="nav-icon active" onclick="goToMenu()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(0, 255, 255, 0.2)"/>
+                    <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                <span class="nav-text">Menu</span>
+            </div>
+        </div>
+    </div>
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                 </svg>
                 <span class="nav-text">Services</span>
@@ -811,6 +982,36 @@
         function goToPage(url) {
             window.location.href = url;
         }
+
+        // Scroll behavior for floating header and bottom navigation
+        let lastScrollTop = 0;
+        const floatingHeader = document.getElementById('floatingHeader');
+        const bottomNav = document.getElementById('bottomNav');
+        
+        function handleScroll() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                // Scrolling down
+                if (floatingHeader) floatingHeader.classList.add('hidden');
+                if (bottomNav) bottomNav.classList.add('hidden');
+            } else {
+                // Scrolling up
+                if (floatingHeader) floatingHeader.classList.remove('hidden');
+                if (bottomNav) bottomNav.classList.remove('hidden');
+            }
+            
+            lastScrollTop = scrollTop;
+        }
+
+        // Throttle scroll event
+        let scrollTimeout;
+        window.addEventListener('scroll', function() {
+            if (scrollTimeout) {
+                clearTimeout(scrollTimeout);
+            }
+            scrollTimeout = setTimeout(handleScroll, 16);
+        });
 
         // Initialize page in public view
         document.addEventListener('DOMContentLoaded', function() {
