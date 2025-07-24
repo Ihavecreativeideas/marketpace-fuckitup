@@ -596,6 +596,83 @@
             color: rgba(255, 255, 255, 0.9);
         }
 
+        /* MyPace Business Integration Styles - Phase 5 Mini-Phase 3 */
+        .business-progress-stat {
+            background: rgba(138, 43, 226, 0.1);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .business-stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #FF69B4;
+            margin-bottom: 4px;
+        }
+
+        .business-stat-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .business-checkin-item {
+            background: rgba(138, 43, 226, 0.1);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .business-checkin-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8A2BE2, #FF69B4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+            font-size: 12px;
+        }
+
+        .business-checkin-content {
+            flex: 1;
+        }
+
+        .business-checkin-event {
+            font-size: 13px;
+            font-weight: bold;
+            color: #FF69B4;
+            margin-bottom: 4px;
+        }
+
+        .business-checkin-message {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 4px;
+        }
+
+        .business-checkin-support {
+            font-size: 11px;
+            color: #8A2BE2;
+            font-weight: bold;
+        }
+
+        .business-checkin-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
         /* Coming Soon Blur Styling */
         .coming-soon {
             filter: blur(2px);
@@ -677,6 +754,36 @@
                 <div class="stat-label">Fans</div>
             </div>
         </div>
+    </div>
+
+    <!-- MyPace Business Integration - Phase 5 Mini-Phase 3 -->
+    <div class="about-section">
+        <h2 class="section-title" style="color: #8A2BE2;">PACE MyPace Business Activity</h2>
+        
+        <!-- Business MyPace Progress -->
+        <div id="business-mypace-progress" class="action-grid" style="margin-bottom: 16px;">
+            <!-- Business progress stats will be loaded here -->
+        </div>
+
+        <!-- Recent Business Check-ins -->
+        <div id="business-recent-checkins" style="margin-bottom: 16px;">
+            <!-- Recent business check-ins will be loaded here -->
+        </div>
+
+        <button onclick="viewBusinessMyPace()" style="
+            width: 100%;
+            background: linear-gradient(135deg, #8A2BE2, #FF69B4);
+            color: #000;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        ">
+            VIEW View Business MyPace Activity
+        </button>
     </div>
 
     <!-- Create Professional Post Section (Only visible in edit mode) -->
@@ -1138,6 +1245,167 @@
             }
         }
 
+        // Phase 5 Mini-Phase 3: Business MyPace Integration Functions
+        async function loadBusinessMyPaceProgress() {
+            try {
+                const response = await fetch('/api/mypace/business/brownbarnes/progress');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayBusinessProgressStats(data.progress);
+                }
+            } catch (error) {
+                console.error('Error loading business MyPace progress:', error);
+                displayBusinessProgressFallback();
+            }
+        }
+
+        function displayBusinessProgressStats(progress) {
+            const statsContainer = document.getElementById('business-mypace-progress');
+            
+            statsContainer.innerHTML = `
+                <div class="business-progress-stat">
+                    <div class="business-stat-value">${progress.stats.totalCustomerCheckins}</div>
+                    <div class="business-stat-label">Customer Check-ins</div>
+                </div>
+                <div class="business-progress-stat">
+                    <div class="business-stat-value">${progress.stats.eventsHosted}</div>
+                    <div class="business-stat-label">Events Hosted</div>
+                </div>
+                <div class="business-progress-stat">
+                    <div class="business-stat-value">#${progress.stats.venueRank}</div>
+                    <div class="business-stat-label">Venue Rank</div>
+                </div>
+                <div class="business-progress-stat">
+                    <div class="business-stat-value">${progress.stats.supportersEarned}</div>
+                    <div class="business-stat-label">Supporters Earned</div>
+                </div>
+            `;
+        }
+
+        function displayBusinessProgressFallback() {
+            const statsContainer = document.getElementById('business-mypace-progress');
+            statsContainer.innerHTML = `
+                <div class="business-progress-stat">
+                    <div class="business-stat-value">47</div>
+                    <div class="business-stat-label">Customer Check-ins</div>
+                </div>
+                <div class="business-progress-stat">
+                    <div class="business-stat-value">12</div>
+                    <div class="business-stat-label">Events Hosted</div>
+                </div>
+                <div class="business-progress-stat">
+                    <div class="business-stat-value">#3</div>
+                    <div class="business-stat-label">Venue Rank</div>
+                </div>
+                <div class="business-progress-stat">
+                    <div class="business-stat-value">156</div>
+                    <div class="business-stat-label">Supporters Earned</div>
+                </div>
+            `;
+        }
+
+        async function loadBusinessRecentCheckins() {
+            try {
+                const response = await fetch('/api/mypace/business/brownbarnes/checkins?limit=3');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayBusinessRecentCheckins(data.checkins);
+                }
+            } catch (error) {
+                console.error('Error loading business recent check-ins:', error);
+                displayBusinessCheckinsFallback();
+            }
+        }
+
+        function displayBusinessRecentCheckins(checkins) {
+            const checkinsContainer = document.getElementById('business-recent-checkins');
+            
+            if (checkins.length === 0) {
+                checkinsContainer.innerHTML = `
+                    <div style="text-align: center; color: rgba(255, 255, 255, 0.6); padding: 20px;">
+                        No customer check-ins yet at your business events.
+                    </div>
+                `;
+                return;
+            }
+
+            const checkinsHtml = checkins.map(checkin => `
+                <div class="business-checkin-item">
+                    <div class="business-checkin-avatar">${checkin.customerInitials}</div>
+                    <div class="business-checkin-content">
+                        <div class="business-checkin-event">${checkin.eventTitle}</div>
+                        <div class="business-checkin-message">${checkin.message}</div>
+                        <div class="business-checkin-support">Supporting @BrownBarnesMusic</div>
+                        <div class="business-checkin-meta">
+                            <div>${formatTimeAgo(checkin.timestamp)}</div>
+                            <div>LIKE ${checkin.likes}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            checkinsContainer.innerHTML = checkinsHtml;
+        }
+
+        function displayBusinessCheckinsFallback() {
+            const checkinsContainer = document.getElementById('business-recent-checkins');
+            checkinsContainer.innerHTML = `
+                <div class="business-checkin-item">
+                    <div class="business-checkin-avatar">SM</div>
+                    <div class="business-checkin-content">
+                        <div class="business-checkin-event">Acoustic Night at Coffee Shop</div>
+                        <div class="business-checkin-message">Love Brown's acoustic sets! Perfect atmosphere for a relaxed evening.</div>
+                        <div class="business-checkin-support">Supporting @BrownBarnesMusic</div>
+                        <div class="business-checkin-meta">
+                            <div>3h ago</div>
+                            <div>LIKE 12</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="business-checkin-item">
+                    <div class="business-checkin-avatar">AL</div>
+                    <div class="business-checkin-content">
+                        <div class="business-checkin-event">Open Mic Friday</div>
+                        <div class="business-checkin-message">Amazing original songs! Can't wait for the next performance.</div>
+                        <div class="business-checkin-support">Supporting @BrownBarnesMusic</div>
+                        <div class="business-checkin-meta">
+                            <div>2d ago</div>
+                            <div>LIKE 18</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="business-checkin-item">
+                    <div class="business-checkin-avatar">JR</div>
+                    <div class="business-checkin-content">
+                        <div class="business-checkin-event">Harbor Jazz Session</div>
+                        <div class="business-checkin-message">Beautiful voice and guitar work. Supporting local talent!</div>
+                        <div class="business-checkin-support">Supporting @BrownBarnesMusic</div>
+                        <div class="business-checkin-meta">
+                            <div>5d ago</div>
+                            <div>LIKE 25</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function formatTimeAgo(timestamp) {
+            const now = new Date();
+            const time = new Date(timestamp);
+            const diff = Math.floor((now - time) / 1000);
+
+            if (diff < 60) return 'Just now';
+            if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+            if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+            return Math.floor(diff / 86400) + 'd ago';
+        }
+
+        function viewBusinessMyPace() {
+            window.location.href = '/mypace-business-activity.html?business=brownbarnes';
+        }
+
         function goToMenu() {
             window.location.href = '/marketpace-menu.html';
         }
@@ -1178,6 +1446,10 @@
         // Initialize page in public view
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Unified Pro Page loaded successfully');
+            
+            // Load MyPace business integration data - Phase 5 Mini-Phase 3
+            loadBusinessMyPaceProgress();
+            loadBusinessRecentCheckins();
         });
     </script>
 </body>

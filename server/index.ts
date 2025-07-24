@@ -4084,6 +4084,365 @@ app.get('/api/mypace/support-tags/:username', async (req, res) => {
   }
 });
 
+// Phase 5 Mini-Phase 3: Profile Integration APIs
+
+// Get User Check-ins for Profile - Phase 5 Step 1
+app.get('/api/mypace/users/:username/checkins', async (req, res) => {
+  try {
+    const { username } = req.params;
+    const { limit = 10 } = req.query;
+
+    // Mock user check-in history - in production this would query database
+    const mockUserCheckins = [
+      {
+        id: 'user_checkin_1',
+        eventId: 'event_1',
+        eventTitle: 'Summer Music Festival',
+        eventType: 'music',
+        message: 'Amazing energy tonight! DJ Nova is incredible!',
+        supportTag: 'Here for @djNova',
+        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+        location: { name: 'Downtown Park', lat: 30.2672, lng: -87.5692 },
+        likes: 12,
+        photos: ['event1_photo.jpg'],
+        isPinned: true
+      },
+      {
+        id: 'user_checkin_2',
+        eventId: 'event_2',
+        eventTitle: 'Community Art Market',
+        eventType: 'market',
+        message: 'Love supporting local artists! Amazing talent here.',
+        supportTag: 'Supporting @localartists',
+        timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
+        location: { name: 'Main Street Plaza', lat: 30.2701, lng: -87.5721 },
+        likes: 8,
+        photos: [],
+        isPinned: false
+      },
+      {
+        id: 'user_checkin_3',
+        eventId: 'event_3',
+        eventTitle: 'Food Truck Friday',
+        eventType: 'food',
+        message: 'Gulf Tacos Mobile has the best fish tacos!',
+        supportTag: 'Supporting @gulftacos',
+        timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
+        location: { name: 'Beachfront Parking', lat: 30.2645, lng: -87.5665 },
+        likes: 6,
+        photos: ['food_truck_photo.jpg'],
+        isPinned: false
+      },
+      {
+        id: 'user_checkin_4',
+        eventId: 'event_4',
+        eventTitle: 'Local Business Showcase',
+        eventType: 'business',
+        message: 'So many great local shops! Perfect for holiday shopping.',
+        supportTag: null,
+        timestamp: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days ago
+        location: { name: 'City Hall Plaza', lat: 30.2680, lng: -87.5700 },
+        likes: 4,
+        photos: [],
+        isPinned: false
+      },
+      {
+        id: 'user_checkin_5',
+        eventId: 'event_5',
+        eventTitle: 'Beach Cleanup Volunteer Day',
+        eventType: 'community',
+        message: 'Proud to help keep our beaches clean! Great turnout today.',
+        supportTag: 'Supporting @community',
+        timestamp: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(), // 2 weeks ago
+        location: { name: 'Gulf State Park Beach', lat: 30.2600, lng: -87.5600 },
+        likes: 15,
+        photos: ['cleanup_photo.jpg'],
+        isPinned: true
+      }
+    ];
+
+    const limitedCheckins = mockUserCheckins.slice(0, parseInt(limit as string));
+
+    res.json({
+      success: true,
+      username,
+      checkins: limitedCheckins,
+      totalCheckins: mockUserCheckins.length,
+      recentActivity: limitedCheckins[0]?.timestamp || null
+    });
+
+  } catch (error) {
+    console.error('Error fetching user check-ins:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch user check-ins'
+    });
+  }
+});
+
+// Get User Progress Stats - Phase 5 Step 2
+app.get('/api/mypace/users/:username/progress', async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    // Calculate streak and progress - in production this would query database
+    const mockProgressData = {
+      username,
+      checkinStreak: {
+        current: 7,
+        longest: 12,
+        lastCheckin: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() // yesterday
+      },
+      badges: [
+        {
+          id: 'first_checkin',
+          name: 'First Check-In',
+          description: 'Completed your first MyPace check-in',
+          icon: 'DEBUT',
+          earnedDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+          rarity: 'common'
+        },
+        {
+          id: 'local_legend',
+          name: 'Local Legend',
+          description: 'Checked in to 10+ different venues',
+          icon: 'LEGEND',
+          earnedDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+          rarity: 'rare'
+        },
+        {
+          id: 'festival_fan',
+          name: 'Festival Fan',
+          description: 'Attended 5+ music events',
+          icon: 'MUSIC',
+          earnedDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+          rarity: 'uncommon'
+        },
+        {
+          id: 'community_champion',
+          name: 'Community Champion',
+          description: 'Supported 20+ local businesses',
+          icon: 'CHAMPION',
+          earnedDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+          rarity: 'epic'
+        }
+      ],
+      stats: {
+        totalCheckins: 47,
+        eventsAttended: 23,
+        businessesSupported: 15,
+        supporterRank: 3, // top 3 supporter in community
+        favoriteEventType: 'music',
+        favoriteVenue: 'Downtown Park',
+        monthlyCheckins: 12,
+        weeklyAverage: 3.2
+      },
+      achievements: {
+        nextBadge: {
+          name: 'Super Supporter',
+          description: 'Support 25+ local businesses',
+          progress: 15,
+          target: 25,
+          icon: 'SUPER'
+        },
+        streakGoal: {
+          name: '10-Day Streak',
+          description: 'Check in for 10 consecutive days',
+          progress: 7,
+          target: 10
+        }
+      }
+    };
+
+    res.json({
+      success: true,
+      progress: mockProgressData
+    });
+
+  } catch (error) {
+    console.error('Error fetching user progress:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch user progress'
+    });
+  }
+});
+
+// Get Available Badges - Phase 5 Step 2
+app.get('/api/mypace/badges', async (req, res) => {
+  try {
+    const allBadges = [
+      {
+        id: 'first_checkin',
+        name: 'First Check-In',
+        description: 'Complete your first MyPace check-in',
+        icon: 'DEBUT',
+        rarity: 'common',
+        requirement: 'Check in to any event'
+      },
+      {
+        id: 'early_bird',
+        name: 'Early Bird',
+        description: 'Check in before 10 AM',
+        icon: 'EARLY',
+        rarity: 'common',
+        requirement: 'Check in before 10:00 AM'
+      },
+      {
+        id: 'night_owl',
+        name: 'Night Owl',
+        description: 'Check in after 10 PM',
+        icon: 'NIGHT',
+        rarity: 'common',
+        requirement: 'Check in after 10:00 PM'
+      },
+      {
+        id: 'local_legend',
+        name: 'Local Legend',
+        description: 'Check in to 10+ different venues',
+        icon: 'LEGEND',
+        rarity: 'rare',
+        requirement: 'Visit 10 unique venues'
+      },
+      {
+        id: 'festival_fan',
+        name: 'Festival Fan',
+        description: 'Attend 5+ music events',
+        icon: 'MUSIC',
+        rarity: 'uncommon',
+        requirement: 'Attend 5 music events'
+      },
+      {
+        id: 'foodie_explorer',
+        name: 'Foodie Explorer',
+        description: 'Try 10+ different food venues',
+        icon: 'FOOD',
+        rarity: 'uncommon',
+        requirement: 'Visit 10 food venues'
+      },
+      {
+        id: 'community_champion',
+        name: 'Community Champion',
+        description: 'Support 20+ local businesses',
+        icon: 'CHAMPION',
+        rarity: 'epic',
+        requirement: 'Support 20 businesses'
+      },
+      {
+        id: 'super_supporter',
+        name: 'Super Supporter',
+        description: 'Support 25+ local businesses',
+        icon: 'SUPER',
+        rarity: 'legendary',
+        requirement: 'Support 25 businesses'
+      },
+      {
+        id: 'streak_master',
+        name: 'Streak Master',
+        description: 'Maintain a 30-day check-in streak',
+        icon: 'STREAK',
+        rarity: 'legendary',
+        requirement: '30-day check-in streak'
+      }
+    ];
+
+    res.json({
+      success: true,
+      badges: allBadges,
+      total: allBadges.length
+    });
+
+  } catch (error) {
+    console.error('Error fetching badges:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch badges'
+    });
+  }
+});
+
+// Get Business/Performer Supporters - Phase 5 Step 4
+app.get('/api/mypace/supporters/:businessUsername', async (req, res) => {
+  try {
+    const { businessUsername } = req.params;
+    const { limit = 20 } = req.query;
+
+    // Mock supporter data - in production this would query database
+    const mockSupporterData = {
+      businessUsername,
+      totalSupporters: 127,
+      recentSupporters: [
+        {
+          username: 'MusicFan2025',
+          avatar: 'MF',
+          lastSupportMessage: 'Here for @djNova',
+          lastSupportDate: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+          totalSupports: 8,
+          favoriteEvent: 'Summer Music Festival'
+        },
+        {
+          username: 'LiveMusicLover',
+          avatar: 'LL',
+          lastSupportMessage: 'Amazing performance as always!',
+          lastSupportDate: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
+          totalSupports: 12,
+          favoriteEvent: 'Downtown Live Sessions'
+        },
+        {
+          username: 'LocalFan88',
+          avatar: 'LF',
+          lastSupportMessage: 'Supporting @djNova since day one!',
+          lastSupportDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+          totalSupports: 15,
+          favoriteEvent: 'Summer Music Festival'
+        },
+        {
+          username: 'PartyMike',  
+          avatar: 'PM',
+          lastSupportMessage: 'Best DJ in the Gulf Coast!',
+          lastSupportDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+          totalSupports: 6,
+          favoriteEvent: 'Beach Party Nights'
+        },
+        {
+          username: 'DanceQueen',
+          avatar: 'DQ',
+          lastSupportMessage: 'Your music gets the whole crowd moving!',
+          lastSupportDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+          totalSupports: 9,
+          favoriteEvent: 'Summer Music Festival'
+        }
+      ],
+      topSupporters: [
+        { username: 'LiveMusicLover', avatar: 'LL', totalSupports: 15, rank: 1 },
+        { username: 'LocalFan88', avatar: 'LF', totalSupports: 12, rank: 2 },
+        { username: 'DanceQueen', avatar: 'DQ', totalSupports: 9, rank: 3 },
+        { username: 'MusicFan2025', avatar: 'MF', totalSupports: 8, rank: 4 },
+        { username: 'PartyMike', avatar: 'PM', totalSupports: 6, rank: 5 }
+      ],
+      supportStats: {
+        thisWeek: 23,
+        thisMonth: 67,
+        averagePerEvent: 8.5,
+        mostSupportedEvent: 'Summer Music Festival',
+        supportGrowth: '+15%' // compared to last month
+      }
+    };
+
+    res.json({
+      success: true,
+      supporterData: mockSupporterData
+    });
+
+  } catch (error) {
+    console.error('Error fetching supporters:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch supporter data'
+    });
+  }
+});
+
 app.get('/api/schedules/:businessId', async (req, res) => {
   try {
     const { businessId } = req.params;

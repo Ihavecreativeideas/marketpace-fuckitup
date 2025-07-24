@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyPace Check-ins History - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0118 0%, #1a0233 50%, #2d1b69 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(138, 43, 226, 0.6);
+            border-radius: 50%;
+            animation: float 6s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Header */
+        .header {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(138, 43, 226, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-btn {
+            background: rgba(138, 43, 226, 0.2);
+            border: 1px solid rgba(138, 43, 226, 0.5);
+            color: #8A2BE2;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(138, 43, 226, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #FF69B4;
+            text-align: center;
+            flex: 1;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8A2BE2, #FF69B4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+            font-size: 12px;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Filter Controls */
+        .filter-section {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .filter-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #8A2BE2;
+            margin-bottom: 12px;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .filter-tab.active {
+            background: linear-gradient(135deg, #8A2BE2, #FF69B4);
+            color: #000;
+            border-color: #FF69B4;
+        }
+
+        .search-bar {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .search-bar::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Check-ins List */
+        .checkins-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .checkin-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .checkin-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .checkin-card.pinned {
+            border-color: #FFD700;
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .checkin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .checkin-event {
+            font-size: 16px;
+            font-weight: bold;
+            color: #FF69B4;
+            margin-bottom: 4px;
+        }
+
+        .checkin-date {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .checkin-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .pin-btn.pinned {
+            background: rgba(255, 215, 0, 0.3);
+            color: #FFD700;
+            border-color: #FFD700;
+        }
+
+        .checkin-message {
+            font-size: 14px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .checkin-support {
+            font-size: 12px;
+            color: #8A2BE2;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .checkin-photos {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .checkin-photo {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+        }
+
+        .checkin-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .checkin-location {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .checkin-engagement {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .engagement-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .engagement-item:hover {
+            color: #FF69B4;
+        }
+
+        /* Load More */
+        .load-more-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #8A2BE2, #FF69B4);
+            color: #000;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .load-more-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.3);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 16px;
+            }
+
+            .main-content {
+                padding: 16px;
+            }
+
+            .filter-tabs {
+                justify-content: center;
+            }
+
+            .checkin-header {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .checkin-actions {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Particles -->
+    <div id="particles" class="particles"></div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <button class="back-btn" onclick="goBack()">BACK Back to Profile</button>
+            <div class="page-title">MyPace Check-ins History</div>
+            <div class="user-info">
+                <div class="user-avatar">JD</div>
+                <span>John Doe</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="filter-title">FILTER Filter Check-ins</div>
+            <div class="filter-tabs">
+                <div class="filter-tab active" onclick="filterCheckins('all')">All</div>
+                <div class="filter-tab" onclick="filterCheckins('this-week')">This Week</div>
+                <div class="filter-tab" onclick="filterCheckins('this-month')">This Month</div>
+                <div class="filter-tab" onclick="filterCheckins('pinned')">Pinned</div>
+                <div class="filter-tab" onclick="filterCheckins('music')">Music Events</div>
+                <div class="filter-tab" onclick="filterCheckins('food')">Food Events</div>
+                <div class="filter-tab" onclick="filterCheckins('art')">Art Events</div>
+            </div>
+            <input type="text" class="search-bar" placeholder="Search check-ins by event name or message..." id="searchInput" oninput="searchCheckins()">
+        </div>
+
+        <!-- Check-ins Container -->
+        <div id="checkinsContainer" class="checkins-container">
+            <!-- Check-ins will be loaded here -->
+        </div>
+
+        <!-- Load More Button -->
+        <button class="load-more-btn" id="loadMoreBtn" onclick="loadMoreCheckins()" style="display: none;">
+            LOAD Load More Check-ins
+        </button>
+    </div>
+
+    <script>
+        let allCheckins = [];
+        let displayedCheckins = [];
+        let currentFilter = 'all';
+        let currentPage = 1;
+        const checkinsPerPage = 10;
+
+        // Initialize floating particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                
+                // MyPace theme colors
+                const colors = ['rgba(138, 43, 226, 0.6)', 'rgba(255, 105, 180, 0.6)', 'rgba(148, 0, 211, 0.6)'];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                container.appendChild(particle);
+            }
+        }
+
+        // Sample check-ins data - would be loaded from API
+        function generateSampleCheckins() {
+            return [
+                {
+                    id: 1,
+                    eventTitle: "Jazz Night at The Harbor",
+                    message: "Amazing saxophone performance! The acoustics in this venue are perfect for jazz music.",
+                    supportTag: "Supporting @TheHarborJazz",
+                    timestamp: Date.now() - 2 * 60 * 60 * 1000, // 2 hours ago
+                    likes: 15,
+                    comments: 3,
+                    shares: 2,
+                    location: "The Harbor Venue",
+                    category: "music",
+                    photos: ["Photo 1", "Photo 2"],
+                    isPinned: true
+                },
+                {
+                    id: 2,
+                    eventTitle: "Local Art Gallery Opening",
+                    message: "So inspired by the local talent! Great community support tonight.",
+                    supportTag: "Supporting @ArtistsUnited",
+                    timestamp: Date.now() - 24 * 60 * 60 * 1000, // 1 day ago
+                    likes: 8,
+                    comments: 5,
+                    shares: 1,
+                    location: "Orange Beach Gallery",
+                    category: "art",
+                    photos: ["Gallery Photo"],
+                    isPinned: false
+                },
+                {
+                    id: 3,
+                    eventTitle: "Food Truck Friday",
+                    message: "Best tacos in Orange Beach! Perfect weather for outdoor dining.",
+                    supportTag: "Supporting @GulfTacos",
+                    timestamp: Date.now() - 3 * 24 * 60 * 60 * 1000, // 3 days ago
+                    likes: 22,
+                    comments: 8,
+                    shares: 4,
+                    location: "Main Street",
+                    category: "food",
+                    photos: ["Taco Photo"],
+                    isPinned: false
+                },
+                {
+                    id: 4,
+                    eventTitle: "Sunset Acoustic Session",
+                    message: "Beautiful evening with live acoustic music overlooking the Gulf.",
+                    supportTag: "Supporting @SunsetSessions",
+                    timestamp: Date.now() - 5 * 24 * 60 * 60 * 1000, // 5 days ago
+                    likes: 18,
+                    comments: 6,
+                    shares: 3,
+                    location: "Gulf State Park",
+                    category: "music",
+                    photos: ["Sunset Photo", "Guitar Photo"],
+                    isPinned: false
+                },
+                {
+                    id: 5,
+                    eventTitle: "Coffee & Comedy Morning",
+                    message: "Laughed so hard I nearly spilled my coffee! Local comedians are hilarious.",
+                    supportTag: "Supporting @ComedyCafe",
+                    timestamp: Date.now() - 7 * 24 * 60 * 60 * 1000, // 1 week ago
+                    likes: 12,
+                    comments: 4,
+                    shares: 2,
+                    location: "The Bean Scene",
+                    category: "entertainment",
+                    photos: [],
+                    isPinned: false
+                },
+                {
+                    id: 6,
+                    eventTitle: "Farmers Market Saturday",
+                    message: "Fresh produce and local crafts! Love supporting our local farmers.",
+                    supportTag: "Supporting @OrangePeachFarmersMarket",
+                    timestamp: Date.now() - 9 * 24 * 60 * 60 * 1000, // 9 days ago
+                    likes: 25,
+                    comments: 7,
+                    shares: 5,
+                    location: "City Park",
+                    category: "food",
+                    photos: ["Market Photo"],
+                    isPinned: false
+                }
+            ];
+        }
+
+        // Load and display check-ins
+        async function loadCheckins() {
+            try {
+                // In real app, would fetch from API
+                const response = await fetch(`/api/mypace/users/johndoe/checkins/all`);
+                if (response.ok) {
+                    const data = await response.json();
+                    allCheckins = data.checkins || [];
+                } else {
+                    throw new Error('API not available');
+                }
+            } catch (error) {
+                console.log('Using sample data for check-ins');
+                allCheckins = generateSampleCheckins();
+            }
+            
+            filterCheckins(currentFilter);
+        }
+
+        // Filter check-ins
+        function filterCheckins(filter) {
+            currentFilter = filter;
+            currentPage = 1;
+            
+            // Update active filter tab
+            document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
+            event?.target?.classList?.add('active');
+            
+            let filtered = [...allCheckins];
+            const now = new Date();
+            
+            switch (filter) {
+                case 'this-week':
+                    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    filtered = filtered.filter(checkin => new Date(checkin.timestamp) > weekAgo);
+                    break;
+                case 'this-month':
+                    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    filtered = filtered.filter(checkin => new Date(checkin.timestamp) > monthAgo);
+                    break;
+                case 'pinned':
+                    filtered = filtered.filter(checkin => checkin.isPinned);
+                    break;
+                case 'music':
+                    filtered = filtered.filter(checkin => checkin.category === 'music');
+                    break;
+                case 'food':
+                    filtered = filtered.filter(checkin => checkin.category === 'food');
+                    break;
+                case 'art':
+                    filtered = filtered.filter(checkin => checkin.category === 'art');
+                    break;
+            }
+            
+            displayedCheckins = filtered;
+            displayCheckins();
+        }
+
+        // Search check-ins
+        function searchCheckins() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            
+            if (!query) {
+                filterCheckins(currentFilter);
+                return;
+            }
+            
+            displayedCheckins = allCheckins.filter(checkin => 
+                checkin.eventTitle.toLowerCase().includes(query) ||
+                checkin.message.toLowerCase().includes(query) ||
+                checkin.supportTag.toLowerCase().includes(query) ||
+                checkin.location.toLowerCase().includes(query)
+            );
+            
+            displayCheckins();
+        }
+
+        // Display check-ins
+        function displayCheckins() {
+            const container = document.getElementById('checkinsContainer');
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            
+            if (displayedCheckins.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">PACE</div>
+                        <div>No check-ins found</div>
+                        <div style="font-size: 12px; margin-top: 8px;">Try adjusting your filters or search terms</div>
+                    </div>
+                `;
+                loadMoreBtn.style.display = 'none';
+                return;
+            }
+            
+            const itemsToShow = currentPage * checkinsPerPage;
+            const checkinsToShow = displayedCheckins.slice(0, itemsToShow);
+            
+            const checkinsHtml = checkinsToShow.map(checkin => `
+                <div class="checkin-card ${checkin.isPinned ? 'pinned' : ''}">
+                    <div class="checkin-header">
+                        <div>
+                            <div class="checkin-event">${checkin.eventTitle}</div>
+                            <div class="checkin-date">${formatDate(checkin.timestamp)}</div>
+                        </div>
+                        <div class="checkin-actions">
+                            <button class="action-btn pin-btn ${checkin.isPinned ? 'pinned' : ''}" onclick="togglePin(${checkin.id})">
+                                ${checkin.isPinned ? 'PIN Pinned' : 'PIN Pin'}
+                            </button>
+                            <button class="action-btn" onclick="shareCheckin(${checkin.id})">SHARE Share</button>
+                        </div>
+                    </div>
+                    
+                    <div class="checkin-message">${checkin.message}</div>
+                    
+                    ${checkin.supportTag ? `<div class="checkin-support">${checkin.supportTag}</div>` : ''}
+                    
+                    ${checkin.photos.length > 0 ? `
+                        <div class="checkin-photos">
+                            ${checkin.photos.map(photo => `
+                                <div class="checkin-photo" onclick="viewPhoto('${photo}')">
+                                    IMG ${photo}
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="checkin-meta">
+                        <div class="checkin-location">
+                            <span>LOC: ${checkin.location}</span>
+                        </div>
+                        <div class="checkin-engagement">
+                            <div class="engagement-item" onclick="toggleLike(${checkin.id})">
+                                <span>LIKE ${checkin.likes}</span>
+                            </div>
+                            <div class="engagement-item" onclick="viewComments(${checkin.id})">
+                                <span>REPLY ${checkin.comments}</span>
+                            </div>
+                            <div class="engagement-item" onclick="shareCheckin(${checkin.id})">
+                                <span>SHARE ${checkin.shares}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = checkinsHtml;
+            
+            // Show/hide load more button
+            if (itemsToShow < displayedCheckins.length) {
+                loadMoreBtn.style.display = 'block';
+            } else {
+                loadMoreBtn.style.display = 'none';
+            }
+        }
+
+        // Utility functions
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000);
+
+            if (diff < 60) return 'Just now';
+            if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+            if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+            if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
+            
+            return date.toLocaleDateString();
+        }
+
+        function loadMoreCheckins() {
+            currentPage++;
+            displayCheckins();
+        }
+
+        function togglePin(checkinId) {
+            const checkin = allCheckins.find(c => c.id === checkinId);
+            if (checkin) {
+                checkin.isPinned = !checkin.isPinned;
+                displayCheckins();
+                
+                // Would sync with server in real app
+                console.log(`Check-in ${checkinId} ${checkin.isPinned ? 'pinned' : 'unpinned'}`);
+            }
+        }
+
+        function toggleLike(checkinId) {
+            const checkin = allCheckins.find(c => c.id === checkinId);
+            if (checkin) {
+                checkin.likes++;
+                displayCheckins();
+                console.log(`Liked check-in ${checkinId}`);
+            }
+        }
+
+        function shareCheckin(checkinId) {
+            const checkin = allCheckins.find(c => c.id === checkinId);
+            if (checkin) {
+                checkin.shares++;
+                displayCheckins();
+                console.log(`Shared check-in: ${checkin.eventTitle}`);
+            }
+        }
+
+        function viewComments(checkinId) {
+            console.log(`Viewing comments for check-in ${checkinId}`);
+        }
+
+        function viewPhoto(photo) {
+            console.log(`Viewing photo: ${photo}`);
+        }
+
+        function goBack() {
+            window.location.href = '/profile.html';
+        }
+
+        // Initialize page
+        createParticles();
+        loadCheckins();
+    </script>
+</body>
+</html>
