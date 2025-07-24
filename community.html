@@ -6382,46 +6382,69 @@
             
             // Test essential functions on page load
             try {
-                // Create floating particles
-                createParticles();
+                // Create floating particles (with null check)
+                if (typeof createParticles === 'function') {
+                    createParticles();
+                }
                 
-                // Create logo particles
-                createLogoParticles();
+                // Create logo particles (with null check)
+                if (typeof createLogoParticles === 'function') {
+                    createLogoParticles();
+                }
                 
-                // Test cart badge update
-                updateCartBadge();
+                // Test cart badge update (with null check)
+                if (typeof updateCartBadge === 'function') {
+                    updateCartBadge();
+                }
                 
-                // Test login status
-                checkLoginStatus();
+                // Test login status (with null check)
+                if (typeof checkLoginStatus === 'function') {
+                    checkLoginStatus();
+                }
                 
                 // Initialize post types
                 initializePostTypes();
                 
-                // Initialize account mode and posting mode synchronization
-                initializeAccountMode();
+                // Initialize account mode and posting mode synchronization (with null check)
+                if (typeof initializeAccountMode === 'function') {
+                    initializeAccountMode();
+                }
                 
-                // Ensure Community button is highlighted (since this is the community page)
-                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-                document.querySelector('.nav-item[onclick="goToPage(\'home\')"]').classList.add('active');
+                // Ensure Community button is highlighted (with null check)
+                const navItems = document.querySelectorAll('.nav-item');
+                const homeNavItem = document.querySelector('.nav-item[onclick="goToPage(\'home\')"]');
+                if (navItems.length > 0) {
+                    navItems.forEach(item => item.classList.remove('active'));
+                }
+                if (homeNavItem) {
+                    homeNavItem.classList.add('active');
+                }
                 
                 // Check if user just logged in with Facebook and should see invite prompt
                 if (localStorage.getItem('showFacebookInvite') === 'true') {
                     localStorage.removeItem('showFacebookInvite');
                     setTimeout(() => {
-                        showFacebookWelcomeInvite();
+                        if (typeof showFacebookWelcomeInvite === 'function') {
+                            showFacebookWelcomeInvite();
+                        }
                     }, 1500); // Show after page loads
                 }
                 
                 console.log('All community functions initialized successfully');
                 
-                // Show a subtle notification that buttons are working
+                // Show a subtle notification that buttons are working (with null check)
                 setTimeout(() => {
-                    showNotification('Community feed loaded successfully! All buttons active.', 'success');
+                    if (typeof showNotification === 'function') {
+                        showNotification('Community feed loaded successfully! All buttons active.', 'success');
+                    }
                 }, 500);
                 
             } catch (error) {
                 console.error('❌ Error initializing community functions:', error);
-                showNotification('Some features may not work properly. Please refresh the page.', 'error');
+                console.error('Error details:', error.message, error.stack);
+                if (typeof showNotification === 'function') {
+                    showNotification('Some features may not work properly. Please refresh the page.', 'error');
+                }
             }
         });
         
