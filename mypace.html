@@ -710,6 +710,29 @@
             margin: 0;
         }
 
+        /* Notification Animations */
+        @keyframes slideInNotification {
+            from { 
+                opacity: 0; 
+                transform: translateX(-50%) translateY(-20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(-50%) translateY(0); 
+            }
+        }
+        
+        @keyframes slideOutNotification {
+            from { 
+                opacity: 1; 
+                transform: translateX(-50%) translateY(0); 
+            }
+            to { 
+                opacity: 0; 
+                transform: translateX(-50%) translateY(-20px); 
+            }
+        }
+
         /* Bottom Navigation */
         .bottom-nav {
             position: fixed;
@@ -2523,6 +2546,39 @@
             }
         }
 
+        // Show notification function
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, #8A2BE2, #FF69B4);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 25px;
+                font-weight: 600;
+                z-index: 2000;
+                box-shadow: 0 4px 20px rgba(138, 43, 226, 0.4);
+                animation: slideInNotification 0.3s ease;
+                max-width: 80vw;
+                text-align: center;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOutNotification 0.3s ease';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 300);
+            }, 3000);
+        }
+
         // Share functions
         function shareToFacebook(badgeName, description) {
             const shareText = `I just unlocked the "${badgeName}" badge on MyPace! ${description}`;
@@ -2535,6 +2591,34 @@
             navigator.clipboard.writeText(link).then(() => {
                 showNotification('Badge link copied to clipboard!');
             });
+        }
+
+        // Navigation function
+        function navigateToPage(page) {
+            console.log('Navigating to:', page);
+            
+            switch(page) {
+                case 'home':
+                    location.href = 'community.html';
+                    break;
+                case 'market':
+                    location.href = 'market.html';
+                    break;
+                case 'mypace':
+                    // Already on MyPace page
+                    break;
+                case 'discover':
+                    location.href = 'mypace-discover.html';
+                    break;
+                case 'the-hub':
+                    location.href = 'the-hub.html';
+                    break;
+                case 'menu':
+                    location.href = 'marketpace-menu.html';
+                    break;
+                default:
+                    console.log('Unknown page:', page);
+            }
         }
 
         // Initialize page
