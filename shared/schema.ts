@@ -72,6 +72,71 @@ export const mypaceCheckins = pgTable("mypace_checkins", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// MyPace Loyalty System - Phase 6 Mini-Phase 4
+export const loyaltyPrograms = pgTable("loyalty_programs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  businessId: varchar("business_id").notNull().references(() => users.id),
+  businessName: varchar("business_name").notNull(),
+  programName: varchar("program_name").notNull(),
+  isActive: boolean("is_active").default(true),
+  pointsPerCheckin: integer("points_per_checkin").default(1),
+  rewardThreshold: integer("reward_threshold").default(5),
+  rewardDescription: text("reward_description").notNull(),
+  rewardValue: varchar("reward_value"), // "$5 off", "Free coffee", etc.
+  customMessage: text("custom_message"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const memberLoyaltyProgress = pgTable("member_loyalty_progress", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  businessId: varchar("business_id").notNull().references(() => users.id),
+  programId: uuid("program_id").notNull().references(() => loyaltyPrograms.id),
+  currentPoints: integer("current_points").default(0),
+  totalPoints: integer("total_points").default(0),
+  rewardsEarned: integer("rewards_earned").default(0),
+  lastCheckinDate: timestamp("last_checkin_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const rewardRedemptions = pgTable("reward_redemptions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  businessId: varchar("business_id").notNull().references(() => users.id),
+  programId: uuid("program_id").notNull().references(() => loyaltyPrograms.id),
+  rewardDescription: text("reward_description").notNull(),
+  pointsRedeemed: integer("points_redeemed").notNull(),
+  isRedeemed: boolean("is_redeemed").default(false),
+  redeemedAt: timestamp("redeemed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const memberReferrals = pgTable("member_referrals", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  referrerId: varchar("referrer_id").notNull().references(() => users.id),
+  referredId: varchar("referred_id").notNull().references(() => users.id),
+  referralCode: varchar("referral_code").notNull(),
+  bonusPointsEarned: integer("bonus_points_earned").default(1),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const supporterTiers = pgTable("supporter_tiers", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  businessId: varchar("business_id").notNull().references(() => users.id),
+  tierLevel: varchar("tier_level").notNull(), // "Super Supporter", "Top 10%", "Weekly Regular"
+  tierIcon: varchar("tier_icon").notNull(), // "SUPER", "TOP", "REGULAR"
+  checkinsCount: integer("checkins_count").default(0),
+  supportValue: integer("support_value").default(0),
+  lastSupportDate: timestamp("last_support_date"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // MyPace check-in likes for social interactions
 export const mypaceCheckinLikes = pgTable("mypace_checkin_likes", {
   id: uuid("id").primaryKey().defaultRandom(),

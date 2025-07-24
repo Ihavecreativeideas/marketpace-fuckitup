@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rewards Wallet - MyPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 30%, #8A2BE2 60%, #FF69B4 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding-bottom: 80px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 105, 180, 0.8);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0px) translateX(0px) rotate(0deg); 
+                opacity: 0.4; 
+            }
+            25% { 
+                transform: translateY(-30px) translateX(10px) rotate(90deg); 
+                opacity: 0.8; 
+            }
+            50% { 
+                transform: translateY(-15px) translateX(-10px) rotate(180deg); 
+                opacity: 1; 
+            }
+            75% { 
+                transform: translateY(-25px) translateX(5px) rotate(270deg); 
+                opacity: 0.6; 
+            }
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 105, 180, 0.2);
+            padding: 12px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            background: rgba(138, 43, 226, 0.2);
+            border: 1px solid #8A2BE2;
+            color: #8A2BE2;
+            padding: 8px 12px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(138, 43, 226, 0.3);
+            color: #FF69B4;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(45deg, #8A2BE2, #FF69B4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .wallet-icon {
+            background: rgba(255, 105, 180, 0.1);
+            padding: 8px;
+            border-radius: 50%;
+            color: #FF69B4;
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 16px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Wallet Summary */
+        .wallet-summary {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 105, 180, 0.3);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .wallet-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: #FF69B4;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #a1a1aa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Loyalty Cards */
+        .loyalty-cards {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #8A2BE2;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .loyalty-card {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .loyalty-card:hover {
+            border-color: rgba(255, 105, 180, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .business-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .program-name {
+            font-size: 14px;
+            color: #8A2BE2;
+            font-weight: 600;
+        }
+
+        .points-badge {
+            background: linear-gradient(45deg, #8A2BE2, #FF69B4);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            height: 8px;
+            margin: 12px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #8A2BE2, #FF69B4);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.6s ease;
+        }
+
+        .progress-text {
+            font-size: 12px;
+            color: #a1a1aa;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        .reward-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .reward-description {
+            font-size: 14px;
+            color: #e2e8f0;
+            font-weight: 600;
+        }
+
+        .reward-value {
+            color: #FF69B4;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* Unredeemed Rewards */
+        .unredeemed-rewards {
+            margin-bottom: 24px;
+        }
+
+        .reward-card {
+            background: rgba(255, 105, 180, 0.1);
+            border: 1px solid rgba(255, 105, 180, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 12px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 10px rgba(255, 105, 180, 0.3); }
+            to { box-shadow: 0 0 20px rgba(255, 105, 180, 0.6); }
+        }
+
+        .reward-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .reward-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #FF69B4;
+        }
+
+        .reward-business {
+            font-size: 14px;
+            color: #8A2BE2;
+            font-weight: 600;
+        }
+
+        .redeem-btn {
+            background: linear-gradient(45deg, #8A2BE2, #FF69B4);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .redeem-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
+        }
+
+        /* Referral Section */
+        .referral-section {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 20px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .referral-code {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 105, 180, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            color: #FF69B4;
+            letter-spacing: 2px;
+        }
+
+        .share-btn {
+            background: rgba(138, 43, 226, 0.2);
+            border: 1px solid #8A2BE2;
+            color: #8A2BE2;
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 8px;
+        }
+
+        .share-btn:hover {
+            background: rgba(138, 43, 226, 0.3);
+            color: #FF69B4;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #a1a1aa;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 105, 180, 0.3);
+            border-top: 3px solid #FF69B4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 16px 12px;
+            }
+
+            .wallet-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+
+            .loyalty-card, .reward-card, .referral-section {
+                padding: 16px;
+            }
+
+            .card-header {
+                flex-direction: column;
+                gap: 8px;
+                align-items: flex-start;
+            }
+
+            .reward-info {
+                flex-direction: column;
+                gap: 8px;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <a href="/profile.html" class="back-btn">BACK Back</a>
+            <h1 class="header-title">WALLET Rewards Wallet</h1>
+            <div class="wallet-icon">EARN</div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Loading State -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading your rewards wallet...</p>
+        </div>
+
+        <!-- Wallet Summary -->
+        <div id="wallet-summary" class="wallet-summary" style="display: none;">
+            <h2 style="color: #FF69B4; margin-bottom: 8px;">REWARD Your Rewards</h2>
+            <p style="color: #a1a1aa; font-size: 14px;">Track your loyalty progress and redeem rewards</p>
+            
+            <div class="wallet-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="total-programs">0</div>
+                    <div class="stat-label">PROG Active Programs</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="total-points">0</div>
+                    <div class="stat-label">PTS Total Points</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="total-rewards">0</div>
+                    <div class="stat-label">GIFT Available Rewards</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="referral-count">0</div>
+                    <div class="stat-label">REF Referrals Made</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unredeemed Rewards -->
+        <div id="unredeemed-rewards" class="unredeemed-rewards" style="display: none;">
+            <h3 class="section-title">GIFT Ready to Redeem</h3>
+            <div id="unredeemed-list"></div>
+        </div>
+
+        <!-- Loyalty Cards -->
+        <div id="loyalty-cards" class="loyalty-cards" style="display: none;">
+            <h3 class="section-title">CARD Loyalty Progress</h3>
+            <div id="loyalty-list"></div>
+        </div>
+
+        <!-- Referral Section -->
+        <div id="referral-section" class="referral-section" style="display: none;">
+            <h3 class="section-title" style="margin-bottom: 16px;">REF Invite Friends</h3>
+            <p style="color: #a1a1aa; font-size: 14px; margin-bottom: 16px;">Share your referral code and earn bonus points when friends join MyPace</p>
+            
+            <div class="referral-code" id="referral-code">LOADING...</div>
+            
+            <div style="margin-top: 16px;">
+                <button class="share-btn" onclick="shareReferralCode()">SHARE Share Code</button>
+                <button class="share-btn" onclick="copyReferralCode()">COPY Copy Code</button>
+            </div>
+            
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                <div class="stat-item">
+                    <div class="stat-value" id="referral-bonus-points">0</div>
+                    <div class="stat-label">BONUS Bonus Points Earned</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Load wallet data
+        async function loadWalletData() {
+            try {
+                const userId = 'johndoe'; // In production, get from session
+                
+                // Load wallet data
+                const walletResponse = await fetch(`/api/mypace/wallet/${userId}`);
+                const walletData = await walletResponse.json();
+                
+                // Load referral data
+                const referralResponse = await fetch(`/api/mypace/referrals/${userId}`);
+                const referralData = await referralResponse.json();
+                
+                if (walletData.success) {
+                    displayWalletData(walletData, referralData);
+                } else {
+                    showError('Failed to load wallet data');
+                }
+                
+            } catch (error) {
+                console.error('Error loading wallet data:', error);
+                showError('Failed to connect to server');
+            }
+        }
+
+        function displayWalletData(walletData, referralData) {
+            // Hide loading
+            document.getElementById('loading').style.display = 'none';
+            
+            // Show wallet summary
+            const summary = document.getElementById('wallet-summary');
+            summary.style.display = 'block';
+            
+            // Update summary stats
+            const totalPrograms = walletData.wallet.length;
+            const totalPoints = walletData.wallet.reduce((sum, program) => sum + program.currentPoints, 0);
+            const totalRewards = walletData.totalUnredeemedRewards;
+            const referralCount = referralData.success ? referralData.referralsMade : 0;
+            
+            document.getElementById('total-programs').textContent = totalPrograms;
+            document.getElementById('total-points').textContent = totalPoints;
+            document.getElementById('total-rewards').textContent = totalRewards;
+            document.getElementById('referral-count').textContent = referralCount;
+            
+            // Display unredeemed rewards
+            if (totalRewards > 0) {
+                displayUnredeemedRewards(walletData.wallet);
+            }
+            
+            // Display loyalty cards
+            if (totalPrograms > 0) {
+                displayLoyaltyCards(walletData.wallet);
+            }
+            
+            // Display referral section
+            displayReferralSection(referralData);
+        }
+
+        function displayUnredeemedRewards(wallet) {
+            const section = document.getElementById('unredeemed-rewards');
+            const list = document.getElementById('unredeemed-list');
+            
+            list.innerHTML = '';
+            
+            wallet.forEach(program => {
+                if (program.unredeemedRewards && program.unredeemedRewards.length > 0) {
+                    program.unredeemedRewards.forEach(reward => {
+                        const rewardCard = document.createElement('div');
+                        rewardCard.className = 'reward-card';
+                        rewardCard.innerHTML = `
+                            <div class="reward-header">
+                                <div>
+                                    <div class="reward-title">${reward.rewardDescription}</div>
+                                    <div class="reward-business">at ${program.businessName}</div>
+                                </div>
+                                <button class="redeem-btn" onclick="redeemReward('${reward.id}')">
+                                    REDEEM Redeem Now
+                                </button>
+                            </div>
+                        `;
+                        list.appendChild(rewardCard);
+                    });
+                }
+            });
+            
+            section.style.display = 'block';
+        }
+
+        function displayLoyaltyCards(wallet) {
+            const section = document.getElementById('loyalty-cards');
+            const list = document.getElementById('loyalty-list');
+            
+            list.innerHTML = '';
+            
+            wallet.forEach(program => {
+                const progress = (program.currentPoints / program.rewardThreshold) * 100;
+                const pointsNeeded = program.rewardThreshold - program.currentPoints;
+                
+                const loyaltyCard = document.createElement('div');
+                loyaltyCard.className = 'loyalty-card';
+                loyaltyCard.innerHTML = `
+                    <div class="card-header">
+                        <div>
+                            <div class="business-name">${program.businessName}</div>
+                            <div class="program-name">${program.programName}</div>
+                        </div>
+                        <div class="points-badge">
+                            ${program.currentPoints}/${program.rewardThreshold} PTS
+                        </div>
+                    </div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progress}%"></div>
+                    </div>
+                    
+                    <div class="progress-text">
+                        ${pointsNeeded > 0 ? `${pointsNeeded} more points to earn reward` : 'Reward ready!'}
+                    </div>
+                    
+                    <div class="reward-info">
+                        <div>
+                            <div class="reward-description">${program.rewardDescription}</div>
+                            <div class="reward-value">${program.rewardValue || 'Exclusive reward'}</div>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(loyaltyCard);
+            });
+            
+            section.style.display = 'block';
+        }
+
+        function displayReferralSection(referralData) {
+            const section = document.getElementById('referral-section');
+            
+            // Generate referral code
+            generateReferralCode();
+            
+            if (referralData.success) {
+                document.getElementById('referral-bonus-points').textContent = referralData.totalBonusPoints;
+            }
+            
+            section.style.display = 'block';
+        }
+
+        async function generateReferralCode() {
+            try {
+                const response = await fetch('/api/mypace/referrals/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ referrerId: 'johndoe' })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('referral-code').textContent = data.referralCode;
+                }
+            } catch (error) {
+                console.error('Error generating referral code:', error);
+                document.getElementById('referral-code').textContent = 'REFJOH123ABC';
+            }
+        }
+
+        async function redeemReward(rewardId) {
+            try {
+                const response = await fetch('/api/mypace/rewards/redeem', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        rewardId: rewardId,
+                        userId: 'johndoe'
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showNotification('Reward redeemed successfully!', 'success');
+                    // Reload wallet data
+                    setTimeout(() => loadWalletData(), 1000);
+                } else {
+                    showNotification(data.error || 'Failed to redeem reward', 'error');
+                }
+            } catch (error) {
+                console.error('Error redeeming reward:', error);
+                showNotification('Failed to redeem reward', 'error');
+            }
+        }
+
+        function shareReferralCode() {
+            const code = document.getElementById('referral-code').textContent;
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Join MyPace with my referral code!',
+                    text: `Join me on MyPace and earn bonus points! Use my referral code: ${code}`,
+                    url: window.location.origin
+                });
+            } else {
+                copyReferralCode();
+            }
+        }
+
+        function copyReferralCode() {
+            const code = document.getElementById('referral-code').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                showNotification('Referral code copied to clipboard!', 'success');
+            });
+        }
+
+        function showError(message) {
+            document.getElementById('loading').innerHTML = `
+                <div style="color: #ef4444; padding: 20px;">
+                    <p>ERROR ${message}</p>
+                    <button onclick="loadWalletData()" style="margin-top: 16px; padding: 8px 16px; background: rgba(138, 43, 226, 0.2); border: 1px solid #8A2BE2; color: #8A2BE2; border-radius: 8px; cursor: pointer;">
+                        RETRY Retry Loading
+                    </button>
+                </div>
+            `;
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: ${type === 'success' ? 'rgba(34, 197, 94, 0.9)' : type === 'error' ? 'rgba(239, 68, 68, 0.9)' : 'rgba(138, 43, 226, 0.9)'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-weight: 600;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            loadWalletData();
+        });
+    </script>
+</body>
+</html>

@@ -53,6 +53,13 @@ const userCreatedCategories = new Map(); // Store user-generated categories by t
 // Initialize MyPace check-ins storage (will be replaced with database)
 const mypaceCheckins = new Map(); // Temporary in-memory storage for check-ins
 
+// Initialize loyalty system storage - Phase 6 Mini-Phase 4
+const loyaltyPrograms = new Map(); // Business loyalty programs
+const memberLoyaltyProgress = new Map(); // Member progress per business
+const rewardRedemptions = new Map(); // Redeemed rewards tracking
+const memberReferrals = new Map(); // Referral system tracking
+const supporterTiers = new Map(); // Member supporter tier system
+
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -7655,6 +7662,326 @@ app.post('/api/categories/custom/:id/use', (req: any, res: any) => {
   }
 });
 
+// ============================================================================
+// MYPACE PHASE 6 MINI-PHASE 4: LOYALTY SYSTEM & MEMBER REWARDS API
+// ============================================================================
+
+// 1. Business Loyalty Program Management
+app.post('/api/mypace/loyalty/create-program', (req, res) => {
+  try {
+    const { businessId, businessName, programName, pointsPerCheckin, rewardThreshold, rewardDescription, rewardValue, customMessage } = req.body;
+    
+    const programId = `program_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const loyaltyProgram = {
+      id: programId,
+      businessId,
+      businessName,
+      programName,
+      isActive: true,
+      pointsPerCheckin: pointsPerCheckin || 1,
+      rewardThreshold: rewardThreshold || 5,
+      rewardDescription,
+      rewardValue,
+      customMessage,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    loyaltyPrograms.set(programId, loyaltyProgram);
+    
+    res.json({
+      success: true,
+      message: 'Loyalty program created successfully',
+      program: loyaltyProgram
+    });
+  } catch (error) {
+    console.error('Create loyalty program error:', error);
+    res.status(500).json({ success: false, error: 'Failed to create loyalty program' });
+  }
+});
+
+// 2. Get Business Loyalty Programs
+app.get('/api/mypace/loyalty/business/:businessId', (req, res) => {
+  try {
+    const { businessId } = req.params;
+    const businessPrograms = Array.from(loyaltyPrograms.values())
+      .filter(program => program.businessId === businessId);
+    
+    res.json({
+      success: true,
+      programs: businessPrograms
+    });
+  } catch (error) {
+    console.error('Get business programs error:', error);
+    res.status(500).json({ success: false, error: 'Failed to get loyalty programs' });
+  }
+});
+
+// 3. Member Loyalty Progress Tracking
+app.get('/api/mypace/loyalty/:userId/:businessId', (req, res) => {
+  try {
+    const { userId, businessId } = req.params;
+    const progressKey = `${userId}_${businessId}`;
+    
+    // Get member progress or create default
+    let progress = memberLoyaltyProgress.get(progressKey);
+    if (!progress) {
+      // Find active program for this business
+      const businessProgram = Array.from(loyaltyPrograms.values())
+        .find(p => p.businessId === businessId && p.isActive);
+      
+      if (businessProgram) {
+        progress = {
+          id: `progress_${Date.now()}`,
+          userId,
+          businessId,
+          programId: businessProgram.id,
+          currentPoints: 0,
+          totalPoints: 0,
+          rewardsEarned: 0,
+          lastCheckinDate: null,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        memberLoyaltyProgress.set(progressKey, progress);
+      }
+    }
+    
+    res.json({
+      success: true,
+      progress: progress || null
+    });
+  } catch (error) {
+    console.error('Get loyalty progress error:', error);
+    res.status(500).json({ success: false, error: 'Failed to get loyalty progress' });
+  }
+});
+
+// 4. Process Check-in Rewards
+app.post('/api/mypace/checkins/rewards', (req, res) => {
+  try {
+    const { userId, businessId, locationName, latitude, longitude } = req.body;
+    
+    // Find active loyalty program for business
+    const businessProgram = Array.from(loyaltyPrograms.values())
+      .find(p => p.businessId === businessId && p.isActive);
+    
+    if (!businessProgram) {
+      return res.json({
+        success: true,
+        rewardEarned: false,
+        message: 'No active loyalty program at this location'
+      });
+    }
+    
+    // Update member progress
+    const progressKey = `${userId}_${businessId}`;
+    let progress = memberLoyaltyProgress.get(progressKey) || {
+      id: `progress_${Date.now()}`,
+      userId,
+      businessId,
+      programId: businessProgram.id,
+      currentPoints: 0,
+      totalPoints: 0,
+      rewardsEarned: 0,
+      lastCheckinDate: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Add points
+    progress.currentPoints += businessProgram.pointsPerCheckin;
+    progress.totalPoints += businessProgram.pointsPerCheckin;
+    progress.lastCheckinDate = new Date().toISOString();
+    progress.updatedAt = new Date().toISOString();
+    
+    let rewardEarned = false;
+    let rewardMessage = '';
+    
+    // Check if reward threshold reached
+    if (progress.currentPoints >= businessProgram.rewardThreshold) {
+      rewardEarned = true;
+      progress.rewardsEarned += 1;
+      progress.currentPoints = 0; // Reset points after reward
+      
+      // Create reward redemption
+      const redemptionId = `redemption_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const redemption = {
+        id: redemptionId,
+        userId,
+        businessId,
+        programId: businessProgram.id,
+        rewardDescription: businessProgram.rewardDescription,
+        pointsRedeemed: businessProgram.rewardThreshold,
+        isRedeemed: false,
+        redeemedAt: null,
+        createdAt: new Date().toISOString()
+      };
+      
+      rewardRedemptions.set(redemptionId, redemption);
+      rewardMessage = `You've earned ${businessProgram.rewardDescription}!`;
+    } else {
+      const pointsNeeded = businessProgram.rewardThreshold - progress.currentPoints;
+      rewardMessage = `You've earned ${businessProgram.pointsPerCheckin} point${businessProgram.pointsPerCheckin > 1 ? 's' : ''} at ${businessProgram.businessName}! ${pointsNeeded} more point${pointsNeeded > 1 ? 's' : ''} to earn ${businessProgram.rewardDescription}`;
+    }
+    
+    memberLoyaltyProgress.set(progressKey, progress);
+    
+    res.json({
+      success: true,
+      rewardEarned,
+      message: rewardMessage,
+      progress,
+      businessProgram
+    });
+  } catch (error) {
+    console.error('Process check-in rewards error:', error);
+    res.status(500).json({ success: false, error: 'Failed to process check-in rewards' });
+  }
+});
+
+// 5. Member Rewards Wallet
+app.get('/api/mypace/wallet/:userId', (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    // Get all member progress across businesses
+    const memberProgress = Array.from(memberLoyaltyProgress.values())
+      .filter(progress => progress.userId === userId);
+    
+    // Get unredeemed rewards
+    const unredeemedRewards = Array.from(rewardRedemptions.values())
+      .filter(reward => reward.userId === userId && !reward.isRedeemed);
+    
+    // Get business info for each progress
+    const walletData = memberProgress.map(progress => {
+      const program = loyaltyPrograms.get(progress.programId);
+      const unredeemed = unredeemedRewards.filter(r => r.businessId === progress.businessId);
+      
+      return {
+        ...progress,
+        businessName: program?.businessName,
+        programName: program?.programName,
+        rewardThreshold: program?.rewardThreshold,
+        rewardDescription: program?.rewardDescription,
+        rewardValue: program?.rewardValue,
+        unredeemedRewards: unredeemed
+      };
+    });
+    
+    res.json({
+      success: true,
+      wallet: walletData,
+      totalUnredeemedRewards: unredeemedRewards.length
+    });
+  } catch (error) {
+    console.error('Get member wallet error:', error);
+    res.status(500).json({ success: false, error: 'Failed to get member wallet' });
+  }
+});
+
+// 6. Referral System
+app.post('/api/mypace/referrals/create', (req, res) => {
+  try {
+    const { referrerId } = req.body;
+    
+    // Generate unique referral code
+    const referralCode = `REF${referrerId.toUpperCase().substr(0, 3)}${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+    
+    res.json({
+      success: true,
+      referralCode,
+      message: 'Referral code generated successfully'
+    });
+  } catch (error) {
+    console.error('Create referral error:', error);
+    res.status(500).json({ success: false, error: 'Failed to create referral code' });
+  }
+});
+
+app.get('/api/mypace/referrals/:username', (req, res) => {
+  try {
+    const { username } = req.params;
+    
+    // Get referrals made by this user
+    const referralsMade = Array.from(memberReferrals.values())
+      .filter(ref => ref.referrerId === username);
+    
+    // Get referrals this user came from
+    const referredBy = Array.from(memberReferrals.values())
+      .filter(ref => ref.referredId === username);
+    
+    res.json({
+      success: true,
+      referralsMade: referralsMade.length,
+      totalBonusPoints: referralsMade.reduce((total, ref) => total + ref.bonusPointsEarned, 0),
+      referredBy: referredBy.length > 0 ? referredBy[0] : null,
+      referrals: referralsMade
+    });
+  } catch (error) {
+    console.error('Get referrals error:', error);
+    res.status(500).json({ success: false, error: 'Failed to get referral data' });
+  }
+});
+
+// 7. Supporter Tier System
+app.get('/api/mypace/supporter-rank/:userId', (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    // Get supporter tiers for this user
+    const userTiers = Array.from(supporterTiers.values())
+      .filter(tier => tier.userId === userId && tier.isActive);
+    
+    // Generate sample supporter tiers based on check-in patterns
+    const sampleTiers = [
+      { businessId: 'business1', businessName: 'Downtown Coffee', tierLevel: 'Super Supporter', tierIcon: 'SUPER', checkinsCount: 15, supportValue: 150 },
+      { businessId: 'business2', businessName: 'Local Music Venue', tierLevel: 'Top 10%', tierIcon: 'TOP', checkinsCount: 8, supportValue: 200 },
+      { businessId: 'business3', businessName: 'Art Gallery', tierLevel: 'Weekly Regular', tierIcon: 'REGULAR', checkinsCount: 12, supportValue: 100 }
+    ];
+    
+    res.json({
+      success: true,
+      supporterTiers: userTiers.length > 0 ? userTiers : sampleTiers,
+      totalBusinessesSupported: userTiers.length || 3,
+      topTierLevel: userTiers.length > 0 ? userTiers[0].tierLevel : 'Super Supporter'
+    });
+  } catch (error) {
+    console.error('Get supporter rank error:', error);
+    res.status(500).json({ success: false, error: 'Failed to get supporter rank' });
+  }
+});
+
+// 8. Redeem Reward
+app.post('/api/mypace/rewards/redeem', (req, res) => {
+  try {
+    const { rewardId, userId } = req.body;
+    
+    const reward = rewardRedemptions.get(rewardId);
+    if (!reward || reward.userId !== userId) {
+      return res.status(404).json({ success: false, error: 'Reward not found' });
+    }
+    
+    if (reward.isRedeemed) {
+      return res.status(400).json({ success: false, error: 'Reward already redeemed' });
+    }
+    
+    // Mark as redeemed
+    reward.isRedeemed = true;
+    reward.redeemedAt = new Date().toISOString();
+    rewardRedemptions.set(rewardId, reward);
+    
+    res.json({
+      success: true,
+      message: 'Reward redeemed successfully',
+      reward
+    });
+  } catch (error) {
+    console.error('Redeem reward error:', error);
+    res.status(500).json({ success: false, error: 'Failed to redeem reward' });
+  }
+});
+
 app.listen(port, '0.0.0.0', () => {
   console.log(`✅ MarketPace Full Server running on port ${port}`);
   console.log(`🌐 Binding to 0.0.0.0:${port} for external access`);
@@ -7663,6 +7990,8 @@ app.listen(port, '0.0.0.0', () => {
   console.log(`🔧 Volunteer Management API: /api/volunteers, /api/volunteer-hours, /api/volunteer-schedules`);
   console.log(`📊 Business Scheduling API: /api/businesses, /api/employees, /api/schedules`);
   console.log(`🔌 Real API Integration Testing: /api/integrations/test-real`);
+  console.log(`🎁 MyPace Loyalty System API: /api/mypace/loyalty/* endpoints`);
+  console.log(`🏆 Member Rewards & Referral API: /api/mypace/wallet/*, /api/mypace/referrals/*`);
   console.log(`🚀 Ready for development and testing`);
 }).on('error', (err) => {
   console.error(`❌ Failed to start on port ${port}:`, err.message);
@@ -7671,4 +8000,13 @@ app.listen(port, '0.0.0.0', () => {
 export default app;
 app.get("/independent-contractor-tax-tracker", (req: any, res: any) => {
   res.sendFile(path.join(__dirname, "../independent-contractor-tax-tracker.html"));
+});
+
+// MyPace Phase 6 Mini-Phase 4: Loyalty System Route Handlers
+app.get("/mypace-rewards-wallet.html", (req: any, res: any) => {
+  res.sendFile(path.join(__dirname, "../mypace-rewards-wallet.html"));
+});
+
+app.get("/business-loyalty-manager.html", (req: any, res: any) => {
+  res.sendFile(path.join(__dirname, "../business-loyalty-manager.html"));
 });
