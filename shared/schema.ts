@@ -80,6 +80,55 @@ export const mypaceCheckinLikes = pgTable("mypace_checkin_likes", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// MyPace user badges for gamification
+export const mypaceBadges = pgTable("mypace_badges", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name").notNull(), // "5x at Joe's Coffee", "Top Local Fan", "Explorer"
+  description: text("description").notNull(),
+  badgeType: varchar("badge_type").notNull(), // "frequency", "support", "exploration", "milestone"
+  icon: varchar("icon").notNull(), // emoji or icon identifier
+  rarity: varchar("rarity").default("common"), // common, rare, epic, legendary
+  criteria: jsonb("criteria"), // JSON object with badge requirements
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// MyPace user badge achievements
+export const mypaceUserBadges = pgTable("mypace_user_badges", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  badgeId: uuid("badge_id").notNull().references(() => mypaceBadges.id),
+  progress: integer("progress").default(0), // current progress towards badge
+  isUnlocked: boolean("is_unlocked").default(false),
+  unlockedAt: timestamp("unlocked_at"),
+  relatedLocation: varchar("related_location"), // location name for location-specific badges
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// MyPace visit statistics for "Places I've Paced"
+export const mypaceVisitStats = pgTable("mypace_visit_stats", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  locationName: varchar("location_name").notNull(),
+  visitCount: integer("visit_count").default(1),
+  totalFanSupport: integer("total_fan_support").default(0), // sum of all support given at this location
+  totalRatingsLeft: integer("total_ratings_left").default(0),
+  averageRating: real("average_rating").default(0),
+  firstVisitAt: timestamp("first_visit_at").defaultNow(),
+  lastVisitAt: timestamp("last_visit_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// MyPace milestones for major achievements
+export const mypaceMilestones = pgTable("mypace_milestones", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  milestoneType: varchar("milestone_type").notNull(), // "total_checkins", "unique_locations", "fan_support_given"
+  currentValue: integer("current_value").default(0),
+  milestoneTier: integer("milestone_tier").default(1), // 1, 5, 10, 25, 50, 100, etc.
+  lastMilestoneReached: integer("last_milestone_reached").default(0),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Business profiles for Pro members
 export const businesses = pgTable("businesses", {
   id: uuid("id").primaryKey().defaultRandom(),

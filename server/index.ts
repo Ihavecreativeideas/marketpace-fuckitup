@@ -3175,6 +3175,327 @@ app.post('/api/mypace/checkin/:id/like', async (req, res) => {
   }
 });
 
+// MyPace Profile Integration & Gamification API Endpoints
+
+// Get user's "Places I've Paced" profile section
+app.get('/api/mypace/profile/:userId/places', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { sortBy = 'most_visited', limit = 20 } = req.query;
+
+    // Query visit statistics with different sorting options
+    const query = `
+      SELECT 
+        location_name,
+        visit_count,
+        total_fan_support,
+        total_ratings_left,
+        average_rating,
+        first_visit_at,
+        last_visit_at
+      FROM mypace_visit_stats 
+      WHERE user_id = $1
+      ORDER BY ${sortBy === 'most_visited' ? 'visit_count DESC' : 
+                 sortBy === 'fan_support' ? 'total_fan_support DESC' :
+                 sortBy === 'ratings_left' ? 'total_ratings_left DESC' : 
+                 'last_visit_at DESC'}
+      LIMIT $2
+    `;
+
+    // For demo purposes, return sample data
+    const samplePlaces = [
+      {
+        location_name: "Joe's Coffee Shop",
+        visit_count: 12,
+        total_fan_support: 45,
+        total_ratings_left: 8,
+        average_rating: 4.8,
+        first_visit_at: "2024-06-15T10:30:00Z",
+        last_visit_at: "2024-07-23T08:15:00Z"
+      },
+      {
+        location_name: "Downtown Music Venue",
+        visit_count: 7,
+        total_fan_support: 25,
+        total_ratings_left: 6,
+        average_rating: 4.5,
+        first_visit_at: "2024-07-01T19:00:00Z",
+        last_visit_at: "2024-07-20T21:30:00Z"
+      },
+      {
+        location_name: "Local Art Gallery",
+        visit_count: 5,
+        total_fan_support: 15,
+        total_ratings_left: 4,
+        average_rating: 5.0,
+        first_visit_at: "2024-06-20T14:00:00Z",
+        last_visit_at: "2024-07-18T16:45:00Z"
+      }
+    ];
+
+    res.json({
+      success: true,
+      places: samplePlaces,
+      total: samplePlaces.length,
+      sortBy
+    });
+
+  } catch (error: any) {
+    console.error('Error fetching user places:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get user's badges and achievements
+app.get('/api/mypace/profile/:userId/badges', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Query user badges with badge information
+    const query = `
+      SELECT 
+        ub.id,
+        ub.progress,
+        ub.is_unlocked,
+        ub.unlocked_at,
+        ub.related_location,
+        b.name,
+        b.description,
+        b.badge_type,
+        b.icon,
+        b.rarity,
+        b.criteria
+      FROM mypace_user_badges ub
+      JOIN mypace_badges b ON ub.badge_id = b.id
+      WHERE ub.user_id = $1
+      ORDER BY ub.is_unlocked DESC, b.rarity DESC, ub.progress DESC
+    `;
+
+    // For demo purposes, return sample badges
+    const sampleBadges = [
+      {
+        id: "badge_1",
+        name: "Regular at Joe's Coffee",
+        description: "Visited Joe's Coffee Shop 5 times",
+        badge_type: "frequency",
+        icon: "⭐",
+        rarity: "common",
+        progress: 12,
+        is_unlocked: true,
+        unlocked_at: "2024-07-10T15:30:00Z",
+        related_location: "Joe's Coffee Shop"
+      },
+      {
+        id: "badge_2",
+        name: "Local Supporter",
+        description: "Gave fan support 10 times",
+        badge_type: "support",
+        icon: "💝",
+        rarity: "common",
+        progress: 15,
+        is_unlocked: true,
+        unlocked_at: "2024-07-15T12:00:00Z",
+        related_location: null
+      },
+      {
+        id: "badge_3",
+        name: "Superfan",
+        description: "Visited the same location 10 times",
+        badge_type: "frequency",
+        icon: "🌟",
+        rarity: "rare",
+        progress: 12,
+        is_unlocked: true,
+        unlocked_at: "2024-07-20T18:45:00Z",
+        related_location: "Joe's Coffee Shop"
+      },
+      {
+        id: "badge_4",
+        name: "Community Champion",
+        description: "Gave fan support 50 times",
+        badge_type: "support",
+        icon: "🏆",
+        rarity: "rare",
+        progress: 35,
+        is_unlocked: false,
+        unlocked_at: null,
+        related_location: null
+      }
+    ];
+
+    const unlockedBadges = sampleBadges.filter(b => b.is_unlocked);
+    const inProgressBadges = sampleBadges.filter(b => !b.is_unlocked);
+
+    res.json({
+      success: true,
+      badges: {
+        unlocked: unlockedBadges,
+        inProgress: inProgressBadges,
+        total: sampleBadges.length,
+        unlockedCount: unlockedBadges.length
+      }
+    });
+
+  } catch (error: any) {
+    console.error('Error fetching user badges:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get user's milestones and achievements
+app.get('/api/mypace/profile/:userId/milestones', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // For demo purposes, return sample milestone data
+    const sampleMilestones = [
+      {
+        milestone_type: "total_checkins",
+        current_value: 42,
+        milestone_tier: 50,
+        last_milestone_reached: 25,
+        next_milestone: 50,
+        progress_percentage: 84
+      },
+      {
+        milestone_type: "unique_locations",
+        current_value: 18,
+        milestone_tier: 25,
+        last_milestone_reached: 10,
+        next_milestone: 25,
+        progress_percentage: 72
+      },
+      {
+        milestone_type: "fan_support_given",
+        current_value: 85,
+        milestone_tier: 100,
+        last_milestone_reached: 50,
+        next_milestone: 100,
+        progress_percentage: 85
+      }
+    ];
+
+    res.json({
+      success: true,
+      milestones: sampleMilestones
+    });
+
+  } catch (error: any) {
+    console.error('Error fetching user milestones:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Export user's check-in history (for creators, business owners, tax purposes)
+app.get('/api/mypace/profile/:userId/export', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { format = 'json', dateFrom, dateTo } = req.query;
+
+    // Build query with date filtering
+    let whereClause = "WHERE user_id = $1";
+    const params = [userId];
+    
+    if (dateFrom) {
+      whereClause += " AND created_at >= $2";
+      params.push(dateFrom as string);
+    }
+    
+    if (dateTo) {
+      whereClause += ` AND created_at <= $${params.length + 1}`;
+      params.push(dateTo as string);
+    }
+
+    // For demo purposes, return sample export data
+    const exportData = {
+      user_id: userId,
+      export_date: new Date().toISOString(),
+      date_range: {
+        from: dateFrom || "2024-01-01",
+        to: dateTo || new Date().toISOString().split('T')[0]
+      },
+      summary: {
+        total_checkins: 42,
+        unique_locations: 18,
+        total_fan_support_given: 85,
+        total_ratings_left: 28,
+        badges_earned: 8
+      },
+      checkins: [
+        {
+          id: "checkin_1",
+          location_name: "Joe's Coffee Shop",
+          latitude: 40.7128,
+          longitude: -74.0060,
+          caption: "Great morning coffee!",
+          rating: 5,
+          review: "Best latte in town",
+          support_target: "Local Coffee Business",
+          likes: 12,
+          created_at: "2024-07-23T08:15:00Z"
+        },
+        {
+          id: "checkin_2", 
+          location_name: "Downtown Music Venue",
+          latitude: 40.7589,
+          longitude: -73.9851,
+          caption: "Amazing live jazz tonight",
+          rating: 5,
+          review: "Incredible atmosphere and talented musicians",
+          support_target: "Live Music Venue",
+          likes: 8,
+          created_at: "2024-07-22T21:30:00Z"
+        }
+      ],
+      places_visited: [
+        {
+          location_name: "Joe's Coffee Shop",
+          visit_count: 12,
+          total_fan_support: 45,
+          total_ratings_left: 8,
+          average_rating: 4.8,
+          first_visit: "2024-06-15T10:30:00Z",
+          last_visit: "2024-07-23T08:15:00Z"
+        }
+      ]
+    };
+
+    if (format === 'csv') {
+      // Convert to CSV format
+      let csv = "Date,Location,Rating,Review,Support Target,Likes\n";
+      exportData.checkins.forEach(checkin => {
+        csv += `"${checkin.created_at}","${checkin.location_name}","${checkin.rating}","${checkin.review || ''}","${checkin.support_target || ''}","${checkin.likes}"\n`;
+      });
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="mypace-history-${userId}.csv"`);
+      return res.send(csv);
+    }
+
+    res.json({
+      success: true,
+      export: exportData,
+      format
+    });
+
+  } catch (error: any) {
+    console.error('Error exporting user data:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 app.get('/api/schedules/:businessId', async (req, res) => {
   try {
     const { businessId } = req.params;
