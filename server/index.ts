@@ -3496,6 +3496,105 @@ app.get('/api/mypace/profile/:userId/export', async (req, res) => {
   }
 });
 
+// Public Profile API - Phase 4-B Feature
+app.get('/api/mypace/profile/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+    
+    // Mock profile data - in production this would come from database
+    const mockProfiles = {
+      'sarah': {
+        username: 'SarahM',
+        avatar: 'SM',
+        bio: 'Coffee enthusiast & local business supporter. Love exploring new places in our community!',
+        totalCheckins: 47,
+        businessesSupported: ['Local Coffee Shop', 'Main Street Bakery', 'Downtown Music Venue'],
+        eventsAttended: ['Community Market', 'Art Walk', 'Music Festival'],
+        recentCheckins: [
+          {
+            locationName: 'Local Coffee Shop',
+            caption: 'Great coffee and atmosphere for morning work sessions!',
+            timestamp: '2 hours ago',
+            likes: 12,
+            supportTag: 'Supporting @JoesCoffee'
+          },
+          {
+            locationName: 'Main Street Bakery',
+            caption: 'Fresh croissants every morning - my favorite local spot!',
+            timestamp: '1 day ago',
+            likes: 8,
+            supportTag: 'Supporting local bakery'
+          }
+        ]
+      },
+      'mike': {
+        username: 'MikeT',
+        avatar: 'MT',
+        bio: 'Music lover and event photographer. Supporting local artists and venues.',
+        totalCheckins: 32,
+        businessesSupported: ['Downtown Music Venue', 'Local Art Gallery'],
+        eventsAttended: ['DJ Nova Set', 'Art Exhibition'],
+        recentCheckins: [
+          {
+            locationName: 'Downtown Music Venue',
+            caption: 'Incredible live music tonight! This venue always brings the best talent.',
+            timestamp: '4 hours ago',
+            likes: 28,
+            supportTag: 'Here for @djNova\'s set'
+          }
+        ]
+      }
+    };
+
+    const profile = mockProfiles[username.toLowerCase()];
+    
+    if (profile) {
+      res.json({
+        success: true,
+        profile: profile
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: 'Profile not found'
+      });
+    }
+
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to fetch profile' 
+    });
+  }
+});
+
+// Support Leaderboard API - Phase 4-B Feature
+app.get('/api/mypace/support-leaderboard', async (req, res) => {
+  try {
+    // Mock leaderboard data - in production this would be calculated from database
+    const mockLeaderboard = [
+      { name: "Joe's Coffee Shop", category: 'COFFEE', supportCount: 47 },
+      { name: "DJ Nova", category: 'MUSIC', supportCount: 32 },
+      { name: "Main Street Bakery", category: 'FOOD', supportCount: 28 },
+      { name: "Local Art Gallery", category: 'ART', supportCount: 25 },
+      { name: "Downtown Music Venue", category: 'VENUE', supportCount: 22 }
+    ];
+
+    res.json({
+      success: true,
+      leaderboard: mockLeaderboard
+    });
+
+  } catch (error) {
+    console.error('Error fetching support leaderboard:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to fetch support leaderboard' 
+    });
+  }
+});
+
 app.get('/api/schedules/:businessId', async (req, res) => {
   try {
     const { businessId } = req.params;
@@ -3979,6 +4078,11 @@ app.get('/independent-contractor-earnings-tracker', (req, res) => {
 // Messages Route
 app.get('/messages', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'messages.html'));
+});
+
+// Public profile route
+app.get('/profile.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public-profile.html'));
 });
 
 // Independent Contractor Invitation API
