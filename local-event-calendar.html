@@ -275,48 +275,167 @@
             background: rgba(6, 182, 212, 0.2);
         }
 
-        .calendar-selector {
+        .tiny-calendar-widget {
+            margin: 30px 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            margin-bottom: 30px;
-            background: rgba(0, 0, 0, 0.85);
-            border-radius: 25px;
-            padding: 20px;
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
+            position: relative;
         }
 
-        .date-dropdown {
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(0, 255, 255, 0.4);
-            color: #00ffff;
-            padding: 12px 20px;
-            border-radius: 20px;
-            font-size: 1.1rem;
+        .calendar-toggle {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #64ffda;
+            border-radius: 25px;
+            color: #64ffda;
+            padding: 15px 30px;
+            font-size: 16px;
             font-weight: 600;
+            min-width: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
             cursor: pointer;
-            outline: none;
-            min-width: 200px;
+        }
+
+        .calendar-toggle:hover {
+            background: rgba(100, 255, 218, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(100, 255, 218, 0.3);
+        }
+
+        .calendar-icon {
+            background: linear-gradient(45deg, #64ffda, #00bcd4);
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .selected-date-display {
+            flex: 1;
             text-align: center;
+            font-size: 16px;
+        }
+
+        .expand-arrow {
+            font-size: 14px;
+            transition: transform 0.3s ease;
+        }
+
+        .expand-arrow.expanded {
+            transform: rotate(180deg);
+        }
+
+        .tiny-calendar-popup {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #64ffda;
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 20px 40px rgba(100, 255, 218, 0.2);
+            z-index: 1000;
+            min-width: 280px;
+            margin-top: 10px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .nav-btn {
+            background: rgba(100, 255, 218, 0.2);
+            border: 1px solid #64ffda;
+            border-radius: 50%;
+            color: #64ffda;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
             transition: all 0.3s ease;
         }
 
-        .date-dropdown:hover {
-            border-color: #00ffff;
-            background: rgba(0, 255, 255, 0.1);
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        .nav-btn:hover {
+            background: rgba(100, 255, 218, 0.4);
+            transform: scale(1.1);
         }
 
-        .date-dropdown:focus {
-            border-color: #00ffff;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        .month-year {
+            color: #64ffda;
+            font-weight: bold;
+            font-size: 16px;
         }
 
-        .date-dropdown option {
-            background: rgba(0, 0, 0, 0.9);
-            color: #00ffff;
-            padding: 10px;
+        .calendar-days-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 10px;
+        }
+
+        .day-header {
+            text-align: center;
+            color: #64ffda;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 5px;
+        }
+
+        .calendar-days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+        }
+
+        .calendar-day {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #999;
+        }
+
+        .calendar-day.current-month {
+            color: #fff;
+        }
+
+        .calendar-day.has-events {
+            background: rgba(100, 255, 218, 0.2);
+            color: #64ffda;
+            font-weight: bold;
+        }
+
+        .calendar-day.selected {
+            background: linear-gradient(45deg, #64ffda, #00bcd4);
+            color: #000;
+            font-weight: bold;
+        }
+
+        .calendar-day.today {
+            border: 2px solid #64ffda;
+        }
+
+        .calendar-day:hover {
+            background: rgba(100, 255, 218, 0.3);
+            transform: scale(1.1);
         }
 
         .selected-date-events {
@@ -866,40 +985,34 @@
             </div>
         </div>
 
-        <div class="calendar-selector">
-            <select class="date-dropdown" id="dateDropdown" onchange="updateSelectedDate()">
-                <option value="2025-07-01">July 1, 2025 - Tuesday</option>
-                <option value="2025-07-02">July 2, 2025 - Wednesday</option>
-                <option value="2025-07-03">July 3, 2025 - Thursday</option>
-                <option value="2025-07-04">July 4, 2025 - Friday</option>
-                <option value="2025-07-05">July 5, 2025 - Saturday</option>
-                <option value="2025-07-06">July 6, 2025 - Sunday</option>
-                <option value="2025-07-07">July 7, 2025 - Monday</option>
-                <option value="2025-07-08">July 8, 2025 - Tuesday</option>
-                <option value="2025-07-09">July 9, 2025 - Wednesday</option>
-                <option value="2025-07-10">July 10, 2025 - Thursday</option>
-                <option value="2025-07-11">July 11, 2025 - Friday</option>
-                <option value="2025-07-12">July 12, 2025 - Saturday</option>
-                <option value="2025-07-13">July 13, 2025 - Sunday</option>
-                <option value="2025-07-14">July 14, 2025 - Monday</option>
-                <option value="2025-07-15">July 15, 2025 - Tuesday</option>
-                <option value="2025-07-16">July 16, 2025 - Wednesday</option>
-                <option value="2025-07-17">July 17, 2025 - Thursday</option>
-                <option value="2025-07-18">July 18, 2025 - Friday</option>
-                <option value="2025-07-19">July 19, 2025 - Saturday</option>
-                <option value="2025-07-20" selected>July 20, 2025 - Sunday (Today)</option>
-                <option value="2025-07-21">July 21, 2025 - Monday</option>
-                <option value="2025-07-22">July 22, 2025 - Tuesday</option>
-                <option value="2025-07-23">July 23, 2025 - Wednesday</option>
-                <option value="2025-07-24">July 24, 2025 - Thursday</option>
-                <option value="2025-07-25">July 25, 2025 - Friday</option>
-                <option value="2025-07-26">July 26, 2025 - Saturday</option>
-                <option value="2025-07-27">July 27, 2025 - Sunday</option>
-                <option value="2025-07-28">July 28, 2025 - Monday</option>
-                <option value="2025-07-29">July 29, 2025 - Tuesday</option>
-                <option value="2025-07-30">July 30, 2025 - Wednesday</option>
-                <option value="2025-07-31">July 31, 2025 - Thursday</option>
-            </select>
+        <div class="tiny-calendar-widget">
+            <button class="calendar-toggle" onclick="toggleTinyCalendar()">
+                <span class="calendar-icon">CAL</span>
+                <span class="selected-date-display" id="selectedDateDisplay">July 24, 2025</span>
+                <span class="expand-arrow" id="expandArrow">▼</span>
+            </button>
+            
+            <div class="tiny-calendar-popup" id="tinyCalendarPopup" style="display: none;">
+                <div class="calendar-header">
+                    <button class="nav-btn" onclick="navigateMonth(-1)">‹</button>
+                    <span class="month-year" id="monthYear">July 2025</span>
+                    <button class="nav-btn" onclick="navigateMonth(1)">›</button>
+                </div>
+                
+                <div class="calendar-days-header">
+                    <div class="day-header">S</div>
+                    <div class="day-header">M</div>
+                    <div class="day-header">T</div>
+                    <div class="day-header">W</div>
+                    <div class="day-header">T</div>
+                    <div class="day-header">F</div>
+                    <div class="day-header">S</div>
+                </div>
+                
+                <div class="calendar-days-grid" id="calendarDaysGrid">
+                    <!-- Calendar days will be generated here -->
+                </div>
+            </div>
         </div>
 
         <div class="selected-date-events" id="selectedDateEvents">
@@ -2284,9 +2397,91 @@
             generateCalendar();
         }
 
-        function updateSelectedDate() {
-            const selectedDate = document.getElementById('dateDropdown').value;
-            loadEventsForDate(selectedDate);
+        let currentCalendarDate = new Date();
+        let selectedDate = '2025-07-24'; // Default to today
+
+        function toggleTinyCalendar() {
+            const popup = document.getElementById('tinyCalendarPopup');
+            const arrow = document.getElementById('expandArrow');
+            
+            if (popup.style.display === 'none') {
+                popup.style.display = 'block';
+                arrow.classList.add('expanded');
+                generateTinyCalendar();
+            } else {
+                popup.style.display = 'none';
+                arrow.classList.remove('expanded');
+            }
+        }
+
+        function navigateMonth(direction) {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
+            generateTinyCalendar();
+        }
+
+        function generateTinyCalendar() {
+            const monthYear = document.getElementById('monthYear');
+            const grid = document.getElementById('calendarDaysGrid');
+            
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            
+            monthYear.textContent = currentCalendarDate.toLocaleDateString('en-US', { 
+                month: 'long', 
+                year: 'numeric' 
+            });
+            
+            // Clear grid
+            grid.innerHTML = '';
+            
+            // Get first day of month and number of days
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+            
+            // Generate 42 days (6 weeks)
+            for (let i = 0; i < 42; i++) {
+                const currentDate = new Date(startDate);
+                currentDate.setDate(startDate.getDate() + i);
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = currentDate.getDate();
+                
+                const dateStr = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
+                
+                // Add classes
+                if (currentDate.getMonth() === month) {
+                    dayElement.classList.add('current-month');
+                }
+                
+                if (dateStr === selectedDate) {
+                    dayElement.classList.add('selected');
+                }
+                
+                if (dateStr === '2025-07-24') { // Today
+                    dayElement.classList.add('today');
+                }
+                
+                // Check if day has events
+                const hasEvents = events.some(event => event.date === dateStr);
+                if (hasEvents) {
+                    dayElement.classList.add('has-events');
+                }
+                
+                // Add click handler
+                dayElement.onclick = () => selectDate(dateStr);
+                
+                grid.appendChild(dayElement);
+            }
+        }
+
+        function selectDate(dateStr) {
+            selectedDate = dateStr;
+            document.getElementById('selectedDateDisplay').textContent = formatDateForDisplay(dateStr);
+            toggleTinyCalendar(); // Close calendar
+            loadEventsForDate(dateStr);
         }
 
         function loadEventsForDate(selectedDate) {
@@ -2330,13 +2525,25 @@
             });
         }
 
+        // Close calendar when clicking outside
+        document.addEventListener('click', function(event) {
+            const widget = document.querySelector('.tiny-calendar-widget');
+            const popup = document.getElementById('tinyCalendarPopup');
+            
+            if (widget && !widget.contains(event.target) && popup.style.display === 'block') {
+                popup.style.display = 'none';
+                document.getElementById('expandArrow').classList.remove('expanded');
+            }
+        });
+
         // Initialize calendar
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Calendar page loaded with community theme');
             createParticles();
-            loadEvents();
-            // Load events for the initially selected date (today)
-            updateSelectedDate();
+            // Initialize the tiny calendar with today's date
+            selectedDate = '2025-07-24';
+            document.getElementById('selectedDateDisplay').textContent = formatDateForDisplay(selectedDate);
+            loadEventsForDate(selectedDate);
         });
 
         function isCurrentDay(eventDate) {
