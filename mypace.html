@@ -13,8 +13,8 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #3d0b1a 0%, #692d1b 30%, #85284c 60%, #c1466b 100%);
-            color: #e2e8f0;
+            background: radial-gradient(circle at center, #001122 0%, #002244 30%, #003366 60%, #004477 100%);
+            color: #00ffaa;
             min-height: 100vh;
             padding-top: 80px;
             padding-bottom: 80px;
@@ -22,8 +22,8 @@
             overflow-x: hidden;
         }
 
-        /* Floating Particles */
-        .particles {
+        /* Sonar Radar Background */
+        .sonar-background {
             position: fixed;
             top: 0;
             left: 0;
@@ -31,33 +31,103 @@
             height: 100%;
             pointer-events: none;
             z-index: 1;
+            overflow: hidden;
         }
 
-        .particle {
+        .radar-sweep {
             position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(255, 147, 197, 0.8);
+            top: 50%;
+            left: 50%;
+            width: 800px;
+            height: 800px;
+            margin: -400px 0 0 -400px;
             border-radius: 50%;
-            animation: float 8s infinite ease-in-out;
+            border: 2px solid rgba(0, 255, 170, 0.3);
+            animation: radarSpin 4s linear infinite;
         }
 
-        @keyframes float {
+        .radar-sweep::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 50%;
+            width: 2px;
+            height: 402px;
+            background: linear-gradient(to bottom, #00ffaa 0%, rgba(0, 255, 170, 0.1) 100%);
+            transform-origin: bottom center;
+            animation: sweepRotate 4s linear infinite;
+        }
+
+        .radar-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 255, 170, 0.2);
+            animation: radarPulse 2s ease-in-out infinite;
+        }
+
+        .radar-ring:nth-child(1) {
+            width: 200px;
+            height: 200px;
+            margin: -100px 0 0 -100px;
+            animation-delay: 0s;
+        }
+
+        .radar-ring:nth-child(2) {
+            width: 400px;
+            height: 400px;
+            margin: -200px 0 0 -200px;
+            animation-delay: 0.5s;
+        }
+
+        .radar-ring:nth-child(3) {
+            width: 600px;
+            height: 600px;
+            margin: -300px 0 0 -300px;
+            animation-delay: 1s;
+        }
+
+        .sonar-dot {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #00ffaa;
+            border-radius: 50%;
+            animation: sonarBlip 3s ease-in-out infinite;
+            box-shadow: 0 0 10px #00ffaa;
+        }
+
+        @keyframes radarSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes sweepRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes radarPulse {
             0%, 100% { 
-                transform: translateY(0px) translateX(0px) rotate(0deg); 
-                opacity: 0.4; 
-            }
-            25% { 
-                transform: translateY(-30px) translateX(10px) rotate(90deg); 
-                opacity: 0.8; 
+                opacity: 0.3;
+                transform: scale(1);
             }
             50% { 
-                transform: translateY(-15px) translateX(-10px) rotate(180deg); 
-                opacity: 1; 
+                opacity: 0.8;
+                transform: scale(1.05);
             }
-            75% { 
-                transform: translateY(-25px) translateX(5px) rotate(270deg); 
-                opacity: 0.6; 
+        }
+
+        @keyframes sonarBlip {
+            0%, 80%, 100% { 
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            40% { 
+                opacity: 1;
+                transform: scale(1.5);
+                box-shadow: 0 0 20px #00ffaa;
             }
         }
 
@@ -68,10 +138,11 @@
             left: 0;
             right: 0;
             z-index: 1000;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 17, 34, 0.95);
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(138, 43, 226, 0.3);
+            border-bottom: 1px solid rgba(0, 255, 170, 0.3);
             padding: 15px 20px;
+            box-shadow: 0 2px 20px rgba(0, 255, 170, 0.1);
         }
 
         .header-content {
@@ -85,10 +156,11 @@
         .logo {
             font-size: 1.5rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #8A2BE2, #FF69B4);
+            background: linear-gradient(135deg, #00ffaa, #00ccff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            text-shadow: 0 0 20px rgba(0, 255, 170, 0.5);
         }
 
         .header-icons {
@@ -100,19 +172,22 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: rgba(138, 43, 226, 0.2);
-            border: 1px solid rgba(138, 43, 226, 0.4);
+            background: rgba(0, 255, 170, 0.1);
+            border: 1px solid rgba(0, 255, 170, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            color: #8A2BE2;
+            color: #00ffaa;
+            font-size: 12px;
+            font-weight: bold;
         }
 
         .header-icon:hover {
-            background: rgba(138, 43, 226, 0.3);
-            box-shadow: 0 0 15px rgba(138, 43, 226, 0.4);
+            background: rgba(0, 255, 170, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 170, 0.6);
+            transform: scale(1.1);
         }
 
         /* Main Content */
@@ -129,83 +204,161 @@
             text-align: center;
             margin-bottom: 30px;
             padding: 30px 20px;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 17, 34, 0.8);
             border-radius: 15px;
-            border: 1px solid rgba(138, 43, 226, 0.3);
+            border: 1px solid rgba(0, 255, 170, 0.4);
             backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(0, 255, 170, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mypace-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 98px,
+                rgba(0, 255, 170, 0.1) 100px
+            );
+            animation: scanlines 2s linear infinite;
         }
 
         .mypace-title {
             font-size: 2.5rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #8A2BE2, #FF69B4, #FF1493);
+            background: linear-gradient(135deg, #00ffaa, #00ccff, #0099ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: 10px;
-            text-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+            text-shadow: 0 0 30px rgba(0, 255, 170, 0.8);
+            position: relative;
+            z-index: 2;
         }
 
         .mypace-slogan {
             font-size: 1.2rem;
             font-weight: 600;
-            color: #e2e8f0;
+            color: #00ffaa;
             font-style: italic;
             margin-top: 10px;
-            text-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
+            text-shadow: 0 0 15px rgba(0, 255, 170, 0.6);
+            position: relative;
+            z-index: 2;
+        }
+
+        @keyframes scanlines {
+            0% { transform: translateX(-100px); }
+            100% { transform: translateX(100px); }
         }
 
         /* Check-In Button */
         .checkin-section {
             margin: 30px 0;
             text-align: center;
+            position: relative;
         }
 
         .checkin-btn {
-            background: linear-gradient(135deg, #8A2BE2, #FF69B4);
-            border: none;
-            border-radius: 12px;
-            padding: 20px 40px;
-            font-size: 1.3rem;
+            background: radial-gradient(circle, #00ffaa, #00cc88);
+            border: 2px solid #00ffaa;
+            border-radius: 50px;
+            padding: 25px 50px;
+            font-size: 1.4rem;
             font-weight: 700;
-            color: white;
+            color: #001122;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(138, 43, 226, 0.4);
+            box-shadow: 
+                0 0 20px rgba(0, 255, 170, 0.6),
+                inset 0 0 20px rgba(0, 255, 170, 0.1);
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             position: relative;
             overflow: hidden;
+            animation: sonarPulse 2s ease-in-out infinite;
         }
 
         .checkin-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(138, 43, 226, 0.6);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 
+                0 0 40px rgba(0, 255, 170, 0.8),
+                0 8px 25px rgba(0, 255, 170, 0.4),
+                inset 0 0 30px rgba(0, 255, 170, 0.2);
+            animation: sonarDetect 0.5s ease-in-out;
         }
 
         .checkin-btn::before {
-            content: '';
+            content: 'RADAR';
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            font-weight: 500;
+            color: #00ffaa;
+            opacity: 0.7;
         }
 
-        .checkin-btn:hover::before {
-            left: 100%;
+        .checkin-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            border: 2px solid #00ffaa;
+            border-radius: 50px;
+            transform: translate(-50%, -50%) scale(1);
+            animation: sonarRipple 2s ease-out infinite;
+            opacity: 0;
+        }
+
+        @keyframes sonarPulse {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 20px rgba(0, 255, 170, 0.6),
+                    inset 0 0 20px rgba(0, 255, 170, 0.1);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 30px rgba(0, 255, 170, 0.8),
+                    inset 0 0 30px rgba(0, 255, 170, 0.2);
+            }
+        }
+
+        @keyframes sonarDetect {
+            0% { transform: translateY(-3px) scale(1.05); }
+            50% { transform: translateY(-3px) scale(1.1); }
+            100% { transform: translateY(-3px) scale(1.05); }
+        }
+
+        @keyframes sonarRipple {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(2);
+                opacity: 0;
+            }
         }
 
         /* Profile Integration Section */
         .profile-section {
             margin: 30px 0;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 17, 34, 0.7);
             border-radius: 15px;
-            border: 1px solid rgba(138, 43, 226, 0.3);
+            border: 1px solid rgba(0, 255, 170, 0.3);
             backdrop-filter: blur(10px);
             padding: 25px;
+            box-shadow: 0 0 20px rgba(0, 255, 170, 0.1);
         }
 
         .profile-tabs {
@@ -1046,28 +1199,26 @@
 </head>
 <body>
     <!-- Floating Particles -->
-    <div class="particles" id="particles"></div>
+    <!-- Sonar Radar Background -->
+    <div class="sonar-background">
+        <div class="radar-ring"></div>
+        <div class="radar-ring"></div>
+        <div class="radar-ring"></div>
+        <div class="radar-sweep"></div>
+        <div class="sonar-dot" style="top: 30%; left: 25%; animation-delay: 0s;"></div>
+        <div class="sonar-dot" style="top: 60%; left: 70%; animation-delay: 1s;"></div>
+        <div class="sonar-dot" style="top: 45%; left: 40%; animation-delay: 2s;"></div>
+        <div class="sonar-dot" style="top: 75%; left: 55%; animation-delay: 0.5s;"></div>
+        <div class="sonar-dot" style="top: 20%; left: 80%; animation-delay: 1.5s;"></div>
+    </div>
 
     <!-- Header -->
     <div class="header">
         <div class="header-content">
             <div class="logo">MarketPace</div>
             <div class="header-icons">
-                <div class="header-icon" onclick="openCalendar()" title="Calendar">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                    </svg>
-                </div>
-                <div class="header-icon" onclick="openMap()" title="Map">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2"></polygon>
-                        <line x1="8" y1="2" x2="8" y2="18"></line>
-                        <line x1="16" y1="6" x2="16" y2="22"></line>
-                    </svg>
-                </div>
+                <div class="header-icon" onclick="openCalendar()" title="Sonar Calendar">SONAR</div>
+                <div class="header-icon" onclick="openMap()" title="Radar Map">RADAR</div>
             </div>
         </div>
     </div>
@@ -1083,25 +1234,25 @@
         <!-- Check-In Section -->
         <div class="checkin-section">
             <button class="checkin-btn" onclick="openCheckInModal()">
-                📍 Check In Now
+                DETECT Check In Now
             </button>
         </div>
 
         <!-- MyPace Profile Integration Section -->
         <div class="profile-section">
             <div class="profile-tabs">
-                <button class="profile-tab active" onclick="switchProfileTab('places')">Places I've Paced</button>
-                <button class="profile-tab" onclick="switchProfileTab('achievements')">My Achievements</button>
-                <button class="profile-tab" onclick="switchProfileTab('export')">Export History</button>
+                <button class="profile-tab active" onclick="switchProfileTab('places')">SCAN Places I've Paced</button>
+                <button class="profile-tab" onclick="switchProfileTab('achievements')">TRACK My Achievements</button>
+                <button class="profile-tab" onclick="switchProfileTab('export')">DATA Export History</button>
             </div>
 
             <!-- Places I've Paced Tab -->
             <div id="places-content" class="profile-content active">
                 <div class="sort-controls">
-                    <button class="sort-btn active" onclick="sortPlaces('most_visited')">Most Visited</button>
-                    <button class="sort-btn" onclick="sortPlaces('fan_support')">Fan Support</button>
-                    <button class="sort-btn" onclick="sortPlaces('ratings_left')">Ratings Left</button>
-                    <button class="sort-btn" onclick="sortPlaces('recent')">Most Recent</button>
+                    <button class="sort-btn active" onclick="sortPlaces('most_visited')">FREQ Most Visited</button>
+                    <button class="sort-btn" onclick="sortPlaces('fan_support')">BOOST Fan Support</button>
+                    <button class="sort-btn" onclick="sortPlaces('ratings_left')">RATE Ratings Left</button>
+                    <button class="sort-btn" onclick="sortPlaces('recent')">PING Most Recent</button>
                 </div>
                 <div class="places-grid" id="places-grid">
                     <!-- Places will be loaded here -->
@@ -1135,9 +1286,9 @@
             <div class="feed-header">
                 <h2 class="feed-title">Recent Check-Ins</h2>
                 <div class="feed-filters">
-                    <button class="filter-btn active" onclick="filterFeedAPI('nearby')">Nearby</button>
-                    <button class="filter-btn" onclick="filterFeedAPI('popular')">Popular</button>
-                    <button class="filter-btn" onclick="filterFeedAPI('week')">This Week</button>
+                    <button class="filter-btn active" onclick="filterFeedAPI('nearby')">SCAN Nearby</button>
+                    <button class="filter-btn" onclick="filterFeedAPI('popular')">TREND Popular</button>
+                    <button class="filter-btn" onclick="filterFeedAPI('week')">WEEK This Week</button>
                 </div>
             </div>
             <!-- Feed content will be loaded here -->
@@ -1272,7 +1423,7 @@
     <div class="modal-overlay" id="mapModal">
         <div class="map-modal">
             <div class="modal-header">
-                <h3 class="modal-title">🗺️ Map Radar View</h3>
+                <h3 class="modal-title">RADAR Map Radar View</h3>
                 <button class="close-btn" onclick="closeMapModal()">&times;</button>
             </div>
 
@@ -1291,26 +1442,60 @@
     <script>
         console.log('MyPace Phase 2 page loaded successfully');
 
-        // Create floating particles
-        function createParticles() {
-            const container = document.getElementById('particles');
-            const particleCount = 20;
+        // Enhance sonar radar effects
+        function enhanceSonarEffects() {
+            // Add dynamic sonar dot positioning
+            const sonarDots = document.querySelectorAll('.sonar-dot');
+            sonarDots.forEach((dot, index) => {
+                // Add random movement within radar scope
+                setInterval(() => {
+                    const randomX = Math.max(20, Math.min(80, parseFloat(dot.style.left) + (Math.random() - 0.5) * 5));
+                    const randomY = Math.max(20, Math.min(80, parseFloat(dot.style.top) + (Math.random() - 0.5) * 5));
+                    dot.style.left = randomX + '%';
+                    dot.style.top = randomY + '%';
+                }, 3000 + index * 1000);
+            });
             
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 8 + 's';
-                particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
-                
-                // Random pink/purple colors
-                const colors = ['rgba(255, 147, 197, 0.8)', 'rgba(138, 43, 226, 0.6)', 'rgba(255, 105, 180, 0.7)'];
-                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-                
-                container.appendChild(particle);
+            // Add sonar detection sound simulation
+            const checkinBtn = document.querySelector('.checkin-btn');
+            if (checkinBtn) {
+                checkinBtn.addEventListener('mouseenter', () => {
+                    // Visual feedback for radar detection
+                    const detection = document.createElement('div');
+                    detection.style.cssText = `
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        width: 50px;
+                        height: 50px;
+                        border: 2px solid #00ffaa;
+                        border-radius: 50%;
+                        animation: sonarPing 0.6s ease-out;
+                        pointer-events: none;
+                        z-index: 9999;
+                    `;
+                    document.body.appendChild(detection);
+                    setTimeout(() => detection.remove(), 600);
+                });
             }
         }
+        
+        // Add sonar ping animation
+        const sonarPingStyle = document.createElement('style');
+        sonarPingStyle.textContent = `
+            @keyframes sonarPing {
+                0% {
+                    transform: translate(-50%, -50%) scale(0.5);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translate(-50%, -50%) scale(3);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(sonarPingStyle);
 
         // Navigation function
         function goToPage(page) {
@@ -1349,7 +1534,7 @@
             
             // Update location in modal
             if (window.userLocation) {
-                document.getElementById('checkinLocation').textContent = '📍 Orange Beach Coffee Shop (0.1km away)';
+                document.getElementById('checkinLocation').textContent = 'SCAN: Orange Beach Coffee Shop (0.1km away)';
             }
         }
 
@@ -1458,7 +1643,7 @@
                 if (result.success) {
                     console.log('✅ Check-in saved to database:', result.checkin);
                     
-                    showNotification('🎉 Check-in successful! Saved to database and added to MyPace feed.');
+                    showNotification('SIGNAL: Check-in successful! Saved to database and added to MyPace feed.');
                     
                     closeCheckInModal();
                     
@@ -1472,7 +1657,7 @@
                 
             } catch (error) {
                 console.error('❌ Check-in submission failed:', error);
-                showNotification('❌ Check-in failed: ' + error.message);
+                showNotification('ERROR: Check-in failed: ' + error.message);
             }
         }
 
@@ -1709,7 +1894,7 @@
         function showLoadingAnimation() {
             const feed = document.getElementById('checkin-feed');
             const loader = document.createElement('div');
-            loader.innerHTML = '<div style="text-align: center; color: #8A2BE2; padding: 20px;">Loading check-ins... 🔄</div>';
+            loader.innerHTML = '<div style="text-align: center; color: #00ffaa; padding: 20px;">SCAN: Loading check-ins...</div>';
             feed.appendChild(loader);
             
             setTimeout(() => {
@@ -1968,7 +2153,7 @@
             const banner = document.createElement('div');
             banner.className = 'location-banner active';
             banner.innerHTML = `
-                <p class="location-text">📍 You're near: <strong>${placeName}</strong> (${distance}km away)</p>
+                <p class="location-text">DETECT: You're near: <strong>${placeName}</strong> (${distance}km away)</p>
                 <button onclick="quickCheckIn('${placeName}')" style="
                     background: rgba(255, 255, 255, 0.2); 
                     border: 1px solid white; 
@@ -2036,7 +2221,7 @@
                 photo: "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=400&h=300&fit=crop&crop=center",
                 rating: 5,
                 review: "Best beach bar atmosphere on the Gulf Coast!",
-                support: "MUSIC: Gulf Shores Music Festival",
+                support: "SOUND: Gulf Shores Music Festival",
                 timestamp: "2 hours ago",
                 likes: 12
             },
@@ -2048,7 +2233,7 @@
                 photo: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=300&fit=crop&crop=center",
                 rating: 4,
                 review: "Great coffee and friendly staff",
-                support: "COFFEE: Orange Beach Coffee Shop",
+                support: "FUEL: Orange Beach Coffee Shop",
                 timestamp: "4 hours ago",
                 likes: 8
             },
@@ -2060,7 +2245,7 @@
                 photo: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=300&fit=crop&crop=center", 
                 rating: 5,
                 review: "Making our community better together",
-                support: "OCEAN: Beach Cleanup Volunteers",
+                support: "ECO: Beach Cleanup Volunteers",
                 timestamp: "6 hours ago",
                 likes: 15
             },
@@ -2623,7 +2808,7 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
-            createParticles();
+            enhanceSonarEffects();
             initializeLocation();
             initStarRating();
             loadSampleFeed();
