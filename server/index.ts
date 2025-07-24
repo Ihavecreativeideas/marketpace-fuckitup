@@ -3595,6 +3595,278 @@ app.get('/api/mypace/support-leaderboard', async (req, res) => {
   }
 });
 
+// Phase 5: Live Events API Endpoints
+
+// Create Event API - Phase 5 Step 1
+app.post('/api/mypace/events', async (req, res) => {
+  try {
+    const { 
+      title, 
+      date, 
+      time, 
+      endDate, 
+      endTime, 
+      location, 
+      eventType, 
+      description, 
+      website, 
+      participants 
+    } = req.body;
+
+    // Generate unique event ID
+    const eventId = `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Geocode location (using Google Maps API would be ideal, for now using mock coordinates)
+    // In production, integrate with Google Maps Geocoding API
+    const coordinates = {
+      lat: 30.2672 + (Math.random() - 0.5) * 0.1, // Gulf Coast area with some variance
+      lng: -87.5692 + (Math.random() - 0.5) * 0.1
+    };
+
+    // Generate Geo QR Code data
+    const qrCodeData = {
+      type: 'event_checkin',
+      eventId: eventId,
+      eventTitle: title,
+      latitude: coordinates.lat,
+      longitude: coordinates.lng,
+      validationRadius: 100, // meters
+      createdAt: new Date().toISOString()
+    };
+
+    // Create event object
+    const eventData = {
+      id: eventId,
+      title,
+      description,
+      eventType,
+      location,
+      coordinates,
+      startDate: date,
+      startTime: time,
+      endDate: endDate || date,
+      endTime: endTime || time,
+      website,
+      participants: participants || [],
+      qrCode: qrCodeData,
+      createdAt: new Date().toISOString(),
+      createdBy: req.session?.user?.id || 'demo_user',
+      status: 'active',
+      attendees: [],
+      checkins: []
+    };
+
+    // In production, save to database
+    // For now, store in memory or return success
+    console.log('Event created:', eventData);
+
+    res.json({
+      success: true,
+      eventId: eventId,
+      message: 'Event created successfully',
+      event: eventData,
+      qrCode: qrCodeData
+    });
+
+  } catch (error) {
+    console.error('Error creating event:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create event'
+    });
+  }
+});
+
+// Get Active Events API - Phase 5 Step 3
+app.get('/api/mypace/events/active', async (req, res) => {
+  try {
+    const { lat, lng, radius = 25 } = req.query; // Default 25 mile radius
+
+    // Mock active events data - in production this would query database
+    const mockEvents = [
+      {
+        id: 'event_1',
+        title: 'Summer Music Festival',
+        eventType: 'music',
+        location: 'Downtown Park',
+        coordinates: { lat: 30.2672, lng: -87.5692 },
+        startDate: '2025-07-25',
+        startTime: '18:00',
+        endTime: '23:00',
+        participants: [
+          { name: 'DJ Nova', role: 'artist' },
+          { name: 'Local Food Truck', role: 'vendor' }
+        ],
+        attendees: 45,
+        status: 'active'
+      },
+      {
+        id: 'event_2',
+        title: 'Community Art Market',
+        eventType: 'market',
+        location: 'Main Street Plaza',
+        coordinates: { lat: 30.2701, lng: -87.5721 },
+        startDate: '2025-07-26',
+        startTime: '10:00',
+        endTime: '16:00',
+        participants: [
+          { name: 'Local Artists Collective', role: 'vendor' },
+          { name: 'Volunteers Needed', role: 'volunteer' }
+        ],
+        attendees: 23,
+        status: 'active'
+      },
+      {
+        id: 'event_3',
+        title: 'Food Truck Friday',
+        eventType: 'food',
+        location: 'Beachfront Parking',
+        coordinates: { lat: 30.2645, lng: -87.5665 },
+        startDate: '2025-07-25',
+        startTime: '17:00',
+        endTime: '21:00',
+        participants: [
+          { name: 'Gulf Tacos Mobile', role: 'vendor' },
+          { name: 'Sweet Treats Truck', role: 'vendor' }
+        ],
+        attendees: 67,
+        status: 'active'
+      }
+    ];
+
+    // Filter by location if coordinates provided
+    let filteredEvents = mockEvents;
+    if (lat && lng) {
+      // In production, calculate actual distance using Haversine formula
+      filteredEvents = mockEvents; // For demo, return all events
+    }
+
+    res.json({
+      success: true,
+      events: filteredEvents,
+      total: filteredEvents.length
+    });
+
+  } catch (error) {
+    console.error('Error fetching active events:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch active events'
+    });
+  }
+});
+
+// Get Single Event Details API - Phase 5 Step 4
+app.get('/api/mypace/events/:eventId', async (req, res) => {
+  try {
+    const { eventId } = req.params;
+
+    // Mock event detail - in production query from database
+    const mockEventDetails = {
+      id: eventId,
+      title: 'Summer Music Festival',
+      description: 'Join us for an amazing evening of local music, food, and community celebration. Featuring talented local artists and delicious food from area vendors.',
+      eventType: 'music',
+      location: 'Downtown Park, 123 Main Street',
+      coordinates: { lat: 30.2672, lng: -87.5692 },
+      startDate: '2025-07-25',
+      startTime: '18:00',
+      endDate: '2025-07-25',
+      endTime: '23:00',
+      website: 'https://example.com/tickets',
+      participants: [
+        { name: 'DJ Nova', role: 'artist', username: 'djnova' },
+        { name: 'Acoustic Sarah', role: 'artist', username: 'acousticsarah' },
+        { name: 'Local Food Truck', role: 'vendor', username: 'localfoodtruck' },
+        { name: 'Event Volunteers', role: 'volunteer' }
+      ],
+      recentCheckins: [
+        {
+          id: 'checkin_1',
+          username: 'MusicLover42',
+          avatar: 'ML',
+          message: 'Excited for DJ Nova\'s set tonight! 🎵',
+          supportTag: 'Here for @djNova\'s set',
+          timestamp: '30 minutes ago',
+          likes: 8
+        },
+        {
+          id: 'checkin_2',
+          username: 'LocalFoodie',
+          avatar: 'LF',
+          message: 'The food truck lineup looks amazing!',
+          supportTag: 'Supporting @LocalFoodTruck',
+          timestamp: '1 hour ago',
+          likes: 5
+        }
+      ],
+      attendees: 45,
+      status: 'active',
+      qrCode: {
+        type: 'event_checkin',
+        eventId: eventId,
+        eventTitle: 'Summer Music Festival',
+        latitude: 30.2672,
+        longitude: -87.5692,
+        validationRadius: 100
+      }
+    };
+
+    res.json({
+      success: true,
+      event: mockEventDetails
+    });
+
+  } catch (error) {
+    console.error('Error fetching event details:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Event not found'
+    });
+  }
+});
+
+// Event Check-in API - Phase 5 Step 5
+app.post('/api/mypace/events/:eventId/checkin', async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { lat, lng, message, supportTarget, photo } = req.body;
+    const userId = req.session?.user?.id || 'demo_user';
+
+    // Validate location proximity (in production, use actual event coordinates)
+    // For demo, assume check-in is valid
+
+    const checkinData = {
+      id: `checkin_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      eventId,
+      userId,
+      username: req.session?.user?.username || 'CurrentUser',
+      message: message || 'Checked in to the event!',
+      supportTarget,
+      location: { lat, lng },
+      photo,
+      timestamp: new Date().toISOString(),
+      likes: 0,
+      comments: []
+    };
+
+    // In production, save to database and update event attendance
+
+    res.json({
+      success: true,
+      checkin: checkinData,
+      message: 'Successfully checked in to event!'
+    });
+
+  } catch (error) {
+    console.error('Error creating event check-in:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to check in to event'
+    });
+  }
+});
+
 app.get('/api/schedules/:businessId', async (req, res) => {
   try {
     const { businessId } = req.params;

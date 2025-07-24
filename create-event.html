@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Event - MyPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #1a0b3d 0%, #6b46c1 100%);
+            min-height: 100vh;
+            color: white;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Floating Particles Background */
+        .particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(0, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
+            50% { transform: translateY(-30px) rotate(180deg); opacity: 1; }
+        }
+
+        /* Header */
+        .header {
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #8A2BE2, #FF69B4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            color: #00ffff;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Form Styling */
+        .event-form {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #00ffff;
+            font-size: 1rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid rgba(138, 43, 226, 0.3);
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #8A2BE2;
+            box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.2);
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Date/Time Row */
+        .datetime-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .datetime-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Event Type Selector */
+        .event-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .event-type-btn {
+            padding: 12px 8px;
+            border: 2px solid rgba(138, 43, 226, 0.3);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .event-type-btn:hover {
+            border-color: #8A2BE2;
+            background: rgba(138, 43, 226, 0.2);
+        }
+
+        .event-type-btn.selected {
+            border-color: #8A2BE2;
+            background: rgba(138, 43, 226, 0.4);
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);
+        }
+
+        /* Participants Section */
+        .participants-section {
+            border: 2px solid rgba(138, 43, 226, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 15px;
+            background: rgba(138, 43, 226, 0.1);
+        }
+
+        .participant-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .participant-input input {
+            flex: 1;
+        }
+
+        .add-participant-btn {
+            padding: 8px 16px;
+            background: #8A2BE2;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-participant-btn:hover {
+            background: #9932CC;
+            transform: translateY(-1px);
+        }
+
+        .participants-list {
+            margin-top: 15px;
+        }
+
+        .participant-tag {
+            display: inline-block;
+            background: rgba(138, 43, 226, 0.6);
+            padding: 6px 12px;
+            border-radius: 20px;
+            margin: 3px;
+            font-size: 0.9rem;
+            color: white;
+            position: relative;
+        }
+
+        .participant-tag .remove-btn {
+            margin-left: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* File Upload */
+        .file-upload {
+            border: 2px dashed rgba(138, 43, 226, 0.5);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-upload:hover {
+            border-color: #8A2BE2;
+            background: rgba(138, 43, 226, 0.1);
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(45deg, #8A2BE2, #FF69B4);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(138, 43, 226, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Back Button */
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 255, 255, 0.2);
+            border: 2px solid #00ffff;
+            border-radius: 50%;
+            color: #00ffff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 255, 255, 0.9);
+            color: black;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Particles -->
+    <div class="particles-container" id="particles-container"></div>
+
+    <!-- Back Button -->
+    <button class="back-btn" onclick="location.href='/mypace.html'">←</button>
+
+    <!-- Header -->
+    <div class="header">
+        <h1>CREATE EVENT</h1>
+        <p>Turn your local gathering into a community movement</p>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <form class="event-form" id="eventForm">
+            <!-- Event Title -->
+            <div class="form-group">
+                <label for="eventTitle">EVENT Event Title</label>
+                <input type="text" id="eventTitle" class="form-input" placeholder="e.g., Summer Music Festival" required>
+            </div>
+
+            <!-- Date & Time -->
+            <div class="form-group">
+                <label>DATE & TIME</label>
+                <div class="datetime-row">
+                    <div>
+                        <input type="date" id="eventDate" class="form-input" required>
+                    </div>
+                    <div>
+                        <input type="time" id="eventTime" class="form-input" required>
+                    </div>
+                </div>
+                <div class="datetime-row" style="margin-top: 10px;">
+                    <div>
+                        <input type="date" id="eventEndDate" class="form-input" placeholder="End Date">
+                    </div>
+                    <div>
+                        <input type="time" id="eventEndTime" class="form-input" placeholder="End Time">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location -->
+            <div class="form-group">
+                <label for="eventLocation">LOC Location</label>
+                <input type="text" id="eventLocation" class="form-input" placeholder="e.g., Downtown Park, 123 Main St" required>
+            </div>
+
+            <!-- Event Type -->
+            <div class="form-group">
+                <label>TYPE Event Type</label>
+                <div class="event-types">
+                    <div class="event-type-btn" data-type="music">MUSIC Music</div>
+                    <div class="event-type-btn" data-type="market">SHOP Market</div>
+                    <div class="event-type-btn" data-type="festival">FEST Festival</div>
+                    <div class="event-type-btn" data-type="food">FOOD Food Truck</div>
+                    <div class="event-type-btn" data-type="art">ART Art Show</div>
+                    <div class="event-type-btn" data-type="community">COMM Community</div>
+                </div>
+            </div>
+
+            <!-- Participants -->
+            <div class="form-group">
+                <label>PART Participants</label>
+                <div class="participants-section">
+                    <p style="margin-bottom: 15px; opacity: 0.8;">Add artists, vendors, staff, or volunteers</p>
+                    <div class="participant-input">
+                        <input type="text" id="participantName" class="form-input" placeholder="Name or @username">
+                        <select id="participantRole" class="form-input" style="width: auto;">
+                            <option value="artist">Artist</option>
+                            <option value="vendor">Vendor</option>
+                            <option value="staff">Staff</option>
+                            <option value="volunteer">Volunteer</option>
+                        </select>
+                        <button type="button" class="add-participant-btn" onclick="addParticipant()">ADD</button>
+                    </div>
+                    <div class="participants-list" id="participantsList"></div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+                <label for="eventDescription">DESC Description</label>
+                <textarea id="eventDescription" class="form-input" rows="4" placeholder="Tell the community what this event is about..."></textarea>
+            </div>
+
+            <!-- Flyer Upload -->
+            <div class="form-group">
+                <label>IMG Flyer Image (Optional)</label>
+                <div class="file-upload" onclick="document.getElementById('flyerUpload').click()">
+                    <input type="file" id="flyerUpload" accept="image/*">
+                    <p>UPLOAD Click to upload event flyer</p>
+                    <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 5px;">JPG, PNG, or GIF</p>
+                </div>
+            </div>
+
+            <!-- Website Link -->
+            <div class="form-group">
+                <label for="eventWebsite">LINK Website or Tickets (Optional)</label>
+                <input type="url" id="eventWebsite" class="form-input" placeholder="https://tickets.example.com">
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="submit-btn">CREATE EVENT</button>
+        </form>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        let selectedEventType = '';
+        let participants = [];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            setupEventTypeSelection();
+            setupFormSubmission();
+            
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('eventDate').value = today;
+            
+            console.log('MyPace Event Creation page loaded');
+        });
+
+        // Create floating particles
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            const particleCount = 15;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const size = Math.random() * 6 + 2;
+                const left = Math.random() * 100;
+                const animationDelay = Math.random() * 6;
+                const duration = Math.random() * 3 + 4;
+
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = left + '%';
+                particle.style.animationDelay = animationDelay + 's';
+                particle.style.animationDuration = duration + 's';
+                
+                container.appendChild(particle);
+            }
+        }
+
+        // Setup event type selection
+        function setupEventTypeSelection() {
+            const eventTypeButtons = document.querySelectorAll('.event-type-btn');
+            
+            eventTypeButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove previous selection
+                    eventTypeButtons.forEach(btn => btn.classList.remove('selected'));
+                    
+                    // Add selection to clicked button
+                    button.classList.add('selected');
+                    selectedEventType = button.dataset.type;
+                    
+                    showNotification(`Selected: ${button.textContent}`);
+                });
+            });
+        }
+
+        // Add participant
+        function addParticipant() {
+            const nameInput = document.getElementById('participantName');
+            const roleSelect = document.getElementById('participantRole');
+            
+            const name = nameInput.value.trim();
+            const role = roleSelect.value;
+            
+            if (name) {
+                const participant = { name, role };
+                participants.push(participant);
+                
+                // Clear input
+                nameInput.value = '';
+                
+                // Update display
+                updateParticipantsList();
+                
+                showNotification(`Added ${name} as ${role}`);
+            }
+        }
+
+        // Update participants list display
+        function updateParticipantsList() {
+            const listContainer = document.getElementById('participantsList');
+            
+            listContainer.innerHTML = participants.map((participant, index) => `
+                <span class="participant-tag">
+                    ${participant.name} (${participant.role})
+                    <span class="remove-btn" onclick="removeParticipant(${index})">×</span>
+                </span>
+            `).join('');
+        }
+
+        // Remove participant
+        function removeParticipant(index) {
+            participants.splice(index, 1);
+            updateParticipantsList();
+            showNotification('Participant removed');
+        }
+
+        // Setup form submission
+        function setupFormSubmission() {
+            const form = document.getElementById('eventForm');
+            
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                // Validate required fields
+                if (!selectedEventType) {
+                    showNotification('Please select an event type');
+                    return;
+                }
+                
+                // Collect form data
+                const formData = {
+                    title: document.getElementById('eventTitle').value,
+                    date: document.getElementById('eventDate').value,
+                    time: document.getElementById('eventTime').value,
+                    endDate: document.getElementById('eventEndDate').value,
+                    endTime: document.getElementById('eventEndTime').value,
+                    location: document.getElementById('eventLocation').value,
+                    eventType: selectedEventType,
+                    description: document.getElementById('eventDescription').value,
+                    website: document.getElementById('eventWebsite').value,
+                    participants: participants
+                };
+                
+                // Disable submit button
+                const submitBtn = document.querySelector('.submit-btn');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'CREATING EVENT...';
+                
+                try {
+                    // Send to API
+                    const response = await fetch('/api/mypace/events', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        showNotification('Event created successfully!');
+                        
+                        // Redirect to event page after 2 seconds
+                        setTimeout(() => {
+                            window.location.href = `/event.html?eventId=${result.eventId}`;
+                        }, 2000);
+                    } else {
+                        throw new Error(result.error || 'Failed to create event');
+                    }
+                    
+                } catch (error) {
+                    console.error('Error creating event:', error);
+                    showNotification('Error creating event. Please try again.');
+                    
+                    // Re-enable submit button
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'CREATE EVENT';
+                }
+            });
+        }
+
+        // Show notification
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Allow enter key to add participants
+        document.getElementById('participantName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addParticipant();
+            }
+        });
+    </script>
+</body>
+</html>
