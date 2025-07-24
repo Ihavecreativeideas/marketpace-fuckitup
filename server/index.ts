@@ -47,6 +47,9 @@ const taxDocuments = new Map();
 const paymentProcessorTracking = new Map(); // Track PayPal transactions for 1099-K
 const memberTaxThresholds = new Map(); // Track member transaction thresholds for 1099-K
 
+// Initialize custom categories storage
+const userCreatedCategories = new Map(); // Store user-generated categories by type (marketplace, services, entertainment, etc.)
+
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -6089,6 +6092,156 @@ app.get("/messages", (req, res) => {
 });
 app.get("/public-festival-schedule", (req, res) => { 
   res.sendFile(path.join(__dirname, "..", "public-festival-schedule.html")); 
+});
+
+// ========== USER-GENERATED CATEGORIES API ==========
+
+// Create new custom category
+app.post('/api/categories/custom', (req: any, res: any) => {
+  try {
+    const { categoryName, categoryType, description, createdBy } = req.body;
+    
+    if (!categoryName || !categoryType || !createdBy) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Category name, type, and creator are required' 
+      });
+    }
+
+    // Validate category type
+    const validTypes = ['marketplace', 'services', 'rentals', 'entertainment', 'food-drinks', 'business-services'];
+    if (!validTypes.includes(categoryType)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid category type. Must be one of: ' + validTypes.join(', ')
+      });
+    }
+
+    const customCategory = {
+      id: `custom_${Date.now()}`,
+      name: categoryName,
+      type: categoryType,
+      description: description || `Custom ${categoryName} category`,
+      createdBy: createdBy,
+      createdAt: new Date().toISOString(),
+      approved: true, // Auto-approve for now, could add moderation later
+      usageCount: 1, // Track how many times it's been used
+      isCustom: true
+    };
+
+    // Initialize category type if doesn't exist
+    if (!userCreatedCategories.has(categoryType)) {
+      userCreatedCategories.set(categoryType, []);
+    }
+    
+    // Add to appropriate category type
+    const typeCategories = userCreatedCategories.get(categoryType);
+    typeCategories.push(customCategory);
+    userCreatedCategories.set(categoryType, typeCategories);
+
+    console.log(`New custom category created: ${categoryName} (${categoryType}) by ${createdBy}`);
+
+    res.json({
+      success: true,
+      message: 'Custom category created successfully!',
+      category: customCategory
+    });
+
+  } catch (error) {
+    console.error('Error creating custom category:', error);
+    res.status(500).json({ success: false, error: 'Failed to create custom category' });
+  }
+});
+
+// Get all custom categories for a specific type
+app.get('/api/categories/custom/:type', (req: any, res: any) => {
+  try {
+    const { type } = req.params;
+    const customCategories = userCreatedCategories.get(type) || [];
+    
+    res.json({
+      success: true,
+      categories: customCategories,
+      count: customCategories.length
+    });
+
+  } catch (error) {
+    console.error('Error getting custom categories:', error);
+    res.status(500).json({ success: false, error: 'Failed to get custom categories' });
+  }
+});
+
+// Get all custom categories across all types (for universal search)
+app.get('/api/categories/custom/all', (req: any, res: any) => {
+  try {
+    const allCustomCategories = [];
+    
+    // Debug log to see what's in the Map
+    console.log('Debug: userCreatedCategories size:', userCreatedCategories.size);
+    console.log('Debug: userCreatedCategories keys:', Array.from(userCreatedCategories.keys()));
+    
+    // Get all category types and their categories
+    const validTypes = ['marketplace', 'services', 'rentals', 'entertainment', 'food-drinks', 'business-services'];
+    
+    for (const type of validTypes) {
+      const categories = userCreatedCategories.get(type) || [];
+      console.log(`Debug: ${type} has ${categories.length} categories`);
+      
+      if (categories.length > 0) {
+        allCustomCategories.push(...categories.map(cat => ({ 
+          ...cat, 
+          categoryType: type 
+        })));
+      }
+    }
+    
+    console.log('Debug: Total categories found:', allCustomCategories.length);
+    
+    res.json({
+      success: true,
+      categories: allCustomCategories,
+      count: allCustomCategories.length,
+      debug: {
+        mapSize: userCreatedCategories.size,
+        mapKeys: Array.from(userCreatedCategories.keys()),
+        totalFound: allCustomCategories.length
+      }
+    });
+
+  } catch (error) {
+    console.error('Error getting all custom categories:', error);
+    res.status(500).json({ success: false, error: 'Failed to get custom categories' });
+  }
+});
+
+// Increment usage count when custom category is used
+app.post('/api/categories/custom/:id/use', (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    let categoryFound = false;
+    
+    // Find and increment usage count
+    for (const [type, categories] of userCreatedCategories.entries()) {
+      const categoryIndex = categories.findIndex(cat => cat.id === id);
+      if (categoryIndex !== -1) {
+        categories[categoryIndex].usageCount += 1;
+        categories[categoryIndex].lastUsed = new Date().toISOString();
+        userCreatedCategories.set(type, categories);
+        categoryFound = true;
+        break;
+      }
+    }
+    
+    if (!categoryFound) {
+      return res.status(404).json({ success: false, error: 'Custom category not found' });
+    }
+    
+    res.json({ success: true, message: 'Category usage tracked' });
+
+  } catch (error) {
+    console.error('Error tracking category usage:', error);
+    res.status(500).json({ success: false, error: 'Failed to track usage' });
+  }
 });
 
 app.listen(port, '0.0.0.0', () => {

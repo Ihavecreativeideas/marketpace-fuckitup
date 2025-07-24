@@ -641,6 +641,9 @@
             </div>
             <div style="margin-bottom: 30px;">
                 <input type="text" placeholder="Search categories..." id="categorySearchInput" style="width: 100%; padding: 15px 20px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 25px; color: white; font-size: 16px; outline: none; box-sizing: border-box;" oninput="filterCategories()">
+                <div style="margin-top: 15px; text-align: center;">
+                    <button type="button" onclick="showCustomCategoryForm()" style="padding: 8px 16px; background: linear-gradient(135deg, #ffd700, #ff8c00); color: #1a0b3d; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;">Create Category</button>
+                </div>
             </div>
             <div id="categoriesGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
                 
@@ -1621,6 +1624,163 @@
             console.log('Opening Hub posting modal...');
             createHubPost('general');
         }
+
+        // Custom Category Functions for The Hub Page
+        function showCustomCategoryForm() {
+            const modal = document.createElement('div');
+            modal.id = 'customCategoryModal';
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(10px); 
+                z-index: 3000; display: flex; align-items: center; justify-content: center;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: linear-gradient(135deg, #1a0b3d, #6b46c1); border-radius: 15px; padding: 30px; max-width: 500px; width: 90%; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);">
+                    <h3 style="color: #ffd700; margin: 0 0 20px 0; font-size: 24px; text-align: center;">Create Custom Category</h3>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="color: white; display: block; margin-bottom: 8px; font-weight: 600;">Category Name</label>
+                        <input type="text" id="customCategoryName" placeholder="e.g., Live Music Venues" style="width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; color: white; font-size: 16px; outline: none; box-sizing: border-box;">
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="color: white; display: block; margin-bottom: 8px; font-weight: 600;">Category Type</label>
+                        <select id="customCategoryType" style="width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; color: white; font-size: 16px; outline: none; box-sizing: border-box;">
+                            <option value="entertainment" selected>Entertainment</option>
+                            <option value="marketplace">Marketplace</option>
+                            <option value="services">Services</option>
+                            <option value="rentals">Rentals</option>
+                            <option value="food-drinks">Food & Drinks</option>
+                            <option value="business-services">Business Services</option>
+                        </select>
+                    </div>
+                    
+                    <div style="margin-bottom: 25px;">
+                        <label style="color: white; display: block; margin-bottom: 8px; font-weight: 600;">Description (Optional)</label>
+                        <textarea id="customCategoryDescription" placeholder="Brief description of what fits in this category..." style="width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; color: white; font-size: 16px; outline: none; box-sizing: border-box; resize: vertical; height: 80px;"></textarea>
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px; justify-content: center;">
+                        <button onclick="hideCustomCategoryForm()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 12px 24px; border-radius: 25px; cursor: pointer; font-size: 16px; transition: all 0.3s ease;">Cancel</button>
+                        <button onclick="createCustomCategory()" style="background: linear-gradient(135deg, #ffd700, #ff8c00); border: none; color: #1a0b3d; padding: 12px 24px; border-radius: 25px; cursor: pointer; font-size: 16px; font-weight: 600; transition: all 0.3s ease;">Create Category</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        function hideCustomCategoryForm() {
+            const modal = document.getElementById('customCategoryModal');
+            if (modal) {
+                document.body.removeChild(modal);
+            }
+        }
+
+        async function createCustomCategory() {
+            const nameInput = document.getElementById('customCategoryName');
+            const typeSelect = document.getElementById('customCategoryType');
+            const descriptionInput = document.getElementById('customCategoryDescription');
+            
+            const categoryName = nameInput.value.trim();
+            const categoryType = typeSelect.value;
+            const description = descriptionInput.value.trim();
+            
+            if (!categoryName) {
+                showNotification('Please enter a category name.', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/categories/custom', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        categoryName,
+                        categoryType,
+                        description: description || `Custom ${categoryName} category`,
+                        createdBy: 'Hub User'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification('Custom category created successfully!', 'success');
+                    hideCustomCategoryForm();
+                    loadCustomCategoriesInModal();
+                } else {
+                    showNotification(result.message || 'Failed to create category.', 'error');
+                }
+            } catch (error) {
+                console.error('Error creating custom category:', error);
+                showNotification('Failed to create custom category. Please try again.', 'error');
+            }
+        }
+
+        // Load custom categories into the search modal
+        async function loadCustomCategoriesInModal() {
+            try {
+                const categoryTypes = ['marketplace', 'services', 'rentals', 'entertainment', 'food-drinks', 'business-services'];
+                let allCustomCategories = [];
+                
+                for (const type of categoryTypes) {
+                    try {
+                        const response = await fetch(`/api/categories/custom/${type}`);
+                        const result = await response.json();
+                        if (result.success && result.categories.length > 0) {
+                            allCustomCategories.push(...result.categories);
+                        }
+                    } catch (error) {
+                        console.warn(`Error loading ${type} custom categories:`, error);
+                    }
+                }
+                
+                if (allCustomCategories.length > 0) {
+                    // Add custom categories to the category search modal
+                    const categoryGrid = document.getElementById('categoriesGrid');
+                    if (categoryGrid) {
+                        // Create or update custom categories section
+                        let customSection = document.querySelector('.custom-categories-section');
+                        if (!customSection) {
+                            customSection = document.createElement('div');
+                            customSection.className = 'category-section custom-categories-section';
+                            customSection.innerHTML = `
+                                <h3 style="color: #ffd700; font-size: 18px; margin-bottom: 15px; font-weight: 600;">Custom Categories</h3>
+                                <div class="custom-category-list category-list"></div>
+                            `;
+                            categoryGrid.appendChild(customSection);
+                        }
+                        
+                        const customList = customSection.querySelector('.custom-category-list');
+                        customList.innerHTML = '';
+                        
+                        allCustomCategories.forEach(category => {
+                            const categoryItem = document.createElement('div');
+                            categoryItem.className = 'category-item';
+                            categoryItem.onclick = () => searchCategory(category.name);
+                            categoryItem.setAttribute('data-category', category.name.toLowerCase());
+                            categoryItem.innerHTML = `
+                                <span>${category.name}</span>
+                                <small style="opacity: 0.7; margin-left: 8px;">(${category.type})</small>
+                            `;
+                            customList.appendChild(categoryItem);
+                        });
+                        
+                        console.log(`Loaded ${allCustomCategories.length} custom categories into Hub search modal`);
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error loading custom categories into modal:', error);
+            }
+        }
+
+        // Load custom categories when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(loadCustomCategoriesInModal, 1000);
+        });
     </script>
 
     <style>
