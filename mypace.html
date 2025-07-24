@@ -546,6 +546,33 @@
             border-color: #8A2BE2;
         }
 
+        /* Map Modal */
+        .map-modal {
+            background: linear-gradient(135deg, rgba(61, 11, 26, 0.95), rgba(133, 40, 76, 0.95));
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 2px solid rgba(138, 43, 226, 0.3);
+            backdrop-filter: blur(20px);
+            position: relative;
+        }
+
+        /* Pulse animation for user location */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 20px rgba(138, 43, 226, 0.8);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(138, 43, 226, 1), 0 0 40px rgba(255, 105, 180, 0.5);
+            }
+            100% {
+                box-shadow: 0 0 20px rgba(138, 43, 226, 0.8);
+            }
+        }
+
         /* Responsive */
         @media (max-width: 480px) {
             .mypace-title {
@@ -753,6 +780,26 @@
         </div>
     </div>
 
+    <!-- Map Radar Modal -->
+    <div class="modal-overlay" id="mapModal">
+        <div class="map-modal">
+            <div class="modal-header">
+                <h3 class="modal-title">🗺️ Map Radar View</h3>
+                <button class="close-btn" onclick="closeMapModal()">&times;</button>
+            </div>
+
+            <div id="mapContainer">
+                <!-- Map content will be loaded here -->
+            </div>
+
+            <div style="margin-top: 20px; text-align: center;">
+                <button onclick="closeMapModal()" class="btn-secondary" style="width: 100%;">
+                    Close Map
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         console.log('MyPace Phase 2 page loaded successfully');
 
@@ -921,7 +968,187 @@
         }
 
         function openMapRadar() {
-            alert('Phase 2: Map radar view with nearby check-ins coming next!');
+            console.log('Opening map radar view...');
+            const mapModal = document.getElementById('mapModal');
+            mapModal.classList.add('active');
+            
+            // Initialize map after modal opens
+            setTimeout(() => {
+                initializeMapRadar();
+            }, 300);
+        }
+
+        function closeMapModal() {
+            const mapModal = document.getElementById('mapModal');
+            mapModal.classList.remove('active');
+        }
+
+        function initializeMapRadar() {
+            const mapContainer = document.getElementById('mapContainer');
+            
+            // Clear existing content
+            mapContainer.innerHTML = '';
+            
+            // Create map interface
+            const mapInterface = document.createElement('div');
+            mapInterface.style.cssText = `
+                width: 100%;
+                height: 400px;
+                background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+                border-radius: 15px;
+                position: relative;
+                overflow: hidden;
+                border: 2px solid rgba(138, 43, 226, 0.3);
+            `;
+            
+            // Add user location pin
+            const userPin = document.createElement('div');
+            userPin.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 20px;
+                height: 20px;
+                background: linear-gradient(135deg, #8A2BE2, #FF69B4);
+                border-radius: 50%;
+                border: 3px solid white;
+                box-shadow: 0 0 20px rgba(138, 43, 226, 0.8);
+                z-index: 10;
+                animation: pulse 2s infinite;
+            `;
+            
+            // Add nearby check-in locations
+            const locations = [
+                { name: "The Flora-Bama", x: 60, y: 30, user: "Sarah M.", time: "2h ago" },
+                { name: "Orange Beach Coffee", x: 45, y: 65, user: "Mike K.", time: "4h ago" },
+                { name: "Gulf State Park", x: 75, y: 70, user: "Emma R.", time: "6h ago" },
+                { name: "The Hangout", x: 30, y: 40, user: "Alex T.", time: "8h ago" }
+            ];
+            
+            locations.forEach(loc => {
+                const pin = document.createElement('div');
+                pin.style.cssText = `
+                    position: absolute;
+                    top: ${loc.y}%;
+                    left: ${loc.x}%;
+                    transform: translate(-50%, -50%);
+                    width: 15px;
+                    height: 15px;
+                    background: #4F46E5;
+                    border-radius: 50%;
+                    border: 2px solid white;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                `;
+                
+                pin.addEventListener('click', () => {
+                    showLocationInfo(loc);
+                });
+                
+                pin.addEventListener('mouseenter', () => {
+                    pin.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                    pin.style.background = '#FF69B4';
+                    pin.style.boxShadow = '0 0 15px rgba(255, 105, 180, 0.8)';
+                });
+                
+                pin.addEventListener('mouseleave', () => {
+                    pin.style.transform = 'translate(-50%, -50%) scale(1)';
+                    pin.style.background = '#4F46E5';
+                    pin.style.boxShadow = 'none';
+                });
+                
+                mapInterface.appendChild(pin);
+            });
+            
+            // Add grid overlay
+            const gridOverlay = document.createElement('div');
+            gridOverlay.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-image: 
+                    linear-gradient(rgba(138, 43, 226, 0.1) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(138, 43, 226, 0.1) 1px, transparent 1px);
+                background-size: 50px 50px;
+                pointer-events: none;
+            `;
+            
+            mapInterface.appendChild(gridOverlay);
+            mapInterface.appendChild(userPin);
+            mapContainer.appendChild(mapInterface);
+            
+            // Add map legend
+            const legend = document.createElement('div');
+            legend.style.cssText = `
+                margin-top: 15px;
+                display: flex;
+                justify-content: space-around;
+                padding: 10px;
+                background: rgba(0, 0, 0, 0.5);
+                border-radius: 8px;
+                border: 1px solid rgba(138, 43, 226, 0.3);
+            `;
+            
+            legend.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px; color: #e2e8f0; font-size: 0.9rem;">
+                    <div style="width: 12px; height: 12px; background: linear-gradient(135deg, #8A2BE2, #FF69B4); border-radius: 50%; border: 2px solid white;"></div>
+                    You
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; color: #e2e8f0; font-size: 0.9rem;">
+                    <div style="width: 12px; height: 12px; background: #4F46E5; border-radius: 50%; border: 2px solid white;"></div>
+                    Check-ins
+                </div>
+                <div style="color: #a0a0a0; font-size: 0.8rem;">
+                    Click pins for details
+                </div>
+            `;
+            
+            mapContainer.appendChild(legend);
+        }
+
+        function showLocationInfo(location) {
+            const info = document.createElement('div');
+            info.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 0, 0, 0.95);
+                padding: 20px;
+                border-radius: 12px;
+                border: 2px solid rgba(138, 43, 226, 0.5);
+                backdrop-filter: blur(20px);
+                z-index: 3000;
+                min-width: 250px;
+                text-align: center;
+            `;
+            
+            info.innerHTML = `
+                <h3 style="color: #FF69B4; margin-bottom: 10px;">${location.name}</h3>
+                <p style="color: #e2e8f0; margin-bottom: 8px;">Last check-in: ${location.user}</p>
+                <p style="color: #a0a0a0; margin-bottom: 15px;">${location.time}</p>
+                <button onclick="this.parentElement.remove()" style="
+                    background: linear-gradient(135deg, #8A2BE2, #FF69B4);
+                    border: none;
+                    border-radius: 6px;
+                    padding: 8px 16px;
+                    color: white;
+                    cursor: pointer;
+                    font-weight: 600;
+                ">Close</button>
+            `;
+            
+            document.body.appendChild(info);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (info.parentElement) {
+                    info.remove();
+                }
+            }, 5000);
         }
 
         function filterFeed(type) {
