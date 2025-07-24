@@ -7050,19 +7050,11 @@
             }
         }
 
-        // Category search functionality
+        // Category search functionality with user customization
         let categorySearchOpen = false;
         
-        function toggleCategorySearch() {
-            const existingPanel = document.getElementById('categorySearchPanel');
-            
-            if (existingPanel) {
-                existingPanel.remove();
-                categorySearchOpen = false;
-                return;
-            }
-            
-            const categories = [
+        // Default categories - base categories that always exist
+        const defaultCategories = [
                 { name: 'General', description: 'All posts and general items' },
                 { name: 'Electronics', description: 'Phones, computers, gadgets, tech' },
                 { name: 'Clothing & Accessories', description: 'Fashion, apparel, jewelry, bags' },
@@ -7093,6 +7085,25 @@
                 { name: 'Lost & Found', description: 'Lost items, found items to return' },
                 { name: 'Local Services', description: 'Community services and assistance' }
             ];
+            
+            // Get user-added custom categories from localStorage
+            function getCustomCategories() {
+                const customCats = localStorage.getItem('marketpace_custom_categories');
+                return customCats ? JSON.parse(customCats) : [];
+            }
+            
+            // Save custom categories to localStorage
+            function saveCustomCategories(categories) {
+                localStorage.setItem('marketpace_custom_categories', JSON.stringify(categories));
+            }
+            
+            // Get all categories (default + custom)
+            function getAllCategories() {
+                const customCategories = getCustomCategories();
+                return [...defaultCategories, ...customCategories];
+            }
+            
+            const categories = getAllCategories();
             
             const panel = document.createElement('div');
             panel.id = 'categorySearchPanel';
