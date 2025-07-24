@@ -1290,12 +1290,22 @@
             const timeAgo = getTimeAgo(new Date(checkin.createdAt));
             const stars = '★'.repeat(checkin.rating) + '☆'.repeat(5 - checkin.rating);
             
+            // Create proper user display name
+            let displayName = checkin.userId;
+            if (checkin.userId.includes('_')) {
+                // Convert user_sarah to Sarah M., user_mike to Mike K.
+                const username = checkin.userId.split('_')[1];
+                if (username) {
+                    displayName = username.charAt(0).toUpperCase() + username.slice(1) + ' ' + username.charAt(0).toUpperCase() + '.';
+                }
+            }
+            
             card.innerHTML = `
                 <div class="checkin-header">
                     <div class="user-info">
                         <div class="user-avatar">👤</div>
                         <div>
-                            <div class="user-name">User ${checkin.userId.slice(-3)}</div>
+                            <div class="user-name">${displayName}</div>
                             <div class="location">📍 ${checkin.locationName}</div>
                         </div>
                     </div>
