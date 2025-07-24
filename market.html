@@ -2169,34 +2169,6 @@
                     backdrop-filter: blur(10px);
                 ">
                     <option value="">Select Category</option>
-                    
-                    <!-- Shops Categories -->
-                    <option value="shops-electronics" data-type="shops">Electronics</option>
-                    <option value="shops-fashion" data-type="shops">Fashion</option>
-                    <option value="shops-home" data-type="shops">Home & Garden</option>
-                    <option value="shops-books" data-type="shops">Books</option>
-                    <option value="shops-sports" data-type="shops">Sports</option>
-                    
-                    <!-- Services Categories -->
-                    <option value="services-handyman" data-type="services">Handyman</option>
-                    <option value="services-tutoring" data-type="services">Tutoring</option>
-                    <option value="services-cleaning" data-type="services">Cleaning</option>
-                    <option value="services-tech" data-type="services">Tech Support</option>
-                    <option value="services-pet" data-type="services">Pet Care</option>
-                    
-                    <!-- Rentals Categories -->
-                    <option value="rentals-tools" data-type="rentals">Tools</option>
-                    <option value="rentals-party" data-type="rentals">Party Supplies</option>
-                    <option value="rentals-sports" data-type="rentals">Sports Equipment</option>
-                    <option value="rentals-baby" data-type="rentals">Baby Gear</option>
-                    <option value="rentals-outdoor" data-type="rentals">Outdoor</option>
-                    
-                    <!-- Eats Categories -->
-                    <option value="eats-restaurant" data-type="eats">Restaurants</option>
-                    <option value="eats-bar" data-type="eats">Bars</option>
-                    <option value="eats-cafe" data-type="eats">Cafes</option>
-                    <option value="eats-foodtruck" data-type="eats">Food Trucks</option>
-                    <option value="eats-bakery" data-type="eats">Bakeries</option>
                 </select>
             </div>
 
@@ -7413,6 +7385,55 @@
         let favoritesActive = false;
         let detailedFiltersVisible = false;
 
+        // Category data for dropdown
+        const categoryData = {
+            shops: [
+                { value: 'electronics', label: 'Electronics' },
+                { value: 'fashion', label: 'Fashion' },
+                { value: 'home', label: 'Home & Garden' },
+                { value: 'books', label: 'Books' },
+                { value: 'sports', label: 'Sports' }
+            ],
+            services: [
+                { value: 'handyman', label: 'Handyman' },
+                { value: 'tutoring', label: 'Tutoring' },
+                { value: 'cleaning', label: 'Cleaning' },
+                { value: 'tech', label: 'Tech Support' },
+                { value: 'pet', label: 'Pet Care' }
+            ],
+            rentals: [
+                { value: 'tools', label: 'Tools' },
+                { value: 'party', label: 'Party Supplies' },
+                { value: 'sports', label: 'Sports Equipment' },
+                { value: 'baby', label: 'Baby Gear' },
+                { value: 'outdoor', label: 'Outdoor' }
+            ],
+            eats: [
+                { value: 'restaurant', label: 'Restaurants' },
+                { value: 'bar', label: 'Bars' },
+                { value: 'cafe', label: 'Cafes' },
+                { value: 'foodtruck', label: 'Food Trucks' },
+                { value: 'bakery', label: 'Bakeries' }
+            ]
+        };
+
+        function updateCategoryDropdown(filterType) {
+            const dropdown = document.getElementById('categoryDropdown');
+            if (!dropdown) return;
+            
+            // Clear existing options except the first one
+            dropdown.innerHTML = '<option value="">Select Category</option>';
+            
+            // Add categories for the selected filter type
+            const categories = categoryData[filterType] || [];
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.value;
+                option.textContent = category.label;
+                dropdown.appendChild(option);
+            });
+        }
+
         function setMarketFilter(category) {
             currentMarketFilter = category;
             
@@ -7432,11 +7453,8 @@
                 activeBtn.style.boxShadow = '0 4px 15px rgba(0, 255, 255, 0.3)';
             }
             
-            // Reset category dropdown
-            const dropdown = document.getElementById('categoryDropdown');
-            if (dropdown) {
-                dropdown.value = '';
-            }
+            // Update category dropdown with relevant categories
+            updateCategoryDropdown(category);
             
             // Filter posts with strict category separation
             filterPostsByCategory(category);
@@ -7450,21 +7468,17 @@
             const selectedValue = dropdown.value;
             
             if (selectedValue) {
-                // Extract category type and specific category
-                const [type, specificCategory] = selectedValue.split('-');
+                const currentFilter = currentMarketFilter;
                 
-                // First set the main filter type
-                setMarketFilter(type);
-                
-                // Then apply specific category filter
-                if (type === 'shops') {
-                    filterShopCategory(specificCategory);
-                } else if (type === 'services') {
-                    filterServiceCategory(specificCategory);
-                } else if (type === 'rentals') {
-                    filterRentalCategory(specificCategory);
-                } else if (type === 'eats') {
-                    filterEatsCategory(specificCategory);
+                // Apply specific category filter based on current market filter
+                if (currentFilter === 'shops') {
+                    filterShopCategory(selectedValue);
+                } else if (currentFilter === 'services') {
+                    filterServiceCategory(selectedValue);
+                } else if (currentFilter === 'rentals') {
+                    filterRentalCategory(selectedValue);
+                } else if (currentFilter === 'eats') {
+                    filterEatsCategory(selectedValue);
                 }
                 
                 showNotification(`Filtering by ${dropdown.options[dropdown.selectedIndex].text}`, 'success');
