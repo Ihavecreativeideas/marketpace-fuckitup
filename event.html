@@ -470,6 +470,19 @@
                 <div id="recent-checkins">
                     <!-- Recent check-ins will be loaded here -->
                 </div>
+                
+                <!-- Auto-refresh indicator -->
+                <div style="text-align: center; margin-top: 15px; opacity: 0.7; font-size: 0.9rem;">
+                    <span id="refresh-indicator">AUTO Auto-refreshing feed...</span>
+                </div>
+            </div>
+
+            <!-- Support Roster Section -->
+            <div class="event-card">
+                <h2 class="section-title">FANS Support Roster</h2>
+                <div id="support-roster">
+                    <!-- Support roster will be loaded here -->
+                </div>
             </div>
         </div>
     </div>
@@ -485,6 +498,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             createParticles();
             loadEventDetails();
+            startRealtimeUpdates();
             
             console.log('MyPace Event Details page loaded');
         });
@@ -719,6 +733,171 @@
 
         function shareCheckin(checkinId) {
             showNotification('Shared check-in!');
+        }
+
+        // Start real-time updates - Phase 5 Mini-Phase 2
+        function startRealtimeUpdates() {
+            loadRecentCheckins();
+            loadSupportRoster();
+            
+            // Auto-refresh every 15 seconds
+            setInterval(() => {
+                loadRecentCheckins();
+                updateRefreshIndicator();
+            }, 15000);
+        }
+
+        // Load recent check-ins for this event
+        async function loadRecentCheckins() {
+            if (!eventId) return;
+
+            try {
+                const response = await fetch(`/api/mypace/events/${eventId}/checkins?limit=10`);
+                const result = await response.json();
+
+                if (result.success) {
+                    displayRecentCheckins(result.checkins);
+                }
+            } catch (error) {
+                console.error('Error loading recent check-ins:', error);
+            }
+        }
+
+        // Display recent check-ins
+        function displayRecentCheckins(checkins) {
+            const container = document.getElementById('recent-checkins');
+            
+            if (checkins.length === 0) {
+                container.innerHTML = '<p style="text-align: center; opacity: 0.7; padding: 20px;">No check-ins yet. Be the first!</p>';
+                return;
+            }
+
+            container.innerHTML = checkins.map(checkin => `
+                <div class="checkin-item" style="background: rgba(138, 43, 226, 0.1); border-radius: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid rgba(138, 43, 226, 0.3);">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; background: linear-gradient(45deg, #8A2BE2, #FF69B4); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: white;">
+                            ${checkin.avatar}
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                                <span style="font-weight: 700; color: #FF69B4; cursor: pointer;" onclick="viewUserProfile('${checkin.username}')">
+                                    ${checkin.username}
+                                </span>
+                                <span style="font-size: 0.8rem; opacity: 0.7;">
+                                    ${formatTimestamp(checkin.timestamp)}
+                                </span>
+                                ${checkin.supportTag ? `
+                                    <span style="background: rgba(0, 255, 255, 0.2); color: #00ffff; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600;">
+                                        ${checkin.supportTag}
+                                    </span>
+                                ` : ''}
+                            </div>
+                            <div style="margin-bottom: 8px; line-height: 1.4;">
+                                ${checkin.message}
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 15px; font-size: 0.9rem; opacity: 0.8;">
+                                <button onclick="likeCheckin('${checkin.id}')" style="background: none; border: none; color: #FF69B4; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                    <span>LIKE</span> <span>${checkin.likes}</span>
+                                </button>
+                                <button onclick="replyToCheckin('${checkin.id}', '${checkin.username}')" style="background: none; border: none; color: #00ffff; cursor: pointer;">
+                                    REPLY
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load support roster
+        async function loadSupportRoster() {
+            if (!currentEvent || !currentEvent.participants) return;
+
+            const supportRoster = {};
+            currentEvent.participants.forEach(participant => {
+                supportRoster[participant.name] = [];
+            });
+
+            // Demo support data
+            supportRoster['DJ Nova'] = [
+                { username: 'MusicFan2025', avatar: 'MF' },
+                { username: 'LiveMusicLover', avatar: 'LL' }
+            ];
+            supportRoster['Local Food Truck'] = [
+                { username: 'LocalFoodie', avatar: 'LF' }
+            ];
+
+            displaySupportRoster(supportRoster);
+        }
+
+        // Display support roster
+        function displaySupportRoster(roster) {
+            const container = document.getElementById('support-roster');
+            
+            const rosterEntries = Object.entries(roster).filter(([name, supporters]) => supporters.length > 0);
+            
+            if (rosterEntries.length === 0) {
+                container.innerHTML = '<p style="text-align: center; opacity: 0.7; padding: 20px;">No support tags yet</p>';
+                return;
+            }
+
+            container.innerHTML = rosterEntries.map(([participantName, supporters]) => `
+                <div style="background: rgba(138, 43, 226, 0.1); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid rgba(138, 43, 226, 0.3);">
+                    <div style="font-weight: 700; color: #00ffff; margin-bottom: 10px; font-size: 1.1rem;">
+                        FANS Fans here for ${participantName}
+                    </div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        ${supporters.map(supporter => `
+                            <div style="display: flex; align-items: center; gap: 8px; background: rgba(0, 255, 255, 0.1); padding: 8px 12px; border-radius: 20px; border: 1px solid rgba(0, 255, 255, 0.3); cursor: pointer;" onclick="viewUserProfile('${supporter.username}')">
+                                <div style="width: 25px; height: 25px; background: linear-gradient(45deg, #8A2BE2, #FF69B4); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: white;">
+                                    ${supporter.avatar}
+                                </div>
+                                <span style="color: #00ffff; font-weight: 600;">
+                                    ${supporter.username}
+                                </span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update refresh indicator
+        function updateRefreshIndicator() {
+            const indicator = document.getElementById('refresh-indicator');
+            if (indicator) {
+                indicator.textContent = 'SYNC Just updated...';
+                setTimeout(() => {
+                    indicator.textContent = 'AUTO Auto-refreshing feed...';
+                }, 2000);
+            }
+        }
+
+        // Format timestamp
+        function formatTimestamp(timestamp) {
+            const now = new Date();
+            const time = new Date(timestamp);
+            const diff = Math.floor((now - time) / 1000);
+
+            if (diff < 60) return `${diff}s ago`;
+            if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+            return `${Math.floor(diff / 86400)}d ago`;
+        }
+
+        // Like check-in
+        async function likeCheckin(checkinId) {
+            showNotification('Liked check-in!');
+        }
+
+        // Reply to check-in
+        function replyToCheckin(checkinId, username) {
+            showNotification(`Reply to ${username} (coming soon)`);
+        }
+
+        // View user profile
+        function viewUserProfile(username) {
+            window.location.href = `/public-profile.html?user=${username}`;
         }
 
         // Show notification

@@ -3867,6 +3867,223 @@ app.post('/api/mypace/events/:eventId/checkin', async (req, res) => {
   }
 });
 
+// Phase 5 Mini-Phase 2: Enhanced API Endpoints
+
+// Get Event Check-ins API - Phase 5 Step 2
+app.get('/api/mypace/events/:eventId/checkins', async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { limit = 10 } = req.query;
+
+    // Mock recent check-ins data - in production this would query database
+    const mockCheckins = [
+      {
+        id: 'checkin_latest_1',
+        eventId,
+        username: 'MusicFan2025',
+        avatar: 'MF',
+        message: 'Amazing energy tonight! DJ Nova is incredible!',
+        supportTag: 'Here for @djNova',
+        timestamp: new Date(Date.now() - 2 * 60 * 1000).toISOString(), // 2 minutes ago
+        location: { lat: 30.2672, lng: -87.5692 },
+        likes: 12,
+        photo: null
+      },
+      {
+        id: 'checkin_latest_2',
+        eventId,
+        username: 'LocalFoodie',
+        avatar: 'LF',
+        message: 'Joe\'s Tacos are fire! Best food truck in town!',
+        supportTag: 'Supporting @joestacos',
+        timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(), // 5 minutes ago
+        location: { lat: 30.2672, lng: -87.5692 },
+        likes: 8,
+        photo: null
+      },
+      {
+        id: 'checkin_latest_3',
+        eventId,
+        username: 'EventGoer42',
+        avatar: 'EG',
+        message: 'First time at this venue - loving the vibe!',
+        supportTag: null,
+        timestamp: new Date(Date.now() - 8 * 60 * 1000).toISOString(), // 8 minutes ago
+        location: { lat: 30.2672, lng: -87.5692 },
+        likes: 3,
+        photo: null
+      },
+      {
+        id: 'checkin_latest_4',
+        eventId,
+        username: 'PartyMike',
+        avatar: 'PM',
+        message: 'Security team is doing great keeping everyone safe!',
+        supportTag: 'Supporting @eventsecurity',
+        timestamp: new Date(Date.now() - 12 * 60 * 1000).toISOString(), // 12 minutes ago
+        location: { lat: 30.2672, lng: -87.5692 },
+        likes: 6,
+        photo: null
+      },
+      {
+        id: 'checkin_latest_5',
+        eventId,
+        username: 'LiveMusicLover',
+        avatar: 'LL',
+        message: 'Can\'t wait for the next set! This is epic!',
+        supportTag: 'Here for @djNova',
+        timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(), // 15 minutes ago
+        location: { lat: 30.2672, lng: -87.5692 },
+        likes: 9,
+        photo: null
+      }
+    ];
+
+    // Apply limit
+    const limitedCheckins = mockCheckins.slice(0, parseInt(limit as string));
+
+    res.json({
+      success: true,
+      checkins: limitedCheckins,
+      total: mockCheckins.length,
+      eventId
+    });
+
+  } catch (error) {
+    console.error('Error fetching event check-ins:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch event check-ins'
+    });
+  }
+});
+
+// Get Top Supporters Leaderboard API - Phase 5 Step 3
+app.get('/api/mypace/checkins/top-supporters', async (req, res) => {
+  try {
+    const { period = 'week', limit = 10 } = req.query;
+
+    // Mock leaderboard data - in production this would calculate from database
+    const mockLeaderboard = [
+      {
+        username: 'MusicFan2025',
+        avatar: 'MF',
+        checkinCount: 24,
+        eventsAttended: 12,
+        favoriteSupport: '@djNova',
+        streak: 7, // consecutive days with check-ins
+        badges: ['Music Lover', 'Event Explorer'],
+        rank: 1
+      },
+      {
+        username: 'LocalFoodie',
+        avatar: 'LF',
+        checkinCount: 21,
+        eventsAttended: 15,
+        favoriteSupport: '@joestacos',
+        streak: 5,
+        badges: ['Food Critic', 'Community Champion'],
+        rank: 2
+      },
+      {
+        username: 'PartyMike',
+        avatar: 'PM',
+        checkinCount: 18,
+        eventsAttended: 9,
+        favoriteSupport: '@venues',
+        streak: 3,
+        badges: ['Party Animal'],
+        rank: 3
+      },
+      {
+        username: 'LiveMusicLover',
+        avatar: 'LL',
+        checkinCount: 16,
+        eventsAttended: 8,
+        favoriteSupport: '@livemusic',
+        streak: 4,
+        badges: ['Concert Goer'],
+        rank: 4
+      },
+      {
+        username: 'EventGoer42',
+        avatar: 'EG',
+        checkinCount: 14,
+        eventsAttended: 7,
+        favoriteSupport: '@community',
+        streak: 2,
+        badges: ['Social Butterfly'],
+        rank: 5
+      }
+    ];
+
+    res.json({
+      success: true,
+      leaderboard: mockLeaderboard.slice(0, parseInt(limit as string)),
+      period,
+      totalEntries: mockLeaderboard.length
+    });
+
+  } catch (error) {
+    console.error('Error fetching leaderboard:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch leaderboard'
+    });
+  }
+});
+
+// Get Support Tags for User API - Phase 5 Step 4
+app.get('/api/mypace/support-tags/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    // Mock support data - in production this would query database
+    const mockSupportData = {
+      username,
+      totalSupports: 42,
+      recentSupports: [
+        {
+          eventTitle: 'Summer Music Festival',
+          supporterUsername: 'MusicFan2025',
+          message: 'Here for @djNova',
+          timestamp: new Date(Date.now() - 2 * 60 * 1000).toISOString()
+        },
+        {
+          eventTitle: 'Community Art Market',
+          supporterUsername: 'ArtLover88',
+          message: 'Supporting @djNova',
+          timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          eventTitle: 'Food Truck Friday',
+          supporterUsername: 'FoodieExplorer',
+          message: 'Love @djNova music!',
+          timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString()
+        }
+      ],
+      supportsByEvent: {
+        music: 28,
+        food: 8,
+        art: 4,
+        community: 2
+      }
+    };
+
+    res.json({
+      success: true,
+      supportData: mockSupportData
+    });
+
+  } catch (error) {
+    console.error('Error fetching support tags:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch support data'
+    });
+  }
+});
+
 app.get('/api/schedules/:businessId', async (req, res) => {
   try {
     const { businessId } = req.params;
