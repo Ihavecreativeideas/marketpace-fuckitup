@@ -3468,7 +3468,7 @@ app.post('/api/booking/submit-review', async (req, res) => {
 
 // Static file routes for all HTML pages
 const htmlRoutes = [
-  '/', '/community', '/market', '/shops', '/services', '/rentals', '/the-hub', 
+  '/', '/community', '/market', '/mypace', '/shops', '/services', '/rentals', '/the-hub', 
   '/menu', '/profile', '/cart', '/settings', '/delivery', '/deliveries', '/messages',
   '/business-scheduling', '/interactive-map', '/item-verification',
   '/signup-login', '/message-owner', '/rental-delivery', '/support',
