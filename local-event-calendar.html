@@ -438,6 +438,102 @@
             transform: scale(1.1);
         }
 
+        /* Event Modal Styles */
+        .event-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .event-modal-content {
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #64ffda;
+            border-radius: 25px;
+            max-width: 90vw;
+            max-height: 80vh;
+            width: 500px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 20px 40px rgba(100, 255, 218, 0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .event-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 30px 20px;
+            border-bottom: 1px solid rgba(100, 255, 218, 0.3);
+        }
+
+        .event-modal-header h2 {
+            color: #64ffda;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin: 0;
+            text-shadow: 0 0 10px rgba(100, 255, 218, 0.5);
+        }
+
+        .modal-close-btn {
+            background: rgba(100, 255, 218, 0.2);
+            border: 1px solid #64ffda;
+            border-radius: 50%;
+            color: #64ffda;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close-btn:hover {
+            background: rgba(100, 255, 218, 0.4);
+            transform: scale(1.1);
+        }
+
+        .event-modal-body {
+            padding: 20px 30px 30px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .event-modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .event-modal-body::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+
+        .event-modal-body::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #64ffda, #00bcd4);
+            border-radius: 4px;
+        }
+
         .selected-date-events {
             background: rgba(0, 0, 0, 0.85);
             border-radius: 25px;
@@ -1015,8 +1111,17 @@
             </div>
         </div>
 
-        <div class="selected-date-events" id="selectedDateEvents">
-            <!-- Events for selected date will be loaded here -->
+        <!-- Event Details Modal -->
+        <div class="event-modal-overlay" id="eventModalOverlay" style="display: none;" onclick="closeEventModal()">
+            <div class="event-modal-content" onclick="event.stopPropagation()">
+                <div class="event-modal-header">
+                    <h2 id="eventModalTitle">Events for Friday, July 18, 2025</h2>
+                    <button class="modal-close-btn" onclick="closeEventModal()">✕</button>
+                </div>
+                <div class="event-modal-body" id="selectedDateEvents">
+                    <!-- Events for selected date will be loaded here -->
+                </div>
+            </div>
         </div>
 
         <div class="event-details">
@@ -2481,7 +2586,37 @@
             selectedDate = dateStr;
             document.getElementById('selectedDateDisplay').textContent = formatDateForDisplay(dateStr);
             toggleTinyCalendar(); // Close calendar
+            openEventModal(dateStr);
+        }
+
+        function openEventModal(dateStr) {
+            const modal = document.getElementById('eventModalOverlay');
+            const title = document.getElementById('eventModalTitle');
+            
+            // Update modal title
+            const date = new Date(dateStr);
+            const formattedDate = date.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            const dayEvents = events.filter(event => event.date === dateStr);
+            title.textContent = `Events for ${formattedDate} (${dayEvents.length} Event${dayEvents.length !== 1 ? 's' : ''})`;
+            
+            // Load events for the selected date
             loadEventsForDate(dateStr);
+            
+            // Show modal
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closeEventModal() {
+            const modal = document.getElementById('eventModalOverlay');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Restore scrolling
         }
 
         function loadEventsForDate(selectedDate) {
@@ -2543,7 +2678,14 @@
             // Initialize the tiny calendar with today's date
             selectedDate = '2025-07-24';
             document.getElementById('selectedDateDisplay').textContent = formatDateForDisplay(selectedDate);
-            loadEventsForDate(selectedDate);
+            // Don't auto-load events on page load - user clicks date to see events in modal
+        });
+
+        // Add keyboard escape to close modal
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeEventModal();
+            }
         });
 
         function isCurrentDay(eventDate) {
