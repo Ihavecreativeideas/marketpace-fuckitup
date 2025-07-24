@@ -1537,7 +1537,10 @@
         // Floating particles system
         function createFloatingParticles() {
             const particlesContainer = document.querySelector('.particles');
-            if (!particlesContainer) return;
+            if (!particlesContainer) {
+                console.log('Particles container not found, skipping particle creation');
+                return;
+            }
             
             // Create 15 particles (reduced from Market page's amount)
             for (let i = 0; i < 15; i++) {
@@ -1554,7 +1557,24 @@
                     animation: particleFloat ${Math.random() * 10 + 5}s linear infinite;
                     pointer-events: none;
                 `;
-                particlesContainer.appendChild(particle);
+                try {
+                    particlesContainer.appendChild(particle);
+                } catch (error) {
+                    console.error('Error adding particle:', error);
+                }
+            }
+        }
+
+        // Test function to verify modal functionality
+        function testCategorySearch() {
+            console.log('Testing category search modal...');
+            const modal = document.getElementById('categorySearchModal');
+            console.log('Modal element:', modal);
+            if (modal) {
+                console.log('Modal found successfully!');
+                console.log('Current display style:', modal.style.display);
+            } else {
+                console.error('Modal not found in DOM!');
             }
         }
 
@@ -1564,10 +1584,14 @@
         }
 
         function toggleCategorySearch() {
+            console.log('Opening category search...');
             const modal = document.getElementById('categorySearchModal');
             if (modal) {
+                console.log('Modal found, displaying...');
                 modal.style.display = 'block';
                 document.body.style.overflow = 'hidden';
+            } else {
+                console.error('Category search modal not found!');
             }
         }
 
@@ -3309,10 +3333,7 @@
             console.log(`Switched to ${newMode} mode`);
         }
 
-        function toggleCategorySearch() {
-            console.log('Opening category search...');
-            // Category search functionality can be added here
-        }
+
 
         function showPostingModal() {
             console.log('Opening posting modal...');
