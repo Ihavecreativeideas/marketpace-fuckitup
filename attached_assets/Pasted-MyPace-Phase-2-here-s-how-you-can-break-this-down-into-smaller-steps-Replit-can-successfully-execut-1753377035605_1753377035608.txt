@@ -1,0 +1,128 @@
+MyPace Phase 2, here's how you can break this down into smaller steps Replit can successfully execute without getting stuck.
+
+✅ What Replit Agent Is Likely Getting Stuck On
+The file_text parameter is required when using create commands to generate HTML or code files — and if the page is too long or complex, Replit's agent may get overwhelmed.
+
+To avoid that, let’s chunk Phase 2 into smaller steps.
+
+🔧 Let’s Walk Through the Build Steps One at a Time
+✅ Step 1: Replit Builds a New Page Template (MyPace v2)
+Ask Replit:
+
+Create a file named mypace.html that includes:
+
+A header with logo, calendar icon, and map icon (same as community.html)
+
+A section with a "Check In Now" button
+
+A reddish-purple theme
+
+A placeholder div called checkin-feed for check-ins
+
+A floating map button
+
+Then let them confirm the file was successfully created.
+
+✅ Step 2: Add Geo Location Script
+Once the page shell exists, ask:
+
+Add the following geolocation script to mypace.html in a <script> tag at the bottom:
+
+js
+Copy
+Edit
+navigator.geolocation.getCurrentPosition(
+  (position) => {
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+    console.log("User is here:", lat, lon);
+    // TODO: Query Supabase for nearby check-in spots
+  },
+  (error) => {
+    console.error("Geolocation error:", error);
+  }
+);
+This lets you verify geolocation is working before connecting Supabase.
+
+✅ Step 3: Build “Create Check-In” Modal
+Add a modal (hidden by default) that includes:
+
+Upload photo input
+
+Optional caption
+
+Dropdown for “In support of [Artist/Vendor]”
+
+Submit button
+
+Rating bar (1–5 stars)
+
+Optional review textarea
+
+Ask Replit:
+
+Add a modal with:
+
+html
+Copy
+Edit
+<input type="file" accept="image/*">
+<input type="text" placeholder="Caption">
+<select><option value="">In support of...</option></select>
+<textarea placeholder="Leave a review..."></textarea>
+<button>Submit Check-In</button>
+✅ Step 4: Add Public Check-In Feed
+Ask Replit:
+
+Add a scrollable section under the map called #checkin-feed. This will later be used to show all recent check-ins from Supabase.
+
+You can preload this with dummy cards like:
+
+html
+Copy
+Edit
+<div class="checkin-card">
+  <p><strong>@brooke checked in at Joe’s Coffee</strong></p>
+  <p>“Best latte in town!” ⭐⭐⭐⭐⭐</p>
+  <img src="checkin1.jpg">
+</div>
+✅ Step 5: Connect to Supabase
+This is the moment for Supabase database table creation:
+
+checkins (user_id, location_name, lat, lon, photo_url, support_tag, review, rating)
+
+geo_codes (place_name, created_by, lat, lon, description, type)
+
+Ask Replit:
+
+Connect Supabase and create two tables: checkins and geo_codes. Each check-in will post the user's current location, image URL, caption, rating, etc.
+
+✅ Step 6: Add Map Radar Button
+Add a floating icon button (like Google Maps pin). When tapped:
+
+Opens modal with Leaflet.js map
+
+Shows user’s location and pins from geo_codes
+
+Ask Replit:
+
+Add a Leaflet.js map button in the bottom corner. When tapped, it opens a modal with the user’s location + any nearby geo QR pins from geo_codes.
+
+✅ Step 7: Add Integration to Profile Page
+Ask Replit:
+
+On the member profile page, create a new section called “📍 Places I’ve Paced” that displays the last 10 check-ins for that user with a small map, timestamp, and support tag.
+
+✅ Optional Later Step: Facebook Sharing + Invite Button
+Ask Replit:
+
+Add a “Share this check-in” button to each post that opens Facebook’s sharing dialog with the image, location, and caption.
+
+✅ Summary Instructions to Tell Replit
+Let’s pause and build each piece of Phase 2 one step at a time. Please start with:
+
+Creating the mypace.html page with reddish-purple theme
+
+Include header with logo, calendar, and map icons
+
+Add a “Check In” button and #checkin-feed container
