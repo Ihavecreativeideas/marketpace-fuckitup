@@ -55,6 +55,31 @@ export const users = pgTable("users", {
   socialMediaSettings: jsonb("social_media_settings"), // auto-response settings, cross-posting preferences
 });
 
+// MyPace check-ins table for social location sharing
+export const mypaceCheckins = pgTable("mypace_checkins", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  locationName: varchar("location_name").notNull(),
+  latitude: real("latitude"),
+  longitude: real("longitude"),
+  caption: text("caption"),
+  photoUrl: varchar("photo_url"),
+  rating: integer("rating").default(0), // 1-5 stars
+  review: text("review"),
+  supportTarget: varchar("support_target"), // business/artist being supported
+  likes: integer("likes").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// MyPace check-in likes for social interactions
+export const mypaceCheckinLikes = pgTable("mypace_checkin_likes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  checkinId: uuid("checkin_id").notNull().references(() => mypaceCheckins.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Business profiles for Pro members
 export const businesses = pgTable("businesses", {
   id: uuid("id").primaryKey().defaultRandom(),

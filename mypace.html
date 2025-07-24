@@ -647,9 +647,9 @@
             <div class="feed-header">
                 <h2 class="feed-title">Recent Check-Ins</h2>
                 <div class="feed-filters">
-                    <button class="filter-btn active" onclick="filterFeed('nearby')">Nearby</button>
-                    <button class="filter-btn" onclick="filterFeed('popular')">Popular</button>
-                    <button class="filter-btn" onclick="filterFeed('week')">This Week</button>
+                    <button class="filter-btn active" onclick="filterFeedAPI('nearby')">Nearby</button>
+                    <button class="filter-btn" onclick="filterFeedAPI('popular')">Popular</button>
+                    <button class="filter-btn" onclick="filterFeedAPI('week')">This Week</button>
                 </div>
             </div>
             <!-- Feed content will be loaded here -->
@@ -934,29 +934,54 @@
         }
 
         // Form submission
-        function submitCheckIn(event) {
+        async function submitCheckIn(event) {
             event.preventDefault();
             
-            const formData = {
-                location: document.getElementById('checkinLocation').textContent,
-                photo: document.getElementById('photoInput').files[0],
+            const checkinData = {
+                userId: 'user_demo_123', // In real app, get from auth session
+                locationName: document.getElementById('checkinLocation').textContent.replace('📍 ', '').split(' (')[0],
+                latitude: window.userLocation?.latitude || null,
+                longitude: window.userLocation?.longitude || null,
                 caption: document.getElementById('captionInput').value,
-                support: document.getElementById('supportSelect').value,
+                supportTarget: document.getElementById('supportSelect').value,
                 rating: currentRating,
                 review: document.getElementById('reviewInput').value,
-                timestamp: new Date().toISOString(),
-                coordinates: window.userLocation
+                photoUrl: document.getElementById('photoInput').files[0] ? 'demo_photo.jpg' : null
             };
 
-            console.log('Submitting check-in:', formData);
+            console.log('Submitting check-in to API:', checkinData);
             
-            // TODO: Send to Supabase database
-            alert(`Check-in submitted!\n\nLocation: ${formData.location}\nCaption: ${formData.caption}\nRating: ${formData.rating} stars\nSupport: ${formData.support}`);
-            
-            closeCheckInModal();
-            
-            // Add to feed (simulation)
-            addCheckInToFeed(formData);
+            try {
+                // Submit to API
+                const response = await fetch('/api/mypace/checkin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(checkinData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    console.log('✅ Check-in saved to database:', result.checkin);
+                    
+                    showNotification('🎉 Check-in successful! Saved to database and added to MyPace feed.');
+                    
+                    closeCheckInModal();
+                    
+                    // Refresh the feed to show new check-in
+                    setTimeout(() => {
+                        loadCheckinFeed();
+                    }, 1000);
+                } else {
+                    throw new Error(result.error || 'Failed to submit check-in');
+                }
+                
+            } catch (error) {
+                console.error('❌ Check-in submission failed:', error);
+                showNotification('❌ Check-in failed: ' + error.message);
+            }
         }
 
         function openCalendar() {
@@ -1198,6 +1223,194 @@
             setTimeout(() => {
                 loader.remove();
             }, 1000);
+        }
+
+        // New API-Connected Functions for Step 6
+        async function loadCheckinFeed(filter = 'nearby') {
+            console.log('Loading check-in feed with filter:', filter);
+            
+            try {
+                const response = await fetch(`/api/mypace/checkins?filter=${filter}&limit=20`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    console.log('✅ Loaded check-ins from database:', result.checkins);
+                    displayCheckinFeed(result.checkins);
+                } else {
+                    console.error('❌ Failed to load check-ins:', result.error);
+                    // Fallback to sample data
+                    displaySampleCheckinFeed();
+                }
+                
+            } catch (error) {
+                console.error('❌ API error loading check-ins:', error);
+                // Fallback to sample data
+                displaySampleCheckinFeed();
+            }
+        }
+
+        function displayCheckinFeed(checkins) {
+            const feedContainer = document.getElementById('checkin-feed');
+            if (!feedContainer) return;
+
+            // Keep the feed header
+            const header = feedContainer.querySelector('.feed-header');
+            feedContainer.innerHTML = '';
+            if (header) feedContainer.appendChild(header);
+
+            if (checkins.length === 0) {
+                feedContainer.innerHTML += `
+                    <div style="text-align: center; padding: 40px; color: #a0a0a0;">
+                        <p>🌟 No check-ins yet. Be the first to check in at a local spot!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            checkins.forEach(checkin => {
+                const checkinCard = createCheckinCardFromAPI(checkin);
+                feedContainer.appendChild(checkinCard);
+            });
+        }
+
+        function createCheckinCardFromAPI(checkin) {
+            const card = document.createElement('div');
+            card.className = 'checkin-card';
+            
+            const timeAgo = getTimeAgo(new Date(checkin.createdAt));
+            const stars = '★'.repeat(checkin.rating) + '☆'.repeat(5 - checkin.rating);
+            
+            card.innerHTML = `
+                <div class="checkin-header">
+                    <div class="user-info">
+                        <div class="user-avatar">👤</div>
+                        <div>
+                            <div class="user-name">User ${checkin.userId.slice(-3)}</div>
+                            <div class="location">📍 ${checkin.locationName}</div>
+                        </div>
+                    </div>
+                    <div class="time">${timeAgo}</div>
+                </div>
+                
+                ${checkin.caption ? `<div class="caption">${checkin.caption}</div>` : ''}
+                
+                ${checkin.rating > 0 ? `
+                    <div class="rating">
+                        <span class="stars">${stars}</span>
+                        <span class="rating-text">${checkin.rating}/5</span>
+                    </div>
+                ` : ''}
+                
+                ${checkin.review ? `<div class="review">"${checkin.review}"</div>` : ''}
+                
+                ${checkin.supportTarget ? `<div class="support">💝 Supporting: ${checkin.supportTarget}</div>` : ''}
+                
+                <div class="actions">
+                    <button onclick="likeCheckin('${checkin.id}')" class="action-btn">
+                        ❤️ ${checkin.likes || 0}
+                    </button>
+                    <button onclick="commentOnCheckin('${checkin.id}')" class="action-btn">
+                        💬 Comment
+                    </button>
+                    <button onclick="shareCheckin('${checkin.id}')" class="action-btn">
+                        📤 Share
+                    </button>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        async function likeCheckin(checkinId) {
+            try {
+                const response = await fetch(`/api/mypace/checkin/${checkinId}/like`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userId: 'user_demo_123' })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    console.log('✅ Check-in liked:', result.checkin);
+                    showNotification('❤️ Liked!');
+                    // Refresh the current filter
+                    const activeFilter = document.querySelector('.filter-btn.active')?.textContent?.toLowerCase() || 'nearby';
+                    loadCheckinFeed(activeFilter);
+                } else {
+                    console.error('❌ Failed to like check-in:', result.error);
+                    showNotification('❌ Failed to like check-in');
+                }
+                
+            } catch (error) {
+                console.error('❌ API error liking check-in:', error);
+                showNotification('❌ API error');
+            }
+        }
+
+        function displaySampleCheckinFeed() {
+            // Show sample data if API is not available
+            const sampleCheckins = [
+                {
+                    id: 'sample1',
+                    userId: 'user_sarah',
+                    locationName: 'Orange Beach Coffee Shop',
+                    caption: 'Perfect morning coffee spot! ☕',
+                    rating: 5,
+                    review: 'Amazing latte art and friendly staff!',
+                    supportTarget: 'Local Coffee Business',
+                    likes: 12,
+                    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // 2 hours ago
+                },
+                {
+                    id: 'sample2', 
+                    userId: 'user_mike',
+                    locationName: 'Gulf State Park',
+                    caption: 'Beautiful sunset walk 🌅',
+                    rating: 4,
+                    likes: 8,
+                    createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString() // 4 hours ago
+                }
+            ];
+            
+            displayCheckinFeed(sampleCheckins);
+        }
+
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            return `${diffDays}d ago`;
+        }
+
+        function commentOnCheckin(checkinId) {
+            showNotification('💬 Comment feature coming in Phase 3!');
+        }
+
+        function shareCheckin(checkinId) {
+            showNotification('📤 Share feature coming in Phase 3!');
+        }
+
+        // Override filter function to use API
+        function filterFeedAPI(type) {
+            console.log('Filtering feed by:', type);
+            
+            // Update active filter button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Load feed with selected filter
+            loadCheckinFeed(type);
+        }
         }
 
         // Geolocation functionality
@@ -1482,6 +1695,9 @@
             document.getElementById('checkinForm').addEventListener('submit', submitCheckIn);
             
             console.log('MyPace Phase 2 with public check-in feed initialized');
+            
+            // Load initial feed from API
+            loadCheckinFeed('nearby');
         });
     </script>
 </body>

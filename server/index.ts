@@ -50,6 +50,9 @@ const memberTaxThresholds = new Map(); // Track member transaction thresholds fo
 // Initialize custom categories storage
 const userCreatedCategories = new Map(); // Store user-generated categories by type (marketplace, services, entertainment, etc.)
 
+// Initialize MyPace check-ins storage (will be replaced with database)
+const mypaceCheckins = new Map(); // Temporary in-memory storage for check-ins
+
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -3033,6 +3036,141 @@ app.post('/api/integrations/supabase/connect', async (req, res) => {
     res.status(500).json({
       success: false,
       error: error.message || 'Failed to connect to Supabase'
+    });
+  }
+});
+
+// MyPace Check-ins API Endpoints
+app.post('/api/mypace/checkin', async (req, res) => {
+  try {
+    const { 
+      userId, 
+      locationName, 
+      latitude, 
+      longitude, 
+      caption, 
+      photoUrl, 
+      rating, 
+      review, 
+      supportTarget 
+    } = req.body;
+
+    if (!userId || !locationName) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'User ID and location name are required' 
+      });
+    }
+
+    // For now, store in memory (will be replaced with database)
+    const checkinId = `checkin_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const checkin = {
+      id: checkinId,
+      userId,
+      locationName,
+      latitude: latitude || null,
+      longitude: longitude || null,
+      caption: caption || null,
+      photoUrl: photoUrl || null,
+      rating: rating || 0,
+      review: review || null,
+      supportTarget: supportTarget || null,
+      likes: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    mypaceCheckins.set(checkinId, checkin);
+
+    res.json({
+      success: true,
+      checkin,
+      message: 'Check-in created successfully'
+    });
+
+  } catch (error: any) {
+    console.error('Check-in creation error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to create check-in'
+    });
+  }
+});
+
+app.get('/api/mypace/checkins', async (req, res) => {
+  try {
+    const { filter = 'nearby', limit = 20 } = req.query;
+    
+    // Get all check-ins from memory storage
+    let checkins = Array.from(mypaceCheckins.values());
+    
+    // Apply filters
+    switch(filter) {
+      case 'popular':
+        checkins.sort((a, b) => b.likes - a.likes);
+        break;
+      case 'week':
+        const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        checkins = checkins.filter(c => c.createdAt >= weekAgo);
+        break;
+      default: // 'nearby'
+        checkins.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+    
+    // Limit results
+    checkins = checkins.slice(0, parseInt(limit as string));
+    
+    res.json({
+      success: true,
+      checkins,
+      total: checkins.length
+    });
+
+  } catch (error: any) {
+    console.error('Error fetching check-ins:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+app.post('/api/mypace/checkin/:id/like', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId } = req.body;
+    
+    if (!userId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'User ID is required' 
+      });
+    }
+
+    const checkin = mypaceCheckins.get(id);
+    if (!checkin) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Check-in not found' 
+      });
+    }
+
+    // Increment likes
+    checkin.likes += 1;
+    checkin.updatedAt = new Date().toISOString();
+    mypaceCheckins.set(id, checkin);
+
+    res.json({
+      success: true,
+      checkin,
+      message: 'Check-in liked successfully'
+    });
+
+  } catch (error: any) {
+    console.error('Error liking check-in:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
     });
   }
 });
