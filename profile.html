@@ -1002,6 +1002,190 @@
                 <button class="view-all-btn" onclick="viewAllCheckins()">VIEW View All Check-Ins</button>
                 <button class="view-all-btn" onclick="window.location.href='/mypace-rewards-wallet.html'" style="background: linear-gradient(45deg, #8A2BE2, #FF69B4); margin-top: 8px; border: 1px solid rgba(255, 105, 180, 0.3);">WALLET Rewards Wallet</button>
             </div>
+
+            <!-- MyPace Detailed Profile Section - Moved from MyPace Page -->
+            <div class="mypace-detailed-section" style="margin-top: 20px;">
+                <h3 class="mypace-section-title">PACE MyPace Detailed Analytics</h3>
+                
+                <div class="mypace-profile-tabs" style="
+                    display: flex; 
+                    background: rgba(255, 255, 255, 0.1); 
+                    border-radius: 8px; 
+                    padding: 4px; 
+                    margin: 16px 0;
+                ">
+                    <button class="mypace-profile-tab active" onclick="switchMypaceTab('places')" style="
+                        flex: 1;
+                        background: linear-gradient(135deg, #64ffda, #18ffff);
+                        color: #000;
+                        border: none;
+                        padding: 8px 12px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 11px;
+                        font-weight: 600;
+                        transition: all 0.3s ease;
+                    ">SCAN Places I've Paced</button>
+                    <button class="mypace-profile-tab" onclick="switchMypaceTab('achievements')" style="
+                        flex: 1;
+                        background: none;
+                        color: rgba(255, 255, 255, 0.6);
+                        border: none;
+                        padding: 8px 12px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 11px;
+                        font-weight: 600;
+                        transition: all 0.3s ease;
+                    ">TRACK My Achievements</button>
+                    <button class="mypace-profile-tab" onclick="switchMypaceTab('export')" style="
+                        flex: 1;
+                        background: none;
+                        color: rgba(255, 255, 255, 0.6);
+                        border: none;
+                        padding: 8px 12px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 11px;
+                        font-weight: 600;
+                        transition: all 0.3s ease;
+                    ">DATA Export History</button>
+                </div>
+
+                <!-- Places I've Paced Tab -->
+                <div id="mypace-places-content" class="mypace-profile-content active" style="display: block;">
+                    <div class="mypace-sort-controls" style="
+                        display: flex; 
+                        gap: 6px; 
+                        margin-bottom: 12px; 
+                        flex-wrap: wrap;
+                    ">
+                        <button class="mypace-sort-btn active" onclick="sortMypacePlaces('most_visited')" style="
+                            background: rgba(100, 255, 218, 0.2);
+                            border: 1px solid rgba(100, 255, 218, 0.3);
+                            color: #64ffda;
+                            padding: 6px 10px;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            font-size: 10px;
+                            font-weight: 600;
+                        ">FREQ Most Visited</button>
+                        <button class="mypace-sort-btn" onclick="sortMypacePlaces('fan_support')" style="
+                            background: rgba(255, 255, 255, 0.1);
+                            border: 1px solid rgba(255, 255, 255, 0.2);
+                            color: rgba(255, 255, 255, 0.7);
+                            padding: 6px 10px;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            font-size: 10px;
+                            font-weight: 600;
+                        ">BOOST Fan Support</button>
+                        <button class="mypace-sort-btn" onclick="sortMypacePlaces('ratings_left')" style="
+                            background: rgba(255, 255, 255, 0.1);
+                            border: 1px solid rgba(255, 255, 255, 0.2);
+                            color: rgba(255, 255, 255, 0.7);
+                            padding: 6px 10px;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            font-size: 10px;
+                            font-weight: 600;
+                        ">RATE Ratings Left</button>
+                        <button class="mypace-sort-btn" onclick="sortMypacePlaces('recent')" style="
+                            background: rgba(255, 255, 255, 0.1);
+                            border: 1px solid rgba(255, 255, 255, 0.2);
+                            color: rgba(255, 255, 255, 0.7);
+                            padding: 6px 10px;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            font-size: 10px;
+                            font-weight: 600;
+                        ">PING Most Recent</button>
+                    </div>
+                    <div class="mypace-places-grid" id="mypace-places-grid" style="
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                        gap: 8px;
+                    ">
+                        <!-- Places will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- My Achievements Tab -->
+                <div id="mypace-achievements-content" class="mypace-profile-content" style="display: none;">
+                    <div class="mypace-achievements-grid" id="mypace-achievements-grid" style="
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                        gap: 10px;
+                    ">
+                        <!-- Achievements will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Export History Tab -->
+                <div id="mypace-export-content" class="mypace-profile-content" style="display: none;">
+                    <div class="mypace-export-section" style="
+                        background: rgba(255, 255, 255, 0.05);
+                        border-radius: 8px;
+                        padding: 16px;
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                    ">
+                        <div class="mypace-export-title" style="
+                            font-size: 14px;
+                            font-weight: 600;
+                            color: #64ffda;
+                            margin-bottom: 8px;
+                        ">Export Check-In History</div>
+                        <p style="color: #a0a0a0; margin-bottom: 12px; font-size: 12px;">Download your complete check-in history for tax purposes, business records, or personal use.</p>
+                        <div class="mypace-export-controls" style="
+                            display: flex;
+                            gap: 8px;
+                            flex-wrap: wrap;
+                            align-items: center;
+                        ">
+                            <input type="date" class="mypace-date-input" id="mypace-export-from" placeholder="From Date" style="
+                                background: rgba(255, 255, 255, 0.1);
+                                border: 1px solid rgba(255, 255, 255, 0.2);
+                                color: white;
+                                padding: 6px 8px;
+                                border-radius: 4px;
+                                font-size: 11px;
+                                flex: 1;
+                                min-width: 100px;
+                            ">
+                            <input type="date" class="mypace-date-input" id="mypace-export-to" placeholder="To Date" style="
+                                background: rgba(255, 255, 255, 0.1);
+                                border: 1px solid rgba(255, 255, 255, 0.2);
+                                color: white;
+                                padding: 6px 8px;
+                                border-radius: 4px;
+                                font-size: 11px;
+                                flex: 1;
+                                min-width: 100px;
+                            ">
+                            <button class="mypace-export-btn" onclick="exportMypaceHistory('json')" style="
+                                background: linear-gradient(135deg, #64ffda, #18ffff);
+                                color: #000;
+                                border: none;
+                                padding: 6px 12px;
+                                border-radius: 4px;
+                                cursor: pointer;
+                                font-size: 10px;
+                                font-weight: 600;
+                            ">Export JSON</button>
+                            <button class="mypace-export-btn" onclick="exportMypaceHistory('csv')" style="
+                                background: linear-gradient(135deg, #64ffda, #18ffff);
+                                color: #000;
+                                border: none;
+                                padding: 6px 12px;
+                                border-radius: 4px;
+                                cursor: pointer;
+                                font-size: 10px;
+                                font-weight: 600;
+                            ">Export CSV</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Tab Navigation -->
@@ -2278,6 +2462,179 @@
             }
         }
 
+        // MyPace Detailed Section Tab Functions - Moved from MyPace page
+        function switchMypaceTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.mypace-profile-content').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.mypace-profile-tab').forEach(btn => {
+                btn.style.background = 'none';
+                btn.style.color = 'rgba(255, 255, 255, 0.6)';
+            });
+            
+            // Show selected tab
+            const targetTab = document.getElementById(`mypace-${tabName}-content`);
+            if (targetTab) {
+                targetTab.style.display = 'block';
+            }
+            
+            // Activate selected tab button
+            const activeBtn = event.target;
+            activeBtn.style.background = 'linear-gradient(135deg, #64ffda, #18ffff)';
+            activeBtn.style.color = '#000';
+            
+            // Load content based on tab
+            if (tabName === 'places') {
+                loadMypacePlaces();
+            } else if (tabName === 'achievements') {
+                loadMypaceAchievements();
+            }
+        }
+        
+        function sortMypacePlaces(sortType) {
+            // Update active sort button
+            document.querySelectorAll('.mypace-sort-btn').forEach(btn => {
+                btn.style.background = 'rgba(255, 255, 255, 0.1)';
+                btn.style.color = 'rgba(255, 255, 255, 0.7)';
+                btn.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+            });
+            
+            event.target.style.background = 'rgba(100, 255, 218, 0.2)';
+            event.target.style.color = '#64ffda';
+            event.target.style.border = '1px solid rgba(100, 255, 218, 0.3)';
+            
+            // Sort and reload places
+            loadMypacePlaces(sortType);
+        }
+        
+        function loadMypacePlaces(sortType = 'most_visited') {
+            const placesGrid = document.getElementById('mypace-places-grid');
+            if (!placesGrid) return;
+            
+            // Sample places data with teal theme - NO EMOJIS
+            const places = [
+                { name: "Joe's Coffee Shop", visits: 15, support: 8, rating: 5, lastVisit: "2d ago", image: "BREW" },
+                { name: "Ocean View Restaurant", visits: 8, support: 12, rating: 4, lastVisit: "1w ago", image: "WAVE" },
+                { name: "Downtown Art Gallery", visits: 6, support: 15, rating: 5, lastVisit: "3d ago", image: "ART" },
+                { name: "Marina Music Venue", visits: 12, support: 20, rating: 5, lastVisit: "5d ago", image: "SOUND" }
+            ];
+            
+            placesGrid.innerHTML = places.map(place => `
+                <div style="
+                    background: rgba(100, 255, 218, 0.1);
+                    border: 1px solid rgba(100, 255, 218, 0.2);
+                    border-radius: 8px;
+                    padding: 12px;
+                    text-align: center;
+                    transition: all 0.3s ease;
+                    cursor: pointer;
+                ">
+                    <div style="font-size: 24px; margin-bottom: 8px;">${place.image}</div>
+                    <div style="font-size: 11px; font-weight: 600; color: #64ffda; margin-bottom: 4px;">${place.name}</div>
+                    <div style="font-size: 9px; color: rgba(255, 255, 255, 0.7); margin-bottom: 6px;">VISIT ${place.visits} visits • BOOST ${place.support} support</div>
+                    <div style="font-size: 8px; color: rgba(255, 255, 255, 0.5);">LAST ${place.lastVisit}</div>
+                </div>
+            `).join('');
+        }
+        
+        function loadMypaceAchievements() {
+            const achievementsGrid = document.getElementById('mypace-achievements-grid');
+            if (!achievementsGrid) return;
+            
+            // Sample achievements with teal theme
+            const achievements = [
+                { name: "REGULAR", desc: "Regular at Joe's Coffee", progress: "5/5", status: "UNLOCKED", rarity: "COMMON", icon: "STAR" },
+                { name: "EXPLORER", desc: "Checked in at 10 locations", progress: "7/10", status: "PROGRESS", rarity: "COMMON", icon: "EXPLORE" },
+                { name: "CHAMPION", desc: "Community Champion", progress: "35/50", status: "PROGRESS", rarity: "RARE", icon: "CROWN" },
+                { name: "SUPPORTER", desc: "Business Supporter", progress: "12/25", status: "PROGRESS", rarity: "COMMON", icon: "SUPPORT" }
+            ];
+            
+            achievementsGrid.innerHTML = achievements.map(achievement => `
+                <div style="
+                    background: ${achievement.status === 'UNLOCKED' ? 'rgba(100, 255, 218, 0.15)' : 'rgba(255, 255, 255, 0.05)'};
+                    border: 1px solid ${achievement.status === 'UNLOCKED' ? 'rgba(100, 255, 218, 0.3)' : 'rgba(255, 255, 255, 0.1)'};
+                    border-radius: 8px;
+                    padding: 12px;
+                    text-align: center;
+                    position: relative;
+                ">
+                    <div style="
+                        position: absolute;
+                        top: 6px;
+                        right: 6px;
+                        background: ${achievement.rarity === 'RARE' ? 'rgba(138, 43, 226, 0.8)' : 'rgba(100, 255, 218, 0.8)'};
+                        color: #000;
+                        padding: 2px 6px;
+                        border-radius: 10px;
+                        font-size: 7px;
+                        font-weight: 600;
+                    ">${achievement.rarity}</div>
+                    <div style="font-size: 14px; font-weight: 600; color: #64ffda; margin-bottom: 4px;">${achievement.icon}</div>
+                    <div style="font-size: 11px; font-weight: 600; color: #64ffda; margin-bottom: 4px;">${achievement.name}</div>
+                    <div style="font-size: 9px; color: rgba(255, 255, 255, 0.7); margin-bottom: 6px;">${achievement.desc}</div>
+                    <div style="
+                        background: rgba(255, 255, 255, 0.1);
+                        height: 4px;
+                        border-radius: 2px;
+                        margin-bottom: 4px;
+                        overflow: hidden;
+                    ">
+                        <div style="
+                            background: ${achievement.status === 'UNLOCKED' ? '#64ffda' : 'rgba(100, 255, 218, 0.5)'};
+                            height: 100%;
+                            width: ${achievement.status === 'UNLOCKED' ? '100%' : '70%'};
+                            border-radius: 2px;
+                        "></div>
+                    </div>
+                    <div style="font-size: 8px; color: rgba(255, 255, 255, 0.5);">${achievement.progress}</div>
+                    <div style="font-size: 7px; color: ${achievement.status === 'UNLOCKED' ? '#64ffda' : 'rgba(255, 255, 255, 0.5)'}; margin-top: 4px;">${achievement.status === 'UNLOCKED' ? 'UNLOCKED' : 'IN PROGRESS'}</div>
+                </div>
+            `).join('');
+        }
+        
+        function exportMypaceHistory(format) {
+            const fromDate = document.getElementById('mypace-export-from').value;
+            const toDate = document.getElementById('mypace-export-to').value;
+            
+            if (!fromDate || !toDate) {
+                alert('Please select both start and end dates for export.');
+                return;
+            }
+            
+            // Sample export functionality
+            const exportData = {
+                dateRange: `${fromDate} to ${toDate}`,
+                format: format.toUpperCase(),
+                totalCheckins: 28,
+                uniqueLocations: 12,
+                exported: new Date().toISOString()
+            };
+            
+            if (format === 'json') {
+                const dataStr = JSON.stringify(exportData, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `mypace-history-${fromDate}-to-${toDate}.json`;
+                link.click();
+            } else if (format === 'csv') {
+                const csvContent = `Date Range,Format,Total Check-ins,Unique Locations,Exported
+${exportData.dateRange},${exportData.format},${exportData.totalCheckins},${exportData.uniqueLocations},${exportData.exported}`;
+                const dataBlob = new Blob([csvContent], {type: 'text/csv'});
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `mypace-history-${fromDate}-to-${toDate}.csv`;
+                link.click();
+            }
+            
+            alert(`MyPace history exported as ${format.toUpperCase()} file successfully!`);
+        }
+
         // Initialize page
         createParticles();
         
@@ -2286,6 +2643,10 @@
         loadRecentCheckins();
         loadUserProfile();
         updateProStatus();
+        
+        // Load MyPace detailed section data
+        loadMypacePlaces();
+        loadMypaceAchievements();
     </script>
 
     <!-- Bottom Navigation -->
