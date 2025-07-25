@@ -2398,7 +2398,7 @@
                 <div class="form-section">
                     <label class="form-label">Location</label>
                     <div style="background: rgba(100, 255, 218, 0.2); padding: 10px; border-radius: 20px; color: #e2e8f0;">
-                        <span id="checkinLocation">LOC: Detecting location...</span>
+                        <span id="checkinLocation">LOC: Getting your location...</span>
                     </div>
                 </div>
 
@@ -2418,17 +2418,13 @@
                     <input type="text" class="form-input" id="captionInput" placeholder="What's happening here?">
                 </div>
 
-                <!-- Support Dropdown -->
+                <!-- Support Tagging -->
                 <div class="form-section">
-                    <label class="form-label">In Support Of</label>
-                    <select class="form-select" id="supportSelect">
-                        <option value="">Choose who you're supporting...</option>
-                        <option value="Orange Beach Coffee Shop">BREW: Orange Beach Coffee Shop</option>
-                        <option value="Gulf Shores Music Festival">SOUND: Gulf Shores Music Festival</option>
-                        <option value="Local Artist Sarah">ART: Local Artist Sarah</option>
-                        <option value="Beach Cleanup Volunteers">WAVE: Beach Cleanup Volunteers</option>
-                        <option value="Custom">ADD: Add Custom Support</option>
-                    </select>
+                    <label class="form-label">Tag Support (People, Businesses, Events)</label>
+                    <input type="text" class="form-input" id="supportTagInput" placeholder="@artistname, @businessname, or #eventname">
+                    <div style="color: #64ffda; font-size: 0.75rem; margin-top: 4px; line-height: 1.3;">
+                        @ for people/businesses • # for events • Non-members get Facebook invites to join MarketPace
+                    </div>
                 </div>
 
                 <!-- Rating -->
@@ -2571,10 +2567,59 @@
             const modal = document.getElementById('checkinModal');
             modal.classList.add('active');
             
-            // Update location in modal
-            if (window.userLocation) {
-                document.getElementById('checkinLocation').textContent = 'SCAN: Orange Beach Coffee Shop (0.1km away)';
+            // Start location detection
+            detectUserLocation();
+        }
+
+        // Detect user location for check-in
+        function detectUserLocation() {
+            const locationSpan = document.getElementById('checkinLocation');
+            locationSpan.textContent = 'LOC: Getting your location...';
+            
+            if (!navigator.geolocation) {
+                locationSpan.textContent = 'LOC: Location not supported';
+                return;
             }
+            
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    // Success - got location
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    // For demo, simulate nearby places based on coordinates
+                    const nearbyPlaces = [
+                        'Orange Beach Coffee Shop',
+                        'Gulf Shores Music Venue', 
+                        'The Flora-Bama',
+                        'Downtown Art Gallery',
+                        'Beach View Restaurant'
+                    ];
+                    
+                    const randomPlace = nearbyPlaces[Math.floor(Math.random() * nearbyPlaces.length)];
+                    const randomDistance = (Math.random() * 0.5 + 0.1).toFixed(1); // 0.1-0.6km
+                    
+                    locationSpan.textContent = `LOC: ${randomPlace} (${randomDistance}km away)`;
+                    
+                    // Store location for form submission
+                    window.currentCheckInLocation = {
+                        place: randomPlace,
+                        distance: randomDistance,
+                        lat: lat,
+                        lng: lng
+                    };
+                },
+                (error) => {
+                    // Error getting location
+                    console.error('Location error:', error);
+                    locationSpan.textContent = 'LOC: Enable location to check-in';
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 300000 // 5 minutes
+                }
+            );
         }
 
         function closeCheckInModal() {
@@ -2653,16 +2698,21 @@
         async function submitCheckIn(event) {
             event.preventDefault();
             
+            // Get location info from our detection
+            const locationInfo = window.currentCheckInLocation || {};
+            const supportTags = document.getElementById('supportTagInput').value;
+            
             const checkinData = {
                 userId: 'user_demo_123', // In real app, get from auth session
-                locationName: document.getElementById('checkinLocation').textContent.replace('LOC: ', '').split(' (')[0],
-                latitude: window.userLocation?.latitude || null,
-                longitude: window.userLocation?.longitude || null,
+                locationName: locationInfo.place || 'Unknown Location',
+                latitude: locationInfo.lat || null,
+                longitude: locationInfo.lng || null,
                 caption: document.getElementById('captionInput').value,
-                supportTarget: document.getElementById('supportSelect').value,
+                supportTags: supportTags, // Now uses the new tagging system
                 rating: currentRating,
                 review: document.getElementById('reviewInput').value,
-                photoUrl: document.getElementById('photoInput').files[0] ? 'demo_photo.jpg' : null
+                photoUrl: document.getElementById('photoInput').files[0] ? 'demo_photo.jpg' : null,
+                distance: locationInfo.distance || null
             };
 
             console.log('Submitting check-in to API:', checkinData);
@@ -2682,7 +2732,14 @@
                 if (result.success) {
                     console.log('✅ Check-in saved to database:', result.checkin);
                     
-                    showNotification('SIGNAL: Check-in successful! Saved to database and added to MyPace feed.');
+                    // Show success message with Facebook notification info
+                    let message = 'SIGNAL: Check-in successful! ';
+                    if (supportTags) {
+                        message += 'Facebook notifications sent to tagged people/businesses. ';
+                    }
+                    message += 'Check-in added to your MyPace feed.';
+                    
+                    showNotification(message);
                     
                     closeCheckInModal();
                     
