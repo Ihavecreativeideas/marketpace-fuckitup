@@ -2847,14 +2847,33 @@
             try {
                 showNotification('Connecting to Facebook...', 'info');
                 
-                const response = await fetch('/api/facebook/auth-url');
-                if (!response.ok) {
-                    throw new Error('Failed to get Facebook auth URL');
+                // Generate Facebook auth URL directly with correct redirect URI
+                const appId = '1043690817269912'; // Your Facebook App ID
+                const currentDomain = window.location.hostname;
+                
+                // Use exact redirect URI that matches your Facebook app configuration
+                let redirectUri;
+                if (currentDomain.includes('workspace.ihavecreativeid.repl.co')) {
+                    redirectUri = 'https://workspace.ihavecreativeid.repl.co/api/facebook/callback';
+                } else if (currentDomain.includes('www.marketpace.shop')) {
+                    redirectUri = 'https://www.marketpace.shop/api/facebook/callback';
+                } else if (currentDomain.includes('marketpace.shop')) {
+                    redirectUri = 'https://marketpace.shop/auth/facebook/callback';
+                } else if (currentDomain.includes('localhost')) {
+                    redirectUri = 'http://localhost:5000/api/facebook/callback';
+                } else {
+                    redirectUri = 'https://www.marketpace.shop/api/facebook/callback';
                 }
-                const data = await response.json();
+                
+                const scopes = 'user_friends,pages_read_engagement,pages_show_list';
+                const authUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scopes}&response_type=code`;
+                
+                console.log('Current domain:', currentDomain);
+                console.log('Using redirect URI:', redirectUri);
+                console.log('Facebook auth URL:', authUrl);
                 
                 // Use same window redirect for reliability in all environments
-                window.location.href = data.authUrl;
+                window.location.href = authUrl;
             } catch (error) {
                 console.error('Facebook authentication error:', error);
                 showNotification('Facebook connection failed: ' + error.message, 'error');

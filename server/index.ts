@@ -6232,6 +6232,26 @@ app.get('/api/facebook/search-artists', async (req, res) => {
   }
 });
 
+// Test endpoint to check domain detection
+app.get('/api/facebook/test-domain', (req, res) => {
+  const host = req.get('host') || '';
+  const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
+  const userAgent = req.get('User-Agent') || '';
+  
+  res.json({
+    host,
+    protocol,
+    fullUrl: `${protocol}://${host}`,
+    userAgent,
+    headers: req.headers,
+    detectedRedirectUri: host.includes('workspace.ihavecreativeid.repl.co') ? 
+      'https://workspace.ihavecreativeid.repl.co/api/facebook/callback' :
+      host.includes('www.marketpace.shop') ?
+      'https://www.marketpace.shop/api/facebook/callback' :
+      'Unknown domain - check Facebook app configuration'
+  });
+});
+
 // Facebook authentication for MyPace
 app.get('/api/facebook/auth-url', (req, res) => {
   const appId = process.env.FACEBOOK_APP_ID;
@@ -6239,15 +6259,22 @@ app.get('/api/facebook/auth-url', (req, res) => {
   // Use exact redirect URI that matches Facebook app configuration
   let redirectUri;
   const host = req.get('host') || '';
+  const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
   
-  if (host.includes('marketpace.shop')) {
-    redirectUri = host.startsWith('www.') ? 
-      'https://www.marketpace.shop/api/facebook/callback' : 
-      'https://marketpace.shop/api/facebook/callback';
-  } else if (host.includes('repl.co')) {
+  console.log('Detecting domain for Facebook redirect:', { host, protocol, fullUrl: `${protocol}://${host}` });
+  
+  // Match exact configured redirect URIs from Facebook app
+  if (host.includes('workspace.ihavecreativeid.repl.co')) {
     redirectUri = 'https://workspace.ihavecreativeid.repl.co/api/facebook/callback';
+  } else if (host.includes('www.marketpace.shop')) {
+    redirectUri = 'https://www.marketpace.shop/api/facebook/callback';
+  } else if (host.includes('marketpace.shop')) {
+    redirectUri = 'https://marketpace.shop/auth/facebook/callback'; // Note: using /auth/ for non-www
   } else if (host.includes('localhost')) {
     redirectUri = 'http://localhost:5000/api/facebook/callback';
+  } else if (host.includes('replit.dev') || host.includes('repl.co')) {
+    // For any other Replit domain, use the workspace URL
+    redirectUri = 'https://workspace.ihavecreativeid.repl.co/api/facebook/callback';
   } else {
     // Default to production
     redirectUri = 'https://www.marketpace.shop/api/facebook/callback';
@@ -6268,16 +6295,23 @@ app.get('/api/facebook/callback', async (req, res) => {
     
     // Use same redirect URI logic as auth-url endpoint
     const host = req.get('host') || '';
+    const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
     let redirectUri;
     
-    if (host.includes('marketpace.shop')) {
-      redirectUri = host.startsWith('www.') ? 
-        'https://www.marketpace.shop/api/facebook/callback' : 
-        'https://marketpace.shop/api/facebook/callback';
-    } else if (host.includes('repl.co')) {
+    console.log('Facebook callback domain detection:', { host, protocol, fullUrl: `${protocol}://${host}` });
+    
+    // Match exact configured redirect URIs from Facebook app
+    if (host.includes('workspace.ihavecreativeid.repl.co')) {
       redirectUri = 'https://workspace.ihavecreativeid.repl.co/api/facebook/callback';
+    } else if (host.includes('www.marketpace.shop')) {
+      redirectUri = 'https://www.marketpace.shop/api/facebook/callback';
+    } else if (host.includes('marketpace.shop')) {
+      redirectUri = 'https://marketpace.shop/auth/facebook/callback'; // Note: using /auth/ for non-www
     } else if (host.includes('localhost')) {
       redirectUri = 'http://localhost:5000/api/facebook/callback';
+    } else if (host.includes('replit.dev') || host.includes('repl.co')) {
+      // For any other Replit domain, use the workspace URL
+      redirectUri = 'https://workspace.ihavecreativeid.repl.co/api/facebook/callback';
     } else {
       // Default to production
       redirectUri = 'https://www.marketpace.shop/api/facebook/callback';
