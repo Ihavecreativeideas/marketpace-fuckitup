@@ -4546,6 +4546,125 @@
 
         // Advanced Shift Management System
         let customShifts = [];
+        let selectedShiftLocation = null;
+        
+        // Comprehensive Location Database
+        const shiftLocations = [
+            // Business Locations
+            { name: "Main Store", type: "STORE", address: "123 Main Street, Gulf Shores, AL", lat: 30.2460, lng: -87.7014 },
+            { name: "Warehouse District", type: "WAREHOUSE", address: "456 Industrial Blvd, Orange Beach, AL", lat: 30.2942, lng: -87.5714 },
+            { name: "Corporate Office", type: "OFFICE", address: "789 Business Park Dr, Mobile, AL", lat: 30.6954, lng: -88.0399 },
+            { name: "Distribution Center", type: "DISTRIB", address: "321 Commerce Way, Pensacola, FL", lat: 30.4518, lng: -87.2169 },
+            
+            // Retail Locations
+            { name: "Downtown Storefront", type: "RETAIL", address: "555 Harbor Blvd, Gulf Shores, AL", lat: 30.2460, lng: -87.7014 },
+            { name: "Beachside Shop", type: "RETAIL", address: "777 Gulf State Park, Orange Beach, AL", lat: 30.2942, lng: -87.5714 },
+            { name: "Mall Kiosk", type: "KIOSK", address: "888 Shopping Center Dr, Mobile, AL", lat: 30.6954, lng: -88.0399 },
+            
+            // Event Venues
+            { name: "The Flora-Bama", type: "VENUE", address: "17401 Perdido Key Dr, Pensacola, FL", lat: 30.2729, lng: -87.5413 },
+            { name: "The Wharf Amphitheater", type: "VENUE", address: "4830 Main St, Orange Beach, AL", lat: 30.2942, lng: -87.5714 },
+            { name: "Gulf State Park Lodge", type: "VENUE", address: "21196 E Beach Blvd, Gulf Shores, AL", lat: 30.2460, lng: -87.7014 },
+            
+            // Food Service Locations
+            { name: "Kitchen Central", type: "KITCHEN", address: "246 Culinary Ave, Mobile, AL", lat: 30.6954, lng: -88.0399 },
+            { name: "Catering Depot", type: "CATERING", address: "135 Service Road, Gulf Shores, AL", lat: 30.2460, lng: -87.7014 },
+            { name: "Food Truck Hub", type: "MOBILE", address: "864 Festival Grounds, Orange Beach, AL", lat: 30.2942, lng: -87.5714 },
+            
+            // Outdoor Locations
+            { name: "Beach Access Point 1", type: "BEACH", address: "Gulf Shores Public Beach, Gulf Shores, AL", lat: 30.2460, lng: -87.7014 },
+            { name: "Marina Dock 7", type: "MARINA", address: "Orange Beach Marina, Orange Beach, AL", lat: 30.2942, lng: -87.5714 },
+            { name: "Festival Grounds", type: "FESTIVAL", address: "Hangout Music Festival Grounds, Gulf Shores, AL", lat: 30.2460, lng: -87.7014 },
+            
+            // Service Locations  
+            { name: "Mobile Service Unit", type: "MOBILE", address: "Various Locations", lat: 30.2460, lng: -87.7014 },
+            { name: "Home Office", type: "HOME", address: "Remote Work Location", lat: 30.2460, lng: -87.7014 },
+            { name: "Client Site Alpha", type: "CLIENT", address: "Customer Location A", lat: 30.2942, lng: -87.5714 }
+        ];
+        
+        function showLocationSuggestions(query, resultsId) {
+            const resultsDiv = document.getElementById(resultsId);
+            
+            if (!query || query.length < 2) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+            
+            const filteredLocations = shiftLocations.filter(location =>
+                location.name.toLowerCase().includes(query.toLowerCase()) ||
+                location.type.toLowerCase().includes(query.toLowerCase()) ||
+                location.address.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            if (filteredLocations.length === 0) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+            
+            resultsDiv.innerHTML = filteredLocations.map(location => `
+                <div onclick="selectShiftLocation('${location.name}', '${location.address}', ${location.lat}, ${location.lng}, '${location.type}', '${resultsId}')" 
+                     style="padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); cursor: pointer; transition: background 0.2s;" 
+                     onmouseover="this.style.background='rgba(0, 255, 255, 0.1)'" 
+                     onmouseout="this.style.background='transparent'">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="background: #00ffff; color: black; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">${location.type}</span>
+                        <span style="color: white; font-weight: bold;">${location.name}</span>
+                    </div>
+                    <div style="color: #94a3b8; font-size: 11px; margin-top: 2px;">${location.address}</div>
+                </div>
+            `).join('');
+            
+            resultsDiv.style.display = 'block';
+        }
+        
+        function selectShiftLocation(name, address, lat, lng, type, resultsId) {
+            const input = document.getElementById('newShiftLocation');
+            const resultsDiv = document.getElementById(resultsId);
+            const qrStatus = document.getElementById('shiftQRStatus');
+            const qrLocationName = document.getElementById('qrLocationName');
+            
+            input.value = name;
+            resultsDiv.style.display = 'none';
+            
+            // Store selected location data
+            selectedShiftLocation = { name, address, lat, lng, type };
+            
+            // Show QR status
+            qrLocationName.textContent = `${name} (${address})`;
+            qrStatus.style.display = 'block';
+            
+            // Generate QR code automatically
+            generateShiftLocationQR(selectedShiftLocation);
+            
+            showNotification(`📍 Location selected: ${name} - QR Code generated automatically`, 'success');
+        }
+        
+        function generateShiftLocationQR(location) {
+            const qrData = {
+                type: 'shift_location',
+                location: location.name,
+                address: location.address,
+                coordinates: { lat: location.lat, lng: location.lng },
+                validationRadius: 100, // meters
+                created: new Date().toISOString()
+            };
+            
+            console.log('Shift Location QR Generated:', qrData);
+            
+            // Here you would typically send to server to generate actual QR code
+            // For now, we'll simulate the QR generation
+            return qrData;
+        }
+        
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function(event) {
+            const resultsDiv = document.getElementById('shiftLocationResults');
+            const input = document.getElementById('newShiftLocation');
+            
+            if (resultsDiv && !input.contains(event.target) && !resultsDiv.contains(event.target)) {
+                resultsDiv.style.display = 'none';
+            }
+        });
         
         function openQuickShiftCreator() {
             if (employees.length === 0) {
@@ -4644,8 +4763,21 @@
                         </div>
                         
                         <div style="margin-bottom: 20px;">
-                            <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Location</label>
-                            <input type="text" id="newShiftLocation" placeholder="e.g., Main Store, Warehouse, Event Hall" style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                            <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Location <span style="color: #00ffff;">(Predictive Search + Auto QR)</span></label>
+                            <div style="position: relative;">
+                                <input type="text" id="newShiftLocation" placeholder="Type location name..." oninput="showLocationSuggestions(this.value, 'shiftLocationResults')" onfocus="showLocationSuggestions(this.value, 'shiftLocationResults')" style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                                <div id="shiftLocationResults" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: rgba(0, 0, 0, 0.95); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; max-height: 200px; overflow-y: auto; z-index: 1000;"></div>
+                            </div>
+                            
+                            <!-- QR Code Status Display -->
+                            <div id="shiftQRStatus" style="display: none; margin-top: 8px; padding: 8px 12px; background: rgba(0, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 6px;">
+                                <div style="display: flex; align-items: center; gap: 8px; color: #00ffff; font-size: 12px;">
+                                    <span>📍</span>
+                                    <span id="qrLocationName"></span>
+                                    <span style="color: #94a3b8;">•</span>
+                                    <span style="color: #22c55e;">QR Code Auto-Generated</span>
+                                </div>
+                            </div>
                         </div>
                         
                         <div style="display: flex; gap: 12px; justify-content: flex-end;">
@@ -4737,7 +4869,7 @@
             const shiftName = document.getElementById('shiftName').value;
             const startTime = document.getElementById('newShiftStartTime').value;
             const endTime = document.getElementById('newShiftEndTime').value;
-            const location = document.getElementById('newShiftLocation').value || 'Main Location';
+            const location = selectedShiftLocation ? selectedShiftLocation.name : (document.getElementById('newShiftLocation').value || 'Main Location');
             
             // Get selected days
             const selectedDays = Array.from(document.querySelectorAll('input[name="shiftDays"]:checked'))
@@ -4765,7 +4897,7 @@
             
             const timeText = `${formatTime(startTime)} - ${formatTime(endTime)}`;
             
-            // Create shift object
+            // Create shift object with location data and QR
             const newShift = {
                 id: Date.now(),
                 name: shiftName,
@@ -4775,6 +4907,8 @@
                 days: selectedDays,
                 members: selectedMembers,
                 location,
+                locationData: selectedShiftLocation,
+                qrCode: selectedShiftLocation ? generateShiftLocationQR(selectedShiftLocation) : null,
                 created: new Date().toISOString()
             };
             
