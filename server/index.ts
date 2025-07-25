@@ -4741,9 +4741,14 @@ app.post('/api/booking/submit-review', async (req, res) => {
   }
 });
 
+// Root redirect route
+app.get('/', (req, res) => {
+  res.redirect('/community');
+});
+
 // Static file routes for all HTML pages
 const htmlRoutes = [
-  '/', '/community', '/market', '/mypace', '/shops', '/services', '/rentals', '/the-hub', 
+  '/community', '/market', '/mypace', '/shops', '/services', '/rentals', '/the-hub', 
   '/menu', '/profile', '/cart', '/settings', '/delivery', '/deliveries', '/messages',
   '/business-scheduling', '/interactive-map', '/item-verification',
   '/signup-login', '/message-owner', '/rental-delivery', '/support',
@@ -4761,16 +4766,12 @@ const htmlRoutes = [
 
 htmlRoutes.forEach(route => {
   app.get(route, (req, res) => {
-    // Redirect root to main app
-    if (route === '/') {
-      return res.redirect('/community');
-    }
-    
     let fileName = route.slice(1) + '.html';
     if (route === '/menu') fileName = 'marketpace-menu.html';
     
     res.sendFile(path.join(process.cwd(), fileName), (err) => {
-      if (err) {
+      if (err && !res.headersSent) {
+        console.error(`File not found: ${fileName}, redirecting to community`);
         res.redirect('/community');
       }
     });
