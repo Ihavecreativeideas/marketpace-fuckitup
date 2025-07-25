@@ -1461,12 +1461,12 @@
 
                         <div style="margin-bottom: 20px;">
                             <label style="color: #00ffff; font-weight: bold; display: block; margin-bottom: 8px;">
-                                Supporting (Tag business/artist)
+                                Tag Support (People, Businesses, Events)
                             </label>
-                            <input id="supportTag" placeholder="@artistname or @businessname" 
+                            <input id="supportTag" placeholder="@artistname, @businessname, or #eventname" 
                                 style="width: 100%; padding: 10px; background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(0, 255, 255, 0.3); color: #fff; border-radius: 6px;">
                             <div style="color: #64ffda; font-size: 0.75rem; margin-top: 4px; line-height: 1.3;">
-                                Tagged businesses will be notified via Facebook and MarketPace about your support
+                                @ for people/businesses • # for events • Non-members get Facebook invites to join MarketPace
                             </div>
                         </div>
 
@@ -1583,9 +1583,10 @@
                 if (result.success) {
                     let successMessage = result.message;
                     
-                    // Add Facebook notification info if business was tagged
-                    if (supportTag && supportTag.startsWith('@') && result.facebookNotificationSent) {
-                        successMessage += ` ${supportTag} has been notified via Facebook with a member signup invitation!`;
+                    // Add Facebook notification info if anyone was tagged
+                    if (supportTag && (supportTag.startsWith('@') || supportTag.startsWith('#')) && result.facebookNotificationSent) {
+                        const tagType = supportTag.startsWith('@') ? 'person/business' : 'event';
+                        successMessage += ` ${supportTag} (${tagType}) has been notified via Facebook with a MarketPace invitation!`;
                     }
                     
                     showNotification(successMessage, 'success');

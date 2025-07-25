@@ -3988,28 +3988,49 @@ app.post('/api/events/:eventId/checkin', async (req, res) => {
       });
     }
 
-    // Handle Facebook business notification if tagged
+    // Handle Facebook notifications for tagged entities (people, businesses, events)
     let facebookNotificationSent = false;
-    let businessNotified = null;
+    let taggedEntity = null;
+    let tagType = null;
 
-    if (supportTag && supportTag.startsWith('@')) {
+    if (supportTag && (supportTag.startsWith('@') || supportTag.startsWith('#'))) {
       try {
-        businessNotified = supportTag.substring(1); // Remove @ symbol
-        
-        // Send Facebook notification to business
-        await sendFacebookBusinessNotification({
-          businessHandle: businessNotified,
-          memberName: `Member${userId}`, // In production, get actual member name
-          eventTitle: mockEvent.title,
-          eventLocation: mockEvent.location,
-          supportMessage: message,
-          checkinType: checkinType
-        });
+        if (supportTag.startsWith('@')) {
+          // Person or business tag
+          taggedEntity = supportTag.substring(1); // Remove @ symbol
+          tagType = 'person_business';
+          
+          // Send Facebook notification to person/business  
+          await sendFacebookNotification({
+            entityHandle: taggedEntity,
+            entityType: 'person_business',
+            memberName: `Member${userId}`, // In production, get actual member name
+            eventTitle: mockEvent.title,
+            eventLocation: mockEvent.location,
+            supportMessage: message,
+            checkinType: checkinType
+          });
+        } else if (supportTag.startsWith('#')) {
+          // Event tag
+          taggedEntity = supportTag.substring(1); // Remove # symbol
+          tagType = 'event';
+          
+          // Send Facebook notification to event organizer
+          await sendFacebookNotification({
+            entityHandle: taggedEntity,
+            entityType: 'event',
+            memberName: `Member${userId}`,
+            eventTitle: mockEvent.title,
+            eventLocation: mockEvent.location,
+            supportMessage: message,
+            checkinType: checkinType
+          });
+        }
         
         facebookNotificationSent = true;
-        console.log(`🔔 Facebook notification sent to business: ${businessNotified}`);
+        console.log(`🔔 Facebook notification sent to ${tagType}: ${taggedEntity}`);
       } catch (fbError) {
-        console.error(`❌ Facebook notification failed for ${businessNotified}:`, fbError);
+        console.error(`❌ Facebook notification failed for ${taggedEntity}:`, fbError);
         // Don't fail the check-in if Facebook notification fails
       }
     }
@@ -4021,7 +4042,8 @@ app.post('/api/events/:eventId/checkin', async (req, res) => {
       userId,
       message: message || '',
       supportTag: supportTag || null,
-      businessNotified,
+      taggedEntity,
+      tagType,
       facebookNotificationSent,
       checkinType,
       geoValidationPassed,
@@ -4037,7 +4059,8 @@ app.post('/api/events/:eventId/checkin', async (req, res) => {
       checkin: checkinData,
       message: 'Check-in successful! You earned Pacemaker points for supporting this event.',
       pacemakerPointsEarned: 5,
-      businessNotified: businessNotified,
+      taggedEntity,
+      tagType,
       facebookNotificationSent
     });
 
@@ -4050,70 +4073,101 @@ app.post('/api/events/:eventId/checkin', async (req, res) => {
   }
 });
 
-// Facebook Business Notification Function
-async function sendFacebookBusinessNotification(notificationData) {
-  const { businessHandle, memberName, eventTitle, eventLocation, supportMessage, checkinType } = notificationData;
+// Facebook Notification Function for People, Businesses, and Events
+async function sendFacebookNotification(notificationData) {
+  const { entityHandle, entityType, memberName, eventTitle, eventLocation, supportMessage, checkinType } = notificationData;
   
   try {
     // In production, this would:
-    // 1. Look up business Facebook page ID from businessHandle
+    // 1. Look up entity Facebook page/profile ID from entityHandle
     // 2. Use Facebook Graph API to send notification
-    // 3. Create post on business page or send message
+    // 3. Create post on page or send message based on entity type
     
-    const mockBusinesses = {
+    const mockEntities = {
+      // Businesses
       'florabama': {
         facebookPageId: 'florabama_page_id',
         facebookAccessToken: 'business_page_token',
-        notificationsEnabled: true
+        notificationsEnabled: true,
+        type: 'business'
       },
       'thehangout': {
         facebookPageId: 'hangout_page_id', 
         facebookAccessToken: 'business_page_token',
-        notificationsEnabled: true
+        notificationsEnabled: true,
+        type: 'business'
       },
-      'thewharf': {
-        facebookPageId: 'wharf_page_id',
-        facebookAccessToken: 'business_page_token', 
-        notificationsEnabled: true
+      // Artists/People
+      'djnova': {
+        facebookPageId: 'djnova_page_id',
+        facebookAccessToken: 'artist_page_token',
+        notificationsEnabled: true,
+        type: 'artist'
+      },
+      'localband': {
+        facebookPageId: 'localband_page_id',
+        facebookAccessToken: 'artist_page_token',
+        notificationsEnabled: true,
+        type: 'artist'
+      },
+      // Events
+      'sunsetvibes': {
+        facebookPageId: 'sunsetvibes_event_id',
+        facebookAccessToken: 'event_page_token',
+        notificationsEnabled: true,
+        type: 'event'
       }
     };
 
-    const business = mockBusinesses[businessHandle.toLowerCase()];
+    const entity = mockEntities[entityHandle.toLowerCase()];
     
-    if (!business || !business.notificationsEnabled) {
-      throw new Error(`Business ${businessHandle} not found or notifications disabled`);
+    if (!entity || !entity.notificationsEnabled) {
+      throw new Error(`Entity ${entityHandle} not found or notifications disabled`);
     }
 
-    // Create Facebook post on business page (mock implementation)
+    // Create appropriate Facebook message based on entity type
+    let facebookMessage = '';
+    if (entityType === 'person_business') {
+      if (entity.type === 'business') {
+        facebookMessage = `Congratulations, a MarketPace member checked in to your business! Become a member to see who! 🎉 #MarketPaceSupport #JoinMarketPace`;
+      } else {
+        facebookMessage = `Congratulations, a member of marketpace came out to support you IRL! Join Marketpace to see who! ⭐ #MarketPaceSupport #JoinMarketPace`;
+      }
+    } else if (entityType === 'event') {
+      facebookMessage = `Congratulations, a MarketPace member checked in to support your event! Join MarketPace to see who's attending! 🎪 #MarketPaceSupport #JoinMarketPace`;
+    }
+
+    // Create Facebook post (mock implementation)
     const facebookPost = {
-      message: `Congratulations, a MarketPace member checked in to your business! Become a member to see who! 🎉 #MarketPaceSupport #JoinMarketPace`,
+      message: facebookMessage,
       link: 'https://marketpace.shop',
       published: true
     };
 
-    console.log(`📱 Facebook notification prepared for ${businessHandle}:`, facebookPost);
+    console.log(`📱 Facebook notification prepared for ${entityHandle} (${entityType}):`, facebookPost);
     
     // In production, make actual Facebook Graph API call:
-    // const response = await fetch(`https://graph.facebook.com/${business.facebookPageId}/feed`, {
+    // const response = await fetch(`https://graph.facebook.com/${entity.facebookPageId}/feed`, {
     //   method: 'POST',
     //   headers: {
     //     'Content-Type': 'application/json'
     //   },
     //   body: JSON.stringify({
     //     ...facebookPost,
-    //     access_token: business.facebookAccessToken
+    //     access_token: entity.facebookAccessToken
     //   })
     // });
 
     return {
       success: true,
-      businessHandle,
-      facebookPageId: business.facebookPageId,
+      entityHandle,
+      entityType,
+      facebookPageId: entity.facebookPageId,
       postCreated: true
     };
 
   } catch (error) {
-    console.error(`Facebook notification error for ${businessHandle}:`, error);
+    console.error(`Facebook notification error for ${entityHandle}:`, error);
     throw error;
   }
 }

@@ -279,7 +279,8 @@ All features are designed to strengthen local communities by keeping commerce lo
 ✓ **MEMBER-CREATED GEO QR CODES**: All members can create geo QR codes for events with customizable validation radius (50m-500m) and strict mode options for enhanced location verification
 ✓ **PACEMAKER REWARDS INTEGRATION**: Event check-ins automatically award Pacemaker points (5 points per check-in) with success/failure feedback and geo-validation status tracking
 ✓ **COMPREHENSIVE API ENDPOINTS**: Implemented /api/events, /api/events/:eventId/checkin, and /api/events/:eventId/generate-qr with full geo-location validation, distance calculation, and QR code generation
-✓ **FACEBOOK BUSINESS NOTIFICATIONS**: Tagged businesses automatically receive Facebook notifications encouraging them to join MarketPace to see member check-ins and support
+✓ **COMPREHENSIVE FACEBOOK TAGGING SYSTEM**: Members can tag people (@artistname), businesses (@businessname), and events (#eventname) during check-ins with automatic Facebook notifications
+✓ **TARGETED INVITATION MESSAGES**: Different Facebook messages for each entity type - businesses get business invites, artists get "came out to support you IRL" messages, events get attendance notifications
 ✓ **AUTOMATIC QR GENERATION**: Events with addresses automatically enable geo QR functionality with event-specific radius settings and member opt-out capability
 ✓ **VISUAL CHECK-IN INDICATORS**: Events display address information, geo QR radius, and check-in availability with professional cyan-themed UI elements matching platform design
 ✓ **NOTIFICATION SYSTEM**: Real-time success/error notifications for check-ins with detailed feedback on geo-validation status and Pacemaker point awards
