@@ -299,11 +299,11 @@ app.post('/api/rental/verify', async (req, res) => {
     if (action === 'return') {
       const pickupData = rentalVerification.get(`${rentalId}_pickup`);
       if (pickupData) {
-        const rentalDuration = new Date() - new Date(pickupData.timestamp);
+        const rentalDuration = new Date().getTime() - new Date(pickupData.timestamp).getTime();
         const rentalHours = rentalDuration / (1000 * 60 * 60);
-        const totalCost = rentalHours * itemDetails.hourlyRate;
+        const totalCost = rentalHours * (itemDetails.hourlyRate || 0);
         
-        verificationData.rentalSummary = {
+        (verificationData as any).rentalSummary = {
           duration: `${rentalHours.toFixed(1)} hours`,
           totalCost: `$${totalCost.toFixed(2)}`,
           pickupTime: pickupData.timestamp,
@@ -338,8 +338,8 @@ app.post('/api/purchase/verify-pickup', async (req, res) => {
     // Release payment to seller after verified pickup
     if (itemDetails.paymentHeld) {
       // In production, this would trigger Stripe payment release
-      verificationData.paymentReleased = true;
-      verificationData.sellerPayout = itemDetails.totalAmount * 0.95; // 5% commission
+      (verificationData as any).paymentReleased = true;
+      (verificationData as any).sellerPayout = (itemDetails.totalAmount || 0) * 0.95; // 5% commission
     }
     
     res.json({ success: true, verificationData, message: 'Purchase pickup verified, payment released' });
@@ -681,7 +681,7 @@ app.post('/api/tax/upload-receipt', async (req, res) => {
     const { businessId, receiptImage, notes, category } = req.body;
     
     // In production, this would use OCR service like AWS Textract
-    const ocrData = await processReceiptOCR(receiptImage);
+    const ocrData = await processReceiptOCR(receiptImage, category);
     
     const receiptRecord = {
       receiptId: `receipt_${Date.now()}`,
@@ -695,18 +695,18 @@ app.post('/api/tax/upload-receipt', async (req, res) => {
     };
 
     // Auto-create tax transaction if OCR confidence is high
-    if (ocrData.confidence > 0.8) {
+    if (ocrData.confidence > 0.8 && ocrData.success) {
       const autoTransaction = {
         businessId,
         type: 'expense',
-        amount: ocrData.total,
-        description: ocrData.vendor || 'Expense from receipt',
+        amount: (ocrData as any).total || 0,
+        description: (ocrData as any).vendor || 'Expense from receipt',
         category: category || 'office_supplies',
-        date: ocrData.date || new Date().toISOString(),
+        date: (ocrData as any).date || new Date().toISOString(),
         receiptUrl: receiptRecord.receiptId,
         taxYear: new Date().getFullYear(),
-        paymentMethod: ocrData.paymentMethod,
-        vendorInfo: ocrData.vendor
+        paymentMethod: (ocrData as any).paymentMethod || 'unknown',
+        vendorInfo: (ocrData as any).vendor || 'unknown'
       };
       
       // Automatically record the transaction
@@ -740,7 +740,7 @@ app.post('/api/tax/generate-forms', async (req, res) => {
       return res.status(404).json({ success: false, error: 'No tax data available' });
     }
 
-    const generatedForms = {};
+    const generatedForms: any = {};
     
     for (const formType of formTypes) {
       switch (formType) {
@@ -1007,13 +1007,13 @@ app.post('/api/member-tax/scan-receipt', async (req: any, res: any) => {
         id: Date.now(),
         memberId,
         type: 'personal_expense',
-        amount: ocrResult.total || 0,
-        description: ocrResult.description || 'Scanned receipt expense',
-        category: ocrResult.category || 'materials',
-        vendor: ocrResult.vendor || 'Unknown vendor',
-        date: ocrResult.date || new Date().toISOString().split('T')[0],
+        amount: (ocrResult as any).total || 0,
+        description: (ocrResult as any).description || 'Scanned receipt expense',
+        category: (ocrResult as any).category || 'materials',
+        vendor: (ocrResult as any).vendor || 'Unknown vendor',
+        date: (ocrResult as any).date || new Date().toISOString().split('T')[0],
         timestamp: new Date().toISOString(),
-        year: new Date(ocrResult.date || new Date()).getFullYear(),
+        year: new Date((ocrResult as any).date || new Date()).getFullYear(),
         autoTracked: true,
         receiptImage: receiptImage,
         ocrConfidence: ocrResult.confidence
@@ -1029,7 +1029,7 @@ app.post('/api/member-tax/scan-receipt', async (req: any, res: any) => {
         success: true,
         expense: expenseData,
         ocrResult,
-        message: `Automatically tracked $${ocrResult.total} from ${ocrResult.vendor}`
+        message: `Automatically tracked $${(ocrResult as any).total} from ${(ocrResult as any).vendor}`
       });
     } else {
       res.json({
