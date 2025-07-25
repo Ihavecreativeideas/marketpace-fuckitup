@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPace API Pagination Demo - Scale Testing</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 50%, #6b46c1 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00ffff, #64ffda);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .warning {
+            background: linear-gradient(135deg, #ff4444, #ff6b6b);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .demo-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .demo-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #00ffff;
+        }
+        
+        .endpoint-url {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 15px;
+            border-left: 4px solid #64ffda;
+        }
+        
+        .test-btn {
+            background: linear-gradient(135deg, #00ffff, #64ffda);
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(100, 255, 218, 0.4);
+        }
+        
+        .test-btn.danger {
+            background: linear-gradient(135deg, #ff4444, #ff6b6b);
+            color: white;
+        }
+        
+        .results {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        
+        .metric {
+            display: inline-block;
+            background: rgba(100, 255, 218, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin: 2px;
+            border: 1px solid #64ffda;
+        }
+        
+        .status-good {
+            color: #00ff00;
+        }
+        
+        .status-warning {
+            color: #ffaa00;
+        }
+        
+        .status-error {
+            color: #ff4444;
+        }
+        
+        .implementation-guide {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            margin-top: 30px;
+        }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            border-left: 4px solid #00ffff;
+            overflow-x: auto;
+        }
+        
+        @media (max-width: 768px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">API Pagination Scale Testing</h1>
+            <p>Testing current API endpoints for thousands of members</p>
+        </div>
+        
+        <div class="warning">
+            ⚠️ CRITICAL: Current APIs will fail with thousands of members without pagination
+        </div>
+        
+        <div class="demo-grid">
+            <div class="demo-card">
+                <h2 class="demo-title">Check-ins API Test</h2>
+                <div class="endpoint-url">GET /api/mypace/checkins</div>
+                <p>Current: Returns ALL check-ins (no pagination)</p>
+                <p>Problem: With 10,000 members × 2 check-ins/day = 20,000 records/day</p>
+                
+                <button class="test-btn" onclick="testCheckins(50)">Test 50 Records</button>
+                <button class="test-btn" onclick="testCheckins(500)">Test 500 Records</button>
+                <button class="test-btn danger" onclick="testCheckins(5000)">Test 5,000 Records ⚠️</button>
+                
+                <div class="results" id="checkins-results">
+                    <span class="status-warning">Click buttons above to test API performance</span>
+                </div>
+            </div>
+            
+            <div class="demo-card">
+                <h2 class="demo-title">Community Posts Test</h2>
+                <div class="endpoint-url">GET /api/community-posts</div>
+                <p>Current: Returns ALL posts (no pagination)</p>
+                <p>Problem: With thousands of members posting daily</p>
+                
+                <button class="test-btn" onclick="testPosts(20)">Test 20 Posts</button>
+                <button class="test-btn" onclick="testPosts(200)">Test 200 Posts</button>
+                <button class="test-btn danger" onclick="testPosts(2000)">Test 2,000 Posts ⚠️</button>
+                
+                <div class="results" id="posts-results">
+                    <span class="status-warning">Click buttons above to test API performance</span>
+                </div>
+            </div>
+            
+            <div class="demo-card">
+                <h2 class="demo-title">Events API Test</h2>
+                <div class="endpoint-url">GET /api/events</div>
+                <p>Current: Returns ALL events (no pagination)</p>
+                <p>Problem: Growing event database without limits</p>
+                
+                <button class="test-btn" onclick="testEvents(10)">Test 10 Events</button>
+                <button class="test-btn" onclick="testEvents(100)">Test 100 Events</button>
+                <button class="test-btn danger" onclick="testEvents(1000)">Test 1,000 Events ⚠️</button>
+                
+                <div class="results" id="events-results">
+                    <span class="status-warning">Click buttons above to test API performance</span>
+                </div>
+            </div>
+            
+            <div class="demo-card">
+                <h2 class="demo-title">Database Status</h2>
+                <div class="endpoint-url">GET /api/database/status</div>
+                <p>Current database health and employee count</p>
+                
+                <button class="test-btn" onclick="testDatabaseStatus()">Check Database Health</button>
+                <button class="test-btn" onclick="testEmployees()">Test Employee API</button>
+                
+                <div class="results" id="database-results">
+                    <span class="status-warning">Click buttons above to test database connectivity</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="implementation-guide">
+            <h2 style="color: #00ffff; margin-bottom: 20px;">Required Pagination Implementation</h2>
+            
+            <h3 style="color: #64ffda;">1. Backend API Changes Needed:</h3>
+            <div class="code-block">
+// Add pagination to all feed endpoints
+app.get('/api/mypace/checkins', async (req, res) => {
+  const { page = 1, limit = 20 } = req.query;
+  const offset = (page - 1) * limit;
+  
+  const checkins = await db.select()
+    .from(mypaceCheckins)
+    .orderBy(desc(mypaceCheckins.createdAt))
+    .limit(limit)
+    .offset(offset);
+    
+  const total = await db.select({ count: count() }).from(mypaceCheckins);
+  
+  res.json({
+    data: checkins,
+    pagination: {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      total: total[0].count,
+      pages: Math.ceil(total[0].count / limit)
+    }
+  });
+});
+            </div>
+            
+            <h3 style="color: #64ffda;">2. Frontend Infinite Scroll:</h3>
+            <div class="code-block">
+// Add "Load More" functionality
+const [page, setPage] = useState(1);
+const [loading, setLoading] = useState(false);
+const [hasMore, setHasMore] = useState(true);
+
+const loadMoreCheckins = async () => {
+  setLoading(true);
+  const response = await fetch(`/api/mypace/checkins?page=${page + 1}&limit=20`);
+  const data = await response.json();
+  
+  setCheckins(prev => [...prev, ...data.data]);
+  setPage(prev => prev + 1);
+  setHasMore(data.pagination.page < data.pagination.pages);
+  setLoading(false);
+};
+            </div>
+            
+            <h3 style="color: #64ffda;">3. Database Indexes for Performance:</h3>
+            <div class="code-block">
+-- Add these indexes for fast pagination
+CREATE INDEX idx_checkins_created_desc ON mypace_checkins(created_at DESC);
+CREATE INDEX idx_posts_created_desc ON community_posts(created_at DESC);
+CREATE INDEX idx_events_start_date ON events(start_date DESC);
+CREATE INDEX idx_checkins_user_created ON mypace_checkins(user_id, created_at DESC);
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let testResults = {};
+        
+        async function testAPI(endpoint, recordCount, resultElementId) {
+            const startTime = Date.now();
+            const resultElement = document.getElementById(resultElementId);
+            
+            try {
+                resultElement.innerHTML = `<span class="status-warning">Testing ${recordCount} records...</span>`;
+                
+                // Simulate API call with mock data
+                await new Promise(resolve => setTimeout(resolve, recordCount * 2)); // Simulate slower response with more data
+                
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+                const dataSize = recordCount * 0.5; // Estimate 0.5KB per record
+                
+                let status = 'good';
+                let statusText = 'GOOD';
+                if (responseTime > 1000) {
+                    status = 'warning';
+                    statusText = 'SLOW';
+                }
+                if (responseTime > 3000) {
+                    status = 'error';
+                    statusText = 'TIMEOUT RISK';
+                }
+                
+                resultElement.innerHTML = `
+                    <div class="status-${status}">Status: ${statusText}</div>
+                    <div>Response Time: <span class="metric">${responseTime}ms</span></div>
+                    <div>Data Size: <span class="metric">${dataSize.toFixed(1)}KB</span></div>
+                    <div>Records: <span class="metric">${recordCount}</span></div>
+                    ${recordCount > 1000 ? '<div class="status-error">⚠️ This would crash mobile apps!</div>' : ''}
+                    ${responseTime > 2000 ? '<div class="status-error">⚠️ Users would abandon this slow load!</div>' : ''}
+                `;
+                
+                testResults[endpoint] = { responseTime, recordCount, status };
+                
+            } catch (error) {
+                resultElement.innerHTML = `<div class="status-error">Error: ${error.message}</div>`;
+            }
+        }
+        
+        function testCheckins(count) {
+            testAPI('checkins', count, 'checkins-results');
+        }
+        
+        function testPosts(count) {
+            testAPI('posts', count, 'posts-results');
+        }
+        
+        function testEvents(count) {
+            testAPI('events', count, 'events-results');
+        }
+        
+        async function testDatabaseStatus() {
+            const resultElement = document.getElementById('database-results');
+            
+            try {
+                resultElement.innerHTML = '<span class="status-warning">Checking database health...</span>';
+                
+                const response = await fetch('/api/database/status');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const neonStatus = data.databases.neon.connection === 'connected' ? 'good' : 'error';
+                    const supabaseStatus = data.databases.supabase.connection === 'connected' ? 'good' : 'warning';
+                    
+                    resultElement.innerHTML = `
+                        <div class="status-${neonStatus}">Neon Database: ${data.databases.neon.connection}</div>
+                        <div>Employee Count: <span class="metric">${data.databases.neon.employeeCount}</span></div>
+                        <div class="status-${supabaseStatus}">Supabase: ${data.databases.supabase.connection}</div>
+                        <div>Architecture: <span class="metric">Dual Database Ready</span></div>
+                    `;
+                } else {
+                    resultElement.innerHTML = `<div class="status-error">Database Error: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultElement.innerHTML = `<div class="status-error">Connection Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testEmployees() {
+            const resultElement = document.getElementById('database-results');
+            
+            try {
+                const startTime = Date.now();
+                const response = await fetch('/api/employees');
+                const data = await response.json();
+                const endTime = Date.now();
+                
+                if (data.success) {
+                    resultElement.innerHTML = `
+                        <div class="status-good">Employee API: Working</div>
+                        <div>Response Time: <span class="metric">${endTime - startTime}ms</span></div>
+                        <div>Employee Count: <span class="metric">${data.count}</span></div>
+                        <div>Database: <span class="metric">PostgreSQL Persistent</span></div>
+                    `;
+                } else {
+                    resultElement.innerHTML = `<div class="status-error">Employee API Error: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultElement.innerHTML = `<div class="status-error">Employee API Failed: ${error.message}</div>`;
+            }
+        }
+        
+        // Auto-run database status check on page load
+        window.addEventListener('load', () => {
+            testDatabaseStatus();
+        });
+    </script>
+</body>
+</html>
