@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPace Cloudinary Image CDN Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 50%, #6b46c1 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .title {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00ffff, #64ffda);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 30px;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .demo-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .demo-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #00ffff;
+        }
+        
+        .upload-zone {
+            border: 2px dashed rgba(100, 255, 218, 0.5);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-zone:hover {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.05);
+        }
+        
+        .upload-zone.dragover {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .upload-btn {
+            background: linear-gradient(135deg, #00ffff, #64ffda);
+            color: #1a0b3d;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 255, 255, 0.3);
+        }
+        
+        .upload-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .image-preview {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .url-display {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 10px 0;
+            word-break: break-all;
+            border-left: 4px solid #64ffda;
+        }
+        
+        .responsive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .responsive-item {
+            text-align: center;
+        }
+        
+        .responsive-item img {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid rgba(100, 255, 218, 0.3);
+        }
+        
+        .responsive-label {
+            font-size: 0.8rem;
+            color: #64ffda;
+            margin-top: 5px;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 600;
+        }
+        
+        .status.success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.5);
+            color: #22c55e;
+        }
+        
+        .status.error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #ef4444;
+        }
+        
+        .status.loading {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            color: #3b82f6;
+        }
+        
+        .features-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .features-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(100, 255, 218, 0.1);
+        }
+        
+        .features-list li:before {
+            content: "✓";
+            color: #00ffff;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">MarketPace CDN</h1>
+            <p class="subtitle">Cloudinary Image CDN Integration Demo</p>
+        </div>
+
+        <div class="demo-grid">
+            <!-- Profile Picture Upload -->
+            <div class="demo-card">
+                <h3 class="demo-title">Profile Pictures</h3>
+                <div class="upload-zone" onclick="document.getElementById('profileInput').click()">
+                    <p>Click or drag profile picture here</p>
+                    <p style="font-size: 0.9rem; opacity: 0.7;">Max 5MB • JPG, PNG, GIF, WebP</p>
+                </div>
+                <input type="file" id="profileInput" class="file-input" accept="image/*">
+                <button class="upload-btn" onclick="uploadImage('profile')" id="profileBtn">Upload Profile Picture</button>
+                <div id="profileStatus"></div>
+                <div id="profilePreview"></div>
+            </div>
+
+            <!-- Post Images Upload -->
+            <div class="demo-card">
+                <h3 class="demo-title">Post Images</h3>
+                <div class="upload-zone" onclick="document.getElementById('postInput').click()">
+                    <p>Click or drag post image here</p>
+                    <p style="font-size: 0.9rem; opacity: 0.7;">Max 10MB • JPG, PNG, GIF, WebP</p>
+                </div>
+                <input type="file" id="postInput" class="file-input" accept="image/*">
+                <button class="upload-btn" onclick="uploadImage('post')" id="postBtn">Upload Post Image</button>
+                <div id="postStatus"></div>
+                <div id="postPreview"></div>
+            </div>
+
+            <!-- Check-in Photos Upload -->
+            <div class="demo-card">
+                <h3 class="demo-title">Check-in Photos</h3>
+                <div class="upload-zone" onclick="document.getElementById('checkinInput').click()">
+                    <p>Click or drag check-in photo here</p>
+                    <p style="font-size: 0.9rem; opacity: 0.7;">Max 8MB • JPG, PNG, GIF, WebP</p>
+                </div>
+                <input type="file" id="checkinInput" class="file-input" accept="image/*">
+                <button class="upload-btn" onclick="uploadImage('checkin')" id="checkinBtn">Upload Check-in Photo</button>
+                <div id="checkinStatus"></div>
+                <div id="checkinPreview"></div>
+            </div>
+
+            <!-- CDN Features -->
+            <div class="demo-card">
+                <h3 class="demo-title">CDN Features</h3>
+                <ul class="features-list">
+                    <li>Automatic image optimization</li>
+                    <li>Real-time transformations</li>
+                    <li>Responsive image sizes</li>
+                    <li>WebP/AVIF format conversion</li>
+                    <li>Global CDN delivery</li>
+                    <li>Unlimited storage</li>
+                    <li>Quality compression</li>
+                    <li>Fast loading speeds</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Product and Event Uploads -->
+        <div class="demo-grid">
+            <div class="demo-card">
+                <h3 class="demo-title">Product Images</h3>
+                <div class="upload-zone" onclick="document.getElementById('productInput').click()">
+                    <p>Click or drag product image here</p>
+                    <p style="font-size: 0.9rem; opacity: 0.7;">Max 10MB • JPG, PNG, GIF, WebP</p>
+                </div>
+                <input type="file" id="productInput" class="file-input" accept="image/*">
+                <button class="upload-btn" onclick="uploadImage('product')" id="productBtn">Upload Product Image</button>
+                <div id="productStatus"></div>
+                <div id="productPreview"></div>
+            </div>
+
+            <div class="demo-card">
+                <h3 class="demo-title">Business Logos</h3>
+                <div class="upload-zone" onclick="document.getElementById('businessInput').click()">
+                    <p>Click or drag business logo here</p>
+                    <p style="font-size: 0.9rem; opacity: 0.7;">Max 3MB • JPG, PNG, GIF, WebP</p>
+                </div>
+                <input type="file" id="businessInput" class="file-input" accept="image/*">
+                <button class="upload-btn" onclick="uploadImage('business-logo')" id="businessBtn">Upload Business Logo</button>
+                <div id="businessStatus"></div>
+                <div id="businessPreview"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Upload types configuration
+        const uploadTypes = {
+            'profile': { 
+                endpoint: '/api/upload/profile',
+                inputId: 'profileInput',
+                buttonId: 'profileBtn',
+                statusId: 'profileStatus',
+                previewId: 'profilePreview'
+            },
+            'post': { 
+                endpoint: '/api/upload/post',
+                inputId: 'postInput',
+                buttonId: 'postBtn',
+                statusId: 'postStatus',
+                previewId: 'postPreview'
+            },
+            'checkin': { 
+                endpoint: '/api/upload/checkin',
+                inputId: 'checkinInput',
+                buttonId: 'checkinBtn',
+                statusId: 'checkinStatus',
+                previewId: 'checkinPreview'
+            },
+            'product': { 
+                endpoint: '/api/upload/product',
+                inputId: 'productInput',
+                buttonId: 'productBtn',
+                statusId: 'productStatus',
+                previewId: 'productPreview'
+            },
+            'business-logo': { 
+                endpoint: '/api/upload/business-logo',
+                inputId: 'businessInput',
+                buttonId: 'businessBtn',
+                statusId: 'businessStatus',
+                previewId: 'businessPreview'
+            }
+        };
+
+        // Show status message
+        function showStatus(type, message, className) {
+            const config = uploadTypes[type];
+            const statusDiv = document.getElementById(config.statusId);
+            statusDiv.innerHTML = `<div class="status ${className}">${message}</div>`;
+        }
+
+        // Upload image function
+        async function uploadImage(type) {
+            const config = uploadTypes[type];
+            const fileInput = document.getElementById(config.inputId);
+            const uploadBtn = document.getElementById(config.buttonId);
+            
+            if (!fileInput.files[0]) {
+                showStatus(type, 'Please select an image first', 'error');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                uploadBtn.disabled = true;
+                uploadBtn.textContent = 'Uploading...';
+                showStatus(type, 'Uploading to Cloudinary CDN...', 'loading');
+
+                const response = await fetch(config.endpoint, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus(type, result.message, 'success');
+                    showImagePreview(type, result);
+                } else {
+                    showStatus(type, result.error || 'Upload failed', 'error');
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                showStatus(type, 'Upload failed: ' + error.message, 'error');
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = uploadBtn.textContent.replace('Uploading...', 'Upload').replace('ing...', '');
+            }
+        }
+
+        // Show image preview with responsive sizes
+        function showImagePreview(type, result) {
+            const config = uploadTypes[type];
+            const previewDiv = document.getElementById(config.previewId);
+            
+            const previewHTML = `
+                <div class="url-display">
+                    <strong>CDN URL:</strong><br>
+                    ${result.imageUrl}
+                </div>
+                <div class="url-display">
+                    <strong>Public ID:</strong> ${result.publicId}
+                </div>
+                <img src="${result.imageUrl}" class="image-preview" alt="Uploaded image">
+                <div class="responsive-grid">
+                    <div class="responsive-item">
+                        <img src="${result.responsiveUrls.thumbnail}" alt="Thumbnail">
+                        <div class="responsive-label">Thumbnail (150px)</div>
+                    </div>
+                    <div class="responsive-item">
+                        <img src="${result.responsiveUrls.small}" alt="Small">
+                        <div class="responsive-label">Small (400px)</div>
+                    </div>
+                    <div class="responsive-item">
+                        <img src="${result.responsiveUrls.medium}" alt="Medium">
+                        <div class="responsive-label">Medium (800px)</div>
+                    </div>
+                </div>
+            `;
+            
+            previewDiv.innerHTML = previewHTML;
+        }
+
+        // Add drag and drop functionality
+        document.querySelectorAll('.upload-zone').forEach(zone => {
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('dragover');
+            });
+
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('dragover');
+            });
+
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    // Find which input this zone corresponds to
+                    const inputId = zone.getAttribute('onclick').match(/getElementById\('(\w+)'\)/)[1];
+                    const input = document.getElementById(inputId);
+                    input.files = files;
+                }
+            });
+        });
+
+        // File input change listeners
+        Object.keys(uploadTypes).forEach(type => {
+            const config = uploadTypes[type];
+            document.getElementById(config.inputId).addEventListener('change', (e) => {
+                if (e.target.files[0]) {
+                    showStatus(type, `Selected: ${e.target.files[0].name}`, 'success');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

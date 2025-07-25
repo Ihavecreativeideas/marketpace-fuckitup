@@ -32,6 +32,20 @@ import { db } from './db.js';
 import { supabase, testSupabaseConnection } from './supabase.js';
 import { employees, businesses, users } from '../shared/schema.js';
 import { eq, and, sql, desc, count } from 'drizzle-orm';
+
+// Import Cloudinary CDN configuration
+const { 
+  testCloudinaryConnection,
+  profileUpload,
+  postUpload,
+  checkinUpload,
+  productUpload,
+  eventUpload,
+  businessUpload,
+  getOptimizedImageUrl,
+  getResponsiveImageUrls,
+  deleteCloudinaryImage
+} = require('./cloudinary-config.js');
 const { sendEmployeeInvitation } = require('./employeeInvitation.js');
 const facebookAdsRouter = require('./routes/facebook-ads');
 
@@ -1322,6 +1336,183 @@ app.get('/api/scale-test', async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ========== CLOUDINARY IMAGE CDN ENDPOINTS ==========
+
+// Upload Profile Picture
+app.post('/api/upload/profile', profileUpload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No image file provided' });
+    }
+
+    const imageData = {
+      success: true,
+      imageUrl: req.file.path,
+      publicId: req.file.filename,
+      responsiveUrls: getResponsiveImageUrls(req.file.filename),
+      message: 'Profile picture uploaded successfully'
+    };
+
+    res.json(imageData);
+  } catch (error) {
+    console.error('Profile upload error:', error);
+    res.status(500).json({ success: false, error: 'Failed to upload profile picture' });
+  }
+});
+
+// Upload Post Image
+app.post('/api/upload/post', postUpload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No image file provided' });
+    }
+
+    const imageData = {
+      success: true,
+      imageUrl: req.file.path,
+      publicId: req.file.filename,
+      responsiveUrls: getResponsiveImageUrls(req.file.filename),
+      message: 'Post image uploaded successfully'
+    };
+
+    res.json(imageData);
+  } catch (error) {
+    console.error('Post upload error:', error);
+    res.status(500).json({ success: false, error: 'Failed to upload post image' });
+  }
+});
+
+// Upload Check-in Photo
+app.post('/api/upload/checkin', checkinUpload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No image file provided' });
+    }
+
+    const imageData = {
+      success: true,
+      imageUrl: req.file.path,
+      publicId: req.file.filename,
+      responsiveUrls: getResponsiveImageUrls(req.file.filename),
+      message: 'Check-in photo uploaded successfully'
+    };
+
+    res.json(imageData);
+  } catch (error) {
+    console.error('Check-in upload error:', error);
+    res.status(500).json({ success: false, error: 'Failed to upload check-in photo' });
+  }
+});
+
+// Upload Product Image
+app.post('/api/upload/product', productUpload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No image file provided' });
+    }
+
+    const imageData = {
+      success: true,
+      imageUrl: req.file.path,
+      publicId: req.file.filename,
+      responsiveUrls: getResponsiveImageUrls(req.file.filename),
+      message: 'Product image uploaded successfully'
+    };
+
+    res.json(imageData);
+  } catch (error) {
+    console.error('Product upload error:', error);
+    res.status(500).json({ success: false, error: 'Failed to upload product image' });
+  }
+});
+
+// Upload Event Image
+app.post('/api/upload/event', eventUpload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No image file provided' });
+    }
+
+    const imageData = {
+      success: true,
+      imageUrl: req.file.path,
+      publicId: req.file.filename,
+      responsiveUrls: getResponsiveImageUrls(req.file.filename),
+      message: 'Event image uploaded successfully'
+    };
+
+    res.json(imageData);
+  } catch (error) {
+    console.error('Event upload error:', error);
+    res.status(500).json({ success: false, error: 'Failed to upload event image' });
+  }
+});
+
+// Upload Business Logo
+app.post('/api/upload/business-logo', businessUpload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No image file provided' });
+    }
+
+    const imageData = {
+      success: true,
+      imageUrl: req.file.path,
+      publicId: req.file.filename,
+      responsiveUrls: getResponsiveImageUrls(req.file.filename),
+      message: 'Business logo uploaded successfully'
+    };
+
+    res.json(imageData);
+  } catch (error) {
+    console.error('Business logo upload error:', error);
+    res.status(500).json({ success: false, error: 'Failed to upload business logo' });
+  }
+});
+
+// Delete Image Endpoint
+app.delete('/api/upload/:publicId', async (req, res) => {
+  try {
+    const { publicId } = req.params;
+    const deleted = await deleteCloudinaryImage(publicId);
+
+    if (deleted) {
+      res.json({ success: true, message: 'Image deleted successfully' });
+    } else {
+      res.status(404).json({ success: false, error: 'Image not found or could not be deleted' });
+    }
+  } catch (error) {
+    console.error('Delete image error:', error);
+    res.status(500).json({ success: false, error: 'Failed to delete image' });
+  }
+});
+
+// Get Optimized Image URL
+app.get('/api/image/optimize/:publicId', (req, res) => {
+  try {
+    const { publicId } = req.params;
+    const { width, height, quality, format } = req.query;
+
+    const transformations = {};
+    if (width) transformations.width = parseInt(width as string);
+    if (height) transformations.height = parseInt(height as string);
+    if (quality) transformations.quality = quality;
+    if (format) transformations.format = format;
+
+    const optimizedUrl = getOptimizedImageUrl(publicId, transformations);
+    const responsiveUrls = getResponsiveImageUrls(publicId);
+
+    res.json({
+      success: true,
+      optimizedUrl,
+      responsiveUrls
+    });
+  } catch (error) {
+    console.error('Image optimization error:', error);
+    res.status(500).json({ success: false, error: 'Failed to generate optimized image URL' });
   }
 });
 
@@ -9115,6 +9306,9 @@ app.listen(port, '0.0.0.0', () => {
   console.log(`🎁 MyPace Loyalty System API: /api/mypace/loyalty/* endpoints`);
   console.log(`🏆 Member Rewards & Referral API: /api/mypace/wallet/*, /api/mypace/referrals/*`);
   console.log(`🚀 Ready for development and testing`);
+
+  // Test Cloudinary connection
+  testCloudinaryConnection();
 
   // Test Supabase connection (but keep using Neon)
   testSupabaseConnection().then(result => {
