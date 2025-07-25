@@ -337,6 +337,15 @@
         let checkInTime = null;
         let currentLocation = null;
         
+        // Demo business location data (this should come from QR code or URL params)
+        const businessLocation = {
+            name: "MarketPace Demo Store",
+            latitude: 30.2672,   // Gulf Shores area
+            longitude: -87.7431,
+            validationRadius: 150, // meters
+            address: "123 Business St, Gulf Shores, AL"
+        };
+        
         // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Employee Check-In Portal initialized');
@@ -386,6 +395,10 @@
         }
 
         function initializeGeolocation() {
+            // Display business location info
+            console.log('Initializing GPS for business location:', businessLocation.name);
+            document.getElementById('locationAddress').textContent = `Work Location: ${businessLocation.name} - ${businessLocation.address}`;
+            
             if (navigator.geolocation) {
                 console.log('GPS available and ready');
                 
@@ -395,24 +408,24 @@
                         console.log('Location permission status:', result.state);
                         
                         if (result.state === 'granted') {
-                            document.getElementById('locationAddress').textContent = 'GPS location access granted - ready for check-in';
+                            document.getElementById('locationAddress').textContent = `✅ GPS enabled for ${businessLocation.name}`;
                             document.getElementById('locationPermissionBtn').style.display = 'none';
                         } else if (result.state === 'denied') {
-                            document.getElementById('locationAddress').textContent = 'GPS location denied - please enable location permissions in browser settings';
+                            document.getElementById('locationAddress').textContent = `❌ GPS blocked - Enable location access to check in at ${businessLocation.name}`;
                             document.getElementById('locationInstructions').style.display = 'block';
                         } else {
-                            document.getElementById('locationAddress').textContent = 'GPS location will be requested during check-in';
+                            document.getElementById('locationAddress').textContent = `📍 GPS will verify location at ${businessLocation.name}`;
                         }
                     }).catch(function(error) {
                         console.log('Permission query not supported');
-                        document.getElementById('locationAddress').textContent = 'GPS location will be verified during check-in';
+                        document.getElementById('locationAddress').textContent = `📍 GPS verification required for ${businessLocation.name}`;
                     });
                 } else {
-                    document.getElementById('locationAddress').textContent = 'GPS location will be verified during check-in';
+                    document.getElementById('locationAddress').textContent = `📍 GPS verification required for ${businessLocation.name}`;
                 }
             } else {
                 console.log('GPS not available');
-                document.getElementById('locationAddress').textContent = 'GPS location verification not available';
+                document.getElementById('locationAddress').textContent = '❌ GPS not available on this device';
             }
             console.log('System ready for use');
         }
@@ -427,7 +440,9 @@
                 return;
             }
 
-            // Give GPS proper time to get a fix - no custom timeout interference
+            // Add debug logging and give GPS proper time to get a fix
+            console.log('🔍 Starting GPS location request...');
+            
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const lat = position.coords.latitude;
@@ -443,7 +458,18 @@
                     console.log('🎯 GPS location obtained successfully:', currentLocation);
                     console.log('📍 Accuracy:', accuracy, 'meters');
                     
-                    processCheckIn();
+                    // Validate location against business location
+                    const distance = calculateDistance(lat, lng, businessLocation.latitude, businessLocation.longitude);
+                    console.log('📏 Distance to work location:', distance, 'meters');
+                    
+                    if (distance <= businessLocation.validationRadius) {
+                        console.log('✅ Location validation passed - within', businessLocation.validationRadius, 'meters');
+                        processCheckIn();
+                    } else {
+                        console.log('❌ Location validation failed - too far from work location');
+                        hideLoading();
+                        showNotification(`You are ${Math.round(distance)}m from ${businessLocation.name}. Please move within ${businessLocation.validationRadius}m to check in.`, 'error');
+                    }
                 },
                 (error) => {
                     console.log('❌ GPS error:', error.message, 'Code:', error.code);
@@ -452,16 +478,16 @@
                     let errorMessage = 'GPS location failed: ';
                     switch(error.code) {
                         case error.PERMISSION_DENIED:
-                            errorMessage += 'Location permission denied. Enable location access in browser settings and reload page.';
+                            errorMessage += 'Location permission denied. Tap "Enable Location Access" button and allow location access.';
                             break;
                         case error.POSITION_UNAVAILABLE:
-                            errorMessage += 'Location unavailable. Check device GPS settings.';
+                            errorMessage += 'GPS signal unavailable. Try moving outside or to a window.';
                             break;
                         case error.TIMEOUT:
-                            errorMessage += 'Location request timed out. Try moving to an area with better GPS signal.';
+                            errorMessage += 'GPS timeout. Move to an area with better signal or use Quick Check-In.';
                             break;
                         default:
-                            errorMessage += 'Unknown error occurred.';
+                            errorMessage += 'Unknown GPS error. Use Quick Check-In instead.';
                     }
                     
                     showNotification(errorMessage, 'error');
@@ -469,7 +495,7 @@
                 {
                     enableHighAccuracy: true, // Use GPS for best accuracy
                     timeout: 15000,           // Give GPS 15 seconds to get a fix
-                    maximumAge: 30000         // Allow 30-second cached location
+                    maximumAge: 10000         // Allow 10-second cached location for faster response
                 }
             );
         }
@@ -578,6 +604,22 @@
             document.getElementById('locationAddress').textContent = 'Manual check-in mode - GPS skipped';
             
             processCheckIn();
+        }
+        
+        // Calculate distance between two GPS coordinates using Haversine formula
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Earth's radius in meters
+            const φ1 = lat1 * Math.PI/180;
+            const φ2 = lat2 * Math.PI/180;
+            const Δφ = (lat2-lat1) * Math.PI/180;
+            const Δλ = (lon2-lon1) * Math.PI/180;
+
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+            return R * c; // Distance in meters
         }
 
         function handleCheckOut() {
