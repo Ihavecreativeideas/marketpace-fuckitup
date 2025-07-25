@@ -931,6 +931,128 @@ async function generateQuarterlyEstimates(yearData, businessId) {
 // Initialize expense categories on startup
 initializeExpenseCategories();
 
+// ========== EMPLOYEE MANAGEMENT API ==========
+
+// In-memory employee storage (replace with database in production)
+const businessEmployees: Record<string, any[]> = {};
+
+// Create new employee
+app.post('/api/employees', async (req, res) => {
+  try {
+    const { name, phone, email, role, category, paymentType, paymentAmount, sendInvitation, businessId } = req.body;
+    
+    console.log('Creating employee with data:', { name, phone, email, role, category, paymentType, paymentAmount });
+    
+    if (!name || !email || !role || !category) {
+      return res.status(400).json({
+        success: false,
+        error: 'Name, email, role, and category are required'
+      });
+    }
+    
+    // Create employee object
+    const employee = {
+      id: Date.now().toString(),
+      name,
+      phone: phone || '',
+      email,
+      role,
+      category: category.toLowerCase(),
+      paymentType: paymentType || 'hourly',
+      paymentAmount: parseFloat(paymentAmount) || 0,
+      status: sendInvitation ? 'Pending Invitation' : 'Available',
+      color: '#00ffff',
+      businessId: businessId || 'default-business',
+      dateAdded: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Store in memory (by business)
+    const bid = businessId || 'default-business';
+    if (!businessEmployees[bid]) {
+      businessEmployees[bid] = [];
+    }
+    businessEmployees[bid].push(employee);
+    
+    console.log('Employee created and stored:', employee);
+    
+    // Send invitation if requested
+    if (sendInvitation) {
+      try {
+        const invitationResult = await sendEmployeeInvitation(employee);
+        console.log('Invitation sent:', invitationResult);
+      } catch (inviteError) {
+        console.error('Invitation sending failed:', inviteError);
+      }
+    }
+    
+    res.json({
+      success: true,
+      employee,
+      message: sendInvitation 
+        ? `Employee ${name} added and invitation sent!`
+        : `Employee ${name} added successfully!`
+    });
+    
+  } catch (error) {
+    console.error('Employee creation error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create employee: ' + error.message
+    });
+  }
+});
+
+// Get employees for a business
+app.get('/api/employees/:businessId', async (req, res) => {
+  try {
+    const { businessId } = req.params;
+    const bid = businessId || 'default-business';
+    
+    console.log('Fetching employees for business:', bid);
+    
+    const employees = businessEmployees[bid] || [];
+    
+    res.json({
+      success: true,
+      employees,
+      count: employees.length,
+      message: 'Employees retrieved successfully'
+    });
+    
+  } catch (error) {
+    console.error('Employee retrieval error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve employees: ' + error.message
+    });
+  }
+});
+
+// Get employees for default business (backward compatibility)
+app.get('/api/employees', async (req, res) => {
+  try {
+    const employees = businessEmployees['default-business'] || [];
+    
+    console.log('Fetching employees for default business');
+    
+    res.json({
+      success: true,
+      employees,
+      count: employees.length,
+      message: 'Employees retrieved successfully'
+    });
+    
+  } catch (error) {
+    console.error('Employee retrieval error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve employees: ' + error.message
+    });
+  }
+});
+
 // ========== MEMBER TAX EXPENSE TRACKING SYSTEM ==========
 
 // In-memory storage for member tax expenses (replace with database in production)

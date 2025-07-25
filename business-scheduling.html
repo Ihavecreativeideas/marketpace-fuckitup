@@ -3984,8 +3984,41 @@
         let employees = [];
         let customRoles = [];
         let selectedRoleColor = '#00ffff';
+        
+        // Load employees from database when page loads
+        async function loadExistingEmployees() {
+            try {
+                console.log('Loading existing employees from database...');
+                
+                const response = await fetch('/api/employees');
+                const result = await response.json();
+                
+                if (result.success && result.employees) {
+                    employees = result.employees;
+                    console.log(`Loaded ${employees.length} existing employees:`, employees);
+                    
+                    // Update display
+                    renderEmployeeGrid();
+                    updateEmployeeStats();
+                    
+                    if (employees.length > 0) {
+                        showNotification(`✅ Loaded ${employees.length} saved employees`, 'success');
+                    }
+                } else {
+                    console.log('No existing employees found or API error:', result.error);
+                }
+            } catch (error) {
+                console.error('Failed to load existing employees:', error);
+                showNotification('⚠️ Could not load saved employees', 'warning');
+            }
+        }
+        
+        // Call load function when page is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(loadExistingEmployees, 1000); // Small delay to ensure UI is ready
+        });
 
-        function addNewEmployee(event) {
+        async function addNewEmployee(event) {
             event.preventDefault();
             
             const name = document.getElementById('newEmployeeName').value;
@@ -4017,44 +4050,69 @@
             
             console.log('All validation passed, proceeding with employee creation');
             
-            // Create employee object with enhanced payment information
-            const employee = {
-                id: Date.now(),
-                name,
-                phone,
-                email,
-                role,
-                category,
-                paymentType,
-                paymentAmount: parseFloat(paymentAmount || 0),
-                status: sendInvitation ? 'Pending Invitation' : 'Available',
-                color: selectedRoleColor,
-                dateAdded: new Date().toISOString()
-            };
-            
-            // Add to employees array
-            employees.push(employee);
-            console.log('Employee added to array:', employee);
-            
-            // Update display
-            renderEmployeeGrid();
-            updateEmployeeStats();
-            
-            const paymentText = paymentType === 'hourly' ? `$${paymentAmount}/hr` :
-                              paymentType === 'per_job' ? `$${paymentAmount}/job` :
-                              paymentType === 'salary' ? `$${paymentAmount}/year` :
-                              paymentType === 'commission' ? `${paymentAmount}% commission` : '';
-            
-            // Send invitation if requested
-            if (sendInvitation) {
-                showNotification(`Employee ${name} added! Sending invitation...`, 'info');
-                sendEmployeeInvitation(employee);
-            } else {
-                showNotification(`Employee ${name} added as ${role} (${paymentText})`, 'success');
+            try {
+                // Save employee to database via API
+                const response = await fetch('/api/employees', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name,
+                        phone,
+                        email,
+                        role,
+                        category,
+                        paymentType,
+                        paymentAmount,
+                        sendInvitation,
+                        businessId: 'current-business'
+                    })
+                });
+                
+                const result = await response.json();
+                console.log('Employee API response:', result);
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to save employee');
+                }
+                
+                // Create employee object for local display
+                const employee = {
+                    id: result.employee.id,
+                    name,
+                    phone,
+                    email,
+                    role,
+                    category,
+                    paymentType,
+                    paymentAmount: parseFloat(paymentAmount || 0),
+                    status: sendInvitation ? 'Pending Invitation' : 'Available',
+                    color: selectedRoleColor,
+                    dateAdded: result.employee.dateAdded
+                };
+                
+                // Add to employees array (for immediate display)
+                employees.push(employee);
+                console.log('Employee added to array:', employee);
+                
+                // Update display
+                renderEmployeeGrid();
+                updateEmployeeStats();
+                
+                const paymentText = paymentType === 'hourly' ? `$${paymentAmount}/hr` :
+                                  paymentType === 'per_job' ? `$${paymentAmount}/job` :
+                                  paymentType === 'salary' ? `$${paymentAmount}/year` :
+                                  paymentType === 'commission' ? `${paymentAmount}% commission` : '';
+                
+                showNotification(`✅ Employee ${name} saved successfully! ${sendInvitation ? 'Invitation sent.' : ''}`, 'success');
+                updateVoiceOutput(`Successfully added ${name} as ${role} with ${paymentText} payment structure`);
+                closeAddEmployeeModal();
+                
+            } catch (error) {
+                console.error('Employee creation failed:', error);
+                showNotification(`❌ Failed to save employee: ${error.message}`, 'error');
             }
-            
-            updateVoiceOutput(`Successfully added ${name} as ${role} with ${paymentText} payment structure`);
-            closeAddEmployeeModal();
         }
 
         function renderEmployeeGrid() {

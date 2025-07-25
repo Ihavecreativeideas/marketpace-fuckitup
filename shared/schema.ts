@@ -273,15 +273,22 @@ export const employees = pgTable("employees", {
   id: uuid("id").primaryKey().defaultRandom(),
   businessId: uuid("business_id").notNull().references(() => businesses.id, { onDelete: "cascade" }),
   userId: varchar("user_id").references(() => users.id), // null if not yet accepted
+  name: varchar("name").notNull(), // full name
   email: varchar("email").notNull(), // for invitation
+  phone: varchar("phone"), // phone number
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   role: varchar("role").default("employee"), // employee, manager, musician, chef, etc.
+  category: varchar("category").default("employee"), // employee, contractor, volunteer
   status: varchar("status").default("pending"), // pending, active, inactive
+  paymentType: varchar("payment_type").default("hourly"), // hourly, salary, per_job, commission
+  paymentAmount: real("payment_amount").default(0), // payment amount
+  color: varchar("color").default("#00ffff"), // role color
   permissions: jsonb("permissions"), // custom permissions per employee
   invitedAt: timestamp("invited_at").defaultNow(),
   joinedAt: timestamp("joined_at"),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Work schedules
