@@ -6326,16 +6326,16 @@ app.get('/api/facebook/auth-url', (req, res) => {
   
   console.log('Detecting domain for Facebook redirect:', { host, protocol, fullUrl: `${protocol}://${host}` });
   
-  // Match exact configured redirect URIs from Facebook app  
-  if (host.includes('replit.dev') || host.includes('repl.co') || host.includes('ihavecreativeid')) {
-    // For ANY Replit domain, use the current domain with HTTPS
-    redirectUri = `https://${host}/api/facebook/callback`;
-  } else if (host.includes('www.marketpace.shop')) {
+  // Prioritize production domain first
+  if (host.includes('www.marketpace.shop')) {
     redirectUri = 'https://www.marketpace.shop/api/facebook/callback';
   } else if (host.includes('marketpace.shop')) {
     redirectUri = 'https://marketpace.shop/api/facebook/callback';
   } else if (host.includes('localhost')) {
     redirectUri = 'http://localhost:5000/api/facebook/callback';
+  } else if (host.includes('replit.dev') || host.includes('repl.co') || host.includes('ihavecreativeid')) {
+    // Fallback to Replit domain for development only
+    redirectUri = `https://${host}/api/facebook/callback`;
   } else {
     // Default to production
     redirectUri = 'https://www.marketpace.shop/api/facebook/callback';
@@ -6346,8 +6346,12 @@ app.get('/api/facebook/auth-url', (req, res) => {
   // Check if popup mode is requested
   const popupMode = req.query.popup === 'true';
   if (popupMode) {
-    // Use popup-specific redirect URI
-    if (host.includes('replit.dev') || host.includes('repl.co') || host.includes('ihavecreativeid')) {
+    // Use popup-specific redirect URI - prioritize production
+    if (host.includes('www.marketpace.shop')) {
+      redirectUri = 'https://www.marketpace.shop/api/facebook/popup-callback';
+    } else if (host.includes('marketpace.shop')) {
+      redirectUri = 'https://marketpace.shop/api/facebook/popup-callback';
+    } else if (host.includes('replit.dev') || host.includes('repl.co') || host.includes('ihavecreativeid')) {
       redirectUri = `https://${host}/api/facebook/popup-callback`;
     } else {
       redirectUri = 'https://www.marketpace.shop/api/facebook/popup-callback';
@@ -6373,16 +6377,16 @@ app.get('/api/facebook/callback', async (req, res) => {
     
     console.log('Facebook callback domain detection:', { host, protocol, fullUrl: `${protocol}://${host}` });
     
-    // Match exact configured redirect URIs from Facebook app
-    if (host.includes('replit.dev') || host.includes('repl.co') || host.includes('ihavecreativeid')) {
-      // For ANY Replit domain, use the current domain with HTTPS
-      redirectUri = `https://${host}/api/facebook/callback`;
-    } else if (host.includes('www.marketpace.shop')) {
+    // Prioritize production domain first
+    if (host.includes('www.marketpace.shop')) {
       redirectUri = 'https://www.marketpace.shop/api/facebook/callback';
     } else if (host.includes('marketpace.shop')) {
       redirectUri = 'https://marketpace.shop/api/facebook/callback';
     } else if (host.includes('localhost')) {
       redirectUri = 'http://localhost:5000/api/facebook/callback';
+    } else if (host.includes('replit.dev') || host.includes('repl.co') || host.includes('ihavecreativeid')) {
+      // Fallback to Replit domain for development only
+      redirectUri = `https://${host}/api/facebook/callback`;
     } else {
       // Default to production
       redirectUri = 'https://www.marketpace.shop/api/facebook/callback';
@@ -6416,11 +6420,15 @@ app.get('/api/facebook/popup-callback', async (req, res) => {
     const appId = process.env.FACEBOOK_APP_ID;
     const appSecret = process.env.FACEBOOK_APP_SECRET;
     
-    // Use popup-specific redirect URI
+    // Use popup-specific redirect URI - prioritize production
     const host = req.get('host') || '';
     let redirectUri;
     
-    if (host.includes('replit.dev') || host.includes('repl.co') || host.includes('ihavecreativeid')) {
+    if (host.includes('www.marketpace.shop')) {
+      redirectUri = 'https://www.marketpace.shop/api/facebook/popup-callback';
+    } else if (host.includes('marketpace.shop')) {
+      redirectUri = 'https://marketpace.shop/api/facebook/popup-callback';
+    } else if (host.includes('replit.dev') || host.includes('repl.co') || host.includes('ihavecreativeid')) {
       redirectUri = `https://${host}/api/facebook/popup-callback`;
     } else {
       redirectUri = 'https://www.marketpace.shop/api/facebook/popup-callback';
