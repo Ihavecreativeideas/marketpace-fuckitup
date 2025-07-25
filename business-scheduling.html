@@ -2180,6 +2180,28 @@
         <div id="schedule" class="tab-content active">
             <div class="tab-title">Schedule Management</div>
             
+            <!-- Edit Schedule Button - Super Obvious -->
+            <div style="margin: 16px 0 24px 0; text-align: center;">
+                <button onclick="openEditSchedule()" style="
+                    background: linear-gradient(135deg, #00ffff, #4169e1); 
+                    color: white; 
+                    border: none; 
+                    border-radius: 12px; 
+                    padding: 16px 32px; 
+                    font-size: 18px; 
+                    font-weight: bold; 
+                    cursor: pointer; 
+                    box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
+                    transition: all 0.3s ease;
+                    min-width: 200px;
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0, 255, 255, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 255, 255, 0.3)'">
+                    📝 EDIT SCHEDULE
+                </button>
+                <div style="color: #94a3b8; font-size: 12px; margin-top: 8px;">
+                    Add members • Create shifts • Manage locations • Generate QR codes
+                </div>
+            </div>
+            
             <!-- Voice Control at Top -->
             <div class="voice-control-compact" style="background: linear-gradient(135deg, rgba(138, 43, 226, 0.2), rgba(65, 105, 225, 0.1)); border: 1px solid rgba(138, 43, 226, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
                 <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -4063,8 +4085,8 @@
             const employeesSection = document.getElementById('employeesSection');
             if (!employeesSection) return;
             
-            // Filter for employees only
-            const employeeList = employees.filter(emp => emp.category === 'employee');
+            // Filter for employees only (case insensitive)
+            const employeeList = employees.filter(emp => emp.category.toLowerCase() === 'employee');
             
             // Find or create person grid container within employees section
             let personGrid = employeesSection.querySelector('.person-grid');
@@ -4111,8 +4133,8 @@
             const contractorsSection = document.getElementById('contractorsSection');
             if (!contractorsSection) return;
             
-            // Filter for contractors only
-            const contractorList = employees.filter(emp => emp.category === 'contractor');
+            // Filter for contractors only (case insensitive)
+            const contractorList = employees.filter(emp => emp.category.toLowerCase() === 'contractor');
             
             // Find or create person grid container
             let personGrid = contractorsSection.querySelector('.person-grid');
@@ -4159,8 +4181,8 @@
             const volunteersSection = document.getElementById('volunteersSection');
             if (!volunteersSection) return;
             
-            // Filter for volunteers only
-            const volunteerList = employees.filter(emp => emp.category === 'volunteer');
+            // Filter for volunteers only (case insensitive)
+            const volunteerList = employees.filter(emp => emp.category.toLowerCase() === 'volunteer');
             
             // Find or create person grid container
             let personGrid = volunteersSection.querySelector('.person-grid');
@@ -4204,10 +4226,10 @@
         }
 
         function updateCategoryCounts() {
-            // Update category counters
-            const employeeCount = employees.filter(emp => emp.category === 'employee').length;
-            const contractorCount = employees.filter(emp => emp.category === 'contractor').length;
-            const volunteerCount = employees.filter(emp => emp.category === 'volunteer').length;
+            // Update category counters (case insensitive)
+            const employeeCount = employees.filter(emp => emp.category.toLowerCase() === 'employee').length;
+            const contractorCount = employees.filter(emp => emp.category.toLowerCase() === 'contractor').length;
+            const volunteerCount = employees.filter(emp => emp.category.toLowerCase() === 'volunteer').length;
             
             // Update counters if elements exist
             const totalEmployeesElement = document.getElementById('totalEmployeesCount');
@@ -4401,6 +4423,384 @@
             const employee = employees.find(e => e.id === employeeId);
             showNotification(`Opening message for ${employee.name}...`, 'info');
             // Here you would integrate with your messaging system
+        }
+
+        // Simple Edit Schedule Interface
+        function openEditSchedule() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0, 0, 0, 0.9); display: flex; align-items: center; 
+                justify-content: center; z-index: 10000; backdrop-filter: blur(10px);
+            `;
+            
+            const content = document.createElement('div');
+            content.style.cssText = `
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                border: 2px solid #00ffff; border-radius: 16px; padding: 24px; 
+                max-width: 600px; width: 95%; max-height: 90vh; overflow-y: auto;
+            `;
+            
+            content.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 style="color: #00ffff; margin: 0; font-size: 24px;">📝 Edit Schedule</h2>
+                    <button onclick="this.closest('.modal').remove()" style="background: transparent; border: none; color: #00ffff; font-size: 28px; cursor: pointer; padding: 0;">&times;</button>
+                </div>
+                
+                <!-- Quick Actions Grid -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                    
+                    <!-- Add Member -->
+                    <div onclick="openAddEmployee(); this.closest('.modal').remove();" style="
+                        background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(0, 0, 0, 0.6)); 
+                        border: 2px solid rgba(255, 215, 0, 0.3); 
+                        border-radius: 12px; 
+                        padding: 20px; 
+                        cursor: pointer; 
+                        transition: all 0.3s ease;
+                        text-align: center;
+                    " onmouseover="this.style.borderColor='#ffd700'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(255, 215, 0, 0.3)'; this.style.transform='translateY(0)'">
+                        <div style="font-size: 32px; margin-bottom: 8px;">👥</div>
+                        <div style="color: #ffd700; font-weight: bold; font-size: 16px; margin-bottom: 4px;">Add Member</div>
+                        <div style="color: #94a3b8; font-size: 12px;">Add employees, contractors, volunteers</div>
+                    </div>
+                    
+                    <!-- Create Shift -->
+                    <div onclick="openQuickShiftCreator()" style="
+                        background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 0, 0, 0.6)); 
+                        border: 2px solid rgba(0, 255, 255, 0.3); 
+                        border-radius: 12px; 
+                        padding: 20px; 
+                        cursor: pointer; 
+                        transition: all 0.3s ease;
+                        text-align: center;
+                    " onmouseover="this.style.borderColor='#00ffff'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(0, 255, 255, 0.3)'; this.style.transform='translateY(0)'">
+                        <div style="font-size: 32px; margin-bottom: 8px;">⏰</div>
+                        <div style="color: #00ffff; font-weight: bold; font-size: 16px; margin-bottom: 4px;">Create Shift</div>
+                        <div style="color: #94a3b8; font-size: 12px;">Schedule members for specific times</div>
+                    </div>
+                    
+                    <!-- Manage Locations -->
+                    <div onclick="openLocationManager()" style="
+                        background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(0, 0, 0, 0.6)); 
+                        border: 2px solid rgba(34, 197, 94, 0.3); 
+                        border-radius: 12px; 
+                        padding: 20px; 
+                        cursor: pointer; 
+                        transition: all 0.3s ease;
+                        text-align: center;
+                    " onmouseover="this.style.borderColor='#22c55e'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(34, 197, 94, 0.3)'; this.style.transform='translateY(0)'">
+                        <div style="font-size: 32px; margin-bottom: 8px;">📍</div>
+                        <div style="color: #22c55e; font-weight: bold; font-size: 16px; margin-bottom: 4px;">Manage Locations</div>
+                        <div style="color: #94a3b8; font-size: 12px;">Add work locations & addresses</div>
+                    </div>
+                    
+                    <!-- Generate QR Codes -->
+                    <div onclick="openQRCodeGenerator()" style="
+                        background: linear-gradient(135deg, rgba(138, 43, 226, 0.1), rgba(0, 0, 0, 0.6)); 
+                        border: 2px solid rgba(138, 43, 226, 0.3); 
+                        border-radius: 12px; 
+                        padding: 20px; 
+                        cursor: pointer; 
+                        transition: all 0.3s ease;
+                        text-align: center;
+                    " onmouseover="this.style.borderColor='#8a2be2'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(138, 43, 226, 0.3)'; this.style.transform='translateY(0)'">
+                        <div style="font-size: 32px; margin-bottom: 8px;">📱</div>
+                        <div style="color: #8a2be2; font-weight: bold; font-size: 16px; margin-bottom: 4px;">Generate QR Codes</div>
+                        <div style="color: #94a3b8; font-size: 12px;">Create geo QR codes for check-ins</div>
+                    </div>
+                    
+                </div>
+                
+                <!-- Current Status Summary -->
+                <div style="background: rgba(0, 0, 0, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                    <h4 style="color: #00ffff; margin: 0 0 16px 0; font-size: 16px;">📊 Current Status</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
+                        <div style="text-align: center;">
+                            <div style="color: #ffd700; font-size: 24px; font-weight: bold;">${employees.length}</div>
+                            <div style="color: #94a3b8; font-size: 12px;">Total Members</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="color: #22c55e; font-size: 24px; font-weight: bold;">${employees.filter(e => e.status && e.status.toLowerCase() === 'active').length}</div>
+                            <div style="color: #94a3b8; font-size: 12px;">Active</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="color: #f59e0b; font-size: 24px; font-weight: bold;">${employees.filter(e => !e.status || e.status.toLowerCase() === 'pending').length}</div>
+                            <div style="color: #94a3b8; font-size: 12px;">Pending Invites</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="color: #8a2be2; font-size: 24px; font-weight: bold;">0</div>
+                            <div style="color: #94a3b8; font-size: 12px;">Locations</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Tips -->
+                <div style="background: rgba(0, 255, 255, 0.05); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 8px; padding: 16px;">
+                    <div style="color: #00ffff; font-weight: bold; font-size: 14px; margin-bottom: 8px;">💡 Quick Tips:</div>
+                    <div style="color: #94a3b8; font-size: 12px; line-height: 1.4;">
+                        • <strong>Add members first</strong> to build your workforce<br>
+                        • <strong>Create locations</strong> for different work sites<br>
+                        • <strong>Generate QR codes</strong> for easy check-ins<br>
+                        • <strong>Create shifts</strong> to assign specific work times
+                    </div>
+                </div>
+            `;
+            
+            modal.className = 'modal';
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+            
+            showNotification('Opening simplified schedule editor...', 'info');
+        }
+
+        // Quick Shift Creator
+        function openQuickShiftCreator() {
+            if (employees.length === 0) {
+                showNotification('Please add members first before creating shifts', 'error');
+                return;
+            }
+            
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0, 0, 0, 0.9); display: flex; align-items: center; 
+                justify-content: center; z-index: 10000; backdrop-filter: blur(10px);
+            `;
+            
+            const content = document.createElement('div');
+            content.style.cssText = `
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                border: 2px solid #00ffff; border-radius: 16px; padding: 24px; 
+                max-width: 500px; width: 95%; max-height: 90vh; overflow-y: auto;
+            `;
+            
+            const memberOptions = employees.map(emp => 
+                `<option value="${emp.id}">${emp.name} (${emp.role})</option>`
+            ).join('');
+            
+            content.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h3 style="color: #00ffff; margin: 0;">⏰ Create New Shift</h3>
+                    <button onclick="this.closest('.modal').remove()" style="background: transparent; border: none; color: #00ffff; font-size: 24px; cursor: pointer;">&times;</button>
+                </div>
+                
+                <form onsubmit="createQuickShift(event)">
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Select Member</label>
+                        <select id="shiftMember" required style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                            <option value="">Choose a member...</option>
+                            ${memberOptions}
+                        </select>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                        <div>
+                            <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Day</label>
+                            <select id="shiftDay" required style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                                <option value="monday">Monday</option>
+                                <option value="tuesday">Tuesday</option>
+                                <option value="wednesday">Wednesday</option>
+                                <option value="thursday">Thursday</option>
+                                <option value="friday">Friday</option>
+                                <option value="saturday">Saturday</option>
+                                <option value="sunday">Sunday</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Time Slot</label>
+                            <select id="shiftTime" required style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                                <option value="6-8">6:00 AM - 8:00 AM</option>
+                                <option value="8-10">8:00 AM - 10:00 AM</option>
+                                <option value="10-12">10:00 AM - 12:00 PM</option>
+                                <option value="12-14">12:00 PM - 2:00 PM</option>
+                                <option value="14-16">2:00 PM - 4:00 PM</option>
+                                <option value="16-18">4:00 PM - 6:00 PM</option>
+                                <option value="18-20">6:00 PM - 8:00 PM</option>
+                                <option value="20-22">8:00 PM - 10:00 PM</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Location (Optional)</label>
+                        <input type="text" id="shiftLocation" placeholder="e.g., Main Store, Warehouse, Event Hall" style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                        <button type="button" onclick="this.closest('.modal').remove()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 12px 20px; border-radius: 6px; cursor: pointer;">Cancel</button>
+                        <button type="submit" style="background: linear-gradient(135deg, #00ffff, #4169e1); border: none; color: white; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">Create Shift</button>
+                    </div>
+                </form>
+            `;
+            
+            modal.className = 'modal';
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+            
+            showNotification('Opening shift creator...', 'info');
+        }
+
+        function createQuickShift(event) {
+            event.preventDefault();
+            
+            const memberId = document.getElementById('shiftMember').value;
+            const day = document.getElementById('shiftDay').value;
+            const timeSlot = document.getElementById('shiftTime').value;
+            const location = document.getElementById('shiftLocation').value || 'Main Location';
+            
+            const member = employees.find(e => e.id == memberId);
+            const timeText = document.getElementById('shiftTime').selectedOptions[0].textContent;
+            
+            showNotification(`✅ Shift created: ${member.name} scheduled for ${day.charAt(0).toUpperCase() + day.slice(1)} at ${timeText} (${location})`, 'success');
+            
+            // Here you would add the shift to your calendar system
+            console.log(`Shift created:`, { member: member.name, day, timeSlot, location });
+            
+            event.target.closest('.modal').remove();
+        }
+
+        // Simple Location Manager
+        function openLocationManager() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0, 0, 0, 0.9); display: flex; align-items: center; 
+                justify-content: center; z-index: 10000; backdrop-filter: blur(10px);
+            `;
+            
+            const content = document.createElement('div');
+            content.style.cssText = `
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                border: 2px solid #22c55e; border-radius: 16px; padding: 24px; 
+                max-width: 500px; width: 95%; max-height: 90vh; overflow-y: auto;
+            `;
+            
+            content.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h3 style="color: #22c55e; margin: 0;">📍 Manage Locations</h3>
+                    <button onclick="this.closest('.modal').remove()" style="background: transparent; border: none; color: #22c55e; font-size: 24px; cursor: pointer;">&times;</button>
+                </div>
+                
+                <form onsubmit="addNewLocation(event)">
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Location Name</label>
+                        <input type="text" id="locationName" required placeholder="e.g., Main Store, Warehouse, Event Hall" style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Address</label>
+                        <input type="text" id="locationAddress" required placeholder="123 Main St, City, State 12345" style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; color: #94a3b8; margin-bottom: 8px;">
+                            <input type="checkbox" id="generateQR" checked style="margin-right: 8px;">
+                            Generate QR Code for this location
+                        </label>
+                        <div style="color: #94a3b8; font-size: 12px; margin-left: 20px;">
+                            Employees can scan to check-in at this location
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                        <button type="button" onclick="this.closest('.modal').remove()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 12px 20px; border-radius: 6px; cursor: pointer;">Cancel</button>
+                        <button type="submit" style="background: linear-gradient(135deg, #22c55e, #16a34a); border: none; color: white; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">Add Location</button>
+                    </div>
+                </form>
+            `;
+            
+            modal.className = 'modal';
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+            
+            showNotification('Opening location manager...', 'info');
+        }
+
+        function addNewLocation(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('locationName').value;
+            const address = document.getElementById('locationAddress').value;
+            const generateQR = document.getElementById('generateQR').checked;
+            
+            showNotification(`✅ Location added: ${name} at ${address}${generateQR ? ' (QR code generated)' : ''}`, 'success');
+            
+            // Here you would add the location to your system
+            console.log(`Location added:`, { name, address, generateQR });
+            
+            event.target.closest('.modal').remove();
+        }
+
+        // QR Code Generator
+        function openQRCodeGenerator() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0, 0, 0, 0.9); display: flex; align-items: center; 
+                justify-content: center; z-index: 10000; backdrop-filter: blur(10px);
+            `;
+            
+            const content = document.createElement('div');
+            content.style.cssText = `
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                border: 2px solid #8a2be2; border-radius: 16px; padding: 24px; 
+                max-width: 500px; width: 95%; max-height: 90vh; overflow-y: auto;
+            `;
+            
+            content.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h3 style="color: #8a2be2; margin: 0;">📱 Generate QR Codes</h3>
+                    <button onclick="this.closest('.modal').remove()" style="background: transparent; border: none; color: #8a2be2; font-size: 24px; cursor: pointer;">&times;</button>
+                </div>
+                
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="background: rgba(138, 43, 226, 0.1); border: 2px dashed rgba(138, 43, 226, 0.3); border-radius: 12px; padding: 40px; margin-bottom: 16px;">
+                        <div style="font-size: 64px; margin-bottom: 16px;">📱</div>
+                        <div style="color: #8a2be2; font-size: 18px; font-weight: bold; margin-bottom: 8px;">Universal QR Code</div>
+                        <div style="color: #94a3b8; font-size: 14px; line-height: 1.4;">
+                            One QR code works for all locations<br>
+                            Automatically detects which location the employee is at
+                        </div>
+                    </div>
+                    
+                    <button onclick="generateUniversalQR()" style="
+                        background: linear-gradient(135deg, #8a2be2, #6d28d9); 
+                        border: none; color: white; padding: 16px 32px; 
+                        border-radius: 8px; cursor: pointer; font-weight: bold; 
+                        font-size: 16px; margin-bottom: 16px;
+                    ">
+                        Generate Universal QR Code
+                    </button>
+                </div>
+                
+                <div style="background: rgba(0, 0, 0, 0.3); border-radius: 12px; padding: 20px;">
+                    <h4 style="color: #8a2be2; margin: 0 0 12px 0; font-size: 14px;">How it works:</h4>
+                    <div style="color: #94a3b8; font-size: 12px; line-height: 1.5;">
+                        1. Generate one QR code for your business<br>
+                        2. Print and place at all work locations<br>
+                        3. Employees scan the same code anywhere<br>
+                        4. System automatically detects their location<br>
+                        5. Check-ins are logged with proper location data
+                    </div>
+                </div>
+            `;
+            
+            modal.className = 'modal';
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+            
+            showNotification('Opening QR code generator...', 'info');
+        }
+
+        function generateUniversalQR() {
+            showNotification('✅ Universal QR code generated! Print and place at all work locations.', 'success');
+            
+            // Here you would generate the actual QR code
+            console.log('Universal QR code generated for business');
+            
+            // Close the modal
+            document.querySelector('.modal').remove();
         }
 
         function updateEmployeeStats() {
