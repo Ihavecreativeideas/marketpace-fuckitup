@@ -3460,16 +3460,7 @@
                     <input type="hidden" id="newEmployeePaymentAmount" required>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Status *</label>
-                    <select class="form-select" id="newEmployeeStatus" required>
-                        <option value="">Select Status</option>
-                        <option value="Available">Available</option>
-                        <option value="Scheduled">Scheduled</option>
-                        <option value="Off Duty">Off Duty</option>
-                        <option value="On Break">On Break</option>
-                    </select>
-                </div>
+
 
                 <div class="form-group">
                     <label class="form-label">Role *</label>
@@ -4609,7 +4600,8 @@
                         </div>
                         <div>
                             <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Time Slot</label>
-                            <select id="shiftTime" required style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                            <select id="shiftTime" onchange="toggleCustomTime()" required style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                                <option value="">Select Time Slot</option>
                                 <option value="6-8">6:00 AM - 8:00 AM</option>
                                 <option value="8-10">8:00 AM - 10:00 AM</option>
                                 <option value="10-12">10:00 AM - 12:00 PM</option>
@@ -4618,7 +4610,23 @@
                                 <option value="16-18">4:00 PM - 6:00 PM</option>
                                 <option value="18-20">6:00 PM - 8:00 PM</option>
                                 <option value="20-22">8:00 PM - 10:00 PM</option>
+                                <option value="custom">🕒 Create Custom Time</option>
                             </select>
+                            
+                            <!-- Custom Time Input (hidden by default) -->
+                            <div id="customTimeInputs" style="display: none; margin-top: 12px; padding: 12px; background: rgba(0, 255, 255, 0.05); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 8px;">
+                                <div style="color: #00ffff; font-size: 12px; margin-bottom: 8px; text-align: center;">Create Custom Shift Time</div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                    <div>
+                                        <label style="display: block; color: #94a3b8; margin-bottom: 4px; font-size: 11px;">Start Time</label>
+                                        <input type="time" id="customStartTime" style="width: 100%; padding: 8px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; color: white;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; color: #94a3b8; margin-bottom: 4px; font-size: 11px;">End Time</label>
+                                        <input type="time" id="customEndTime" style="width: 100%; padding: 8px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; color: white;">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
@@ -4641,6 +4649,17 @@
             showNotification('Opening shift creator...', 'info');
         }
 
+        function toggleCustomTime() {
+            const shiftTimeSelect = document.getElementById('shiftTime');
+            const customTimeInputs = document.getElementById('customTimeInputs');
+            
+            if (shiftTimeSelect.value === 'custom') {
+                customTimeInputs.style.display = 'block';
+            } else {
+                customTimeInputs.style.display = 'none';
+            }
+        }
+
         function createQuickShift(event) {
             event.preventDefault();
             
@@ -4650,12 +4669,34 @@
             const location = document.getElementById('shiftLocation').value || 'Main Location';
             
             const member = employees.find(e => e.id == memberId);
-            const timeText = document.getElementById('shiftTime').selectedOptions[0].textContent;
+            let timeText;
+            
+            if (timeSlot === 'custom') {
+                const startTime = document.getElementById('customStartTime').value;
+                const endTime = document.getElementById('customEndTime').value;
+                
+                if (!startTime || !endTime) {
+                    showNotification('Please enter both start and end times for custom shift', 'error');
+                    return;
+                }
+                
+                // Convert 24-hour format to 12-hour format for display
+                const formatTime = (time) => {
+                    const [hours, minutes] = time.split(':');
+                    const hour12 = hours % 12 || 12;
+                    const ampm = hours < 12 ? 'AM' : 'PM';
+                    return `${hour12}:${minutes} ${ampm}`;
+                };
+                
+                timeText = `${formatTime(startTime)} - ${formatTime(endTime)}`;
+            } else {
+                timeText = document.getElementById('shiftTime').selectedOptions[0].textContent;
+            }
             
             showNotification(`✅ Shift created: ${member.name} scheduled for ${day.charAt(0).toUpperCase() + day.slice(1)} at ${timeText} (${location})`, 'success');
             
             // Here you would add the shift to your calendar system
-            console.log(`Shift created:`, { member: member.name, day, timeSlot, location });
+            console.log(`Shift created:`, { member: member.name, day, timeSlot, timeText, location });
             
             event.target.closest('.modal').remove();
         }
