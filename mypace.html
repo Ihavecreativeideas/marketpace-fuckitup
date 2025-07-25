@@ -2841,6 +2841,35 @@
 
         // Global Facebook access token storage
         let facebookAccessToken = localStorage.getItem('facebook_access_token');
+        
+        // Check for Facebook authentication success in URL parameters
+        function checkFacebookAuthStatus() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const authStatus = urlParams.get('facebook_auth');
+            const token = urlParams.get('token');
+            
+            if (authStatus === 'success' && token) {
+                // Store the access token
+                facebookAccessToken = token;
+                localStorage.setItem('facebook_access_token', token);
+                
+                // Clean up URL parameters
+                const cleanUrl = window.location.origin + window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+                
+                // Show success notification
+                showNotification('✅ Facebook connected successfully! You can now search your Facebook friends.', 'success');
+                
+                console.log('Facebook authentication successful, token stored');
+            } else if (authStatus === 'error') {
+                const errorMessage = urlParams.get('message') || 'Unknown error';
+                showNotification('❌ Facebook connection failed: ' + errorMessage, 'error');
+                console.error('Facebook authentication failed:', errorMessage);
+            }
+        }
+        
+        // Call this when page loads
+        checkFacebookAuthStatus();
 
         // Facebook authentication and artist search
         async function connectFacebook() {
