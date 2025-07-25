@@ -6235,12 +6235,29 @@ app.get('/api/facebook/search-artists', async (req, res) => {
 // Facebook authentication for MyPace
 app.get('/api/facebook/auth-url', (req, res) => {
   const appId = process.env.FACEBOOK_APP_ID;
-  const redirectUri = encodeURIComponent(`${req.protocol}://${req.get('host')}/api/facebook/callback`);
+  
+  // Use exact redirect URI that matches Facebook app configuration
+  let redirectUri;
+  const host = req.get('host') || '';
+  
+  if (host.includes('marketpace.shop')) {
+    redirectUri = host.startsWith('www.') ? 
+      'https://www.marketpace.shop/api/facebook/callback' : 
+      'https://marketpace.shop/api/facebook/callback';
+  } else if (host.includes('repl.co')) {
+    redirectUri = 'https://workspace.ihavecreativeid.repl.co/api/facebook/callback';
+  } else if (host.includes('localhost')) {
+    redirectUri = 'http://localhost:5000/api/facebook/callback';
+  } else {
+    // Default to production
+    redirectUri = 'https://www.marketpace.shop/api/facebook/callback';
+  }
+  
   const scopes = 'user_friends,pages_read_engagement,pages_show_list';
+  const authUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scopes}&response_type=code`;
   
-  const authUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=code`;
-  
-  res.json({ authUrl });
+  console.log('Facebook Auth URL generated with redirect URI:', redirectUri);
+  res.json({ authUrl, redirectUri });
 });
 
 app.get('/api/facebook/callback', async (req, res) => {
@@ -6248,7 +6265,25 @@ app.get('/api/facebook/callback', async (req, res) => {
   try {
     const appId = process.env.FACEBOOK_APP_ID;
     const appSecret = process.env.FACEBOOK_APP_SECRET;
-    const redirectUri = `${req.protocol}://${req.get('host')}/api/facebook/callback`;
+    
+    // Use same redirect URI logic as auth-url endpoint
+    const host = req.get('host') || '';
+    let redirectUri;
+    
+    if (host.includes('marketpace.shop')) {
+      redirectUri = host.startsWith('www.') ? 
+        'https://www.marketpace.shop/api/facebook/callback' : 
+        'https://marketpace.shop/api/facebook/callback';
+    } else if (host.includes('repl.co')) {
+      redirectUri = 'https://workspace.ihavecreativeid.repl.co/api/facebook/callback';
+    } else if (host.includes('localhost')) {
+      redirectUri = 'http://localhost:5000/api/facebook/callback';
+    } else {
+      // Default to production
+      redirectUri = 'https://www.marketpace.shop/api/facebook/callback';
+    }
+    
+    console.log('Facebook callback using redirect URI:', redirectUri);
     
     // Exchange code for access token
     const tokenResponse = await fetch(`https://graph.facebook.com/v18.0/oauth/access_token?client_id=${appId}&client_secret=${appSecret}&redirect_uri=${redirectUri}&code=${code}`);
