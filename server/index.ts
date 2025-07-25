@@ -30,6 +30,69 @@ import { sponsorManagementRoutes } from './sponsorManagement';
 import { zapierRouter } from './zapier-integration';
 const { sendEmployeeInvitation } = require('./employeeInvitation.js');
 const facebookAdsRouter = require('./routes/facebook-ads');
+
+// Facebook API for real artist/friend search
+async function searchFacebookFriendsAndArtists(accessToken: string, query: string, userLocation?: { lat: number, lng: number }) {
+  try {
+    const results = [];
+    
+    // Search user's friends who are musicians/artists
+    const friendsResponse = await fetch(`https://graph.facebook.com/v18.0/me/friends?fields=id,name,picture,location&access_token=${accessToken}`);
+    const friendsData = await friendsResponse.json();
+    
+    if (friendsData.data) {
+      for (const friend of friendsData.data) {
+        if (friend.name.toLowerCase().includes(query.toLowerCase())) {
+          // Check if friend has musician/artist interests or pages
+          try {
+            const friendDetailsResponse = await fetch(`https://graph.facebook.com/v18.0/${friend.id}?fields=id,name,picture,music,books,interests&access_token=${accessToken}`);
+            const friendDetails = await friendDetailsResponse.json();
+            
+            results.push({
+              name: friend.name,
+              type: 'FRIEND_ARTIST',
+              details: `Facebook friend - Local musician`,
+              id: friend.id,
+              picture: friend.picture?.data?.url || null,
+              source: 'facebook_friend'
+            });
+          } catch (error) {
+            console.log('Error fetching friend details:', error);
+          }
+        }
+      }
+    }
+    
+    // Search for local artist pages near user's location
+    if (userLocation) {
+      const searchResponse = await fetch(`https://graph.facebook.com/v18.0/search?type=page&q=${encodeURIComponent(query)}&fields=id,name,picture,location,category,fan_count&center=${userLocation.lat},${userLocation.lng}&distance=10000&access_token=${accessToken}`);
+      const searchData = await searchResponse.json();
+      
+      if (searchData.data) {
+        for (const page of searchData.data) {
+          // Filter for music-related pages
+          const musicCategories = ['musician', 'band', 'artist', 'music', 'dj', 'singer', 'songwriter'];
+          if (page.category && musicCategories.some(cat => page.category.toLowerCase().includes(cat))) {
+            results.push({
+              name: page.name,
+              type: 'LOCAL_ARTIST',
+              details: `${page.category} - ${page.fan_count || 0} followers`,
+              id: page.id,
+              picture: page.picture?.data?.url || null,
+              location: page.location?.city || 'Local area',
+              source: 'facebook_page'
+            });
+          }
+        }
+      }
+    }
+    
+    return results;
+  } catch (error) {
+    console.error('Facebook API error:', error);
+    return [];
+  }
+}
 // Import driver invitation module
 const { sendDriverInvitation } = require('./driverInvitation.js');
 
@@ -6141,6 +6204,75 @@ registerDriverApplicationRoutes(app);
 app.use(socialMediaRoutes);
 app.use('/api/zapier', zapierRouter);
 app.use('/api/facebook-ads', facebookAdsRouter);
+
+// Facebook real-time artist/friend search for MyPace tagging
+app.get('/api/facebook/search-artists', async (req, res) => {
+  try {
+    const { query, access_token, lat, lng } = req.query;
+    
+    if (!access_token) {
+      return res.status(401).json({ error: 'Facebook access token required' });
+    }
+    
+    if (!query || query.length < 2) {
+      return res.json({ artists: [] });
+    }
+    
+    let userLocation = null;
+    if (lat && lng) {
+      userLocation = { lat: parseFloat(lat as string), lng: parseFloat(lng as string) };
+    }
+    
+    const artists = await searchFacebookFriendsAndArtists(access_token as string, query as string, userLocation);
+    
+    res.json({ artists });
+  } catch (error) {
+    console.error('Error searching Facebook artists:', error);
+    res.status(500).json({ error: 'Failed to search Facebook artists' });
+  }
+});
+
+// Facebook authentication for MyPace
+app.get('/api/facebook/auth-url', (req, res) => {
+  const appId = process.env.FACEBOOK_APP_ID;
+  const redirectUri = encodeURIComponent(`${req.protocol}://${req.get('host')}/api/facebook/callback`);
+  const scopes = 'user_friends,pages_read_engagement,pages_show_list';
+  
+  const authUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=code`;
+  
+  res.json({ authUrl });
+});
+
+app.get('/api/facebook/callback', async (req, res) => {
+  try {
+    const { code } = req.query;
+    const appId = process.env.FACEBOOK_APP_ID;
+    const appSecret = process.env.FACEBOOK_APP_SECRET;
+    const redirectUri = `${req.protocol}://${req.get('host')}/api/facebook/callback`;
+    
+    // Exchange code for access token
+    const tokenResponse = await fetch(`https://graph.facebook.com/v18.0/oauth/access_token?client_id=${appId}&client_secret=${appSecret}&redirect_uri=${redirectUri}&code=${code}`);
+    const tokenData = await tokenResponse.json();
+    
+    if (tokenData.access_token) {
+      // Store access token in session or return to frontend
+      res.send(`
+        <script>
+          window.opener.postMessage({
+            type: 'FACEBOOK_AUTH_SUCCESS',
+            accessToken: '${tokenData.access_token}'
+          }, '*');
+          window.close();
+        </script>
+      `);
+    } else {
+      res.status(400).json({ error: 'Failed to get access token' });
+    }
+  } catch (error) {
+    console.error('Facebook auth callback error:', error);
+    res.status(500).json({ error: 'Authentication failed' });
+  }
+});
 
 // Add missing admin routes for driver applications
 app.get('/api/admin/driver-applications', async (req, res) => {

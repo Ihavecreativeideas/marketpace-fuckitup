@@ -2839,8 +2839,75 @@
             };
         }
 
-        // Support tag search with predictive results
-        function searchSupportTags(query) {
+        // Global Facebook access token storage
+        let facebookAccessToken = localStorage.getItem('facebook_access_token');
+
+        // Facebook authentication and artist search
+        async function connectFacebook() {
+            try {
+                const response = await fetch('/api/facebook/auth-url');
+                const data = await response.json();
+                
+                const popup = window.open(data.authUrl, 'facebook-auth', 'width=600,height=600');
+                
+                return new Promise((resolve, reject) => {
+                    const messageHandler = (event) => {
+                        if (event.data.type === 'FACEBOOK_AUTH_SUCCESS') {
+                            facebookAccessToken = event.data.accessToken;
+                            localStorage.setItem('facebook_access_token', facebookAccessToken);
+                            window.removeEventListener('message', messageHandler);
+                            popup.close();
+                            resolve(facebookAccessToken);
+                        }
+                    };
+                    
+                    window.addEventListener('message', messageHandler);
+                    
+                    // Check if popup was closed manually
+                    const checkClosed = setInterval(() => {
+                        if (popup.closed) {
+                            clearInterval(checkClosed);
+                            window.removeEventListener('message', messageHandler);
+                            reject(new Error('Authentication cancelled'));
+                        }
+                    }, 1000);
+                });
+            } catch (error) {
+                console.error('Facebook authentication error:', error);
+                throw error;
+            }
+        }
+
+        // Search Facebook friends and local artists
+        async function searchFacebookArtists(query) {
+            if (!facebookAccessToken) {
+                throw new Error('Not authenticated with Facebook');
+            }
+
+            try {
+                const params = new URLSearchParams({
+                    query: query,
+                    access_token: facebookAccessToken,
+                    lat: '30.2672', // Gulf Shores coordinates
+                    lng: '-87.7031'
+                });
+
+                const response = await fetch(`/api/facebook/search-artists?${params}`);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to search Facebook artists');
+                }
+                
+                return data.artists || [];
+            } catch (error) {
+                console.error('Facebook artist search error:', error);
+                throw error;
+            }
+        }
+
+        // Support tag search with real Facebook integration
+        async function searchSupportTags(query) {
             const resultsContainer = document.getElementById('supportTagResults');
             
             if (!query.trim() || (!query.includes('@') && !query.includes('#'))) {
@@ -2859,84 +2926,60 @@
             let suggestions = [];
 
             if (query.includes('@')) {
-                // Comprehensive artists and businesses database
-                const entities = [
-                    // Local Musicians & Artists
-                    { name: 'BrownBarnesMusic', type: 'ARTIST', details: 'Country singer-songwriter from Gulf Shores' },
-                    { name: 'DJ_Nova', type: 'ARTIST', details: 'Electronic music DJ & producer' },
-                    { name: 'SunsetBand', type: 'ARTIST', details: 'Rock cover band, weekend shows' },
-                    { name: 'CoastalJazz', type: 'ARTIST', details: 'Jazz ensemble, dinner music' },
-                    { name: 'BeachVibesAcoustic', type: 'ARTIST', details: 'Acoustic duo, tropical vibes' },
-                    { name: 'SarahMichaels', type: 'ARTIST', details: 'Local singer, open mic regular' },
-                    { name: 'TidePoolBand', type: 'ARTIST', details: 'Indie rock group from Orange Beach' },
-                    { name: 'GulfCoastBlues', type: 'ARTIST', details: 'Blues guitarist & harmonica' },
-                    { name: 'IslandTimeMusic', type: 'ARTIST', details: 'Jimmy Buffett tribute artist' },
-                    { name: 'RedTideRockers', type: 'ARTIST', details: 'Local metal/rock band' },
-                    { name: 'AcousticWaves', type: 'ARTIST', details: 'Folk singer-songwriter' },
-                    { name: 'BeachBum_Brad', type: 'ARTIST', details: 'Comedy musician & entertainer' },
-                    { name: 'MikeTheMusician', type: 'ARTIST', details: 'Multi-instrumentalist for hire' },
-                    { name: 'SeashellSerenade', type: 'ARTIST', details: 'Classical violinist, weddings' },
-                    { name: 'DriftewoodDuo', type: 'ARTIST', details: 'Husband-wife acoustic team' },
-                    { name: 'CoastalCreatives', type: 'ARTIST', details: 'Art collective & gallery group' },
-                    { name: 'PaintTheBeach', type: 'ARTIST', details: 'Local painter & art instructor' },
-                    { name: 'SculptureByTheSea', type: 'ARTIST', details: 'Beach-inspired sculpture artist' },
-                    { name: 'PhotosByMarina', type: 'ARTIST', details: 'Wedding & event photographer' },
-                    { name: 'CeramicWaves', type: 'ARTIST', details: 'Pottery studio & classes' },
+                // First try to get real Facebook artists/friends
+                try {
+                    const facebookResults = await searchFacebookArtists(searchTerm);
+                    if (facebookResults.length > 0) {
+                        suggestions = facebookResults.map(artist => ({
+                            display: `@${artist.name}`,
+                            type: artist.source === 'facebook_friend' ? 'FRIEND_ARTIST' : 'LOCAL_ARTIST',
+                            details: artist.details,
+                            picture: artist.picture,
+                            source: artist.source
+                        }));
+                    }
+                } catch (error) {
+                    console.log('Facebook search not available, using local database:', error.message);
                     
-                    // Local Businesses - Food & Drink
-                    { name: 'OrangeBeachCoffee', type: 'BUSINESS', details: 'Locally owned coffee shop & roastery' },
-                    { name: 'GulfShoresBrewery', type: 'BUSINESS', details: 'Craft brewery with live music' },
-                    { name: 'FloraBarama', type: 'BUSINESS', details: 'Iconic beach bar & restaurant' },
-                    { name: 'SeafoodMarina', type: 'BUSINESS', details: 'Fresh catch restaurant & market' },
-                    { name: 'SunriseCafe', type: 'BUSINESS', details: 'Breakfast spot with ocean views' },
-                    { name: 'BeachsideBrew', type: 'BUSINESS', details: 'Coffee shop with beach access' },
-                    { name: 'CoastalGrill', type: 'BUSINESS', details: 'BBQ & seafood restaurant' },
-                    { name: 'TropicalTreats', type: 'BUSINESS', details: 'Smoothie bar & healthy eats' },
-                    { name: 'HarborHouse', type: 'BUSINESS', details: 'Fine dining with marina views' },
-                    { name: 'BeachBarBistro', type: 'BUSINESS', details: 'Casual dining & cocktails' },
-                    { name: 'GulfCoastDistillery', type: 'BUSINESS', details: 'Local spirits & tasting room' },
-                    { name: 'FishTalesTavern', type: 'BUSINESS', details: 'Sports bar with fresh seafood' },
-                    { name: 'OysterShellCafe', type: 'BUSINESS', details: 'Breakfast & lunch specialists' },
-                    { name: 'MargaritavilleGS', type: 'BUSINESS', details: 'Themed restaurant & bar' },
-                    { name: 'ShrimpersCatch', type: 'BUSINESS', details: 'Local shrimp boat restaurant' },
-                    
-                    // Retail & Services
-                    { name: 'ArtisanGallery', type: 'BUSINESS', details: 'Local art gallery & gift shop' },
-                    { name: 'BeachGearRentals', type: 'BUSINESS', details: 'Beach equipment & bike rentals' },
-                    { name: 'SouvenirCity', type: 'BUSINESS', details: 'T-shirts, gifts & beach supplies' },
-                    { name: 'MarinaSupply', type: 'BUSINESS', details: 'Boat supplies & marine services' },
-                    { name: 'SurfShopGS', type: 'BUSINESS', details: 'Surfboards, swimwear & lessons' },
-                    { name: 'BeachHairSalon', type: 'BUSINESS', details: 'Full service salon & spa' },
-                    { name: 'FitnessOnTheBeach', type: 'BUSINESS', details: 'Personal training & yoga classes' },
-                    { name: 'RealEstateByTheBay', type: 'BUSINESS', details: 'Vacation rental specialists' },
-                    { name: 'PhotoStudioGS', type: 'BUSINESS', details: 'Portrait & wedding photography' },
-                    { name: 'WeddingsByTheWater', type: 'BUSINESS', details: 'Beach wedding planning services' },
-                    { name: 'CharterFishingGS', type: 'BUSINESS', details: 'Deep sea fishing charters' },
-                    { name: 'DolphinCruises', type: 'BUSINESS', details: 'Dolphin watching & sunset tours' },
-                    { name: 'ParasailAdventures', type: 'BUSINESS', details: 'Parasailing & water sports' },
-                    { name: 'JetSkiRentalsOB', type: 'BUSINESS', details: 'Jet ski & pontoon boat rentals' },
-                    { name: 'BeachBikeShop', type: 'BUSINESS', details: 'Bike sales, rentals & repairs' },
-                    
-                    // Entertainment & Activities
-                    { name: 'AdventureIslandOB', type: 'BUSINESS', details: 'Mini golf & family entertainment' },
-                    { name: 'TheTrackGS', type: 'BUSINESS', details: 'Go-karts, arcade & laser tag' },
-                    { name: 'WatervilleUSA', type: 'BUSINESS', details: 'Water park & amusement rides' },
-                    { name: 'GolfLinksGS', type: 'BUSINESS', details: '18-hole championship golf course' },
-                    { name: 'PirateCruiseOB', type: 'BUSINESS', details: 'Family pirate adventure tours' },
-                    { name: 'ZoolandAnimalPark', type: 'BUSINESS', details: 'Petting zoo & animal encounters' },
-                    { name: 'EscapeRoomBeach', type: 'BUSINESS', details: 'Themed escape room experiences' },
-                    { name: 'BowlingAlleyGS', type: 'BUSINESS', details: 'Bowling, arcade & party venue' },
-                    { name: 'MovieTheaterOB', type: 'BUSINESS', details: 'Latest movies & concessions' },
-                    { name: 'LaserTagBeach', type: 'BUSINESS', details: 'Indoor laser tag arena' }
-                ];
+                    // Show Facebook connect option if not authenticated
+                    if (error.message.includes('Not authenticated') && !document.getElementById('facebook-connect-hint')) {
+                        const connectHint = document.createElement('div');
+                        connectHint.id = 'facebook-connect-hint';
+                        connectHint.innerHTML = `
+                            <div class="autocomplete-item" onclick="connectFacebook().then(() => searchSupportTags('${query}'))" style="background: rgba(59, 89, 152, 0.1); border-color: #3b5998;">
+                                <div>
+                                    <span class="item-type">CONNECT</span>
+                                    <span class="item-name">Connect Facebook to find your musician friends</span>
+                                </div>
+                                <div class="item-details">Tap to connect and search your Facebook friends who are artists</div>
+                            </div>
+                        `;
+                        resultsContainer.appendChild(connectHint);
+                        resultsContainer.style.display = 'block';
+                    }
+                }
 
-                suggestions = entities.filter(entity => 
-                    entity.name.toLowerCase().includes(searchTerm)
-                ).map(entity => ({
-                    display: `@${entity.name}`,
-                    type: entity.type,
-                    details: entity.details
-                }));
+                // If no Facebook results, fall back to local businesses only
+                if (suggestions.length === 0) {
+                    const localBusinesses = [
+                        // Key local businesses for fallback
+                        { name: 'OrangeBeachCoffee', type: 'BUSINESS', details: 'Locally owned coffee shop & roastery' },
+                        { name: 'GulfShoresBrewery', type: 'BUSINESS', details: 'Craft brewery with live music' },
+                        { name: 'FloraBarama', type: 'BUSINESS', details: 'Iconic beach bar & restaurant' },
+                        { name: 'TheWharfAmphitheater', type: 'BUSINESS', details: 'Concert venue & entertainment complex' },
+                        { name: 'SunriseCafe', type: 'BUSINESS', details: 'Breakfast spot with ocean views' },
+                        { name: 'ArtisanGallery', type: 'BUSINESS', details: 'Local art gallery & gift shop' }
+                    ];
+
+                    suggestions = localBusinesses.filter(business => 
+                        business.name.toLowerCase().includes(searchTerm)
+                    ).map(business => ({
+                        display: `@${business.name}`,
+                        type: business.type,
+                        details: business.details,
+                        source: 'local_fallback'
+                    }));
+                }
             }
 
             if (query.includes('#')) {
@@ -3024,21 +3067,31 @@
                 }));
             }
 
-            if (suggestions.length === 0) {
+            // Display suggestions with enhanced styling for Facebook results
+            if (suggestions.length === 0 && !document.getElementById('facebook-connect-hint')) {
                 resultsContainer.style.display = 'none';
                 return;
             }
 
-            resultsContainer.innerHTML = suggestions.map(suggestion => `
+            const suggestionsHTML = suggestions.map(suggestion => `
                 <div class="autocomplete-item" onclick="selectSupportTag('${suggestion.display}')">
-                    <div>
-                        <span class="item-type">${suggestion.type}</span>
-                        <span class="item-name">${suggestion.display}</span>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        ${suggestion.picture ? `<img src="${suggestion.picture}" style="width: 20px; height: 20px; border-radius: 50%;" alt="Profile">` : ''}
+                        <div>
+                            <span class="item-type" style="color: ${suggestion.source === 'facebook_friend' ? '#3b5998' : suggestion.source === 'facebook_page' ? '#1877f2' : '#00ffff'}">${suggestion.type}</span>
+                            <span class="item-name">${suggestion.display}</span>
+                        </div>
                     </div>
-                    <div class="item-details">${suggestion.details}</div>
+                    <div class="item-details">${suggestion.details} ${suggestion.source === 'facebook_friend' ? '👫 Facebook Friend' : suggestion.source === 'facebook_page' ? '📄 Facebook Page' : ''}</div>
                 </div>
             `).join('');
 
+            if (!document.getElementById('facebook-connect-hint')) {
+                resultsContainer.innerHTML = suggestionsHTML;
+            } else {
+                resultsContainer.innerHTML = suggestionsHTML + resultsContainer.innerHTML;
+            }
+            
             resultsContainer.style.display = 'block';
         }
 
