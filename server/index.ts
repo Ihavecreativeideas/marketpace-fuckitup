@@ -28,6 +28,9 @@ import { subscriptionRoutes } from './subscriptionManager';
 import { subscriptionScheduler } from './subscriptionScheduler';
 import { sponsorManagementRoutes } from './sponsorManagement';
 import { zapierRouter } from './zapier-integration';
+import { db } from './db.js';
+import { employees, businesses } from '../shared/schema.js';
+import { eq, and } from 'drizzle-orm';
 const { sendEmployeeInvitation } = require('./employeeInvitation.js');
 const facebookAdsRouter = require('./routes/facebook-ads');
 
@@ -931,28 +934,52 @@ async function generateQuarterlyEstimates(yearData, businessId) {
 // Initialize expense categories on startup
 initializeExpenseCategories();
 
-// ========== EMPLOYEE MANAGEMENT API ==========
+// ========== EMPLOYEE MANAGEMENT API WITH DATABASE PERSISTENCE ==========
 
-// In-memory employee storage (replace with database in production)
-const businessEmployees: Record<string, any[]> = {};
-
-// Create new employee
+// Create new employee with database persistence
 app.post('/api/employees', async (req, res) => {
   try {
     const { name, phone, email, role, category, paymentType, paymentAmount, sendInvitation, businessId } = req.body;
     
-    console.log('Creating employee with data:', { name, phone, email, role, category, paymentType, paymentAmount });
+    console.log('🔄 CREATING EMPLOYEE IN DATABASE:', { name, phone, email, role, category, paymentType, paymentAmount });
     
+    // Validation
     if (!name || !email || !role || !category) {
       return res.status(400).json({
         success: false,
         error: 'Name, email, role, and category are required'
       });
     }
+
+    // Ensure we have a business ID (create default if needed)
+    let actualBusinessId = businessId;
+    if (!actualBusinessId) {
+      // Create or find default business
+      const defaultBusiness = await db.select()
+        .from(businesses)
+        .where(eq(businesses.name, 'Default Business'))
+        .limit(1);
+      
+      if (defaultBusiness.length === 0) {
+        const newBusiness = await db.insert(businesses).values({
+          name: 'Default Business',
+          ownerId: 'default-owner',
+          description: 'Default business for employee management',
+          businessType: 'general',
+          address: '',
+          phone: '',
+          email: email
+        }).returning();
+        actualBusinessId = newBusiness[0].id;
+        console.log('📊 Created default business:', actualBusinessId);
+      } else {
+        actualBusinessId = defaultBusiness[0].id;
+      }
+    }
     
-    // Create employee object
-    const employee = {
-      id: Date.now().toString(),
+    // Insert employee into database
+    const newEmployee = await db.insert(employees).values({
+      businessId: actualBusinessId,
       name,
       phone: phone || '',
       email,
@@ -960,95 +987,154 @@ app.post('/api/employees', async (req, res) => {
       category: category.toLowerCase(),
       paymentType: paymentType || 'hourly',
       paymentAmount: parseFloat(paymentAmount) || 0,
-      status: sendInvitation ? 'Pending Invitation' : 'Available',
-      color: '#00ffff',
-      businessId: businessId || 'default-business',
-      dateAdded: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+      status: sendInvitation ? 'pending' : 'active',
+      color: '#00ffff'
+    }).returning();
     
-    // Store in memory (by business)
-    const bid = businessId || 'default-business';
-    if (!businessEmployees[bid]) {
-      businessEmployees[bid] = [];
-    }
-    businessEmployees[bid].push(employee);
-    
-    console.log('Employee created and stored:', employee);
+    const employee = newEmployee[0];
+    console.log('✅ EMPLOYEE SAVED TO DATABASE:', employee.id);
     
     // Send invitation if requested
     if (sendInvitation) {
       try {
         const invitationResult = await sendEmployeeInvitation(employee);
-        console.log('Invitation sent:', invitationResult);
+        console.log('📧 Invitation sent:', invitationResult);
       } catch (inviteError) {
-        console.error('Invitation sending failed:', inviteError);
+        console.error('❌ Invitation sending failed:', inviteError);
       }
     }
     
+    // Return employee data in expected format
+    const responseEmployee = {
+      id: employee.id,
+      name: employee.name,
+      phone: employee.phone,
+      email: employee.email,
+      role: employee.role,
+      category: employee.category,
+      paymentType: employee.paymentType,
+      paymentAmount: employee.paymentAmount,
+      status: sendInvitation ? 'Pending Invitation' : 'Available',
+      color: employee.color,
+      dateAdded: employee.createdAt.toISOString()
+    };
+    
     res.json({
       success: true,
-      employee,
+      employee: responseEmployee,
       message: sendInvitation 
-        ? `Employee ${name} added and invitation sent!`
-        : `Employee ${name} added successfully!`
+        ? `Employee ${name} saved to database and invitation sent!`
+        : `Employee ${name} permanently saved to database!`
     });
     
   } catch (error) {
-    console.error('Employee creation error:', error);
+    console.error('❌ DATABASE ERROR - Employee creation failed:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to create employee: ' + error.message
+      error: 'Database error: Failed to save employee permanently. Please try again.'
     });
   }
 });
 
-// Get employees for a business
+// Get employees from database
 app.get('/api/employees/:businessId', async (req, res) => {
   try {
     const { businessId } = req.params;
-    const bid = businessId || 'default-business';
     
-    console.log('Fetching employees for business:', bid);
+    console.log('🔍 FETCHING EMPLOYEES FROM DATABASE for business:', businessId);
     
-    const employees = businessEmployees[bid] || [];
+    const employeeRecords = await db.select()
+      .from(employees)
+      .where(eq(employees.businessId, businessId))
+      .orderBy(employees.createdAt);
+    
+    // Convert to expected format
+    const formattedEmployees = employeeRecords.map(emp => ({
+      id: emp.id,
+      name: emp.name,
+      phone: emp.phone,
+      email: emp.email,
+      role: emp.role,
+      category: emp.category,
+      paymentType: emp.paymentType,
+      paymentAmount: emp.paymentAmount,
+      status: emp.status === 'pending' ? 'Pending Invitation' : 'Available',
+      color: emp.color || '#00ffff',
+      dateAdded: emp.createdAt.toISOString()
+    }));
+    
+    console.log(`✅ LOADED ${formattedEmployees.length} EMPLOYEES FROM DATABASE`);
     
     res.json({
       success: true,
-      employees,
-      count: employees.length,
-      message: 'Employees retrieved successfully'
+      employees: formattedEmployees,
+      count: formattedEmployees.length,
+      message: `${formattedEmployees.length} employees loaded from database`
     });
     
   } catch (error) {
-    console.error('Employee retrieval error:', error);
+    console.error('❌ DATABASE ERROR - Employee retrieval failed:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to retrieve employees: ' + error.message
+      error: 'Database error: Failed to load employees from database.'
     });
   }
 });
 
-// Get employees for default business (backward compatibility)
+// Get employees for default business
 app.get('/api/employees', async (req, res) => {
   try {
-    const employees = businessEmployees['default-business'] || [];
+    console.log('🔍 FETCHING ALL EMPLOYEES FROM DATABASE');
     
-    console.log('Fetching employees for default business');
+    // Find default business first
+    const defaultBusiness = await db.select()
+      .from(businesses)
+      .where(eq(businesses.name, 'Default Business'))
+      .limit(1);
+    
+    if (defaultBusiness.length === 0) {
+      return res.json({
+        success: true,
+        employees: [],
+        count: 0,
+        message: 'No default business found - no employees to load'
+      });
+    }
+    
+    const employeeRecords = await db.select()
+      .from(employees)
+      .where(eq(employees.businessId, defaultBusiness[0].id))
+      .orderBy(employees.createdAt);
+    
+    // Convert to expected format
+    const formattedEmployees = employeeRecords.map(emp => ({
+      id: emp.id,
+      name: emp.name,
+      phone: emp.phone,
+      email: emp.email,
+      role: emp.role,
+      category: emp.category,
+      paymentType: emp.paymentType,
+      paymentAmount: emp.paymentAmount,
+      status: emp.status === 'pending' ? 'Pending Invitation' : 'Available',
+      color: emp.color || '#00ffff',
+      dateAdded: emp.createdAt.toISOString()
+    }));
+    
+    console.log(`✅ LOADED ${formattedEmployees.length} EMPLOYEES FROM DATABASE`);
     
     res.json({
       success: true,
-      employees,
-      count: employees.length,
-      message: 'Employees retrieved successfully'
+      employees: formattedEmployees,
+      count: formattedEmployees.length,
+      message: `${formattedEmployees.length} employees permanently stored in database`
     });
     
   } catch (error) {
-    console.error('Employee retrieval error:', error);
+    console.error('❌ DATABASE ERROR - Employee retrieval failed:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to retrieve employees: ' + error.message
+      error: 'Database error: Failed to load employees from database.'
     });
   }
 });
