@@ -6230,7 +6230,45 @@ app.use(socialMediaRoutes);
 app.use('/api/zapier', zapierRouter);
 app.use('/api/facebook-ads', facebookAdsRouter);
 
-// Facebook real-time artist/friend search for MyPace tagging
+// Facebook comprehensive search for friends, pages, businesses, and events
+app.get('/api/facebook/search-all', async (req, res) => {
+  try {
+    const { query, access_token, lat, lng } = req.query;
+    
+    if (!access_token) {
+      return res.status(401).json({ error: 'Facebook access token required' });
+    }
+    
+    if (!query || query.length < 2) {
+      return res.json({ results: [] });
+    }
+    
+    let userLocation = null;
+    if (lat && lng) {
+      userLocation = { lat: parseFloat(lat as string), lng: parseFloat(lng as string) };
+    }
+    
+    console.log('Facebook search-all request:', { query, userLocation, hasToken: !!access_token });
+    
+    const results = await searchFacebookFriendsAndArtists(access_token as string, query as string, userLocation);
+    
+    console.log(`Facebook search-all results: ${results.length} items found`);
+    
+    res.json({
+      success: true,
+      results: results,
+      total: results.length
+    });
+  } catch (error: any) {
+    console.error('Facebook comprehensive search error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to search Facebook'
+    });
+  }
+});
+
+// Facebook real-time artist/friend search for MyPace tagging (legacy endpoint)
 app.get('/api/facebook/search-artists', async (req, res) => {
   try {
     const { query, access_token, lat, lng } = req.query;
@@ -6304,6 +6342,18 @@ app.get('/api/facebook/auth-url', (req, res) => {
   }
   
   const scopes = 'user_friends,pages_read_engagement,pages_show_list';
+  
+  // Check if popup mode is requested
+  const popupMode = req.query.popup === 'true';
+  if (popupMode) {
+    // Use popup-specific redirect URI
+    if (host.includes('replit.dev') || host.includes('repl.co')) {
+      redirectUri = `https://${host}/api/facebook/popup-callback`;
+    } else {
+      redirectUri = 'https://www.marketpace.shop/api/facebook/popup-callback';
+    }
+  }
+  
   const authUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scopes}&response_type=code`;
   
   console.log('Facebook Auth URL generated with redirect URI:', redirectUri);
@@ -6356,6 +6406,113 @@ app.get('/api/facebook/callback', async (req, res) => {
   } catch (error) {
     console.error('Facebook auth error:', error);
     res.redirect('/mypace?facebook_auth=error&message=' + encodeURIComponent(error.message));
+  }
+});
+
+// Facebook popup callback endpoint for in-app authentication
+app.get('/api/facebook/popup-callback', async (req, res) => {
+  const { code } = req.query;
+  try {
+    const appId = process.env.FACEBOOK_APP_ID;
+    const appSecret = process.env.FACEBOOK_APP_SECRET;
+    
+    // Use popup-specific redirect URI
+    const host = req.get('host') || '';
+    let redirectUri;
+    
+    if (host.includes('replit.dev') || host.includes('repl.co')) {
+      redirectUri = `https://${host}/api/facebook/popup-callback`;
+    } else {
+      redirectUri = 'https://www.marketpace.shop/api/facebook/popup-callback';
+    }
+    
+    console.log('Facebook popup callback using redirect URI:', redirectUri);
+    
+    // Exchange code for access token
+    const tokenResponse = await fetch(`https://graph.facebook.com/v18.0/oauth/access_token?client_id=${appId}&client_secret=${appSecret}&redirect_uri=${redirectUri}&code=${code}`);
+    const tokenData = await tokenResponse.json();
+    
+    if (tokenData.access_token) {
+      // Store token in session
+      req.session.facebookAccessToken = tokenData.access_token;
+      
+      // Send HTML that posts message to parent window
+      res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Facebook Authentication Success</title>
+        </head>
+        <body>
+          <script>
+            if (window.opener) {
+              window.opener.postMessage({
+                type: 'FACEBOOK_AUTH_SUCCESS',
+                token: '${tokenData.access_token}'
+              }, window.location.origin);
+              window.close();
+            } else {
+              // Fallback for when popup isn't available
+              window.location.href = '/mypace?facebook_auth=success&token=${encodeURIComponent(tokenData.access_token)}';
+            }
+          </script>
+          <p>Authentication successful! This window will close automatically.</p>
+        </body>
+        </html>
+      `);
+    } else {
+      console.error('Facebook popup token exchange failed:', tokenData);
+      // Send error message to parent window
+      res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Facebook Authentication Error</title>
+        </head>
+        <body>
+          <script>
+            if (window.opener) {
+              window.opener.postMessage({
+                type: 'FACEBOOK_AUTH_ERROR',
+                error: 'Token exchange failed'
+              }, window.location.origin);
+              window.close();
+            } else {
+              // Fallback for when popup isn't available
+              window.location.href = '/mypace?facebook_auth=error&message=Token exchange failed';
+            }
+          </script>
+          <p>Authentication failed. This window will close automatically.</p>
+        </body>
+        </html>
+      `);
+    }
+  } catch (error: any) {
+    console.error('Facebook popup callback error:', error);
+    // Send error message to parent window
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Facebook Authentication Error</title>
+      </head>
+      <body>
+        <script>
+          if (window.opener) {
+            window.opener.postMessage({
+              type: 'FACEBOOK_AUTH_ERROR',
+              error: '${error.message || 'Authentication failed'}'
+            }, window.location.origin);
+            window.close();
+          } else {
+            // Fallback for when popup isn't available
+            window.location.href = '/mypace?facebook_auth=error&message=${encodeURIComponent(error.message)}';
+          }
+        </script>
+        <p>Authentication failed. This window will close automatically.</p>
+      </body>
+      </html>
+    `);
   }
 });
 
