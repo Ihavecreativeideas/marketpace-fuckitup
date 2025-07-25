@@ -17,8 +17,8 @@ async function sendEmployeeInvitation(employeeData) {
     const { name, role, email, phone, paymentInfo, employeeId, businessName } = employeeData;
     
     // Create employee dashboard URL
-    const dashboardUrl = `${process.env.BASE_URL || 'https://workspace.ihavecreativeid.repl.co'}/employee-dashboard?id=${employeeId}`;
-    const qrSystemUrl = `${process.env.BASE_URL || 'https://workspace.ihavecreativeid.repl.co'}/employee-geo-qr-system`;
+    const dashboardUrl = `${process.env.BASE_URL || 'https://www.marketpace.shop'}/employee-dashboard?id=${employeeId}`;
+    const qrSystemUrl = `${process.env.BASE_URL || 'https://www.marketpace.shop'}/employee-geo-qr-system`;
     
     // SMS Message with business name integration
     const businessNameText = businessName && businessName !== 'Your Business' ? businessName : 'MarketPace';
