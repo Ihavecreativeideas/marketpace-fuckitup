@@ -2397,9 +2397,10 @@
                 <!-- Location Display -->
                 <div class="form-section">
                     <label class="form-label">Location</label>
-                    <div style="background: rgba(100, 255, 218, 0.2); padding: 10px; border-radius: 20px; color: #e2e8f0;">
-                        <span id="checkinLocation">LOC: Getting your location...</span>
+                    <div style="background: rgba(100, 255, 218, 0.2); padding: 10px; border-radius: 20px; color: #e2e8f0; cursor: pointer;" onclick="showManualLocationInput()">
+                        <span id="checkinLocation">LOC: Getting your location... (tap to enter manually)</span>
                     </div>
+                    <input type="text" class="form-input" id="manualLocationInput" placeholder="Enter location name" style="display: none; margin-top: 10px;">
                 </div>
 
                 <!-- Photo Upload -->
@@ -2475,7 +2476,12 @@
     </div>
 
     <script>
-        console.log('MyPace Phase 2 page loaded successfully');
+        console.log('MyPace Phase 2 page loaded successfully - v2.1 with manual location and tagging');
+        
+        // Clear any potential browser cache issues
+        if (document.getElementById('supportSelect')) {
+            console.warn('Old dropdown detected - please refresh browser to see new tagging interface');
+        }
 
         // Enhance sonar radar effects
         function enhanceSonarEffects() {
@@ -2577,7 +2583,8 @@
             locationSpan.textContent = 'LOC: Getting your location...';
             
             if (!navigator.geolocation) {
-                locationSpan.textContent = 'LOC: Location not supported';
+                locationSpan.textContent = 'LOC: Location not supported (tap to enter manually)';
+                locationSpan.style.cursor = 'pointer';
                 return;
             }
             
@@ -2612,7 +2619,8 @@
                 (error) => {
                     // Error getting location
                     console.error('Location error:', error);
-                    locationSpan.textContent = 'LOC: Enable location to check-in';
+                    locationSpan.textContent = 'LOC: Location unavailable (tap to enter manually)';
+                    locationSpan.style.cursor = 'pointer';
                 },
                 {
                     enableHighAccuracy: true,
@@ -2632,6 +2640,33 @@
             const preview = document.getElementById('photoPreview');
             preview.style.display = 'none';
             clearStarRating();
+            
+            // Hide manual location input
+            document.getElementById('manualLocationInput').style.display = 'none';
+        }
+
+        // Show manual location input when location detection fails
+        function showManualLocationInput() {
+            const manualInput = document.getElementById('manualLocationInput');
+            const locationSpan = document.getElementById('checkinLocation');
+            
+            manualInput.style.display = 'block';
+            manualInput.focus();
+            locationSpan.textContent = 'LOC: Enter location below';
+            
+            manualInput.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    locationSpan.textContent = `LOC: ${this.value.trim()}`;
+                    // Store manual location
+                    window.currentCheckInLocation = {
+                        place: this.value.trim(),
+                        distance: 'manual',
+                        lat: null,
+                        lng: null,
+                        isManual: true
+                    };
+                }
+            });
         }
 
         // Photo preview functionality
