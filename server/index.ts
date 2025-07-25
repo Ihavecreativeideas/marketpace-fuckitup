@@ -6244,8 +6244,8 @@ app.get('/api/facebook/auth-url', (req, res) => {
 });
 
 app.get('/api/facebook/callback', async (req, res) => {
+  const { code } = req.query;
   try {
-    const { code } = req.query;
     const appId = process.env.FACEBOOK_APP_ID;
     const appSecret = process.env.FACEBOOK_APP_SECRET;
     const redirectUri = `${req.protocol}://${req.get('host')}/api/facebook/callback`;
@@ -6255,22 +6255,17 @@ app.get('/api/facebook/callback', async (req, res) => {
     const tokenData = await tokenResponse.json();
     
     if (tokenData.access_token) {
-      // Store access token in session or return to frontend
-      res.send(`
-        <script>
-          window.opener.postMessage({
-            type: 'FACEBOOK_AUTH_SUCCESS',
-            accessToken: '${tokenData.access_token}'
-          }, '*');
-          window.close();
-        </script>
-      `);
+      // Store token in session for same-window auth
+      req.session.facebookAccessToken = tokenData.access_token;
+      
+      // Redirect back to MyPace with success parameter
+      res.redirect('/mypace?facebook_auth=success&token=' + encodeURIComponent(tokenData.access_token));
     } else {
-      res.status(400).json({ error: 'Failed to get access token' });
+      throw new Error('Failed to get access token: ' + JSON.stringify(tokenData));
     }
   } catch (error) {
-    console.error('Facebook auth callback error:', error);
-    res.status(500).json({ error: 'Authentication failed' });
+    console.error('Facebook auth error:', error);
+    res.redirect('/mypace?facebook_auth=error&message=' + encodeURIComponent(error.message));
   }
 });
 
