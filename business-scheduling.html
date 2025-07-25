@@ -4544,7 +4544,9 @@
             showNotification('Opening simplified schedule editor...', 'info');
         }
 
-        // Quick Shift Creator
+        // Advanced Shift Management System
+        let customShifts = [];
+        
         function openQuickShiftCreator() {
             if (employees.length === 0) {
                 showNotification('Please add members first before creating shifts', 'error');
@@ -4562,140 +4564,250 @@
             content.style.cssText = `
                 background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
                 border: 2px solid #00ffff; border-radius: 16px; padding: 24px; 
-                max-width: 500px; width: 95%; max-height: 90vh; overflow-y: auto;
+                max-width: 600px; width: 95%; max-height: 90vh; overflow-y: auto;
             `;
             
-            const memberOptions = employees.map(emp => 
-                `<option value="${emp.id}">${emp.name} (${emp.role})</option>`
+            const memberCheckboxes = employees.map(emp => 
+                `<label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #94a3b8; cursor: pointer;">
+                    <input type="checkbox" value="${emp.id}" name="shiftMembers" style="margin: 0;">
+                    <span>${emp.name} (${emp.role})</span>
+                </label>`
+            ).join('');
+            
+            const existingShiftsOptions = customShifts.map(shift => 
+                `<option value="${shift.id}">${shift.name} (${shift.startTime} - ${shift.endTime})</option>`
             ).join('');
             
             content.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <h3 style="color: #00ffff; margin: 0;">⏰ Create New Shift</h3>
+                    <h3 style="color: #00ffff; margin: 0;">🏗️ Advanced Shift Management</h3>
                     <button onclick="this.closest('.modal').remove()" style="background: transparent; border: none; color: #00ffff; font-size: 24px; cursor: pointer;">&times;</button>
                 </div>
                 
-                <form onsubmit="createQuickShift(event)">
-                    <div style="margin-bottom: 16px;">
-                        <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Select Member</label>
-                        <select id="shiftMember" required style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
-                            <option value="">Choose a member...</option>
-                            ${memberOptions}
-                        </select>
-                    </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-                        <div>
-                            <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Day</label>
-                            <select id="shiftDay" required style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
-                                <option value="monday">Monday</option>
-                                <option value="tuesday">Tuesday</option>
-                                <option value="wednesday">Wednesday</option>
-                                <option value="thursday">Thursday</option>
-                                <option value="friday">Friday</option>
-                                <option value="saturday">Saturday</option>
-                                <option value="sunday">Sunday</option>
-                            </select>
+                <!-- Tab System -->
+                <div style="display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                    <button type="button" onclick="switchShiftTab('create')" id="createTab" class="shift-tab active" style="background: linear-gradient(135deg, #00ffff, #4169e1); color: white; border: none; padding: 10px 20px; border-radius: 8px 8px 0 0; cursor: pointer; font-weight: bold;">Create New Shift</button>
+                    <button type="button" onclick="switchShiftTab('assign')" id="assignTab" class="shift-tab" style="background: rgba(255, 255, 255, 0.1); color: #94a3b8; border: none; padding: 10px 20px; border-radius: 8px 8px 0 0; cursor: pointer;">Assign to Existing</button>
+                </div>
+                
+                <!-- Create New Shift Tab -->
+                <div id="createShiftTab" style="display: block;">
+                    <form onsubmit="createCustomShift(event)">
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Shift Name / Title *</label>
+                            <input type="text" id="shiftName" required placeholder="e.g., Morning Shift, Evening Team, Weekend Coverage" style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
                         </div>
-                        <div>
-                            <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Time Slot</label>
-                            <select id="shiftTime" onchange="toggleCustomTime()" required style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
-                                <option value="">Select Time Slot</option>
-                                <option value="6-8">6:00 AM - 8:00 AM</option>
-                                <option value="8-10">8:00 AM - 10:00 AM</option>
-                                <option value="10-12">10:00 AM - 12:00 PM</option>
-                                <option value="12-14">12:00 PM - 2:00 PM</option>
-                                <option value="14-16">2:00 PM - 4:00 PM</option>
-                                <option value="16-18">4:00 PM - 6:00 PM</option>
-                                <option value="18-20">6:00 PM - 8:00 PM</option>
-                                <option value="20-22">8:00 PM - 10:00 PM</option>
-                                <option value="custom">🕒 Create Custom Time</option>
-                            </select>
-                            
-                            <!-- Custom Time Input (hidden by default) -->
-                            <div id="customTimeInputs" style="display: none; margin-top: 12px; padding: 12px; background: rgba(0, 255, 255, 0.05); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 8px;">
-                                <div style="color: #00ffff; font-size: 12px; margin-bottom: 8px; text-align: center;">Create Custom Shift Time</div>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                                    <div>
-                                        <label style="display: block; color: #94a3b8; margin-bottom: 4px; font-size: 11px;">Start Time</label>
-                                        <input type="time" id="customStartTime" style="width: 100%; padding: 8px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; color: white;">
-                                    </div>
-                                    <div>
-                                        <label style="display: block; color: #94a3b8; margin-bottom: 4px; font-size: 11px;">End Time</label>
-                                        <input type="time" id="customEndTime" style="width: 100%; padding: 8px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; color: white;">
-                                    </div>
-                                </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                            <div>
+                                <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Start Time *</label>
+                                <input type="time" id="newShiftStartTime" required style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                            </div>
+                            <div>
+                                <label style="display: block; color: #94a3b8; margin-bottom: 8px;">End Time *</label>
+                                <input type="time" id="newShiftEndTime" required style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
                             </div>
                         </div>
-                    </div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Location (Optional)</label>
-                        <input type="text" id="shiftLocation" placeholder="e.g., Main Store, Warehouse, Event Hall" style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
-                    </div>
-                    
-                    <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                        <button type="button" onclick="this.closest('.modal').remove()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 12px 20px; border-radius: 6px; cursor: pointer;">Cancel</button>
-                        <button type="submit" style="background: linear-gradient(135deg, #00ffff, #4169e1); border: none; color: white; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">Create Shift</button>
-                    </div>
-                </form>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Days of Week *</label>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px;">
+                                <label style="display: flex; align-items: center; gap: 6px; color: #94a3b8; cursor: pointer;">
+                                    <input type="checkbox" value="monday" name="shiftDays"> Mon
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 6px; color: #94a3b8; cursor: pointer;">
+                                    <input type="checkbox" value="tuesday" name="shiftDays"> Tue
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 6px; color: #94a3b8; cursor: pointer;">
+                                    <input type="checkbox" value="wednesday" name="shiftDays"> Wed
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 6px; color: #94a3b8; cursor: pointer;">
+                                    <input type="checkbox" value="thursday" name="shiftDays"> Thu
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 6px; color: #94a3b8; cursor: pointer;">
+                                    <input type="checkbox" value="friday" name="shiftDays"> Fri
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 6px; color: #94a3b8; cursor: pointer;">
+                                    <input type="checkbox" value="saturday" name="shiftDays"> Sat
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 6px; color: #94a3b8; cursor: pointer;">
+                                    <input type="checkbox" value="sunday" name="shiftDays"> Sun
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Assign Members to This Shift</label>
+                            <div style="max-height: 120px; overflow-y: auto; padding: 8px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px;">
+                                ${memberCheckboxes}
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Location</label>
+                            <input type="text" id="newShiftLocation" placeholder="e.g., Main Store, Warehouse, Event Hall" style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                        </div>
+                        
+                        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                            <button type="button" onclick="this.closest('.modal').remove()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 12px 20px; border-radius: 6px; cursor: pointer;">Cancel</button>
+                            <button type="submit" style="background: linear-gradient(135deg, #00ffff, #4169e1); border: none; color: white; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">Create & Save Shift</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Assign to Existing Shift Tab -->
+                <div id="assignShiftTab" style="display: none;">
+                    <form onsubmit="assignToExistingShift(event)">
+                        ${customShifts.length === 0 ? 
+                            `<div style="text-align: center; color: #94a3b8; padding: 40px;">
+                                <div style="font-size: 48px; margin-bottom: 16px;">📋</div>
+                                <h4 style="margin: 0 0 8px 0;">No Custom Shifts Created Yet</h4>
+                                <p style="margin: 0;">Create your first shift in the "Create New Shift" tab to get started.</p>
+                            </div>` :
+                            `<div style="margin-bottom: 16px;">
+                                <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Select Existing Shift *</label>
+                                <select id="existingShiftSelect" required style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                                    <option value="">Choose a shift...</option>
+                                    ${existingShiftsOptions}
+                                </select>
+                            </div>
+                            
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Select Day *</label>
+                                <select id="assignDay" required style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                                    <option value="monday">Monday</option>
+                                    <option value="tuesday">Tuesday</option>
+                                    <option value="wednesday">Wednesday</option>
+                                    <option value="thursday">Thursday</option>
+                                    <option value="friday">Friday</option>
+                                    <option value="saturday">Saturday</option>
+                                    <option value="sunday">Sunday</option>
+                                </select>
+                            </div>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Assign Additional Members</label>
+                                <div style="max-height: 120px; overflow-y: auto; padding: 8px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px;">
+                                    ${memberCheckboxes.replace(/name="shiftMembers"/g, 'name="assignMembers"')}
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                                <button type="button" onclick="this.closest('.modal').remove()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 12px 20px; border-radius: 6px; cursor: pointer;">Cancel</button>
+                                <button type="submit" style="background: linear-gradient(135deg, #22c55e, #16a34a); border: none; color: white; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">Assign to Shift</button>
+                            </div>`
+                        }
+                    </form>
+                </div>
             `;
             
             modal.className = 'modal';
             modal.appendChild(content);
             document.body.appendChild(modal);
             
-            showNotification('Opening shift creator...', 'info');
+            showNotification('Opening advanced shift management...', 'info');
         }
 
-        function toggleCustomTime() {
-            const shiftTimeSelect = document.getElementById('shiftTime');
-            const customTimeInputs = document.getElementById('customTimeInputs');
+        function switchShiftTab(tab) {
+            const createTab = document.getElementById('createTab');
+            const assignTab = document.getElementById('assignTab');
+            const createContent = document.getElementById('createShiftTab');
+            const assignContent = document.getElementById('assignShiftTab');
             
-            if (shiftTimeSelect.value === 'custom') {
-                customTimeInputs.style.display = 'block';
+            if (tab === 'create') {
+                createTab.style.background = 'linear-gradient(135deg, #00ffff, #4169e1)';
+                createTab.style.color = 'white';
+                assignTab.style.background = 'rgba(255, 255, 255, 0.1)';
+                assignTab.style.color = '#94a3b8';
+                createContent.style.display = 'block';
+                assignContent.style.display = 'none';
             } else {
-                customTimeInputs.style.display = 'none';
+                assignTab.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+                assignTab.style.color = 'white';
+                createTab.style.background = 'rgba(255, 255, 255, 0.1)';
+                createTab.style.color = '#94a3b8';
+                assignContent.style.display = 'block';
+                createContent.style.display = 'none';
             }
         }
 
-        function createQuickShift(event) {
+        function createCustomShift(event) {
             event.preventDefault();
             
-            const memberId = document.getElementById('shiftMember').value;
-            const day = document.getElementById('shiftDay').value;
-            const timeSlot = document.getElementById('shiftTime').value;
-            const location = document.getElementById('shiftLocation').value || 'Main Location';
+            const shiftName = document.getElementById('shiftName').value;
+            const startTime = document.getElementById('newShiftStartTime').value;
+            const endTime = document.getElementById('newShiftEndTime').value;
+            const location = document.getElementById('newShiftLocation').value || 'Main Location';
             
-            const member = employees.find(e => e.id == memberId);
-            let timeText;
+            // Get selected days
+            const selectedDays = Array.from(document.querySelectorAll('input[name="shiftDays"]:checked'))
+                .map(cb => cb.value);
             
-            if (timeSlot === 'custom') {
-                const startTime = document.getElementById('customStartTime').value;
-                const endTime = document.getElementById('customEndTime').value;
-                
-                if (!startTime || !endTime) {
-                    showNotification('Please enter both start and end times for custom shift', 'error');
-                    return;
-                }
-                
-                // Convert 24-hour format to 12-hour format for display
-                const formatTime = (time) => {
-                    const [hours, minutes] = time.split(':');
-                    const hour12 = hours % 12 || 12;
-                    const ampm = hours < 12 ? 'AM' : 'PM';
-                    return `${hour12}:${minutes} ${ampm}`;
-                };
-                
-                timeText = `${formatTime(startTime)} - ${formatTime(endTime)}`;
-            } else {
-                timeText = document.getElementById('shiftTime').selectedOptions[0].textContent;
+            // Get selected members
+            const selectedMembers = Array.from(document.querySelectorAll('input[name="shiftMembers"]:checked'))
+                .map(cb => {
+                    const member = employees.find(e => e.id == cb.value);
+                    return { id: member.id, name: member.name, role: member.role };
+                });
+            
+            if (selectedDays.length === 0) {
+                showNotification('Please select at least one day for the shift', 'error');
+                return;
             }
             
-            showNotification(`✅ Shift created: ${member.name} scheduled for ${day.charAt(0).toUpperCase() + day.slice(1)} at ${timeText} (${location})`, 'success');
+            // Format time for display
+            const formatTime = (time) => {
+                const [hours, minutes] = time.split(':');
+                const hour12 = hours % 12 || 12;
+                const ampm = hours < 12 ? 'AM' : 'PM';
+                return `${hour12}:${minutes} ${ampm}`;
+            };
             
-            // Here you would add the shift to your calendar system
-            console.log(`Shift created:`, { member: member.name, day, timeSlot, timeText, location });
+            const timeText = `${formatTime(startTime)} - ${formatTime(endTime)}`;
+            
+            // Create shift object
+            const newShift = {
+                id: Date.now(),
+                name: shiftName,
+                startTime,
+                endTime,
+                timeText,
+                days: selectedDays,
+                members: selectedMembers,
+                location,
+                created: new Date().toISOString()
+            };
+            
+            customShifts.push(newShift);
+            
+            showNotification(`✅ Custom shift "${shiftName}" created! (${timeText}) with ${selectedMembers.length} members assigned`, 'success');
+            console.log(`Custom shift created:`, newShift);
+            
+            event.target.closest('.modal').remove();
+        }
+
+        function assignToExistingShift(event) {
+            event.preventDefault();
+            
+            const shiftId = document.getElementById('existingShiftSelect').value;
+            const day = document.getElementById('assignDay').value;
+            
+            // Get selected members
+            const selectedMembers = Array.from(document.querySelectorAll('input[name="assignMembers"]:checked'))
+                .map(cb => {
+                    const member = employees.find(e => e.id == cb.value);
+                    return { id: member.id, name: member.name, role: member.role };
+                });
+            
+            const shift = customShifts.find(s => s.id == shiftId);
+            
+            if (selectedMembers.length === 0) {
+                showNotification('Please select at least one member to assign', 'error');
+                return;
+            }
+            
+            showNotification(`✅ Assigned ${selectedMembers.length} members to "${shift.name}" on ${day.charAt(0).toUpperCase() + day.slice(1)}`, 'success');
+            console.log(`Members assigned to existing shift:`, { shift: shift.name, day, members: selectedMembers });
             
             event.target.closest('.modal').remove();
         }
