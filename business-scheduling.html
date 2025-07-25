@@ -3411,13 +3411,30 @@
 
                 <div class="form-group" id="paymentAmountGroup" style="display: none;">
                     <label class="form-label" id="paymentAmountLabel">Amount ($) *</label>
+                    
+                    <!-- Quick Preset Buttons (shown only for hourly) -->
+                    <div id="hourlyPresets" style="display: none; margin-bottom: 12px;">
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
+                            <button type="button" onclick="setHourlyRate(10)" style="background: rgba(0,255,255,0.1); border: 1px solid rgba(0,255,255,0.3); color: #00ffff; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">$10</button>
+                            <button type="button" onclick="setHourlyRate(12)" style="background: rgba(0,255,255,0.1); border: 1px solid rgba(0,255,255,0.3); color: #00ffff; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">$12</button>
+                            <button type="button" onclick="setHourlyRate(15)" style="background: rgba(0,255,255,0.1); border: 1px solid rgba(0,255,255,0.3); color: #00ffff; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">$15</button>
+                            <button type="button" onclick="setHourlyRate(18)" style="background: rgba(0,255,255,0.1); border: 1px solid rgba(0,255,255,0.3); color: #00ffff; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">$18</button>
+                            <button type="button" onclick="setHourlyRate(20)" style="background: rgba(0,255,255,0.1); border: 1px solid rgba(0,255,255,0.3); color: #00ffff; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">$20</button>
+                        </div>
+                        <div style="color: #94a3b8; font-size: 11px; text-align: center;">Quick rates or use arrows below</div>
+                    </div>
+                    
                     <div class="payment-stepper" id="paymentStepper">
-                        <div class="stepper-display" id="stepperDisplay">0.00</div>
+                        <div class="stepper-display" id="stepperDisplay" onclick="showDirectInput()" style="cursor: pointer;" title="Click to enter amount directly">0.00</div>
                         <div class="stepper-controls">
-                            <button type="button" class="stepper-btn stepper-up" onclick="adjustPayment(1)">▲</button>
-                            <button type="button" class="stepper-btn stepper-down" onclick="adjustPayment(-1)">▼</button>
+                            <button type="button" class="stepper-btn stepper-up" onclick="adjustPayment(1)" title="Increase by $1.00">▲</button>
+                            <button type="button" class="stepper-btn stepper-down" onclick="adjustPayment(-1)" title="Decrease by $1.00">▼</button>
                         </div>
                     </div>
+                    
+                    <!-- Direct Input (hidden) -->
+                    <input type="number" id="directAmountInput" style="display: none; margin-top: 8px; width: 100%; padding: 8px; border: 1px solid rgba(0,255,255,0.3); border-radius: 6px; background: rgba(0,0,0,0.3); color: #fff;" placeholder="Enter amount directly" step="0.25" min="0">
+                    
                     <input type="hidden" id="newEmployeePaymentAmount" required>
                 </div>
 
@@ -4395,12 +4412,20 @@
                 amountGroup.style.display = 'block';
                 amountInput.required = true;
                 
+                // Show/hide hourly presets
+                const presets = document.getElementById('hourlyPresets');
+                if (paymentType === 'hourly') {
+                    presets.style.display = 'block';
+                } else {
+                    presets.style.display = 'none';
+                }
+                
                 // Set initial values and step amounts based on payment type
                 switch(paymentType) {
                     case 'hourly':
                         amountLabel.textContent = 'Hourly Rate ($) *';
                         currentPaymentAmount = 15.00;
-                        stepAmount = 0.25;
+                        stepAmount = 1.00; // Changed from 0.25 to 1.00 for faster adjustment
                         break;
                     case 'per_job':
                         amountLabel.textContent = 'Per Job Base Pay ($) *';
@@ -4475,6 +4500,59 @@
             hiddenInput.value = currentPaymentAmount;
             
             console.log('Stepper display updated:', formattedAmount, 'value set to:', currentPaymentAmount);
+        }
+
+        // Quick preset functions for hourly rates
+        function setHourlyRate(rate) {
+            currentPaymentAmount = rate;
+            updateStepperDisplay();
+            showNotification(`Hourly rate set to $${rate.toFixed(2)}`, 'success');
+            console.log('Quick rate set to:', rate);
+        }
+
+        // Direct input functionality
+        function showDirectInput() {
+            if (currentPaymentType === 'hourly') {
+                const directInput = document.getElementById('directAmountInput');
+                const display = document.getElementById('stepperDisplay');
+                
+                directInput.style.display = 'block';
+                directInput.value = currentPaymentAmount;
+                directInput.focus();
+                directInput.select();
+                
+                // Handle enter key and blur
+                directInput.onkeydown = function(e) {
+                    if (e.key === 'Enter') {
+                        applyDirectInput();
+                    } else if (e.key === 'Escape') {
+                        cancelDirectInput();
+                    }
+                };
+                
+                directInput.onblur = function() {
+                    applyDirectInput();
+                };
+            }
+        }
+
+        function applyDirectInput() {
+            const directInput = document.getElementById('directAmountInput');
+            const newAmount = parseFloat(directInput.value);
+            
+            if (!isNaN(newAmount) && newAmount >= 0 && newAmount <= 100) {
+                currentPaymentAmount = newAmount;
+                updateStepperDisplay();
+                showNotification(`Rate updated to $${newAmount.toFixed(2)}`, 'success');
+            } else {
+                showNotification('Invalid amount. Enter between $0-$100', 'error');
+            }
+            
+            directInput.style.display = 'none';
+        }
+
+        function cancelDirectInput() {
+            document.getElementById('directAmountInput').style.display = 'none';
         }
 
         // QR System Functions
