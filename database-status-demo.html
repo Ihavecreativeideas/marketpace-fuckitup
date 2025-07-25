@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPace Database Status - Dual Database Architecture</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 50%, #6b46c1 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00ffff, #64ffda);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+        
+        .database-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .database-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .database-card.active {
+            border-color: #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+        
+        .database-card.standby {
+            border-color: #ffa500;
+            box-shadow: 0 0 20px rgba(255, 165, 0, 0.2);
+        }
+        
+        .database-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .database-status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .status-active {
+            background: rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+            border: 1px solid #00ff00;
+        }
+        
+        .status-standby {
+            background: rgba(255, 165, 0, 0.2);
+            color: #ffa500;
+            border: 1px solid #ffa500;
+        }
+        
+        .status-unavailable {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff0000;
+            border: 1px solid #ff0000;
+        }
+        
+        .database-info {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+        
+        .employee-count {
+            background: rgba(100, 255, 218, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #64ffda;
+        }
+        
+        .refresh-btn {
+            background: linear-gradient(135deg, #00ffff, #64ffda);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+            font-size: 1rem;
+        }
+        
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(100, 255, 218, 0.4);
+        }
+        
+        .status-message {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+            border: 1px solid rgba(100, 255, 218, 0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .database-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">MarketPace Database Status</h1>
+            <p class="subtitle">Dual Database Architecture - Production Ready</p>
+        </div>
+        
+        <div class="database-grid" id="database-grid">
+            <!-- Database cards will be populated by JavaScript -->
+        </div>
+        
+        <button class="refresh-btn" onclick="checkDatabaseStatus()">Refresh Status</button>
+        
+        <div class="status-message" id="status-message">
+            <p>Loading database status...</p>
+        </div>
+    </div>
+
+    <script>
+        async function checkDatabaseStatus() {
+            try {
+                document.getElementById('status-message').innerHTML = '<p>Checking database connections...</p>';
+                
+                const response = await fetch('/api/database/status');
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderDatabaseStatus(data);
+                } else {
+                    document.getElementById('status-message').innerHTML = 
+                        `<p style="color: #ff4444;">Error: ${data.error}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('status-message').innerHTML = 
+                    `<p style="color: #ff4444;">Connection Error: ${error.message}</p>`;
+            }
+        }
+        
+        function renderDatabaseStatus(data) {
+            const neon = data.databases.neon;
+            const supabase = data.databases.supabase;
+            
+            const neonCard = `
+                <div class="database-card active">
+                    <h2 class="database-name">🐘 Neon Database</h2>
+                    <span class="database-status status-active">ACTIVE</span>
+                    <div class="database-info">
+                        <p><strong>Role:</strong> ${neon.description}</p>
+                        <p><strong>Connection:</strong> ${neon.connection}</p>
+                        <p><strong>Type:</strong> PostgreSQL-compatible</p>
+                        <div class="employee-count">
+                            <strong>Employee Records:</strong> ${neon.employeeCount} stored permanently
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const supabaseCard = `
+                <div class="database-card standby">
+                    <h2 class="database-name">⚡ Supabase</h2>
+                    <span class="database-status ${supabase.connection === 'connected' ? 'status-standby' : 'status-unavailable'}">
+                        ${supabase.connection === 'connected' ? 'STANDBY' : 'UNAVAILABLE'}
+                    </span>
+                    <div class="database-info">
+                        <p><strong>Role:</strong> ${supabase.description}</p>
+                        <p><strong>Connection:</strong> ${supabase.connection}</p>
+                        <p><strong>Future Features:</strong> Real-time, Advanced Auth, File Storage</p>
+                        ${supabase.error ? `<p style="color: #ff4444;"><strong>Note:</strong> ${supabase.error}</p>` : ''}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('database-grid').innerHTML = neonCard + supabaseCard;
+            document.getElementById('status-message').innerHTML = 
+                `<p style="color: #00ff00;"><strong>Status:</strong> ${data.message}</p>`;
+        }
+        
+        // Load initial status
+        checkDatabaseStatus();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(checkDatabaseStatus, 30000);
+    </script>
+</body>
+</html>

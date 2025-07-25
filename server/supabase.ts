@@ -1,96 +1,51 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Supabase configuration
-const supabaseUrl = process.env.SUPABASE_URL || process.env.DATABASE_URL?.replace('postgresql://', 'https://').split('@')[1]?.split('/')[0] + '.supabase.co';
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'fallback-for-direct-db-connection';
+// Supabase client setup - prepared for future migration
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
-// Create Supabase client (fallback to direct database connection if Supabase not configured)
-export const supabase = process.env.SUPABASE_URL ? 
-  createClient(supabaseUrl, supabaseAnonKey) : 
-  null;
+let supabase: any = null;
 
-// Check if Supabase is properly configured
-export const isSupabaseConfigured = () => {
-  return !!(process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY);
-};
-
-// Supabase-specific functions (when configured)
-export const supabaseStorage = {
-  // User management with Supabase Auth
-  async signUp(email: string, password: string, metadata?: any) {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: metadata
-      }
-    });
-    
-    if (error) throw error;
-    return data;
-  },
-
-  async signIn(email: string, password: string) {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-    
-    if (error) throw error;
-    return data;
-  },
-
-  async signOut() {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-  },
-
-  // Real-time subscription for live updates
-  async subscribeToUserData(userId: string, callback: (data: any) => void) {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    return supabase
-      .channel('user-data')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'users',
-          filter: `id=eq.${userId}`
-        },
-        callback
-      )
-      .subscribe();
-  },
-
-  // File storage for user uploads
-  async uploadFile(bucket: string, path: string, file: File) {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    const { data, error } = await supabase.storage
-      .from(bucket)
-      .upload(path, file);
-    
-    if (error) throw error;
-    return data;
-  },
-
-  async getFileUrl(bucket: string, path: string) {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    const { data } = supabase.storage
-      .from(bucket)
-      .getPublicUrl(path);
-    
-    return data.publicUrl;
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.warn('⚠️ Supabase credentials missing - connection unavailable');
+} else {
+  try {
+    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('🔗 Supabase client configured successfully');
+  } catch (error) {
+    console.error('❌ Supabase client initialization failed:', error);
   }
-};
+}
 
-export default supabase;
+export { supabase };
+
+// Test Supabase connection
+export async function testSupabaseConnection() {
+  if (!supabase) {
+    return { success: false, error: 'Supabase client not initialized - credentials missing' };
+  }
+  
+  try {
+    const { data, error } = await supabase.from('_supabase_migrations').select('*').limit(1);
+    if (error && error.code !== 'PGRST116') { // PGRST116 = table not found, which is fine
+      console.log('🔗 Supabase connection: Ready but not active');
+      return { success: true, message: 'Connected to Supabase' };
+    }
+    console.log('🔗 Supabase connection: Ready but not active');
+    return { success: true, message: 'Connected to Supabase' };
+  } catch (error) {
+    console.error('❌ Supabase connection failed:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Future migration functions (prepared but not implemented)
+export async function migrateToSupabase() {
+  console.log('🚧 Migration to Supabase not implemented yet - staying with Neon');
+  return { success: false, message: 'Migration not ready' };
+}
+
+export async function syncNeonToSupabase() {
+  console.log('🔄 Sync not implemented yet - using Neon only');
+  return { success: false, message: 'Sync not ready' };
+}

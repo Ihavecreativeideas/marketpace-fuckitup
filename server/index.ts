@@ -29,6 +29,7 @@ import { subscriptionScheduler } from './subscriptionScheduler';
 import { sponsorManagementRoutes } from './sponsorManagement';
 import { zapierRouter } from './zapier-integration';
 import { db } from './db.js';
+import { supabase, testSupabaseConnection } from './supabase.js';
 import { employees, businesses } from '../shared/schema.js';
 import { eq, and } from 'drizzle-orm';
 const { sendEmployeeInvitation } = require('./employeeInvitation.js');
@@ -1077,6 +1078,43 @@ app.get('/api/employees/:businessId', async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Database error: Failed to load employees from database.'
+    });
+  }
+});
+
+// Database status endpoint
+app.get('/api/database/status', async (req, res) => {
+  try {
+    const supabaseTest = await testSupabaseConnection();
+    
+    // Test Neon connection with employee count
+    const employeeCount = await db.select()
+      .from(employees)
+      .then(result => result.length);
+    
+    res.json({
+      success: true,
+      databases: {
+        neon: {
+          status: 'active',
+          connection: 'connected',
+          employeeCount: employeeCount,
+          description: 'Primary production database'
+        },
+        supabase: {
+          status: 'standby',
+          connection: supabaseTest.success ? 'connected' : 'unavailable',
+          description: 'Future migration target for real-time features',
+          error: supabaseTest.error || null
+        }
+      },
+      message: 'Dual database architecture ready - Neon active, Supabase standby'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to check database status',
+      details: error.message
     });
   }
 });
@@ -8928,6 +8966,18 @@ app.listen(port, '0.0.0.0', () => {
   console.log(`🎁 MyPace Loyalty System API: /api/mypace/loyalty/* endpoints`);
   console.log(`🏆 Member Rewards & Referral API: /api/mypace/wallet/*, /api/mypace/referrals/*`);
   console.log(`🚀 Ready for development and testing`);
+
+  // Test Supabase connection (but keep using Neon)
+  testSupabaseConnection().then(result => {
+    if (result.success) {
+      console.log('📊 Database Status: Neon (Active) + Supabase (Standby)');
+    } else {
+      console.log('📊 Database Status: Neon (Active) | Supabase (Unavailable)');
+      console.log('💡 To enable Supabase: Add SUPABASE_URL and SUPABASE_ANON_KEY to environment');
+    }
+  }).catch(err => {
+    console.log('📊 Database Status: Neon (Active) | Supabase (Error)');
+  });
 }).on('error', (err) => {
   console.error(`❌ Failed to start on port ${port}:`, err.message);
 });
