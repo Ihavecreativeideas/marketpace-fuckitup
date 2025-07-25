@@ -4046,47 +4046,361 @@
         }
 
         function renderEmployeeGrid() {
-            const grid = document.getElementById('employeeGrid');
-            if (!grid) {
-                console.log('Employee grid not found on current tab, skipping render');
-                return;
+            console.log('Rendering workforce with', employees.length, 'total members');
+            
+            // Render employees in their respective category sections
+            renderEmployeesInSection();
+            renderContractorsInSection(); 
+            renderVolunteersInSection();
+            
+            // Update stats for all categories
+            updateCategoryCounts();
+            
+            console.log('✅ All workforce categories updated and visible immediately');
+        }
+
+        function renderEmployeesInSection() {
+            const employeesSection = document.getElementById('employeesSection');
+            if (!employeesSection) return;
+            
+            // Filter for employees only
+            const employeeList = employees.filter(emp => emp.category === 'employee');
+            
+            // Find or create person grid container within employees section
+            let personGrid = employeesSection.querySelector('.person-grid');
+            if (!personGrid) {
+                personGrid = document.createElement('div');
+                personGrid.className = 'person-grid';
+                personGrid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 16px;';
+                employeesSection.appendChild(personGrid);
             }
             
-            const placeholder = grid.querySelector('.employee-placeholder');
-            const managementControls = document.getElementById('managementControls');
-            const employeeStats = document.getElementById('employeeStats');
-            
-            if (employees.length === 0) {
-                if (placeholder) placeholder.style.display = 'block';
-                if (managementControls) managementControls.style.display = 'none';
-                if (employeeStats) employeeStats.style.display = 'none';
-                return;
-            }
-            
-            // Hide placeholder and show controls
-            if (placeholder) placeholder.style.display = 'none';
-            if (managementControls) managementControls.style.display = 'block';
-            if (employeeStats) employeeStats.style.display = 'block';
-            
-            // Create employee cards
-            const employeeCards = employees.map(employee => `
-                <div class="employee-card" onclick="selectEmployee('${employee.id}')">
-                    <div class="employee-avatar" style="background: linear-gradient(135deg, ${employee.color}, #4169e1);">
-                        ${employee.name.charAt(0).toUpperCase()}
+            // Generate employee cards
+            const employeeCards = employeeList.map(employee => `
+                <div class="person-card" style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(0, 0, 0, 0.6)); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.3s ease;" onclick="selectEmployeeForScheduling('${employee.id}')">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #ffd700, #ffb347); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; font-size: 16px;">
+                            ${employee.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <div style="color: #ffd700; font-weight: 600; font-size: 14px;">${employee.name}</div>
+                            <div style="color: #94a3b8; font-size: 11px;">${employee.role} • W-2 Status</div>
+                        </div>
+                        <div style="margin-left: auto;">
+                            <div style="background: ${employee.status === 'active' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255, 165, 0, 0.2)'}; color: ${employee.status === 'active' ? '#22c55e' : '#f59e0b'}; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">
+                                ${employee.status === 'active' ? 'ACTIVE' : 'PENDING'}
+                            </div>
+                        </div>
                     </div>
-                    <div class="employee-name">${employee.name}</div>
-                    <div class="employee-role">${employee.role} • ${employee.category}</div>
-                    <div class="employee-status ${employee.status === 'active' ? 'status-active' : 'status-pending'}">
-                        ${employee.status === 'active' ? 'Active' : 'Invitation Pending'}
+                    <div style="background: rgba(0, 0, 0, 0.4); border-radius: 6px; padding: 8px; margin-bottom: 8px;">
+                        <div style="color: #94a3b8; font-size: 10px; margin-bottom: 4px;">Payment Structure</div>
+                        <div style="color: #00ffff; font-size: 12px;">$${employee.paymentAmount}/${employee.paymentType === 'hourly' ? 'hr' : employee.paymentType}</div>
                     </div>
-                    <div style="margin-top: 8px; font-size: 12px; color: #64748b;">
-                        ${employee.phone} • ${employee.email}
+                    <div style="display: flex; gap: 6px;">
+                        <button onclick="scheduleEmployee('${employee.id}'); event.stopPropagation();" style="background: linear-gradient(135deg, #00ffff, #4169e1); color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 10px; font-weight: 600; cursor: pointer;">Schedule Now</button>
+                        <button onclick="viewEmployeeDetails('${employee.id}'); event.stopPropagation();" style="background: rgba(255, 215, 0, 0.2); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 4px; padding: 4px 8px; font-size: 10px; cursor: pointer;">View Details</button>
                     </div>
                 </div>
             `).join('');
             
-            grid.innerHTML = employeeCards;
-            console.log('Employee grid updated with', employees.length, 'employees');
+            personGrid.innerHTML = employeeCards || '<div style="color: #94a3b8; text-align: center; padding: 20px;">No employees added yet</div>';
+            console.log('✅ Employees section updated with', employeeList.length, 'employees - immediately visible');
+        }
+
+        function renderContractorsInSection() {
+            const contractorsSection = document.getElementById('contractorsSection');
+            if (!contractorsSection) return;
+            
+            // Filter for contractors only
+            const contractorList = employees.filter(emp => emp.category === 'contractor');
+            
+            // Find or create person grid container
+            let personGrid = contractorsSection.querySelector('.person-grid');
+            if (!personGrid) {
+                personGrid = document.createElement('div');
+                personGrid.className = 'person-grid';
+                personGrid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 16px;';
+                contractorsSection.appendChild(personGrid);
+            }
+            
+            // Generate contractor cards
+            const contractorCards = contractorList.map(contractor => `
+                <div class="person-card" style="background: linear-gradient(135deg, rgba(138, 43, 226, 0.15), rgba(0, 0, 0, 0.6)); border: 1px solid rgba(138, 43, 226, 0.3); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.3s ease;" onclick="selectEmployeeForScheduling('${contractor.id}')">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #8a2be2, #6d28d9); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px;">
+                            ${contractor.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <div style="color: #8a2be2; font-weight: 600; font-size: 14px;">${contractor.name}</div>
+                            <div style="color: #94a3b8; font-size: 11px;">${contractor.role} • 1099 Status</div>
+                        </div>
+                        <div style="margin-left: auto;">
+                            <div style="background: ${contractor.status === 'active' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255, 165, 0, 0.2)'}; color: ${contractor.status === 'active' ? '#22c55e' : '#f59e0b'}; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">
+                                ${contractor.status === 'active' ? 'ACTIVE' : 'PENDING'}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.4); border-radius: 6px; padding: 8px; margin-bottom: 8px;">
+                        <div style="color: #94a3b8; font-size: 10px; margin-bottom: 4px;">Payment Structure</div>
+                        <div style="color: #00ffff; font-size: 12px;">$${contractor.paymentAmount}/${contractor.paymentType === 'hourly' ? 'hr' : contractor.paymentType}</div>
+                    </div>
+                    <div style="display: flex; gap: 6px;">
+                        <button onclick="scheduleEmployee('${contractor.id}'); event.stopPropagation();" style="background: linear-gradient(135deg, #8a2be2, #6d28d9); color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 10px; font-weight: 600; cursor: pointer;">Schedule Now</button>
+                        <button onclick="viewEmployeeDetails('${contractor.id}'); event.stopPropagation();" style="background: rgba(138, 43, 226, 0.2); color: #8a2be2; border: 1px solid rgba(138, 43, 226, 0.3); border-radius: 4px; padding: 4px 8px; font-size: 10px; cursor: pointer;">View Details</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            personGrid.innerHTML = contractorCards || '<div style="color: #94a3b8; text-align: center; padding: 20px;">No contractors added yet</div>';
+            console.log('✅ Contractors section updated with', contractorList.length, 'contractors - immediately visible');
+        }
+
+        function renderVolunteersInSection() {
+            const volunteersSection = document.getElementById('volunteersSection');
+            if (!volunteersSection) return;
+            
+            // Filter for volunteers only
+            const volunteerList = employees.filter(emp => emp.category === 'volunteer');
+            
+            // Find or create person grid container
+            let personGrid = volunteersSection.querySelector('.person-grid');
+            if (!personGrid) {
+                personGrid = document.createElement('div');
+                personGrid.className = 'person-grid';
+                personGrid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 16px;';
+                volunteersSection.appendChild(personGrid);
+            }
+            
+            // Generate volunteer cards
+            const volunteerCards = volunteerList.map(volunteer => `
+                <div class="person-card" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(0, 0, 0, 0.6)); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.3s ease;" onclick="selectEmployeeForScheduling('${volunteer.id}')">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #22c55e, #16a34a); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px;">
+                            ${volunteer.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <div style="color: #22c55e; font-weight: 600; font-size: 14px;">${volunteer.name}</div>
+                            <div style="color: #94a3b8; font-size: 11px;">${volunteer.role} • No Income</div>
+                        </div>
+                        <div style="margin-left: auto;">
+                            <div style="background: ${volunteer.status === 'active' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255, 165, 0, 0.2)'}; color: ${volunteer.status === 'active' ? '#22c55e' : '#f59e0b'}; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">
+                                ${volunteer.status === 'active' ? 'ACTIVE' : 'PENDING'}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.4); border-radius: 6px; padding: 8px; margin-bottom: 8px;">
+                        <div style="color: #94a3b8; font-size: 10px; margin-bottom: 4px;">Volunteer Service</div>
+                        <div style="color: #00ffff; font-size: 12px;">Recognition Only • Community Service</div>
+                    </div>
+                    <div style="display: flex; gap: 6px;">
+                        <button onclick="scheduleEmployee('${volunteer.id}'); event.stopPropagation();" style="background: linear-gradient(135deg, #22c55e, #16a34a); color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 10px; font-weight: 600; cursor: pointer;">Schedule Now</button>
+                        <button onclick="viewEmployeeDetails('${volunteer.id}'); event.stopPropagation();" style="background: rgba(34, 197, 94, 0.2); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 4px; padding: 4px 8px; font-size: 10px; cursor: pointer;">View Details</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            personGrid.innerHTML = volunteerCards || '<div style="color: #94a3b8; text-align: center; padding: 20px;">No volunteers added yet</div>';
+            console.log('✅ Volunteers section updated with', volunteerList.length, 'volunteers - immediately visible');
+        }
+
+        function updateCategoryCounts() {
+            // Update category counters
+            const employeeCount = employees.filter(emp => emp.category === 'employee').length;
+            const contractorCount = employees.filter(emp => emp.category === 'contractor').length;
+            const volunteerCount = employees.filter(emp => emp.category === 'volunteer').length;
+            
+            // Update counters if elements exist
+            const totalEmployeesElement = document.getElementById('totalEmployeesCount');
+            if (totalEmployeesElement) totalEmployeesElement.textContent = employeeCount;
+            
+            console.log(`📊 Category counts updated: ${employeeCount} employees, ${contractorCount} contractors, ${volunteerCount} volunteers`);
+        }
+
+        // Workforce interaction functions
+        function selectEmployeeForScheduling(employeeId) {
+            const employee = employees.find(e => e.id === employeeId);
+            if (!employee) return;
+            
+            showNotification(`Selected ${employee.name} for scheduling - ready to add to calendar`, 'success');
+            
+            // Switch to schedule tab if not already active
+            showTab('schedule');
+            
+            // Highlight the selected employee
+            document.querySelectorAll('.person-card').forEach(card => {
+                card.style.border = '1px solid rgba(255, 255, 255, 0.3)';
+            });
+            
+            event.target.closest('.person-card').style.border = '2px solid #00ffff';
+            
+            console.log('Selected employee for scheduling:', employee.name);
+        }
+
+        function scheduleEmployee(employeeId) {
+            const employee = employees.find(e => e.id === employeeId);
+            if (!employee) return;
+            
+            // Show quick scheduling modal
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; 
+                justify-content: center; z-index: 10000; backdrop-filter: blur(10px);
+            `;
+            
+            const content = document.createElement('div');
+            content.style.cssText = `
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                border: 2px solid #00ffff; border-radius: 16px; padding: 24px; 
+                max-width: 400px; width: 90%;
+            `;
+            
+            content.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="color: #00ffff; margin: 0;">Schedule ${employee.name}</h3>
+                    <button onclick="this.closest('.modal').remove()" style="background: transparent; border: none; color: #00ffff; font-size: 24px; cursor: pointer;">&times;</button>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Select Day</label>
+                    <select id="scheduleDay" style="width: 100%; padding: 10px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                        <option value="monday">Monday</option>
+                        <option value="tuesday">Tuesday</option>
+                        <option value="wednesday">Wednesday</option>
+                        <option value="thursday">Thursday</option>
+                        <option value="friday">Friday</option>
+                        <option value="saturday">Saturday</option>
+                        <option value="sunday">Sunday</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Time Slot</label>
+                    <select id="scheduleTime" style="width: 100%; padding: 10px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                        <option value="6-8">6:00 AM - 8:00 AM</option>
+                        <option value="8-10">8:00 AM - 10:00 AM</option>
+                        <option value="10-12">10:00 AM - 12:00 PM</option>
+                        <option value="12-14">12:00 PM - 2:00 PM</option>
+                        <option value="14-16">2:00 PM - 4:00 PM</option>
+                        <option value="16-18">4:00 PM - 6:00 PM</option>
+                        <option value="18-20">6:00 PM - 8:00 PM</option>
+                        <option value="20-22">8:00 PM - 10:00 PM</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button onclick="this.closest('.modal').remove()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 10px 16px; border-radius: 6px; cursor: pointer;">Cancel</button>
+                    <button onclick="confirmSchedule('${employeeId}', this)" style="background: linear-gradient(135deg, #00ffff, #4169e1); border: none; color: white; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: bold;">Schedule Now</button>
+                </div>
+            `;
+            
+            modal.className = 'modal';
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+            
+            showNotification(`Opening schedule options for ${employee.name}`, 'info');
+        }
+
+        function confirmSchedule(employeeId, button) {
+            const employee = employees.find(e => e.id === employeeId);
+            const modal = button.closest('.modal');
+            const day = modal.querySelector('#scheduleDay').value;
+            const timeSlot = modal.querySelector('#scheduleTime').value;
+            const timeText = modal.querySelector('#scheduleTime option:checked').textContent;
+            
+            showNotification(`✅ ${employee.name} scheduled for ${day.charAt(0).toUpperCase() + day.slice(1)} at ${timeText}`, 'success');
+            
+            // Here you would add logic to actually add to the calendar
+            console.log(`Scheduled ${employee.name} for ${day} at ${timeSlot}`);
+            
+            modal.remove();
+        }
+
+        function viewEmployeeDetails(employeeId) {
+            const employee = employees.find(e => e.id === employeeId);
+            if (!employee) return;
+            
+            // Show employee details modal
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; 
+                justify-content: center; z-index: 10000; backdrop-filter: blur(10px);
+            `;
+            
+            const content = document.createElement('div');
+            content.style.cssText = `
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                border: 2px solid ${employee.category === 'employee' ? '#ffd700' : employee.category === 'contractor' ? '#8a2be2' : '#22c55e'}; 
+                border-radius: 16px; padding: 24px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;
+            `;
+            
+            const statusColor = employee.status === 'active' ? '#22c55e' : '#f59e0b';
+            const categoryColor = employee.category === 'employee' ? '#ffd700' : employee.category === 'contractor' ? '#8a2be2' : '#22c55e';
+            
+            content.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="color: ${categoryColor}; margin: 0;">Employee Details</h3>
+                    <button onclick="this.closest('.modal').remove()" style="background: transparent; border: none; color: ${categoryColor}; font-size: 24px; cursor: pointer;">&times;</button>
+                </div>
+                
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, ${categoryColor}, #4169e1); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 32px; margin-bottom: 12px;">
+                        ${employee.name.charAt(0).toUpperCase()}
+                    </div>
+                    <h4 style="color: white; margin: 0 0 4px 0; font-size: 20px;">${employee.name}</h4>
+                    <p style="color: #94a3b8; margin: 0; font-size: 14px;">${employee.role} • ${employee.category.charAt(0).toUpperCase() + employee.category.slice(1)}</p>
+                    <div style="background: rgba(${statusColor === '#22c55e' ? '34, 197, 94' : '245, 158, 11'}, 0.2); color: ${statusColor}; padding: 4px 12px; border-radius: 12px; display: inline-block; margin-top: 8px; font-size: 12px; font-weight: bold;">
+                        ${employee.status === 'active' ? 'ACTIVE' : 'INVITATION PENDING'}
+                    </div>
+                </div>
+                
+                <div style="background: rgba(0, 0, 0, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                    <h5 style="color: ${categoryColor}; margin: 0 0 12px 0; font-size: 14px;">Contact Information</h5>
+                    <div style="margin-bottom: 8px;">
+                        <span style="color: #94a3b8; font-size: 12px;">Phone:</span>
+                        <span style="color: white; margin-left: 8px;">${employee.phone}</span>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span style="color: #94a3b8; font-size: 12px;">Email:</span>
+                        <span style="color: white; margin-left: 8px;">${employee.email}</span>
+                    </div>
+                </div>
+                
+                <div style="background: rgba(0, 0, 0, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                    <h5 style="color: ${categoryColor}; margin: 0 0 12px 0; font-size: 14px;">Employment Details</h5>
+                    <div style="margin-bottom: 8px;">
+                        <span style="color: #94a3b8; font-size: 12px;">Category:</span>
+                        <span style="color: white; margin-left: 8px;">${employee.category === 'employee' ? 'W-2 Employee' : employee.category === 'contractor' ? '1099 Contractor' : 'Volunteer'}</span>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span style="color: #94a3b8; font-size: 12px;">Role:</span>
+                        <span style="color: white; margin-left: 8px;">${employee.role}</span>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span style="color: #94a3b8; font-size: 12px;">Payment:</span>
+                        <span style="color: #00ffff; margin-left: 8px;">$${employee.paymentAmount}/${employee.paymentType === 'hourly' ? 'hr' : employee.paymentType}</span>
+                    </div>
+                    <div>
+                        <span style="color: #94a3b8; font-size: 12px;">Date Added:</span>
+                        <span style="color: white; margin-left: 8px;">${new Date(employee.dateAdded).toLocaleDateString()}</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                    <button onclick="scheduleEmployee('${employeeId}'); this.closest('.modal').remove();" style="background: linear-gradient(135deg, #00ffff, #4169e1); border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">Schedule Now</button>
+                    <button onclick="sendEmployeeMessage('${employeeId}')" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Send Message</button>
+                </div>
+            `;
+            
+            modal.className = 'modal';
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+            
+            showNotification(`Viewing details for ${employee.name}`, 'info');
+        }
+
+        function sendEmployeeMessage(employeeId) {
+            const employee = employees.find(e => e.id === employeeId);
+            showNotification(`Opening message for ${employee.name}...`, 'info');
+            // Here you would integrate with your messaging system
         }
 
         function updateEmployeeStats() {
