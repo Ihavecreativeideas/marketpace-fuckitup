@@ -4086,7 +4086,7 @@ async function sendFacebookBusinessNotification(notificationData) {
 
     // Create Facebook post on business page (mock implementation)
     const facebookPost = {
-      message: `🎉 ${memberName} checked in at ${eventTitle} in ${eventLocation}! ${supportMessage ? `"${supportMessage}"` : 'Thanks for the support!'} #MarketPaceSupport #LocalBusiness`,
+      message: `Congratulations, a MarketPace member checked in to your business! Become a member to see who! 🎉 #MarketPaceSupport #JoinMarketPace`,
       link: 'https://marketpace.shop',
       published: true
     };
