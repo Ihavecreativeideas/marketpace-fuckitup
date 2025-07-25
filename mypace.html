@@ -1499,6 +1499,59 @@
             min-height: 80px;
         }
 
+        /* Autocomplete Styles */
+        .autocomplete-container {
+            position: relative;
+        }
+
+        .autocomplete-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(20, 20, 35, 0.95);
+            border: 1px solid rgba(100, 255, 218, 0.3);
+            border-radius: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            display: none;
+        }
+
+        .autocomplete-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(100, 255, 218, 0.1);
+            color: #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .autocomplete-item:hover {
+            background: rgba(100, 255, 218, 0.1);
+            color: #64ffda;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item .item-type {
+            font-size: 0.75rem;
+            color: #64ffda;
+            margin-right: 8px;
+        }
+
+        .autocomplete-item .item-name {
+            font-weight: 500;
+        }
+
+        .autocomplete-item .item-details {
+            font-size: 0.8rem;
+            color: #a0a0a0;
+            margin-top: 2px;
+        }
+
         /* Star Rating */
         .star-rating {
             display: flex;
@@ -2397,10 +2450,13 @@
                 <!-- Location Display -->
                 <div class="form-section">
                     <label class="form-label">Location</label>
-                    <div style="background: rgba(100, 255, 218, 0.2); padding: 10px; border-radius: 20px; color: #e2e8f0; cursor: pointer;" onclick="showManualLocationInput()">
-                        <span id="checkinLocation">LOC: Getting your location... (tap to enter manually)</span>
+                    <div style="background: rgba(100, 255, 218, 0.2); padding: 10px; border-radius: 20px; color: #e2e8f0; cursor: pointer;" onclick="showLocationSearch()">
+                        <span id="checkinLocation">LOC: Getting your location... (tap to search)</span>
                     </div>
-                    <input type="text" class="form-input" id="manualLocationInput" placeholder="Enter location name" style="display: none; margin-top: 10px;">
+                    <div class="autocomplete-container" id="locationAutocomplete" style="display: none; position: relative; margin-top: 10px;">
+                        <input type="text" class="form-input" id="locationSearchInput" placeholder="Search locations..." onkeyup="searchLocations(this.value)">
+                        <div class="autocomplete-results" id="locationResults"></div>
+                    </div>
                 </div>
 
                 <!-- Photo Upload -->
@@ -2422,7 +2478,10 @@
                 <!-- Support Tagging -->
                 <div class="form-section">
                     <label class="form-label">Tag Support (People, Businesses, Events)</label>
-                    <input type="text" class="form-input" id="supportTagInput" placeholder="@artistname, @businessname, or #eventname">
+                    <div class="autocomplete-container" style="position: relative;">
+                        <input type="text" class="form-input" id="supportTagInput" placeholder="@artistname, @businessname, or #eventname" onkeyup="searchSupportTags(this.value)">
+                        <div class="autocomplete-results" id="supportTagResults"></div>
+                    </div>
                     <div style="color: #64ffda; font-size: 0.75rem; margin-top: 4px; line-height: 1.3;">
                         @ for people/businesses • # for events • Non-members get Facebook invites to join MarketPace
                     </div>
@@ -2645,28 +2704,167 @@
             document.getElementById('manualLocationInput').style.display = 'none';
         }
 
-        // Show manual location input when location detection fails
-        function showManualLocationInput() {
-            const manualInput = document.getElementById('manualLocationInput');
+        // Show location search with autocomplete
+        function showLocationSearch() {
+            const locationAutocomplete = document.getElementById('locationAutocomplete');
             const locationSpan = document.getElementById('checkinLocation');
+            const searchInput = document.getElementById('locationSearchInput');
             
-            manualInput.style.display = 'block';
-            manualInput.focus();
-            locationSpan.textContent = 'LOC: Enter location below';
+            locationAutocomplete.style.display = 'block';
+            searchInput.focus();
+            locationSpan.textContent = 'LOC: Search for your location';
+        }
+
+        // Location search with predictive results
+        function searchLocations(query) {
+            const resultsContainer = document.getElementById('locationResults');
             
-            manualInput.addEventListener('input', function() {
-                if (this.value.trim()) {
-                    locationSpan.textContent = `LOC: ${this.value.trim()}`;
-                    // Store manual location
-                    window.currentCheckInLocation = {
-                        place: this.value.trim(),
-                        distance: 'manual',
-                        lat: null,
-                        lng: null,
-                        isManual: true
-                    };
-                }
-            });
+            if (!query.trim()) {
+                resultsContainer.style.display = 'none';
+                return;
+            }
+
+            // Sample nearby locations for demo
+            const locations = [
+                { name: 'Orange Beach Coffee Shop', type: 'COFFEE', address: '123 Main St, Orange Beach', distance: '0.1km' },
+                { name: 'Gulf Shores Music Venue', type: 'VENUE', address: '456 Beach Blvd, Gulf Shores', distance: '0.3km' },
+                { name: 'The Flora-Bama', type: 'BAR', address: '17401 Perdido Key Dr', distance: '0.5km' },
+                { name: 'Downtown Art Gallery', type: 'ART', address: '789 Art St, Downtown', distance: '0.7km' },
+                { name: 'Beach View Restaurant', type: 'FOOD', address: '321 Ocean Dr, Gulf Shores', distance: '0.8km' },
+                { name: 'Sunset Brewing Company', type: 'BREW', address: '654 Brewery Ln, Orange Beach', distance: '1.2km' },
+                { name: 'Marina Seafood House', type: 'FOOD', address: '987 Harbor Dr, Gulf Shores', distance: '1.5km' },
+                { name: 'The Wharf Amphitheater', type: 'VENUE', address: '4851 Wharf Pkwy W, Orange Beach', distance: '2.1km' }
+            ];
+
+            // Filter locations based on query
+            const filtered = locations.filter(loc => 
+                loc.name.toLowerCase().includes(query.toLowerCase()) ||
+                loc.type.toLowerCase().includes(query.toLowerCase())
+            );
+
+            if (filtered.length === 0) {
+                resultsContainer.style.display = 'none';
+                return;
+            }
+
+            resultsContainer.innerHTML = filtered.map(location => `
+                <div class="autocomplete-item" onclick="selectLocation('${location.name}', '${location.distance}')">
+                    <div>
+                        <span class="item-type">${location.type}</span>
+                        <span class="item-name">${location.name}</span>
+                    </div>
+                    <div class="item-details">${location.address} • ${location.distance} away</div>
+                </div>
+            `).join('');
+
+            resultsContainer.style.display = 'block';
+        }
+
+        // Select location from autocomplete
+        function selectLocation(name, distance) {
+            const locationSpan = document.getElementById('checkinLocation');
+            const resultsContainer = document.getElementById('locationResults');
+            const searchInput = document.getElementById('locationSearchInput');
+            
+            locationSpan.textContent = `LOC: ${name} (${distance} away)`;
+            searchInput.value = name;
+            resultsContainer.style.display = 'none';
+            
+            // Store selected location
+            window.currentCheckInLocation = {
+                place: name,
+                distance: distance,
+                lat: null, // Would be real coordinates in production
+                lng: null,
+                isSelected: true
+            };
+        }
+
+        // Support tag search with predictive results
+        function searchSupportTags(query) {
+            const resultsContainer = document.getElementById('supportTagResults');
+            
+            if (!query.trim() || (!query.includes('@') && !query.includes('#'))) {
+                resultsContainer.style.display = 'none';
+                return;
+            }
+
+            const lastChar = query.charAt(query.length - 1);
+            const searchTerm = query.split(/[@#]/).pop().toLowerCase();
+            
+            if (!searchTerm.trim()) {
+                resultsContainer.style.display = 'none';
+                return;
+            }
+
+            let suggestions = [];
+
+            if (query.includes('@')) {
+                // Artists and businesses
+                const entities = [
+                    { name: 'BrownBarnesMusic', type: 'ARTIST', details: 'Local musician & performer' },
+                    { name: 'OrangeBeachCoffee', type: 'BUSINESS', details: 'Coffee shop & café' },
+                    { name: 'GulfShoresBrewery', type: 'BUSINESS', details: 'Local brewery' },
+                    { name: 'DJ_Nova', type: 'ARTIST', details: 'Electronic music DJ' },
+                    { name: 'ArtisanGallery', type: 'BUSINESS', details: 'Art gallery & studio' },
+                    { name: 'SeafoodMarina', type: 'BUSINESS', details: 'Seafood restaurant' },
+                    { name: 'SunsetBand', type: 'ARTIST', details: 'Live music band' },
+                    { name: 'FloraBarama', type: 'BUSINESS', details: 'Beach bar & grill' }
+                ];
+
+                suggestions = entities.filter(entity => 
+                    entity.name.toLowerCase().includes(searchTerm)
+                ).map(entity => ({
+                    display: `@${entity.name}`,
+                    type: entity.type,
+                    details: entity.details
+                }));
+            }
+
+            if (query.includes('#')) {
+                // Events
+                const events = [
+                    { name: 'GulfShoresMusicFest', type: 'EVENT', details: 'Annual music festival' },
+                    { name: 'BeachCleanup2025', type: 'EVENT', details: 'Community cleanup event' },
+                    { name: 'ArtWalk', type: 'EVENT', details: 'Monthly art gallery walk' },
+                    { name: 'SunsetJazzNight', type: 'EVENT', details: 'Weekly jazz performances' },
+                    { name: 'SeafoodFestival', type: 'EVENT', details: 'Annual seafood celebration' }
+                ];
+
+                suggestions = events.filter(event => 
+                    event.name.toLowerCase().includes(searchTerm)
+                ).map(event => ({
+                    display: `#${event.name}`,
+                    type: event.type,
+                    details: event.details
+                }));
+            }
+
+            if (suggestions.length === 0) {
+                resultsContainer.style.display = 'none';
+                return;
+            }
+
+            resultsContainer.innerHTML = suggestions.map(suggestion => `
+                <div class="autocomplete-item" onclick="selectSupportTag('${suggestion.display}')">
+                    <div>
+                        <span class="item-type">${suggestion.type}</span>
+                        <span class="item-name">${suggestion.display}</span>
+                    </div>
+                    <div class="item-details">${suggestion.details}</div>
+                </div>
+            `).join('');
+
+            resultsContainer.style.display = 'block';
+        }
+
+        // Select support tag from autocomplete
+        function selectSupportTag(tag) {
+            const tagInput = document.getElementById('supportTagInput');
+            const resultsContainer = document.getElementById('supportTagResults');
+            
+            tagInput.value = tag;
+            resultsContainer.style.display = 'none';
         }
 
         // Photo preview functionality
