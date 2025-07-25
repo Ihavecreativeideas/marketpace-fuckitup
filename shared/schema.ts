@@ -55,6 +55,52 @@ export const users = pgTable("users", {
   socialMediaSettings: jsonb("social_media_settings"), // auto-response settings, cross-posting preferences
 });
 
+// Events table for community calendar system
+export const events = pgTable("events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organizerId: varchar("organizer_id").notNull().references(() => users.id),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  category: varchar("category").notNull(), // music, sports, food, community, business
+  type: varchar("type"), // festival, concert, market, etc.
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  location: varchar("location").notNull(),
+  address: text("address"), // Full address for geo QR code generation
+  latitude: real("latitude"),
+  longitude: real("longitude"),
+  isPublic: boolean("is_public").default(true),
+  requiresTicket: boolean("requires_ticket").default(false),
+  ticketPrice: integer("ticket_price"), // in cents
+  maxAttendees: integer("max_attendees"),
+  currentAttendees: integer("current_attendees").default(0),
+  // Geo QR Code settings for check-ins
+  geoQrEnabled: boolean("geo_qr_enabled").default(true),
+  geoQrRadius: integer("geo_qr_radius").default(100), // radius in meters
+  geoQrStrictMode: boolean("geo_qr_strict_mode").default(false),
+  allowManualCheckin: boolean("allow_manual_checkin").default(true),
+  // Event details
+  websiteUrl: varchar("website_url"),
+  socialLinks: jsonb("social_links"), // Facebook, Instagram, etc.
+  images: jsonb("images"), // array of image URLs
+  tags: jsonb("tags"), // array of tags
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Event check-ins table linking events to MyPace check-ins
+export const eventCheckins = pgTable("event_checkins", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  eventId: uuid("event_id").notNull().references(() => events.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  checkinId: uuid("checkin_id").notNull().references(() => mypaceCheckins.id),
+  qrCodeId: uuid("qr_code_id").references(() => qrCodes.id), // if checked in via QR
+  checkinType: varchar("checkin_type").notNull(), // manual, geo_qr, standard_qr
+  pacemakerCredit: boolean("pacemaker_credit").default(false), // for Pacemaker scoring
+  supportTag: varchar("support_tag"), // "Supporting @artist"
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // MyPace check-ins table for social location sharing
 export const mypaceCheckins = pgTable("mypace_checkins", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -68,6 +114,8 @@ export const mypaceCheckins = pgTable("mypace_checkins", {
   review: text("review"),
   supportTarget: varchar("support_target"), // business/artist being supported
   likes: integer("likes").default(0),
+  // Event linking
+  eventId: uuid("event_id").references(() => events.id), // link check-in to event if applicable
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

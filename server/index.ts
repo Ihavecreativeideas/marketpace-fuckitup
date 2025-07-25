@@ -3874,6 +3874,191 @@ app.post('/api/mypace/events/:eventId/checkin', async (req, res) => {
   }
 });
 
+// Event Calendar API Endpoints with Geo QR Check-in Support
+
+// Get all events with geo QR capabilities
+app.get('/api/events', async (req, res) => {
+  try {
+    const { category, town, radius, limit = 20 } = req.query;
+    
+    // Mock event data with addresses for geo QR - would query database in production
+    const mockEvents = [
+      {
+        id: 'event_1',
+        title: "DJ Sunset Vibes Live",
+        description: "Live DJ set with beachside views and dancing",
+        category: "music",
+        startDate: "2025-07-05T20:00:00Z",
+        endDate: "2025-07-06T00:00:00Z",
+        location: "The Flora-Bama",
+        address: "17401 Perdido Key Dr, Pensacola, FL 32507",
+        latitude: 30.2672,
+        longitude: -87.5692,
+        geoQrEnabled: true,
+        geoQrRadius: 150,
+        allowMemberCreatedQr: true,
+        currentAttendees: 45,
+        maxAttendees: 200,
+        distance: "1.2 miles"
+      },
+      {
+        id: 'event_2',
+        title: "Gulf Coast Food Festival",
+        description: "Local seafood, BBQ, and craft vendors",
+        category: "food",
+        startDate: "2025-07-10T11:00:00Z",
+        endDate: "2025-07-10T21:00:00Z",
+        location: "The Wharf Amphitheater",
+        address: "23101 Canal Rd, Orange Beach, AL 36561",
+        latitude: 30.2701,
+        longitude: -87.5721,
+        geoQrEnabled: true,
+        geoQrRadius: 100,
+        allowMemberCreatedQr: true,
+        currentAttendees: 128,
+        maxAttendees: 500,
+        distance: "3.1 miles"
+      }
+    ];
+
+    // Apply filters (simplified for demo)
+    let filteredEvents = mockEvents;
+    if (category && category !== 'all') {
+      filteredEvents = filteredEvents.filter(event => event.category === category);
+    }
+
+    res.json({
+      success: true,
+      events: filteredEvents.slice(0, parseInt(limit as string)),
+      total: filteredEvents.length
+    });
+
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch events: ' + error.message
+    });
+  }
+});
+
+// Create event check-in with geo QR validation
+app.post('/api/events/:eventId/checkin', async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { 
+      userId, 
+      message, 
+      supportTag, 
+      latitude, 
+      longitude, 
+      qrCodeId,
+      checkinType = 'manual' // manual, geo_qr, standard_qr
+    } = req.body;
+
+    // In production, would validate user location against event geo settings
+    const mockEvent = {
+      id: eventId,
+      geoQrEnabled: true,
+      geoQrRadius: 150,
+      latitude: 30.2672,
+      longitude: -87.5692
+    };
+
+    let geoValidationPassed = true;
+    let distanceFromEvent = 0;
+
+    if (mockEvent.geoQrEnabled && latitude && longitude) {
+      // Calculate distance (simplified for demo)
+      const latDiff = Math.abs(latitude - mockEvent.latitude);
+      const lngDiff = Math.abs(longitude - mockEvent.longitude);
+      distanceFromEvent = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff) * 111000; // rough meters
+      
+      geoValidationPassed = distanceFromEvent <= mockEvent.geoQrRadius;
+    }
+
+    if (mockEvent.geoQrEnabled && !geoValidationPassed) {
+      return res.status(400).json({
+        success: false,
+        error: `You must be within ${mockEvent.geoQrRadius}m of the event location to check-in`,
+        distanceFromEvent: Math.round(distanceFromEvent),
+        requiredRadius: mockEvent.geoQrRadius
+      });
+    }
+
+    // Create the check-in (would save to database)
+    const checkinData = {
+      id: `checkin_${Date.now()}`,
+      eventId,
+      userId,
+      message: message || '',
+      supportTag: supportTag || null,
+      checkinType,
+      geoValidationPassed,
+      distanceFromEvent: Math.round(distanceFromEvent),
+      pacemakerCredit: true, // award Pacemaker points
+      timestamp: new Date().toISOString()
+    };
+
+    console.log(`✅ Event check-in created:`, checkinData);
+
+    res.json({
+      success: true,
+      checkin: checkinData,
+      message: 'Check-in successful! You earned Pacemaker points for supporting this event.',
+      pacemakerPointsEarned: 5
+    });
+
+  } catch (error) {
+    console.error('Error creating event check-in:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create check-in: ' + error.message
+    });
+  }
+});
+
+// Generate geo QR code for event
+app.post('/api/events/:eventId/generate-qr', async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { 
+      creatorId, 
+      geoRadius = 100, 
+      strictMode = false 
+    } = req.body;
+
+    // In production, would create actual QR code and save to database
+    const qrCodeData = {
+      id: `qr_${Date.now()}`,
+      eventId,
+      creatorId,
+      purpose: 'event_checkin',
+      geoValidationEnabled: true,
+      geoRadius: parseInt(geoRadius),
+      geoStrictMode: strictMode,
+      qrCodeUrl: `https://marketpace.app/qr/event/${eventId}/${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days
+    };
+
+    console.log(`🔲 Geo QR code created for event ${eventId}:`, qrCodeData);
+
+    res.json({
+      success: true,
+      qrCode: qrCodeData,
+      message: `Geo QR Code created! Share this with others to let them check-in to the event.`
+    });
+
+  } catch (error) {
+    console.error('Error generating QR code:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to generate QR code: ' + error.message
+    });
+  }
+});
+
 // Phase 5 Mini-Phase 2: Enhanced API Endpoints
 
 // Get Event Check-ins API - Phase 5 Step 2
