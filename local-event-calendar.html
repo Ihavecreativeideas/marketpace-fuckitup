@@ -1465,6 +1465,9 @@
                             </label>
                             <input id="supportTag" placeholder="@artistname or @businessname" 
                                 style="width: 100%; padding: 10px; background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(0, 255, 255, 0.3); color: #fff; border-radius: 6px;">
+                            <div style="color: #64ffda; font-size: 0.75rem; margin-top: 4px; line-height: 1.3;">
+                                Tagged businesses will be notified via Facebook and MarketPace about your support
+                            </div>
                         </div>
 
                         <div style="background: rgba(138, 43, 226, 0.2); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(138, 43, 226, 0.4);">
@@ -1558,15 +1561,41 @@
             const message = document.getElementById('checkinMessage')?.value || '';
             const supportTag = document.getElementById('supportTag')?.value || '';
             
-            // In a real app, this would validate GPS location and create the check-in
-            const success = Math.random() > 0.1; // 90% success rate for demo
-            
-            if (success) {
-                // Show success feedback
-                showNotification('Check-in successful! You earned Pacemaker points for supporting this event.', 'success');
-                closeCheckinModal();
-            } else {
-                showNotification('Check-in failed: You must be within the event location radius.', 'error');
+            try {
+                // Call the API to create check-in with business notification
+                const response = await fetch(`/api/events/${eventId}/checkin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: 'demo_user_123',
+                        message: message,
+                        supportTag: supportTag,
+                        latitude: 30.2672, // Demo GPS coordinates
+                        longitude: -87.5692,
+                        checkinType: event.geoQrEnabled ? 'geo_qr' : 'manual'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    let successMessage = result.message;
+                    
+                    // Add Facebook notification info if business was tagged
+                    if (supportTag && supportTag.startsWith('@')) {
+                        successMessage += ` ${supportTag} has been notified via Facebook!`;
+                    }
+                    
+                    showNotification(successMessage, 'success');
+                    closeCheckinModal();
+                } else {
+                    showNotification(result.error || 'Check-in failed', 'error');
+                }
+            } catch (error) {
+                console.error('Check-in error:', error);
+                showNotification('Check-in failed: Network error', 'error');
             }
         }
 

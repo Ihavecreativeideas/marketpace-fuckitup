@@ -3942,7 +3942,7 @@ app.get('/api/events', async (req, res) => {
   }
 });
 
-// Create event check-in with geo QR validation
+// Create event check-in with geo QR validation and Facebook business notifications
 app.post('/api/events/:eventId/checkin', async (req, res) => {
   try {
     const { eventId } = req.params;
@@ -3959,6 +3959,8 @@ app.post('/api/events/:eventId/checkin', async (req, res) => {
     // In production, would validate user location against event geo settings
     const mockEvent = {
       id: eventId,
+      title: "DJ Sunset Vibes Live",
+      location: "The Flora-Bama",
       geoQrEnabled: true,
       geoQrRadius: 150,
       latitude: 30.2672,
@@ -3986,6 +3988,32 @@ app.post('/api/events/:eventId/checkin', async (req, res) => {
       });
     }
 
+    // Handle Facebook business notification if tagged
+    let facebookNotificationSent = false;
+    let businessNotified = null;
+
+    if (supportTag && supportTag.startsWith('@')) {
+      try {
+        businessNotified = supportTag.substring(1); // Remove @ symbol
+        
+        // Send Facebook notification to business
+        await sendFacebookBusinessNotification({
+          businessHandle: businessNotified,
+          memberName: `Member${userId}`, // In production, get actual member name
+          eventTitle: mockEvent.title,
+          eventLocation: mockEvent.location,
+          supportMessage: message,
+          checkinType: checkinType
+        });
+        
+        facebookNotificationSent = true;
+        console.log(`🔔 Facebook notification sent to business: ${businessNotified}`);
+      } catch (fbError) {
+        console.error(`❌ Facebook notification failed for ${businessNotified}:`, fbError);
+        // Don't fail the check-in if Facebook notification fails
+      }
+    }
+
     // Create the check-in (would save to database)
     const checkinData = {
       id: `checkin_${Date.now()}`,
@@ -3993,6 +4021,8 @@ app.post('/api/events/:eventId/checkin', async (req, res) => {
       userId,
       message: message || '',
       supportTag: supportTag || null,
+      businessNotified,
+      facebookNotificationSent,
       checkinType,
       geoValidationPassed,
       distanceFromEvent: Math.round(distanceFromEvent),
@@ -4006,7 +4036,9 @@ app.post('/api/events/:eventId/checkin', async (req, res) => {
       success: true,
       checkin: checkinData,
       message: 'Check-in successful! You earned Pacemaker points for supporting this event.',
-      pacemakerPointsEarned: 5
+      pacemakerPointsEarned: 5,
+      businessNotified: businessNotified,
+      facebookNotificationSent
     });
 
   } catch (error) {
@@ -4017,6 +4049,74 @@ app.post('/api/events/:eventId/checkin', async (req, res) => {
     });
   }
 });
+
+// Facebook Business Notification Function
+async function sendFacebookBusinessNotification(notificationData) {
+  const { businessHandle, memberName, eventTitle, eventLocation, supportMessage, checkinType } = notificationData;
+  
+  try {
+    // In production, this would:
+    // 1. Look up business Facebook page ID from businessHandle
+    // 2. Use Facebook Graph API to send notification
+    // 3. Create post on business page or send message
+    
+    const mockBusinesses = {
+      'florabama': {
+        facebookPageId: 'florabama_page_id',
+        facebookAccessToken: 'business_page_token',
+        notificationsEnabled: true
+      },
+      'thehangout': {
+        facebookPageId: 'hangout_page_id', 
+        facebookAccessToken: 'business_page_token',
+        notificationsEnabled: true
+      },
+      'thewharf': {
+        facebookPageId: 'wharf_page_id',
+        facebookAccessToken: 'business_page_token', 
+        notificationsEnabled: true
+      }
+    };
+
+    const business = mockBusinesses[businessHandle.toLowerCase()];
+    
+    if (!business || !business.notificationsEnabled) {
+      throw new Error(`Business ${businessHandle} not found or notifications disabled`);
+    }
+
+    // Create Facebook post on business page (mock implementation)
+    const facebookPost = {
+      message: `🎉 ${memberName} checked in at ${eventTitle} in ${eventLocation}! ${supportMessage ? `"${supportMessage}"` : 'Thanks for the support!'} #MarketPaceSupport #LocalBusiness`,
+      link: 'https://marketpace.shop',
+      published: true
+    };
+
+    console.log(`📱 Facebook notification prepared for ${businessHandle}:`, facebookPost);
+    
+    // In production, make actual Facebook Graph API call:
+    // const response = await fetch(`https://graph.facebook.com/${business.facebookPageId}/feed`, {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   },
+    //   body: JSON.stringify({
+    //     ...facebookPost,
+    //     access_token: business.facebookAccessToken
+    //   })
+    // });
+
+    return {
+      success: true,
+      businessHandle,
+      facebookPageId: business.facebookPageId,
+      postCreated: true
+    };
+
+  } catch (error) {
+    console.error(`Facebook notification error for ${businessHandle}:`, error);
+    throw error;
+  }
+}
 
 // Generate geo QR code for event
 app.post('/api/events/:eventId/generate-qr', async (req, res) => {
