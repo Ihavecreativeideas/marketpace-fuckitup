@@ -2895,7 +2895,7 @@
                     redirectUri = 'https://www.marketpace.shop/api/facebook/callback';
                 }
                 
-                const scopes = 'user_friends,pages_read_engagement,pages_show_list';
+                const scopes = 'user_friends,pages_read_engagement,pages_show_list,user_events,user_location';
                 const authUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scopes}&response_type=code`;
                 
                 console.log('Current domain:', currentDomain);
@@ -3127,11 +3127,23 @@
                     <div style="display: flex; align-items: center; gap: 8px;">
                         ${suggestion.picture ? `<img src="${suggestion.picture}" style="width: 20px; height: 20px; border-radius: 50%;" alt="Profile">` : ''}
                         <div>
-                            <span class="item-type" style="color: ${suggestion.source === 'facebook_friend' ? '#3b5998' : suggestion.source === 'facebook_page' ? '#1877f2' : '#00ffff'}">${suggestion.type}</span>
+                            <span class="item-type" style="color: ${
+                                suggestion.source === 'facebook_friend' ? '#1877f2' : 
+                                suggestion.source === 'facebook_page' ? '#42a5f5' : 
+                                suggestion.source === 'facebook_place' ? '#ff9800' : 
+                                suggestion.source === 'facebook_event' ? '#4caf50' : 
+                                '#00ffff'
+                            }">${suggestion.type}</span>
                             <span class="item-name">${suggestion.display}</span>
                         </div>
                     </div>
-                    <div class="item-details">${suggestion.details} ${suggestion.source === 'facebook_friend' ? '👫 Facebook Friend' : suggestion.source === 'facebook_page' ? '📄 Facebook Page' : ''}</div>
+                    <div class="item-details">${suggestion.details} ${
+                        suggestion.source === 'facebook_friend' ? '👫 Facebook Friend' : 
+                        suggestion.source === 'facebook_page' ? '📄 Facebook Page' : 
+                        suggestion.source === 'facebook_place' ? '🏢 Facebook Business' : 
+                        suggestion.source === 'facebook_event' ? '🎉 Facebook Event' : 
+                        ''
+                    }</div>
                 </div>
             `).join('');
 

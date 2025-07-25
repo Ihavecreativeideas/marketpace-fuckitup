@@ -31,58 +31,83 @@ import { zapierRouter } from './zapier-integration';
 const { sendEmployeeInvitation } = require('./employeeInvitation.js');
 const facebookAdsRouter = require('./routes/facebook-ads');
 
-// Facebook API for real artist/friend search
+// Facebook API for comprehensive friend, page, business, and event search
 async function searchFacebookFriendsAndArtists(accessToken: string, query: string, userLocation?: { lat: number, lng: number }) {
   try {
     const results = [];
     
-    // Search user's friends who are musicians/artists
+    // 1. Search ALL user's friends (not just musicians)
     const friendsResponse = await fetch(`https://graph.facebook.com/v18.0/me/friends?fields=id,name,picture,location&access_token=${accessToken}`);
     const friendsData = await friendsResponse.json();
     
     if (friendsData.data) {
       for (const friend of friendsData.data) {
         if (friend.name.toLowerCase().includes(query.toLowerCase())) {
-          // Check if friend has musician/artist interests or pages
-          try {
-            const friendDetailsResponse = await fetch(`https://graph.facebook.com/v18.0/${friend.id}?fields=id,name,picture,music,books,interests&access_token=${accessToken}`);
-            const friendDetails = await friendDetailsResponse.json();
-            
-            results.push({
-              name: friend.name,
-              type: 'FRIEND_ARTIST',
-              details: `Facebook friend - Local musician`,
-              id: friend.id,
-              picture: friend.picture?.data?.url || null,
-              source: 'facebook_friend'
-            });
-          } catch (error) {
-            console.log('Error fetching friend details:', error);
-          }
+          results.push({
+            name: friend.name,
+            type: 'FRIEND',
+            details: `Facebook friend`,
+            id: friend.id,
+            picture: friend.picture?.data?.url || null,
+            source: 'facebook_friend'
+          });
         }
       }
     }
     
-    // Search for local artist pages near user's location
+    // 2. Search for ALL local pages near user's location (not just music)
     if (userLocation) {
-      const searchResponse = await fetch(`https://graph.facebook.com/v18.0/search?type=page&q=${encodeURIComponent(query)}&fields=id,name,picture,location,category,fan_count&center=${userLocation.lat},${userLocation.lng}&distance=10000&access_token=${accessToken}`);
-      const searchData = await searchResponse.json();
+      const pageSearchResponse = await fetch(`https://graph.facebook.com/v18.0/search?type=page&q=${encodeURIComponent(query)}&fields=id,name,picture,location,category,fan_count,about&center=${userLocation.lat},${userLocation.lng}&distance=15000&access_token=${accessToken}`);
+      const pageSearchData = await pageSearchResponse.json();
       
-      if (searchData.data) {
-        for (const page of searchData.data) {
-          // Filter for music-related pages
-          const musicCategories = ['musician', 'band', 'artist', 'music', 'dj', 'singer', 'songwriter'];
-          if (page.category && musicCategories.some(cat => page.category.toLowerCase().includes(cat))) {
-            results.push({
-              name: page.name,
-              type: 'LOCAL_ARTIST',
-              details: `${page.category} - ${page.fan_count || 0} followers`,
-              id: page.id,
-              picture: page.picture?.data?.url || null,
-              location: page.location?.city || 'Local area',
-              source: 'facebook_page'
-            });
-          }
+      if (pageSearchData.data) {
+        for (const page of pageSearchData.data) {
+          results.push({
+            name: page.name,
+            type: 'PAGE',
+            details: `${page.category || 'Business'} - ${page.fan_count || 0} followers`,
+            id: page.id,
+            picture: page.picture?.data?.url || null,
+            location: page.location?.city || 'Local area',
+            source: 'facebook_page'
+          });
+        }
+      }
+      
+      // 3. Search for local places/businesses
+      const placesResponse = await fetch(`https://graph.facebook.com/v18.0/search?type=place&q=${encodeURIComponent(query)}&fields=id,name,picture,location,category,checkins&center=${userLocation.lat},${userLocation.lng}&distance=15000&access_token=${accessToken}`);
+      const placesData = await placesResponse.json();
+      
+      if (placesData.data) {
+        for (const place of placesData.data) {
+          results.push({
+            name: place.name,
+            type: 'BUSINESS',
+            details: `${place.category || 'Local business'} - ${place.checkins || 0} check-ins`,
+            id: place.id,
+            picture: place.picture?.data?.url || null,
+            location: place.location?.city || 'Local area',
+            source: 'facebook_place'
+          });
+        }
+      }
+      
+      // 4. Search for local events
+      const eventsResponse = await fetch(`https://graph.facebook.com/v18.0/search?type=event&q=${encodeURIComponent(query)}&fields=id,name,picture,place,start_time,attending_count,category&center=${userLocation.lat},${userLocation.lng}&distance=15000&access_token=${accessToken}`);
+      const eventsData = await eventsResponse.json();
+      
+      if (eventsData.data) {
+        for (const event of eventsData.data) {
+          results.push({
+            name: event.name,
+            type: 'EVENT',
+            details: `Event - ${event.attending_count || 0} attending`,
+            id: event.id,
+            picture: event.picture?.data?.url || null,
+            location: event.place?.name || 'Local area',
+            startTime: event.start_time,
+            source: 'facebook_event'
+          });
         }
       }
     }
