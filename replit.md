@@ -273,6 +273,12 @@ All features are designed to strengthen local communities by keeping commerce lo
 
 ## Recent Changes
 
+✓ **EMPLOYEE ADD FUNCTIONALITY FIXED** (July 25, 2025)
+✓ **REMOVED UNNECESSARY STATUS FIELD**: Eliminated "Available Status" dropdown from add employee form as requested for cleaner interface
+✓ **ADDED CUSTOM SHIFT TIME CREATION**: Enhanced shift creator with flexible time selection - users can create custom shifts with any start/end time beyond preset options
+✓ **JAVASCRIPT ERROR RESOLUTION**: Fixed critical "newEmployeeStatus is null" error by removing orphaned status field references in addNewEmployee() function
+✓ **AUTOMATIC STATUS ASSIGNMENT**: System now automatically assigns employee status based on invitation sending: "Pending Invitation" or "Available"
+
 ✓ **PRODUCTION DOMAIN DEPLOYMENT CONFIGURATION COMPLETED** (July 25, 2025)
 ✓ **CUSTOM DOMAIN SETUP**: Configured app to use registered domain www.marketpace.shop instead of temporary Replit domains
 ✓ **FACEBOOK AUTHENTICATION PRODUCTION-READY**: Updated all redirect URIs to prioritize production domain for seamless authentication
