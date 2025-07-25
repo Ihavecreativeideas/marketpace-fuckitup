@@ -2847,6 +2847,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             const authStatus = urlParams.get('facebook_auth');
             const token = urlParams.get('token');
+            const autoClose = urlParams.get('auto_close');
             
             if (authStatus === 'success' && token) {
                 // Store the access token
@@ -2858,7 +2859,27 @@
                 window.history.replaceState({}, document.title, cleanUrl);
                 
                 // Show success notification
-                showNotification('✅ Facebook connected successfully! You can now search your Facebook friends.', 'success');
+                showNotification('✅ Facebook connected successfully! You can now search your Facebook friends, pages, businesses, and events.', 'success');
+                
+                // If user was in check-in modal, reopen it automatically
+                if (autoClose === 'true' && localStorage.getItem('was_in_checkin_modal') === 'true') {
+                    setTimeout(() => {
+                        openCheckInModal();
+                        // Restore the original search query if it exists
+                        const originalQuery = localStorage.getItem('original_search_query');
+                        if (originalQuery) {
+                            setTimeout(() => {
+                                const supportInput = document.getElementById('supportTagInput');
+                                if (supportInput) {
+                                    supportInput.value = originalQuery;
+                                    searchSupportTags(originalQuery);
+                                }
+                                localStorage.removeItem('original_search_query');
+                            }, 500);
+                        }
+                        localStorage.removeItem('was_in_checkin_modal');
+                    }, 1500);
+                }
                 
                 console.log('Facebook authentication successful, token stored');
             } else if (authStatus === 'error') {
@@ -2902,7 +2923,10 @@
                 console.log('Using redirect URI:', redirectUri);
                 console.log('Facebook auth URL:', authUrl);
                 
-                // Use same window redirect for reliability in all environments
+                // Store current page URL for proper redirect back
+                localStorage.setItem('facebook_redirect_back', window.location.href);
+                
+                // Use same window redirect for reliability in all environments  
                 window.location.href = authUrl;
             } catch (error) {
                 console.error('Facebook authentication error:', error);
@@ -3159,6 +3183,10 @@
         // Handle Facebook connect button click
         async function handleFacebookConnect(originalQuery) {
             try {
+                // Track that user is in check-in modal for redirect back
+                localStorage.setItem('was_in_checkin_modal', 'true');
+                localStorage.setItem('original_search_query', originalQuery || '');
+                
                 await connectFacebook();
                 // Clear the connect hint
                 const connectHint = document.getElementById('facebook-connect-hint');
@@ -3258,17 +3286,41 @@
             const locationInfo = window.currentCheckInLocation || {};
             const supportTags = document.getElementById('supportTagInput').value;
             
+            // Ensure we have valid location data
+            if (!locationInfo.place && !locationInfo.lat) {
+                // Try to detect location again if not available
+                await new Promise((resolve) => {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            locationInfo.lat = position.coords.latitude;
+                            locationInfo.lng = position.coords.longitude;
+                            locationInfo.place = 'Current Location';
+                            window.currentCheckInLocation = locationInfo;
+                            resolve();
+                        },
+                        () => {
+                            // Fallback location if GPS fails
+                            locationInfo.place = 'Manual Check-in Location';
+                            locationInfo.lat = 30.2672; // Gulf Shores default
+                            locationInfo.lng = -87.7031;
+                            window.currentCheckInLocation = locationInfo;
+                            resolve();
+                        }
+                    );
+                });
+            }
+            
             const checkinData = {
                 userId: 'user_demo_123', // In real app, get from auth session
-                locationName: locationInfo.place || 'Unknown Location',
-                latitude: locationInfo.lat || null,
-                longitude: locationInfo.lng || null,
+                locationName: locationInfo.place || 'Check-in Location',
+                latitude: locationInfo.lat || 30.2672,
+                longitude: locationInfo.lng || -87.7031,
                 caption: document.getElementById('captionInput').value,
                 supportTags: supportTags, // Now uses the new tagging system
                 rating: currentRating,
                 review: document.getElementById('reviewInput').value,
                 photoUrl: document.getElementById('photoInput').files[0] ? 'demo_photo.jpg' : null,
-                distance: locationInfo.distance || null
+                distance: locationInfo.distance || 0.5
             };
 
             console.log('Submitting check-in to API:', checkinData);

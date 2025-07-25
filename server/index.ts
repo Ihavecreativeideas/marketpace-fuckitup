@@ -6348,8 +6348,8 @@ app.get('/api/facebook/callback', async (req, res) => {
       // Store token in session for same-window auth
       req.session.facebookAccessToken = tokenData.access_token;
       
-      // Redirect back to MyPace with success parameter
-      res.redirect('/mypace?facebook_auth=success&token=' + encodeURIComponent(tokenData.access_token));
+      // Redirect back to MyPace with success parameter and auto-close flag for modal
+      res.redirect('/mypace?facebook_auth=success&token=' + encodeURIComponent(tokenData.access_token) + '&auto_close=true');
     } else {
       throw new Error('Failed to get access token: ' + JSON.stringify(tokenData));
     }
