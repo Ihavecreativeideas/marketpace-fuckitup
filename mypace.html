@@ -2949,10 +2949,16 @@
                     
                     // Check if popup was closed manually
                     const checkClosed = setInterval(() => {
-                        if (popup.closed) {
+                        try {
+                            if (popup && popup.closed) {
+                                clearInterval(checkClosed);
+                                window.removeEventListener('message', messageListener);
+                                reject(new Error('Facebook authentication cancelled'));
+                            }
+                        } catch (error) {
+                            // Popup may be null or access restricted
                             clearInterval(checkClosed);
                             window.removeEventListener('message', messageListener);
-                            reject(new Error('Facebook authentication cancelled'));
                         }
                     }, 1000);
                 });
