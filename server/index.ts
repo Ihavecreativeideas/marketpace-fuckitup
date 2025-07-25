@@ -4761,12 +4761,17 @@ const htmlRoutes = [
 
 htmlRoutes.forEach(route => {
   app.get(route, (req, res) => {
-    let fileName = route === '/' ? 'pitch-page.html' : route.slice(1) + '.html';
+    // Redirect root to main app
+    if (route === '/') {
+      return res.redirect('/community');
+    }
+    
+    let fileName = route.slice(1) + '.html';
     if (route === '/menu') fileName = 'marketpace-menu.html';
     
     res.sendFile(path.join(process.cwd(), fileName), (err) => {
       if (err) {
-        res.redirect('/');
+        res.redirect('/community');
       }
     });
   });
