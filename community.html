@@ -8789,9 +8789,39 @@
                 console.log('Creating post element for:', post.title, 'category:', post.category);
                 const postElement = createPostElement(post);
                 feedContainer.appendChild(postElement);
+                
+                // Initialize post interactions after element is added
+                initializePostInteractions(post.id);
             });
 
             // Demo posts will remain in the HTML for context
+            
+            // Initialize demo posts if they exist
+            setTimeout(() => {
+                initializeDemoPostInteractions();
+            }, 500);
+        }
+
+        // Initialize demo posts with interactions
+        function initializeDemoPostInteractions() {
+            const demoSocialButtons = document.querySelectorAll('.social-btn');
+            demoSocialButtons.forEach(button => {
+                const onclick = button.getAttribute('onclick');
+                if (onclick && onclick.includes('likePost')) {
+                    // Extract post ID from onclick attribute
+                    const match = onclick.match(/likePost\('([^']+)'\)/);
+                    if (match) {
+                        const postId = match[1];
+                        initializePostInteractions(postId);
+                    }
+                } else if (onclick && onclick.includes('sharePost')) {
+                    const match = onclick.match(/sharePost\('([^']+)'\)/);
+                    if (match) {
+                        const postId = match[1];
+                        initializePostInteractions(postId);
+                    }
+                }
+            });
         }
 
         // Create individual post element
@@ -8840,13 +8870,13 @@
 
                 <div style="display: flex; gap: 20px; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
                     <button class="social-btn" onclick="likePost('${post.id}')" style="background: none; border: none; color: #00ffff; padding: 8px 12px; cursor: pointer; font-size: 12px; font-weight: 500; transition: all 0.3s ease; opacity: 0.8;">
-                        LIKE
+                        <span class="like-icon">◇</span> LIKE <span class="like-count">0</span>
                     </button>
                     <button class="social-btn" onclick="commentOnPost('${post.id}')" style="background: none; border: none; color: #00ffff; padding: 8px 12px; cursor: pointer; font-size: 12px; font-weight: 500; transition: all 0.3s ease; opacity: 0.8;">
-                        COMMENT
+                        <span class="comment-icon">◈</span> COMMENT
                     </button>
                     <button class="social-btn" onclick="sharePost('${post.id}')" style="background: none; border: none; color: #00ffff; padding: 8px 12px; cursor: pointer; font-size: 12px; font-weight: 500; transition: all 0.3s ease; opacity: 0.8;">
-                        SHARE
+                        <span class="share-icon">⧉</span> SHARE <span class="share-count">0</span>
                     </button>
                 </div>
             `;
@@ -8978,6 +9008,22 @@
                         text-shadow: 0 0 8px #00ffff;
                         transform: translateY(-1px);
                     }
+                    .like-icon, .share-icon, .comment-icon {
+                        font-size: 14px;
+                        margin-right: 4px;
+                        transition: all 0.3s ease;
+                    }
+                    .like-icon.liked {
+                        color: #ff6b6b;
+                        text-shadow: 0 0 8px #ff6b6b;
+                    }
+                    .like-count, .share-count {
+                        background: rgba(0, 255, 255, 0.2);
+                        padding: 2px 6px;
+                        border-radius: 10px;
+                        font-size: 11px;
+                        margin-left: 4px;
+                    }
                 </style>
             `;
         }
@@ -9003,10 +9049,67 @@
             `;
         }
 
+        // Post interaction data storage
+        let postInteractions = JSON.parse(localStorage.getItem('postInteractions') || '{}');
+
+        // Initialize post interactions with counters
+        function initializePostInteractions(postId) {
+            if (!postInteractions[postId]) {
+                postInteractions[postId] = { 
+                    likes: Math.floor(Math.random() * 15) + 5, // Start with 5-20 likes
+                    userLiked: false,
+                    shares: Math.floor(Math.random() * 8) + 2  // Start with 2-10 shares
+                };
+                localStorage.setItem('postInteractions', JSON.stringify(postInteractions));
+            }
+            
+            // Update the UI with initial counts
+            const post = postInteractions[postId];
+            const likeButton = document.querySelector(`[onclick="likePost('${postId}')"]`);
+            const shareButton = document.querySelector(`[onclick="sharePost('${postId}')"]`);
+            
+            if (likeButton) {
+                likeButton.innerHTML = `<span class="like-icon">◇</span> LIKE <span class="like-count">${post.likes}</span>`;
+            }
+            if (shareButton) {
+                shareButton.innerHTML = `<span class="share-icon">⧉</span> SHARE <span class="share-count">${post.shares}</span>`;
+            }
+        }
+
         // Post interaction functions
         function likePost(postId) {
             console.log('Liked post:', postId);
-            showNotification('Post liked successfully!', 'success');
+            
+            // Initialize post data if it doesn't exist
+            if (!postInteractions[postId]) {
+                postInteractions[postId] = { 
+                    likes: Math.floor(Math.random() * 15) + 5, // Start with 5-20 likes
+                    userLiked: false,
+                    shares: Math.floor(Math.random() * 8) + 2  // Start with 2-10 shares
+                };
+            }
+            
+            const post = postInteractions[postId];
+            const likeButton = document.querySelector(`[onclick="likePost('${postId}')"]`);
+            
+            if (post.userLiked) {
+                // Unlike
+                post.likes--;
+                post.userLiked = false;
+                likeButton.innerHTML = `<span class="like-icon">◇</span> LIKE <span class="like-count">${post.likes}</span>`;
+                likeButton.style.color = '#00ffff';
+                showNotification('Post unliked', 'info');
+            } else {
+                // Like
+                post.likes++;
+                post.userLiked = true;
+                likeButton.innerHTML = `<span class="like-icon liked">◆</span> LIKED <span class="like-count">${post.likes}</span>`;
+                likeButton.style.color = '#ff6b6b';
+                showNotification('Post liked successfully!', 'success');
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('postInteractions', JSON.stringify(postInteractions));
         }
 
         function commentOnPost(postId) {
@@ -9059,7 +9162,41 @@
 
         function sharePost(postId) {
             console.log('Shared post:', postId);
-            showNotification('Post shared successfully!', 'success');
+            
+            // Initialize post data if it doesn't exist
+            if (!postInteractions[postId]) {
+                postInteractions[postId] = { 
+                    likes: Math.floor(Math.random() * 15) + 5,
+                    userLiked: false,
+                    shares: Math.floor(Math.random() * 8) + 2
+                };
+            }
+            
+            const post = postInteractions[postId];
+            post.shares++;
+            
+            // Update share button
+            const shareButton = document.querySelector(`[onclick="sharePost('${postId}')"]`);
+            shareButton.innerHTML = `<span class="share-icon">⧉</span> SHARE <span class="share-count">${post.shares}</span>`;
+            
+            // Save to localStorage
+            localStorage.setItem('postInteractions', JSON.stringify(postInteractions));
+            
+            // Simulate sharing functionality
+            if (navigator.share) {
+                navigator.share({
+                    title: 'MarketPace Community Post',
+                    text: 'Check out this post on MarketPace!',
+                    url: window.location.href
+                });
+            } else {
+                const url = window.location.href;
+                navigator.clipboard.writeText(url).then(() => {
+                    showNotification('Post link copied to clipboard!', 'success');
+                }).catch(() => {
+                    showNotification('Post shared successfully!', 'success');
+                });
+            }
         }
 
         function voteOnPoll(postId, optionIndex) {
