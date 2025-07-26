@@ -1206,6 +1206,57 @@
             transform: scale(1.1);
         }
 
+        /* Owner Availability Calendar Styling */
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1px solid transparent;
+        }
+
+        .calendar-day:hover {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: rgba(0, 255, 255, 0.4);
+        }
+
+        .calendar-day.selected {
+            background: #00ffff;
+            color: #1a0b3d;
+            font-weight: bold;
+            box-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+        }
+
+        .calendar-day.header {
+            background: rgba(0, 255, 255, 0.1);
+            color: #00ffff;
+            font-weight: bold;
+            cursor: default;
+            font-size: 10px;
+        }
+
+        .calendar-day.header:hover {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: transparent;
+        }
+
+        .calendar-day.past {
+            background: rgba(100, 100, 100, 0.3);
+            color: #64748b;
+            cursor: not-allowed;
+        }
+
+        .calendar-day.past:hover {
+            background: rgba(100, 100, 100, 0.3);
+            border-color: transparent;
+        }
+
         .post-modal-body {
             padding: 16px 18px;
         }
@@ -3386,10 +3437,8 @@ Example:
                 case 'rent':
                     console.log('Showing rental rate group');
                     if (rentalRateGroup) rentalRateGroup.style.display = 'block';
-                    // Open comprehensive rental booking popup
-                    if (typeof openRentalBookingPopup === 'function') {
-                        openRentalBookingPopup();
-                    }
+                    // Initialize owner availability calendar
+                    initializeOwnerCalendar();
                     break;
                 case 'service':
                     console.log('Showing service rate field');
@@ -5307,6 +5356,32 @@ Example:
                             </div>
                         </div>
                         <small style="color: #94a3b8; font-size: 12px; margin-top: 8px; display: block;">Set both rates to give customers flexible rental options</small>
+                        
+                        <!-- Owner Availability Calendar -->
+                        <div style="margin-top: 20px;">
+                            <h5 style="color: #00ffff; margin-bottom: 12px; display: flex; align-items: center;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-right: 8px;">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                                    <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2"/>
+                                    <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2"/>
+                                    <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                                Select Available Days
+                            </h5>
+                            <div id="ownerAvailabilityCalendar" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; background: rgba(15, 23, 42, 0.8); padding: 12px; border-radius: 8px; border: 1px solid rgba(0, 255, 255, 0.2);">
+                                <!-- Calendar will be populated by JavaScript -->
+                            </div>
+                            <div style="display: flex; gap: 8px; margin: 12px 0; flex-wrap: wrap;">
+                                <button type="button" onclick="selectWeekends()" style="background: rgba(0, 255, 255, 0.2); color: #00ffff; border: 1px solid rgba(0, 255, 255, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">Weekends Only</button>
+                                <button type="button" onclick="selectWeekdays()" style="background: rgba(0, 255, 255, 0.2); color: #00ffff; border: 1px solid rgba(0, 255, 255, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">Weekdays Only</button>
+                                <button type="button" onclick="selectAllDays()" style="background: rgba(0, 255, 255, 0.2); color: #00ffff; border: 1px solid rgba(0, 255, 255, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">All Days</button>
+                                <button type="button" onclick="clearAllDays()" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">Clear All</button>
+                            </div>
+                            <div id="selectedDatesDisplay" style="font-size: 12px; color: #94a3b8; line-height: 1.4;">
+                                <strong>Selected Dates:</strong> <span id="selectedDatesCount">0</span> days selected
+                                <div id="selectedDatesList" style="margin-top: 4px;"></div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Delivery Methods (for rent/sale/service only) -->
@@ -10656,6 +10731,147 @@ Example:
             if (modal) modal.remove();
         }
 
+        // Owner Availability Calendar Functions (for rental posting modal)
+        let ownerSelectedDates = [];
+
+        function generateOwnerAvailabilityCalendar() {
+            const calendar = document.getElementById('ownerAvailabilityCalendar');
+            if (!calendar) return;
+
+            calendar.innerHTML = '';
+            
+            // Add day headers
+            const dayHeaders = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+            dayHeaders.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day header';
+                header.textContent = day;
+                calendar.appendChild(header);
+            });
+
+            // Generate next 28 days (4 weeks)
+            const today = new Date();
+            for (let i = 0; i < 28; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = date.getDate();
+                dayElement.dataset.date = date.toISOString().split('T')[0];
+                
+                if (ownerSelectedDates.includes(dayElement.dataset.date)) {
+                    dayElement.classList.add('selected');
+                }
+                
+                dayElement.addEventListener('click', function() {
+                    toggleOwnerDate(this, dayElement.dataset.date);
+                });
+                
+                calendar.appendChild(dayElement);
+            }
+        }
+
+        function toggleOwnerDate(element, dateStr) {
+            if (element.classList.contains('selected')) {
+                element.classList.remove('selected');
+                ownerSelectedDates = ownerSelectedDates.filter(d => d !== dateStr);
+            } else {
+                element.classList.add('selected');
+                ownerSelectedDates.push(dateStr);
+            }
+            
+            ownerSelectedDates.sort();
+            updateOwnerSelectedDatesDisplay();
+        }
+
+        function updateOwnerSelectedDatesDisplay() {
+            const countElement = document.getElementById('selectedDatesCount');
+            const listElement = document.getElementById('selectedDatesList');
+            
+            if (countElement) {
+                countElement.textContent = ownerSelectedDates.length;
+            }
+            
+            if (listElement) {
+                if (ownerSelectedDates.length === 0) {
+                    listElement.innerHTML = 'No dates selected';
+                } else {
+                    listElement.innerHTML = ownerSelectedDates.slice(0, 5).map(date => {
+                        const dateObj = new Date(date);
+                        return `<span style="background: rgba(0, 255, 255, 0.2); padding: 2px 6px; border-radius: 4px; margin: 2px; display: inline-block; font-size: 11px;">
+                            ${dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </span>`;
+                    }).join('') + (ownerSelectedDates.length > 5 ? `<span style="color: #00ffff;">... +${ownerSelectedDates.length - 5} more</span>` : '');
+                }
+            }
+        }
+
+        // Preset functions for owner calendar
+        function selectWeekends() {
+            ownerSelectedDates = [];
+            const today = new Date();
+            
+            for (let i = 0; i < 28; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                const dayOfWeek = date.getDay();
+                
+                if (dayOfWeek === 0 || dayOfWeek === 6) { // Sunday or Saturday
+                    ownerSelectedDates.push(date.toISOString().split('T')[0]);
+                }
+            }
+            
+            generateOwnerAvailabilityCalendar();
+            updateOwnerSelectedDatesDisplay();
+        }
+
+        function selectWeekdays() {
+            ownerSelectedDates = [];
+            const today = new Date();
+            
+            for (let i = 0; i < 28; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                const dayOfWeek = date.getDay();
+                
+                if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Monday to Friday
+                    ownerSelectedDates.push(date.toISOString().split('T')[0]);
+                }
+            }
+            
+            generateOwnerAvailabilityCalendar();
+            updateOwnerSelectedDatesDisplay();
+        }
+
+        function selectAllDays() {
+            ownerSelectedDates = [];
+            const today = new Date();
+            
+            for (let i = 0; i < 28; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                ownerSelectedDates.push(date.toISOString().split('T')[0]);
+            }
+            
+            generateOwnerAvailabilityCalendar();
+            updateOwnerSelectedDatesDisplay();
+        }
+
+        function clearAllDays() {
+            ownerSelectedDates = [];
+            generateOwnerAvailabilityCalendar();
+            updateOwnerSelectedDatesDisplay();
+        }
+
+        // Initialize owner calendar when rental category is selected
+        function initializeOwnerCalendar() {
+            setTimeout(() => {
+                generateOwnerAvailabilityCalendar();
+                updateOwnerSelectedDatesDisplay();
+            }, 100);
+        }
+
         // Post interaction data storage
         let postInteractions = JSON.parse(localStorage.getItem('postInteractions') || '{}');
 
@@ -11307,6 +11523,13 @@ Example:
                 } else {
                     bookingFeeData = { enabled: false };
                 }
+                
+                // Collect owner availability data
+                rentalExtras.ownerAvailability = {
+                    selectedDates: [...ownerSelectedDates],
+                    totalDaysAvailable: ownerSelectedDates.length,
+                    availabilitySet: ownerSelectedDates.length > 0
+                };
                 
                 // Collect other rental-specific data
                 rentalExtras = {

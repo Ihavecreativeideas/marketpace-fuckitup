@@ -273,6 +273,15 @@ All features are designed to strengthen local communities by keeping commerce lo
 
 ## Recent Changes
 
+✓ **OWNER AVAILABILITY CALENDAR INTEGRATED INTO RENTAL POSTING MODAL FULLY IMPLEMENTED** (July 26, 2025)
+✓ **INTERACTIVE CALENDAR FUNCTIONALITY**: Added comprehensive owner availability calendar directly in rental posting modal allowing owners to select specific days their item is available for rent
+✓ **VISUAL CALENDAR INTERFACE**: 4-week calendar grid with clickable dates, visual selection feedback, and hover effects using futuristic cyan theme (#00ffff)
+✓ **PRESET SELECTION BUTTONS**: Quick selection buttons for Weekends Only, Weekdays Only, All Days, and Clear All with instant calendar updates
+✓ **REAL-TIME DATE TRACKING**: Selected dates counter and visual list display showing first 5 selected dates with overflow indicator
+✓ **FORM INTEGRATION**: Owner availability data automatically collected during rental post submission and stored with rental metadata
+✓ **CALENDAR CSS STYLING**: Professional calendar styling with selected/hover states, past date disabling, and responsive grid layout
+✓ **JAVASCRIPT FUNCTIONS**: Complete calendar generation, date selection/deselection, preset functionality, and real-time display updates
+
 ✓ **COMPLETE DUAL QR CHECK-IN/CHECK-OUT SYSTEM INTEGRATION FOR RENTAL TRANSACTIONS FULLY IMPLEMENTED** (July 26, 2025)
 ✓ **CUSTOMER BOOKING INTEGRATION**: Enhanced customer-booking.html to automatically create dual QR transaction data during rental confirmation with proper grace period and late fee configuration
 ✓ **COMPREHENSIVE QR TRANSACTION CREATION**: confirmBooking function now generates complete QR transaction data including rental duration calculation, late fee structure, and phase management
