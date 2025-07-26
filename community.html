@@ -5225,6 +5225,52 @@ Example:
                             These buttons appear on your rental post for renters to interact.
                         </div>
                     </div>
+
+                    <!-- Terms and Conditions Section -->
+                    <div style="margin-bottom: 20px; padding: 15px; background: rgba(255, 107, 53, 0.1); border: 1px solid rgba(255, 107, 53, 0.3); border-radius: 8px;">
+                        <label style="display: block; margin-bottom: 12px; color: #ff6b35; font-weight: 600;">Terms & Conditions</label>
+                        
+                        <div style="background: rgba(255, 107, 53, 0.05); padding: 10px; border-radius: 6px; margin-bottom: 12px; border-left: 3px solid #ff6b35;">
+                            <div style="color: #ff6b35; font-size: 12px; font-weight: 500; margin-bottom: 4px;">⚠️ Important Disclaimer</div>
+                            <div style="color: #e2e8f0; font-size: 11px; line-height: 1.4;">
+                                MarketPace is not responsible for lost, damaged, or stolen rental items. You must provide your own terms and conditions for renters to agree to before completing any rental transaction.
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 12px;">
+                            <label style="display: block; margin-bottom: 8px; color: #e2e8f0; font-size: 13px;">Provide your rental terms:</label>
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: flex; align-items: center; color: #e2e8f0; margin-bottom: 8px; cursor: pointer;">
+                                    <input type="radio" name="termsMethod" value="write" style="margin-right: 8px;" checked onchange="toggleTermsMethod()"> Write terms directly
+                                </label>
+                                <label style="display: flex; align-items: center; color: #e2e8f0; cursor: pointer;">
+                                    <input type="radio" name="termsMethod" value="upload" style="margin-right: 8px;" onchange="toggleTermsMethod()"> Upload terms document
+                                </label>
+                            </div>
+                            
+                            <div id="writeTermsSection" style="display: block;">
+                                <textarea id="rentalTermsText" placeholder="Enter your rental terms and conditions here. Include policies for damage, late returns, security deposits, usage restrictions, etc." style="width: 100%; height: 120px; padding: 10px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(100, 116, 139, 0.4); border-radius: 6px; color: #e2e8f0; font-size: 12px; resize: vertical;" maxlength="2000" oninput="updateCharCount()"></textarea>
+                                <div style="text-align: right; color: #94a3b8; font-size: 10px; margin-top: 4px;">
+                                    <span id="termsCharCount">0</span>/2000 characters
+                                </div>
+                            </div>
+                            
+                            <div id="uploadTermsSection" style="display: none;">
+                                <input type="file" id="termsFileUpload" accept=".pdf,.doc,.docx,.txt" style="display: none;" onchange="handleTermsFileUpload(event)">
+                                <button type="button" onclick="document.getElementById('termsFileUpload').click()" style="width: 100%; padding: 12px; background: rgba(59, 130, 246, 0.2); border: 1px dashed rgba(59, 130, 246, 0.4); border-radius: 6px; color: #93c5fd; cursor: pointer; font-size: 12px;">
+                                    📄 Choose Terms Document (PDF, DOC, TXT)
+                                </button>
+                                <div id="uploadedFileName" style="color: #10b981; font-size: 11px; margin-top: 6px; display: none;"></div>
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(16, 185, 129, 0.1); padding: 8px; border-radius: 6px; border-left: 3px solid #10b981;">
+                            <div style="color: #10b981; font-size: 11px; font-weight: 500; margin-bottom: 3px;">✓ Renter Agreement Required</div>
+                            <div style="color: #94a3b8; font-size: 10px;">
+                                Renters must check "I have read and agree to the terms" before completing any rental transaction.
+                            </div>
+                        </div>
+                    </div>
                     
                     <div style="display: flex; gap: 10px; justify-content: flex-end;">
                         <button type="button" onclick="this.closest('.posting-modal').remove()" style="padding: 10px 20px; background: #666; color: white; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
@@ -7078,6 +7124,72 @@ Example:
         function toggleMainMenu() {
             const dropdown = document.getElementById('mainMenuDropdown');
             dropdown.classList.toggle('show');
+        }
+
+        // Terms and Conditions functions
+        function toggleTermsMethod() {
+            const writeSection = document.getElementById('writeTermsSection');
+            const uploadSection = document.getElementById('uploadTermsSection');
+            const writeRadio = document.querySelector('input[name="termsMethod"][value="write"]');
+            
+            if (writeRadio.checked) {
+                writeSection.style.display = 'block';
+                uploadSection.style.display = 'none';
+            } else {
+                writeSection.style.display = 'none';
+                uploadSection.style.display = 'block';
+            }
+        }
+
+        function updateCharCount() {
+            const textarea = document.getElementById('rentalTermsText');
+            const counter = document.getElementById('termsCharCount');
+            if (textarea && counter) {
+                counter.textContent = textarea.value.length;
+            }
+        }
+
+        function handleTermsFileUpload(event) {
+            const file = event.target.files[0];
+            const fileNameDisplay = document.getElementById('uploadedFileName');
+            
+            if (file) {
+                const maxSize = 5 * 1024 * 1024; // 5MB limit
+                if (file.size > maxSize) {
+                    alert('File size must be under 5MB');
+                    event.target.value = '';
+                    return;
+                }
+                
+                fileNameDisplay.textContent = `✓ ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                fileNameDisplay.style.display = 'block';
+                
+                // Store file reference for later upload
+                window.uploadedTermsFile = file;
+            }
+        }
+
+        // Functions for rental post terms display
+        function toggleTermsView(postId) {
+            const termsDiv = document.getElementById(`terms-${postId}`);
+            if (termsDiv) {
+                termsDiv.style.display = termsDiv.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function viewTermsFile(postId) {
+            // In a real implementation, this would open the uploaded terms file
+            alert('Terms document viewing would open here. This is a demo - the actual file would be displayed in a modal or new window.');
+        }
+
+        // Check if terms are agreed before allowing rental actions
+        function checkTermsAgreement(postId) {
+            const checkbox = document.getElementById(`terms-agree-${postId}`);
+            if (checkbox && !checkbox.checked) {
+                alert('Please read and agree to the terms and conditions before proceeding with the rental.');
+                return false;
+            }
+            return true;
         }
 
         // Close dropdowns when clicking outside
@@ -9189,6 +9301,45 @@ Example:
             if (deliveryOptions.privateDelivery) availableDeliveryMethods.push('Private Delivery');
             if (deliveryOptions.marketPaceDelivery) availableDeliveryMethods.push('MarketPace Delivery');
             
+            // Create terms and conditions display
+            let termsDisplay = '';
+            if (post.termsAndConditions) {
+                const terms = post.termsAndConditions;
+                if (terms.method === 'text' && terms.content) {
+                    termsDisplay = `
+                        <div style="background: rgba(255, 107, 53, 0.1); border: 1px solid rgba(255, 107, 53, 0.3); border-radius: 6px; padding: 12px; margin-top: 12px;">
+                            <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 8px;">
+                                <div style="color: #ff6b35; font-weight: 600; font-size: 13px;">📋 Terms & Conditions</div>
+                                <button onclick="toggleTermsView('${post.id}')" style="background: none; border: none; color: #ff6b35; font-size: 11px; cursor: pointer; padding: 2px 6px;">View</button>
+                            </div>
+                            <div id="terms-${post.id}" style="display: none; color: #e2e8f0; font-size: 11px; line-height: 1.4; max-height: 120px; overflow-y: auto; background: rgba(0, 0, 0, 0.2); padding: 8px; border-radius: 4px; white-space: pre-wrap;">${terms.content}</div>
+                            <div style="margin-top: 10px; padding: 8px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px;">
+                                <label style="display: flex; align-items: center; cursor: pointer; color: #e2e8f0; font-size: 11px;">
+                                    <input type="checkbox" id="terms-agree-${post.id}" style="margin-right: 8px; accent-color: #10b981;">
+                                    <span>I have read and agree to the terms and conditions</span>
+                                </label>
+                            </div>
+                        </div>
+                    `;
+                } else if (terms.method === 'file') {
+                    termsDisplay = `
+                        <div style="background: rgba(255, 107, 53, 0.1); border: 1px solid rgba(255, 107, 53, 0.3); border-radius: 6px; padding: 12px; margin-top: 12px;">
+                            <div style="color: #ff6b35; font-weight: 600; font-size: 13px; margin-bottom: 8px;">📋 Terms & Conditions</div>
+                            <div style="color: #e2e8f0; font-size: 11px; margin-bottom: 8px;">
+                                📄 ${terms.fileName} (${(terms.fileSize / 1024).toFixed(1)} KB)
+                            </div>
+                            <button onclick="viewTermsFile('${post.id}')" style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); color: #93c5fd; padding: 4px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-bottom: 10px;">View Document</button>
+                            <div style="margin-top: 10px; padding: 8px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px;">
+                                <label style="display: flex; align-items: center; cursor: pointer; color: #e2e8f0; font-size: 11px;">
+                                    <input type="checkbox" id="terms-agree-${post.id}" style="margin-right: 8px; accent-color: #10b981;">
+                                    <span>I have read and agree to the terms and conditions</span>
+                                </label>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
             return `
                 <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 15px; margin: 15px 0;">
                     <h4 style="color: #10b981; margin: 0 0 10px 0;">Rental Details:</h4>
@@ -9196,7 +9347,11 @@ Example:
                     ${post.paymentMethod ? `<div style="color: #e2e8f0; margin-bottom: 5px;">Payment: <span style="color: #00ffff; font-weight: 500;">${post.paymentMethod === 'escrow' ? 'MarketPace Escrow' : 'Cash Meeting'}</span></div>` : ''}
                     ${availableDeliveryMethods.length > 0 ? `<div style="color: #e2e8f0; margin-bottom: 5px;">Delivery Options: <span style="color: #f59e0b; font-weight: 500;">${availableDeliveryMethods.join(', ')}</span></div>` : ''}
                     ${post.bookingFee && post.bookingFee.enabled ? `<div style="color: #e2e8f0; margin-bottom: 5px;">Booking Fee: <span style="color: #a855f7; font-weight: 500;">$${post.bookingFee.amount} (${post.bookingFee.type})</span></div>` : ''}
-                    ${post.rentalTerms ? `<div style="color: #94a3b8; font-size: 12px; margin-top: 8px; padding: 8px; background: rgba(0, 0, 0, 0.3); border-radius: 4px;"><strong>Terms:</strong> ${post.rentalTerms}</div>` : ''}
+                    ${termsDisplay}
+                    <div style="background: rgba(255, 107, 53, 0.05); padding: 8px; border-radius: 4px; border-left: 3px solid #ff6b35; margin-top: 12px;">
+                        <div style="color: #ff6b35; font-size: 10px; font-weight: 500;">⚠️ Important Notice</div>
+                        <div style="color: #94a3b8; font-size: 10px; margin-top: 2px;">MarketPace is not responsible for lost, damaged, or stolen rental items.</div>
+                    </div>
                 </div>
             `;
         }
@@ -10639,6 +10794,27 @@ Example:
                 return;
             }
             
+            // Validate terms and conditions for rental posts
+            if (category === 'rent') {
+                const writeRadio = document.querySelector('input[name="termsMethod"][value="write"]');
+                const isWriteMethod = writeRadio?.checked;
+                
+                if (isWriteMethod) {
+                    const termsText = document.getElementById('rentalTermsText')?.value?.trim();
+                    if (!termsText) {
+                        console.log('Validation failed - missing rental terms');
+                        showNotification('Please provide terms and conditions for your rental.', 'error');
+                        return;
+                    }
+                } else {
+                    if (!window.uploadedTermsFile) {
+                        console.log('Validation failed - missing terms file');
+                        showNotification('Please upload your terms and conditions document.', 'error');
+                        return;
+                    }
+                }
+            }
+            
             // Get price based on category
             let priceValue = '';
             if (category === 'rent') {
@@ -10678,6 +10854,34 @@ Example:
             console.log('Action buttons collected:', actionButtons);
             console.log('📸 Uploaded images count:', uploadedImages.length, uploadedImages);
             
+            // Collect terms and conditions data for rental posts
+            let termsData = null;
+            if (category === 'rent') {
+                const writeRadio = document.querySelector('input[name="termsMethod"][value="write"]');
+                const isWriteMethod = writeRadio?.checked;
+                
+                if (isWriteMethod) {
+                    const termsText = document.getElementById('rentalTermsText')?.value?.trim();
+                    if (termsText) {
+                        termsData = {
+                            method: 'text',
+                            content: termsText
+                        };
+                    }
+                } else {
+                    // File upload method
+                    if (window.uploadedTermsFile) {
+                        termsData = {
+                            method: 'file',
+                            fileName: window.uploadedTermsFile.name,
+                            fileSize: window.uploadedTermsFile.size,
+                            fileType: window.uploadedTermsFile.type
+                        };
+                        // Note: In a real implementation, you'd upload the file to server here
+                    }
+                }
+            }
+            
             const formData = {
                 uploadType: 'single',
                 postingMode: currentPostingMode,
@@ -10687,6 +10891,7 @@ Example:
                 price: priceValue,
                 actionButtons: actionButtons,
                 images: uploadedImages.map(img => ({ url: img.url, name: img.name })), // Include uploaded images
+                termsAndConditions: termsData, // Add terms data
                 timestamp: new Date().toISOString(),
                 author: currentPostingMode === 'business' ? "MarketPace Pro Business" : "Local Pace Member",
                 location: "Orange Beach, AL",
@@ -10797,6 +11002,11 @@ Example:
         // Rental booking navigation function
         function rentNow(itemTitle, postId) {
             console.log('🏠 Rent Now clicked for:', itemTitle, 'Post ID:', postId);
+            
+            // Check if terms are agreed to before proceeding
+            if (!checkTermsAgreement(postId)) {
+                return;
+            }
             
             // Find the post data from community posts
             const communityPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
