@@ -9225,6 +9225,139 @@
             
             console.log('✅ Embedded rental calendar added to posting modal');
         }
+
+        // Generate embedded calendar in the posting modal
+        function generateEmbeddedCalendar() {
+            const grid = document.getElementById('embeddedCalendarGrid');
+            const monthTitle = document.getElementById('embeddedCurrentMonth');
+            
+            if (!grid || !monthTitle) {
+                console.log('⚠️ Calendar elements not found:', { grid: !!grid, monthTitle: !!monthTitle });
+                return;
+            }
+            
+            console.log('📅 Generating embedded calendar');
+            
+            const year = window.currentCalendarDate.getFullYear();
+            const month = window.currentCalendarDate.getMonth();
+            
+            monthTitle.textContent = window.currentCalendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            
+            // Clear previous calendar
+            grid.innerHTML = '';
+            
+            // Add day headers
+            const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            dayHeaders.forEach(day => {
+                const header = document.createElement('div');
+                header.style.cssText = 'padding: 6px; text-align: center; color: #00ffff; font-weight: bold; font-size: 11px;';
+                header.textContent = day;
+                grid.appendChild(header);
+            });
+            
+            // Get first day of month and number of days
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Add empty cells for days before month starts
+            for (let i = 0; i < firstDay; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.style.cssText = 'padding: 6px;';
+                grid.appendChild(emptyCell);
+            }
+            
+            // Add days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dateStr = date.toDateString();
+                const isPastDate = date < today;
+                const isSelected = window.selectedDates.includes(dateStr);
+                
+                const dayCell = document.createElement('div');
+                dayCell.style.cssText = `
+                    padding: 8px; 
+                    text-align: center; 
+                    cursor: ${isPastDate ? 'not-allowed' : 'pointer'}; 
+                    border-radius: 4px; 
+                    font-size: 12px;
+                    background: ${isSelected ? '#10b981' : isPastDate ? 'rgba(107, 114, 128, 0.3)' : 'rgba(255, 255, 255, 0.1)'};
+                    color: ${isPastDate ? '#6b7280' : isSelected ? 'white' : '#e2e8f0'};
+                    border: ${isSelected ? '2px solid #059669' : '1px solid rgba(255, 255, 255, 0.2)'};
+                    transition: all 0.2s ease;
+                    min-height: 30px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                `;
+                
+                dayCell.textContent = day;
+                
+                if (!isPastDate) {
+                    dayCell.addEventListener('mouseenter', () => {
+                        if (!isSelected) {
+                            dayCell.style.background = 'rgba(16, 185, 129, 0.3)';
+                        }
+                    });
+                    
+                    dayCell.addEventListener('mouseleave', () => {
+                        if (!isSelected) {
+                            dayCell.style.background = 'rgba(255, 255, 255, 0.1)';
+                        }
+                    });
+                    
+                    dayCell.addEventListener('click', () => {
+                        toggleEmbeddedDate(dateStr);
+                    });
+                }
+                
+                grid.appendChild(dayCell);
+            }
+            
+            updateEmbeddedSelectedDatesDisplay();
+            console.log('✅ Calendar generated successfully');
+        }
+        
+        function toggleEmbeddedDate(dateStr) {
+            const index = window.selectedDates.indexOf(dateStr);
+            if (index > -1) {
+                window.selectedDates.splice(index, 1);
+            } else {
+                window.selectedDates.push(dateStr);
+            }
+            generateEmbeddedCalendar();
+        }
+        
+        function changeEmbeddedMonth(direction) {
+            window.currentCalendarDate.setMonth(window.currentCalendarDate.getMonth() + direction);
+            generateEmbeddedCalendar();
+        }
+        
+        function updateEmbeddedSelectedDatesDisplay() {
+            const display = document.getElementById('embeddedSelectedDatesDisplay');
+            if (!display) return;
+            
+            if (window.selectedDates.length === 0) {
+                display.innerHTML = 'No dates selected';
+                return;
+            }
+            
+            const sortedDates = window.selectedDates.sort((a, b) => new Date(a) - new Date(b));
+            const datesList = sortedDates.map(dateStr => {
+                const date = new Date(dateStr);
+                const formattedDate = date.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+                return `<span style="display: inline-block; background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 2px 6px; border-radius: 4px; margin: 2px; font-size: 12px;">${formattedDate}</span>`;
+            }).join('');
+            
+            display.innerHTML = `
+                <div style="margin-bottom: 8px; color: #00ffff; font-weight: bold;">${window.selectedDates.length} dates selected:</div>
+                <div>${datesList}</div>
+            `;
+        }
         
         // Quick preset functions for embedded calendar
         function selectWeekends() {
