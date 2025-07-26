@@ -9228,34 +9228,47 @@
 
         // Generate embedded calendar in the posting modal
         function generateEmbeddedCalendar() {
+            // Prevent multiple rapid calls
+            if (window.calendarGenerating) return;
+            window.calendarGenerating = true;
+            
             const grid = document.getElementById('embeddedCalendarGrid');
             const monthTitle = document.getElementById('embeddedCurrentMonth');
             
             if (!grid || !monthTitle) {
-                console.log('⚠️ Calendar elements not found:', { grid: !!grid, monthTitle: !!monthTitle });
+                window.calendarGenerating = false;
                 return;
             }
-            
-            console.log('📅 Generating embedded calendar');
             
             const year = window.currentCalendarDate.getFullYear();
             const month = window.currentCalendarDate.getMonth();
             
             monthTitle.textContent = window.currentCalendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
             
-            // Clear previous calendar
+            // Clear and rebuild calendar
             grid.innerHTML = '';
+            
+            // Create calendar fragment for better performance
+            const fragment = document.createDocumentFragment();
             
             // Add day headers
             const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             dayHeaders.forEach(day => {
                 const header = document.createElement('div');
-                header.style.cssText = 'padding: 6px; text-align: center; color: #00ffff; font-weight: bold; font-size: 11px;';
+                header.style.cssText = `
+                    padding: 8px 4px; 
+                    text-align: center; 
+                    color: #00ffff; 
+                    font-weight: bold; 
+                    font-size: 11px;
+                    background: rgba(0, 255, 255, 0.1);
+                    border-radius: 4px;
+                `;
                 header.textContent = day;
-                grid.appendChild(header);
+                fragment.appendChild(header);
             });
             
-            // Get first day of month and number of days
+            // Get calendar data
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             const today = new Date();
@@ -9264,8 +9277,8 @@
             // Add empty cells for days before month starts
             for (let i = 0; i < firstDay; i++) {
                 const emptyCell = document.createElement('div');
-                emptyCell.style.cssText = 'padding: 6px;';
-                grid.appendChild(emptyCell);
+                emptyCell.style.cssText = 'padding: 8px; min-height: 32px;';
+                fragment.appendChild(emptyCell);
             }
             
             // Add days of the month
@@ -9273,60 +9286,70 @@
                 const date = new Date(year, month, day);
                 const dateStr = date.toDateString();
                 const isPastDate = date < today;
-                const isSelected = window.selectedDates.includes(dateStr);
+                const isSelected = window.selectedDates && window.selectedDates.includes(dateStr);
                 
                 const dayCell = document.createElement('div');
+                dayCell.className = 'calendar-day';
+                dayCell.setAttribute('data-date', dateStr);
                 dayCell.style.cssText = `
                     padding: 8px; 
                     text-align: center; 
                     cursor: ${isPastDate ? 'not-allowed' : 'pointer'}; 
-                    border-radius: 4px; 
+                    border-radius: 6px; 
                     font-size: 12px;
-                    background: ${isSelected ? '#10b981' : isPastDate ? 'rgba(107, 114, 128, 0.3)' : 'rgba(255, 255, 255, 0.1)'};
-                    color: ${isPastDate ? '#6b7280' : isSelected ? 'white' : '#e2e8f0'};
+                    font-weight: 500;
+                    background: ${isSelected ? '#10b981' : isPastDate ? 'rgba(107, 114, 128, 0.4)' : 'rgba(255, 255, 255, 0.1)'};
+                    color: ${isPastDate ? '#9ca3af' : isSelected ? 'white' : '#e2e8f0'};
                     border: ${isSelected ? '2px solid #059669' : '1px solid rgba(255, 255, 255, 0.2)'};
-                    transition: all 0.2s ease;
-                    min-height: 30px;
+                    min-height: 32px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                    user-select: none;
+                    ${!isPastDate ? 'transition: all 0.15s ease;' : ''}
                 `;
                 
                 dayCell.textContent = day;
                 
                 if (!isPastDate) {
-                    dayCell.addEventListener('mouseenter', () => {
-                        if (!isSelected) {
-                            dayCell.style.background = 'rgba(16, 185, 129, 0.3)';
-                        }
-                    });
-                    
-                    dayCell.addEventListener('mouseleave', () => {
-                        if (!isSelected) {
-                            dayCell.style.background = 'rgba(255, 255, 255, 0.1)';
-                        }
-                    });
-                    
                     dayCell.addEventListener('click', () => {
                         toggleEmbeddedDate(dateStr);
-                    });
+                    }, { passive: true });
                 }
                 
-                grid.appendChild(dayCell);
+                fragment.appendChild(dayCell);
             }
             
-            updateEmbeddedSelectedDatesDisplay();
-            console.log('✅ Calendar generated successfully');
+            // Add all elements at once
+            grid.appendChild(fragment);
+            
+            // Update selected dates display
+            setTimeout(() => {
+                updateEmbeddedSelectedDatesDisplay();
+                window.calendarGenerating = false;
+            }, 10);
         }
         
         function toggleEmbeddedDate(dateStr) {
+            if (!window.selectedDates) window.selectedDates = [];
+            
             const index = window.selectedDates.indexOf(dateStr);
             if (index > -1) {
                 window.selectedDates.splice(index, 1);
             } else {
                 window.selectedDates.push(dateStr);
             }
-            generateEmbeddedCalendar();
+            
+            // Update just the clicked cell instead of regenerating entire calendar
+            const dayCell = document.querySelector(`[data-date="${dateStr}"]`);
+            if (dayCell) {
+                const isSelected = window.selectedDates.includes(dateStr);
+                dayCell.style.background = isSelected ? '#10b981' : 'rgba(255, 255, 255, 0.1)';
+                dayCell.style.color = isSelected ? 'white' : '#e2e8f0';
+                dayCell.style.border = isSelected ? '2px solid #059669' : '1px solid rgba(255, 255, 255, 0.2)';
+            }
+            
+            updateEmbeddedSelectedDatesDisplay();
         }
         
         function changeEmbeddedMonth(direction) {
