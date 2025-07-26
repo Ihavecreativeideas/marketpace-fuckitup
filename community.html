@@ -4814,7 +4814,7 @@ Example:
         }
 
         // Facebook Marketplace-style posting modal
-        function openAdvancedPostModal(type = 'rent') {
+        function openAdvancedPostModal(type = 'rent', existingPost = null) {
             console.log(`✅ Opening post modal for type: ${type}`);
             const modal = document.createElement('div');
             modal.style.cssText = `
@@ -5237,13 +5237,23 @@ Example:
             modal.appendChild(modalContent);
             document.body.appendChild(modal);
             
+            // Pre-populate fields if editing an existing post
+            if (existingPost) {
+                populateEditForm(existingPost);
+                // Update header to show editing mode
+                const headerTitle = modalContent.querySelector('h2');
+                if (headerTitle) {
+                    headerTitle.textContent = 'Edit Post';
+                }
+            }
+            
             // Initialize modal with current posting mode
             setTimeout(() => {
                 switchPostingMode(currentPostingMode);
             }, 50);
             
             // Set initial category to "general" and update fields
-            document.getElementById('postCategory').value = 'general';
+            document.getElementById('postCategory').value = type || 'general';
             updatePostCategoryFields(); // Use the global function to ensure proper field visibility
             updateUploadFields();
             
@@ -9017,7 +9027,10 @@ Example:
                             <div style="color: #94a3b8; font-size: 12px;">${post.location || 'Orange Beach, AL'} • ${timeAgo}</div>
                         </div>
                     </div>
-                    ${categoryBadge}
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        ${categoryBadge}
+                        ${createPostOwnerActions(post)}
+                    </div>
                 </div>
 
                 <div style="margin-bottom: 15px;">
@@ -9050,6 +9063,44 @@ Example:
             `;
 
             return postDiv;
+        }
+
+        // Create post owner actions (edit/delete buttons)
+        function createPostOwnerActions(post) {
+            // Only show edit/delete for posts created by current user
+            // For now, assuming all user-created posts are editable (vs demo posts)
+            const isOwner = post.postingMode || post.author === 'Local Pace Member' || post.author === 'MarketPace Pro Business';
+            
+            if (!isOwner) return '';
+            
+            return `
+                <div style="display: flex; gap: 4px;">
+                    <button onclick="editPost('${post.id}')" style="
+                        background: rgba(0, 255, 255, 0.1); 
+                        border: 1px solid rgba(0, 255, 255, 0.3); 
+                        color: #00ffff; 
+                        padding: 4px 8px; 
+                        border-radius: 6px; 
+                        font-size: 10px; 
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                    " onmouseover="this.style.background='rgba(0, 255, 255, 0.2)'" onmouseout="this.style.background='rgba(0, 255, 255, 0.1)'">
+                        EDIT
+                    </button>
+                    <button onclick="deletePost('${post.id}')" style="
+                        background: rgba(239, 68, 68, 0.1); 
+                        border: 1px solid rgba(239, 68, 68, 0.3); 
+                        color: #ef4444; 
+                        padding: 4px 8px; 
+                        border-radius: 6px; 
+                        font-size: 10px; 
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                    " onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'">
+                        DELETE
+                    </button>
+                </div>
+            `;
         }
 
         // Helper functions for post display
@@ -10222,6 +10273,232 @@ Example:
             showNotification('Vote cast successfully!', 'success');
         }
 
+        // Edit post function
+        function editPost(postId) {
+            console.log('Editing post:', postId);
+            
+            // Get post from localStorage
+            const posts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+            const post = posts.find(p => p.id.toString() === postId.toString());
+            
+            if (!post) {
+                showNotification('Post not found', 'error');
+                return;
+            }
+            
+            // Set editing mode and populate modal with existing data
+            currentEditingPostId = postId;
+            openAdvancedPostModal(post.category, post);
+        }
+
+        // Delete post function
+        function deletePost(postId) {
+            console.log('Deleting post:', postId);
+            
+            if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+                return;
+            }
+            
+            // Remove from community posts
+            let posts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+            const originalLength = posts.length;
+            posts = posts.filter(p => p.id.toString() !== postId.toString());
+            
+            if (posts.length === originalLength) {
+                showNotification('Post not found', 'error');
+                return;
+            }
+            
+            localStorage.setItem('communityPosts', JSON.stringify(posts));
+            
+            // Remove from profile posts
+            const profileKeys = ['personalPosts', 'businessPosts'];
+            profileKeys.forEach(key => {
+                let profilePosts = JSON.parse(localStorage.getItem(key) || '[]');
+                profilePosts = profilePosts.filter(p => p.id.toString() !== postId.toString());
+                localStorage.setItem(key, JSON.stringify(profilePosts));
+            });
+            
+            // Refresh the feed
+            loadCommunityPosts();
+            showNotification('Post deleted successfully', 'success');
+        }
+
+        // Variable to track editing state
+        let currentEditingPostId = null;
+
+        // Populate form fields when editing
+        function populateEditForm(post) {
+            setTimeout(() => {
+                // Basic fields
+                const titleField = document.getElementById('postTitle');
+                const descField = document.getElementById('postDescription');
+                const categoryField = document.getElementById('postCategory');
+                
+                if (titleField) titleField.value = post.title || '';
+                if (descField) descField.value = post.description || '';
+                if (categoryField) {
+                    categoryField.value = post.category || 'general';
+                    updatePostCategoryFields();
+                }
+                
+                // Set upload type
+                const uploadTypeField = document.getElementById('uploadType');
+                if (uploadTypeField) {
+                    uploadTypeField.value = post.uploadType || 'single';
+                    updateUploadFields();
+                }
+                
+                // Set posting mode
+                if (post.postingMode) {
+                    switchPostingMode(post.postingMode);
+                }
+                
+                // Category-specific fields
+                if (post.category === 'rent') {
+                    setTimeout(() => {
+                        const hourlyRate = document.getElementById('rentalHourlyRate');
+                        const dailyRate = document.getElementById('rentalDailyRate');
+                        if (hourlyRate) hourlyRate.value = post.hourlyRate || '';
+                        if (dailyRate) dailyRate.value = post.dailyRate || '';
+                        
+                        // Populate delivery options
+                        if (post.deliveryOptions) {
+                            post.deliveryOptions.forEach(option => {
+                                const checkbox = document.querySelector(`input[name="deliveryOptions"][value="${option}"]`);
+                                if (checkbox) checkbox.checked = true;
+                            });
+                        }
+                    }, 100);
+                }
+                
+                if (post.category === 'poll' && post.pollOptions) {
+                    setTimeout(() => {
+                        post.pollOptions.forEach((option, index) => {
+                            const optionInput = document.getElementById(`pollOption${index + 1}`);
+                            if (optionInput) optionInput.value = option.text || '';
+                        });
+                    }, 100);
+                }
+                
+                if (post.category === 'event') {
+                    setTimeout(() => {
+                        const startTime = document.getElementById('eventStartTime');
+                        const endTime = document.getElementById('eventEndTime');
+                        const location = document.getElementById('eventLocation');
+                        const eventLink = document.getElementById('eventLink');
+                        
+                        if (startTime) startTime.value = post.startTime || '';
+                        if (endTime) endTime.value = post.endTime || '';
+                        if (location) location.value = post.location || '';
+                        if (eventLink) eventLink.value = post.eventLink || '';
+                    }, 100);
+                }
+                
+                if (post.category === 'service') {
+                    setTimeout(() => {
+                        const hourlyAmount = document.getElementById('serviceHourlyAmount');
+                        const perJobAmount = document.getElementById('servicePerJobAmount');
+                        const rateType = document.querySelector(`input[name="serviceRate"][value="${post.serviceRateType || 'per-job'}"]`);
+                        
+                        if (hourlyAmount) hourlyAmount.value = post.serviceHourlyRate || '';
+                        if (perJobAmount) perJobAmount.value = post.servicePerJobRate || '';
+                        if (rateType) rateType.checked = true;
+                    }, 100);
+                }
+            }, 200);
+        }
+
+        // Update existing post
+        function updateExistingPost() {
+            console.log('Updating existing post:', currentEditingPostId);
+            
+            // Get form data (similar to submitSinglePost but update instead of create)
+            const titleEl = document.getElementById('postTitle');
+            const descEl = document.getElementById('postDescription');
+            const categoryEl = document.getElementById('postCategory');
+            
+            if (!titleEl || !descEl || !categoryEl) {
+                showNotification('Form fields not found', 'error');
+                return;
+            }
+            
+            const formData = {
+                id: currentEditingPostId,
+                title: titleEl.value,
+                description: descEl.value,
+                category: categoryEl.value,
+                images: uploadedImages || [],
+                timestamp: new Date().toISOString(),
+                author: currentPostingMode === 'business' ? "MarketPace Pro Business" : "Local Pace Member",
+                location: "Orange Beach, AL",
+                postingMode: currentPostingMode
+            };
+            
+            // Add category-specific data
+            if (formData.category === 'rent') {
+                const hourlyRate = document.getElementById('rentalHourlyRate')?.value;
+                const dailyRate = document.getElementById('rentalDailyRate')?.value;
+                if (hourlyRate) formData.hourlyRate = hourlyRate;
+                if (dailyRate) formData.dailyRate = dailyRate;
+                
+                // Get delivery options
+                const deliveryOptions = [];
+                document.querySelectorAll('input[name="deliveryOptions"]:checked').forEach(checkbox => {
+                    deliveryOptions.push(checkbox.value);
+                });
+                formData.deliveryOptions = deliveryOptions;
+            }
+            
+            if (formData.category === 'event') {
+                formData.startTime = document.getElementById('eventStartTime')?.value;
+                formData.endTime = document.getElementById('eventEndTime')?.value;
+                formData.eventLocation = document.getElementById('eventLocation')?.value;
+                formData.eventLink = document.getElementById('eventLink')?.value;
+            }
+            
+            if (formData.category === 'service') {
+                const selectedServiceRate = document.querySelector('input[name="serviceRate"]:checked')?.value || 'per-job';
+                const hourlyAmount = parseFloat(document.getElementById('serviceHourlyAmount')?.value) || 0;
+                const perJobAmount = parseFloat(document.getElementById('servicePerJobAmount')?.value) || 0;
+                
+                formData.serviceRateType = selectedServiceRate;
+                formData.serviceHourlyRate = hourlyAmount;
+                formData.servicePerJobRate = perJobAmount;
+            }
+            
+            // Update in localStorage
+            let posts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+            const postIndex = posts.findIndex(p => p.id.toString() === currentEditingPostId.toString());
+            
+            if (postIndex === -1) {
+                showNotification('Post not found for update', 'error');
+                return;
+            }
+            
+            posts[postIndex] = formData;
+            localStorage.setItem('communityPosts', JSON.stringify(posts));
+            
+            // Update in profile posts too
+            const profileKeys = ['personalPosts', 'businessPosts', 'personalProfilePosts', 'businessProfilePosts'];
+            profileKeys.forEach(key => {
+                let profilePosts = JSON.parse(localStorage.getItem(key) || '[]');
+                const profilePostIndex = profilePosts.findIndex(p => p.id.toString() === currentEditingPostId.toString());
+                if (profilePostIndex !== -1) {
+                    profilePosts[profilePostIndex] = formData;
+                    localStorage.setItem(key, JSON.stringify(profilePosts));
+                }
+            });
+            
+            // Reset editing state
+            currentEditingPostId = null;
+            
+            // Close modal and refresh
+            document.querySelector('.posting-modal')?.remove();
+            showNotification('Post updated successfully!', 'success');
+            loadCommunityPosts();
+        }
+
         // Profile and utility functions
         function addPostToProfile(postData, mode) {
             const profileKey = mode === 'business' ? 'businessPosts' : 'personalPosts';
@@ -10266,7 +10543,13 @@ Example:
                 submitBulkPost();
             } else {
                 console.log('Calling submitSinglePost()');
-                submitSinglePost();
+                
+                // If editing, call update function instead
+                if (currentEditingPostId) {
+                    updateExistingPost();
+                } else {
+                    submitSinglePost();
+                }
             }
         }
 
