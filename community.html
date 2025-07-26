@@ -4858,7 +4858,7 @@ Example:
                 </div>
                 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2 style="color: #00ffff; margin: 0;">Create Post</h2>
+                    <h2 id="modalTitle" style="color: #00ffff; margin: 0;">Create Post</h2>
                     <button onclick="this.closest('.posting-modal').remove()" style="background: none; border: none; color: #00ffff; font-size: 24px; cursor: pointer;">&times;</button>
                 </div>
                 
@@ -5228,7 +5228,7 @@ Example:
                     
                     <div style="display: flex; gap: 10px; justify-content: flex-end;">
                         <button type="button" onclick="this.closest('.posting-modal').remove()" style="padding: 10px 20px; background: #666; color: white; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
-                        <button type="button" onclick="handleFormSubmission()" style="padding: 10px 20px; background: #00ffff; color: #1a0b3d; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Create Post</button>
+                        <button type="button" id="submitButton" onclick="handleFormSubmission()" style="padding: 10px 20px; background: #00ffff; color: #1a0b3d; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Create Post</button>
                     </div>
                 </form>
             `;
@@ -5240,10 +5240,14 @@ Example:
             // Pre-populate fields if editing an existing post
             if (existingPost) {
                 populateEditForm(existingPost);
-                // Update header to show editing mode
-                const headerTitle = modalContent.querySelector('h2');
+                // Update header and button text to show editing mode
+                const headerTitle = modalContent.querySelector('#modalTitle');
+                const submitButton = modalContent.querySelector('#submitButton');
                 if (headerTitle) {
                     headerTitle.textContent = 'Edit Post';
+                }
+                if (submitButton) {
+                    submitButton.textContent = 'Save Changes';
                 }
             }
             
@@ -9028,7 +9032,6 @@ Example:
                         </div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        ${categoryBadge}
                         ${createPostOwnerActions(post)}
                     </div>
                 </div>
