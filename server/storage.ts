@@ -5,19 +5,21 @@ import {
   rentalAvailability,
   rentalBookings,
   communityPosts,
-  type User,
-  type UpsertUser,
-  type RentalItem,
-  type InsertRentalItem,
-  type RentalAvailability,
-  type InsertRentalAvailability,
-  type RentalBooking,
-  type InsertRentalBooking,
-  type CommunityPost,
-  type InsertCommunityPost,
-} from "@shared/schema";
+} from "../shared/schema";
 import { db } from "./db";
-import { eq, and, gte, lte, desc } from "drizzle-orm";
+import { eq, and, gte, lte, desc, type InferSelectModel, type InferInsertModel } from "drizzle-orm";
+
+// Type inference from Drizzle schemas
+type User = InferSelectModel<typeof users>;
+type UpsertUser = InferInsertModel<typeof users>;
+type RentalItem = InferSelectModel<typeof rentalItems>;
+type InsertRentalItem = InferInsertModel<typeof rentalItems>;
+type RentalAvailability = InferSelectModel<typeof rentalAvailability>;
+type InsertRentalAvailability = InferInsertModel<typeof rentalAvailability>;
+type RentalBooking = InferSelectModel<typeof rentalBookings>;
+type InsertRentalBooking = InferInsertModel<typeof rentalBookings>;
+type CommunityPost = InferSelectModel<typeof communityPosts>;
+type InsertCommunityPost = InferInsertModel<typeof communityPosts>;
 
 export interface IStorage {
   // User management
