@@ -306,25 +306,17 @@
                 
                 <div class="form-group">
                     <label for="itemTitle">Item Title</label>
-                    <input type="text" id="itemTitle" placeholder="What are you renting out?">
+                    <input type="text" id="itemTitle" placeholder="Loading rental item..." readonly>
                 </div>
 
                 <div class="form-group">
                     <label for="itemDescription">Description</label>
-                    <textarea id="itemDescription" rows="3" placeholder="Describe your rental item..."></textarea>
+                    <textarea id="itemDescription" rows="3" placeholder="Loading description..." readonly></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label for="itemCategory">Category</label>
-                    <select id="itemCategory">
-                        <option value="tools">Tools & Equipment</option>
-                        <option value="electronics">Electronics</option>
-                        <option value="furniture">Furniture</option>
-                        <option value="sports">Sports & Recreation</option>
-                        <option value="automotive">Automotive</option>
-                        <option value="party">Party & Events</option>
-                        <option value="other">Other</option>
-                    </select>
+                    <label for="itemCondition">Item Condition</label>
+                    <input type="text" id="itemCondition" placeholder="Loading condition..." readonly>
                 </div>
 
                 <div class="form-group">
@@ -332,23 +324,35 @@
                     <div class="rate-selector">
                         <div class="rate-option" data-rate="hourly">
                             <div>Hourly</div>
-                            <input type="number" placeholder="$0.00" id="hourlyRate" style="margin-top: 10px;">
+                            <input type="number" placeholder="$0.00" id="hourlyRate" style="margin-top: 10px;" readonly>
                         </div>
                         <div class="rate-option" data-rate="daily">
                             <div>Daily</div>
-                            <input type="number" placeholder="$0.00" id="dailyRate" style="margin-top: 10px;">
+                            <input type="number" placeholder="$0.00" id="dailyRate" style="margin-top: 10px;" readonly>
                         </div>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="securityDeposit">Security Deposit</label>
-                    <input type="number" id="securityDeposit" placeholder="$0.00">
+                    <label for="paymentMethod">Payment Method</label>
+                    <input type="text" id="paymentMethod" placeholder="Loading payment method..." readonly>
+                </div>
+
+                <div class="form-group" id="bookingFeeSection" style="display: none;">
+                    <label for="bookingFee">Booking Fee</label>
+                    <input type="text" id="bookingFee" placeholder="No booking fee" readonly>
                 </div>
 
                 <div class="form-group">
-                    <label for="cancellationFee">Cancellation Fee</label>
-                    <input type="number" id="cancellationFee" placeholder="$0.00">
+                    <label for="rentalTerms">Terms & Conditions</label>
+                    <textarea id="rentalTerms" rows="6" placeholder="Loading terms and conditions..." readonly style="font-size: 14px;"></textarea>
+                </div>
+
+                <div style="margin-top: 20px; padding: 15px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);">
+                    <div style="color: #f87171; font-weight: 600; margin-bottom: 8px;">⚠️ Legal Notice</div>
+                    <div style="color: #fca5a5; font-size: 14px; line-height: 1.4;">
+                        MarketPace is not responsible for lost or damaged rental items. By proceeding, you agree to the owner's terms and conditions at your own risk.
+                    </div>
                 </div>
             </div>
 
@@ -407,6 +411,10 @@
                 <span>Subtotal:</span>
                 <span id="subtotal">$0.00</span>
             </div>
+            <div class="summary-row" id="bookingFeeSummary" style="display: none;">
+                <span>Booking Fee:</span>
+                <span id="bookingFeeAmount">$0.00</span>
+            </div>
             <div class="summary-row">
                 <span>Security Deposit:</span>
                 <span id="depositAmount">$0.00</span>
@@ -415,6 +423,15 @@
                 <span>Total Amount:</span>
                 <span id="totalAmount">$0.00</span>
             </div>
+        </div>
+
+        <!-- Terms Agreement -->
+        <div style="margin: 30px 0; padding: 20px; background: rgba(30, 41, 59, 0.7); border-radius: 15px; border: 1px solid rgba(0, 255, 255, 0.2);">
+            <h2 class="section-title">Agreement Required</h2>
+            <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer; margin-bottom: 15px;">
+                <input type="checkbox" id="agreeTerms" style="margin-top: 4px; transform: scale(1.2);">
+                <span style="line-height: 1.5;">I have read and agree to the owner's terms and conditions listed above. I understand that MarketPace is not responsible for lost or damaged items and that I am renting at my own risk.</span>
+            </label>
         </div>
 
         <!-- Payment Section -->
@@ -564,26 +581,38 @@
                 return;
             }
 
-            // Create rental booking with Stripe escrow
+            if (!document.getElementById('agreeTerms').checked) {
+                alert('You must agree to the terms and conditions to proceed with the rental.');
+                return;
+            }
+
+            // Create rental booking with comprehensive data
             const bookingData = {
                 itemTitle: document.getElementById('itemTitle').value,
                 description: document.getElementById('itemDescription').value,
-                category: document.getElementById('itemCategory').value,
+                itemCondition: document.getElementById('itemCondition').value,
                 selectedDates: selectedDates,
                 rateType: rateType,
                 rate: currentRate,
-                securityDeposit: parseFloat(document.getElementById('securityDeposit').value) || 0,
-                cancellationFee: parseFloat(document.getElementById('cancellationFee').value) || 0,
+                paymentMethod: document.getElementById('paymentMethod').value,
+                bookingFee: document.getElementById('bookingFee').value || 'None',
+                rentalTerms: document.getElementById('rentalTerms').value,
                 timeSlots: document.getElementById('timeSlots').value,
                 totalAmount: parseFloat(document.getElementById('totalAmount').textContent.replace('$', ''))
             };
 
-            console.log('Creating rental booking:', bookingData);
+            console.log('Creating comprehensive rental booking:', bookingData);
             
-            // In a real implementation, this would integrate with Stripe and save to the database
-            alert('Rental booking created successfully! Your listing is now live on MarketPace.');
+            // Show confirmation based on payment method
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            if (paymentMethod.includes('Escrow')) {
+                alert('Rental booking confirmed! Payment will be held in escrow and released to the owner upon successful completion.');
+            } else {
+                alert('Rental booking confirmed! Please arrange cash payment directly with the owner at pickup.');
+            }
             
-            // Redirect back to community page
+            // Clear localStorage and redirect back to community page
+            localStorage.removeItem('selectedRentalItem');
             goBack();
         }
 
@@ -591,15 +620,97 @@
             window.location.href = '/community.html';
         }
 
-        // Populate initial data if passed from the post creation
-        function populateFromPost(itemId, title, author, dailyRate) {
-            if (title) document.getElementById('itemTitle').value = title;
-            if (dailyRate) document.getElementById('dailyRate').value = dailyRate;
+        // Load rental data from localStorage when page loads
+        function loadRentalData() {
+            const rentalData = localStorage.getItem('selectedRentalItem');
+            console.log('Loading rental data from localStorage:', rentalData);
+            
+            if (rentalData) {
+                try {
+                    const rental = JSON.parse(rentalData);
+                    console.log('Parsed rental data:', rental);
+                    
+                    // Populate form fields with rental data
+                    document.getElementById('itemTitle').value = rental.title || 'Rental Item';
+                    document.getElementById('itemDescription').value = rental.description || 'No description available';
+                    document.getElementById('itemCondition').value = rental.itemCondition || 'Not specified';
+                    
+                    // Display condition in user-friendly format
+                    const conditionDisplay = {
+                        'excellent': 'Excellent - Like new, no wear',
+                        'good': 'Good - Minor wear, fully functional', 
+                        'used': 'Used - Visible wear but works well',
+                        'fair': 'Fair - Heavy wear but functional'
+                    };
+                    document.getElementById('itemCondition').value = conditionDisplay[rental.itemCondition] || rental.itemCondition;
+                    
+                    // Set rental rates
+                    if (rental.hourlyRate && rental.hourlyRate > 0) {
+                        document.getElementById('hourlyRate').value = rental.hourlyRate;
+                    }
+                    if (rental.dailyRate && rental.dailyRate > 0) {
+                        document.getElementById('dailyRate').value = rental.dailyRate;
+                    }
+                    
+                    // Set payment method
+                    const paymentMethodDisplay = {
+                        'escrow': 'MarketPace Escrow - Secure payment holding',
+                        'cash': 'Cash Meeting - In-person exchange'
+                    };
+                    document.getElementById('paymentMethod').value = paymentMethodDisplay[rental.paymentMethod] || 'MarketPace Escrow';
+                    
+                    // Show booking fee if enabled
+                    if (rental.bookingFee && rental.bookingFee.enabled) {
+                        document.getElementById('bookingFeeSection').style.display = 'block';
+                        document.getElementById('bookingFeeSummary').style.display = 'flex';
+                        const feeType = rental.bookingFee.type === 'refundable' ? 'Refundable' : 'Non-refundable';
+                        document.getElementById('bookingFee').value = `$${rental.bookingFee.amount} (${feeType})`;
+                        document.getElementById('bookingFeeAmount').textContent = `$${rental.bookingFee.amount}`;
+                    }
+                    
+                    // Set terms and conditions
+                    document.getElementById('rentalTerms').value = rental.rentalTerms || 'No terms specified';
+                    
+                    // Set default rate type based on what's available
+                    if (rental.rentalRateType === 'hourly' && rental.hourlyRate > 0) {
+                        rateType = 'hourly';
+                        document.querySelector('[data-rate="hourly"]').classList.add('selected');
+                    } else {
+                        rateType = 'daily';
+                        document.querySelector('[data-rate="daily"]').classList.add('selected');
+                    }
+                    
+                    updateSummary();
+                    
+                } catch (error) {
+                    console.error('Error parsing rental data:', error);
+                    loadFallbackData();
+                }
+            } else {
+                console.log('No rental data found in localStorage, loading fallback');
+                loadFallbackData();
+            }
+        }
+        
+        function loadFallbackData() {
+            // Fallback to sample data if no localStorage data
+            document.getElementById('itemTitle').value = 'Guitar';
+            document.getElementById('itemDescription').value = 'Acoustic guitar for rent';
+            document.getElementById('itemCondition').value = 'Good - Minor wear, fully functional';
+            document.getElementById('dailyRate').value = '25';
+            document.getElementById('paymentMethod').value = 'MarketPace Escrow - Secure payment holding';
+            document.getElementById('rentalTerms').value = 'Please handle with care. Must be returned in same condition. Late returns subject to additional fees.';
+            
+            rateType = 'daily';
+            document.querySelector('[data-rate="daily"]').classList.add('selected');
             updateSummary();
         }
 
+        // Initialize rental data when page loads
+        document.addEventListener('DOMContentLoaded', loadRentalData);
+
         // Global function for integration with community.html
-        window.bookRental = populateFromPost;
+        window.bookRental = loadRentalData;
     </script>
 </body>
 </html>
