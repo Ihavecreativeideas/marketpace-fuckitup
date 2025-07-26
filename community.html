@@ -5359,43 +5359,25 @@
                     return;
                 }
                 
-                // Enhanced price validation based on category
-                if (formData.category === 'sale' && (!formData.price || formData.price.length === 0)) {
-                    showNotification('Please enter a price for this sale item.', 'error');
-                    return;
-                }
+                console.log('✅ Post validation passed, saving to localStorage and profile...');
                 
-                if (formData.category === 'rent') {
-                    const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
-                    const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
-                    if (hourlyRate === 0 && dailyRate === 0) {
-                        showNotification('Please set at least one rental rate (hourly or daily).', 'error');
-                        return;
-                    }
-                }
-                
-                if (formData.category === 'service') {
-                    const hourlyAmount = parseFloat(document.getElementById('serviceHourlyAmount')?.value) || 0;
-                    const perJobAmount = parseFloat(document.getElementById('servicePerJobAmount')?.value) || 0;
-                    if (hourlyAmount === 0 && perJobAmount === 0) {
-                        showNotification('Please set at least one service rate (hourly or per job).', 'error');
-                        return;
-                    }
-                }
-                
-                // Save to localStorage
+                // Save to localStorage (community feed)
                 const existingPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
                 existingPosts.unshift(formData);
                 localStorage.setItem('communityPosts', JSON.stringify(existingPosts));
+                console.log('✅ Post saved to community feed. Total posts:', existingPosts.length);
 
                 // Add to profile based on posting mode
                 addPostToProfile(formData, currentPostingMode);
+                console.log('✅ Post added to profile for mode:', currentPostingMode);
                 
                 // Close modal and show success
-                closeModalAndShowSuccess(formData.category, formData.title);
+                closePostModal();
+                showNotification(`${formData.category.charAt(0).toUpperCase() + formData.category.slice(1)} post "${formData.title}" shared successfully!`, 'success');
                 
                 // Refresh the community feed to show the new post
                 loadCommunityPosts();
+                console.log('✅ Community feed refreshed');
             }
 
             // Submit bulk upload post
