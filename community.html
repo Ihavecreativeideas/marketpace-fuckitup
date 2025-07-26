@@ -2692,6 +2692,50 @@
                             </div>
                         </div>
 
+                        <!-- Booking Fee Section -->
+                        <div style="margin-bottom: 20px; padding: 15px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 10px;">
+                            <label style="display: flex; align-items: center; margin-bottom: 15px;">
+                                <input type="checkbox" id="enableBookingFee" onchange="toggleBookingFeeOptions()" style="margin-right: 8px; accent-color: #a855f7;">
+                                <span style="color: #a855f7; font-weight: 500;">Require Booking Fee (Optional)</span>
+                            </label>
+                            
+                            <div id="bookingFeeOptions" style="display: none;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                    <div>
+                                        <label style="color: #e2e8f0; font-size: 13px; margin-bottom: 5px; display: block;">Fee Amount</label>
+                                        <input type="number" id="bookingFeeAmount" placeholder="$0.00" step="0.01" min="0" style="width: 100%; padding: 8px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 6px; color: #e2e8f0;">
+                                    </div>
+                                    <div>
+                                        <label style="color: #e2e8f0; font-size: 13px; margin-bottom: 5px; display: block;">Refund Policy</label>
+                                        <select id="bookingFeeRefund" style="width: 100%; padding: 8px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 6px; color: #e2e8f0;">
+                                            <option value="full">Full Refund</option>
+                                            <option value="partial">Partial Refund (50%)</option>
+                                            <option value="nonrefundable">Non-Refundable</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div style="background: rgba(0, 0, 0, 0.3); padding: 12px; border-radius: 6px; margin-bottom: 15px;">
+                                    <div style="color: #f59e0b; font-size: 12px; font-weight: 500; margin-bottom: 8px;">🔒 Escrow Protection</div>
+                                    <div style="color: #94a3b8; font-size: 11px; line-height: 1.4;">
+                                        • Booking fee held in escrow until rental completion<br>
+                                        • Automatic refund if owner doesn't show up<br>
+                                        • QR check-in required for payment release
+                                    </div>
+                                </div>
+                                
+                                <div style="background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 6px;">
+                                    <label style="display: flex; align-items: center;">
+                                        <input type="checkbox" id="requireQRCheckin" checked style="margin-right: 8px; accent-color: #10b981;">
+                                        <span style="color: #10b981; font-size: 12px; font-weight: 500;">Enable QR Check-In System</span>
+                                    </label>
+                                    <div style="color: #94a3b8; font-size: 10px; margin-top: 5px; margin-left: 24px;">
+                                        Renter must scan QR code in person to confirm pickup and release payment
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Booking Fee (Optional) -->
                         <div style="margin-bottom: 20px;">
                             <label style="display: flex; align-items: center; margin-bottom: 12px;">
@@ -7192,6 +7236,16 @@ Example:
             return true;
         }
 
+        // Toggle booking fee options
+        function toggleBookingFeeOptions() {
+            const checkbox = document.getElementById('enableBookingFee');
+            const options = document.getElementById('bookingFeeOptions');
+            
+            if (checkbox && options) {
+                options.style.display = checkbox.checked ? 'block' : 'none';
+            }
+        }
+
         // Close dropdowns when clicking outside
         document.addEventListener('click', function(event) {
             if (!event.target.closest('.filter-btn') && !event.target.closest('.filter-dropdown')) {
@@ -9340,14 +9394,29 @@ Example:
                 }
             }
             
+            // Add booking fee display if present
+            let bookingFeeDisplay = '';
+            if (post.bookingFee && post.bookingFee.enabled) {
+                const refundText = post.bookingFee.refundPolicy === 'nonrefundable' ? 'Non-Refundable' : 
+                                 post.bookingFee.refundPolicy === 'partial' ? 'Partial Refund (50%)' : 'Full Refund';
+                bookingFeeDisplay = `
+                    <div style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 6px; padding: 12px; margin-top: 10px;">
+                        <div style="color: #a855f7; font-weight: 600; font-size: 12px; margin-bottom: 8px;">💳 Booking Fee Required</div>
+                        <div style="color: #e2e8f0; font-size: 11px; margin-bottom: 4px;">Amount: <span style="color: #a855f7; font-weight: 500;">$${post.bookingFee.amount}</span></div>
+                        <div style="color: #e2e8f0; font-size: 11px; margin-bottom: 4px;">Refund Policy: <span style="color: #a855f7; font-weight: 500;">${refundText}</span></div>
+                        ${post.bookingFee.requiresQRCheckin ? '<div style="color: #10b981; font-size: 10px; margin-top: 6px;">🔒 QR Check-in required for payment release</div>' : ''}
+                    </div>
+                `;
+            }
+
             return `
                 <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 15px; margin: 15px 0;">
                     <h4 style="color: #10b981; margin: 0 0 10px 0;">Rental Details:</h4>
                     ${post.itemCondition ? `<div style="color: #e2e8f0; margin-bottom: 5px;">Condition: <span style="color: #10b981; font-weight: 500;">${post.itemCondition}</span></div>` : ''}
                     ${post.paymentMethod ? `<div style="color: #e2e8f0; margin-bottom: 5px;">Payment: <span style="color: #00ffff; font-weight: 500;">${post.paymentMethod === 'escrow' ? 'MarketPace Escrow' : 'Cash Meeting'}</span></div>` : ''}
                     ${availableDeliveryMethods.length > 0 ? `<div style="color: #e2e8f0; margin-bottom: 5px;">Delivery Options: <span style="color: #f59e0b; font-weight: 500;">${availableDeliveryMethods.join(', ')}</span></div>` : ''}
-                    ${post.bookingFee && post.bookingFee.enabled ? `<div style="color: #e2e8f0; margin-bottom: 5px;">Booking Fee: <span style="color: #a855f7; font-weight: 500;">$${post.bookingFee.amount} (${post.bookingFee.type})</span></div>` : ''}
                     ${termsDisplay}
+                    ${bookingFeeDisplay}
                     <div style="background: rgba(255, 107, 53, 0.05); padding: 8px; border-radius: 4px; border-left: 3px solid #ff6b35; margin-top: 12px;">
                         <div style="color: #ff6b35; font-size: 10px; font-weight: 500;">⚠️ Important Notice</div>
                         <div style="color: #94a3b8; font-size: 10px; margin-top: 2px;">MarketPace is not responsible for lost, damaged, or stolen rental items.</div>
@@ -10856,6 +10925,9 @@ Example:
             
             // Collect terms and conditions data for rental posts
             let termsData = null;
+            let bookingFeeData = null;
+            let rentalExtras = {};
+            
             if (category === 'rent') {
                 const writeRadio = document.querySelector('input[name="termsMethod"][value="write"]');
                 const isWriteMethod = writeRadio?.checked;
@@ -10880,6 +10952,36 @@ Example:
                         // Note: In a real implementation, you'd upload the file to server here
                     }
                 }
+                
+                // Collect booking fee data
+                const enableBookingFee = document.getElementById('enableBookingFee')?.checked || false;
+                if (enableBookingFee) {
+                    const feeAmount = parseFloat(document.getElementById('bookingFeeAmount')?.value) || 0;
+                    const refundPolicy = document.getElementById('bookingFeeRefund')?.value || 'full';
+                    
+                    bookingFeeData = {
+                        enabled: true,
+                        amount: feeAmount,
+                        refundPolicy: refundPolicy,
+                        requiresQRCheckin: document.getElementById('requireQRCheckin')?.checked || true
+                    };
+                } else {
+                    bookingFeeData = { enabled: false };
+                }
+                
+                // Collect other rental-specific data
+                rentalExtras = {
+                    itemCondition: document.getElementById('itemCondition')?.value || '',
+                    paymentMethod: document.querySelector('input[name="paymentMethod"]:checked')?.value || 'escrow',
+                    hourlyRate: hourlyRate,
+                    dailyRate: dailyRate,
+                    rentalRateType: selectedRate,
+                    deliveryOptions: {
+                        selfPickup: document.getElementById('selfPickupOptionRental')?.checked || false,
+                        privateDelivery: document.getElementById('privateDeliveryOptionRental')?.checked || false,
+                        marketPaceDelivery: document.getElementById('marketPaceDeliveryOptionRental')?.checked || false
+                    }
+                };
             }
             
             const formData = {
@@ -10892,6 +10994,8 @@ Example:
                 actionButtons: actionButtons,
                 images: uploadedImages.map(img => ({ url: img.url, name: img.name })), // Include uploaded images
                 termsAndConditions: termsData, // Add terms data
+                bookingFee: bookingFeeData, // Add booking fee data
+                ...rentalExtras, // Add rental-specific data
                 timestamp: new Date().toISOString(),
                 author: currentPostingMode === 'business' ? "MarketPace Pro Business" : "Local Pace Member",
                 location: "Orange Beach, AL",
