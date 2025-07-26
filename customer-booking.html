@@ -344,6 +344,11 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="securityDeposit">Security Deposit</label>
+                    <input type="number" id="securityDeposit" placeholder="$0.00" readonly>
+                </div>
+
+                <div class="form-group">
                     <label for="rentalTerms">Terms & Conditions</label>
                     <textarea id="rentalTerms" rows="6" placeholder="Loading terms and conditions..." readonly style="font-size: 14px;"></textarea>
                 </div>
@@ -658,6 +663,25 @@
                         'cash': 'Cash Meeting - In-person exchange'
                     };
                     document.getElementById('paymentMethod').value = paymentMethodDisplay[rental.paymentMethod] || 'MarketPace Escrow';
+                    
+                    // Display delivery options (owner's choices)
+                    const deliveryOptions = rental.deliveryOptions || { selfPickup: true };
+                    const availableDeliveryMethods = [];
+                    if (deliveryOptions.selfPickup) availableDeliveryMethods.push('Self Pickup');
+                    if (deliveryOptions.privateDelivery) availableDeliveryMethods.push('Private Delivery');
+                    if (deliveryOptions.marketPaceDelivery) availableDeliveryMethods.push('MarketPace Delivery');
+                    
+                    // Add delivery options display field
+                    const deliveryOptionsField = document.createElement('div');
+                    deliveryOptionsField.className = 'form-group';
+                    deliveryOptionsField.innerHTML = `
+                        <label for="deliveryOptionsDisplay">Available Delivery Methods</label>
+                        <input type="text" id="deliveryOptionsDisplay" value="${availableDeliveryMethods.join(', ')}" readonly>
+                    `;
+                    
+                    // Insert delivery options after payment method field
+                    const paymentMethodGroup = document.getElementById('paymentMethod').closest('.form-group');
+                    paymentMethodGroup.parentNode.insertBefore(deliveryOptionsField, paymentMethodGroup.nextSibling);
                     
                     // Show booking fee if enabled
                     if (rental.bookingFee && rental.bookingFee.enabled) {
