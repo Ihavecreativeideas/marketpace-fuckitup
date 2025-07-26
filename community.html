@@ -4094,12 +4094,14 @@
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
             const bottomNav = document.getElementById('bottomNav');
             
-            if (scrollTop > lastScrollTop && scrollTop > 100) {
-                // Scrolling down
-                bottomNav.classList.add('hidden');
-            } else {
-                // Scrolling up
-                bottomNav.classList.remove('hidden');
+            if (bottomNav) {
+                if (scrollTop > lastScrollTop && scrollTop > 100) {
+                    // Scrolling down
+                    bottomNav.classList.add('hidden');
+                } else {
+                    // Scrolling up
+                    bottomNav.classList.remove('hidden');
+                }
             }
             
             lastScrollTop = scrollTop;
@@ -5178,12 +5180,29 @@
                 const activePriceField = document.querySelector('.posting-modal #postPrice');
                 const priceValue = activePriceField ? activePriceField.value.trim() : '';
                 
+                // Debug input field values
+                const titleEl = document.getElementById('postTitle');
+                const descEl = document.getElementById('postDescription');
+                const categoryEl = document.getElementById('postCategory');
+                
+                console.log('Form elements found:', {
+                    titleEl: !!titleEl,
+                    descEl: !!descEl,
+                    categoryEl: !!categoryEl
+                });
+                
+                console.log('Form values:', {
+                    title: titleEl?.value,
+                    description: descEl?.value,
+                    category: categoryEl?.value
+                });
+                
                 const formData = {
                     uploadType: 'single',
                     postingMode: currentPostingMode,
-                    category: document.getElementById('postCategory').value,
-                    title: document.getElementById('postTitle').value,
-                    description: document.getElementById('postDescription').value,
+                    category: categoryEl?.value || 'general',
+                    title: titleEl?.value?.trim() || '',
+                    description: descEl?.value?.trim() || '',
                     price: priceValue,
                     eventDate: document.getElementById('eventDate')?.value,
                     eventTime: document.getElementById('eventTime')?.value,
@@ -5326,7 +5345,13 @@
                 // Enhanced validation for rental/sale posts
                 const requiresPrice = ['sale', 'rent', 'service'].includes(formData.category);
                 
+                console.log('Final formData for validation:', formData);
+                
                 if (!formData.title || !formData.description) {
+                    console.log('Validation failed - missing title or description:', {
+                        title: formData.title,
+                        description: formData.description
+                    });
                     showNotification('Please fill in title and description.', 'error');
                     return;
                 }
