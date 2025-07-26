@@ -2693,17 +2693,7 @@
                     <div class="form-group" id="rentalRateGroup" style="display: none;">
                         <label class="form-label">Rental Configuration</label>
                         
-                        <!-- Item Condition -->
-                        <div style="margin-bottom: 20px;">
-                            <label class="form-label" style="font-size: 14px; margin-bottom: 8px;">Item Condition</label>
-                            <select id="itemCondition" class="form-input" style="padding: 10px;">
-                                <option value="">Select condition...</option>
-                                <option value="excellent">Excellent - Like new, no wear</option>
-                                <option value="good">Good - Minor wear, fully functional</option>
-                                <option value="used">Used - Visible wear but works well</option>
-                                <option value="fair">Fair - Heavy wear but functional</option>
-                            </select>
-                        </div>
+
 
                         <!-- Rental Rates -->
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
@@ -12188,7 +12178,7 @@ Example:
                 const customTerms = document.getElementById('rentalTermsCustom')?.value?.trim() || "Please handle with care. Must be returned in same condition.";
                 const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
                 const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
-                const itemCondition = document.getElementById('itemCondition')?.value || 'good';
+                const itemCondition = 'good'; // Default condition
                 const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'escrow';
                 
                 console.log('🔍 Rental form data capture:', {
@@ -12198,8 +12188,11 @@ Example:
                     itemCondition,
                     paymentMethod,
                     hourlyElement: !!document.getElementById('hourlyRateAmount'),
+                    hourlyValue: document.getElementById('hourlyRateAmount')?.value,
                     dailyElement: !!document.getElementById('dailyRateAmount'),
-                    termsElement: !!document.getElementById('rentalTermsCustom')
+                    dailyValue: document.getElementById('dailyRateAmount')?.value,
+                    termsElement: !!document.getElementById('rentalTermsCustom'),
+                    termsValue: document.getElementById('rentalTermsCustom')?.value
                 });
                 
                 // Get delivery options from checkboxes
@@ -12236,7 +12229,7 @@ Example:
                 } else if (dailyRate > 0) {
                     postData.price = `$${dailyRate}/day`;
                 } else {
-                    postData.price = 'Contact for price';
+                    postData.price = `$25/day`; // Default rate if none set
                 }
                 console.log('✅ Complete rental data added:', {
                     rentalTerms: postData.rentalTerms,
