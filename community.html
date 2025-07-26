@@ -2842,6 +2842,57 @@ Example:
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Payment Summary Preview -->
+                        <div id="rentalPaymentPreview" style="margin-top: 25px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 12px; padding: 20px;">
+                            <label class="form-label" style="font-size: 16px; color: #00ffff; margin-bottom: 15px; display: block;">Payment Summary Preview</label>
+                            
+                            <div style="background: rgba(15, 23, 42, 0.8); border-radius: 8px; padding: 15px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(0, 255, 255, 0.2);">
+                                    <span style="color: #e2e8f0; font-size: 14px;">Rental Rate (Sample: 5 days)</span>
+                                    <span id="previewRentalRate" style="color: #00ffff; font-weight: 600;">$125.00</span>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="color: #94a3b8; font-size: 13px;">Security Deposit</span>
+                                    <span id="previewSecurityDeposit" style="color: #94a3b8;">$25.00</span>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="color: #94a3b8; font-size: 13px;">Late Fee Protection</span>
+                                    <span id="previewLateFee" style="color: #94a3b8;">$5.00</span>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="color: #94a3b8; font-size: 13px;">MarketPace Commission (5%)</span>
+                                    <span id="previewCommission" style="color: #94a3b8;">$6.25</span>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="color: #94a3b8; font-size: 13px;">Sustainability Fee</span>
+                                    <span style="color: #94a3b8;">$2.50</span>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <span style="color: #94a3b8; font-size: 13px;">Sales Tax (8%)</span>
+                                    <span id="previewTax" style="color: #94a3b8;">$13.10</span>
+                                </div>
+                                
+                                <div style="border-top: 1px solid rgba(0, 255, 255, 0.3); padding-top: 12px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="color: #e2e8f0; font-size: 16px; font-weight: 600;">Total Amount</span>
+                                        <span id="previewTotal" style="color: #00ffff; font-size: 18px; font-weight: 700;">$176.85</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top: 15px; padding: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px;">
+                                <div style="color: #10b981; font-size: 12px; font-weight: 600; margin-bottom: 6px;">SECURE Escrow Payment Protection</div>
+                                <div style="color: #94a3b8; font-size: 11px; line-height: 1.4;">
+                                    Your payment will be held safely in escrow and released to the owner upon successful rental completion and QR verification.
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Event Fields -->
@@ -11624,9 +11675,45 @@ Example:
                 const category = document.getElementById('postCategory')?.value;
                 if (category === 'rent') {
                     initializeRentalCalendar();
+                    updatePaymentPreview(); // Initialize payment preview
                 }
             }, 100);
         };
+
+        // Update payment preview when rates change
+        function updatePaymentPreview() {
+            const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
+            const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
+            const selectedRate = document.querySelector('input[name="rentalRate"]:checked')?.value || 'daily';
+            
+            let baseRate = selectedRate === 'hourly' ? hourlyRate * 24 * 5 : dailyRate * 5; // 5-day sample
+            const securityDeposit = baseRate * 0.2; // 20% security deposit
+            const lateFee = 5.00;
+            const commission = baseRate * 0.05; // 5% commission
+            const sustainabilityFee = 2.50;
+            const tax = (baseRate + securityDeposit + lateFee + commission + sustainabilityFee) * 0.08;
+            const total = baseRate + securityDeposit + lateFee + commission + sustainabilityFee + tax;
+            
+            document.getElementById('previewRentalRate').textContent = `$${baseRate.toFixed(2)}`;
+            document.getElementById('previewSecurityDeposit').textContent = `$${securityDeposit.toFixed(2)}`;
+            document.getElementById('previewLateFee').textContent = `$${lateFee.toFixed(2)}`;
+            document.getElementById('previewCommission').textContent = `$${commission.toFixed(2)}`;
+            document.getElementById('previewTax').textContent = `$${tax.toFixed(2)}`;
+            document.getElementById('previewTotal').textContent = `$${total.toFixed(2)}`;
+        }
+
+        // Add event listeners to rate inputs
+        document.addEventListener('input', function(e) {
+            if (e.target.id === 'hourlyRateAmount' || e.target.id === 'dailyRateAmount') {
+                updatePaymentPreview();
+            }
+        });
+
+        document.addEventListener('change', function(e) {
+            if (e.target.name === 'rentalRate') {
+                updatePaymentPreview();
+            }
+        });
 
         // Hook into modal closing to reset calendar data
         document.addEventListener('click', function(e) {
