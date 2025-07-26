@@ -5188,6 +5188,7 @@ Example:
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; margin-bottom: 5px; color: #00ffff;">Images:</label>
                         <input type="file" id="postImages" multiple accept="image/*" onchange="handlePostImageUpload('postImages')" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                        <div id="postImages-preview" style="margin-top: 10px;"></div>
                     </div>
                     
                     <!-- Delivery Options (Owner Setup) -->
@@ -5987,16 +5988,14 @@ Example:
         }
         
         // Handle post image upload
-        async function handlePostImageUpload(inputId = 'imageInput') {
+        async function handlePostImageUpload(inputId = 'postImages') {
             const fileInput = document.getElementById(inputId);
             const files = fileInput.files;
             
             if (!files || files.length === 0) {
-                showNotification('Please select images first', 'warning');
-                return [];
+                console.log('No files selected for upload');
+                return;
             }
-            
-            const uploadedImages = [];
             
             try {
                 showUploadProgress(`Uploading ${files.length} image(s)...`);
@@ -6004,16 +6003,16 @@ Example:
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
                     const result = await uploadToCloudinary(file, '/api/upload/post');
-                    uploadedImages.push(result);
+                    uploadedImages.push(result); // Add to global uploadedImages array
                 }
                 
                 // Display uploaded images
                 displayUploadedImages(uploadedImages, inputId + '-preview');
                 showNotification(`${uploadedImages.length} image(s) uploaded successfully!`, 'success');
-                return uploadedImages;
+                console.log('✅ Images uploaded to global array:', uploadedImages);
             } catch (error) {
                 showNotification('Failed to upload images: ' + error.message, 'error');
-                return [];
+                console.error('Image upload error:', error);
             }
         }
         
