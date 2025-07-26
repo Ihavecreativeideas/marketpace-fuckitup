@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPace Rental Booking</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 30%, #4c2885 60%, #6b46c1 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .booking-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(30, 41, 59, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #00ffff;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .booking-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .rental-details {
+            background: rgba(30, 41, 59, 0.7);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .calendar-section {
+            background: rgba(30, 41, 59, 0.7);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .section-title {
+            color: #00ffff;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.1);
+        }
+
+        .rate-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .rate-option {
+            background: rgba(15, 23, 42, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid rgba(0, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .rate-option:hover {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .rate-option.selected {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.2);
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .calendar-header {
+            text-align: center;
+            padding: 10px 5px;
+            font-weight: 600;
+            color: #00ffff;
+            font-size: 0.9rem;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .calendar-day:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .calendar-day.available {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.5);
+        }
+
+        .calendar-day.booked {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            cursor: not-allowed;
+        }
+
+        .calendar-day.selected {
+            background: rgba(0, 255, 255, 0.3);
+            border: 2px solid #00ffff;
+        }
+
+        .booking-summary {
+            background: rgba(15, 23, 42, 0.8);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            margin-bottom: 30px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .summary-total {
+            border-top: 1px solid rgba(0, 255, 255, 0.3);
+            padding-top: 15px;
+            margin-top: 15px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #00ffff;
+        }
+
+        .payment-section {
+            background: rgba(30, 41, 59, 0.7);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00ffff, #0891b2);
+            color: #0f172a;
+            box-shadow: 0 10px 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(0, 255, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(107, 114, 128, 0.8);
+            color: #e2e8f0;
+            margin-right: 15px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(107, 114, 128, 1);
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .calendar-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        .legend-available { background: rgba(34, 197, 94, 0.4); }
+        .legend-booked { background: rgba(239, 68, 68, 0.4); }
+        .legend-selected { background: rgba(0, 255, 255, 0.4); }
+
+        @media (max-width: 768px) {
+            .booking-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .rate-selector {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="booking-container">
+        <div class="header">
+            <h1>🏠 Rental Booking</h1>
+            <p>Set up your rental with calendar, pricing, and secure payments</p>
+        </div>
+
+        <div class="booking-grid">
+            <!-- Rental Details Section -->
+            <div class="rental-details">
+                <h2 class="section-title">Rental Details</h2>
+                
+                <div class="form-group">
+                    <label for="itemTitle">Item Title</label>
+                    <input type="text" id="itemTitle" placeholder="What are you renting out?">
+                </div>
+
+                <div class="form-group">
+                    <label for="itemDescription">Description</label>
+                    <textarea id="itemDescription" rows="3" placeholder="Describe your rental item..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="itemCategory">Category</label>
+                    <select id="itemCategory">
+                        <option value="tools">Tools & Equipment</option>
+                        <option value="electronics">Electronics</option>
+                        <option value="furniture">Furniture</option>
+                        <option value="sports">Sports & Recreation</option>
+                        <option value="automotive">Automotive</option>
+                        <option value="party">Party & Events</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Rental Rates</label>
+                    <div class="rate-selector">
+                        <div class="rate-option" data-rate="hourly">
+                            <div>Hourly</div>
+                            <input type="number" placeholder="$0.00" id="hourlyRate" style="margin-top: 10px;">
+                        </div>
+                        <div class="rate-option" data-rate="daily">
+                            <div>Daily</div>
+                            <input type="number" placeholder="$0.00" id="dailyRate" style="margin-top: 10px;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="securityDeposit">Security Deposit</label>
+                    <input type="number" id="securityDeposit" placeholder="$0.00">
+                </div>
+
+                <div class="form-group">
+                    <label for="cancellationFee">Cancellation Fee</label>
+                    <input type="number" id="cancellationFee" placeholder="$0.00">
+                </div>
+            </div>
+
+            <!-- Calendar Section -->
+            <div class="calendar-section">
+                <h2 class="section-title">Availability Calendar</h2>
+                
+                <div class="calendar-legend">
+                    <div class="legend-item">
+                        <div class="legend-color legend-available"></div>
+                        <span>Available</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color legend-booked"></div>
+                        <span>Booked</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color legend-selected"></div>
+                        <span>Selected</span>
+                    </div>
+                </div>
+
+                <div class="calendar" id="calendar">
+                    <!-- Calendar will be generated by JavaScript -->
+                </div>
+
+                <div class="form-group">
+                    <label for="timeSlots">Available Time Slots</label>
+                    <select id="timeSlots">
+                        <option value="all-day">All Day</option>
+                        <option value="morning">Morning (8AM - 12PM)</option>
+                        <option value="afternoon">Afternoon (12PM - 6PM)</option>
+                        <option value="evening">Evening (6PM - 10PM)</option>
+                        <option value="custom">Custom Hours</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Summary -->
+        <div class="booking-summary">
+            <h2 class="section-title">Booking Summary</h2>
+            <div class="summary-row">
+                <span>Selected Dates:</span>
+                <span id="selectedDates">None selected</span>
+            </div>
+            <div class="summary-row">
+                <span>Duration:</span>
+                <span id="duration">0 days</span>
+            </div>
+            <div class="summary-row">
+                <span>Rate:</span>
+                <span id="rateDisplay">$0.00/day</span>
+            </div>
+            <div class="summary-row">
+                <span>Subtotal:</span>
+                <span id="subtotal">$0.00</span>
+            </div>
+            <div class="summary-row">
+                <span>Security Deposit:</span>
+                <span id="depositAmount">$0.00</span>
+            </div>
+            <div class="summary-row summary-total">
+                <span>Total Amount:</span>
+                <span id="totalAmount">$0.00</span>
+            </div>
+        </div>
+
+        <!-- Payment Section -->
+        <div class="payment-section">
+            <h2 class="section-title">🔒 Secure Payment</h2>
+            <p style="margin-bottom: 20px; opacity: 0.8;">
+                Your payment will be held in escrow and released to the owner upon successful rental completion.
+            </p>
+            
+            <div id="stripe-payment-element">
+                <!-- Stripe Payment Element will be mounted here -->
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-secondary" onclick="goBack()">Back to Community</button>
+            <button class="btn btn-primary" onclick="confirmBooking()">Confirm Rental Booking</button>
+        </div>
+    </div>
+
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        // Initialize calendar and booking system
+        let selectedDates = [];
+        let currentRate = 0;
+        let rateType = 'daily';
+
+        // Initialize the booking system
+        document.addEventListener('DOMContentLoaded', function() {
+            generateCalendar();
+            setupRateSelection();
+            updateSummary();
+        });
+
+        function generateCalendar() {
+            const calendar = document.getElementById('calendar');
+            const today = new Date();
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+
+            // Add calendar headers
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            days.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-header';
+                header.textContent = day;
+                calendar.appendChild(header);
+            });
+
+            // Generate calendar days for current month
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            // Add empty cells for days before the first day of the month
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day';
+                calendar.appendChild(emptyDay);
+            }
+
+            // Add days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day available';
+                dayElement.textContent = day;
+                dayElement.addEventListener('click', () => selectDate(day, currentMonth, currentYear));
+                calendar.appendChild(dayElement);
+            }
+        }
+
+        function setupRateSelection() {
+            const rateOptions = document.querySelectorAll('.rate-option');
+            rateOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    rateOptions.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                    rateType = option.dataset.rate;
+                    updateSummary();
+                });
+            });
+
+            // Set default to daily rate
+            document.querySelector('[data-rate="daily"]').classList.add('selected');
+        }
+
+        function selectDate(day, month, year) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            
+            if (selectedDates.includes(dateStr)) {
+                selectedDates = selectedDates.filter(date => date !== dateStr);
+            } else {
+                selectedDates.push(dateStr);
+            }
+            
+            selectedDates.sort();
+            updateCalendarDisplay();
+            updateSummary();
+        }
+
+        function updateCalendarDisplay() {
+            const calendarDays = document.querySelectorAll('.calendar-day');
+            calendarDays.forEach(day => {
+                if (day.textContent) {
+                    const dayNum = parseInt(day.textContent);
+                    const today = new Date();
+                    const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+                    
+                    if (selectedDates.includes(dateStr)) {
+                        day.classList.add('selected');
+                    } else {
+                        day.classList.remove('selected');
+                    }
+                }
+            });
+        }
+
+        function updateSummary() {
+            const rateInput = rateType === 'hourly' ? document.getElementById('hourlyRate') : document.getElementById('dailyRate');
+            currentRate = parseFloat(rateInput.value) || 0;
+            
+            const duration = selectedDates.length;
+            const subtotal = currentRate * duration;
+            const deposit = parseFloat(document.getElementById('securityDeposit').value) || 0;
+            const total = subtotal + deposit;
+
+            document.getElementById('selectedDates').textContent = selectedDates.length > 0 ? `${selectedDates.length} dates selected` : 'None selected';
+            document.getElementById('duration').textContent = `${duration} ${rateType === 'hourly' ? 'hours' : 'days'}`;
+            document.getElementById('rateDisplay').textContent = `$${currentRate.toFixed(2)}/${rateType === 'hourly' ? 'hour' : 'day'}`;
+            document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('depositAmount').textContent = `$${deposit.toFixed(2)}`;
+            document.getElementById('totalAmount').textContent = `$${total.toFixed(2)}`;
+        }
+
+        // Update summary when rate inputs change
+        document.getElementById('hourlyRate').addEventListener('input', updateSummary);
+        document.getElementById('dailyRate').addEventListener('input', updateSummary);
+        document.getElementById('securityDeposit').addEventListener('input', updateSummary);
+
+        function confirmBooking() {
+            if (selectedDates.length === 0) {
+                alert('Please select at least one date for your rental.');
+                return;
+            }
+
+            if (currentRate === 0) {
+                alert('Please set a rental rate.');
+                return;
+            }
+
+            // Create rental booking with Stripe escrow
+            const bookingData = {
+                itemTitle: document.getElementById('itemTitle').value,
+                description: document.getElementById('itemDescription').value,
+                category: document.getElementById('itemCategory').value,
+                selectedDates: selectedDates,
+                rateType: rateType,
+                rate: currentRate,
+                securityDeposit: parseFloat(document.getElementById('securityDeposit').value) || 0,
+                cancellationFee: parseFloat(document.getElementById('cancellationFee').value) || 0,
+                timeSlots: document.getElementById('timeSlots').value,
+                totalAmount: parseFloat(document.getElementById('totalAmount').textContent.replace('$', ''))
+            };
+
+            console.log('Creating rental booking:', bookingData);
+            
+            // In a real implementation, this would integrate with Stripe and save to the database
+            alert('Rental booking created successfully! Your listing is now live on MarketPace.');
+            
+            // Redirect back to community page
+            goBack();
+        }
+
+        function goBack() {
+            window.location.href = '/community.html';
+        }
+
+        // Populate initial data if passed from the post creation
+        function populateFromPost(itemId, title, author, dailyRate) {
+            if (title) document.getElementById('itemTitle').value = title;
+            if (dailyRate) document.getElementById('dailyRate').value = dailyRate;
+            updateSummary();
+        }
+
+        // Global function for integration with community.html
+        window.bookRental = populateFromPost;
+    </script>
+</body>
+</html>

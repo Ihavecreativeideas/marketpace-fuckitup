@@ -5216,7 +5216,7 @@
                 // Check if this is a rental post and open rental booking popup instead
                 if (formData.category === 'rent') {
                     // Close the posting modal first
-                    closePostingModal();
+                    document.querySelector('.posting-modal').remove();
                     
                     // Generate a unique item ID for the rental
                     const itemId = 'rental_' + Date.now();
@@ -5225,10 +5225,15 @@
                     const dailyRate = parseFloat(formData.price) || 0;
                     
                     // Open the comprehensive rental booking system
-                    bookRental(itemId, formData.title, formData.author, dailyRate);
+                    if (typeof bookRental === 'function') {
+                        bookRental(itemId, formData.title, formData.author, dailyRate);
+                    } else {
+                        // Fallback: open rental booking page directly
+                        window.location.href = '/customer-booking.html';
+                    }
                     
                     // Show success notification
-                    showNotification('Rental booking system opened! Complete your rental listing setup.', 'success');
+                    showNotification('Opening rental booking system with calendar and pricing options...', 'success');
                     return; // Stop here, don't create a regular post
                 }
                 
