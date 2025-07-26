@@ -11508,7 +11508,7 @@ Example:
                 return;
             }
             
-            // Validate terms and conditions for rental posts
+            // Validate terms and conditions for rental posts - make optional
             if (category === 'rent') {
                 const writeRadio = document.querySelector('input[name="termsMethod"][value="write"]');
                 const isWriteMethod = writeRadio?.checked;
@@ -11516,15 +11516,18 @@ Example:
                 if (isWriteMethod) {
                     const termsText = document.getElementById('rentalTermsText')?.value?.trim();
                     if (!termsText) {
-                        console.log('Validation failed - missing rental terms');
-                        showNotification('Please provide terms and conditions for your rental.', 'error');
-                        return;
+                        console.log('No rental terms provided, using default terms');
+                        // Set default terms instead of failing
+                        const defaultTerms = 'Return';
+                        const termsTextArea = document.getElementById('rentalTermsText');
+                        if (termsTextArea) {
+                            termsTextArea.value = defaultTerms;
+                        }
                     }
                 } else {
                     if (!window.uploadedTermsFile) {
-                        console.log('Validation failed - missing terms file');
-                        showNotification('Please upload your terms and conditions document.', 'error');
-                        return;
+                        console.log('No terms file uploaded, proceeding with default terms');
+                        // Don't fail validation, just proceed
                     }
                 }
             }
