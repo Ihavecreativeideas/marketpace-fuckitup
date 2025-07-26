@@ -5113,7 +5113,7 @@
                     
                     <div style="display: flex; gap: 10px; justify-content: flex-end;">
                         <button type="button" onclick="this.closest('.posting-modal').remove()" style="padding: 10px 20px; background: #666; color: white; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
-                        <button type="submit" style="padding: 10px 20px; background: #00ffff; color: #1a0b3d; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Create Post</button>
+                        <button type="button" onclick="handleFormSubmission()" style="padding: 10px 20px; background: #00ffff; color: #1a0b3d; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Create Post</button>
                     </div>
                 </form>
             `;
@@ -8975,6 +8975,22 @@
             
             // Show success notification
             showNotification(`${category.charAt(0).toUpperCase() + category.slice(1)} post "${title}" created successfully! 🎉`, 'success');
+        }
+
+        // Global form submission handler
+        function handleFormSubmission() {
+            console.log('📋 handleFormSubmission called!');
+            
+            const uploadType = document.getElementById('uploadType')?.value || 'single';
+            console.log('Upload type:', uploadType);
+            
+            if (uploadType === 'bulk') {
+                console.log('Calling submitBulkPost()');
+                submitBulkPost();
+            } else {
+                console.log('Calling submitSinglePost()');
+                submitSinglePost();
+            }
         }
 
         console.log('All post display and interaction functions loaded successfully');
