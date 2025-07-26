@@ -2689,26 +2689,24 @@
                         <input type="text" id="postPrice" class="form-input" placeholder="$0 or price range">
                     </div>
 
-                    <!-- Comprehensive Rental Configuration (for rent only) -->
-                    <div class="form-group" id="rentalRateGroup" style="display: none;">
-                        <label class="form-label">Rental Configuration</label>
+                    <!-- RENTAL CONFIGURATION (Always visible when rent category selected) -->
+                    <div class="form-group rental-fields" style="display: none;">
+                        <label class="form-label" style="color: #00ffff; margin-bottom: 15px;">Rental Rates</label>
                         
-
-
-                        <!-- Rental Rates -->
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                            <div style="padding: 15px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px;">
-                                <label style="display: block; margin-bottom: 10px; color: #10b981; font-weight: 500;">
-                                    Hourly Rate ($)
-                                </label>
-                                <input type="number" id="hourlyRateAmount" placeholder="15.00" step="0.01" min="0" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.9); border: 2px solid rgba(16, 185, 129, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px; font-weight: 500;">
+                            <div style="padding: 15px; background: rgba(16, 185, 129, 0.1); border: 2px solid rgba(16, 185, 129, 0.4); border-radius: 8px;">
+                                <label style="display: block; margin-bottom: 8px; color: #10b981; font-weight: 600; font-size: 14px;">Hourly Rate ($)</label>
+                                <input type="number" id="rentalHourlyRate" name="rentalHourlyRate" placeholder="15.00" step="0.01" min="0" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(16, 185, 129, 0.6); border-radius: 6px; color: #e2e8f0; font-size: 16px; font-weight: 500;">
                             </div>
-                            <div style="padding: 15px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px;">
-                                <label style="display: block; margin-bottom: 10px; color: #3b82f6; font-weight: 500;">
-                                    Daily Rate ($)
-                                </label>
-                                <input type="number" id="dailyRateAmount" placeholder="75.00" step="0.01" min="0" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.9); border: 2px solid rgba(59, 130, 246, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px; font-weight: 500;">
+                            <div style="padding: 15px; background: rgba(59, 130, 246, 0.1); border: 2px solid rgba(59, 130, 246, 0.4); border-radius: 8px;">
+                                <label style="display: block; margin-bottom: 8px; color: #3b82f6; font-weight: 600; font-size: 14px;">Daily Rate ($)</label>
+                                <input type="number" id="rentalDailyRate" name="rentalDailyRate" placeholder="75.00" step="0.01" min="0" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(59, 130, 246, 0.6); border-radius: 6px; color: #e2e8f0; font-size: 16px; font-weight: 500;">
                             </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label" style="color: #00ffff; margin-bottom: 8px;">Custom Terms & Conditions</label>
+                            <textarea id="rentalCustomTerms" name="rentalCustomTerms" placeholder="Please handle with care. Must be returned in same condition." style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(0, 255, 255, 0.4); border-radius: 6px; color: #e2e8f0; font-size: 14px; min-height: 80px; resize: vertical;"></textarea>
                         </div>
                         
                         <div style="margin-bottom: 20px; padding: 12px; background: rgba(0, 255, 255, 0.1); border-radius: 8px; text-align: center;">
@@ -8707,6 +8705,10 @@ Example:
             if (pollFields) pollFields.style.display = 'none';
             if (serviceFields) serviceFields.style.display = 'none';
             
+            // Hide new rental fields section
+            const rentalFieldsSection = document.querySelector('.rental-fields');
+            if (rentalFieldsSection) rentalFieldsSection.style.display = 'none';
+            
             // Handle custom category creation
             if (category === 'custom') {
                 if (customCategoryFields) {
@@ -8738,6 +8740,14 @@ Example:
                     
                 case 'rent':
                     console.log('Showing rental fields');
+                    
+                    // Show the new rental fields section
+                    const rentalFieldsSection = document.querySelector('.rental-fields');
+                    if (rentalFieldsSection) {
+                        rentalFieldsSection.style.display = 'block';
+                        console.log('✅ New rental fields made visible');
+                    }
+                    
                     if (rentalRateField) rentalRateField.style.display = 'block';
                     if (deliveryMethodField) deliveryMethodField.style.display = 'block';
                     
@@ -8747,17 +8757,18 @@ Example:
                     
                     // Debug: Log which inputs are visible after showing rental fields
                     setTimeout(() => {
-                        const hourlyModalEl = document.getElementById('hourlyRateAmountModal');
-                        const dailyModalEl = document.getElementById('dailyRateAmountModal');
-                        const hourlyOrigEl = document.getElementById('hourlyRateAmount');
-                        const dailyOrigEl = document.getElementById('dailyRateAmount');
+                        const hourlyField = document.getElementById('rentalHourlyRate');
+                        const dailyField = document.getElementById('rentalDailyRate');
+                        const termsField = document.getElementById('rentalCustomTerms');
                         
-                        console.log('Rental field visibility debug:', {
-                            rentalRateFieldDisplay: rentalRateField?.style.display,
-                            hourlyModalVisible: hourlyModalEl && window.getComputedStyle(hourlyModalEl).display !== 'none',
-                            dailyModalVisible: dailyModalEl && window.getComputedStyle(dailyModalEl).display !== 'none',
-                            hourlyOrigVisible: hourlyOrigEl && window.getComputedStyle(hourlyOrigEl).display !== 'none',
-                            dailyOrigVisible: dailyOrigEl && window.getComputedStyle(dailyOrigEl).display !== 'none'
+                        console.log('New rental field visibility debug:', {
+                            rentalFieldsSection: !!rentalFieldsSection,
+                            hourlyFieldVisible: hourlyField && window.getComputedStyle(hourlyField).display !== 'none',
+                            dailyFieldVisible: dailyField && window.getComputedStyle(dailyField).display !== 'none',
+                            termsFieldVisible: termsField && window.getComputedStyle(termsField).display !== 'none',
+                            hourlyFieldElement: !!hourlyField,
+                            dailyFieldElement: !!dailyField,
+                            termsFieldElement: !!termsField
                         });
                     }, 100);
                     break;
@@ -11232,10 +11243,10 @@ Example:
                 
                 if (post.category === 'rent') {
                     setTimeout(() => {
-                        // Pre-populate rental rates
-                        const hourlyRateField = document.getElementById('hourlyRateAmount');
-                        const dailyRateField = document.getElementById('dailyRateAmount');
-                        const customTermsField = document.getElementById('rentalTermsCustom');
+                        // Pre-populate rental rates using NEW field IDs
+                        const hourlyRateField = document.getElementById('rentalHourlyRate');
+                        const dailyRateField = document.getElementById('rentalDailyRate');
+                        const customTermsField = document.getElementById('rentalCustomTerms');
                         const paymentMethodEscrow = document.getElementById('escrowPayment');
                         const paymentMethodCash = document.getElementById('cashPayment');
                         
@@ -11260,6 +11271,13 @@ Example:
                             if (privateDeliveryCheckbox) privateDeliveryCheckbox.checked = post.deliveryOptions.privateDelivery || false;
                             if (marketPaceDeliveryCheckbox) marketPaceDeliveryCheckbox.checked = post.deliveryOptions.marketPaceDelivery || false;
                         }
+                        
+                        console.log('✅ Rental fields pre-populated for editing:', {
+                            hourlyRate: post.hourlyRate,
+                            dailyRate: post.dailyRate,
+                            customTerms: post.rentalTerms,
+                            paymentMethod: post.paymentMethod
+                        });
                     }, 100);
                 }
                 
@@ -11305,9 +11323,9 @@ Example:
             
             // Add category-specific data
             if (formData.category === 'rent') {
-                const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
-                const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
-                const customTerms = document.getElementById('rentalTermsCustom')?.value?.trim() || "Please handle with care. Must be returned in same condition.";
+                const hourlyRate = parseFloat(document.getElementById('rentalHourlyRate')?.value) || 0;
+                const dailyRate = parseFloat(document.getElementById('rentalDailyRate')?.value) || 0;
+                const customTerms = document.getElementById('rentalCustomTerms')?.value?.trim() || "Please handle with care. Must be returned in same condition.";
                 const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'escrow';
                 
                 formData.hourlyRate = hourlyRate;
@@ -11338,6 +11356,13 @@ Example:
                 } else {
                     formData.price = `$25/day`;
                 }
+                
+                console.log('✅ Rental data captured for update:', {
+                    hourlyRate: hourlyRate,
+                    dailyRate: dailyRate,
+                    customTerms: customTerms,
+                    paymentMethod: paymentMethod
+                });
             }
             
             if (formData.category === 'event') {
@@ -12230,9 +12255,9 @@ Example:
                 };
                 postData.availabilityDates = [...ownerSelectedDates];
                 // Get custom rental data from form with debugging
-                const customTerms = document.getElementById('rentalTermsCustom')?.value?.trim() || "Please handle with care. Must be returned in same condition.";
-                const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
-                const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
+                const customTerms = document.getElementById('rentalCustomTerms')?.value?.trim() || "Please handle with care. Must be returned in same condition.";
+                const hourlyRate = parseFloat(document.getElementById('rentalHourlyRate')?.value) || 0;
+                const dailyRate = parseFloat(document.getElementById('rentalDailyRate')?.value) || 0;
                 const itemCondition = 'good'; // Default condition
                 const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'escrow';
                 
@@ -12242,12 +12267,12 @@ Example:
                     dailyRate,
                     itemCondition,
                     paymentMethod,
-                    hourlyElement: !!document.getElementById('hourlyRateAmount'),
-                    hourlyValue: document.getElementById('hourlyRateAmount')?.value,
-                    dailyElement: !!document.getElementById('dailyRateAmount'),
-                    dailyValue: document.getElementById('dailyRateAmount')?.value,
-                    termsElement: !!document.getElementById('rentalTermsCustom'),
-                    termsValue: document.getElementById('rentalTermsCustom')?.value
+                    hourlyElement: !!document.getElementById('rentalHourlyRate'),
+                    hourlyValue: document.getElementById('rentalHourlyRate')?.value,
+                    dailyElement: !!document.getElementById('rentalDailyRate'),
+                    dailyValue: document.getElementById('rentalDailyRate')?.value,
+                    termsElement: !!document.getElementById('rentalCustomTerms'),
+                    termsValue: document.getElementById('rentalCustomTerms')?.value
                 });
                 
                 // Get delivery options from checkboxes
