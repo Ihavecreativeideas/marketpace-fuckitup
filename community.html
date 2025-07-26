@@ -6086,7 +6086,19 @@
         }
 
         function deliverNow(item) {
-            alert(`Arranging delivery for "${item}"`);
+            showNotification(`Arranging delivery for "${item}"`, 'success');
+        }
+
+        function bookNow(itemName) {
+            showNotification(`Opening booking calendar for "${itemName}"`, 'success');
+            // Navigate to booking page or open booking modal
+            console.log('Booking item:', itemName);
+        }
+
+        function messageNow(itemName) {
+            showNotification(`Opening message with seller of "${itemName}"`, 'success');
+            // Navigate to messaging system
+            console.log('Messaging about item:', itemName);
         }
 
         function rentNow(item) {
@@ -8824,6 +8836,8 @@
                 ${post.category === 'event' ? createEventDisplay(post) : ''}
                 ${post.uploadType === 'bulk' ? createBulkDisplay(post) : ''}
 
+                ${createActionButtonsDisplay(post)}
+
                 <div style="display: flex; gap: 15px; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
                     <button onclick="likePost('${post.id}')" style="background: none; border: 1px solid rgba(0, 255, 255, 0.3); color: #00ffff; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px;">
                         👍 Like
@@ -8915,6 +8929,43 @@
                     ${post.location ? `<div style="color: #e2e8f0; margin-bottom: 5px;">📍 Location: ${post.location}</div>` : ''}
                     ${post.eventLink ? `<div style="color: #e2e8f0; margin-bottom: 5px;">🔗 <a href="${post.eventLink}" style="color: #00ffff;">Event Link</a></div>` : ''}
                     ${post.hasGeoQR ? `<div style="color: #10b981; font-size: 12px;">✅ Geo QR Check-in Available</div>` : ''}
+                </div>
+            `;
+        }
+
+        function createActionButtonsDisplay(post) {
+            if (!post.actionButtons) return '';
+            
+            const buttons = [];
+            
+            if (post.actionButtons.deliverNow) {
+                buttons.push(`<button onclick="deliverNow('${post.title}')" style="background: linear-gradient(135deg, #00ffff, #0ea5e9); color: #1a0b3d; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">🚚 Deliver Now</button>`);
+            }
+            
+            if (post.actionButtons.selfPickup) {
+                buttons.push(`<button onclick="selfPickup('${post.title}')" style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">📍 Self Pickup</button>`);
+            }
+            
+            if (post.actionButtons.bookNow) {
+                buttons.push(`<button onclick="bookNow('${post.title}')" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">📅 Book Now</button>`);
+            }
+            
+            if (post.actionButtons.callNow) {
+                buttons.push(`<button onclick="callNow('${post.title}')" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">📞 Call Now</button>`);
+            }
+            
+            if (post.actionButtons.messageNow) {
+                buttons.push(`<button onclick="messageNow('${post.title}')" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">💬 Message Now</button>`);
+            }
+            
+            if (buttons.length === 0) return '';
+            
+            return `
+                <div style="background: rgba(0, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; padding: 15px; margin: 15px 0;">
+                    <h4 style="color: #00ffff; margin: 0 0 10px 0; font-size: 14px;">Quick Actions:</h4>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        ${buttons.join('')}
+                    </div>
                 </div>
             `;
         }
@@ -9110,6 +9161,17 @@
                 priceValue = activePriceField ? activePriceField.value.trim() : '';
             }
             
+            // Collect action button states
+            const actionButtons = {
+                deliverNow: document.getElementById('deliverNow')?.checked || false,
+                selfPickup: document.getElementById('selfPickup')?.checked || false,
+                bookNow: document.getElementById('bookNow')?.checked || false,
+                callNow: document.getElementById('callNow')?.checked || false,
+                messageNow: document.getElementById('messageNow')?.checked || false
+            };
+            
+            console.log('Action buttons collected:', actionButtons);
+            
             const formData = {
                 uploadType: 'single',
                 postingMode: currentPostingMode,
@@ -9117,6 +9179,7 @@
                 title: title,
                 description: description,
                 price: priceValue,
+                actionButtons: actionButtons,
                 timestamp: new Date().toISOString(),
                 author: currentPostingMode === 'business' ? "MarketPace Pro Business" : "Local Pace Member",
                 location: "Orange Beach, AL",
