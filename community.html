@@ -12254,6 +12254,14 @@ Example:
                     availabilitySet: ownerSelectedDates.length > 0
                 };
                 postData.availabilityDates = [...ownerSelectedDates];
+                
+                // FORCE RENTAL FIELDS TO BE VISIBLE BEFORE READING VALUES
+                const rentalFieldsSection = document.querySelector('.rental-fields');
+                if (rentalFieldsSection) {
+                    rentalFieldsSection.style.display = 'block';
+                    console.log('🔧 FORCED rental fields to be visible for data capture');
+                }
+                
                 // Get custom rental data from form with debugging
                 const customTerms = document.getElementById('rentalCustomTerms')?.value?.trim() || "Please handle with care. Must be returned in same condition.";
                 const hourlyRate = parseFloat(document.getElementById('rentalHourlyRate')?.value) || 0;
@@ -12261,18 +12269,33 @@ Example:
                 const itemCondition = 'good'; // Default condition
                 const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'escrow';
                 
+                // DEBUG: Log field visibility and values
+                const hourlyField = document.getElementById('rentalHourlyRate');
+                const dailyField = document.getElementById('rentalDailyRate'); 
+                const termsField = document.getElementById('rentalCustomTerms');
+                
                 console.log('🔍 Rental form data capture:', {
                     customTerms,
                     hourlyRate,
                     dailyRate,
                     itemCondition,
                     paymentMethod,
-                    hourlyElement: !!document.getElementById('rentalHourlyRate'),
-                    hourlyValue: document.getElementById('rentalHourlyRate')?.value,
-                    dailyElement: !!document.getElementById('rentalDailyRate'),
-                    dailyValue: document.getElementById('rentalDailyRate')?.value,
-                    termsElement: !!document.getElementById('rentalCustomTerms'),
-                    termsValue: document.getElementById('rentalCustomTerms')?.value
+                    fieldVisibility: {
+                        rentalSection: rentalFieldsSection ? window.getComputedStyle(rentalFieldsSection).display : 'not found',
+                        hourlyVisible: hourlyField ? window.getComputedStyle(hourlyField).display : 'not found',
+                        dailyVisible: dailyField ? window.getComputedStyle(dailyField).display : 'not found',
+                        termsVisible: termsField ? window.getComputedStyle(termsField).display : 'not found'
+                    },
+                    fieldValues: {
+                        hourlyValue: hourlyField?.value || 'EMPTY',
+                        dailyValue: dailyField?.value || 'EMPTY', 
+                        termsValue: termsField?.value || 'EMPTY'
+                    },
+                    fieldElements: {
+                        hourlyExists: !!hourlyField,
+                        dailyExists: !!dailyField,
+                        termsExists: !!termsField
+                    }
                 });
                 
                 // Get delivery options from checkboxes
