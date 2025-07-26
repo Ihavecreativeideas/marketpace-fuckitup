@@ -6329,7 +6329,7 @@
             
             commentsList.appendChild(newComment);
             commentInput.value = '';
-            showNotification('Comment posted!', 'success');
+            showNotification('Comment posted successfully!', 'success');
         }
 
         function likeComment(button) {
@@ -9010,11 +9010,51 @@
         }
 
         function commentOnPost(postId) {
-            const comment = prompt('Add a comment:');
-            if (comment && comment.trim()) {
-                console.log('Comment on post:', postId, comment);
-                showNotification('Comment added successfully!', 'success');
+            // Find the post element
+            const post = document.querySelector(`[data-post-id="${postId}"]`) || 
+                         document.querySelector('.community-post');
+            
+            if (!post) {
+                console.error('Could not find post element');
+                return;
             }
+            
+            // Check if comment section already exists
+            let commentSection = post.querySelector('.comments-section');
+            if (commentSection) {
+                // Toggle visibility
+                commentSection.style.display = commentSection.style.display === 'none' ? 'block' : 'none';
+                return;
+            }
+            
+            // Create comment section
+            commentSection = document.createElement('div');
+            commentSection.className = 'comments-section';
+            commentSection.innerHTML = `
+                <div class="comment-input-area">
+                    <textarea class="comment-input" placeholder="Write a comment..." rows="2"></textarea>
+                    <button class="comment-send-btn" onclick="postComment(this)">Post</button>
+                </div>
+                <div class="comments-list">
+                    <div class="comment">
+                        <div class="comment-author">
+                            <div class="comment-avatar">JD</div>
+                            <div class="comment-content">
+                                <div class="comment-header">
+                                    <span class="comment-name">John Doe</span>
+                                    <span class="comment-time">5 minutes ago</span>
+                                </div>
+                                <p class="comment-text">This looks great! Is it available?</p>
+                                <div class="comment-actions">
+                                    <button class="comment-action-btn" onclick="likeComment(this)">Like</button>
+                                    <button class="comment-action-btn" onclick="replyComment(this)">Reply</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            post.appendChild(commentSection);
         }
 
         function sharePost(postId) {
