@@ -2850,7 +2850,7 @@
                                 </svg>
                                 Click to add photos
                             </p>
-                            <input type="file" id="imageInput" multiple accept="image/*" style="display: none;">
+                            <input type="file" id="imageInput" multiple accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
                         </div>
                     </div>
 
@@ -8865,6 +8865,8 @@
                 ${post.category === 'poll' ? createPollDisplay(post) : ''}
                 ${post.category === 'event' ? createEventDisplay(post) : ''}
                 ${post.uploadType === 'bulk' ? createBulkDisplay(post) : ''}
+                
+                ${post.images && post.images.length > 0 ? createImageDisplay(post.images) : ''}
 
                 ${createActionButtonsDisplay(post)}
 
@@ -9047,6 +9049,114 @@
                     </div>
                 </div>
             `;
+        }
+
+        // Create image display for posts
+        function createImageDisplay(images) {
+            if (!images || images.length === 0) return '';
+            
+            return `
+                <div style="margin: 15px 0;">
+                    <div style="display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); max-height: 300px; overflow-y: auto;">
+                        ${images.map(img => `
+                            <div style="position: relative; border-radius: 8px; overflow: hidden; aspect-ratio: 1; border: 2px solid rgba(0, 255, 255, 0.3);">
+                                <img src="${img.url}" alt="${img.name || 'Post image'}" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" onclick="openImageModal('${img.url}')">
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${images.length > 4 ? `<div style="color: #94a3b8; font-size: 12px; text-align: center; margin-top: 8px;">+ ${images.length - 4} more images</div>` : ''}
+                </div>
+            `;
+        }
+
+        // Open image in modal for full view
+        function openImageModal(imageUrl) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0, 0, 0, 0.9); z-index: 10000; 
+                display: flex; align-items: center; justify-content: center;
+                cursor: pointer;
+            `;
+            modal.innerHTML = `
+                <img src="${imageUrl}" style="max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0, 255, 255, 0.3);">
+                <button onclick="this.closest('div').remove()" style="position: absolute; top: 20px; right: 20px; background: rgba(0, 0, 0, 0.7); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer;">×</button>
+            `;
+            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+            document.body.appendChild(modal);
+        }
+
+        // Image upload storage
+        let uploadedImages = [];
+
+        // Handle image upload
+        function handleImageUpload(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            console.log('📸 Processing', files.length, 'image(s)...');
+            
+            Array.from(files).forEach((file, index) => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const imageData = {
+                            id: Date.now() + index,
+                            name: file.name,
+                            url: e.target.result,
+                            size: file.size
+                        };
+                        uploadedImages.push(imageData);
+                        console.log('✅ Image processed:', file.name);
+                        updateImagePreview();
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    console.warn('⚠️ Skipped non-image file:', file.name);
+                }
+            });
+        }
+
+        // Update image preview in upload area
+        function updateImagePreview() {
+            const uploadArea = document.querySelector('.image-upload-area');
+            if (!uploadArea) return;
+
+            if (uploadedImages.length === 0) {
+                uploadArea.innerHTML = `
+                    <p>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                            <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(0, 255, 255, 0.2)"/>
+                            <circle cx="9" cy="9" r="2" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                        Click to add photos
+                    </p>
+                    <input type="file" id="imageInput" multiple accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                `;
+            } else {
+                uploadArea.innerHTML = `
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+                        ${uploadedImages.map(img => `
+                            <div style="position: relative; width: 60px; height: 60px;">
+                                <img src="${img.url}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px; border: 2px solid #00ffff;">
+                                <button onclick="removeImage(${img.id})" style="position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 50%; background: #ff4444; border: none; color: white; font-size: 12px; cursor: pointer;">×</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <p style="color: #00ffff; font-size: 12px;">
+                        ${uploadedImages.length} image(s) selected • Click to add more
+                    </p>
+                    <input type="file" id="imageInput" multiple accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                `;
+            }
+        }
+
+        // Remove image from upload
+        function removeImage(imageId) {
+            uploadedImages = uploadedImages.filter(img => img.id !== imageId);
+            updateImagePreview();
+            console.log('🗑️ Image removed. Remaining:', uploadedImages.length);
         }
 
         // Post interaction data storage
@@ -9369,6 +9479,7 @@
                 description: description,
                 price: priceValue,
                 actionButtons: actionButtons,
+                images: uploadedImages.map(img => ({ url: img.url, name: img.name })), // Include uploaded images
                 timestamp: new Date().toISOString(),
                 author: currentPostingMode === 'business' ? "MarketPace Pro Business" : "Local Pace Member",
                 location: "Orange Beach, AL",
@@ -9386,6 +9497,9 @@
             // Add to profile based on posting mode
             addPostToProfile(formData, currentPostingMode);
             console.log('✅ Post added to profile for mode:', currentPostingMode);
+            
+            // Clear uploaded images after successful post
+            uploadedImages = [];
             
             // Close modal and show success
             const modal = document.querySelector('.posting-modal');
