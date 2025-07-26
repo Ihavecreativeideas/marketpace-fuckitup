@@ -4933,7 +4933,7 @@
                     
                     <div id="priceField" style="margin-bottom: 20px; display: block;">
                         <label style="display: block; margin-bottom: 5px; color: #00ffff;">Price:</label>
-                        <input type="text" id="postPrice" placeholder="$0.00" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                        <input type="text" id="postPrice" placeholder="$0.00" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;" onchange="console.log('Price changed to:', this.value);">
                     </div>
 
                     <!-- Rental Rate Options (for rent only) -->
@@ -5178,13 +5178,17 @@
 
             // Submit single item post
             function submitSinglePost() {
+                // Get the price from the correct modal input field
+                const activePriceField = document.querySelector('.posting-modal #postPrice');
+                const priceValue = activePriceField ? activePriceField.value.trim() : '';
+                
                 const formData = {
                     uploadType: 'single',
                     postingMode: currentPostingMode,
                     category: document.getElementById('postCategory').value,
                     title: document.getElementById('postTitle').value,
                     description: document.getElementById('postDescription').value,
-                    price: document.getElementById('postPrice')?.value,
+                    price: priceValue,
                     eventDate: document.getElementById('eventDate')?.value,
                     eventTime: document.getElementById('eventTime')?.value,
                     eventLocation: document.getElementById('eventLocation')?.value,
@@ -5209,8 +5213,16 @@
                     id: Date.now()
                 };
                 
+                // Enhanced validation for rental/sale posts
+                const requiresPrice = ['sale', 'rent', 'service'].includes(formData.category);
+                
                 if (!formData.title || !formData.description) {
-                    showNotification('Please fill in all required fields.', 'error');
+                    showNotification('Please fill in title and description.', 'error');
+                    return;
+                }
+                
+                if (requiresPrice && (!formData.price || formData.price.length === 0)) {
+                    showNotification('Please enter a price for this item.', 'error');
                     return;
                 }
                 
