@@ -2631,6 +2631,22 @@
                         <textarea id="postDescription" class="form-textarea" placeholder="Tell the local pace more details..."></textarea>
                     </div>
 
+                    <!-- RENTAL RATES - ALWAYS VISIBLE FOR TESTING -->
+                    <div id="rentalRatesVisible" style="margin-bottom: 20px; background: #00ffff; color: #000; border-radius: 10px; padding: 20px;">
+                        <h3 style="margin: 0 0 15px 0; color: #000;">Set Rental Rates</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; color: #000; font-weight: bold;">Hourly Rate ($):</label>
+                                <input type="number" id="hourlyRateTest" placeholder="15.00" step="0.01" style="width: 100%; padding: 10px; border: 2px solid #000; border-radius: 5px; background: #fff; color: #000; font-size: 16px;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; color: #000; font-weight: bold;">Daily Rate ($):</label>
+                                <input type="number" id="dailyRateTest" placeholder="75.00" step="0.01" style="width: 100%; padding: 10px; border: 2px solid #000; border-radius: 5px; background: #fff; color: #000; font-size: 16px;">
+                            </div>
+                        </div>
+                        <small style="color: #000; font-size: 12px; margin-top: 8px; display: block;">Enter at least one rate. This will be used for your rental pricing.</small>
+                    </div>
+
                     <!-- Price (for sale/rent/service) -->
                     <div class="form-group" id="priceGroup" style="display: none;">
                         <label class="form-label" for="postPrice">Price</label>
@@ -5186,12 +5202,11 @@
                 
                 // Handle rental posts with rate validation
                 if (formData.category === 'rent') {
-                    // Get rental rate information from the correct input fields
-                    const selectedRateType = document.querySelector('input[name="rentalRate"]:checked')?.value || 'daily';
-                    const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
-                    const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
+                    // Get rental rate information from the test input fields
+                    const hourlyRate = parseFloat(document.getElementById('hourlyRateTest')?.value) || 0;
+                    const dailyRate = parseFloat(document.getElementById('dailyRateTest')?.value) || 0;
                     
-                    console.log('Rate values captured:', { selectedRateType, hourlyRate, dailyRate });
+                    console.log('Rate values captured:', { hourlyRate, dailyRate });
                     
                     // Validate that a rate is set
                     if (hourlyRate === 0 && dailyRate === 0) {
@@ -5199,16 +5214,17 @@
                         return;
                     }
                     
-                    // Set the price field based on selected rate type for display purposes
-                    if (selectedRateType === 'hourly' && hourlyRate > 0) {
+                    // Set the price field based on available rates for display purposes
+                    if (hourlyRate > 0 && dailyRate > 0) {
+                        formData.price = `$${hourlyRate.toFixed(2)}/hour, $${dailyRate.toFixed(2)}/day`;
+                    } else if (hourlyRate > 0) {
                         formData.price = `$${hourlyRate.toFixed(2)}/hour`;
-                    } else if (selectedRateType === 'daily' && dailyRate > 0) {
+                    } else if (dailyRate > 0) {
                         formData.price = `$${dailyRate.toFixed(2)}/day`;
                     }
                     
                     // Add rental rate data to formData
                     formData.rentalRates = {
-                        selectedType: selectedRateType,
                         hourlyRate: hourlyRate,
                         dailyRate: dailyRate
                     };
