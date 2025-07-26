@@ -9338,3 +9338,11 @@ app.get("/mypace-rewards-wallet.html", (req: any, res: any) => {
 app.get("/business-loyalty-manager.html", (req: any, res: any) => {
   res.sendFile(path.join(__dirname, "../business-loyalty-manager.html"));
 });
+
+app.get("/cloudinary-demo", (req: any, res: any) => {
+  res.sendFile(path.join(__dirname, "../cloudinary-demo.html"));
+});
+
+app.get("/cloudinary-demo.html", (req: any, res: any) => {
+  res.sendFile(path.join(__dirname, "../cloudinary-demo.html"));
+});
