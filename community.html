@@ -8747,11 +8747,9 @@ Example:
                     if (rentalRateField) rentalRateField.style.display = 'block';
                     if (deliveryMethodField) deliveryMethodField.style.display = 'block';
                     
-                    // Embedded calendar disabled to prevent glitching
-                    // setTimeout(() => {
-                    //     console.log('🗓️ Adding embedded rental calendar');
-                    //     addEmbeddedRentalCalendar();
-                    // }, 100);
+                    // Initialize owner availability calendar
+                    console.log('🗓️ Initializing rental calendar...');
+                    initializeOwnerCalendar();
                     
                     // Debug: Log which inputs are visible after showing rental fields
                     setTimeout(() => {
@@ -10736,8 +10734,12 @@ Example:
 
         function generateOwnerAvailabilityCalendar() {
             const calendar = document.getElementById('ownerAvailabilityCalendar');
-            if (!calendar) return;
+            if (!calendar) {
+                console.error('❌ Calendar container not found');
+                return;
+            }
 
+            console.log('📅 Generating calendar grid...');
             calendar.innerHTML = '';
             
             // Add day headers
@@ -10746,6 +10748,18 @@ Example:
                 const header = document.createElement('div');
                 header.className = 'calendar-day header';
                 header.textContent = day;
+                header.style.cssText = `
+                    aspect-ratio: 1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(0, 255, 255, 0.1);
+                    color: #00ffff;
+                    font-weight: bold;
+                    cursor: default;
+                    font-size: 10px;
+                    border-radius: 4px;
+                `;
                 calendar.appendChild(header);
             });
 
@@ -10760,29 +10774,76 @@ Example:
                 dayElement.textContent = date.getDate();
                 dayElement.dataset.date = date.toISOString().split('T')[0];
                 
+                // Apply base styling
+                dayElement.style.cssText = `
+                    aspect-ratio: 1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(30, 41, 59, 0.6);
+                    border-radius: 4px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    font-size: 12px;
+                    font-weight: 500;
+                    border: 1px solid transparent;
+                    color: #e2e8f0;
+                `;
+                
                 if (ownerSelectedDates.includes(dayElement.dataset.date)) {
                     dayElement.classList.add('selected');
+                    dayElement.style.background = '#00ffff';
+                    dayElement.style.color = '#1a0b3d';
+                    dayElement.style.fontWeight = 'bold';
+                    dayElement.style.boxShadow = '0 0 8px rgba(0, 255, 255, 0.4)';
                 }
                 
                 dayElement.addEventListener('click', function() {
                     toggleOwnerDate(this, dayElement.dataset.date);
                 });
                 
+                dayElement.addEventListener('mouseenter', function() {
+                    if (!this.classList.contains('selected')) {
+                        this.style.background = 'rgba(0, 255, 255, 0.2)';
+                        this.style.borderColor = 'rgba(0, 255, 255, 0.4)';
+                    }
+                });
+                
+                dayElement.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('selected')) {
+                        this.style.background = 'rgba(30, 41, 59, 0.6)';
+                        this.style.borderColor = 'transparent';
+                    }
+                });
+                
                 calendar.appendChild(dayElement);
             }
+            
+            console.log(`📅 Calendar generated with ${7 + 28} cells (headers + days)`);
         }
 
         function toggleOwnerDate(element, dateStr) {
             if (element.classList.contains('selected')) {
+                // Deselect date
                 element.classList.remove('selected');
+                element.style.background = 'rgba(30, 41, 59, 0.6)';
+                element.style.color = '#e2e8f0';
+                element.style.fontWeight = '500';
+                element.style.boxShadow = 'none';
                 ownerSelectedDates = ownerSelectedDates.filter(d => d !== dateStr);
             } else {
+                // Select date
                 element.classList.add('selected');
+                element.style.background = '#00ffff';
+                element.style.color = '#1a0b3d';
+                element.style.fontWeight = 'bold';
+                element.style.boxShadow = '0 0 8px rgba(0, 255, 255, 0.4)';
                 ownerSelectedDates.push(dateStr);
             }
             
             ownerSelectedDates.sort();
             updateOwnerSelectedDatesDisplay();
+            console.log(`📅 Date ${dateStr} ${element.classList.contains('selected') ? 'selected' : 'deselected'}`);
         }
 
         function updateOwnerSelectedDatesDisplay() {
@@ -10866,10 +10927,12 @@ Example:
 
         // Initialize owner calendar when rental category is selected
         function initializeOwnerCalendar() {
+            console.log('📅 Initializing owner availability calendar...');
             setTimeout(() => {
                 generateOwnerAvailabilityCalendar();
                 updateOwnerSelectedDatesDisplay();
-            }, 100);
+                console.log('📅 Owner calendar generated');
+            }, 300);
         }
 
         // Post interaction data storage
