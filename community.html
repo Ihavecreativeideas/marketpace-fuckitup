@@ -2637,9 +2637,9 @@
                         <input type="text" id="postPrice" class="form-input" placeholder="$0 or price range">
                     </div>
 
-                    <!-- Rental Rate Options (for rent only) -->
-                    <div id="rentalRateField" style="margin-bottom: 20px; display: none; background: rgba(0, 255, 255, 0.1); border: 2px solid #00ffff; border-radius: 10px; padding: 20px;">
-                        <h4 style="color: #00ffff; margin-bottom: 15px;">🎯 RENTAL RATE STRUCTURE - THIS SHOULD BE VISIBLE</h4>
+                    <!-- RENTAL RATE STRUCTURE - TESTING VISIBILITY -->
+                    <div id="rentalRateField" class="form-group" style="margin-bottom: 20px; display: block; background: rgba(0, 255, 255, 0.2); border: 3px solid #00ffff; border-radius: 10px; padding: 20px; position: relative; z-index: 10000;">
+                        <h4 style="color: #00ffff; margin-bottom: 15px;">🎯 RENTAL RATE STRUCTURE</h4>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                             <label style="display: flex; align-items: center; padding: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; cursor: pointer; color: #10b981;">
                                 <input type="radio" name="rentalRate" value="hourly" id="hourlyRate" style="margin-right: 8px;">
@@ -5199,6 +5199,13 @@
                         return;
                     }
                     
+                    // Set the price field based on selected rate type for display purposes
+                    if (selectedRateType === 'hourly' && hourlyRate > 0) {
+                        formData.price = `$${hourlyRate.toFixed(2)}/hour`;
+                    } else if (selectedRateType === 'daily' && dailyRate > 0) {
+                        formData.price = `$${dailyRate.toFixed(2)}/day`;
+                    }
+                    
                     // Add rental rate data to formData
                     formData.rentalRates = {
                         selectedType: selectedRateType,
@@ -5206,6 +5213,7 @@
                         dailyRate: dailyRate
                     };
                     
+                    console.log('Rental post data prepared:', formData);
                     // Continue with normal posting flow
                 }
 
