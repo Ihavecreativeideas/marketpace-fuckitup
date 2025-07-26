@@ -5049,7 +5049,7 @@
                     
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; margin-bottom: 5px; color: #00ffff;">Images:</label>
-                        <input type="file" id="postImages" multiple accept="image/*" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                        <input type="file" id="postImages" multiple accept="image/*" onchange="handlePostImageUpload('postImages')" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
                     </div>
                     
                     <div style="margin-bottom: 20px;">
@@ -5616,8 +5616,253 @@
             }
         }
         
+        // ========== CLOUDINARY IMAGE UPLOAD FUNCTIONS ==========
+        
+        // Upload image to Cloudinary CDN
+        async function uploadToCloudinary(file, endpoint) {
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Upload failed: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.error || 'Upload failed');
+                }
+                
+                return result;
+            } catch (error) {
+                console.error('Cloudinary upload error:', error);
+                throw error;
+            }
+        }
+        
+        // Handle profile picture upload
+        async function previewProfilePic() {
+            const fileInput = document.getElementById('profilePicInput');
+            const file = fileInput.files[0];
+            
+            if (file) {
+                await handleProfilePicUpload(file);
+            }
+        }
+        
+        async function handleProfilePicUpload(file) {
+            try {
+                showUploadProgress('Uploading profile picture...');
+                const result = await uploadToCloudinary(file, '/api/upload/profile');
+                
+                // Update profile picture display
+                const profileImg = document.querySelector('.profile-pic img, .composer-avatar img, .profile-avatar img');
+                if (profileImg) {
+                    profileImg.src = result.responsiveUrls.medium;
+                }
+                
+                showNotification('Profile picture updated successfully!', 'success');
+                return result;
+            } catch (error) {
+                showNotification('Failed to upload profile picture: ' + error.message, 'error');
+                return null;
+            }
+        }
+        
+        // Handle post image upload
+        async function handlePostImageUpload(inputId = 'imageInput') {
+            const fileInput = document.getElementById(inputId);
+            const files = fileInput.files;
+            
+            if (!files || files.length === 0) {
+                showNotification('Please select images first', 'warning');
+                return [];
+            }
+            
+            const uploadedImages = [];
+            
+            try {
+                showUploadProgress(`Uploading ${files.length} image(s)...`);
+                
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const result = await uploadToCloudinary(file, '/api/upload/post');
+                    uploadedImages.push(result);
+                }
+                
+                // Display uploaded images
+                displayUploadedImages(uploadedImages, inputId + '-preview');
+                showNotification(`${uploadedImages.length} image(s) uploaded successfully!`, 'success');
+                return uploadedImages;
+            } catch (error) {
+                showNotification('Failed to upload images: ' + error.message, 'error');
+                return [];
+            }
+        }
+        
+        // Handle product image upload  
+        async function handleProductImageUpload(inputId = 'postImages') {
+            const fileInput = document.getElementById(inputId);
+            const files = fileInput.files;
+            
+            if (!files || files.length === 0) {
+                showNotification('Please select images first', 'warning');
+                return [];
+            }
+            
+            const uploadedImages = [];
+            
+            try {
+                showUploadProgress(`Uploading ${files.length} product image(s)...`);
+                
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const result = await uploadToCloudinary(file, '/api/upload/product');
+                    uploadedImages.push(result);
+                }
+                
+                displayUploadedImages(uploadedImages, inputId + '-preview');
+                showNotification(`${uploadedImages.length} product image(s) uploaded successfully!`, 'success');
+                return uploadedImages;
+            } catch (error) {
+                showNotification('Failed to upload product images: ' + error.message, 'error');
+                return [];
+            }
+        }
+        
+        // Display uploaded images preview
+        function displayUploadedImages(images, containerId) {
+            let container = document.getElementById(containerId);
+            if (!container) {
+                container = document.createElement('div');
+                container.id = containerId;
+                container.style.cssText = `
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                    gap: 10px;
+                    margin: 15px 0;
+                    padding: 15px;
+                    border: 1px solid rgba(0, 255, 255, 0.3);
+                    border-radius: 8px;
+                    background: rgba(0, 0, 0, 0.2);
+                `;
+                
+                // Insert after the related file input
+                const fileInput = document.querySelector('#' + containerId.replace('-preview', ''));
+                if (fileInput && fileInput.parentNode) {
+                    fileInput.parentNode.insertBefore(container, fileInput.nextSibling);
+                }
+            }
+            
+            container.innerHTML = '';
+            
+            images.forEach((image, index) => {
+                const imgContainer = document.createElement('div');
+                imgContainer.style.cssText = `
+                    position: relative;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    border: 1px solid rgba(0, 255, 255, 0.2);
+                `;
+                
+                imgContainer.innerHTML = `
+                    <img src="${image.responsiveUrls.small}" 
+                         alt="Uploaded image ${index + 1}"
+                         style="width: 100%; height: 80px; object-fit: cover;">
+                    <div style="position: absolute; top: 5px; right: 5px; 
+                                background: rgba(0, 0, 0, 0.7); color: white; 
+                                border-radius: 50%; width: 20px; height: 20px; 
+                                display: flex; align-items: center; justify-content: center; 
+                                cursor: pointer; font-size: 12px;"
+                         onclick="removeUploadedImage('${image.publicId}', this.parentElement)">×</div>
+                `;
+                
+                container.appendChild(imgContainer);
+            });
+        }
+        
+        // Remove uploaded image
+        async function removeUploadedImage(publicId, element) {
+            try {
+                const response = await fetch(`/api/upload/${encodeURIComponent(publicId)}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    element.remove();
+                    showNotification('Image removed successfully', 'success');
+                } else {
+                    showNotification('Failed to remove image', 'error');
+                }
+            } catch (error) {
+                showNotification('Error removing image', 'error');
+            }
+        }
+        
+        // Show upload progress
+        function showUploadProgress(message) {
+            const notification = document.createElement('div');
+            notification.className = 'upload-progress';
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 20px; height: 20px; border: 2px solid #00ffff; 
+                                border-top: 2px solid transparent; border-radius: 50%; 
+                                animation: spin 1s linear infinite;"></div>
+                    <span>${message}</span>
+                </div>
+            `;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0, 0, 0, 0.9);
+                color: #00ffff;
+                padding: 15px 25px;
+                border-radius: 8px;
+                z-index: 1001;
+                font-weight: bold;
+                border: 1px solid rgba(0, 255, 255, 0.3);
+            `;
+            
+            // Add spinning animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            `;
+            if (!document.querySelector('style[data-upload-styles]')) {
+                style.setAttribute('data-upload-styles', 'true');
+                document.head.appendChild(style);
+            }
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 10 seconds
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
+            }, 10000);
+            
+            return notification;
+        }
+
         // Show notification function
         function showNotification(message, type = 'info') {
+            // Remove any existing upload progress
+            const existingProgress = document.querySelector('.upload-progress');
+            if (existingProgress) {
+                document.body.removeChild(existingProgress);
+            }
+            
             const notification = document.createElement('div');
             notification.style.cssText = `
                 position: fixed;
