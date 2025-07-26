@@ -2553,33 +2553,25 @@
 
                     <!-- Rental Rate Options (for rent only) -->
                     <div class="form-group" id="rentalRateGroup" style="display: none;">
-                        <label class="form-label">Rental Rate Structure</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-                            <label class="rate-option" style="display: flex; align-items: center; padding: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; cursor: pointer;">
-                                <input type="radio" name="rentalRate" value="hourly" id="hourlyRate" style="margin-right: 8px;">
-                                <span style="color: #10b981;">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
-                                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                                        <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
+                        <label class="form-label">Rental Rates</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                            <div style="padding: 15px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px;">
+                                <label style="display: flex; align-items: center; margin-bottom: 10px; color: #10b981; font-weight: 500;">
+                                    <input type="radio" name="rentalRate" value="hourly" id="hourlyRate" style="margin-right: 8px;">
                                     Hourly Rate
-                                </span>
-                            </label>
-                            <label class="rate-option" style="display: flex; align-items: center; padding: 10px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; cursor: pointer;">
-                                <input type="radio" name="rentalRate" value="daily" id="dailyRate" style="margin-right: 8px;" checked>
-                                <span style="color: #3b82f6;">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
-                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
-                                        <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2"/>
-                                        <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2"/>
-                                        <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/>
-                                    </svg>
+                                </label>
+                                <input type="number" id="hourlyRateAmount" placeholder="$0.00" step="0.01" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px;">
+                            </div>
+                            <div style="padding: 15px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px;">
+                                <label style="display: flex; align-items: center; margin-bottom: 10px; color: #3b82f6; font-weight: 500;">
+                                    <input type="radio" name="rentalRate" value="daily" id="dailyRate" style="margin-right: 8px;" checked>
                                     Daily Rate (Recommended)
-                                </span>
-                            </label>
+                                </label>
+                                <input type="number" id="dailyRateAmount" placeholder="$0.00" step="0.01" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(59, 130, 246, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px;">
+                            </div>
                         </div>
-                        <div style="margin-top: 10px; padding: 10px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; font-size: 12px; color: #94a3b8;">
-                            <strong>Daily Rate Tips:</strong> Most successful rentals use flat daily rates. Hourly rates work best for tools/equipment needed for specific tasks.
+                        <div style="margin-top: 15px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; font-size: 13px; color: #94a3b8; text-align: center;">
+                            💡 <strong>Tip:</strong> Daily rates work best for most rentals. Set hourly rates for short-term tool usage.
                         </div>
                     </div>
 
@@ -5146,8 +5138,10 @@
                 }
                 
                 // Show rental rate field for rent category only
-                if (category === 'rent' && rentalRateField) {
-                    rentalRateField.style.display = 'block';
+                if (category === 'rent') {
+                    if (priceField) priceField.style.display = 'none'; // Hide regular price field for rent
+                    const rentalGroup = document.getElementById('rentalRateGroup');
+                    if (rentalGroup) rentalGroup.style.display = 'block';
                 }
                 
                 if (category === 'event' && eventFields) {
@@ -5215,25 +5209,30 @@
                 
                 // Check if this is a rental post and open rental booking popup instead
                 if (formData.category === 'rent') {
+                    // Get rental rate information
+                    const selectedRateType = document.querySelector('input[name="rentalRate"]:checked')?.value || 'daily';
+                    const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
+                    const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
+                    
+                    // Validate that a rate is set
+                    if (hourlyRate === 0 && dailyRate === 0) {
+                        showNotification('Please set at least one rental rate (hourly or daily).', 'error');
+                        return;
+                    }
+                    
                     // Close the posting modal first
                     document.querySelector('.posting-modal').remove();
                     
-                    // Generate a unique item ID for the rental
-                    const itemId = 'rental_' + Date.now();
+                    // Open simplified rental booking calendar
+                    openRentalBookingCalendar({
+                        title: formData.title,
+                        description: formData.description,
+                        rateType: selectedRateType,
+                        hourlyRate: hourlyRate,
+                        dailyRate: dailyRate,
+                        author: formData.author
+                    });
                     
-                    // Extract daily rate from the price field
-                    const dailyRate = parseFloat(formData.price) || 0;
-                    
-                    // Open the comprehensive rental booking system
-                    if (typeof bookRental === 'function') {
-                        bookRental(itemId, formData.title, formData.author, dailyRate);
-                    } else {
-                        // Fallback: open rental booking page directly
-                        window.location.href = '/customer-booking.html';
-                    }
-                    
-                    // Show success notification
-                    showNotification('Opening rental booking system with calendar and pricing options...', 'success');
                     return; // Stop here, don't create a regular post
                 }
                 
@@ -8017,7 +8016,278 @@
         }
     </script>
 
-    <!-- Include Rental Booking System -->
-    <script src="customer-booking.js"></script>
+    <script>
+        // Simplified Rental Booking Calendar System
+        let selectedDates = [];
+        let currentRentalData = {};
+
+        function openRentalBookingCalendar(rentalData) {
+            currentRentalData = rentalData;
+            selectedDates = [];
+            
+            const modal = document.createElement('div');
+            modal.className = 'rental-booking-modal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                backdrop-filter: blur(10px);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            `;
+            
+            const container = document.createElement('div');
+            container.style.cssText = `
+                background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+                border-radius: 20px;
+                padding: 30px;
+                max-width: 500px;
+                width: 100%;
+                max-height: 90vh;
+                overflow-y: auto;
+                border: 2px solid rgba(0, 255, 255, 0.3);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            `;
+            
+            container.innerHTML = `
+                <div style="text-align: center; margin-bottom: 25px;">
+                    <div style="background: linear-gradient(90deg, #f59e0b, #f97316); padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+                        <div style="color: #0f172a; font-weight: bold; font-size: 14px;">📋 MarketPace Pro Feature - FREE</div>
+                        <div style="color: #0f172a; font-weight: bold; font-size: 14px;">Until Jan 1, 2026!</div>
+                        <div style="color: #0f172a; font-size: 12px; margin-top: 5px;">Advanced rental booking is a Pro feature. All Pro features are free during our launch campaign!</div>
+                    </div>
+                    
+                    <h2 style="color: #00ffff; font-size: 1.5rem; margin-bottom: 5px;">📅 Rent</h2>
+                    <h3 style="color: #e2e8f0; font-size: 1.2rem; margin-bottom: 20px;">${rentalData.title}</h3>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: #cbd5e1; font-weight: 500; margin-bottom: 10px;">Select dates to check availability:</label>
+                    <div id="rentalCalendar" style="
+                        display: grid;
+                        grid-template-columns: repeat(7, 1fr);
+                        gap: 5px;
+                        background: rgba(15, 23, 42, 0.7);
+                        padding: 15px;
+                        border-radius: 12px;
+                        border: 1px solid rgba(0, 255, 255, 0.2);
+                    "></div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: #cbd5e1; font-weight: 500; margin-bottom: 10px;">Your Name:</label>
+                    <input type="text" id="renterName" placeholder="Enter your name" style="
+                        width: 100%;
+                        padding: 12px;
+                        background: rgba(15, 23, 42, 0.8);
+                        border: 1px solid rgba(0, 255, 255, 0.3);
+                        border-radius: 8px;
+                        color: #e2e8f0;
+                        font-size: 16px;
+                    ">
+                </div>
+
+                <div style="background: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(59, 130, 246, 0.3);">
+                    <h4 style="color: #8b5cf6; margin-bottom: 15px; font-size: 1.1rem;">Pricing Breakdown:</h4>
+                    <div id="pricingDetails" style="color: #cbd5e1; font-size: 15px;">
+                        Select dates to see pricing
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button onclick="closeRentalBooking()" style="
+                        padding: 12px 25px;
+                        background: rgba(107, 114, 128, 0.8);
+                        color: #e2e8f0;
+                        border: none;
+                        border-radius: 10px;
+                        font-size: 16px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                    ">Cancel</button>
+                    <button onclick="confirmRentalBooking()" style="
+                        padding: 12px 25px;
+                        background: linear-gradient(135deg, #10b981, #059669);
+                        color: white;
+                        border: none;
+                        border-radius: 10px;
+                        font-size: 16px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+                    ">Confirm Rental</button>
+                </div>
+            `;
+            
+            modal.appendChild(container);
+            document.body.appendChild(modal);
+            
+            generateRentalCalendar();
+            updatePricingDisplay();
+        }
+
+        function generateRentalCalendar() {
+            const calendar = document.getElementById('rentalCalendar');
+            const today = new Date();
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+
+            // Add day headers
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            days.forEach(day => {
+                const header = document.createElement('div');
+                header.style.cssText = `
+                    text-align: center;
+                    padding: 8px 4px;
+                    font-weight: 600;
+                    color: #00ffff;
+                    font-size: 12px;
+                `;
+                header.textContent = day;
+                calendar.appendChild(header);
+            });
+
+            // Generate calendar days
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            // Add empty cells for days before the first day
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                calendar.appendChild(emptyDay);
+            }
+
+            // Add days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                dayElement.style.cssText = `
+                    aspect-ratio: 1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(71, 85, 105, 0.4);
+                    border-radius: 6px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    font-size: 14px;
+                    font-weight: 500;
+                    border: 1px solid transparent;
+                `;
+                
+                dayElement.textContent = day;
+                dayElement.setAttribute('data-date', dateStr);
+                
+                dayElement.addEventListener('click', () => toggleDateSelection(dateStr, dayElement));
+                
+                // Disable past dates
+                const dayDate = new Date(currentYear, currentMonth, day);
+                if (dayDate < today) {
+                    dayElement.style.opacity = '0.3';
+                    dayElement.style.cursor = 'not-allowed';
+                    dayElement.removeEventListener('click', () => toggleDateSelection(dateStr, dayElement));
+                }
+                
+                calendar.appendChild(dayElement);
+            }
+        }
+
+        function toggleDateSelection(dateStr, element) {
+            if (selectedDates.includes(dateStr)) {
+                // Remove date
+                selectedDates = selectedDates.filter(date => date !== dateStr);
+                element.style.background = 'rgba(71, 85, 105, 0.4)';
+                element.style.border = '1px solid transparent';
+                element.style.color = '#e2e8f0';
+            } else {
+                // Add date
+                selectedDates.push(dateStr);
+                element.style.background = 'linear-gradient(135deg, #00ffff, #0891b2)';
+                element.style.border = '2px solid #00ffff';
+                element.style.color = '#0f172a';
+                element.style.fontWeight = '700';
+                element.style.boxShadow = '0 0 10px rgba(0, 255, 255, 0.5)';
+            }
+            
+            selectedDates.sort();
+            updatePricingDisplay();
+        }
+
+        function updatePricingDisplay() {
+            const pricingDiv = document.getElementById('pricingDetails');
+            
+            if (selectedDates.length === 0) {
+                pricingDiv.innerHTML = 'Select dates to see pricing';
+                return;
+            }
+            
+            const { rateType, hourlyRate, dailyRate } = currentRentalData;
+            const selectedRate = rateType === 'hourly' ? hourlyRate : dailyRate;
+            const rateLabel = rateType === 'hourly' ? 'hour' : 'day';
+            const duration = selectedDates.length;
+            const subtotal = selectedRate * duration;
+            
+            pricingDiv.innerHTML = `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>Selected dates:</span>
+                    <span>${duration} ${rateLabel}${duration > 1 ? 's' : ''}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>Rate:</span>
+                    <span>$${selectedRate.toFixed(2)}/${rateLabel}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 16px; color: #00ffff; border-top: 1px solid rgba(0, 255, 255, 0.3); padding-top: 8px;">
+                    <span>Total:</span>
+                    <span>$${subtotal.toFixed(2)}</span>
+                </div>
+            `;
+        }
+
+        function confirmRentalBooking() {
+            const renterName = document.getElementById('renterName').value.trim();
+            
+            if (selectedDates.length === 0) {
+                alert('Please select at least one date.');
+                return;
+            }
+            
+            if (!renterName) {
+                alert('Please enter your name.');
+                return;
+            }
+            
+            // Create booking
+            const bookingData = {
+                title: currentRentalData.title,
+                description: currentRentalData.description,
+                renterName: renterName,
+                selectedDates: selectedDates,
+                rateType: currentRentalData.rateType,
+                rate: currentRentalData.rateType === 'hourly' ? currentRentalData.hourlyRate : currentRentalData.dailyRate,
+                totalAmount: (currentRentalData.rateType === 'hourly' ? currentRentalData.hourlyRate : currentRentalData.dailyRate) * selectedDates.length
+            };
+            
+            console.log('Rental booking created:', bookingData);
+            
+            closeRentalBooking();
+            showNotification(`Rental booking created successfully! ${selectedDates.length} dates reserved for $${bookingData.totalAmount.toFixed(2)}.`, 'success');
+        }
+
+        function closeRentalBooking() {
+            const modal = document.querySelector('.rental-booking-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+    </script>
 </body>
 </html>
