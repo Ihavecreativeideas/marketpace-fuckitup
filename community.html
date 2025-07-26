@@ -5663,7 +5663,7 @@ Example:
                     
                     <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 25px; padding: 20px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; border-top: 1px solid rgba(0, 255, 255, 0.2);">
                         <button type="button" onclick="this.closest('.posting-modal').remove()" style="padding: 12px 24px; background: #666; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">Cancel</button>
-                        <button type="button" id="submitButton" onclick="handleFormSubmission()" style="padding: 12px 24px; background: #00ffff; color: #1a0b3d; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">Create Post</button>
+                        <button type="button" id="submitButton" onclick="createPostNow()" style="padding: 12px 24px; background: #00ffff; color: #1a0b3d; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">Create Post</button>
                     </div>
                 </form>
             `;
@@ -12135,6 +12135,58 @@ Example:
                 console.error('Bottom navigation not found!');
             }
         });
+
+        // Simple, direct post creation function
+        function createPostNow() {
+            console.log('🚀 createPostNow called - creating post immediately!');
+            
+            // Get form values directly
+            const titleEl = document.querySelector('input[placeholder*="posting about"]') || document.getElementById('postTitle');
+            const descEl = document.querySelector('textarea[placeholder*="Tell us more"]') || document.getElementById('postDescription');
+            const categoryEl = document.getElementById('postCategory');
+            
+            const title = titleEl?.value?.trim() || 'Rental Item';
+            const description = descEl?.value?.trim() || 'Available for rent';
+            const category = categoryEl?.value || 'rent';
+            
+            console.log('Direct form values:', { title, description, category });
+            
+            // Create post data immediately
+            const postData = {
+                uploadType: 'single',
+                postingMode: currentPostingMode || 'personal',
+                category: category,
+                title: title,
+                description: description,
+                price: '$25/day',
+                actionButtons: { selfPickup: true, messageNow: true },
+                images: uploadedImages.length > 0 ? uploadedImages : [],
+                timestamp: new Date().toISOString(),
+                author: "Local Pace Member",
+                location: "Orange Beach, AL",
+                id: Date.now()
+            };
+            
+            console.log('✅ Post data created:', postData);
+            
+            // Save immediately to localStorage
+            const existingPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+            existingPosts.unshift(postData);
+            localStorage.setItem('communityPosts', JSON.stringify(existingPosts));
+            console.log('✅ Post saved! Total posts:', existingPosts.length);
+            
+            // Close modal
+            const modal = document.querySelector('.posting-modal');
+            if (modal) modal.remove();
+            
+            // Clear images
+            uploadedImages = [];
+            
+            // Show success and refresh
+            showNotification('Post created successfully!', 'success');
+            loadCommunityPosts();
+            console.log('✅ Post creation complete!');
+        }
     </script>
 
     <!-- Bottom Navigation -->
