@@ -8993,6 +8993,177 @@
             }
         }
 
+        // Global submitSinglePost function
+        function submitSinglePost() {
+            console.log('🚀 submitSinglePost called!');
+            
+            // Debug input field values
+            const titleEl = document.getElementById('postTitle');
+            const descEl = document.getElementById('postDescription');
+            const categoryEl = document.getElementById('postCategory');
+            
+            console.log('Form elements found:', {
+                titleEl: !!titleEl,
+                descEl: !!descEl,
+                categoryEl: !!categoryEl
+            });
+            
+            if (!titleEl || !descEl || !categoryEl) {
+                console.error('Missing form elements!');
+                showNotification('Form elements missing. Please try again.', 'error');
+                return;
+            }
+            
+            const title = titleEl.value?.trim() || '';
+            const description = descEl.value?.trim() || '';
+            const category = categoryEl.value || 'general';
+            
+            console.log('Form values:', { title, description, category });
+            
+            if (!title || !description) {
+                console.log('Validation failed - missing title or description');
+                showNotification('Please fill in title and description.', 'error');
+                return;
+            }
+            
+            // Get price based on category
+            let priceValue = '';
+            if (category === 'rent') {
+                const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
+                const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
+                const selectedRate = document.querySelector('input[name="rentalRate"]:checked')?.value || 'daily';
+                
+                if (selectedRate === 'hourly' && hourlyRate > 0) {
+                    priceValue = `$${hourlyRate}/hour`;
+                } else if (selectedRate === 'daily' && dailyRate > 0) {
+                    priceValue = `$${dailyRate}/day`;
+                }
+            } else if (category === 'service') {
+                const hourlyAmount = parseFloat(document.getElementById('serviceHourlyAmount')?.value) || 0;
+                const perJobAmount = parseFloat(document.getElementById('servicePerJobAmount')?.value) || 0;
+                const selectedServiceRate = document.querySelector('input[name="serviceRate"]:checked')?.value || 'per-job';
+                
+                if (selectedServiceRate === 'hourly' && hourlyAmount > 0) {
+                    priceValue = `$${hourlyAmount}/hour`;
+                } else if (selectedServiceRate === 'per-job' && perJobAmount > 0) {
+                    priceValue = `$${perJobAmount}/job`;
+                }
+            } else {
+                const activePriceField = document.getElementById('postPrice');
+                priceValue = activePriceField ? activePriceField.value.trim() : '';
+            }
+            
+            const formData = {
+                uploadType: 'single',
+                postingMode: currentPostingMode,
+                category: category,
+                title: title,
+                description: description,
+                price: priceValue,
+                timestamp: new Date().toISOString(),
+                author: currentPostingMode === 'business' ? "MarketPace Pro Business" : "Local Pace Member",
+                location: "Orange Beach, AL",
+                id: Date.now()
+            };
+            
+            console.log('✅ Post validation passed, saving to localStorage and profile...');
+            
+            // Save to localStorage (community feed)
+            const existingPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+            existingPosts.unshift(formData);
+            localStorage.setItem('communityPosts', JSON.stringify(existingPosts));
+            console.log('✅ Post saved to community feed. Total posts:', existingPosts.length);
+
+            // Add to profile based on posting mode
+            addPostToProfile(formData, currentPostingMode);
+            console.log('✅ Post added to profile for mode:', currentPostingMode);
+            
+            // Close modal and show success
+            const modal = document.querySelector('.posting-modal');
+            if (modal) {
+                modal.remove();
+            }
+            showNotification(`${category.charAt(0).toUpperCase() + category.slice(1)} post "${title}" shared successfully!`, 'success');
+            
+            // Refresh the community feed to show the new post
+            loadCommunityPosts();
+            console.log('✅ Community feed refreshed');
+        }
+
+        // Global submitBulkPost function  
+        function submitBulkPost() {
+            console.log('🚀 submitBulkPost called!');
+            
+            const itemCount = parseInt(document.getElementById('itemCount')?.value) || 2;
+            const categoryEl = document.getElementById('postCategory');
+            const category = categoryEl?.value || 'general';
+            
+            console.log('Bulk post data:', { itemCount, category });
+            
+            const bulkItems = [];
+            let hasErrors = false;
+            
+            // Validate and collect all bulk items
+            for (let i = 1; i <= itemCount; i++) {
+                const nameEl = document.getElementById(`bulkItemName${i}`);
+                const descEl = document.getElementById(`bulkItemDesc${i}`);
+                const priceEl = document.getElementById(`bulkItemPrice${i}`);
+                
+                if (!nameEl || !descEl || !nameEl.value || !descEl.value) {
+                    showNotification(`Please fill in all fields for Item ${i}`, 'error');
+                    hasErrors = true;
+                    break;
+                }
+                
+                const itemData = {
+                    name: nameEl.value,
+                    description: descEl.value,
+                    price: priceEl?.value || '',
+                    photos: []
+                };
+                
+                bulkItems.push(itemData);
+            }
+            
+            if (hasErrors) return;
+            
+            // Create the bulk post
+            const bulkPostData = {
+                uploadType: 'bulk',
+                postingMode: currentPostingMode,
+                category: category,
+                title: `${category.charAt(0).toUpperCase() + category.slice(1)} Collection`,
+                description: `Bulk collection of ${itemCount} ${category} items`,
+                items: bulkItems,
+                itemCount: itemCount,
+                timestamp: new Date().toISOString(),
+                author: currentPostingMode === 'business' ? "MarketPace Pro Business" : "Local Pace Member",
+                location: "Orange Beach, AL",
+                id: Date.now()
+            };
+            
+            // Store in localStorage
+            const existingPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+            existingPosts.unshift(bulkPostData);
+            localStorage.setItem('communityPosts', JSON.stringify(existingPosts));
+            console.log('✅ Bulk post saved to community feed. Total posts:', existingPosts.length);
+
+            // Add to profile based on posting mode
+            addPostToProfile(bulkPostData, currentPostingMode);
+            console.log('✅ Bulk post added to profile for mode:', currentPostingMode);
+            
+            // Close modal and show success
+            const modal = document.querySelector('.posting-modal');
+            if (modal) {
+                modal.remove();
+            }
+            showNotification(`Bulk ${category} collection shared successfully!`, 'success');
+            
+            // Refresh the community feed
+            loadCommunityPosts();
+            console.log('✅ Community feed refreshed');
+        }
+
         console.log('All post display and interaction functions loaded successfully');
     </script>
 </body>
