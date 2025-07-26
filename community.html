@@ -5994,7 +5994,7 @@ Example:
             
             if (!files || files.length === 0) {
                 console.log('No files selected for upload');
-                return;
+                return Promise.resolve();
             }
             
             try {
@@ -6003,16 +6003,22 @@ Example:
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
                     const result = await uploadToCloudinary(file, '/api/upload/post');
-                    uploadedImages.push(result); // Add to global uploadedImages array
+                    uploadedImages.push({
+                        url: result.imageUrl || result.url,
+                        name: file.name,
+                        publicId: result.publicId
+                    }); // Add to global uploadedImages array with proper format
                 }
                 
                 // Display uploaded images
                 displayUploadedImages(uploadedImages, inputId + '-preview');
                 showNotification(`${uploadedImages.length} image(s) uploaded successfully!`, 'success');
                 console.log('✅ Images uploaded to global array:', uploadedImages);
+                return Promise.resolve();
             } catch (error) {
                 showNotification('Failed to upload images: ' + error.message, 'error');
                 console.error('Image upload error:', error);
+                return Promise.reject(error);
             }
         }
         
@@ -10227,15 +10233,27 @@ Example:
             }
             
             // Show success notification
-            showNotification(`${category.charAt(0).toUpperCase() + category.slice(1)} post "${title}" created successfully! 🎉`, 'success');
+            showNotification(`${category.charAt(0).toUpperCase() + category.slice(1)} post "${title}" created successfully!`, 'success');
         }
 
         // Global form submission handler
-        function handleFormSubmission() {
+        async function handleFormSubmission() {
             console.log('📋 handleFormSubmission called!');
             
             const uploadType = document.getElementById('uploadType')?.value || 'single';
             console.log('Upload type:', uploadType);
+            
+            // Check if images are being uploaded and wait for them
+            const fileInput = document.getElementById('postImages');
+            if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                console.log('⏳ Images detected, ensuring upload completes...');
+                
+                // Clear any existing images and upload fresh
+                uploadedImages = [];
+                await handlePostImageUpload('postImages');
+                
+                console.log('✅ Image upload completed before form submission, images:', uploadedImages.length);
+            }
             
             if (uploadType === 'bulk') {
                 console.log('Calling submitBulkPost()');
