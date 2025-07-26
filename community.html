@@ -2646,14 +2646,14 @@
                                     <input type="radio" name="rentalRate" value="hourly" id="hourlyRate" style="margin-right: 8px;">
                                     Hourly Rate
                                 </label>
-                                <input type="number" id="hourlyRateAmount" placeholder="$0.00" step="0.01" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px;">
+                                <input type="number" id="hourlyRateAmountPrimary" placeholder="15.00" step="0.01" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px;">
                             </div>
                             <div style="padding: 15px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px;">
                                 <label style="display: flex; align-items: center; margin-bottom: 10px; color: #3b82f6; font-weight: 500;">
                                     <input type="radio" name="rentalRate" value="daily" id="dailyRate" style="margin-right: 8px;" checked>
                                     Daily Rate (Recommended)
                                 </label>
-                                <input type="number" id="dailyRateAmount" placeholder="$0.00" step="0.01" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(59, 130, 246, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px;">
+                                <input type="number" id="dailyRateAmountPrimary" placeholder="75.00" step="0.01" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(59, 130, 246, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px;">
                             </div>
                         </div>
                         <div style="margin-top: 15px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; font-size: 13px; color: #94a3b8; text-align: center;">
@@ -5214,33 +5214,22 @@
                     // Get rental rate information from the correct input fields
                     const selectedRateType = document.querySelector('input[name="rentalRate"]:checked')?.value || 'daily';
                     
-                    // Try both sets of input fields to find the active ones
-                    let hourlyRate = parseFloat(document.getElementById('hourlyRateAmountModal')?.value) || 0;
-                    let dailyRate = parseFloat(document.getElementById('dailyRateAmountModal')?.value) || 0;
+                    // Get rental rate information from the primary rental rate group
+                    const hourlyRate = parseFloat(document.getElementById('hourlyRateAmountPrimary')?.value) || 0;
+                    const dailyRate = parseFloat(document.getElementById('dailyRateAmountPrimary')?.value) || 0;
                     
-                    // If modal inputs are empty, try the original inputs
-                    if (hourlyRate === 0 && dailyRate === 0) {
-                        hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
-                        dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
-                    }
+                    // Debug: Log primary input field values
+                    const hourlyPrimaryEl = document.getElementById('hourlyRateAmountPrimary');
+                    const dailyPrimaryEl = document.getElementById('dailyRateAmountPrimary');
                     
-                    // Debug: Log which input fields exist and their values
-                    const hourlyModalEl = document.getElementById('hourlyRateAmountModal');
-                    const dailyModalEl = document.getElementById('dailyRateAmountModal');
-                    const hourlyOrigEl = document.getElementById('hourlyRateAmount');
-                    const dailyOrigEl = document.getElementById('dailyRateAmount');
-                    
-                    console.log('Input field debugging:', {
-                        hourlyModalExists: !!hourlyModalEl,
-                        hourlyModalValue: hourlyModalEl?.value,
-                        dailyModalExists: !!dailyModalEl,
-                        dailyModalValue: dailyModalEl?.value,
-                        hourlyOrigExists: !!hourlyOrigEl,
-                        hourlyOrigValue: hourlyOrigEl?.value,
-                        dailyOrigExists: !!dailyOrigEl,
-                        dailyOrigValue: dailyOrigEl?.value,
+                    console.log('Primary rate input debugging:', {
+                        hourlyPrimaryExists: !!hourlyPrimaryEl,
+                        hourlyPrimaryValue: hourlyPrimaryEl?.value,
+                        dailyPrimaryExists: !!dailyPrimaryEl,
+                        dailyPrimaryValue: dailyPrimaryEl?.value,
                         finalHourlyRate: hourlyRate,
-                        finalDailyRate: dailyRate
+                        finalDailyRate: dailyRate,
+                        selectedRateType: selectedRateType
                     });
                     
                     // Validate that a rate is set
@@ -7919,7 +7908,7 @@
             
             // Get all field elements
             const priceField = document.getElementById('priceField');
-            const rentalRateField = document.getElementById('rentalRateField');
+            const rentalRateGroup = document.getElementById('rentalRateGroup');
             const deliveryMethodField = document.getElementById('deliveryMethodField');
             const eventFields = document.getElementById('eventFields');
             const pollFields = document.getElementById('pollFields');
@@ -7928,7 +7917,7 @@
             
             console.log('Field elements found:', {
                 priceField: !!priceField,
-                rentalRateField: !!rentalRateField,
+                rentalRateGroup: !!rentalRateGroup,
                 deliveryMethodField: !!deliveryMethodField,
                 eventFields: !!eventFields,
                 pollFields: !!pollFields,
@@ -7938,7 +7927,7 @@
             
             // Hide all conditional fields first
             if (priceField) priceField.style.display = 'none';
-            if (rentalRateField) rentalRateField.style.display = 'none';
+            if (rentalRateGroup) rentalRateGroup.style.display = 'none';
             if (deliveryMethodField) deliveryMethodField.style.display = 'none';
             if (eventFields) eventFields.style.display = 'none';
             if (pollFields) pollFields.style.display = 'none';
@@ -7975,22 +7964,18 @@
                     
                 case 'rent':
                     console.log('Showing rental fields');
-                    if (rentalRateField) rentalRateField.style.display = 'block';
+                    if (rentalRateGroup) rentalRateGroup.style.display = 'block';
                     if (deliveryMethodField) deliveryMethodField.style.display = 'block';
                     
                     // Debug: Log which inputs are visible after showing rental fields
                     setTimeout(() => {
-                        const hourlyModalEl = document.getElementById('hourlyRateAmountModal');
-                        const dailyModalEl = document.getElementById('dailyRateAmountModal');
-                        const hourlyOrigEl = document.getElementById('hourlyRateAmount');
-                        const dailyOrigEl = document.getElementById('dailyRateAmount');
+                        const hourlyPrimaryEl = document.getElementById('hourlyRateAmountPrimary');
+                        const dailyPrimaryEl = document.getElementById('dailyRateAmountPrimary');
                         
                         console.log('Rental field visibility debug:', {
-                            rentalRateFieldDisplay: rentalRateField?.style.display,
-                            hourlyModalVisible: hourlyModalEl && window.getComputedStyle(hourlyModalEl).display !== 'none',
-                            dailyModalVisible: dailyModalEl && window.getComputedStyle(dailyModalEl).display !== 'none',
-                            hourlyOrigVisible: hourlyOrigEl && window.getComputedStyle(hourlyOrigEl).display !== 'none',
-                            dailyOrigVisible: dailyOrigEl && window.getComputedStyle(dailyOrigEl).display !== 'none'
+                            rentalRateGroupDisplay: rentalRateGroup?.style.display,
+                            hourlyPrimaryVisible: hourlyPrimaryEl && window.getComputedStyle(hourlyPrimaryEl).display !== 'none',
+                            dailyPrimaryVisible: dailyPrimaryEl && window.getComputedStyle(dailyPrimaryEl).display !== 'none'
                         });
                     }, 100);
                     break;
