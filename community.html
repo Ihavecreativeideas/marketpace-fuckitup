@@ -5284,13 +5284,54 @@ Example:
                                     </div>
                                 </div>
 
-                                <!-- QR Check-in Option -->
+                                <!-- QR Check-in/Check-out System -->
                                 <div style="margin-bottom: 15px;">
                                     <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                                        <input type="checkbox" id="requireQRCheckinModal" style="margin-right: 10px;">
-                                        <label for="requireQRCheckinModal" style="color: #e2e8f0; cursor: pointer;">Require QR Check-in for Verification</label>
+                                        <input type="checkbox" id="requireQRCheckinModal" style="margin-right: 10px;" onchange="toggleQROptions()">
+                                        <label for="requireQRCheckinModal" style="color: #e2e8f0; cursor: pointer;">Require QR Check-in & Check-out Verification</label>
                                     </div>
-                                    <p style="font-size: 11px; color: #94a3b8; margin-left: 20px;">Members must scan QR code in person before payment is released from escrow</p>
+                                    <p style="font-size: 11px; color: #94a3b8; margin-left: 20px;">Dual QR system: Check-in at pickup, Check-out at return with late fee protection</p>
+                                    
+                                    <div id="qrOptionsModal" style="display: none; margin-top: 12px; margin-left: 20px; padding: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 6px;">
+                                        <!-- Grace Period Settings -->
+                                        <div style="margin-bottom: 12px;">
+                                            <label style="display: block; margin-bottom: 5px; color: #10b981; font-size: 12px; font-weight: 500;">Late Return Grace Period:</label>
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                <input type="number" id="gracePeriodModal" value="15" min="0" max="120" style="width: 60px; padding: 6px; border: 1px solid #10b981; border-radius: 4px; background: #2d1b69; color: #e2e8f0; font-size: 12px;">
+                                                <span style="color: #e2e8f0; font-size: 12px;">minutes after scheduled return</span>
+                                            </div>
+                                            <p style="font-size: 10px; color: #6ee7b7; margin-top: 4px;">Grace period before late fees are charged</p>
+                                        </div>
+                                        
+                                        <!-- Late Fee Settings -->
+                                        <div style="margin-bottom: 12px;">
+                                            <label style="display: block; margin-bottom: 5px; color: #10b981; font-size: 12px; font-weight: 500;">Late Fee Structure:</label>
+                                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                                <label style="display: flex; align-items: center; color: #e2e8f0; cursor: pointer; font-size: 11px;">
+                                                    <input type="radio" name="lateFeeType" value="hourly" style="margin-right: 8px;" checked> 
+                                                    Hourly late fee: $<input type="number" id="hourlyLateFeeModal" value="5" min="1" max="50" style="width: 40px; padding: 2px 4px; margin: 0 4px; border: 1px solid #10b981; border-radius: 3px; background: #2d1b69; color: #e2e8f0; font-size: 11px;"> per hour
+                                                </label>
+                                                <label style="display: flex; align-items: center; color: #e2e8f0; cursor: pointer; font-size: 11px;">
+                                                    <input type="radio" name="lateFeeType" value="daily" style="margin-right: 8px;"> 
+                                                    Daily late fee: $<input type="number" id="dailyLateFeeModal" value="25" min="5" max="200" style="width: 50px; padding: 2px 4px; margin: 0 4px; border: 1px solid #10b981; border-radius: 3px; background: #2d1b69; color: #e2e8f0; font-size: 11px;"> per day
+                                                </label>
+                                                <label style="display: flex; align-items: center; color: #e2e8f0; cursor: pointer; font-size: 11px;">
+                                                    <input type="radio" name="lateFeeType" value="flat" style="margin-right: 8px;"> 
+                                                    Flat late fee: $<input type="number" id="flatLateFeeModal" value="50" min="10" max="500" style="width: 50px; padding: 2px 4px; margin: 0 4px; border: 1px solid #10b981; border-radius: 3px; background: #2d1b69; color: #e2e8f0; font-size: 11px;"> one-time charge
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- QR Check-out Requirements -->
+                                        <div style="background: rgba(16, 185, 129, 0.05); padding: 8px; border-radius: 4px; border-left: 2px solid #10b981;">
+                                            <div style="color: #10b981; font-size: 11px; font-weight: 500; margin-bottom: 3px;">DUAL QR VERIFICATION</div>
+                                            <div style="color: #e2e8f0; font-size: 10px; line-height: 1.3;">
+                                                • Check-in QR: Scanned at pickup to release payment from escrow<br>
+                                                • Check-out QR: Scanned at return to finalize rental and avoid late fees<br>
+                                                • Late fees automatically charged if check-out exceeds grace period
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Booking Fee Info -->
@@ -7343,6 +7384,16 @@ Example:
             } else {
                 percentageInput.style.display = 'none';
                 flatInput.style.display = 'block';
+            }
+        }
+
+        // Toggle QR check-in/check-out options
+        function toggleQROptions() {
+            const checkbox = document.getElementById('requireQRCheckinModal');
+            const options = document.getElementById('qrOptionsModal');
+            
+            if (checkbox && options) {
+                options.style.display = checkbox.checked ? 'block' : 'none';
             }
         }
 
@@ -9513,7 +9564,12 @@ Example:
                         <div style="color: #8b5cf6; font-weight: 600; font-size: 12px; margin-bottom: 8px;">SECURE Booking Fee Required</div>
                         <div style="color: #e2e8f0; font-size: 11px; margin-bottom: 4px;">Amount: <span style="color: #8b5cf6; font-weight: 500;">${feeAmountText}</span></div>
                         <div style="color: #e2e8f0; font-size: 11px; margin-bottom: 4px;">Refund Policy: <span style="color: #8b5cf6; font-weight: 500;">${refundText}</span></div>
-                        ${post.bookingFee.requireQRCheckin ? '<div style="color: #10b981; font-size: 10px; margin-top: 6px;">QR Check-in required for payment release</div>' : ''}
+                        ${post.bookingFee.requireQRCheckin && post.bookingFee.qrCheckInOut?.enabled ? 
+                            `<div style="color: #10b981; font-size: 10px; margin-top: 6px;">
+                                DUAL QR: Check-in + Check-out required<br>
+                                <span style="color: #6ee7b7;">Grace period: ${post.bookingFee.qrCheckInOut.gracePeriodMinutes} min • Late fee: ${post.bookingFee.qrCheckInOut.lateFeeStructure.type}</span>
+                            </div>` : 
+                            post.bookingFee.requireQRCheckin ? '<div style="color: #10b981; font-size: 10px; margin-top: 6px;">QR Check-in required for payment release</div>' : ''}
                         <div style="background: rgba(139, 92, 246, 0.05); padding: 6px; border-radius: 4px; margin-top: 8px;">
                             <div style="color: #8b5cf6; font-size: 10px; font-weight: 500;">ESCROW PROTECTION</div>
                             <div style="color: #94a3b8; font-size: 9px; margin-top: 2px;">Fee held in escrow until rental completion</div>
@@ -11067,16 +11123,44 @@ Example:
                 }
                 
                 // Collect booking fee data
-                const enableBookingFee = document.getElementById('enableBookingFee')?.checked || false;
+                const enableBookingFee = document.getElementById('requireBookingFeeModal')?.checked || false;
                 if (enableBookingFee) {
-                    const feeAmount = parseFloat(document.getElementById('bookingFeeAmount')?.value) || 0;
-                    const refundPolicy = document.getElementById('bookingFeeRefund')?.value || 'full';
+                    const feeType = document.querySelector('input[name="bookingFeeType"]:checked')?.value || 'percentage';
+                    const percentage = parseFloat(document.getElementById('bookingFeePercentageModal')?.value) || 0;
+                    const flatAmount = parseFloat(document.getElementById('bookingFeeFlatModal')?.value?.replace('$', '')) || 0;
+                    const refundPolicy = document.querySelector('input[name="bookingFeeRefund"]:checked')?.value || 'full';
+                    
+                    // Get QR check-in/check-out settings
+                    const requireQRCheckin = document.getElementById('requireQRCheckinModal')?.checked || false;
+                    let qrSettings = { enabled: false };
+                    
+                    if (requireQRCheckin) {
+                        const gracePeriod = parseInt(document.getElementById('gracePeriodModal')?.value) || 15;
+                        const lateFeeType = document.querySelector('input[name="lateFeeType"]:checked')?.value || 'hourly';
+                        const hourlyLateFee = parseFloat(document.getElementById('hourlyLateFeeModal')?.value) || 5;
+                        const dailyLateFee = parseFloat(document.getElementById('dailyLateFeeModal')?.value) || 25;
+                        const flatLateFee = parseFloat(document.getElementById('flatLateFeeModal')?.value) || 50;
+                        
+                        qrSettings = {
+                            enabled: true,
+                            gracePeriodMinutes: gracePeriod,
+                            lateFeeStructure: {
+                                type: lateFeeType,
+                                hourlyRate: hourlyLateFee,
+                                dailyRate: dailyLateFee,
+                                flatRate: flatLateFee
+                            }
+                        };
+                    }
                     
                     bookingFeeData = {
                         enabled: true,
-                        amount: feeAmount,
+                        type: feeType,
+                        percentage: feeType === 'percentage' ? percentage : null,
+                        flatAmount: feeType === 'flat' ? flatAmount : null,
                         refundPolicy: refundPolicy,
-                        requiresQRCheckin: document.getElementById('requireQRCheckin')?.checked || true
+                        requireQRCheckin: requireQRCheckin,
+                        qrCheckInOut: qrSettings
                     };
                 } else {
                     bookingFeeData = { enabled: false };

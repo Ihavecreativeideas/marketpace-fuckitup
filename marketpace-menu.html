@@ -1511,35 +1511,43 @@
         }
 
         // Load pending QR check-ins and update badge
-        async function loadQRCheckIns() {
+        function loadQRCheckIns() {
             try {
-                const userId = getCurrentUserId(); // Get current user ID
-                if (!userId) return;
-
-                const response = await fetch(`/api/qr-checkin/user/${userId}`);
-                const data = await response.json();
-
-                if (data.success) {
-                    const pendingTransactions = data.transactions.filter(t => t.status === 'pending');
-                    const badge = document.getElementById('qrCheckInBadge');
-                    
-                    if (badge) {
-                        badge.textContent = pendingTransactions.length;
-                        
-                        // Update badge visibility and styling based on count
-                        if (pendingTransactions.length > 0) {
-                            badge.style.display = 'block';
-                            badge.style.background = '#a855f7';
-                            badge.style.animation = 'pulse 2s infinite';
-                        } else {
-                            badge.textContent = '0';
-                            badge.style.background = 'rgba(168, 85, 247, 0.3)';
-                            badge.style.animation = 'none';
+                // Get all QR transactions from localStorage
+                const allTransactions = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('qr_transaction_')) {
+                        try {
+                            const transaction = JSON.parse(localStorage.getItem(key));
+                            if (transaction && transaction.status !== 'completed') {
+                                allTransactions.push(transaction);
+                            }
+                        } catch (e) {
+                            console.warn('Failed to parse QR transaction:', key);
                         }
                     }
-
-                    console.log(`🔍 QR Check-ins loaded: ${pendingTransactions.length} pending`);
                 }
+
+                const badge = document.getElementById('qrCheckInBadge');
+                
+                if (badge) {
+                    const pendingCount = allTransactions.length;
+                    badge.textContent = pendingCount;
+                    
+                    // Update badge visibility and styling based on count
+                    if (pendingCount > 0) {
+                        badge.style.display = 'block';
+                        badge.style.background = '#a855f7';
+                        badge.style.animation = 'pulse 2s infinite';
+                    } else {
+                        badge.textContent = '0';
+                        badge.style.background = 'rgba(168, 85, 247, 0.3)';
+                        badge.style.animation = 'none';
+                    }
+                }
+
+                console.log(`🔍 QR Check-ins loaded: ${allTransactions.length} pending`);
             } catch (error) {
                 console.error('Failed to load QR check-ins:', error);
             }

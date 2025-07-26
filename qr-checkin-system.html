@@ -262,8 +262,16 @@
                 <span class="info-value" id="meetingWith">Sarah Johnson (Owner)</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Status:</span>
-                <span class="status-indicator status-pending" id="checkInStatus">Pending Check-In</span>
+                <span class="info-label">Rental Phase:</span>
+                <span class="status-indicator status-pending" id="rentalPhase">Check-In Phase</span>
+            </div>
+            <div class="info-row" id="returnTimeRow" style="display: none;">
+                <span class="info-label">Return By:</span>
+                <span class="info-value" id="returnTime">--</span>
+            </div>
+            <div class="info-row" id="gracePeriodRow" style="display: none;">
+                <span class="info-label">Grace Period:</span>
+                <span class="info-value" id="gracePeriod">15 minutes</span>
             </div>
         </div>
 
@@ -281,19 +289,33 @@
             </div>
         </div>
 
-        <div class="instructions">
-            <div class="instructions-title">How to Complete Check-In:</div>
-            <div class="instructions-text">
+        <div class="instructions" id="instructionsBox">
+            <div class="instructions-title" id="instructionsTitle">How to Complete Check-In:</div>
+            <div class="instructions-text" id="instructionsText">
                 1. Meet the other party in person<br>
                 2. Have them scan this QR code with their MarketPace app<br>
                 3. Both parties will receive instant verification<br>
-                4. Payment will be released automatically upon successful scan
+                4. For rentals: Item handover occurs, check-out QR will be generated<br>
+                5. Payment held in escrow until check-out completed
+            </div>
+        </div>
+
+        <!-- Late Fee Warning (hidden by default) -->
+        <div class="instructions" id="lateFeeWarning" style="display: none; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3);">
+            <div class="instructions-title" style="color: #ef4444;">Late Return Warning:</div>
+            <div class="instructions-text" id="lateFeeText">
+                Return is overdue. Late fees will be automatically charged to your payment method.
             </div>
         </div>
 
         <div class="action-buttons">
-            <button class="btn btn-primary" onclick="refreshQRCode()">Refresh QR Code</button>
+            <button class="btn btn-primary" onclick="generateDualQRCode()">Refresh QR Code</button>
             <button class="btn btn-secondary" onclick="contactOtherParty()">Message Other Party</button>
+            
+            <!-- Demo Buttons for Testing -->
+            <button class="btn btn-primary" id="simulateButton" onclick="simulateCheckInSuccess()" style="background: rgba(16, 185, 129, 0.8);">Demo: Complete Check-In</button>
+            <button class="btn btn-secondary" onclick="switchToCheckoutPhase()" style="background: rgba(245, 158, 11, 0.8);">Demo: Switch to Check-Out</button>
+            
             <a href="/marketpace-menu.html" class="btn btn-secondary">Back to Menu</a>
         </div>
     </div>
@@ -305,10 +327,21 @@
             type: 'rental_pickup',
             itemName: 'Power Drill Rental',
             amount: 45.00,
+            rentalDuration: 24, // hours
             otherParty: {
                 name: 'Sarah Johnson',
                 role: 'Owner',
                 userId: 'user_12345'
+            },
+            rentalPhase: 'checkin', // 'checkin' or 'checkout'
+            checkInTime: null,
+            expectedReturnTime: null,
+            gracePeriodMinutes: 15,
+            lateFeeStructure: {
+                type: 'hourly', // 'hourly', 'daily', 'flat'
+                hourlyRate: 5.00,
+                dailyRate: 25.00,
+                flatRate: 50.00
             },
             createdAt: new Date().toISOString(),
             status: 'pending',
@@ -317,117 +350,295 @@
 
         // Initialize QR Check-in System
         function initializeQRCheckIn() {
-            console.log('🔍 Initializing QR Check-in System');
+            console.log('🔍 Initializing Dual QR Check-in/Check-out System');
             
             // Load transaction data from URL params or localStorage
             loadTransactionData();
             
-            // Generate QR code
-            generateQRCode();
+            // Update UI based on rental phase
+            updateRentalPhaseUI();
             
-            // Check for existing notifications
-            checkNotificationStatus();
+            // Generate QR code for current phase
+            generateDualQRCode();
             
-            console.log('✅ QR Check-in system initialized');
+            // Check for late fees if in checkout phase
+            if (transactionData.rentalPhase === 'checkout') {
+                checkForLateFees();
+            }
         }
 
+        // Update UI based on current rental phase
+        function updateRentalPhaseUI() {
+            const phase = transactionData.rentalPhase;
+            const rentalPhaseEl = document.getElementById('rentalPhase');
+            const instructionsTitle = document.getElementById('instructionsTitle');
+            const instructionsText = document.getElementById('instructionsText');
+            const transactionType = document.getElementById('transactionType');
+            
+            if (phase === 'checkin') {
+                rentalPhaseEl.textContent = 'Check-In Phase';
+                rentalPhaseEl.className = 'status-indicator status-pending';
+                transactionType.textContent = 'Rental Pickup (Check-In)';
+                instructionsTitle.textContent = 'How to Complete Check-In:';
+                instructionsText.innerHTML = `
+                    1. Meet the rental owner in person<br>
+                    2. Have them scan this QR code with their MarketPace app<br>
+                    3. Both parties will receive verification<br>
+                    4. Item will be handed over to you<br>
+                    5. Check-out QR will be generated for return
+                `;
+                
+                // Hide return time info during check-in
+                document.getElementById('returnTimeRow').style.display = 'none';
+                document.getElementById('gracePeriodRow').style.display = 'none';
+                
+            } else if (phase === 'checkout') {
+                rentalPhaseEl.textContent = 'Check-Out Phase';
+                rentalPhaseEl.className = 'status-indicator status-warning';
+                transactionType.textContent = 'Rental Return (Check-Out)';
+                instructionsTitle.textContent = 'How to Complete Check-Out:';
+                instructionsText.innerHTML = `
+                    1. Meet the rental owner in person<br>
+                    2. Return the item in good condition<br>
+                    3. Have them scan this QR code to confirm return<br>
+                    4. Payment will be released from escrow<br>
+                    5. Any late fees will be automatically charged
+                `;
+                
+                // Show return time info during check-out
+                document.getElementById('returnTimeRow').style.display = 'flex';
+                document.getElementById('gracePeriodRow').style.display = 'flex';
+                
+                if (transactionData.expectedReturnTime) {
+                    const returnTime = new Date(transactionData.expectedReturnTime);
+                    document.getElementById('returnTime').textContent = returnTime.toLocaleDateString() + ' ' + returnTime.toLocaleTimeString();
+                }
+                
+                document.getElementById('gracePeriod').textContent = `${transactionData.gracePeriodMinutes} minutes`;
+            }
+        }
+
+        // Generate QR code for current phase
+        function generateDualQRCode() {
+            const qrData = {
+                transactionId: transactionData.id,
+                phase: transactionData.rentalPhase,
+                itemName: transactionData.itemName,
+                amount: transactionData.amount,
+                timestamp: new Date().toISOString(),
+                expectedAction: transactionData.rentalPhase === 'checkin' ? 'pickup_verification' : 'return_verification'
+            };
+            
+            // Store QR data for verification
+            transactionData.qrCodeData = qrData;
+            
+            // Generate visual QR code (in real app would use QR library)
+            displayQRCode(qrData);
+            
+            console.log(`Generated ${transactionData.rentalPhase} QR code:`, qrData);
+        }
+
+        // Check for late fees during checkout phase
+        function checkForLateFees() {
+            if (!transactionData.expectedReturnTime) return;
+            
+            const now = new Date();
+            const returnTime = new Date(transactionData.expectedReturnTime);
+            const graceEndTime = new Date(returnTime.getTime() + (transactionData.gracePeriodMinutes * 60000));
+            
+            if (now > graceEndTime) {
+                // Calculate late fee
+                const minutesLate = Math.floor((now - graceEndTime) / 60000);
+                const lateFee = calculateLateFee(minutesLate);
+                
+                // Show late fee warning
+                showLateFeeWarning(minutesLate, lateFee);
+                
+                console.log(`Item is ${minutesLate} minutes late. Late fee: $${lateFee}`);
+            }
+        }
+
+        // Calculate late fee based on structure
+        function calculateLateFee(minutesLate) {
+            const structure = transactionData.lateFeeStructure;
+            
+            switch (structure.type) {
+                case 'hourly':
+                    const hoursLate = Math.ceil(minutesLate / 60);
+                    return hoursLate * structure.hourlyRate;
+                    
+                case 'daily':
+                    const daysLate = Math.ceil(minutesLate / (24 * 60));
+                    return daysLate * structure.dailyRate;
+                    
+                case 'flat':
+                    return structure.flatRate;
+                    
+                default:
+                    return 0;
+            }
+        }
+
+        // Show late fee warning
+        function showLateFeeWarning(minutesLate, lateFee) {
+            const warningEl = document.getElementById('lateFeeWarning');
+            const lateFeeText = document.getElementById('lateFeeText');
+            
+            const hoursLate = Math.floor(minutesLate / 60);
+            const remainingMinutes = minutesLate % 60;
+            
+            let timeText = '';
+            if (hoursLate > 0) {
+                timeText = `${hoursLate} hour(s) and ${remainingMinutes} minute(s)`;
+            } else {
+                timeText = `${remainingMinutes} minute(s)`;
+            }
+            
+            lateFeeText.innerHTML = `
+                Return is ${timeText} overdue.<br>
+                Late fee of $${lateFee.toFixed(2)} will be charged automatically upon check-out completion.
+            `;
+            
+            warningEl.style.display = 'block';
+        }
+
+        // Simulate successful check-in (transitions to checkout phase)
+        function simulateCheckInSuccess() {
+            if (transactionData.rentalPhase === 'checkin') {
+                // Record check-in time and calculate expected return
+                transactionData.checkInTime = new Date().toISOString();
+                const returnTime = new Date();
+                returnTime.setHours(returnTime.getHours() + transactionData.rentalDuration);
+                transactionData.expectedReturnTime = returnTime.toISOString();
+                
+                // Transition to checkout phase
+                transactionData.rentalPhase = 'checkout';
+                
+                // Update UI
+                updateRentalPhaseUI();
+                generateDualQRCode();
+                
+                // Show success notification
+                showNotification('Check-in successful! Item handed over. Return by: ' + returnTime.toLocaleString(), 'success');
+                
+                // Store updated transaction data
+                localStorage.setItem('qr_transaction_' + transactionData.id, JSON.stringify(transactionData));
+                
+                console.log('✅ Check-in completed, transitioned to checkout phase');
+            }
+        }
+
+        // Simulate successful check-out (completes rental)
+        function simulateCheckOutSuccess() {
+            if (transactionData.rentalPhase === 'checkout') {
+                // Calculate any late fees
+                const now = new Date();
+                const returnTime = new Date(transactionData.expectedReturnTime);
+                const graceEndTime = new Date(returnTime.getTime() + (transactionData.gracePeriodMinutes * 60000));
+                let lateFee = 0;
+                
+                if (now > graceEndTime) {
+                    const minutesLate = Math.floor((now - graceEndTime) / 60000);
+                    lateFee = calculateLateFee(minutesLate);
+                }
+                
+                // Mark as completed
+                transactionData.status = 'completed';
+                transactionData.checkOutTime = now.toISOString();
+                transactionData.finalLateFee = lateFee;
+                
+                // Show completion message
+                let message = 'Check-out successful! Rental completed.';
+                if (lateFee > 0) {
+                    message += ` Late fee of $${lateFee.toFixed(2)} has been charged.`;
+                }
+                message += ' Payment has been released from escrow.';
+                
+                showNotification(message, 'success');
+                
+                // Store completed transaction
+                localStorage.setItem('qr_transaction_' + transactionData.id, JSON.stringify(transactionData));
+                
+                // Update UI to show completion
+                document.getElementById('rentalPhase').textContent = 'Completed';
+                document.getElementById('rentalPhase').className = 'status-indicator status-success';
+                document.getElementById('escrowAmount').textContent = 'Released';
+                
+                console.log('✅ Check-out completed, rental finished');
+            }
+        }
+
+        // Demo function to switch phases for testing
+        function switchToCheckoutPhase() {
+            if (transactionData.rentalPhase === 'checkin') {
+                simulateCheckInSuccess();
+            } else {
+                simulateCheckOutSuccess();
+            }
+        }
+
+        // Display QR code visually
+        function displayQRCode(qrData) {
+            const qrElement = document.getElementById('qrCode');
+            qrElement.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 14px; color: #64748b; margin-bottom: 10px;">
+                        ${qrData.phase.toUpperCase()} QR Code
+                    </div>
+                    <div style="font-size: 11px; color: #94a3b8; line-height: 1.3;">
+                        Transaction ID:<br>
+                        <strong>${qrData.transactionId}</strong><br><br>
+                        Phase: <strong>${qrData.phase}</strong><br>
+                        Action: <strong>${qrData.expectedAction}</strong><br><br>
+                        Generated: ${new Date(qrData.timestamp).toLocaleTimeString()}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Load transaction data from URL or localStorage
         function loadTransactionData() {
-            // In real implementation, this would load from localStorage or URL params
             const urlParams = new URLSearchParams(window.location.search);
             const transactionId = urlParams.get('id');
+            const phase = urlParams.get('phase');
             
             if (transactionId) {
-                // Load specific transaction data
-                const storedData = localStorage.getItem(`qr_checkin_${transactionId}`);
+                const storedData = localStorage.getItem(`qr_transaction_${transactionId}`);
                 if (storedData) {
-                    Object.assign(transactionData, JSON.parse(storedData));
+                    const parsed = JSON.parse(storedData);
+                    Object.assign(transactionData, parsed);
                 }
             }
             
-            // Update UI with transaction data
+            if (phase && ['checkin', 'checkout'].includes(phase)) {
+                transactionData.rentalPhase = phase;
+            }
+            
             updateTransactionDisplay();
         }
 
         function updateTransactionDisplay() {
-            document.getElementById('transactionType').textContent = getTransactionTypeDisplay(transactionData.type);
             document.getElementById('itemName').textContent = transactionData.itemName;
             document.getElementById('meetingWith').textContent = `${transactionData.otherParty.name} (${transactionData.otherParty.role})`;
             document.getElementById('escrowAmount').textContent = `$${transactionData.amount.toFixed(2)}`;
-            
-            const statusEl = document.getElementById('checkInStatus');
-            if (transactionData.status === 'verified') {
-                statusEl.textContent = 'Verified';
-                statusEl.className = 'status-indicator status-verified';
-            } else {
-                statusEl.textContent = 'Pending Check-In';
-                statusEl.className = 'status-indicator status-pending';
-            }
-        }
-
-        function getTransactionTypeDisplay(type) {
-            const types = {
-                'rental_pickup': 'Rental Pickup',
-                'rental_return': 'Rental Return',
-                'purchase_pickup': 'Purchase Pickup',
-                'service_meeting': 'Service Meeting',
-                'delivery_pickup': 'Delivery Pickup',
-                'delivery_dropoff': 'Delivery Drop-off'
-            };
-            return types[type] || 'Transaction Meeting';
-        }
-
-        function generateQRCode() {
-            console.log('📱 Generating QR code for transaction:', transactionData.id);
-            
-            // Create QR code data
-            const qrData = {
-                transactionId: transactionData.id,
-                type: transactionData.type,
-                amount: transactionData.amount,
-                timestamp: Date.now(),
-                verificationCode: generateVerificationCode()
-            };
-            
-            transactionData.qrCodeData = qrData;
-            
-            // In real implementation, this would generate actual QR code
-            // For demo, show QR representation
-            const qrElement = document.getElementById('qrCode');
-            qrElement.innerHTML = `
-                <div style="text-align: center; padding: 20px;">
-                    <div style="font-size: 14px; color: #64748b; margin-bottom: 10px;">QR Code Generated</div>
-                    <div style="font-size: 11px; color: #94a3b8; line-height: 1.3;">
-                        Transaction ID:<br>
-                        <strong>${transactionData.id}</strong><br><br>
-                        Verification Code:<br>
-                        <strong>${qrData.verificationCode}</strong>
-                    </div>
-                </div>
-            `;
-            
-            // Store QR data for scanning
-            localStorage.setItem(`qr_checkin_${transactionData.id}`, JSON.stringify(transactionData));
-            
-            showNotification('QR Code generated successfully', 'success');
-        }
-
-        function generateVerificationCode() {
-            return Math.random().toString(36).substring(2, 10).toUpperCase();
-        }
-
-        function refreshQRCode() {
-            console.log('🔄 Refreshing QR code');
-            generateQRCode();
         }
 
         function contactOtherParty() {
-            console.log('💬 Opening message to:', transactionData.otherParty.name);
             showNotification(`Opening message to ${transactionData.otherParty.name}`, 'success');
+        }
+
+        // Notification system
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
             
-            // In real implementation, this would open messaging system
+            setTimeout(() => notification.classList.add('show'), 100);
             setTimeout(() => {
-                window.location.href = `/messages.html?user=${transactionData.otherParty.userId}`;
-            }, 1000);
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
         }
 
         function checkNotificationStatus() {
@@ -470,19 +681,18 @@
             `;
         }
 
-        function showNotification(message, type = 'success') {
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.textContent = message;
+        // Update demo button text based on phase
+        function updateDemoButtons() {
+            const simulateButton = document.getElementById('simulateButton');
+            const phase = transactionData.rentalPhase;
             
-            document.body.appendChild(notification);
-            
-            setTimeout(() => notification.classList.add('show'), 100);
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => document.body.removeChild(notification), 300);
-            }, 3000);
+            if (phase === 'checkin') {
+                simulateButton.textContent = 'Demo: Complete Check-In';
+                simulateButton.onclick = () => simulateCheckInSuccess();
+            } else if (phase === 'checkout') {
+                simulateButton.textContent = 'Demo: Complete Check-Out';
+                simulateButton.onclick = () => simulateCheckOutSuccess();
+            }
         }
 
         // Simulate QR scan for demo purposes
@@ -502,17 +712,10 @@
         }
 
         // Initialize system on page load
-        document.addEventListener('DOMContentLoaded', initializeQRCheckIn);
-
-        // Add demo scan button for testing (remove in production)
-        setTimeout(() => {
-            const demoButton = document.createElement('button');
-            demoButton.textContent = 'Simulate QR Scan (Demo)';
-            demoButton.className = 'btn btn-secondary';
-            demoButton.style.marginTop = '10px';
-            demoButton.onclick = simulateQRScan;
-            document.querySelector('.action-buttons').appendChild(demoButton);
-        }, 1000);
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeQRCheckIn();
+            updateDemoButtons();
+        });
     </script>
 </body>
 </html>

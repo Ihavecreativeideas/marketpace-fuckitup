@@ -651,11 +651,70 @@
             // Store booking data
             localStorage.setItem('pendingBooking', JSON.stringify(bookingData));
             
-            // Show confirmation
-            alert('Booking confirmed! Your payment is now held in escrow. You will receive QR codes for verification when meeting the owner.');
+            // Create dual QR transaction data for rental
+            const qrTransactionData = {
+                id: 'qr_' + Date.now(),
+                type: 'rental_pickup',
+                itemName: rentalData.title,
+                amount: parseFloat(document.getElementById('totalAmount').textContent.replace('$', '')),
+                rentalDuration: calculateRentalDurationHours(),
+                otherParty: {
+                    name: rentalData.author || 'Rental Owner',
+                    role: 'Owner',
+                    userId: 'owner_' + Math.random().toString(36).substr(2, 9)
+                },
+                rentalPhase: 'checkin', // Start with check-in phase
+                checkInTime: null,
+                expectedReturnTime: null,
+                gracePeriodMinutes: rentalData.bookingFee?.qrCheckInOut?.gracePeriodMinutes || 15,
+                lateFeeStructure: rentalData.bookingFee?.qrCheckInOut?.lateFeeStructure || {
+                    type: 'hourly',
+                    hourlyRate: 5.00,
+                    dailyRate: 25.00,
+                    flatRate: 50.00
+                },
+                selectedDates: selectedDates,
+                bookingFee: rentalData.bookingFee,
+                createdAt: new Date().toISOString(),
+                status: 'pending',
+                qrCodeData: null
+            };
             
-            // Redirect back to community
-            goBack();
+            // Store QR transaction data
+            localStorage.setItem('qr_transaction_' + qrTransactionData.id, JSON.stringify(qrTransactionData));
+            
+            // Show confirmation with QR system info
+            let confirmationMessage = 'Rental booking confirmed! Your payment is now held in escrow.\n\n';
+            
+            if (rentalData.bookingFee?.requireQRCheckin && rentalData.bookingFee?.qrCheckInOut?.enabled) {
+                confirmationMessage += 'DUAL QR VERIFICATION:\n';
+                confirmationMessage += '• Check-In QR: Scan when receiving the item\n';
+                confirmationMessage += '• Check-Out QR: Scan when returning the item\n';
+                confirmationMessage += `• Grace period: ${qrTransactionData.gracePeriodMinutes} minutes\n`;
+                confirmationMessage += '• Late fees apply after grace period\n\n';
+            } else if (rentalData.bookingFee?.requireQRCheckin) {
+                confirmationMessage += 'QR VERIFICATION: You will receive a QR code for pickup verification.\n\n';
+            }
+            
+            confirmationMessage += 'You will be redirected to your QR check-in page.';
+            
+            alert(confirmationMessage);
+            
+            // Redirect to QR check-in system
+            window.location.href = `/qr-checkin-system.html?id=${qrTransactionData.id}&phase=checkin`;
+        }
+
+        function calculateRentalDurationHours() {
+            if (selectedDates.length === 0) return 24; // Default 24 hours
+            
+            // Calculate total rental duration based on selected dates
+            if (currentRateType === 'hourly') {
+                // For hourly rentals, assume 8 hours per day selected
+                return selectedDates.length * 8;
+            } else {
+                // For daily rentals, calculate days and convert to hours
+                return selectedDates.length * 24;
+            }
         }
 
         function goBack() {
