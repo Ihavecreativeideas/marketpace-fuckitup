@@ -9199,9 +9199,9 @@
                     
                     <!-- Calendar navigation -->
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <button onclick="changeEmbeddedMonth(-1)" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: #00ffff; padding: 8px 12px; border-radius: 6px; cursor: pointer;">‹ Prev</button>
+                        <button id="prevMonthBtn" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: #00ffff; padding: 8px 12px; border-radius: 6px; cursor: pointer; transition: all 0.2s;">‹ Prev</button>
                         <h5 id="embeddedCurrentMonth" style="color: #00ffff; margin: 0; font-size: 16px;"></h5>
-                        <button onclick="changeEmbeddedMonth(1)" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: #00ffff; padding: 8px 12px; border-radius: 6px; cursor: pointer;">Next ›</button>
+                        <button id="nextMonthBtn" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: #00ffff; padding: 8px 12px; border-radius: 6px; cursor: pointer; transition: all 0.2s;">Next ›</button>
                     </div>
                     
                     <!-- Calendar grid -->
@@ -9230,6 +9230,7 @@
             
             setTimeout(() => {
                 generateEmbeddedCalendar();
+                initializeCalendarNavigation();
             }, 150);
             
             console.log('✅ Embedded rental calendar added to posting modal');
@@ -9385,11 +9386,51 @@
             updateEmbeddedSelectedDatesDisplay();
         }
         
+        // Initialize navigation event listeners to prevent glitching
+        function initializeCalendarNavigation() {
+            const prevBtn = document.getElementById('prevMonthBtn');
+            const nextBtn = document.getElementById('nextMonthBtn');
+            
+            if (prevBtn && nextBtn) {
+                // Remove any existing listeners
+                prevBtn.replaceWith(prevBtn.cloneNode(true));
+                nextBtn.replaceWith(nextBtn.cloneNode(true));
+                
+                // Get fresh references
+                const newPrevBtn = document.getElementById('prevMonthBtn');
+                const newNextBtn = document.getElementById('nextMonthBtn');
+                
+                newPrevBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    changeEmbeddedMonth(-1);
+                });
+                
+                newNextBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    changeEmbeddedMonth(1);
+                });
+                
+                console.log('✅ Calendar navigation initialized');
+            }
+        }
+        
         function changeEmbeddedMonth(direction) {
             // Prevent rapid clicks and overlapping calls
-            if (window.calendarGenerating || window.monthChanging) return;
+            if (window.calendarGenerating || window.monthChanging) {
+                console.log('⚠️ Month change blocked - calendar busy');
+                return;
+            }
             
+            console.log('📅 Changing month by:', direction);
             window.monthChanging = true;
+            
+            // Disable navigation buttons temporarily
+            const prevBtn = document.getElementById('prevMonthBtn');
+            const nextBtn = document.getElementById('nextMonthBtn');
+            if (prevBtn) prevBtn.style.opacity = '0.5';
+            if (nextBtn) nextBtn.style.opacity = '0.5';
             
             // Update the date
             window.currentCalendarDate.setMonth(window.currentCalendarDate.getMonth() + direction);
@@ -9402,7 +9443,14 @@
             // Regenerate calendar with proper timing
             window.monthChangeTimeout = setTimeout(() => {
                 generateEmbeddedCalendar();
-                window.monthChanging = false;
+                
+                // Re-enable navigation buttons
+                setTimeout(() => {
+                    if (prevBtn) prevBtn.style.opacity = '1';
+                    if (nextBtn) nextBtn.style.opacity = '1';
+                    window.monthChanging = false;
+                    console.log('✅ Month change complete');
+                }, 50);
             }, 100);
         }
         
