@@ -9186,12 +9186,15 @@
                 <div style="margin: 15px 0; padding: 15px; background: rgba(0, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px;">
                     <h4 style="color: #00ffff; margin: 0 0 15px 0;">📅 Set Available Rental Dates</h4>
                     
-                    <!-- Quick preset buttons -->
-                    <div style="display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap;">
-                        <button onclick="selectWeekends()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: #00ffff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">Weekends Only</button>
-                        <button onclick="selectWeekdays()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: #00ffff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">Weekdays Only</button>
-                        <button onclick="selectAllDays()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: #00ffff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">All Days</button>
-                        <button onclick="clearAllDates()" style="background: rgba(255, 0, 0, 0.2); border: 1px solid rgba(255, 0, 0, 0.5); color: #ff6b6b; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">Clear All</button>
+                    <!-- Quick preset buttons and instructions -->
+                    <div style="margin-bottom: 15px;">
+                        <p style="color: #00ffff; font-size: 13px; margin: 0 0 10px 0; opacity: 0.9;">Click individual dates below to customize your availability, or use quick presets:</p>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button onclick="selectWeekends()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: #00ffff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">Weekends Only</button>
+                            <button onclick="selectWeekdays()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: #00ffff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">Weekdays Only</button>
+                            <button onclick="selectAllDays()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: #00ffff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">All Days</button>
+                            <button onclick="clearAllDates()" style="background: rgba(255, 0, 0, 0.2); border: 1px solid rgba(255, 0, 0, 0.5); color: #ff6b6b; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">Clear All</button>
+                        </div>
                     </div>
                     
                     <!-- Calendar navigation -->
@@ -9218,10 +9221,14 @@
             
             rentalRateField.appendChild(calendarSection);
             
-            // Initialize embedded calendar
+            // Initialize embedded calendar with delay to ensure DOM is ready
             window.currentCalendarDate = new Date();
             window.selectedDates = [];
-            generateEmbeddedCalendar();
+            window.calendarGenerating = false;
+            
+            setTimeout(() => {
+                generateEmbeddedCalendar();
+            }, 100);
             
             console.log('✅ Embedded rental calendar added to posting modal');
         }
@@ -9292,29 +9299,47 @@
                 dayCell.className = 'calendar-day';
                 dayCell.setAttribute('data-date', dateStr);
                 dayCell.style.cssText = `
-                    padding: 8px; 
+                    padding: 10px 6px; 
                     text-align: center; 
                     cursor: ${isPastDate ? 'not-allowed' : 'pointer'}; 
-                    border-radius: 6px; 
-                    font-size: 12px;
-                    font-weight: 500;
-                    background: ${isSelected ? '#10b981' : isPastDate ? 'rgba(107, 114, 128, 0.4)' : 'rgba(255, 255, 255, 0.1)'};
+                    border-radius: 8px; 
+                    font-size: 13px;
+                    font-weight: ${isSelected ? '700' : '500'};
+                    background: ${isSelected ? 'linear-gradient(135deg, #10b981, #059669)' : isPastDate ? 'rgba(107, 114, 128, 0.3)' : 'rgba(255, 255, 255, 0.1)'};
                     color: ${isPastDate ? '#9ca3af' : isSelected ? 'white' : '#e2e8f0'};
-                    border: ${isSelected ? '2px solid #059669' : '1px solid rgba(255, 255, 255, 0.2)'};
-                    min-height: 32px;
+                    border: ${isSelected ? '2px solid #00ffff' : '1px solid rgba(255, 255, 255, 0.2)'};
+                    min-height: 36px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     user-select: none;
-                    ${!isPastDate ? 'transition: all 0.15s ease;' : ''}
+                    box-shadow: ${isSelected ? '0 0 10px rgba(16, 185, 129, 0.5)' : 'none'};
+                    ${!isPastDate ? 'transition: all 0.2s ease; transform: translateZ(0);' : ''}
                 `;
                 
                 dayCell.textContent = day;
                 
                 if (!isPastDate) {
-                    dayCell.addEventListener('click', () => {
+                    // Add hover effects
+                    dayCell.addEventListener('mouseenter', () => {
+                        if (!isSelected) {
+                            dayCell.style.background = 'rgba(16, 185, 129, 0.3)';
+                            dayCell.style.transform = 'scale(1.05)';
+                        }
+                    });
+                    
+                    dayCell.addEventListener('mouseleave', () => {
+                        if (!isSelected) {
+                            dayCell.style.background = 'rgba(255, 255, 255, 0.1)';
+                            dayCell.style.transform = 'scale(1)';
+                        }
+                    });
+                    
+                    dayCell.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
                         toggleEmbeddedDate(dateStr);
-                    }, { passive: true });
+                    });
                 }
                 
                 fragment.appendChild(dayCell);
@@ -9344,17 +9369,26 @@
             const dayCell = document.querySelector(`[data-date="${dateStr}"]`);
             if (dayCell) {
                 const isSelected = window.selectedDates.includes(dateStr);
-                dayCell.style.background = isSelected ? '#10b981' : 'rgba(255, 255, 255, 0.1)';
+                dayCell.style.background = isSelected ? 'linear-gradient(135deg, #10b981, #059669)' : 'rgba(255, 255, 255, 0.1)';
                 dayCell.style.color = isSelected ? 'white' : '#e2e8f0';
-                dayCell.style.border = isSelected ? '2px solid #059669' : '1px solid rgba(255, 255, 255, 0.2)';
+                dayCell.style.border = isSelected ? '2px solid #00ffff' : '1px solid rgba(255, 255, 255, 0.2)';
+                dayCell.style.fontWeight = isSelected ? '700' : '500';
+                dayCell.style.boxShadow = isSelected ? '0 0 10px rgba(16, 185, 129, 0.5)' : 'none';
+                dayCell.style.transform = 'scale(1)';
             }
             
             updateEmbeddedSelectedDatesDisplay();
         }
         
         function changeEmbeddedMonth(direction) {
+            if (window.calendarGenerating) return; // Prevent rapid clicks
+            
             window.currentCalendarDate.setMonth(window.currentCalendarDate.getMonth() + direction);
-            generateEmbeddedCalendar();
+            
+            // Throttle month changes
+            setTimeout(() => {
+                generateEmbeddedCalendar();
+            }, 50);
         }
         
         function updateEmbeddedSelectedDatesDisplay() {
