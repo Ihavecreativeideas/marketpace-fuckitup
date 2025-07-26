@@ -8796,23 +8796,25 @@
                 return;
             }
 
-            feedContainer.innerHTML = '';
+            console.log('Loading community posts:', existingPosts.length, 'posts found');
 
+            // Clear existing content but keep demo posts if no user posts
             if (existingPosts.length === 0) {
-                feedContainer.innerHTML = `
-                    <div style="text-align: center; padding: 40px 20px; color: #94a3b8;">
-                        <div style="font-size: 48px; margin-bottom: 16px;">📝</div>
-                        <h3 style="color: #00ffff; margin-bottom: 8px;">No posts yet</h3>
-                        <p>Be the first to share something with your community!</p>
-                    </div>
-                `;
+                // Keep demo posts visible when no user posts exist
+                console.log('No user posts found, keeping demo posts visible');
                 return;
             }
 
-            existingPosts.forEach(post => {
+            // Clear all content and show user posts first
+            feedContainer.innerHTML = '';
+
+            existingPosts.forEach((post, index) => {
+                console.log('Creating post element for:', post.title, 'category:', post.category);
                 const postElement = createPostElement(post);
                 feedContainer.appendChild(postElement);
             });
+
+            // Demo posts will remain in the HTML for context
         }
 
         // Create individual post element
