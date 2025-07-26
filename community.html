@@ -5976,7 +5976,7 @@ Example:
                 // Update profile picture display
                 const profileImg = document.querySelector('.profile-pic img, .composer-avatar img, .profile-avatar img');
                 if (profileImg) {
-                    profileImg.src = result.responsiveUrls.medium;
+                    profileImg.src = result.responsiveUrls?.medium || result.imageUrl || result.url;
                 }
                 
                 showNotification('Profile picture updated successfully!', 'success');
@@ -6003,10 +6003,16 @@ Example:
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
                     const result = await uploadToCloudinary(file, '/api/upload/post');
+                    console.log('Cloudinary upload result:', result);
                     uploadedImages.push({
-                        url: result.imageUrl || result.url,
+                        url: result.imageUrl || result.responsiveUrls?.original || result.url,
                         name: file.name,
-                        publicId: result.publicId
+                        publicId: result.publicId,
+                        responsiveUrls: result.responsiveUrls || {
+                            small: result.imageUrl || result.url,
+                            medium: result.imageUrl || result.url,
+                            large: result.imageUrl || result.url
+                        }
                     }); // Add to global uploadedImages array with proper format
                 }
                 
@@ -6088,7 +6094,7 @@ Example:
                 `;
                 
                 imgContainer.innerHTML = `
-                    <img src="${image.responsiveUrls.small}" 
+                    <img src="${image.responsiveUrls?.small || image.url}" 
                          alt="Uploaded image ${index + 1}"
                          style="width: 100%; height: 80px; object-fit: cover;">
                     <div style="position: absolute; top: 5px; right: 5px; 
