@@ -7674,15 +7674,16 @@ Example:
                 console.log('All community functions initialized successfully');
                 
                 // Clear any persistent notification elements that might cause blue line
-                setTimeout(() => {
+                setInterval(() => {
                     const persistentNotifications = document.querySelectorAll('div[style*="position: fixed"][style*="top:"]');
                     persistentNotifications.forEach(notification => {
-                        if (notification.textContent.trim() === 's' || notification.textContent.trim().length <= 2) {
-                            console.log('Removing persistent notification:', notification.textContent);
+                        const text = notification.textContent.trim();
+                        if (text === 's' || text.length <= 2 || text.includes('Uploading')) {
+                            console.log('Removing problematic notification:', text);
                             notification.remove();
                         }
                     });
-                }, 100);
+                }, 500);
                 
                 // Load existing posts on page load
                 loadCommunityPosts();
@@ -11352,7 +11353,11 @@ Example:
             // Debug input field values - try both possible form field sets
             let titleEl = document.getElementById('postTitle');
             let descEl = document.getElementById('postDescription');
-            const categoryEl = document.getElementById('postCategory');
+            // Try multiple possible category element IDs
+            let categoryEl = document.getElementById('postCategory') || 
+                           document.querySelector('select[name="category"]') ||
+                           document.querySelector('#category') ||
+                           document.querySelector('.category-select');
             
             // Debug: Check which form elements are actually visible and accessible
             console.log('Title element details:', {
@@ -11410,10 +11415,16 @@ Example:
                 categoryEl: !!categoryEl
             });
             
-            if (!titleEl || !descEl || !categoryEl) {
-                console.error('Missing form elements!');
-                showNotification('Form elements missing. Please try again.', 'error');
+            // More forgiving element detection - if we have title and description, continue
+            if (!titleEl || !descEl) {
+                console.error('Missing required form elements!');
+                showNotification('Title and description are required. Please fill them in.', 'error');
                 return;
+            }
+            
+            // Default category if not found
+            if (!categoryEl) {
+                console.warn('Category element not found, defaulting to "general"');
             }
             
             const title = titleEl.value?.trim() || '';
