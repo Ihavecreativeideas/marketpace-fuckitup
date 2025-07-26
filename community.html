@@ -5211,10 +5211,37 @@
                 
                 // Check if this is a rental post and open rental booking popup instead
                 if (formData.category === 'rent') {
-                    // Get rental rate information
+                    // Get rental rate information from the correct input fields
                     const selectedRateType = document.querySelector('input[name="rentalRate"]:checked')?.value || 'daily';
-                    const hourlyRate = parseFloat(document.getElementById('hourlyRateAmountModal')?.value) || 0;
-                    const dailyRate = parseFloat(document.getElementById('dailyRateAmountModal')?.value) || 0;
+                    
+                    // Try both sets of input fields to find the active ones
+                    let hourlyRate = parseFloat(document.getElementById('hourlyRateAmountModal')?.value) || 0;
+                    let dailyRate = parseFloat(document.getElementById('dailyRateAmountModal')?.value) || 0;
+                    
+                    // If modal inputs are empty, try the original inputs
+                    if (hourlyRate === 0 && dailyRate === 0) {
+                        hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
+                        dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
+                    }
+                    
+                    // Debug: Log which input fields exist and their values
+                    const hourlyModalEl = document.getElementById('hourlyRateAmountModal');
+                    const dailyModalEl = document.getElementById('dailyRateAmountModal');
+                    const hourlyOrigEl = document.getElementById('hourlyRateAmount');
+                    const dailyOrigEl = document.getElementById('dailyRateAmount');
+                    
+                    console.log('Input field debugging:', {
+                        hourlyModalExists: !!hourlyModalEl,
+                        hourlyModalValue: hourlyModalEl?.value,
+                        dailyModalExists: !!dailyModalEl,
+                        dailyModalValue: dailyModalEl?.value,
+                        hourlyOrigExists: !!hourlyOrigEl,
+                        hourlyOrigValue: hourlyOrigEl?.value,
+                        dailyOrigExists: !!dailyOrigEl,
+                        dailyOrigValue: dailyOrigEl?.value,
+                        finalHourlyRate: hourlyRate,
+                        finalDailyRate: dailyRate
+                    });
                     
                     // Validate that a rate is set
                     if (hourlyRate === 0 && dailyRate === 0) {
@@ -7950,6 +7977,22 @@
                     console.log('Showing rental fields');
                     if (rentalRateField) rentalRateField.style.display = 'block';
                     if (deliveryMethodField) deliveryMethodField.style.display = 'block';
+                    
+                    // Debug: Log which inputs are visible after showing rental fields
+                    setTimeout(() => {
+                        const hourlyModalEl = document.getElementById('hourlyRateAmountModal');
+                        const dailyModalEl = document.getElementById('dailyRateAmountModal');
+                        const hourlyOrigEl = document.getElementById('hourlyRateAmount');
+                        const dailyOrigEl = document.getElementById('dailyRateAmount');
+                        
+                        console.log('Rental field visibility debug:', {
+                            rentalRateFieldDisplay: rentalRateField?.style.display,
+                            hourlyModalVisible: hourlyModalEl && window.getComputedStyle(hourlyModalEl).display !== 'none',
+                            dailyModalVisible: dailyModalEl && window.getComputedStyle(dailyModalEl).display !== 'none',
+                            hourlyOrigVisible: hourlyOrigEl && window.getComputedStyle(hourlyOrigEl).display !== 'none',
+                            dailyOrigVisible: dailyOrigEl && window.getComputedStyle(dailyOrigEl).display !== 'none'
+                        });
+                    }, 100);
                     break;
                     
                 case 'sale':
