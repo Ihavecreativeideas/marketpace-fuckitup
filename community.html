@@ -2699,15 +2699,15 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                             <div style="padding: 15px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px;">
                                 <label style="display: block; margin-bottom: 10px; color: #10b981; font-weight: 500;">
-                                    Hourly Rate
+                                    Hourly Rate ($)
                                 </label>
-                                <input type="number" id="hourlyRateAmount" placeholder="15.00" step="0.01" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px;">
+                                <input type="number" id="hourlyRateAmount" placeholder="15.00" step="0.01" min="0" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.9); border: 2px solid rgba(16, 185, 129, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px; font-weight: 500;">
                             </div>
                             <div style="padding: 15px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px;">
                                 <label style="display: block; margin-bottom: 10px; color: #3b82f6; font-weight: 500;">
-                                    Daily Rate (Recommended)
+                                    Daily Rate ($)
                                 </label>
-                                <input type="number" id="dailyRateAmount" placeholder="75.00" step="0.01" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(59, 130, 246, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px;">
+                                <input type="number" id="dailyRateAmount" placeholder="75.00" step="0.01" min="0" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.9); border: 2px solid rgba(59, 130, 246, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px; font-weight: 500;">
                             </div>
                         </div>
                         
@@ -11230,6 +11230,39 @@ Example:
                     }, 100);
                 }
                 
+                if (post.category === 'rent') {
+                    setTimeout(() => {
+                        // Pre-populate rental rates
+                        const hourlyRateField = document.getElementById('hourlyRateAmount');
+                        const dailyRateField = document.getElementById('dailyRateAmount');
+                        const customTermsField = document.getElementById('rentalTermsCustom');
+                        const paymentMethodEscrow = document.getElementById('escrowPayment');
+                        const paymentMethodCash = document.getElementById('cashPayment');
+                        
+                        if (hourlyRateField && post.hourlyRate) hourlyRateField.value = post.hourlyRate;
+                        if (dailyRateField && post.dailyRate) dailyRateField.value = post.dailyRate;
+                        if (customTermsField && post.rentalTerms) customTermsField.value = post.rentalTerms;
+                        
+                        // Set payment method
+                        if (post.paymentMethod === 'cash' && paymentMethodCash) {
+                            paymentMethodCash.checked = true;
+                        } else if (paymentMethodEscrow) {
+                            paymentMethodEscrow.checked = true;
+                        }
+                        
+                        // Set delivery options
+                        if (post.deliveryOptions) {
+                            const selfPickupCheckbox = document.getElementById('selfPickupOptionRental');
+                            const privateDeliveryCheckbox = document.getElementById('privateDeliveryOptionRental');
+                            const marketPaceDeliveryCheckbox = document.getElementById('marketPaceDeliveryOptionRental');
+                            
+                            if (selfPickupCheckbox) selfPickupCheckbox.checked = post.deliveryOptions.selfPickup || false;
+                            if (privateDeliveryCheckbox) privateDeliveryCheckbox.checked = post.deliveryOptions.privateDelivery || false;
+                            if (marketPaceDeliveryCheckbox) marketPaceDeliveryCheckbox.checked = post.deliveryOptions.marketPaceDelivery || false;
+                        }
+                    }, 100);
+                }
+                
                 if (post.category === 'service') {
                     setTimeout(() => {
                         const hourlyAmount = document.getElementById('serviceHourlyAmount');
@@ -11272,17 +11305,39 @@ Example:
             
             // Add category-specific data
             if (formData.category === 'rent') {
-                const hourlyRate = document.getElementById('rentalHourlyRate')?.value;
-                const dailyRate = document.getElementById('rentalDailyRate')?.value;
-                if (hourlyRate) formData.hourlyRate = hourlyRate;
-                if (dailyRate) formData.dailyRate = dailyRate;
+                const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
+                const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
+                const customTerms = document.getElementById('rentalTermsCustom')?.value?.trim() || "Please handle with care. Must be returned in same condition.";
+                const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'escrow';
+                
+                formData.hourlyRate = hourlyRate;
+                formData.dailyRate = dailyRate;
+                formData.rentalTerms = customTerms;
+                formData.paymentMethod = paymentMethod;
+                formData.itemCondition = 'good';
+                formData.rentalRateType = (hourlyRate > 0 && dailyRate > 0) ? "both" : (hourlyRate > 0 ? "hourly" : "daily");
                 
                 // Get delivery options
-                const deliveryOptions = [];
-                document.querySelectorAll('input[name="deliveryOptions"]:checked').forEach(checkbox => {
-                    deliveryOptions.push(checkbox.value);
-                });
-                formData.deliveryOptions = deliveryOptions;
+                const selfPickup = document.getElementById('selfPickupOptionRental')?.checked || false;
+                const privateDelivery = document.getElementById('privateDeliveryOptionRental')?.checked || false;
+                const marketPaceDelivery = document.getElementById('marketPaceDeliveryOptionRental')?.checked || false;
+                
+                formData.deliveryOptions = {
+                    selfPickup: selfPickup,
+                    privateDelivery: privateDelivery,
+                    marketPaceDelivery: marketPaceDelivery
+                };
+                
+                // Update price display
+                if (hourlyRate > 0 && dailyRate > 0) {
+                    formData.price = `$${hourlyRate}/hr | $${dailyRate}/day`;
+                } else if (hourlyRate > 0) {
+                    formData.price = `$${hourlyRate}/hour`;
+                } else if (dailyRate > 0) {
+                    formData.price = `$${dailyRate}/day`;
+                } else {
+                    formData.price = `$25/day`;
+                }
             }
             
             if (formData.category === 'event') {
