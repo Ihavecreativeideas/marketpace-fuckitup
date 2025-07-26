@@ -5225,6 +5225,83 @@ Example:
                             <input type="text" id="privateDeliveryFeeModal" placeholder="$0.00" style="width: 100%; padding: 10px; border: 1px solid #f59e0b; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
                             <p style="font-size: 11px; color: #94a3b8; margin-top: 5px; line-height: 1.4;"><strong>Disclaimer:</strong> Private party delivery is not a vetted MarketPace driver, not associated with MarketPace, and we're not responsible for any inconveniences.</p>
                         </div>
+
+                        <!-- Booking Fee (Security Fee) Section -->
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 8px;">
+                            <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                                <input type="checkbox" id="requireBookingFeeModal" style="margin-right: 10px;" onchange="toggleBookingFeeOptions()">
+                                <label for="requireBookingFeeModal" style="color: #8b5cf6; font-weight: 600; cursor: pointer;">Require Booking Fee (Security Fee)</label>
+                            </div>
+                            
+                            <div id="bookingFeeOptionsModal" style="display: none;">
+                                <!-- Fee Type Selection -->
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display: block; margin-bottom: 8px; color: #e2e8f0; font-size: 13px;">Fee Type:</label>
+                                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                        <label style="display: flex; align-items: center; color: #e2e8f0; cursor: pointer;">
+                                            <input type="radio" name="bookingFeeType" value="percentage" style="margin-right: 8px;" checked onchange="toggleFeeType()"> Percentage of rental
+                                        </label>
+                                        <label style="display: flex; align-items: center; color: #e2e8f0; cursor: pointer;">
+                                            <input type="radio" name="bookingFeeType" value="flat" style="margin-right: 8px;" onchange="toggleFeeType()"> Flat rate amount
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Fee Amount Input -->
+                                <div style="margin-bottom: 15px;">
+                                    <div id="percentageFeeInput" style="display: block;">
+                                        <label style="display: block; margin-bottom: 5px; color: #8b5cf6;">Booking Fee Percentage:</label>
+                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                            <input type="number" id="bookingFeePercentageModal" placeholder="20" min="5" max="50" style="width: 80px; padding: 10px; border: 1px solid #8b5cf6; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                                            <span style="color: #e2e8f0;">% of rental cost</span>
+                                        </div>
+                                        <p style="font-size: 11px; color: #94a3b8; margin-top: 5px;">Recommended: 15-25% of total rental amount</p>
+                                    </div>
+                                    
+                                    <div id="flatFeeInput" style="display: none;">
+                                        <label style="display: block; margin-bottom: 5px; color: #8b5cf6;">Flat Booking Fee Amount:</label>
+                                        <input type="text" id="bookingFeeFlatModal" placeholder="$25.00" style="width: 120px; padding: 10px; border: 1px solid #8b5cf6; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                                        <p style="font-size: 11px; color: #94a3b8; margin-top: 5px;">Fixed amount regardless of rental cost</p>
+                                    </div>
+                                </div>
+
+                                <!-- Refund Policy -->
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display: block; margin-bottom: 8px; color: #e2e8f0; font-size: 13px;">Refund Policy:</label>
+                                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                                        <label style="display: flex; align-items: center; color: #e2e8f0; cursor: pointer;">
+                                            <input type="radio" name="bookingFeeRefund" value="full" style="margin-right: 8px;" checked> Fully Refundable
+                                            <span style="margin-left: 8px; color: #10b981; font-size: 11px;">(100% refund if rental cancelled)</span>
+                                        </label>
+                                        <label style="display: flex; align-items: center; color: #e2e8f0; cursor: pointer;">
+                                            <input type="radio" name="bookingFeeRefund" value="partial" style="margin-right: 8px;"> Partial Refund (50%)
+                                            <span style="margin-left: 8px; color: #f59e0b; font-size: 11px;">(50% refund if rental cancelled)</span>
+                                        </label>
+                                        <label style="display: flex; align-items: center; color: #e2e8f0; cursor: pointer;">
+                                            <input type="radio" name="bookingFeeRefund" value="none" style="margin-right: 8px;"> Non-Refundable
+                                            <span style="margin-left: 8px; color: #ef4444; font-size: 11px;">(No refund if rental cancelled)</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- QR Check-in Option -->
+                                <div style="margin-bottom: 15px;">
+                                    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                                        <input type="checkbox" id="requireQRCheckinModal" style="margin-right: 10px;">
+                                        <label for="requireQRCheckinModal" style="color: #e2e8f0; cursor: pointer;">Require QR Check-in for Verification</label>
+                                    </div>
+                                    <p style="font-size: 11px; color: #94a3b8; margin-left: 20px;">Members must scan QR code in person before payment is released from escrow</p>
+                                </div>
+
+                                <!-- Booking Fee Info -->
+                                <div style="background: rgba(139, 92, 246, 0.05); padding: 10px; border-radius: 6px; border-left: 3px solid #8b5cf6;">
+                                    <div style="color: #8b5cf6; font-size: 12px; font-weight: 500; margin-bottom: 4px;">SECURE Booking Fee Protection</div>
+                                    <div style="color: #e2e8f0; font-size: 11px; line-height: 1.4;">
+                                        Booking fees are held in escrow until rental completion. If you fail to deliver the rental as promised, the member automatically receives a full refund regardless of your refund policy.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
 
@@ -5501,13 +5578,18 @@ Example:
                     const itemCondition = document.getElementById('itemCondition')?.value;
                     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
                     const rentalTerms = document.getElementById('rentalTerms')?.value;
-                    const enableBookingFee = document.getElementById('enableBookingFee')?.checked;
-                    const bookingFeeAmount = parseFloat(document.getElementById('bookingFeeAmount')?.value) || 0;
-                    const bookingFeeType = document.getElementById('bookingFeeType')?.value;
+                    // New booking fee system
+                    const enableBookingFee = document.getElementById('requireBookingFeeModal')?.checked;
+                    const bookingFeeType = document.querySelector('input[name="bookingFeeType"]:checked')?.value || 'percentage';
+                    const bookingFeePercentage = parseFloat(document.getElementById('bookingFeePercentageModal')?.value) || 20;
+                    const bookingFeeFlat = parseFloat(document.getElementById('bookingFeeFlatModal')?.value.replace('$', '')) || 0;
+                    const bookingFeeRefund = document.querySelector('input[name="bookingFeeRefund"]:checked')?.value || 'full';
+                    const requireQRCheckin = document.getElementById('requireQRCheckinModal')?.checked;
                     
                     console.log('Comprehensive rental data:', { 
                         hourlyRate, dailyRate, itemCondition, paymentMethod, 
-                        rentalTerms, enableBookingFee, bookingFeeAmount, bookingFeeType 
+                        rentalTerms, enableBookingFee, bookingFeeType, bookingFeePercentage, 
+                        bookingFeeFlat, bookingFeeRefund, requireQRCheckin 
                     });
                     
                     // Validate required rental fields
@@ -5535,8 +5617,11 @@ Example:
                     formData.rentalTerms = rentalTerms.trim();
                     formData.bookingFee = enableBookingFee ? {
                         enabled: true,
-                        amount: bookingFeeAmount,
-                        type: bookingFeeType
+                        type: bookingFeeType,
+                        percentage: bookingFeeType === 'percentage' ? bookingFeePercentage : null,
+                        flatAmount: bookingFeeType === 'flat' ? bookingFeeFlat : null,
+                        refundPolicy: bookingFeeRefund,
+                        requireQRCheckin: requireQRCheckin
                     } : { enabled: false };
                     
                     // Collect delivery options for rental
@@ -7238,11 +7323,26 @@ Example:
 
         // Toggle booking fee options
         function toggleBookingFeeOptions() {
-            const checkbox = document.getElementById('enableBookingFee');
-            const options = document.getElementById('bookingFeeOptions');
+            const checkbox = document.getElementById('requireBookingFeeModal');
+            const options = document.getElementById('bookingFeeOptionsModal');
             
             if (checkbox && options) {
                 options.style.display = checkbox.checked ? 'block' : 'none';
+            }
+        }
+
+        // Toggle between percentage and flat fee types
+        function toggleFeeType() {
+            const percentageRadio = document.querySelector('input[name="bookingFeeType"][value="percentage"]');
+            const percentageInput = document.getElementById('percentageFeeInput');
+            const flatInput = document.getElementById('flatFeeInput');
+            
+            if (percentageRadio && percentageRadio.checked) {
+                percentageInput.style.display = 'block';
+                flatInput.style.display = 'none';
+            } else {
+                percentageInput.style.display = 'none';
+                flatInput.style.display = 'block';
             }
         }
 
@@ -9397,14 +9497,27 @@ Example:
             // Add booking fee display if present
             let bookingFeeDisplay = '';
             if (post.bookingFee && post.bookingFee.enabled) {
-                const refundText = post.bookingFee.refundPolicy === 'nonrefundable' ? 'Non-Refundable' : 
+                const refundText = post.bookingFee.refundPolicy === 'none' ? 'Non-Refundable' : 
                                  post.bookingFee.refundPolicy === 'partial' ? 'Partial Refund (50%)' : 'Full Refund';
+                
+                // Calculate fee amount display based on type
+                let feeAmountText = '';
+                if (post.bookingFee.type === 'percentage' && post.bookingFee.percentage) {
+                    feeAmountText = `${post.bookingFee.percentage}% of rental cost`;
+                } else if (post.bookingFee.type === 'flat' && post.bookingFee.flatAmount) {
+                    feeAmountText = `$${post.bookingFee.flatAmount} flat rate`;
+                }
+                
                 bookingFeeDisplay = `
-                    <div style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 6px; padding: 12px; margin-top: 10px;">
-                        <div style="color: #a855f7; font-weight: 600; font-size: 12px; margin-bottom: 8px;">💳 Booking Fee Required</div>
-                        <div style="color: #e2e8f0; font-size: 11px; margin-bottom: 4px;">Amount: <span style="color: #a855f7; font-weight: 500;">$${post.bookingFee.amount}</span></div>
-                        <div style="color: #e2e8f0; font-size: 11px; margin-bottom: 4px;">Refund Policy: <span style="color: #a855f7; font-weight: 500;">${refundText}</span></div>
-                        ${post.bookingFee.requiresQRCheckin ? '<div style="color: #10b981; font-size: 10px; margin-top: 6px;">🔒 QR Check-in required for payment release</div>' : ''}
+                    <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 6px; padding: 12px; margin-top: 10px;">
+                        <div style="color: #8b5cf6; font-weight: 600; font-size: 12px; margin-bottom: 8px;">SECURE Booking Fee Required</div>
+                        <div style="color: #e2e8f0; font-size: 11px; margin-bottom: 4px;">Amount: <span style="color: #8b5cf6; font-weight: 500;">${feeAmountText}</span></div>
+                        <div style="color: #e2e8f0; font-size: 11px; margin-bottom: 4px;">Refund Policy: <span style="color: #8b5cf6; font-weight: 500;">${refundText}</span></div>
+                        ${post.bookingFee.requireQRCheckin ? '<div style="color: #10b981; font-size: 10px; margin-top: 6px;">QR Check-in required for payment release</div>' : ''}
+                        <div style="background: rgba(139, 92, 246, 0.05); padding: 6px; border-radius: 4px; margin-top: 8px;">
+                            <div style="color: #8b5cf6; font-size: 10px; font-weight: 500;">ESCROW PROTECTION</div>
+                            <div style="color: #94a3b8; font-size: 9px; margin-top: 2px;">Fee held in escrow until rental completion</div>
+                        </div>
                     </div>
                 `;
             }

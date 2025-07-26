@@ -385,6 +385,11 @@
                         <span class="cost-value" id="lateFee">$5.00</span>
                     </div>
                     
+                    <div class="cost-item" id="bookingFeeRow" style="display: none;">
+                        <span class="cost-label" id="bookingFeeLabel">Booking Fee</span>
+                        <span class="cost-value" id="bookingFee">$0.00</span>
+                    </div>
+                    
                     <div class="cost-item">
                         <span class="cost-label">MarketPace Commission (5%)</span>
                         <span class="cost-value" id="commission">$0.00</span>
@@ -575,18 +580,42 @@
             const sustainabilityFee = 2.50;
             const lateFee = 5.00;
             
+            // Calculate booking fee if enabled
+            let bookingFee = 0;
+            const bookingFeeRow = document.getElementById('bookingFeeRow');
+            const bookingFeeLabel = document.getElementById('bookingFeeLabel');
+            
+            if (rentalData.bookingFee && rentalData.bookingFee.enabled) {
+                if (rentalData.bookingFee.type === 'percentage' && rentalData.bookingFee.percentage) {
+                    bookingFee = baseAmount * (rentalData.bookingFee.percentage / 100);
+                    bookingFeeLabel.textContent = `Booking Fee (${rentalData.bookingFee.percentage}%)`;
+                } else if (rentalData.bookingFee.type === 'flat' && rentalData.bookingFee.flatAmount) {
+                    bookingFee = rentalData.bookingFee.flatAmount;
+                    bookingFeeLabel.textContent = 'Booking Fee (Flat Rate)';
+                }
+                
+                // Show booking fee row and update refund policy info
+                bookingFeeRow.style.display = 'flex';
+                const refundText = rentalData.bookingFee.refundPolicy === 'none' ? 'Non-Refundable' : 
+                                 rentalData.bookingFee.refundPolicy === 'partial' ? 'Partial Refund (50%)' : 'Full Refund';
+                bookingFeeLabel.innerHTML += `<br><small style="color: #8b5cf6; font-size: 0.8em;">${refundText}</small>`;
+            } else {
+                bookingFeeRow.style.display = 'none';
+            }
+            
             let deliveryFee = 0;
             const deliveryOptions = rentalData.deliveryOptions || {};
             if (deliveryOptions.marketPaceDelivery || deliveryOptions.privateDelivery) {
                 deliveryFee = 15.00;
             }
             
-            const subtotal = baseAmount + securityDeposit + commission + sustainabilityFee + lateFee + deliveryFee;
+            const subtotal = baseAmount + securityDeposit + bookingFee + commission + sustainabilityFee + lateFee + deliveryFee;
             const salesTax = subtotal * 0.08; // 8% sales tax
             const total = subtotal + salesTax;
             
             // Update display
             document.getElementById('securityDeposit').textContent = `$${securityDeposit.toFixed(2)}`;
+            document.getElementById('bookingFee').textContent = `$${bookingFee.toFixed(2)}`;
             document.getElementById('commission').textContent = `$${commission.toFixed(2)}`;
             document.getElementById('salesTax').textContent = `$${salesTax.toFixed(2)}`;
             document.getElementById('totalAmount').textContent = `$${total.toFixed(2)}`;
@@ -610,6 +639,7 @@
                 paymentBreakdown: {
                     rentalCost: document.getElementById('rentalCost').textContent,
                     securityDeposit: document.getElementById('securityDeposit').textContent,
+                    bookingFee: document.getElementById('bookingFee').textContent,
                     commission: document.getElementById('commission').textContent,
                     sustainabilityFee: document.getElementById('sustainabilityFee').textContent,
                     lateFee: document.getElementById('lateFee').textContent,

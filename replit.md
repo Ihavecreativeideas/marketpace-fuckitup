@@ -273,6 +273,16 @@ All features are designed to strengthen local communities by keeping commerce lo
 
 ## Recent Changes
 
+✓ **COMPREHENSIVE BOOKING FEE (SECURITY FEE) SYSTEM WITH REFUND OPTIONS FULLY IMPLEMENTED** (July 26, 2025)
+✓ **FLEXIBLE FEE CONFIGURATION**: Added owner-configurable booking fee system with percentage (5-50%) or flat rate amount options in rental posting modal
+✓ **REFUND POLICY OPTIONS**: Three selectable refund policies - Full Refund, Partial Refund (50%), and Non-Refundable with clear member protection emphasis
+✓ **QR CHECK-IN INTEGRATION**: Optional QR code scanning requirement for in-person verification before payment release from escrow
+✓ **ESCROW PROTECTION DISPLAY**: Enhanced escrow messaging emphasizing automatic refunds if rental owner fails to deliver as promised
+✓ **COMMUNITY FEED INTEGRATION**: Booking fee information prominently displayed in rental posts when enabled with amount, refund policy, and QR requirements
+✓ **CUSTOMER BOOKING PAGE ENHANCEMENT**: Automatic booking fee calculation and display in payment breakdown with percentage vs flat rate detection
+✓ **REAL-TIME FEE CALCULATION**: Percentage fees calculated from rental cost, flat fees show fixed amount with proper labeling and refund policy display
+✓ **MEMBER PROTECTION FOCUS**: System emphasizes member safety with escrow holding, automatic refunds, and secure transaction verification across all booking fee interactions
+
 ✓ **PROFESSIONAL CUSTOMER BOOKING PAGE REDESIGN COMPLETED** (July 26, 2025)
 ✓ **EMOJI-FREE SLEEK DESIGN**: Completely removed emojis and created compact, professional booking interface
 ✓ **COMPREHENSIVE PAYMENT BREAKDOWN**: Single payment summary box showing rental rate, security deposit, late fee, MarketPace 5% commission, sustainability fee, sales tax, and delivery fee
