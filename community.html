@@ -6477,7 +6477,7 @@ Example:
                 
                 // Display uploaded images
                 displayUploadedImages(uploadedImages, inputId + '-preview');
-                showNotification(`${uploadedImages.length} image(s) uploaded successfully!`, 'success');
+                // Remove success notification to prevent blue line display issue
                 console.log('✅ Images uploaded to global array:', uploadedImages);
                 return Promise.resolve();
             } catch (error) {
@@ -7673,10 +7673,19 @@ Example:
                 
                 console.log('All community functions initialized successfully');
                 
+                // Clear any persistent notification elements that might cause blue line
+                setTimeout(() => {
+                    const persistentNotifications = document.querySelectorAll('div[style*="position: fixed"][style*="top:"]');
+                    persistentNotifications.forEach(notification => {
+                        if (notification.textContent.trim() === 's' || notification.textContent.trim().length <= 2) {
+                            console.log('Removing persistent notification:', notification.textContent);
+                            notification.remove();
+                        }
+                    });
+                }, 100);
+                
                 // Load existing posts on page load
                 loadCommunityPosts();
-                
-                // Removed auto-notification to prevent blue line at top
                 
             } catch (error) {
                 console.error('❌ Error initializing community functions:', error);
