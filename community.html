@@ -9188,12 +9188,13 @@
                     
                     <!-- Quick preset buttons and instructions -->
                     <div style="margin-bottom: 15px;">
-                        <p style="color: #00ffff; font-size: 13px; margin: 0 0 10px 0; opacity: 0.9;">Click individual dates below to customize your availability, or use quick presets:</p>
+                        <p style="color: #00ffff; font-size: 14px; margin: 0 0 8px 0; font-weight: 600;">✨ CLICK ANY DATE TO SELECT/DESELECT ✨</p>
+                        <p style="color: #10b981; font-size: 12px; margin: 0 0 12px 0; opacity: 0.9;">Tap individual dates to build your custom availability schedule, or use quick presets below:</p>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            <button onclick="selectWeekends()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: #00ffff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">Weekends Only</button>
-                            <button onclick="selectWeekdays()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: #00ffff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">Weekdays Only</button>
-                            <button onclick="selectAllDays()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: #00ffff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">All Days</button>
-                            <button onclick="clearAllDates()" style="background: rgba(255, 0, 0, 0.2); border: 1px solid rgba(255, 0, 0, 0.5); color: #ff6b6b; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">Clear All</button>
+                            <button onclick="selectWeekends()" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.5); color: #10b981; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s; font-weight: 500;">Weekends Only</button>
+                            <button onclick="selectWeekdays()" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.5); color: #10b981; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s; font-weight: 500;">Weekdays Only</button>
+                            <button onclick="selectAllDays()" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.5); color: #10b981; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s; font-weight: 500;">All Days</button>
+                            <button onclick="clearAllDates()" style="background: rgba(255, 0, 0, 0.2); border: 1px solid rgba(255, 0, 0, 0.5); color: #ff6b6b; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s; font-weight: 500;">Clear All</button>
                         </div>
                     </div>
                     
@@ -9304,47 +9305,70 @@
                 dayCell.className = 'calendar-day';
                 dayCell.setAttribute('data-date', dateStr);
                 dayCell.style.cssText = `
-                    padding: 10px 6px; 
+                    padding: 12px 8px; 
                     text-align: center; 
                     cursor: ${isPastDate ? 'not-allowed' : 'pointer'}; 
-                    border-radius: 8px; 
-                    font-size: 13px;
-                    font-weight: ${isSelected ? '700' : '500'};
-                    background: ${isSelected ? 'linear-gradient(135deg, #10b981, #059669)' : isPastDate ? 'rgba(107, 114, 128, 0.3)' : 'rgba(255, 255, 255, 0.1)'};
+                    border-radius: 10px; 
+                    font-size: 14px;
+                    font-weight: ${isSelected ? '800' : '600'};
+                    background: ${isSelected ? 'linear-gradient(135deg, #10b981, #059669)' : isPastDate ? 'rgba(107, 114, 128, 0.3)' : 'rgba(255, 255, 255, 0.15)'};
                     color: ${isPastDate ? '#9ca3af' : isSelected ? 'white' : '#e2e8f0'};
-                    border: ${isSelected ? '2px solid #00ffff' : '1px solid rgba(255, 255, 255, 0.2)'};
-                    min-height: 36px;
+                    border: ${isSelected ? '3px solid #00ffff' : isPastDate ? '1px solid rgba(107, 114, 128, 0.5)' : '2px solid rgba(255, 255, 255, 0.3)'};
+                    min-height: 40px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     user-select: none;
-                    box-shadow: ${isSelected ? '0 0 10px rgba(16, 185, 129, 0.5)' : 'none'};
-                    ${!isPastDate ? 'transition: all 0.2s ease; transform: translateZ(0);' : ''}
+                    box-shadow: ${isSelected ? '0 0 15px rgba(16, 185, 129, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.2)' : isPastDate ? 'none' : '0 2px 4px rgba(0, 0, 0, 0.1)'};
+                    ${!isPastDate ? 'transition: all 0.25s ease; transform: translateZ(0);' : ''}
+                    ${!isPastDate && !isSelected ? 'position: relative; overflow: hidden;' : ''}
                 `;
                 
                 dayCell.textContent = day;
                 
                 if (!isPastDate) {
-                    // Add hover effects
+                    // Add enhanced hover effects
                     dayCell.addEventListener('mouseenter', () => {
                         if (!isSelected) {
-                            dayCell.style.background = 'rgba(16, 185, 129, 0.3)';
-                            dayCell.style.transform = 'scale(1.05)';
+                            dayCell.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.4), rgba(5, 150, 105, 0.4))';
+                            dayCell.style.transform = 'scale(1.08)';
+                            dayCell.style.border = '2px solid #10b981';
+                            dayCell.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+                            dayCell.style.color = '#ffffff';
                         }
                     });
                     
                     dayCell.addEventListener('mouseleave', () => {
                         if (!isSelected) {
-                            dayCell.style.background = 'rgba(255, 255, 255, 0.1)';
+                            dayCell.style.background = 'rgba(255, 255, 255, 0.15)';
                             dayCell.style.transform = 'scale(1)';
+                            dayCell.style.border = '2px solid rgba(255, 255, 255, 0.3)';
+                            dayCell.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                            dayCell.style.color = '#e2e8f0';
                         }
                     });
                     
+                    // Enhanced click handling with visual feedback
                     dayCell.addEventListener('click', (e) => {
                         e.preventDefault();
                         e.stopPropagation();
+                        
+                        // Add click animation
+                        dayCell.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            if (!window.selectedDates.includes(dateStr)) {
+                                dayCell.style.transform = 'scale(1.08)';
+                            }
+                        }, 100);
+                        
                         toggleEmbeddedDate(dateStr);
+                        console.log('📅 Date clicked:', dateStr, 'Selected:', window.selectedDates.includes(dateStr));
                     });
+                    
+                    // Add visual indicator for clickable dates
+                    if (!isSelected) {
+                        dayCell.setAttribute('title', 'Click to select this date for rental availability');
+                    }
                 }
                 
                 fragment.appendChild(dayCell);
@@ -9375,12 +9399,21 @@
             const dayCell = document.querySelector(`[data-date="${dateStr}"]`);
             if (dayCell) {
                 const isSelected = window.selectedDates.includes(dateStr);
-                dayCell.style.background = isSelected ? 'linear-gradient(135deg, #10b981, #059669)' : 'rgba(255, 255, 255, 0.1)';
+                dayCell.style.background = isSelected ? 'linear-gradient(135deg, #10b981, #059669)' : 'rgba(255, 255, 255, 0.15)';
                 dayCell.style.color = isSelected ? 'white' : '#e2e8f0';
-                dayCell.style.border = isSelected ? '2px solid #00ffff' : '1px solid rgba(255, 255, 255, 0.2)';
-                dayCell.style.fontWeight = isSelected ? '700' : '500';
-                dayCell.style.boxShadow = isSelected ? '0 0 10px rgba(16, 185, 129, 0.5)' : 'none';
+                dayCell.style.border = isSelected ? '3px solid #00ffff' : '2px solid rgba(255, 255, 255, 0.3)';
+                dayCell.style.fontWeight = isSelected ? '800' : '600';
+                dayCell.style.boxShadow = isSelected ? '0 0 15px rgba(16, 185, 129, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.2)' : '0 2px 4px rgba(0, 0, 0, 0.1)';
                 dayCell.style.transform = 'scale(1)';
+                
+                // Update tooltip
+                if (isSelected) {
+                    dayCell.setAttribute('title', 'Click to remove this date from availability');
+                } else {
+                    dayCell.setAttribute('title', 'Click to select this date for rental availability');
+                }
+                
+                console.log('✅ Updated date cell:', dateStr, 'Selected:', isSelected);
             }
             
             updateEmbeddedSelectedDatesDisplay();
