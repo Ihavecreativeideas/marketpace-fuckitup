@@ -273,6 +273,13 @@ All features are designed to strengthen local communities by keeping commerce lo
 
 ## Recent Changes
 
+✓ **CATEGORY SWITCHING SYSTEM IN POSTING MODAL DEBUGGED AND FIXED** (July 26, 2025)
+✓ **DUPLICATE FUNCTION CONFLICTS RESOLVED**: Removed conflicting selectCategory function definitions that were preventing category button clicks from working
+✓ **COMPREHENSIVE DEBUGGING ADDED**: Added console logging to selectCategory and toggleFieldsForCategory functions to track category switching behavior
+✓ **FORM FIELD ELEMENT DETECTION**: Added logging to verify which category-specific form elements (priceGroup, rentalRateGroup, serviceRateField, eventFields, pollOptions) are found in DOM
+✓ **CATEGORY BUTTON HANDLERS FIXED**: initializeCategoryButtons function properly assigns onclick handlers to each category button with correct function parameters
+✓ **WORKING CATEGORY SYSTEM**: Poll, Event, Service, Rent, and Sale categories now properly switch form fields when clicked in posting modal
+
 ✓ **COMPREHENSIVE RENTAL BOOKING SYSTEM POPUP INTEGRATION FULLY IMPLEMENTED** (July 26, 2025)
 ✓ **COMPLETE RENTAL BOOKING POPUP FROM POSTS**: Successfully integrated existing comprehensive rental booking system as popup when users create rental posts - replaces standard post creation with full booking interface
 ✓ **ADVANCED RENTAL FEATURES ACTIVE**: Hourly/daily rates, calendar availability checking, escrow payments via Stripe, date blocking after bookings, cancellation fees, and renter verification all operational through popup
