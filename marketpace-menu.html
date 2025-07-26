@@ -460,6 +460,15 @@
                 <div class="badge" style="background: linear-gradient(135deg, #ffd700, #ff9500); color: #000; font-size: 9px; padding: 2px 6px; border-radius: 8px;">PRO</div>
                 <div class="menu-arrow">›</div>
             </div>
+            <div class="menu-item" onclick="goToPage('/qr-checkin-system.html')">
+                <div class="menu-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(168, 85, 247, 0.2)"/><rect x="6" y="6" width="3" height="3" fill="currentColor"/><rect x="15" y="6" width="3" height="3" fill="currentColor"/><rect x="6" y="15" width="3" height="3" fill="currentColor"/><rect x="10" y="10" width="4" height="4" stroke="currentColor" stroke-width="1.5"/></svg></div>
+                <div class="menu-content">
+                    <div class="menu-title" style="color: #a855f7;">QR Check-In Verification</div>
+                    <div class="menu-description">Secure transaction verification & escrow</div>
+                </div>
+                <div class="badge" id="qrCheckInBadge" style="background: #a855f7;">0</div>
+                <div class="menu-arrow">›</div>
+            </div>
             <div class="menu-item" onclick="goToPage('/cart')">
                 <div class="menu-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(0, 255, 255, 0.2)"/><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" stroke="currentColor" stroke-width="1.5"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0" stroke="currentColor" stroke-width="1.5"/></svg></div>
                 <div class="menu-content">
@@ -1499,6 +1508,55 @@
         function filterRentals() {
             // Navigate to community page and trigger rental filtering
             window.location.href = '/community?filter=rentals';
+        }
+
+        // Load pending QR check-ins and update badge
+        async function loadQRCheckIns() {
+            try {
+                const userId = getCurrentUserId(); // Get current user ID
+                if (!userId) return;
+
+                const response = await fetch(`/api/qr-checkin/user/${userId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const pendingTransactions = data.transactions.filter(t => t.status === 'pending');
+                    const badge = document.getElementById('qrCheckInBadge');
+                    
+                    if (badge) {
+                        badge.textContent = pendingTransactions.length;
+                        
+                        // Update badge visibility and styling based on count
+                        if (pendingTransactions.length > 0) {
+                            badge.style.display = 'block';
+                            badge.style.background = '#a855f7';
+                            badge.style.animation = 'pulse 2s infinite';
+                        } else {
+                            badge.textContent = '0';
+                            badge.style.background = 'rgba(168, 85, 247, 0.3)';
+                            badge.style.animation = 'none';
+                        }
+                    }
+
+                    console.log(`🔍 QR Check-ins loaded: ${pendingTransactions.length} pending`);
+                }
+            } catch (error) {
+                console.error('Failed to load QR check-ins:', error);
+            }
+        }
+
+        // Get current user ID (placeholder function)
+        function getCurrentUserId() {
+            // In real implementation, this would get the actual user ID from session or localStorage
+            const user = localStorage.getItem('marketpaceUser');
+            if (user) {
+                try {
+                    return JSON.parse(user).id || 'demo_user_123';
+                } catch (e) {
+                    return 'demo_user_123';
+                }
+            }
+            return 'demo_user_123';
         }
 
         async function logout() {
@@ -3112,6 +3170,13 @@ Let's keep our money circulating locally and support each other! 💪
         });
 
 
+        // Initialize QR check-ins when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadQRCheckIns();
+            
+            // Refresh QR check-ins every 30 seconds
+            setInterval(loadQRCheckIns, 30000);
+        });
     </script>
 </body>
 </html>

@@ -17,12 +17,221 @@ import { sponsorExpirationNotificationService } from "./sponsorExpirationNotific
 import { sponsorNotificationScheduler } from "./sponsorNotificationScheduler";
 import { discountCodeService } from "./discountCodeService";
 
+// In-memory storage for QR check-in transactions
+const qrTransactions = new Map<string, any>();
+const escrowPayments = new Map<string, any>();
+
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-10-16",
 });
+
+// QR Check-In System Routes
+function registerQRCheckInRoutes(app: Express) {
+  // Create QR check-in transaction (automatically called when purchase/rental is made)
+  app.post('/api/qr-checkin/create', async (req, res) => {
+    try {
+      const { 
+        transactionType, 
+        itemName, 
+        amount, 
+        buyerId, 
+        sellerId, 
+        originalTransactionId 
+      } = req.body;
+
+      const qrTransactionId = `qr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const verificationCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+      // Create escrow payment intent with Stripe
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: 'usd',
+        automatic_payment_methods: { enabled: true },
+        metadata: {
+          qrTransactionId,
+          transactionType,
+          originalTransactionId
+        }
+      });
+
+      const qrTransaction = {
+        id: qrTransactionId,
+        type: transactionType,
+        itemName,
+        amount,
+        buyerId,
+        sellerId,
+        originalTransactionId,
+        verificationCode,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+        paymentIntentId: paymentIntent.id,
+        clientSecret: paymentIntent.client_secret
+      };
+
+      // Store transaction
+      qrTransactions.set(qrTransactionId, qrTransaction);
+      
+      // Store escrow payment
+      escrowPayments.set(qrTransactionId, {
+        amount,
+        paymentIntentId: paymentIntent.id,
+        released: false,
+        heldAt: new Date().toISOString()
+      });
+
+      console.log(`🔍 QR Check-in created: ${qrTransactionId} for ${transactionType}`);
+
+      res.json({
+        success: true,
+        qrTransactionId,
+        verificationCode,
+        clientSecret: paymentIntent.client_secret,
+        transaction: qrTransaction
+      });
+    } catch (error) {
+      console.error('QR Check-in creation error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to create QR check-in transaction' 
+      });
+    }
+  });
+
+  // Get QR transaction details
+  app.get('/api/qr-checkin/:transactionId', (req, res) => {
+    try {
+      const { transactionId } = req.params;
+      const transaction = qrTransactions.get(transactionId);
+      
+      if (!transaction) {
+        return res.status(404).json({ 
+          success: false, 
+          error: 'QR transaction not found' 
+        });
+      }
+
+      const escrow = escrowPayments.get(transactionId);
+      
+      res.json({
+        success: true,
+        transaction,
+        escrow
+      });
+    } catch (error) {
+      console.error('QR Check-in retrieval error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to retrieve QR transaction' 
+      });
+    }
+  });
+
+  // Verify QR code scan and release payment
+  app.post('/api/qr-checkin/verify', async (req, res) => {
+    try {
+      const { transactionId, verificationCode, scannedBy, location } = req.body;
+      
+      const transaction = qrTransactions.get(transactionId);
+      if (!transaction) {
+        return res.status(404).json({ 
+          success: false, 
+          error: 'QR transaction not found' 
+        });
+      }
+
+      if (transaction.verificationCode !== verificationCode) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Invalid verification code' 
+        });
+      }
+
+      if (transaction.status === 'verified') {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Transaction already verified' 
+        });
+      }
+
+      // Update transaction status
+      transaction.status = 'verified';
+      transaction.verifiedAt = new Date().toISOString();
+      transaction.scannedBy = scannedBy;
+      transaction.location = location;
+
+      // Release escrow payment
+      const escrow = escrowPayments.get(transactionId);
+      if (escrow && !escrow.released) {
+        try {
+          // Confirm the payment intent to release funds
+          await stripe.paymentIntents.confirm(escrow.paymentIntentId);
+          
+          escrow.released = true;
+          escrow.releasedAt = new Date().toISOString();
+          
+          console.log(`💰 Escrow released for QR transaction: ${transactionId}`);
+        } catch (stripeError) {
+          console.error('Stripe payment release error:', stripeError);
+          // Continue with verification even if payment release fails
+        }
+      }
+
+      // Update stored data
+      qrTransactions.set(transactionId, transaction);
+      escrowPayments.set(transactionId, escrow);
+
+      console.log(`✅ QR Check-in verified: ${transactionId}`);
+
+      res.json({
+        success: true,
+        message: 'QR check-in verified successfully',
+        transaction,
+        paymentReleased: escrow?.released || false
+      });
+    } catch (error) {
+      console.error('QR verification error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to verify QR check-in' 
+      });
+    }
+  });
+
+  // Get user's pending QR check-ins
+  app.get('/api/qr-checkin/user/:userId', (req, res) => {
+    try {
+      const { userId } = req.params;
+      const userTransactions = [];
+
+      for (const [id, transaction] of qrTransactions) {
+        if (transaction.buyerId === userId || transaction.sellerId === userId) {
+          const escrow = escrowPayments.get(id);
+          userTransactions.push({
+            ...transaction,
+            escrow
+          });
+        }
+      }
+
+      res.json({
+        success: true,
+        transactions: userTransactions
+      });
+    } catch (error) {
+      console.error('User QR transactions retrieval error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to retrieve user QR transactions' 
+      });
+    }
+  });
+
+  console.log('🔍 QR Check-In API routes registered');
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -33,6 +242,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Enhanced authentication routes (signup, login, password reset)
   registerAuthRoutes(app);
+
+  // QR Check-In System API
+  registerQRCheckInRoutes(app);
   
   // Supabase integration API
   app.post('/api/integrations/supabase/connect', async (req, res) => {
