@@ -2631,49 +2631,35 @@
                         <textarea id="postDescription" class="form-textarea" placeholder="Tell the local pace more details..."></textarea>
                     </div>
 
-                    <!-- Rental Rate Structure (hidden by default, shown when category is 'rent') -->
-                    <div id="rentalRateField" class="form-group" style="margin-bottom: 20px; display: none; background: rgba(0, 255, 255, 0.1); border: 2px solid #00ffff; border-radius: 10px; padding: 20px;">
-                        <h3 style="color: #00ffff; margin-bottom: 20px; font-size: 18px;">Rental Rate Structure</h3>
-                        
-                        <!-- Radio button selection for rate type -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                            <div style="display: flex; align-items: center; background: rgba(0, 255, 255, 0.1); border: 2px solid #00ffff; border-radius: 8px; padding: 15px;">
-                                <input type="radio" id="hourlyRateOption" name="rentalRate" value="hourly" style="margin-right: 10px; transform: scale(1.2);">
-                                <label for="hourlyRateOption" style="color: #00ffff; font-weight: bold; cursor: pointer;">
-                                    <div style="font-size: 16px;">Hourly Rate</div>
-                                </label>
-                            </div>
-                            <div style="display: flex; align-items: center; background: rgba(0, 255, 255, 0.1); border: 2px solid #00ffff; border-radius: 8px; padding: 15px;">
-                                <input type="radio" id="dailyRateOption" name="rentalRate" value="daily" checked style="margin-right: 10px; transform: scale(1.2);">
-                                <label for="dailyRateOption" style="color: #00ffff; font-weight: bold; cursor: pointer;">
-                                    <div style="font-size: 16px;">Daily Rate</div>
-                                    <div style="font-size: 12px; color: #64ffda;">(Recommended)</div>
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <!-- Rate input fields -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                            <div>
-                                <label style="display: block; color: #00ffff; margin-bottom: 8px; font-size: 14px;">Hourly Rate:</label>
-                                <input type="number" id="hourlyRateAmount" placeholder="15.00" step="0.01" style="width: 100%; padding: 12px; background: rgba(0, 255, 255, 0.1); border: 2px solid #00ffff; border-radius: 8px; color: #00ffff; font-size: 16px;">
-                            </div>
-                            <div>
-                                <label style="display: block; color: #00ffff; margin-bottom: 8px; font-size: 14px;">Daily Rate:</label>
-                                <input type="number" id="dailyRateAmount" placeholder="75.00" step="0.01" style="width: 100%; padding: 12px; background: rgba(0, 255, 255, 0.1); border: 2px solid #00ffff; border-radius: 8px; color: #00ffff; font-size: 16px;">
-                            </div>
-                        </div>
-                        
-                        <p style="color: #64ffda; font-size: 12px; margin: 0;">Set both rates to give customers flexible rental options</p>
-                    </div>
-
                     <!-- Price (for sale/rent/service) -->
                     <div class="form-group" id="priceGroup" style="display: none;">
                         <label class="form-label" for="postPrice">Price</label>
                         <input type="text" id="postPrice" class="form-input" placeholder="$0 or price range">
                     </div>
 
-
+                    <!-- Rental Rate Options (for rent only) -->
+                    <div class="form-group" id="rentalRateGroup" style="display: none;">
+                        <label class="form-label">Rental Rates</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                            <div style="padding: 15px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px;">
+                                <label style="display: flex; align-items: center; margin-bottom: 10px; color: #10b981; font-weight: 500;">
+                                    <input type="radio" name="rentalRate" value="hourly" id="hourlyRate" style="margin-right: 8px;">
+                                    Hourly Rate
+                                </label>
+                                <input type="number" id="hourlyRateAmount" placeholder="$0.00" step="0.01" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px;">
+                            </div>
+                            <div style="padding: 15px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px;">
+                                <label style="display: flex; align-items: center; margin-bottom: 10px; color: #3b82f6; font-weight: 500;">
+                                    <input type="radio" name="rentalRate" value="daily" id="dailyRate" style="margin-right: 8px;" checked>
+                                    Daily Rate (Recommended)
+                                </label>
+                                <input type="number" id="dailyRateAmount" placeholder="$0.00" step="0.01" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(59, 130, 246, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px;">
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; font-size: 13px; color: #94a3b8; text-align: center;">
+                            💡 <strong>Tip:</strong> Daily rates work best for most rentals. Set hourly rates for short-term tool usage.
+                        </div>
+                    </div>
 
                     <!-- Event Fields -->
                     <div class="form-group event-fields" id="eventFields" style="display: none;">
@@ -3165,7 +3151,10 @@
                 case 'rent':
                     console.log('Showing rental rate group');
                     if (rentalRateGroup) rentalRateGroup.style.display = 'block';
-                    // Rental rate fields will be handled by main updatePostCategoryFields function
+                    // Open comprehensive rental booking popup
+                    if (typeof openRentalBookingPopup === 'function') {
+                        openRentalBookingPopup();
+                    }
                     break;
                 case 'service':
                     console.log('Showing service rate field');
@@ -5181,10 +5170,12 @@
                     id: Date.now()
                 };
                 
-                // Handle rental posts with rate validation
+                // Check if this is a rental post and open rental booking popup instead
                 if (formData.category === 'rent') {
                     // Get rental rate information from the correct input fields
                     const selectedRateType = document.querySelector('input[name="rentalRate"]:checked')?.value || 'daily';
+                    
+                    // Get rental rate information from the correct input fields
                     const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
                     const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
                     
@@ -5196,22 +5187,20 @@
                         return;
                     }
                     
-                    // Set the price field based on selected rate type for display purposes
-                    if (selectedRateType === 'hourly' && hourlyRate > 0) {
-                        formData.price = `$${hourlyRate.toFixed(2)}/hour`;
-                    } else if (selectedRateType === 'daily' && dailyRate > 0) {
-                        formData.price = `$${dailyRate.toFixed(2)}/day`;
-                    }
+                    // Close the posting modal first
+                    document.querySelector('.posting-modal').remove();
                     
-                    // Add rental rate data to formData
-                    formData.rentalRates = {
-                        selectedType: selectedRateType,
+                    // Open simplified rental booking calendar
+                    openRentalBookingCalendar({
+                        title: formData.title,
+                        description: formData.description,
+                        rateType: selectedRateType,
                         hourlyRate: hourlyRate,
-                        dailyRate: dailyRate
-                    };
+                        dailyRate: dailyRate,
+                        author: formData.author
+                    });
                     
-                    console.log('Rental post data prepared:', formData);
-                    // Continue with normal posting flow
+                    return; // Stop here, don't create a regular post
                 }
 
                 // Handle category-specific data collection
@@ -7867,8 +7856,8 @@
             console.log('Selected category:', category);
             
             // Get all field elements
-            const priceField = document.getElementById('priceGroup');
-            const rentalRateField = document.getElementById('rentalRateField');
+            const priceField = document.getElementById('priceField');
+            const rentalRateField = document.getElementById('rentalRateGroup');
             const deliveryMethodField = document.getElementById('deliveryMethodField');
             const eventFields = document.getElementById('eventFields');
             const pollFields = document.getElementById('pollFields');
@@ -7926,6 +7915,8 @@
                     console.log('Showing rental fields');
                     if (rentalRateField) rentalRateField.style.display = 'block';
                     if (deliveryMethodField) deliveryMethodField.style.display = 'block';
+                    
+
                     break;
                     
                 case 'sale':
