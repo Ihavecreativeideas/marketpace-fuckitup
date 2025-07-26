@@ -2539,7 +2539,7 @@
                 <button class="close-modal" onclick="closePostModal()">&times;</button>
             </div>
             <div class="post-modal-body">
-                <form id="advancedPostForm">
+                <form id="postForm">
                     <!-- Category Selection -->
                     <div class="form-group">
                         <label class="form-label">Category</label>
@@ -5176,10 +5176,6 @@
 
             // Submit single item post
             function submitSinglePost() {
-                // Get the price from the correct modal input field
-                const activePriceField = document.querySelector('.posting-modal #postPrice');
-                const priceValue = activePriceField ? activePriceField.value.trim() : '';
-                
                 // Debug input field values
                 const titleEl = document.getElementById('postTitle');
                 const descEl = document.getElementById('postDescription');
@@ -5197,10 +5193,44 @@
                     category: categoryEl?.value
                 });
                 
+                // Get price based on category
+                let priceValue = '';
+                const category = categoryEl?.value || 'general';
+                
+                if (category === 'rent') {
+                    // For rentals, get price from rental rate fields
+                    const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
+                    const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
+                    const selectedRate = document.querySelector('input[name="rentalRate"]:checked')?.value || 'daily';
+                    
+                    if (selectedRate === 'hourly' && hourlyRate > 0) {
+                        priceValue = `$${hourlyRate}/hour`;
+                    } else if (selectedRate === 'daily' && dailyRate > 0) {
+                        priceValue = `$${dailyRate}/day`;
+                    }
+                } else if (category === 'service') {
+                    // For services, get price from service rate fields
+                    const hourlyAmount = parseFloat(document.getElementById('serviceHourlyAmount')?.value) || 0;
+                    const perJobAmount = parseFloat(document.getElementById('servicePerJobAmount')?.value) || 0;
+                    const selectedServiceRate = document.querySelector('input[name="serviceRate"]:checked')?.value || 'per-job';
+                    
+                    if (selectedServiceRate === 'hourly' && hourlyAmount > 0) {
+                        priceValue = `$${hourlyAmount}/hour`;
+                    } else if (selectedServiceRate === 'per-job' && perJobAmount > 0) {
+                        priceValue = `$${perJobAmount}/job`;
+                    }
+                } else {
+                    // For all other categories, get price from general price field
+                    const activePriceField = document.getElementById('postPrice');
+                    priceValue = activePriceField ? activePriceField.value.trim() : '';
+                }
+                
+                console.log('Price value determined:', priceValue, 'for category:', category);
+                
                 const formData = {
                     uploadType: 'single',
                     postingMode: currentPostingMode,
-                    category: categoryEl?.value || 'general',
+                    category: category,
                     title: titleEl?.value?.trim() || '',
                     description: descEl?.value?.trim() || '',
                     price: priceValue,
@@ -5342,9 +5372,6 @@
                     formData.servicePerJobRate = perJobAmount;
                 }
                 
-                // Enhanced validation for rental/sale posts
-                const requiresPrice = ['sale', 'rent', 'service'].includes(formData.category);
-                
                 console.log('Final formData for validation:', formData);
                 
                 if (!formData.title || !formData.description) {
@@ -5356,9 +5383,28 @@
                     return;
                 }
                 
-                if (requiresPrice && (!formData.price || formData.price.length === 0)) {
-                    showNotification('Please enter a price for this item.', 'error');
+                // Enhanced price validation based on category
+                if (formData.category === 'sale' && (!formData.price || formData.price.length === 0)) {
+                    showNotification('Please enter a price for this sale item.', 'error');
                     return;
+                }
+                
+                if (formData.category === 'rent') {
+                    const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
+                    const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
+                    if (hourlyRate === 0 && dailyRate === 0) {
+                        showNotification('Please set at least one rental rate (hourly or daily).', 'error');
+                        return;
+                    }
+                }
+                
+                if (formData.category === 'service') {
+                    const hourlyAmount = parseFloat(document.getElementById('serviceHourlyAmount')?.value) || 0;
+                    const perJobAmount = parseFloat(document.getElementById('servicePerJobAmount')?.value) || 0;
+                    if (hourlyAmount === 0 && perJobAmount === 0) {
+                        showNotification('Please set at least one service rate (hourly or per job).', 'error');
+                        return;
+                    }
                 }
                 
                 // Save to localStorage
@@ -6514,7 +6560,7 @@
 
         function closePostModal() {
             document.getElementById('postModal').style.display = 'none';
-            document.getElementById('advancedPostForm').reset();
+            document.getElementById('postForm').reset();
             clearCategorySelection();
         }
 
@@ -6850,7 +6896,7 @@
             });
 
             // Form submission
-            document.getElementById('advancedPostForm').addEventListener('submit', function(e) {
+            document.getElementById('postForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 
                 const formData = {
