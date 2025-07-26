@@ -3168,10 +3168,7 @@
                 case 'rent':
                     console.log('Showing rental rate group');
                     if (rentalRateGroup) rentalRateGroup.style.display = 'block';
-                    // Open comprehensive rental booking popup
-                    if (typeof openRentalBookingPopup === 'function') {
-                        openRentalBookingPopup();
-                    }
+                    // Rental rate fields will be handled by main updatePostCategoryFields function
                     break;
                 case 'service':
                     console.log('Showing service rate field');
@@ -5187,12 +5184,10 @@
                     id: Date.now()
                 };
                 
-                // Check if this is a rental post and open rental booking popup instead
+                // Handle rental posts with rate validation
                 if (formData.category === 'rent') {
                     // Get rental rate information from the correct input fields
                     const selectedRateType = document.querySelector('input[name="rentalRate"]:checked')?.value || 'daily';
-                    
-                    // Get rental rate information from the correct input fields
                     const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
                     const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
                     
@@ -5204,20 +5199,14 @@
                         return;
                     }
                     
-                    // Close the posting modal first
-                    document.querySelector('.posting-modal').remove();
-                    
-                    // Open simplified rental booking calendar
-                    openRentalBookingCalendar({
-                        title: formData.title,
-                        description: formData.description,
-                        rateType: selectedRateType,
+                    // Add rental rate data to formData
+                    formData.rentalRates = {
+                        selectedType: selectedRateType,
                         hourlyRate: hourlyRate,
-                        dailyRate: dailyRate,
-                        author: formData.author
-                    });
+                        dailyRate: dailyRate
+                    };
                     
-                    return; // Stop here, don't create a regular post
+                    // Continue with normal posting flow
                 }
 
                 // Handle category-specific data collection
