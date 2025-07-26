@@ -6637,6 +6637,22 @@
             });
         }
 
+        function selectCategory(element, category) {
+            // Remove selected class from all category buttons
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked button
+            element.classList.add('selected');
+            
+            // Store selected category
+            window.selectedPostCategory = category;
+            
+            // Toggle fields for this category
+            toggleFieldsForCategory(category);
+        }
+
         function toggleFieldsForCategory(category) {
             const priceGroup = document.getElementById('priceGroup');
             const rentalRateGroup = document.getElementById('rentalRateGroup');
@@ -7981,6 +7997,19 @@
             const postModal = document.getElementById('postModal');
             if (postModal) {
                 postModal.style.display = 'flex';
+                
+                // Initialize category button handlers
+                initializeCategoryButtons();
+                
+                // Set general as default selected category
+                document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
+                const generalBtn = document.querySelector('[data-category="general"]');
+                if (generalBtn) generalBtn.classList.add('selected');
+                
+                // Show appropriate fields for general category
+                toggleFieldsForCategory('general');
+                
+                console.log('✅ Post modal opened with category handlers initialized');
             } else {
                 console.log('Opening posting modal...');
                 openAdvancedPostModal();
@@ -8696,6 +8725,15 @@
                 </div>
             `;
         }
+        // Initialize category button handlers
+        function initializeCategoryButtons() {
+            const categoryButtons = document.querySelectorAll('.category-btn');
+            categoryButtons.forEach(btn => {
+                const category = btn.getAttribute('data-category');
+                btn.onclick = function() { selectCategory(this, category); };
+            });
+        }
+
         // Initialize example poll data when page loads
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize the example poll with data
@@ -8704,6 +8742,9 @@
                 { text: 'Dark French Roast', price: 15.99, votes: 0 },
                 { text: 'Guatemalan Medium', price: 16.99, votes: 0 }
             ]);
+            
+            // Initialize category button handlers
+            initializeCategoryButtons();
         });
     </script>
 </body>
