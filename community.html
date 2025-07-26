@@ -9175,28 +9175,115 @@
             console.log('🗑️ Image removed. Remaining:', uploadedImages.length);
         }
 
-        // Add rental booking calendar button
+        // Add embedded rental calendar to the posting modal
         function addRentalBookingButton() {
-            // Check if button already exists
-            if (document.getElementById('rentalBookingButton')) return;
+            // Check if calendar already exists
+            if (document.getElementById('embeddedRentalCalendar')) return;
             
             const rentalRateField = document.getElementById('rentalRateField');
             if (!rentalRateField) return;
             
-            const bookingButton = document.createElement('div');
-            bookingButton.id = 'rentalBookingButton';
-            bookingButton.innerHTML = `
+            const calendarSection = document.createElement('div');
+            calendarSection.id = 'embeddedRentalCalendar';
+            calendarSection.innerHTML = `
                 <div style="margin: 15px 0; padding: 15px; background: rgba(0, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px;">
-                    <h4 style="color: #00ffff; margin: 0 0 10px 0;">📅 Rental Calendar</h4>
-                    <p style="color: #e2e8f0; margin: 0 0 15px 0; font-size: 14px;">Set your availability dates for this rental item</p>
-                    <button onclick="event.preventDefault(); event.stopPropagation(); openRentalCalendar();" style="background: linear-gradient(135deg, #00ffff, #0080ff); color: #000; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">
-                        Set Available Dates
-                    </button>
+                    <h4 style="color: #00ffff; margin: 0 0 15px 0;">📅 Set Available Rental Dates</h4>
+                    
+                    <!-- Quick preset buttons -->
+                    <div style="display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap;">
+                        <button onclick="selectWeekends()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: #00ffff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">Weekends Only</button>
+                        <button onclick="selectWeekdays()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: #00ffff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">Weekdays Only</button>
+                        <button onclick="selectAllDays()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: #00ffff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">All Days</button>
+                        <button onclick="clearAllDates()" style="background: rgba(255, 0, 0, 0.2); border: 1px solid rgba(255, 0, 0, 0.5); color: #ff6b6b; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">Clear All</button>
+                    </div>
+                    
+                    <!-- Calendar navigation -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <button onclick="changeEmbeddedMonth(-1)" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: #00ffff; padding: 8px 12px; border-radius: 6px; cursor: pointer;">‹ Prev</button>
+                        <h5 id="embeddedCurrentMonth" style="color: #00ffff; margin: 0; font-size: 16px;"></h5>
+                        <button onclick="changeEmbeddedMonth(1)" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: #00ffff; padding: 8px 12px; border-radius: 6px; cursor: pointer;">Next ›</button>
+                    </div>
+                    
+                    <!-- Calendar grid -->
+                    <div id="embeddedCalendarGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+                        <!-- Calendar will be generated here -->
+                    </div>
+                    
+                    <!-- Selected dates summary -->
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: #00ffff; display: block; margin-bottom: 8px; font-weight: bold; font-size: 14px;">Selected Available Dates:</label>
+                        <div id="embeddedSelectedDatesDisplay" style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); min-height: 40px; color: #e2e8f0; font-size: 13px;">
+                            No dates selected
+                        </div>
+                    </div>
                 </div>
             `;
             
-            rentalRateField.appendChild(bookingButton);
-            console.log('✅ Rental booking button added');
+            rentalRateField.appendChild(calendarSection);
+            
+            // Initialize embedded calendar
+            window.currentCalendarDate = new Date();
+            window.selectedDates = [];
+            generateEmbeddedCalendar();
+            
+            console.log('✅ Embedded rental calendar added');
+        }
+        
+        // Quick preset functions for embedded calendar
+        function selectWeekends() {
+            window.selectedDates = [];
+            const currentDate = new Date(window.currentCalendarDate);
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            // Get all weekend days in current month
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dayOfWeek = date.getDay();
+                if (dayOfWeek === 0 || dayOfWeek === 6) { // Sunday or Saturday
+                    window.selectedDates.push(date.toDateString());
+                }
+            }
+            generateEmbeddedCalendar();
+        }
+        
+        function selectWeekdays() {
+            window.selectedDates = [];
+            const currentDate = new Date(window.currentCalendarDate);
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            // Get all weekday days in current month
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dayOfWeek = date.getDay();
+                if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Monday to Friday
+                    window.selectedDates.push(date.toDateString());
+                }
+            }
+            generateEmbeddedCalendar();
+        }
+        
+        function selectAllDays() {
+            window.selectedDates = [];
+            const currentDate = new Date(window.currentCalendarDate);
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            // Get all days in current month
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                window.selectedDates.push(date.toDateString());
+            }
+            generateEmbeddedCalendar();
+        }
+        
+        function clearAllDates() {
+            window.selectedDates = [];
+            generateEmbeddedCalendar();
         }
 
         // Open rental calendar modal
@@ -9272,14 +9359,14 @@
             document.body.appendChild(modal);
             
             // Initialize calendar
-            currentCalendarDate = new Date();
-            selectedDates = [];
+            window.currentCalendarDate = new Date();
+            window.selectedDates = [];
             generateCalendar();
         }
 
-        // Rental calendar functions
-        var currentCalendarDate = new Date();
-        var selectedDates = [];
+        // Rental calendar functions (global scope)
+        window.currentCalendarDate = new Date();
+        window.selectedDates = [];
 
         function generateCalendar() {
             const grid = document.getElementById('calendarGrid');
@@ -9287,10 +9374,10 @@
             
             if (!grid || !monthTitle) return;
             
-            const year = currentCalendarDate.getFullYear();
-            const month = currentCalendarDate.getMonth();
+            const year = window.currentCalendarDate.getFullYear();
+            const month = window.currentCalendarDate.getMonth();
             
-            monthTitle.textContent = currentCalendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            monthTitle.textContent = window.currentCalendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
             
             // Clear previous calendar
             grid.innerHTML = '';
