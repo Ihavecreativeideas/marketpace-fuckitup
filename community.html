@@ -5134,7 +5134,17 @@
             
             // Add event listeners
             document.getElementById('postCategory').addEventListener('change', updateFormFields);
-            document.getElementById('postForm').addEventListener('submit', handlePostSubmit);
+            document.getElementById('postForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                console.log('📋 Form submitted, processing...');
+                
+                const uploadType = document.getElementById('uploadType')?.value || 'single';
+                if (uploadType === 'bulk') {
+                    submitBulkPost();
+                } else {
+                    submitSinglePost();
+                }
+            });
             
             // Add listener for private delivery checkbox
             const privateDeliveryCheckbox = document.getElementById('privateDeliveryModal');
@@ -5258,33 +5268,12 @@
                     id: Date.now()
                 };
                 
-                // Check if this is a rental post and open rental booking popup instead
+                // Handle rental posts - collect rental rate data
                 if (formData.category === 'rent') {
-                    // Get rental rate information from the modal input fields
-                    const selectedRateType = document.querySelector('input[name="rentalRateModalType"]:checked')?.value || 'daily';
+                    const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
+                    const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
                     
-                    // Get values from the modal input fields only
-                    const hourlyRate = parseFloat(document.getElementById('hourlyRateAmountModal')?.value) || 0;
-                    const dailyRate = parseFloat(document.getElementById('dailyRateAmountModal')?.value) || 0;
-                    
-                    // Debug: Log which input fields exist and their values
-                    const hourlyModalEl = document.getElementById('hourlyRateAmountModal');
-                    const dailyModalEl = document.getElementById('dailyRateAmountModal');
-                    const hourlyOrigEl = document.getElementById('hourlyRateAmount');
-                    const dailyOrigEl = document.getElementById('dailyRateAmount');
-                    
-                    console.log('Input field debugging:', {
-                        hourlyModalExists: !!hourlyModalEl,
-                        hourlyModalValue: hourlyModalEl?.value,
-                        dailyModalExists: !!dailyModalEl,
-                        dailyModalValue: dailyModalEl?.value,
-                        hourlyOrigExists: !!hourlyOrigEl,
-                        hourlyOrigValue: hourlyOrigEl?.value,
-                        dailyOrigExists: !!dailyOrigEl,
-                        dailyOrigValue: dailyOrigEl?.value,
-                        finalHourlyRate: hourlyRate,
-                        finalDailyRate: dailyRate
-                    });
+                    console.log('Rental rate values:', { hourlyRate, dailyRate });
                     
                     // Validate that a rate is set
                     if (hourlyRate === 0 && dailyRate === 0) {
@@ -5292,23 +5281,10 @@
                         return;
                     }
                     
-                    // Close the posting modal first
-                    document.querySelector('.posting-modal').remove();
-                    
-                    // Save rental data temporarily and open owner availability calendar
-                    localStorage.setItem('rentalTitle', formData.title);
-                    localStorage.setItem('rentalDescription', formData.description);
-                    localStorage.setItem('rentalRateType', selectedRateType);
-                    localStorage.setItem('rentalHourlyRate', hourlyRate.toString());
-                    localStorage.setItem('rentalDailyRate', dailyRate.toString());
-                    
-                    // Open owner availability calendar in new window/tab
-                    const availabilityUrl = `/owner-availability-calendar.html?title=${encodeURIComponent(formData.title)}&description=${encodeURIComponent(formData.description)}&rateType=${selectedRateType}&hourlyRate=${hourlyRate}&dailyRate=${dailyRate}`;
-                    
-                    // Try to open in same window for better mobile experience
-                    window.location.href = availabilityUrl;
-                    
-                    return; // Stop here, don't create a regular post
+                    // Add rental rate data to formData
+                    formData.hourlyRate = hourlyRate;
+                    formData.dailyRate = dailyRate;
+                    formData.rentalRateType = document.querySelector('input[name="rentalRate"]:checked')?.value || 'daily';
                 }
 
                 // Handle category-specific data collection
