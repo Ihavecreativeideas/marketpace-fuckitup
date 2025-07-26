@@ -53,6 +53,91 @@ export const users = pgTable("users", {
   youtubeUrl: varchar("youtube_url"),
   linkedinUrl: varchar("linkedin_url"),
   socialMediaSettings: jsonb("social_media_settings"), // auto-response settings, cross-posting preferences
+  stripeCustomerId: varchar("stripe_customer_id"),
+  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  userType: varchar("user_type").default('personal'), // personal, business, driver
+});
+
+// Rental items table for marketplace
+export const rentalItems = pgTable("rental_items", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  ownerId: varchar("owner_id").notNull().references(() => users.id),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  category: varchar("category").notNull(),
+  hourlyRate: integer("hourly_rate"), // in cents
+  dailyRate: integer("daily_rate"), // in cents
+  weeklyRate: integer("weekly_rate"), // in cents
+  monthlyRate: integer("monthly_rate"), // in cents
+  securityDeposit: integer("security_deposit"), // in cents
+  cancellationFee: integer("cancellation_fee"), // in cents, non-refundable
+  isRefundableCancellation: boolean("is_refundable_cancellation").default(false),
+  cancellationPolicy: text("cancellation_policy"),
+  minRentalDuration: integer("min_rental_duration").default(1), // hours
+  maxRentalDuration: integer("max_rental_duration"), // hours
+  location: varchar("location"),
+  address: text("address"),
+  latitude: real("latitude"),
+  longitude: real("longitude"),
+  images: jsonb("images"), // array of cloudinary URLs
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Rental availability calendar
+export const rentalAvailability = pgTable("rental_availability", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  rentalItemId: uuid("rental_item_id").notNull().references(() => rentalItems.id),
+  date: timestamp("date").notNull(),
+  startTime: varchar("start_time"), // "09:00" format
+  endTime: varchar("end_time"), // "17:00" format
+  isAvailable: boolean("is_available").default(true),
+  customRate: integer("custom_rate"), // in cents, overrides default rates for special dates
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Rental bookings with escrow
+export const rentalBookings = pgTable("rental_bookings", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  rentalItemId: uuid("rental_item_id").notNull().references(() => rentalItems.id),
+  renterId: varchar("renter_id").notNull().references(() => users.id),
+  ownerId: varchar("owner_id").notNull().references(() => users.id),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  startTime: varchar("start_time"),
+  endTime: varchar("end_time"),
+  totalAmount: integer("total_amount").notNull(), // in cents
+  securityDeposit: integer("security_deposit"), // in cents
+  cancellationFee: integer("cancellation_fee"), // in cents
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  escrowStatus: varchar("escrow_status").default('pending'), // pending, held, released, refunded
+  bookingStatus: varchar("booking_status").default('confirmed'), // confirmed, in_progress, completed, cancelled
+  cancellationReason: text("cancellation_reason"),
+  cancelledAt: timestamp("cancelled_at"),
+  cancelledBy: varchar("cancelled_by"), // renter or owner
+  specialInstructions: text("special_instructions"),
+  pickupMethod: varchar("pickup_method").default('pickup'), // pickup, delivery
+  deliveryAddress: text("delivery_address"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Community posts for marketplace
+export const communityPosts = pgTable("community_posts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  authorId: varchar("author_id").notNull().references(() => users.id),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  category: varchar("category").notNull(),
+  type: varchar("type").notNull(), // sale, rent, service, event, general
+  price: integer("price"), // in cents
+  images: jsonb("images"),
+  location: varchar("location"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Events table for community calendar system
