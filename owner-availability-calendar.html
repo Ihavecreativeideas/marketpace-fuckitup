@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Rental Availability - MarketPace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .availability-modal {
+            background: rgba(15, 23, 42, 0.95);
+            border: 2px solid #00ffff;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 450px;
+            width: 100%;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 40px rgba(0, 255, 255, 0.3);
+            position: relative;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-title {
+            color: #00ffff;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .modal-subtitle {
+            color: #94a3b8;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .pro-badge {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .calendar-container {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .month-nav {
+            background: transparent;
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .month-nav:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .current-month {
+            color: #00ffff;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .weekday {
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+            font-weight: bold;
+            padding: 8px 0;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .calendar-day:not(.disabled):hover {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+        }
+
+        .calendar-day.available {
+            background: #10b981;
+            color: white;
+            border-color: #059669;
+        }
+
+        .calendar-day.available:hover {
+            background: #059669;
+        }
+
+        .calendar-day.disabled {
+            color: #475569;
+            cursor: not-allowed;
+        }
+
+        .calendar-day.today {
+            border-color: #00ffff;
+            font-weight: bold;
+        }
+
+        .availability-info {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-text {
+            color: #10b981;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .selected-dates {
+            color: #e2e8f0;
+            font-size: 14px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cancel {
+            background: #64748b;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #475569;
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-1px);
+        }
+
+        .quick-select {
+            margin-bottom: 15px;
+        }
+
+        .quick-select-label {
+            color: #00ffff;
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .quick-options {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .quick-option {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quick-option:hover {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="availability-modal">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                📅 Set Rental Availability
+            </h2>
+            <p class="modal-subtitle">Select the dates when your item is available for rent</p>
+            <div class="pro-badge">MarketPace Pro Feature - FREE Until Jan 1, 2026!</div>
+        </div>
+
+        <div class="quick-select">
+            <label class="quick-select-label">Quick Select:</label>
+            <div class="quick-options">
+                <button class="quick-option" onclick="selectWeekends()">Weekends Only</button>
+                <button class="quick-option" onclick="selectWeekdays()">Weekdays Only</button>
+                <button class="quick-option" onclick="selectNextWeek()">Next 7 Days</button>
+                <button class="quick-option" onclick="selectNextMonth()">Next 30 Days</button>
+                <button class="quick-option" onclick="clearAllDates()">Clear All</button>
+            </div>
+        </div>
+
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <button class="month-nav" onclick="previousMonth()">‹</button>
+                <span class="current-month" id="currentMonth">January 2025</span>
+                <button class="month-nav" onclick="nextMonth()">›</button>
+            </div>
+
+            <div class="weekdays">
+                <div class="weekday">Sun</div>
+                <div class="weekday">Mon</div>
+                <div class="weekday">Tue</div>
+                <div class="weekday">Wed</div>
+                <div class="weekday">Thu</div>
+                <div class="weekday">Fri</div>
+                <div class="weekday">Sat</div>
+            </div>
+
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Calendar days will be generated here -->
+            </div>
+        </div>
+
+        <div class="availability-info">
+            <div class="info-text">📋 Instructions:</div>
+            <div class="selected-dates">
+                • Click dates to toggle availability (green = available)<br>
+                • Selected dates: <span id="selectedCount">0</span> days<br>
+                • Customers will only see and can book your available dates
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-cancel" onclick="cancelAvailability()">Cancel</button>
+            <button class="btn btn-confirm" onclick="confirmAvailability()">Set Availability & Post Item</button>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let selectedDates = new Set();
+        let rentalData = {};
+
+        // Get rental data from URL parameters or localStorage
+        function loadRentalData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            rentalData = {
+                title: urlParams.get('title') || localStorage.getItem('rentalTitle') || '',
+                description: urlParams.get('description') || localStorage.getItem('rentalDescription') || '',
+                hourlyRate: parseFloat(urlParams.get('hourlyRate') || localStorage.getItem('rentalHourlyRate') || '0'),
+                dailyRate: parseFloat(urlParams.get('dailyRate') || localStorage.getItem('rentalDailyRate') || '0'),
+                rateType: urlParams.get('rateType') || localStorage.getItem('rentalRateType') || 'daily'
+            };
+        }
+
+        function generateCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const monthYear = document.getElementById('currentMonth');
+            
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            monthYear.textContent = currentDate.toLocaleDateString('en-US', { 
+                month: 'long', 
+                year: 'numeric' 
+            });
+            
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < 42; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = date.getDate();
+                
+                const dateString = date.toISOString().split('T')[0];
+                
+                if (date.getMonth() !== month) {
+                    dayElement.classList.add('disabled');
+                } else if (date < today) {
+                    dayElement.classList.add('disabled');
+                } else {
+                    if (date.toDateString() === today.toDateString()) {
+                        dayElement.classList.add('today');
+                    }
+                    
+                    if (selectedDates.has(dateString)) {
+                        dayElement.classList.add('available');
+                    }
+                    
+                    dayElement.addEventListener('click', () => toggleDate(dateString, dayElement));
+                }
+                
+                grid.appendChild(dayElement);
+            }
+        }
+
+        function toggleDate(dateString, element) {
+            if (selectedDates.has(dateString)) {
+                selectedDates.delete(dateString);
+                element.classList.remove('available');
+            } else {
+                selectedDates.add(dateString);
+                element.classList.add('available');
+            }
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            document.getElementById('selectedCount').textContent = selectedDates.size;
+        }
+
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            generateCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            generateCalendar();
+        }
+
+        function selectWeekends() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            for (let day = 1; day <= new Date(year, month + 1, 0).getDate(); day++) {
+                const date = new Date(year, month, day);
+                if (date >= today && (date.getDay() === 0 || date.getDay() === 6)) {
+                    selectedDates.add(date.toISOString().split('T')[0]);
+                }
+            }
+            generateCalendar();
+        }
+
+        function selectWeekdays() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            for (let day = 1; day <= new Date(year, month + 1, 0).getDate(); day++) {
+                const date = new Date(year, month, day);
+                if (date >= today && date.getDay() !== 0 && date.getDay() !== 6) {
+                    selectedDates.add(date.toISOString().split('T')[0]);
+                }
+            }
+            generateCalendar();
+        }
+
+        function selectNextWeek() {
+            const today = new Date();
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(today);
+                date.setDate(date.getDate() + i);
+                selectedDates.add(date.toISOString().split('T')[0]);
+            }
+            generateCalendar();
+        }
+
+        function selectNextMonth() {
+            const today = new Date();
+            for (let i = 0; i < 30; i++) {
+                const date = new Date(today);
+                date.setDate(date.getDate() + i);
+                selectedDates.add(date.toISOString().split('T')[0]);
+            }
+            generateCalendar();
+        }
+
+        function clearAllDates() {
+            selectedDates.clear();
+            generateCalendar();
+        }
+
+        function cancelAvailability() {
+            if (confirm('Are you sure you want to cancel? Your rental item will not be posted.')) {
+                window.close();
+                // If window.close() doesn't work (popup blocker), redirect back
+                setTimeout(() => {
+                    window.location.href = '/community.html';
+                }, 100);
+            }
+        }
+
+        function confirmAvailability() {
+            if (selectedDates.size === 0) {
+                alert('Please select at least one available date for your rental item.');
+                return;
+            }
+
+            // Prepare the complete rental data
+            const finalRentalData = {
+                ...rentalData,
+                availableDates: Array.from(selectedDates).sort(),
+                dateCreated: new Date().toISOString()
+            };
+
+            // Save to server or localStorage
+            localStorage.setItem('newRentalPost', JSON.stringify(finalRentalData));
+
+            // Show success message
+            alert(`Rental availability set! Your item "${rentalData.title}" will be posted with ${selectedDates.size} available dates.`);
+
+            // Close modal and return to community page
+            window.close();
+            setTimeout(() => {
+                window.location.href = '/community.html';
+            }, 100);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRentalData();
+            generateCalendar();
+        });
+    </script>
+</body>
+</html>

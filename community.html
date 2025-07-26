@@ -5246,15 +5246,18 @@
                     // Close the posting modal first
                     document.querySelector('.posting-modal').remove();
                     
-                    // Open simplified rental booking calendar
-                    openRentalBookingCalendar({
-                        title: formData.title,
-                        description: formData.description,
-                        rateType: selectedRateType,
-                        hourlyRate: hourlyRate,
-                        dailyRate: dailyRate,
-                        author: formData.author
-                    });
+                    // Save rental data temporarily and open owner availability calendar
+                    localStorage.setItem('rentalTitle', formData.title);
+                    localStorage.setItem('rentalDescription', formData.description);
+                    localStorage.setItem('rentalRateType', selectedRateType);
+                    localStorage.setItem('rentalHourlyRate', hourlyRate.toString());
+                    localStorage.setItem('rentalDailyRate', dailyRate.toString());
+                    
+                    // Open owner availability calendar in new window/tab
+                    const availabilityUrl = `/owner-availability-calendar.html?title=${encodeURIComponent(formData.title)}&description=${encodeURIComponent(formData.description)}&rateType=${selectedRateType}&hourlyRate=${hourlyRate}&dailyRate=${dailyRate}`;
+                    
+                    // Try to open in same window for better mobile experience
+                    window.location.href = availabilityUrl;
                     
                     return; // Stop here, don't create a regular post
                 }
