@@ -9225,10 +9225,12 @@
             window.currentCalendarDate = new Date();
             window.selectedDates = [];
             window.calendarGenerating = false;
+            window.monthChanging = false;
+            window.monthChangeTimeout = null;
             
             setTimeout(() => {
                 generateEmbeddedCalendar();
-            }, 100);
+            }, 150);
             
             console.log('✅ Embedded rental calendar added to posting modal');
         }
@@ -9238,6 +9240,8 @@
             // Prevent multiple rapid calls
             if (window.calendarGenerating) return;
             window.calendarGenerating = true;
+            
+            console.log('📅 Generating calendar for:', window.currentCalendarDate.toLocaleDateString());
             
             const grid = document.getElementById('embeddedCalendarGrid');
             const monthTitle = document.getElementById('embeddedCurrentMonth');
@@ -9348,11 +9352,12 @@
             // Add all elements at once
             grid.appendChild(fragment);
             
-            // Update selected dates display
+            // Update selected dates display and reset flags
             setTimeout(() => {
                 updateEmbeddedSelectedDatesDisplay();
                 window.calendarGenerating = false;
-            }, 10);
+                console.log('✅ Calendar generation complete');
+            }, 50);
         }
         
         function toggleEmbeddedDate(dateStr) {
@@ -9381,14 +9386,24 @@
         }
         
         function changeEmbeddedMonth(direction) {
-            if (window.calendarGenerating) return; // Prevent rapid clicks
+            // Prevent rapid clicks and overlapping calls
+            if (window.calendarGenerating || window.monthChanging) return;
             
+            window.monthChanging = true;
+            
+            // Update the date
             window.currentCalendarDate.setMonth(window.currentCalendarDate.getMonth() + direction);
             
-            // Throttle month changes
-            setTimeout(() => {
+            // Clear any existing timeout
+            if (window.monthChangeTimeout) {
+                clearTimeout(window.monthChangeTimeout);
+            }
+            
+            // Regenerate calendar with proper timing
+            window.monthChangeTimeout = setTimeout(() => {
                 generateEmbeddedCalendar();
-            }, 50);
+                window.monthChanging = false;
+            }, 100);
         }
         
         function updateEmbeddedSelectedDatesDisplay() {
