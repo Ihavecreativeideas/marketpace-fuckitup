@@ -5190,100 +5190,7 @@
                 });
             });
             
-            function updatePostCategoryFields() {
-                console.log('updatePostCategoryFields() called');
-                const category = document.getElementById('postCategory').value;
-                console.log('Selected category:', category);
-                
-                // Get all field elements
-                const priceField = document.getElementById('priceField');
-                const rentalRateField = document.getElementById('rentalRateField');
-                const deliveryMethodField = document.getElementById('deliveryMethodField');
-                const eventFields = document.getElementById('eventFields');
-                const pollFields = document.getElementById('pollFields');
-                const serviceFields = document.getElementById('serviceFields');
-                const customCategoryFields = document.getElementById('customCategoryFields');
-                
-                console.log('Field elements found:', {
-                    priceField: !!priceField,
-                    rentalRateField: !!rentalRateField,
-                    deliveryMethodField: !!deliveryMethodField,
-                    eventFields: !!eventFields,
-                    pollFields: !!pollFields,
-                    serviceFields: !!serviceFields,
-                    customCategoryFields: !!customCategoryFields
-                });
-                
-                // Hide all conditional fields first
-                if (priceField) priceField.style.display = 'none';
-                if (rentalRateField) rentalRateField.style.display = 'none';
-                if (deliveryMethodField) deliveryMethodField.style.display = 'none';
-                if (eventFields) eventFields.style.display = 'none';
-                if (pollFields) pollFields.style.display = 'none';
-                if (serviceFields) serviceFields.style.display = 'none';
-                
-                // Handle custom category creation
-                if (category === 'custom') {
-                    if (customCategoryFields) {
-                        customCategoryFields.style.display = 'block';
-                        console.log('Showing custom category fields');
-                    }
-                    return; // Don't show other fields when creating custom category
-                } else {
-                    if (customCategoryFields) customCategoryFields.style.display = 'none';
-                }
-                
-                // Show category-specific fields based on selection
-                switch (category) {
-                    case 'poll':
-                        console.log('Showing poll fields');
-                        if (pollFields) pollFields.style.display = 'block';
-                        break;
-                        
-                    case 'event':
-                        console.log('Showing event fields');
-                        if (eventFields) eventFields.style.display = 'block';
-                        break;
-                        
-                    case 'service':
-                        console.log('Showing service fields');
-                        if (serviceFields) serviceFields.style.display = 'block';
-                        if (deliveryMethodField) deliveryMethodField.style.display = 'block';
-                        break;
-                        
-                    case 'rent':
-                        console.log('Showing rental fields');
-                        if (rentalRateField) rentalRateField.style.display = 'block';
-                        if (deliveryMethodField) deliveryMethodField.style.display = 'block';
-                        break;
-                        
-                    case 'sale':
-                        console.log('Showing sale fields');
-                        if (priceField) priceField.style.display = 'block';
-                        if (deliveryMethodField) deliveryMethodField.style.display = 'block';
-                        break;
-                        
-                    case 'general':
-                    case 'job':
-                    case 'iso':
-                    case 'announcement':
-                        console.log('Showing basic fields only for category:', category);
-                        // Only show basic title/description fields (already visible)
-                        break;
-                        
-                    default:
-                        console.log('Unknown category:', category);
-                        break;
-                }
-
-                // Update bulk fields if in bulk mode
-                const uploadType = document.getElementById('uploadType');
-                if (uploadType && uploadType.value === 'bulk') {
-                    generateBulkItemFields();
-                }
-                
-                console.log('updatePostCategoryFields() completed');
-            }
+            // Function moved to global scope - see global updatePostCategoryFields function
             
             function handlePostSubmit(e) {
                 e.preventDefault();
@@ -8008,7 +7915,102 @@
 
         // ========== CUSTOM CATEGORY CREATION SYSTEM ==========
 
-        // Custom category handling is now part of the comprehensive updatePostCategoryFields() function above
+        // ========== GLOBAL CATEGORY SWITCHING FUNCTION ==========
+        
+        function updatePostCategoryFields() {
+            console.log('updatePostCategoryFields() called from global scope');
+            const category = document.getElementById('postCategory').value;
+            console.log('Selected category:', category);
+            
+            // Get all field elements
+            const priceField = document.getElementById('priceField');
+            const rentalRateField = document.getElementById('rentalRateField');
+            const deliveryMethodField = document.getElementById('deliveryMethodField');
+            const eventFields = document.getElementById('eventFields');
+            const pollFields = document.getElementById('pollFields');
+            const serviceFields = document.getElementById('serviceFields');
+            const customCategoryFields = document.getElementById('customCategoryFields');
+            
+            console.log('Field elements found:', {
+                priceField: !!priceField,
+                rentalRateField: !!rentalRateField,
+                deliveryMethodField: !!deliveryMethodField,
+                eventFields: !!eventFields,
+                pollFields: !!pollFields,
+                serviceFields: !!serviceFields,
+                customCategoryFields: !!customCategoryFields
+            });
+            
+            // Hide all conditional fields first
+            if (priceField) priceField.style.display = 'none';
+            if (rentalRateField) rentalRateField.style.display = 'none';
+            if (deliveryMethodField) deliveryMethodField.style.display = 'none';
+            if (eventFields) eventFields.style.display = 'none';
+            if (pollFields) pollFields.style.display = 'none';
+            if (serviceFields) serviceFields.style.display = 'none';
+            
+            // Handle custom category creation
+            if (category === 'custom') {
+                if (customCategoryFields) {
+                    customCategoryFields.style.display = 'block';
+                    console.log('Showing custom category fields');
+                }
+                return; // Don't show other fields when creating custom category
+            } else {
+                if (customCategoryFields) customCategoryFields.style.display = 'none';
+            }
+            
+            // Show category-specific fields based on selection
+            switch (category) {
+                case 'poll':
+                    console.log('Showing poll fields');
+                    if (pollFields) pollFields.style.display = 'block';
+                    break;
+                    
+                case 'event':
+                    console.log('Showing event fields');
+                    if (eventFields) eventFields.style.display = 'block';
+                    break;
+                    
+                case 'service':
+                    console.log('Showing service fields');
+                    if (serviceFields) serviceFields.style.display = 'block';
+                    if (deliveryMethodField) deliveryMethodField.style.display = 'block';
+                    break;
+                    
+                case 'rent':
+                    console.log('Showing rental fields');
+                    if (rentalRateField) rentalRateField.style.display = 'block';
+                    if (deliveryMethodField) deliveryMethodField.style.display = 'block';
+                    break;
+                    
+                case 'sale':
+                    console.log('Showing sale fields');
+                    if (priceField) priceField.style.display = 'block';
+                    if (deliveryMethodField) deliveryMethodField.style.display = 'block';
+                    break;
+                    
+                case 'general':
+                case 'job':
+                case 'iso':
+                case 'announcement':
+                    console.log('Showing basic fields only for category:', category);
+                    // Only show basic title/description fields (already visible)
+                    break;
+                    
+                default:
+                    console.log('Unknown category:', category);
+                    break;
+            }
+
+            // Update bulk fields if in bulk mode
+            const uploadType = document.getElementById('uploadType');
+            if (uploadType && uploadType.value === 'bulk') {
+                generateBulkItemFields();
+            }
+            
+            console.log('updatePostCategoryFields() completed');
+        }
 
         // Cancel custom category creation
         function cancelCustomCategory() {
