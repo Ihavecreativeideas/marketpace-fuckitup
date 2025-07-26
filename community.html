@@ -9762,6 +9762,14 @@ Example:
                         </div>
                     `;
                 }
+            } else if (post.rentalTerms && post.rentalTerms.trim() !== 'Please handle with care. Must be returned in same condition.') {
+                // Show custom rental terms if they're not the default
+                termsDisplay = `
+                    <div style="background: rgba(255, 107, 53, 0.1); border: 1px solid rgba(255, 107, 53, 0.3); border-radius: 6px; padding: 12px; margin-top: 12px;">
+                        <div style="color: #ff6b35; font-weight: 600; font-size: 13px; margin-bottom: 8px;">CUSTOM TERMS</div>
+                        <div style="color: #e2e8f0; font-size: 11px; line-height: 1.4; background: rgba(0, 0, 0, 0.2); padding: 8px; border-radius: 4px; white-space: pre-wrap;">${post.rentalTerms}</div>
+                    </div>
+                `;
             }
             
             // Add booking fee display if present
@@ -11189,10 +11197,22 @@ Example:
                         
                         // Populate delivery options
                         if (post.deliveryOptions) {
-                            post.deliveryOptions.forEach(option => {
-                                const checkbox = document.querySelector(`input[name="deliveryOptions"][value="${option}"]`);
-                                if (checkbox) checkbox.checked = true;
-                            });
+                            // Handle both object and array formats
+                            if (typeof post.deliveryOptions === 'object' && !Array.isArray(post.deliveryOptions)) {
+                                // Object format: {selfPickup: true, privateDelivery: false, marketPaceDelivery: true}
+                                Object.entries(post.deliveryOptions).forEach(([key, value]) => {
+                                    if (value) {
+                                        const checkbox = document.querySelector(`input[name="deliveryOptions"][value="${key}"]`);
+                                        if (checkbox) checkbox.checked = true;
+                                    }
+                                });
+                            } else if (Array.isArray(post.deliveryOptions)) {
+                                // Array format: ["selfPickup", "privateDelivery"]
+                                post.deliveryOptions.forEach(option => {
+                                    const checkbox = document.querySelector(`input[name="deliveryOptions"][value="${option}"]`);
+                                    if (checkbox) checkbox.checked = true;
+                                });
+                            }
                         }
                     }, 100);
                 }
@@ -12167,21 +12187,37 @@ Example:
                 // Get custom rental data from form
                 const customTerms = document.getElementById('rentalTermsCustom')?.value?.trim() || "Please handle with care. Must be returned in same condition.";
                 const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
-                const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 25;
+                const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
                 const itemCondition = document.getElementById('itemCondition')?.value || 'good';
                 const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'escrow';
+                
+                // Get delivery options from checkboxes
+                const selfPickup = document.getElementById('selfPickupOptionRental')?.checked || false;
+                const privateDelivery = document.getElementById('privateDeliveryOptionRental')?.checked || false;
+                const marketPaceDelivery = document.getElementById('marketPaceDeliveryOptionRental')?.checked || false;
                 
                 postData.rentalTerms = customTerms;
                 postData.itemCondition = itemCondition;
                 postData.paymentMethod = paymentMethod;
                 postData.dailyRate = dailyRate;
                 postData.hourlyRate = hourlyRate;
-                postData.rentalRateType = "both"; // Allow both rates
+                postData.rentalRateType = (hourlyRate > 0 && dailyRate > 0) ? "both" : (hourlyRate > 0 ? "hourly" : "daily");
                 postData.deliveryOptions = {
-                    selfPickup: true,
-                    privateDelivery: false,
-                    marketPaceDelivery: false
+                    selfPickup: selfPickup,
+                    privateDelivery: privateDelivery,
+                    marketPaceDelivery: marketPaceDelivery
                 };
+                
+                // Update price display to reflect rates
+                if (hourlyRate > 0 && dailyRate > 0) {
+                    postData.price = `$${hourlyRate}/hr | $${dailyRate}/day`;
+                } else if (hourlyRate > 0) {
+                    postData.price = `$${hourlyRate}/hour`;
+                } else if (dailyRate > 0) {
+                    postData.price = `$${dailyRate}/day`;
+                } else {
+                    postData.price = 'Contact for price';
+                }
                 console.log('✅ Rental data added:', postData.ownerAvailability);
             }
             
