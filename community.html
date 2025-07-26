@@ -2803,6 +2803,45 @@ Example:
                         <div style="margin-top: 15px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; font-size: 13px; color: #94a3b8; text-align: center;">
                             <strong>Tip:</strong> Clear terms and condition ratings help build trust with renters.
                         </div>
+
+                        <!-- Rental Availability Calendar -->
+                        <div style="margin-top: 25px;">
+                            <label class="form-label" style="font-size: 16px; color: #00ffff; margin-bottom: 15px; display: block;">Available Rental Dates</label>
+                            <div style="background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 12px; padding: 20px;">
+                                
+                                <!-- Calendar Header -->
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <button type="button" onclick="navigateCalendarMonth(-1)" style="background: rgba(0, 255, 255, 0.2); border: 1px solid #00ffff; color: #00ffff; width: 35px; height: 35px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;">‹</button>
+                                    <h3 id="rentalCalendarMonth" style="color: #00ffff; margin: 0; font-size: 16px; font-weight: 600;"></h3>
+                                    <button type="button" onclick="navigateCalendarMonth(1)" style="background: rgba(0, 255, 255, 0.2); border: 1px solid #00ffff; color: #00ffff; width: 35px; height: 35px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;">›</button>
+                                </div>
+
+                                <!-- Calendar Grid -->
+                                <div id="rentalCalendarGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 15px;">
+                                    <!-- Calendar will be generated here -->
+                                </div>
+
+                                <!-- Quick Preset Buttons -->
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px;">
+                                    <button type="button" onclick="selectWeekends()" style="background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: #a855f7; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 12px;">Weekends Only</button>
+                                    <button type="button" onclick="selectWeekdays()" style="background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #22c55e; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 12px;">Weekdays Only</button>
+                                    <button type="button" onclick="selectAllDays()" style="background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; color: #3b82f6; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 12px;">All Days</button>
+                                    <button type="button" onclick="clearAllDates()" style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 12px;">Clear All</button>
+                                </div>
+
+                                <!-- Selected Dates Summary -->
+                                <div id="selectedDatesSummary" style="padding: 12px; background: rgba(0, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; font-size: 13px;">
+                                    <div style="color: #00ffff; font-weight: 600; margin-bottom: 8px;">Selected Dates: <span id="selectedDatesCount">0</span></div>
+                                    <div id="selectedDatesList" style="color: #94a3b8; line-height: 1.4;">
+                                        No dates selected. Click on calendar dates to select availability.
+                                    </div>
+                                </div>
+
+                                <div style="margin-top: 12px; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; font-size: 12px; color: #10b981; text-align: center;">
+                                    📅 <strong>Owner Availability:</strong> Select the dates when your item is available for rent. Customers will only be able to book from these available dates.
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Event Fields -->
@@ -5656,6 +5695,7 @@ Example:
                     formData.itemCondition = itemCondition;
                     formData.paymentMethod = paymentMethod || 'escrow';
                     formData.rentalTerms = rentalTerms.trim();
+                    formData.availabilityDates = selectedRentalDates || []; // Add selected availability dates
                     formData.bookingFee = enableBookingFee ? {
                         enabled: true,
                         type: bookingFeeType,
@@ -11173,6 +11213,7 @@ Example:
                     hourlyRate: hourlyRate,
                     dailyRate: dailyRate,
                     rentalRateType: selectedRate,
+                    availabilityDates: selectedRentalDates || [], // Add selected availability dates
                     deliveryOptions: {
                         selfPickup: document.getElementById('selfPickupOptionRental')?.checked || false,
                         privateDelivery: document.getElementById('privateDeliveryOptionRental')?.checked || false,
@@ -11353,6 +11394,246 @@ Example:
         });
 
         console.log('All post display and interaction functions loaded successfully');
+
+        // Rental Calendar Variables
+        let currentCalendarMonth = new Date().getMonth();
+        let currentCalendarYear = new Date().getFullYear();
+        let selectedRentalDates = [];
+
+        // Initialize rental calendar when post modal opens for rent category
+        function initializeRentalCalendar() {
+            if (document.getElementById('rentalCalendarGrid')) {
+                generateRentalCalendar();
+                updateSelectedDatesDisplay();
+            }
+        }
+
+        // Generate rental calendar
+        function generateRentalCalendar() {
+            const grid = document.getElementById('rentalCalendarGrid');
+            const monthTitle = document.getElementById('rentalCalendarMonth');
+            
+            if (!grid || !monthTitle) return;
+
+            // Update month title
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+            monthTitle.textContent = `${monthNames[currentCalendarMonth]} ${currentCalendarYear}`;
+
+            // Clear existing calendar
+            grid.innerHTML = '';
+
+            // Day headers
+            const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            dayHeaders.forEach(day => {
+                const dayEl = document.createElement('div');
+                dayEl.style.cssText = 'padding: 8px; text-align: center; font-weight: 600; color: #64748b; font-size: 12px;';
+                dayEl.textContent = day;
+                grid.appendChild(dayEl);
+            });
+
+            // Get first day and days in month
+            const firstDay = new Date(currentCalendarYear, currentCalendarMonth, 1).getDay();
+            const daysInMonth = new Date(currentCalendarYear, currentCalendarMonth + 1, 0).getDate();
+            const today = new Date();
+
+            // Add empty cells for days before month starts
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.style.cssText = 'padding: 8px;';
+                grid.appendChild(emptyDay);
+            }
+
+            // Add days of month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayEl = document.createElement('div');
+                const currentDate = new Date(currentCalendarYear, currentCalendarMonth, day);
+                const dateString = currentDate.toISOString().split('T')[0];
+                const isPast = currentDate < today.setHours(0,0,0,0);
+                const isSelected = selectedRentalDates.includes(dateString);
+
+                dayEl.style.cssText = `
+                    padding: 8px; text-align: center; cursor: pointer; border-radius: 6px; 
+                    font-size: 13px; transition: all 0.2s ease; min-height: 32px; display: flex; 
+                    align-items: center; justify-content: center;
+                    ${isPast ? 'color: #64748b; background: rgba(100, 116, 139, 0.1);' : 'color: #e2e8f0; background: rgba(255, 255, 255, 0.05);'}
+                    ${isSelected ? 'background: rgba(0, 255, 255, 0.3) !important; color: #00ffff; font-weight: 600;' : ''}
+                `;
+
+                dayEl.textContent = day;
+                dayEl.onclick = () => toggleRentalDate(dateString, isPast);
+
+                if (!isPast) {
+                    dayEl.onmouseover = () => {
+                        if (!isSelected) dayEl.style.background = 'rgba(0, 255, 255, 0.1)';
+                    };
+                    dayEl.onmouseout = () => {
+                        if (!isSelected) dayEl.style.background = 'rgba(255, 255, 255, 0.05)';
+                    };
+                }
+
+                grid.appendChild(dayEl);
+            }
+        }
+
+        // Navigate calendar months
+        function navigateCalendarMonth(direction) {
+            currentCalendarMonth += direction;
+            if (currentCalendarMonth > 11) {
+                currentCalendarMonth = 0;
+                currentCalendarYear++;
+            } else if (currentCalendarMonth < 0) {
+                currentCalendarMonth = 11;
+                currentCalendarYear--;
+            }
+            generateRentalCalendar();
+        }
+
+        // Toggle rental date selection
+        function toggleRentalDate(dateString, isPast) {
+            if (isPast) return;
+
+            const index = selectedRentalDates.indexOf(dateString);
+            if (index > -1) {
+                selectedRentalDates.splice(index, 1);
+            } else {
+                selectedRentalDates.push(dateString);
+            }
+            
+            generateRentalCalendar();
+            updateSelectedDatesDisplay();
+        }
+
+        // Preset date selections
+        function selectWeekends() {
+            selectedRentalDates = [];
+            const today = new Date();
+            
+            for (let month = 0; month < 12; month++) {
+                const year = currentCalendarYear + Math.floor(month / 12);
+                const monthIndex = (currentCalendarMonth + month) % 12;
+                const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const date = new Date(year, monthIndex, day);
+                    const dayOfWeek = date.getDay();
+                    
+                    if ((dayOfWeek === 0 || dayOfWeek === 6) && date >= today) {
+                        selectedRentalDates.push(date.toISOString().split('T')[0]);
+                    }
+                }
+            }
+            
+            generateRentalCalendar();
+            updateSelectedDatesDisplay();
+        }
+
+        function selectWeekdays() {
+            selectedRentalDates = [];
+            const today = new Date();
+            
+            for (let month = 0; month < 12; month++) {
+                const year = currentCalendarYear + Math.floor(month / 12);
+                const monthIndex = (currentCalendarMonth + month) % 12;
+                const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const date = new Date(year, monthIndex, day);
+                    const dayOfWeek = date.getDay();
+                    
+                    if (dayOfWeek >= 1 && dayOfWeek <= 5 && date >= today) {
+                        selectedRentalDates.push(date.toISOString().split('T')[0]);
+                    }
+                }
+            }
+            
+            generateRentalCalendar();
+            updateSelectedDatesDisplay();
+        }
+
+        function selectAllDays() {
+            selectedRentalDates = [];
+            const today = new Date();
+            
+            for (let month = 0; month < 12; month++) {
+                const year = currentCalendarYear + Math.floor(month / 12);
+                const monthIndex = (currentCalendarMonth + month) % 12;
+                const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const date = new Date(year, monthIndex, day);
+                    
+                    if (date >= today) {
+                        selectedRentalDates.push(date.toISOString().split('T')[0]);
+                    }
+                }
+            }
+            
+            generateRentalCalendar();
+            updateSelectedDatesDisplay();
+        }
+
+        function clearAllDates() {
+            selectedRentalDates = [];
+            generateRentalCalendar();
+            updateSelectedDatesDisplay();
+        }
+
+        // Update selected dates display
+        function updateSelectedDatesDisplay() {
+            const countEl = document.getElementById('selectedDatesCount');
+            const listEl = document.getElementById('selectedDatesList');
+            
+            if (!countEl || !listEl) return;
+
+            countEl.textContent = selectedRentalDates.length;
+            
+            if (selectedRentalDates.length === 0) {
+                listEl.textContent = 'No dates selected. Click on calendar dates to select availability.';
+            } else {
+                const sortedDates = selectedRentalDates.sort();
+                const formattedDates = sortedDates.map(date => {
+                    const d = new Date(date + 'T00:00:00');
+                    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                });
+                
+                if (formattedDates.length <= 10) {
+                    listEl.textContent = formattedDates.join(', ');
+                } else {
+                    listEl.textContent = formattedDates.slice(0, 10).join(', ') + ` and ${formattedDates.length - 10} more...`;
+                }
+            }
+        }
+
+        // Reset rental calendar data
+        function resetRentalCalendar() {
+            selectedRentalDates = [];
+            currentCalendarMonth = new Date().getMonth();
+            currentCalendarYear = new Date().getFullYear();
+        }
+
+        // Hook into existing category update function to initialize calendar
+        const originalUpdatePostCategoryFields = window.updatePostCategoryFields;
+        window.updatePostCategoryFields = function() {
+            if (originalUpdatePostCategoryFields) {
+                originalUpdatePostCategoryFields();
+            }
+            
+            // Initialize calendar if rent category is selected
+            setTimeout(() => {
+                const category = document.getElementById('postCategory')?.value;
+                if (category === 'rent') {
+                    initializeRentalCalendar();
+                }
+            }, 100);
+        };
+
+        // Hook into modal closing to reset calendar data
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-backdrop') || e.target.classList.contains('close-modal-btn')) {
+                resetRentalCalendar();
+            }
+        });
     </script>
 </body>
 </html>
