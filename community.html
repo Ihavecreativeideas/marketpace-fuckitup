@@ -2708,19 +2708,21 @@
                         <!-- Rental Rates -->
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                             <div style="padding: 15px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px;">
-                                <label style="display: flex; align-items: center; margin-bottom: 10px; color: #10b981; font-weight: 500;">
-                                    <input type="radio" name="rentalRate" value="hourly" id="hourlyRate" style="margin-right: 8px;">
+                                <label style="display: block; margin-bottom: 10px; color: #10b981; font-weight: 500;">
                                     Hourly Rate
                                 </label>
-                                <input type="number" id="hourlyRateAmount" placeholder="$0.00" step="0.01" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px;">
+                                <input type="number" id="hourlyRateAmount" placeholder="15.00" step="0.01" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px;">
                             </div>
                             <div style="padding: 15px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px;">
-                                <label style="display: flex; align-items: center; margin-bottom: 10px; color: #3b82f6; font-weight: 500;">
-                                    <input type="radio" name="rentalRate" value="daily" id="dailyRate" style="margin-right: 8px;" checked>
+                                <label style="display: block; margin-bottom: 10px; color: #3b82f6; font-weight: 500;">
                                     Daily Rate (Recommended)
                                 </label>
-                                <input type="number" id="dailyRateAmount" placeholder="$0.00" step="0.01" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(59, 130, 246, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px;">
+                                <input type="number" id="dailyRateAmount" placeholder="75.00" step="0.01" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(59, 130, 246, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px;">
                             </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px; padding: 12px; background: rgba(0, 255, 255, 0.1); border-radius: 8px; text-align: center;">
+                            <p style="color: #00ffff; font-size: 13px; margin: 0;">Set both rates to give customers flexible rental options</p>
                         </div>
 
                         <!-- Payment Options -->
@@ -2788,34 +2790,18 @@
                             </div>
                         </div>
 
-                        <!-- Booking Fee (Optional) -->
-                        <div style="margin-bottom: 20px;">
-                            <label style="display: flex; align-items: center; margin-bottom: 12px;">
-                                <input type="checkbox" id="enableBookingFee" style="margin-right: 8px;">
-                                <span class="form-label" style="font-size: 14px; margin: 0;">Optional Booking Fee</span>
-                            </label>
-                            <div id="bookingFeeOptions" style="display: none; padding: 15px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px;">
-                                <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-bottom: 10px;">
-                                    <input type="number" id="bookingFeeAmount" placeholder="$0.00" step="0.01" class="form-input" style="margin: 0;">
-                                    <select id="bookingFeeType" class="form-input" style="margin: 0; padding: 8px;">
-                                        <option value="refundable">Refundable</option>
-                                        <option value="non-refundable">Non-refundable</option>
-                                    </select>
-                                </div>
-                                <div style="color: #94a3b8; font-size: 12px;">Fee to secure booking date. Refundable fees are returned if rental completes successfully.</div>
-                            </div>
-                        </div>
-
                         <!-- Terms and Conditions -->
                         <div style="margin-bottom: 20px;">
-                            <label class="form-label" style="font-size: 14px; margin-bottom: 8px;">Terms & Conditions (Required)</label>
-                            <textarea id="rentalTerms" class="form-textarea" placeholder="Enter your rental terms and conditions...
+                            <label class="form-label" style="font-size: 14px; margin-bottom: 8px;">Custom Terms & Conditions</label>
+                            <textarea id="rentalTermsCustom" class="form-textarea" placeholder="Enter your specific rental terms and conditions...
+
 Example:
 - Item must be returned in same condition
-- Late returns incur $10/day fee  
+- Late returns incur additional fees  
 - Renter responsible for any damages
 - No smoking/pets allowed with this item
-- Must provide valid ID for rental" style="min-height: 120px;"></textarea>
+- Must provide valid ID for rental
+- Security deposit may be required" style="min-height: 120px; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; color: #e2e8f0; font-size: 14px;"></textarea>
                             <div style="margin-top: 8px; padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; font-size: 12px; color: #f87171;">
                                 ⚠️ <strong>Legal Notice:</strong> MarketPace is not responsible for lost or damaged rental items. Renters and owners agree to terms at their own risk.
                             </div>
@@ -12178,12 +12164,19 @@ Example:
                     availabilitySet: ownerSelectedDates.length > 0
                 };
                 postData.availabilityDates = [...ownerSelectedDates];
-                postData.rentalTerms = "Please handle with care. Must be returned in same condition.";
-                postData.itemCondition = "good";
-                postData.paymentMethod = "escrow";
-                postData.dailyRate = 25;
-                postData.hourlyRate = 0;
-                postData.rentalRateType = "daily";
+                // Get custom rental data from form
+                const customTerms = document.getElementById('rentalTermsCustom')?.value?.trim() || "Please handle with care. Must be returned in same condition.";
+                const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
+                const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 25;
+                const itemCondition = document.getElementById('itemCondition')?.value || 'good';
+                const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'escrow';
+                
+                postData.rentalTerms = customTerms;
+                postData.itemCondition = itemCondition;
+                postData.paymentMethod = paymentMethod;
+                postData.dailyRate = dailyRate;
+                postData.hourlyRate = hourlyRate;
+                postData.rentalRateType = "both"; // Allow both rates
                 postData.deliveryOptions = {
                     selfPickup: true,
                     privateDelivery: false,
