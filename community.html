@@ -12184,17 +12184,37 @@ Example:
                     availabilitySet: ownerSelectedDates.length > 0
                 };
                 postData.availabilityDates = [...ownerSelectedDates];
-                // Get custom rental data from form
+                // Get custom rental data from form with debugging
                 const customTerms = document.getElementById('rentalTermsCustom')?.value?.trim() || "Please handle with care. Must be returned in same condition.";
                 const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
                 const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
                 const itemCondition = document.getElementById('itemCondition')?.value || 'good';
                 const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'escrow';
                 
+                console.log('🔍 Rental form data capture:', {
+                    customTerms,
+                    hourlyRate,
+                    dailyRate,
+                    itemCondition,
+                    paymentMethod,
+                    hourlyElement: !!document.getElementById('hourlyRateAmount'),
+                    dailyElement: !!document.getElementById('dailyRateAmount'),
+                    termsElement: !!document.getElementById('rentalTermsCustom')
+                });
+                
                 // Get delivery options from checkboxes
                 const selfPickup = document.getElementById('selfPickupOptionRental')?.checked || false;
                 const privateDelivery = document.getElementById('privateDeliveryOptionRental')?.checked || false;
                 const marketPaceDelivery = document.getElementById('marketPaceDeliveryOptionRental')?.checked || false;
+                
+                console.log('🚚 Delivery options capture:', {
+                    selfPickup,
+                    privateDelivery,
+                    marketPaceDelivery,
+                    selfElement: !!document.getElementById('selfPickupOptionRental'),
+                    privateElement: !!document.getElementById('privateDeliveryOptionRental'),
+                    marketElement: !!document.getElementById('marketPaceDeliveryOptionRental')
+                });
                 
                 postData.rentalTerms = customTerms;
                 postData.itemCondition = itemCondition;
@@ -12218,7 +12238,16 @@ Example:
                 } else {
                     postData.price = 'Contact for price';
                 }
-                console.log('✅ Rental data added:', postData.ownerAvailability);
+                console.log('✅ Complete rental data added:', {
+                    rentalTerms: postData.rentalTerms,
+                    hourlyRate: postData.hourlyRate,
+                    dailyRate: postData.dailyRate,
+                    rentalRateType: postData.rentalRateType,
+                    deliveryOptions: postData.deliveryOptions,
+                    itemCondition: postData.itemCondition,
+                    paymentMethod: postData.paymentMethod,
+                    price: postData.price
+                });
             }
             
             console.log('✅ Post data created:', postData);
