@@ -5132,6 +5132,13 @@
             updatePostCategoryFields(); // Use the global function to ensure proper field visibility
             updateUploadFields();
             
+            // Ensure the correct form fields are visible
+            const singleItemFields = document.getElementById('singleItemFields');
+            if (singleItemFields) {
+                singleItemFields.style.display = 'block';
+                console.log('✅ Single item fields made visible');
+            }
+            
             // Add event listeners
             document.getElementById('postCategory').addEventListener('change', updateFormFields);
             document.getElementById('postForm').addEventListener('submit', function(e) {
@@ -8997,10 +9004,60 @@
         function submitSinglePost() {
             console.log('🚀 submitSinglePost called!');
             
-            // Debug input field values
-            const titleEl = document.getElementById('postTitle');
-            const descEl = document.getElementById('postDescription');
+            // Debug input field values - try both possible form field sets
+            let titleEl = document.getElementById('postTitle');
+            let descEl = document.getElementById('postDescription');
             const categoryEl = document.getElementById('postCategory');
+            
+            // Debug: Check which form elements are actually visible and accessible
+            console.log('Title element details:', {
+                exists: !!titleEl,
+                value: titleEl?.value,
+                visible: titleEl?.offsetParent !== null,
+                placeholder: titleEl?.placeholder
+            });
+            
+            console.log('Description element details:', {
+                exists: !!descEl,
+                value: descEl?.value,
+                visible: descEl?.offsetParent !== null,
+                placeholder: descEl?.placeholder
+            });
+            
+            // Get all possible title/description fields to debug
+            const allTitleFields = document.querySelectorAll('input[id="postTitle"], input[placeholder*="What are you"]');
+            const allDescFields = document.querySelectorAll('textarea[id="postDescription"], textarea[placeholder*="Tell"]');
+            
+            console.log('Found title fields:', Array.from(allTitleFields).map(el => ({
+                id: el.id,
+                value: el.value,
+                visible: el.offsetParent !== null,
+                placeholder: el.placeholder
+            })));
+            
+            console.log('Found description fields:', Array.from(allDescFields).map(el => ({
+                id: el.id,
+                value: el.value,
+                visible: el.offsetParent !== null,
+                placeholder: el.placeholder
+            })));
+            
+            // Use the visible fields with values
+            for (let field of allTitleFields) {
+                if (field.offsetParent !== null && field.value.trim()) {
+                    titleEl = field;
+                    console.log('Using visible title field:', field.placeholder);
+                    break;
+                }
+            }
+            
+            for (let field of allDescFields) {
+                if (field.offsetParent !== null && field.value.trim()) {
+                    descEl = field;
+                    console.log('Using visible description field:', field.placeholder);
+                    break;
+                }
+            }
             
             console.log('Form elements found:', {
                 titleEl: !!titleEl,
