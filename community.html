@@ -8824,7 +8824,7 @@ Example:
             const today = new Date();
             
             // Live system: Check for real unavailable dates (no demo mode)
-            const unavailableDates = await window.getUnavailableDates(rentalItemId);
+            const unavailableDates = await window.getUnavailableDates(rentalItemId || "demo_rental_item_123");
             
             for (let i = 0; i < 28; i++) {
                 const date = new Date(today);
@@ -8872,6 +8872,14 @@ Example:
                     dayElement.style.color = 'white';
                     dayElement.style.fontWeight = '600';
                 } else {
+                    // Weekend styling for Saturday/Sunday
+                    if (date.getDay() === 0 || date.getDay() === 6) {
+                        dayElement.style.background = 'rgba(0, 150, 255, 0.2)';
+                        dayElement.style.borderColor = 'rgba(0, 150, 255, 0.5)';
+                        dayElement.style.color = '#0096ff';
+                        dayElement.title = 'Weekend day - available for booking';
+                    }
+                    
                     // Available dates - add hover effects (only if not selected)
                     dayElement.addEventListener("mouseenter", function() {
                         if (!dayElement.classList.contains("selected")) {
