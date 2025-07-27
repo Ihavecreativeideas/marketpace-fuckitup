@@ -2778,22 +2778,7 @@
                             </div>
                         </div>
 
-                        <!-- Terms and Conditions -->
-                        <div style="margin-bottom: 20px;">
-                            <label class="form-label" style="font-size: 14px; margin-bottom: 8px;">Custom Terms & Conditions</label>
-                            <textarea id="rentalTermsCustom" class="form-textarea" placeholder="Enter your specific rental terms and conditions...
 
-Example:
-- Item must be returned in same condition
-- Late returns incur additional fees  
-- Renter responsible for any damages
-- No smoking/pets allowed with this item
-- Must provide valid ID for rental
-- Security deposit may be required" style="min-height: 120px; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; color: #e2e8f0; font-size: 14px;"></textarea>
-                            <div style="margin-top: 8px; padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; font-size: 12px; color: #f87171;">
-                                ⚠️ <strong>Legal Notice:</strong> MarketPace is not responsible for lost or damaged rental items. Renters and owners agree to terms at their own risk.
-                            </div>
-                        </div>
 
                         <!-- Delivery Options for Rental -->
                         <div style="margin-bottom: 20px;">
@@ -2869,57 +2854,6 @@ Example:
                             </div>
                         </div>
 
-                        <!-- Payment Summary Preview -->
-                        <div id="rentalPaymentPreview" style="margin-top: 25px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 12px; padding: 20px;">
-                            <label class="form-label" style="font-size: 16px; color: #00ffff; margin-bottom: 15px; display: block;">Payment Summary Preview</label>
-                            
-                            <div style="background: rgba(15, 23, 42, 0.8); border-radius: 8px; padding: 15px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(0, 255, 255, 0.2);">
-                                    <span style="color: #e2e8f0; font-size: 14px;">Rental Rate (Sample: 5 days)</span>
-                                    <span id="previewRentalRate" style="color: #00ffff; font-weight: 600;">$125.00</span>
-                                </div>
-                                
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <span style="color: #94a3b8; font-size: 13px;">Security Deposit</span>
-                                    <span id="previewSecurityDeposit" style="color: #94a3b8;">$25.00</span>
-                                </div>
-                                
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <span style="color: #94a3b8; font-size: 13px;">Late Fee Protection</span>
-                                    <span id="previewLateFee" style="color: #94a3b8;">$5.00</span>
-                                </div>
-                                
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <span style="color: #94a3b8; font-size: 13px;">MarketPace Commission (5%)</span>
-                                    <span id="previewCommission" style="color: #94a3b8;">$6.25</span>
-                                </div>
-                                
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <span style="color: #94a3b8; font-size: 13px;">Sustainability Fee</span>
-                                    <span style="color: #94a3b8;">$2.50</span>
-                                </div>
-                                
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                    <span style="color: #94a3b8; font-size: 13px;">Sales Tax (8%)</span>
-                                    <span id="previewTax" style="color: #94a3b8;">$13.10</span>
-                                </div>
-                                
-                                <div style="border-top: 1px solid rgba(0, 255, 255, 0.3); padding-top: 12px;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span style="color: #e2e8f0; font-size: 16px; font-weight: 600;">Total Amount</span>
-                                        <span id="previewTotal" style="color: #00ffff; font-size: 18px; font-weight: 700;">$176.85</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div style="margin-top: 15px; padding: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px;">
-                                <div style="color: #10b981; font-size: 12px; font-weight: 600; margin-bottom: 6px;">SECURE Escrow Payment Protection</div>
-                                <div style="color: #94a3b8; font-size: 11px; line-height: 1.4;">
-                                    Your payment will be held safely in escrow and released to the owner upon successful rental completion and QR verification.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Event Fields -->
                     <div class="form-group event-fields" id="eventFields" style="display: none;">
@@ -12000,6 +11934,42 @@ Example:
             }
             
             console.log('✅ Posting mode switched to:', currentPostingMode);
+        }
+
+        // Essential category selection function - global scope
+        function selectCategory(element, category) {
+            console.log(`🔄 Switching to category: ${category}`);
+            
+            // Update visual selection
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
+            if (element) {
+                element.classList.add('selected');
+            }
+            
+            // Show/hide relevant form fields based on category
+            const rentalFields = document.querySelectorAll('.rental-fields');
+            const serviceFields = document.querySelectorAll('.service-fields');
+            const eventFields = document.querySelectorAll('.event-fields');
+            const pollFields = document.querySelectorAll('.poll-fields');
+            
+            // Hide all category-specific fields
+            rentalFields.forEach(field => field.style.display = 'none');
+            serviceFields.forEach(field => field.style.display = 'none');
+            eventFields.forEach(field => field.style.display = 'none');
+            pollFields.forEach(field => field.style.display = 'none');
+            
+            // Show relevant fields for selected category
+            if (category === 'rent') {
+                rentalFields.forEach(field => field.style.display = 'block');
+            } else if (category === 'service') {
+                serviceFields.forEach(field => field.style.display = 'block');
+            } else if (category === 'event') {
+                eventFields.forEach(field => field.style.display = 'block');
+            } else if (category === 'poll') {
+                pollFields.forEach(field => field.style.display = 'block');
+            }
+            
+            console.log('✅ Category switched to:', category);
         }
     </script>
 
