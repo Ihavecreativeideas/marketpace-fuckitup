@@ -10842,8 +10842,8 @@ Example:
             }
         }
 
-        // Calendar preset functions
-        function selectWeekends() {
+        // Calendar preset functions (moved to global scope)
+        window.selectWeekends = function() {
             ownerSelectedDates = [];
             const today = new Date();
             
@@ -10861,7 +10861,7 @@ Example:
             updateOwnerSelectedDatesDisplay();
         }
 
-        function selectWeekdays() {
+        window.selectWeekdays = function() {
             ownerSelectedDates = [];
             const today = new Date();
             
@@ -10877,9 +10877,9 @@ Example:
             
             generateOwnerAvailabilityCalendar();
             updateOwnerSelectedDatesDisplay();
-        }
+        };
 
-        function selectAllDays() {
+        window.selectAllDays = function() {
             ownerSelectedDates = [];
             const today = new Date();
             
@@ -10891,24 +10891,24 @@ Example:
             
             generateOwnerAvailabilityCalendar();
             updateOwnerSelectedDatesDisplay();
-        }
+        };
 
-        function clearAllDates() {
+        window.clearAllDates = function() {
             ownerSelectedDates = [];
             generateOwnerAvailabilityCalendar();
             updateOwnerSelectedDatesDisplay();
-        }
+        };
 
         // Calendar month navigation functions
         let currentOwnerCalendarMonth = new Date();
 
-        function navigateCalendarMonth(direction) {
+        window.navigateCalendarMonth = function(direction) {
             currentOwnerCalendarMonth.setMonth(currentOwnerCalendarMonth.getMonth() + direction);
             updateCalendarMonth();
             generateOwnerAvailabilityCalendar();
-        }
+        };
 
-        function updateCalendarMonth() {
+        window.updateCalendarMonth = function() {
             const monthElement = document.getElementById('rentalCalendarMonth');
             if (monthElement) {
                 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -11367,6 +11367,12 @@ Example:
         }
 
         // Global form submission handler
+        // Add missing loadCommunityPosts function
+        function loadCommunityPosts() {
+            const posts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+            displayCommunityPosts(posts);
+        }
+
         async function handleFormSubmission() {
             console.log('📋 handleFormSubmission called!');
             
