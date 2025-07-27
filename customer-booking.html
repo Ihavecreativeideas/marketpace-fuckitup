@@ -352,10 +352,7 @@
                 </div>
 
                 <div class="agreement-section">
-                    <div class="section-title">Owner's Terms & Conditions</div>
-                    <div class="terms-display" id="ownerTermsDisplay" style="background: rgba(15, 23, 42, 0.8); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid rgba(0, 255, 255, 0.2); color: #e2e8f0; line-height: 1.5; font-size: 0.9rem;">
-                        Loading terms and conditions...
-                    </div>
+                    <div class="section-title">Agreement Required</div>
                     <div class="checkbox-wrapper">
                         <input type="checkbox" id="termsAgreement" required>
                         <label for="termsAgreement">
@@ -494,9 +491,6 @@
                         document.getElementById('deliveryFee').textContent = '$15.00';
                     }
                     
-                    // Load and display rental terms
-                    loadRentalTerms();
-                    
                 } catch (error) {
                     console.error('Error parsing rental data:', error);
                     showFallbackData();
@@ -517,39 +511,12 @@
             document.getElementById('ratePeriod').textContent = 'per day';
             dailyRate = 25;
             currentRateType = 'daily';
-            loadRentalTerms();
-        }
-
-        function loadRentalTerms() {
-            const termsDisplay = document.getElementById('ownerTermsDisplay');
-            
-            if (rentalData.termsAndConditions) {
-                if (rentalData.termsAndConditions.method === 'text' && rentalData.termsAndConditions.content) {
-                    termsDisplay.textContent = rentalData.termsAndConditions.content;
-                } else if (rentalData.termsAndConditions.method === 'file') {
-                    termsDisplay.innerHTML = `
-                        <div style="color: #00ffff;">📄 Terms Document:</div>
-                        <div style="margin-top: 8px;">${rentalData.termsAndConditions.fileName || 'Terms document uploaded'}</div>
-                        <div style="font-size: 0.8rem; opacity: 0.7; margin-top: 4px;">Please contact the owner for full terms details</div>
-                    `;
-                } else {
-                    termsDisplay.textContent = rentalData.rentalTerms || 'Please handle with care. Must be returned in same condition.';
-                }
-            } else {
-                // Fallback to any terms data available
-                termsDisplay.textContent = rentalData.rentalTerms || 'Please handle with care. Must be returned in same condition.';
-            }
         }
 
         function generateCalendar() {
             const calendar = document.getElementById('rentalCalendar');
             const today = new Date();
-            
-            // Get owner's available dates from rental data
-            const ownerAvailableDates = rentalData.ownerAvailability?.selectedDates || 
-                                      rentalData.availabilityDates || [];
-            
-            console.log('Owner available dates:', ownerAvailableDates);
+            const daysToShow = 28; // Show 4 weeks
             
             // Create day headers
             const dayHeaders = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -562,60 +529,21 @@
                 calendar.appendChild(header);
             });
             
-            // If no owner availability data, show fallback message
-            if (!ownerAvailableDates || ownerAvailableDates.length === 0) {
-                const noAvailabilityMsg = document.createElement('div');
-                noAvailabilityMsg.style.gridColumn = '1 / -1';
-                noAvailabilityMsg.style.textAlign = 'center';
-                noAvailabilityMsg.style.padding = '20px';
-                noAvailabilityMsg.style.color = '#94a3b8';
-                noAvailabilityMsg.textContent = 'Owner has not set available dates yet. Please contact the owner to arrange rental dates.';
-                calendar.appendChild(noAvailabilityMsg);
-                return;
-            }
-            
-            // Convert owner dates to Date objects and sort them
-            const availableDates = ownerAvailableDates.map(dateStr => new Date(dateStr)).sort((a, b) => a - b);
-            const startDate = new Date(Math.min(...availableDates));
-            const endDate = new Date(Math.max(...availableDates));
-            
-            // Generate calendar for the range of available dates
-            let currentDate = new Date(startDate);
-            currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // Start from beginning of week
-            
-            let daysShown = 0;
-            const maxDaysToShow = 42; // 6 weeks max
-            
-            while (currentDate <= endDate && daysShown < maxDaysToShow) {
-                const dateStr = currentDate.toISOString().split('T')[0];
-                const isAvailable = ownerAvailableDates.includes(dateStr);
-                const isPastDate = currentDate < today;
+            // Generate calendar days
+            for (let i = 0; i < daysToShow; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
                 
                 const dayElement = document.createElement('div');
                 dayElement.className = 'calendar-day';
-                dayElement.textContent = currentDate.getDate();
-                dayElement.dataset.date = dateStr;
+                dayElement.textContent = date.getDate();
+                dayElement.dataset.date = date.toISOString().split('T')[0];
                 
-                if (isPastDate) {
-                    dayElement.style.opacity = '0.3';
-                    dayElement.style.cursor = 'not-allowed';
-                } else if (isAvailable) {
-                    dayElement.style.background = 'rgba(0, 255, 255, 0.1)';
-                    dayElement.style.border = '1px solid #00ffff';
-                    dayElement.style.cursor = 'pointer';
-                    dayElement.addEventListener('click', function() {
-                        toggleDateSelection(this, currentDate);
-                    });
-                } else {
-                    dayElement.style.opacity = '0.2';
-                    dayElement.style.cursor = 'not-allowed';
-                    dayElement.style.background = 'rgba(128, 128, 128, 0.1)';
-                }
+                dayElement.addEventListener('click', function() {
+                    toggleDateSelection(this, date);
+                });
                 
                 calendar.appendChild(dayElement);
-                
-                currentDate.setDate(currentDate.getDate() + 1);
-                daysShown++;
             }
         }
 
