@@ -5283,7 +5283,8 @@
             updateHeaderModeIndicator(currentPostingMode);
             
             // Update modal mode if it's open
-            if (document.getElementById('postModal').style.display !== 'none') {
+            const postModal = document.getElementById('postingModal');
+            if (postModal && postModal.style.display !== 'none') {
                 switchPostingMode(currentPostingMode);
             }
             
@@ -6823,7 +6824,19 @@
                 }, 500);
                 
                 // Load existing posts on page load
-                loadCommunityPosts();
+                const communityFeed = document.getElementById('communityFeed');
+                const existingPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+                
+                if (existingPosts.length === 0) {
+                    communityFeed.innerHTML = '<div style="text-align: center; color: rgba(255, 255, 255, 0.6); padding: 40px;">No posts yet. Be the first to share something!</div>';
+                } else {
+                    communityFeed.innerHTML = '';
+                    existingPosts.forEach(post => {
+                        const postElement = createPostElement(post);
+                        postElement.setAttribute('data-post-id', post.id);
+                        communityFeed.appendChild(postElement);
+                    });
+                }
                 
             } catch (error) {
                 console.error('❌ Error initializing community functions:', error);
@@ -7396,7 +7409,8 @@
             updateMainComposerMode(currentPostingMode);
             
             // Update modal mode if it's open
-            if (document.getElementById('postModal').style.display !== 'none') {
+            const postModal = document.getElementById('postingModal');
+            if (postModal && postModal.style.display !== 'none') {
                 switchPostingMode(currentPostingMode);
             }
             
@@ -9592,10 +9606,8 @@
             }
         });
 
-        // Ensure currentPostingMode is defined
-        if (typeof currentPostingMode === 'undefined') {
-            let currentPostingMode = 'personal';
-        }
+        // Ensure currentPostingMode is defined globally
+        let currentPostingMode = 'personal';
 
         // Initialize page
         window.addEventListener('DOMContentLoaded', function() {
