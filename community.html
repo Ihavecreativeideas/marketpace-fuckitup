@@ -8765,6 +8765,13 @@ Example:
         // CRITICAL FIX: Global calendar system for rental availability
         window.ownerSelectedDates = [];
         
+        // Live system: Function to get real unavailable dates from bookings
+        window.getUnavailableDates = function() {
+            // This will integrate with real booking data
+            // For now returns empty array (all dates available)
+            return [];
+        };
+        
         // Step 1: Build and Display the Calendar Grid
         window.generateOwnerAvailabilityCalendar = function() {
             console.log('✅ Generating owner availability calendar...');
@@ -8803,14 +8810,8 @@ Example:
             // Generate 28 clickable date buttons (4 weeks)
             const today = new Date();
             
-            // Step 4: Simulate some unavailable dates (already booked)
-            const unavailableDates = [
-                // Simulate some random bookings in the next 4 weeks
-                new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                new Date(today.getTime() + 12 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                new Date(today.getTime() + 19 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-            ];
+            // Live system: Check for real unavailable dates (no demo mode)
+            const unavailableDates = window.getUnavailableDates ? window.getUnavailableDates() : [];
             
             for (let i = 0; i < 28; i++) {
                 const date = new Date(today);
@@ -8842,7 +8843,7 @@ Example:
                 `;
                 
                 if (isUnavailable) {
-                    // Step 4: Mark unavailable dates (already booked)
+                    // Mark unavailable dates (already booked)
                     dayElement.classList.add('unavailable');
                     dayElement.style.background = 'rgba(239, 68, 68, 0.2)';
                     dayElement.style.borderColor = 'rgba(239, 68, 68, 0.5)';
@@ -11105,7 +11106,7 @@ Example:
                 `;
                 
                 if (isUnavailable) {
-                    // Step 4: Mark unavailable dates (already booked)
+                    // Mark unavailable dates (already booked)
                     dayElement.classList.add('unavailable');
                     dayElement.style.background = 'rgba(239, 68, 68, 0.2)';
                     dayElement.style.borderColor = 'rgba(239, 68, 68, 0.5)';
