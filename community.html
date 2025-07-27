@@ -11817,8 +11817,6 @@ Example:
                 dailyRate: selectedPost?.dailyRate || selectedPost?.rentalDailyRate || 25,
                 rentalRateType: selectedPost?.rentalRateType || 'daily',
                 itemCondition: selectedPost?.itemCondition || 'good',
-                ownerAvailability: selectedPost?.ownerAvailability || {},
-                availabilityDates: selectedPost?.availabilityDates || selectedPost?.ownerAvailability?.selectedDates || [],
                 paymentMethod: selectedPost?.paymentMethod || 'escrow',
                 rentalTerms: selectedPost?.rentalTerms || 'Please handle with care. Must be returned in same condition.',
                 bookingFee: selectedPost?.bookingFee || { enabled: false },
@@ -12169,29 +12167,6 @@ Example:
                 id: Date.now()
             };
             
-            // Add rental-specific data if this is a rental post
-            if (category === 'rent') {
-                console.log('Adding rental data - Owner selected dates:', ownerSelectedDates);
-                postData.ownerAvailability = {
-                    selectedDates: [...ownerSelectedDates],
-                    totalDaysAvailable: ownerSelectedDates.length,
-                    availabilitySet: ownerSelectedDates.length > 0
-                };
-                postData.availabilityDates = [...ownerSelectedDates];
-                postData.rentalTerms = "Please handle with care. Must be returned in same condition.";
-                postData.itemCondition = "good";
-                postData.paymentMethod = "escrow";
-                postData.dailyRate = 25;
-                postData.hourlyRate = 0;
-                postData.rentalRateType = "daily";
-                postData.deliveryOptions = {
-                    selfPickup: true,
-                    privateDelivery: false,
-                    marketPaceDelivery: false
-                };
-                console.log('✅ Rental data added:', postData.ownerAvailability);
-            }
-            
             console.log('✅ Post data created:', postData);
             
             // Save immediately to localStorage
@@ -12204,9 +12179,8 @@ Example:
             const modal = document.querySelector('.posting-modal');
             if (modal) modal.remove();
             
-            // Clear images and calendar data
+            // Clear images
             uploadedImages = [];
-            ownerSelectedDates = [];
             
             // Show success and refresh
             showNotification('Post created successfully!', 'success');
