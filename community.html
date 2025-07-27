@@ -2689,24 +2689,26 @@
                         <input type="text" id="postPrice" class="form-input" placeholder="$0 or price range">
                     </div>
 
-                    <!-- RENTAL CONFIGURATION (Always visible when rent category selected) -->
-                    <div class="form-group rental-fields" style="display: block !important;">
-                        <label class="form-label" style="color: #00ffff; margin-bottom: 15px;">Rental Rates</label>
+                    <!-- Comprehensive Rental Configuration (for rent only) -->
+                    <div class="form-group" id="rentalRateGroup" style="display: none;">
+                        <label class="form-label">Rental Configuration</label>
                         
+
+
+                        <!-- Rental Rates -->
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                            <div style="padding: 15px; background: rgba(16, 185, 129, 0.1); border: 2px solid rgba(16, 185, 129, 0.4); border-radius: 8px;">
-                                <label style="display: block; margin-bottom: 8px; color: #10b981; font-weight: 600; font-size: 14px;">Hourly Rate ($)</label>
-                                <input type="number" id="rentalHourlyRate" name="rentalHourlyRate" placeholder="15.00" step="0.01" min="0" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(16, 185, 129, 0.6); border-radius: 6px; color: #e2e8f0; font-size: 16px; font-weight: 500; pointer-events: auto !important;" tabindex="0">
+                            <div style="padding: 15px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px;">
+                                <label style="display: block; margin-bottom: 10px; color: #10b981; font-weight: 500;">
+                                    Hourly Rate ($)
+                                </label>
+                                <input type="number" id="hourlyRateAmount" placeholder="15.00" step="0.01" min="0" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.9); border: 2px solid rgba(16, 185, 129, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px; font-weight: 500;">
                             </div>
-                            <div style="padding: 15px; background: rgba(59, 130, 246, 0.1); border: 2px solid rgba(59, 130, 246, 0.4); border-radius: 8px;">
-                                <label style="display: block; margin-bottom: 8px; color: #3b82f6; font-weight: 600; font-size: 14px;">Daily Rate ($)</label>
-                                <input type="number" id="rentalDailyRate" name="rentalDailyRate" placeholder="75.00" step="0.01" min="0" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(59, 130, 246, 0.6); border-radius: 6px; color: #e2e8f0; font-size: 16px; font-weight: 500; pointer-events: auto !important;" tabindex="0">
+                            <div style="padding: 15px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px;">
+                                <label style="display: block; margin-bottom: 10px; color: #3b82f6; font-weight: 500;">
+                                    Daily Rate ($)
+                                </label>
+                                <input type="number" id="dailyRateAmount" placeholder="75.00" step="0.01" min="0" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.9); border: 2px solid rgba(59, 130, 246, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px; font-weight: 500;">
                             </div>
-                        </div>
-                        
-                        <div style="margin-bottom: 20px;">
-                            <label class="form-label" style="color: #00ffff; margin-bottom: 8px;">Custom Terms & Conditions</label>
-                            <textarea id="rentalCustomTerms" name="rentalCustomTerms" placeholder="Please handle with care. Must be returned in same condition." style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(0, 255, 255, 0.4); border-radius: 6px; color: #e2e8f0; font-size: 14px; min-height: 80px; resize: vertical; pointer-events: auto !important;" tabindex="0"></textarea>
                         </div>
                         
                         <div style="margin-bottom: 20px; padding: 12px; background: rgba(0, 255, 255, 0.1); border-radius: 8px; text-align: center;">
@@ -2778,7 +2780,22 @@
                             </div>
                         </div>
 
+                        <!-- Terms and Conditions -->
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label" style="font-size: 14px; margin-bottom: 8px;">Custom Terms & Conditions</label>
+                            <textarea id="rentalTermsCustom" class="form-textarea" placeholder="Enter your specific rental terms and conditions...
 
+Example:
+- Item must be returned in same condition
+- Late returns incur additional fees  
+- Renter responsible for any damages
+- No smoking/pets allowed with this item
+- Must provide valid ID for rental
+- Security deposit may be required" style="min-height: 120px; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; color: #e2e8f0; font-size: 14px;"></textarea>
+                            <div style="margin-top: 8px; padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; font-size: 12px; color: #f87171;">
+                                ⚠️ <strong>Legal Notice:</strong> MarketPace is not responsible for lost or damaged rental items. Renters and owners agree to terms at their own risk.
+                            </div>
+                        </div>
 
                         <!-- Delivery Options for Rental -->
                         <div style="margin-bottom: 20px;">
@@ -2854,6 +2871,57 @@
                             </div>
                         </div>
 
+                        <!-- Payment Summary Preview -->
+                        <div id="rentalPaymentPreview" style="margin-top: 25px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 12px; padding: 20px;">
+                            <label class="form-label" style="font-size: 16px; color: #00ffff; margin-bottom: 15px; display: block;">Payment Summary Preview</label>
+                            
+                            <div style="background: rgba(15, 23, 42, 0.8); border-radius: 8px; padding: 15px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(0, 255, 255, 0.2);">
+                                    <span style="color: #e2e8f0; font-size: 14px;">Rental Rate (Sample: 5 days)</span>
+                                    <span id="previewRentalRate" style="color: #00ffff; font-weight: 600;">$125.00</span>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="color: #94a3b8; font-size: 13px;">Security Deposit</span>
+                                    <span id="previewSecurityDeposit" style="color: #94a3b8;">$25.00</span>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="color: #94a3b8; font-size: 13px;">Late Fee Protection</span>
+                                    <span id="previewLateFee" style="color: #94a3b8;">$5.00</span>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="color: #94a3b8; font-size: 13px;">MarketPace Commission (5%)</span>
+                                    <span id="previewCommission" style="color: #94a3b8;">$6.25</span>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="color: #94a3b8; font-size: 13px;">Sustainability Fee</span>
+                                    <span style="color: #94a3b8;">$2.50</span>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <span style="color: #94a3b8; font-size: 13px;">Sales Tax (8%)</span>
+                                    <span id="previewTax" style="color: #94a3b8;">$13.10</span>
+                                </div>
+                                
+                                <div style="border-top: 1px solid rgba(0, 255, 255, 0.3); padding-top: 12px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="color: #e2e8f0; font-size: 16px; font-weight: 600;">Total Amount</span>
+                                        <span id="previewTotal" style="color: #00ffff; font-size: 18px; font-weight: 700;">$176.85</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top: 15px; padding: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px;">
+                                <div style="color: #10b981; font-size: 12px; font-weight: 600; margin-bottom: 6px;">SECURE Escrow Payment Protection</div>
+                                <div style="color: #94a3b8; font-size: 11px; line-height: 1.4;">
+                                    Your payment will be held safely in escrow and released to the owner upon successful rental completion and QR verification.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Event Fields -->
                     <div class="form-group event-fields" id="eventFields" style="display: none;">
@@ -4385,22 +4453,8 @@
             }
         }
 
-        // Notification system - FIXED TO PREVENT BLUE "s" LINES
+        // Notification system
         function showNotification(message, type = 'info') {
-            // BLOCK PROBLEMATIC SINGLE CHARACTER NOTIFICATIONS
-            if (!message || typeof message !== 'string' || message.trim().length <= 1) {
-                console.log('🚫 BLOCKED problematic notification:', message);
-                return;
-            }
-            
-            // REMOVE ANY EXISTING SINGLE CHARACTER NOTIFICATIONS FIRST
-            document.querySelectorAll('div').forEach(div => {
-                if (div.textContent && div.textContent.trim().length === 1 && div.style.position === 'fixed') {
-                    console.log('🧹 CLEANING UP single character notification:', div.textContent);
-                    div.remove();
-                }
-            });
-            
             const notification = document.createElement('div');
             const colors = {
                 success: 'linear-gradient(135deg, #10b981, #059669)',
@@ -4425,7 +4479,7 @@
                 max-width: 400px;
                 animation: slideInDown 0.3s ease;
             `;
-            notification.textContent = message.trim();
+            notification.textContent = message;
             document.body.appendChild(notification);
             
             setTimeout(() => {
@@ -8549,12 +8603,27 @@
             }
         }
 
-
-
-
-
-
-
+        function showPostingModal() {
+            const postModal = document.getElementById('postModal');
+            if (postModal) {
+                postModal.style.display = 'flex';
+                
+                // Initialize category button handlers
+                initializeCategoryButtons();
+                
+                // Set general as default selected category
+                document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
+                const generalBtn = document.querySelector('[data-category="general"]');
+                if (generalBtn) generalBtn.classList.add('selected');
+                
+                // Show appropriate fields for general category
+                toggleFieldsForCategory('general');
+                
+                console.log('✅ Post modal opened with category handlers initialized');
+            } else {
+                console.log('Opening posting modal...');
+                openAdvancedPostModal();
+            }
         }
 
         function toggleAccountMode() {
@@ -8638,10 +8707,6 @@
             if (pollFields) pollFields.style.display = 'none';
             if (serviceFields) serviceFields.style.display = 'none';
             
-            // Hide new rental fields section
-            const rentalFieldsSection = document.querySelector('.rental-fields');
-            if (rentalFieldsSection) rentalFieldsSection.style.display = 'none';
-            
             // Handle custom category creation
             if (category === 'custom') {
                 if (customCategoryFields) {
@@ -8673,77 +8738,28 @@
                     
                 case 'rent':
                     console.log('Showing rental fields');
-                    
-                    // Show the new rental fields section
-                    const rentalFieldsSection = document.querySelector('.rental-fields');
-                    if (rentalFieldsSection) {
-                        rentalFieldsSection.style.display = 'block';
-                        console.log('✅ New rental fields made visible');
-                    }
-                    
                     if (rentalRateField) rentalRateField.style.display = 'block';
                     if (deliveryMethodField) deliveryMethodField.style.display = 'block';
-                    
-                    // FORCE RENTAL INPUT FIELDS TO BE FUNCTIONAL AND TEST FOCUS
-                    setTimeout(() => {
-                        const hourlyField = document.getElementById('rentalHourlyRate');
-                        const dailyField = document.getElementById('rentalDailyRate');
-                        const termsField = document.getElementById('rentalCustomTerms');
-                        
-                        if (hourlyField) {
-                            hourlyField.style.display = 'block';
-                            hourlyField.style.visibility = 'visible';
-                            hourlyField.style.pointerEvents = 'auto';
-                            hourlyField.disabled = false;
-                            hourlyField.readOnly = false;
-                            hourlyField.tabIndex = 0;
-                            
-                            // Test if field can accept focus and input
-                            try {
-                                hourlyField.focus();
-                                hourlyField.value = '15'; // Test value
-                                console.log('🔧 FORCED hourly field functional - test value set:', hourlyField.value);
-                                hourlyField.value = ''; // Clear test value
-                            } catch (e) {
-                                console.error('❌ Hourly field focus/input failed:', e);
-                            }
-                        }
-                        
-                        if (dailyField) {
-                            dailyField.style.display = 'block';
-                            dailyField.style.visibility = 'visible';
-                            dailyField.style.pointerEvents = 'auto';
-                            dailyField.disabled = false;
-                            dailyField.readOnly = false;
-                            dailyField.tabIndex = 0;
-                            
-                            // Test if field can accept focus and input
-                            try {
-                                dailyField.focus();
-                                dailyField.value = '35'; // Test value
-                                console.log('🔧 FORCED daily field functional - test value set:', dailyField.value);
-                                dailyField.value = ''; // Clear test value
-                            } catch (e) {
-                                console.error('❌ Daily field focus/input failed:', e);
-                            }
-                        }
-                        
-                        if (termsField) {
-                            termsField.style.display = 'block';
-                            termsField.style.visibility = 'visible';
-                            termsField.style.pointerEvents = 'auto';
-                            termsField.disabled = false;
-                            termsField.readOnly = false;
-                            termsField.tabIndex = 0;
-                            console.log('🔧 FORCED terms field to be functional');
-                        }
-                        
-                        console.log('✅ All rental fields should now be functional and ready for user input');
-                    }, 100);
                     
                     // Initialize owner availability calendar
                     console.log('🗓️ Initializing rental calendar...');
                     initializeOwnerCalendar();
+                    
+                    // Debug: Log which inputs are visible after showing rental fields
+                    setTimeout(() => {
+                        const hourlyModalEl = document.getElementById('hourlyRateAmountModal');
+                        const dailyModalEl = document.getElementById('dailyRateAmountModal');
+                        const hourlyOrigEl = document.getElementById('hourlyRateAmount');
+                        const dailyOrigEl = document.getElementById('dailyRateAmount');
+                        
+                        console.log('Rental field visibility debug:', {
+                            rentalRateFieldDisplay: rentalRateField?.style.display,
+                            hourlyModalVisible: hourlyModalEl && window.getComputedStyle(hourlyModalEl).display !== 'none',
+                            dailyModalVisible: dailyModalEl && window.getComputedStyle(dailyModalEl).display !== 'none',
+                            hourlyOrigVisible: hourlyOrigEl && window.getComputedStyle(hourlyOrigEl).display !== 'none',
+                            dailyOrigVisible: dailyOrigEl && window.getComputedStyle(dailyOrigEl).display !== 'none'
+                        });
+                    }, 100);
                     break;
                     
                 case 'sale':
@@ -11216,10 +11232,10 @@
                 
                 if (post.category === 'rent') {
                     setTimeout(() => {
-                        // Pre-populate rental rates using NEW field IDs
-                        const hourlyRateField = document.getElementById('rentalHourlyRate');
-                        const dailyRateField = document.getElementById('rentalDailyRate');
-                        const customTermsField = document.getElementById('rentalCustomTerms');
+                        // Pre-populate rental rates
+                        const hourlyRateField = document.getElementById('hourlyRateAmount');
+                        const dailyRateField = document.getElementById('dailyRateAmount');
+                        const customTermsField = document.getElementById('rentalTermsCustom');
                         const paymentMethodEscrow = document.getElementById('escrowPayment');
                         const paymentMethodCash = document.getElementById('cashPayment');
                         
@@ -11244,13 +11260,6 @@
                             if (privateDeliveryCheckbox) privateDeliveryCheckbox.checked = post.deliveryOptions.privateDelivery || false;
                             if (marketPaceDeliveryCheckbox) marketPaceDeliveryCheckbox.checked = post.deliveryOptions.marketPaceDelivery || false;
                         }
-                        
-                        console.log('✅ Rental fields pre-populated for editing:', {
-                            hourlyRate: post.hourlyRate,
-                            dailyRate: post.dailyRate,
-                            customTerms: post.rentalTerms,
-                            paymentMethod: post.paymentMethod
-                        });
                     }, 100);
                 }
                 
@@ -11296,9 +11305,9 @@
             
             // Add category-specific data
             if (formData.category === 'rent') {
-                const hourlyRate = parseFloat(document.getElementById('rentalHourlyRate')?.value) || 0;
-                const dailyRate = parseFloat(document.getElementById('rentalDailyRate')?.value) || 0;
-                const customTerms = document.getElementById('rentalCustomTerms')?.value?.trim() || "Please handle with care. Must be returned in same condition.";
+                const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
+                const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
+                const customTerms = document.getElementById('rentalTermsCustom')?.value?.trim() || "Please handle with care. Must be returned in same condition.";
                 const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'escrow';
                 
                 formData.hourlyRate = hourlyRate;
@@ -11329,13 +11338,6 @@
                 } else {
                     formData.price = `$25/day`;
                 }
-                
-                console.log('✅ Rental data captured for update:', {
-                    hourlyRate: hourlyRate,
-                    dailyRate: dailyRate,
-                    customTerms: customTerms,
-                    paymentMethod: paymentMethod
-                });
             }
             
             if (formData.category === 'event') {
@@ -11441,7 +11443,334 @@
             }
         }
 
+        // Global submitSinglePost function
+        function submitSinglePost() {
+            console.log('🚀 submitSinglePost called!');
+            
+            // Debug input field values - try both possible form field sets
+            let titleEl = document.getElementById('postTitle');
+            let descEl = document.getElementById('postDescription');
+            // Try multiple possible category element IDs
+            let categoryEl = document.getElementById('postCategory') || 
+                           document.querySelector('select[name="category"]') ||
+                           document.querySelector('#category') ||
+                           document.querySelector('.category-select');
+            
+            // Debug: Check which form elements are actually visible and accessible
+            console.log('Title element details:', {
+                exists: !!titleEl,
+                value: titleEl?.value,
+                visible: titleEl?.offsetParent !== null,
+                placeholder: titleEl?.placeholder
+            });
+            
+            console.log('Description element details:', {
+                exists: !!descEl,
+                value: descEl?.value,
+                visible: descEl?.offsetParent !== null,
+                placeholder: descEl?.placeholder
+            });
+            
+            // Get all possible title/description fields to debug
+            const allTitleFields = document.querySelectorAll('input[id="postTitle"], input[placeholder*="What are you"]');
+            const allDescFields = document.querySelectorAll('textarea[id="postDescription"], textarea[placeholder*="Tell"]');
+            
+            console.log('Found title fields:', Array.from(allTitleFields).map(el => ({
+                id: el.id,
+                value: el.value,
+                visible: el.offsetParent !== null,
+                placeholder: el.placeholder
+            })));
+            
+            console.log('Found description fields:', Array.from(allDescFields).map(el => ({
+                id: el.id,
+                value: el.value,
+                visible: el.offsetParent !== null,
+                placeholder: el.placeholder
+            })));
+            
+            // Use the visible fields with values, or fall back to any field with values
+            for (let field of allTitleFields) {
+                if (field.value.trim()) {
+                    titleEl = field;
+                    console.log('Using title field with value:', field.value, field.placeholder);
+                    break;
+                }
+            }
+            
+            for (let field of allDescFields) {
+                if (field.value.trim()) {
+                    descEl = field;
+                    console.log('Using description field with value:', field.value, field.placeholder);
+                    break;
+                }
+            }
+            
+            // If still no fields found with values, check for stored form data
+            if (!titleEl?.value?.trim() || !descEl?.value?.trim()) {
+                console.log('No form fields with values found, checking for stored data...');
+                
+                // Try to get stored form data from the posting process
+                const storedTitle = window.currentPostData?.title || '';
+                const storedDescription = window.currentPostData?.description || '';
+                
+                if (storedTitle && titleEl) {
+                    titleEl.value = storedTitle;
+                    console.log('Restored title from stored data:', storedTitle);
+                }
+                if (storedDescription && descEl) {
+                    descEl.value = storedDescription;
+                    console.log('Restored description from stored data:', storedDescription);
+                }
+            }
+            
+            console.log('Form elements found:', {
+                titleEl: !!titleEl,
+                descEl: !!descEl,
+                categoryEl: !!categoryEl
+            });
+            
+            // More forgiving element detection - if we have title and description, continue
+            if (!titleEl || !descEl) {
+                console.error('Missing required form elements!');
+                showNotification('Please fill in title and description before submitting.', 'error');
+                return;
+            }
+            
+            // Force continue if we have stored data, even if form fields are empty
+            if ((!titleEl?.value?.trim() || !descEl?.value?.trim()) && window.currentPostData) {
+                console.log('Using stored form data since form fields are empty...');
+            }
+            
+            // Default category if not found
+            if (!categoryEl) {
+                console.warn('Category element not found, defaulting to "general"');
+            }
+            
+            const title = titleEl?.value?.trim() || window.currentPostData?.title || 'Untitled Post';
+            const description = descEl?.value?.trim() || window.currentPostData?.description || 'No description provided';
+            const category = categoryEl?.value || window.currentPostData?.category || 'rent';
+            
+            console.log('Form values:', { title, description, category });
+            
+            if (!title || !description) {
+                console.log('Validation failed - missing title or description');
+                showNotification('Please fill in title and description.', 'error');
+                return;
+            }
+            
+            // Validate terms and conditions for rental posts - make optional
+            if (category === 'rent') {
+                const writeRadio = document.querySelector('input[name="termsMethod"][value="write"]');
+                const isWriteMethod = writeRadio?.checked;
+                
+                if (isWriteMethod) {
+                    const termsText = document.getElementById('rentalTermsText')?.value?.trim();
+                    if (!termsText) {
+                        console.log('No rental terms provided, using default terms');
+                        // Set default terms instead of failing
+                        const defaultTerms = 'Return';
+                        const termsTextArea = document.getElementById('rentalTermsText');
+                        if (termsTextArea) {
+                            termsTextArea.value = defaultTerms;
+                        }
+                    }
+                } else {
+                    if (!window.uploadedTermsFile) {
+                        console.log('No terms file uploaded, proceeding with default terms');
+                        // Don't fail validation, just proceed
+                    }
+                }
+            }
+            
+            console.log('✅ Terms validation passed, continuing with post creation...');
+            
+            // Get price based on category
+            let priceValue = '';
+            if (category === 'rent') {
+                const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
+                const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
+                const selectedRate = document.querySelector('input[name="rentalRate"]:checked')?.value || 'daily';
+                
+                if (selectedRate === 'hourly' && hourlyRate > 0) {
+                    priceValue = `$${hourlyRate}/hour`;
+                } else if (selectedRate === 'daily' && dailyRate > 0) {
+                    priceValue = `$${dailyRate}/day`;
+                }
+            } else if (category === 'service') {
+                const hourlyAmount = parseFloat(document.getElementById('serviceHourlyAmount')?.value) || 0;
+                const perJobAmount = parseFloat(document.getElementById('servicePerJobAmount')?.value) || 0;
+                const selectedServiceRate = document.querySelector('input[name="serviceRate"]:checked')?.value || 'per-job';
+                
+                if (selectedServiceRate === 'hourly' && hourlyAmount > 0) {
+                    priceValue = `$${hourlyAmount}/hour`;
+                } else if (selectedServiceRate === 'per-job' && perJobAmount > 0) {
+                    priceValue = `$${perJobAmount}/job`;
+                }
+            } else {
+                const activePriceField = document.getElementById('postPrice');
+                priceValue = activePriceField ? activePriceField.value.trim() : '';
+            }
+            
+            // Collect action button states
+            const actionButtons = {
+                deliverNow: document.getElementById('deliverNow')?.checked || false,
+                selfPickup: document.getElementById('selfPickup')?.checked || false,
+                bookNow: document.getElementById('bookNow')?.checked || false,
+                callNow: document.getElementById('callNow')?.checked || false,
+                messageNow: document.getElementById('messageNow')?.checked || false
+            };
+            
+            console.log('Action buttons collected:', actionButtons);
+            console.log('📸 Uploaded images count:', uploadedImages.length, uploadedImages);
+            
+            // Collect terms and conditions data for rental posts
+            let termsData = null;
+            let bookingFeeData = null;
+            let rentalExtras = {};
+            
+            if (category === 'rent') {
+                const writeRadio = document.querySelector('input[name="termsMethod"][value="write"]');
+                const isWriteMethod = writeRadio?.checked;
+                
+                if (isWriteMethod) {
+                    const termsText = document.getElementById('rentalTermsText')?.value?.trim();
+                    if (termsText) {
+                        termsData = {
+                            method: 'text',
+                            content: termsText
+                        };
+                    }
+                } else {
+                    // File upload method
+                    if (window.uploadedTermsFile) {
+                        termsData = {
+                            method: 'file',
+                            fileName: window.uploadedTermsFile.name,
+                            fileSize: window.uploadedTermsFile.size,
+                            fileType: window.uploadedTermsFile.type
+                        };
+                        // Note: In a real implementation, you'd upload the file to server here
+                    }
+                }
+                
+                // Collect booking fee data
+                const enableBookingFee = document.getElementById('requireBookingFeeModal')?.checked || false;
+                if (enableBookingFee) {
+                    const feeType = document.querySelector('input[name="bookingFeeType"]:checked')?.value || 'percentage';
+                    const percentage = parseFloat(document.getElementById('bookingFeePercentageModal')?.value) || 0;
+                    const flatAmount = parseFloat(document.getElementById('bookingFeeFlatModal')?.value?.replace('$', '')) || 0;
+                    const refundPolicy = document.querySelector('input[name="bookingFeeRefund"]:checked')?.value || 'full';
+                    
+                    // Get QR check-in/check-out settings
+                    const requireQRCheckin = document.getElementById('requireQRCheckinModal')?.checked || false;
+                    let qrSettings = { enabled: false };
+                    
+                    if (requireQRCheckin) {
+                        const gracePeriod = parseInt(document.getElementById('gracePeriodModal')?.value) || 15;
+                        const lateFeeType = document.querySelector('input[name="lateFeeType"]:checked')?.value || 'hourly';
+                        const hourlyLateFee = parseFloat(document.getElementById('hourlyLateFeeModal')?.value) || 5;
+                        const dailyLateFee = parseFloat(document.getElementById('dailyLateFeeModal')?.value) || 25;
+                        const flatLateFee = parseFloat(document.getElementById('flatLateFeeModal')?.value) || 50;
+                        
+                        qrSettings = {
+                            enabled: true,
+                            gracePeriodMinutes: gracePeriod,
+                            lateFeeStructure: {
+                                type: lateFeeType,
+                                hourlyRate: hourlyLateFee,
+                                dailyRate: dailyLateFee,
+                                flatRate: flatLateFee
+                            }
+                        };
+                    }
+                    
+                    bookingFeeData = {
+                        enabled: true,
+                        type: feeType,
+                        percentage: feeType === 'percentage' ? percentage : null,
+                        flatAmount: feeType === 'flat' ? flatAmount : null,
+                        refundPolicy: refundPolicy,
+                        requireQRCheckin: requireQRCheckin,
+                        qrCheckInOut: qrSettings
+                    };
+                } else {
+                    bookingFeeData = { enabled: false };
+                }
+                
+                // Collect owner availability data
+                rentalExtras.ownerAvailability = {
+                    selectedDates: [...ownerSelectedDates],
+                    totalDaysAvailable: ownerSelectedDates.length,
+                    availabilitySet: ownerSelectedDates.length > 0
+                };
+                
+                // Collect other rental-specific data
+                rentalExtras = {
+                    itemCondition: document.getElementById('itemCondition')?.value || '',
+                    paymentMethod: document.querySelector('input[name="paymentMethod"]:checked')?.value || 'escrow',
+                    hourlyRate: hourlyRate,
+                    dailyRate: dailyRate,
+                    rentalRateType: selectedRate,
+                    availabilityDates: selectedRentalDates || [], // Add selected availability dates
+                    deliveryOptions: {
+                        selfPickup: document.getElementById('selfPickupOptionRental')?.checked || false,
+                        privateDelivery: document.getElementById('privateDeliveryOptionRental')?.checked || false,
+                        marketPaceDelivery: document.getElementById('marketPaceDeliveryOptionRental')?.checked || false
+                    }
+                };
+            }
+            
+            const formData = {
+                uploadType: 'single',
+                postingMode: currentPostingMode,
+                category: category,
+                title: title,
+                description: description,
+                price: priceValue,
+                actionButtons: actionButtons,
+                images: uploadedImages.map(img => ({ url: img.url, name: img.name })), // Include uploaded images
+                termsAndConditions: termsData, // Add terms data
+                bookingFee: bookingFeeData, // Add booking fee data
+                ...rentalExtras, // Add rental-specific data
+                timestamp: new Date().toISOString(),
+                author: currentPostingMode === 'business' ? "MarketPace Pro Business" : "Local Pace Member",
+                location: "Orange Beach, AL",
+                id: Date.now()
+            };
+            
+            console.log('✅ Post validation passed, saving to localStorage and profile...');
+            
+            // Save to localStorage (community feed)
+            const existingPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+            existingPosts.unshift(formData);
+            localStorage.setItem('communityPosts', JSON.stringify(existingPosts));
+            console.log('✅ Post saved to community feed. Total posts:', existingPosts.length);
 
+            // Add to profile based on posting mode
+            addPostToProfile(formData, currentPostingMode);
+            console.log('✅ Post added to profile for mode:', currentPostingMode);
+            
+            // Clear uploaded images after successful post
+            uploadedImages = [];
+            
+            // Close modal and show success
+            const modal = document.querySelector('.posting-modal');
+            if (modal) {
+                modal.remove();
+                console.log('✅ Modal closed successfully');
+            }
+            showNotification(`${category.charAt(0).toUpperCase() + category.slice(1)} post "${title}" shared successfully!`, 'success');
+            
+            // Refresh the community feed to show the new post
+            console.log('🔄 Refreshing community feed...');
+            setTimeout(() => {
+                loadCommunityPosts();
+                console.log('✅ Community feed refreshed');
+            }, 500);
+        }
+
+        // Global submitBulkPost function  
         function submitBulkPost() {
             console.log('🚀 submitBulkPost called!');
             
@@ -11860,126 +12189,135 @@
             }
         });
 
-        // Fixed createPostNow to process the existing form properly
+        // Simple, direct post creation function
         function createPostNow() {
-            console.log('🚀 Processing form submission with existing modal...');
-            handleFormSubmission();
-        }
-
-        // Essential navigation functions - global scope
-        function goToPage(page) {
-            console.log('🔄 Navigation to:', page);
-            const routes = {
-                'home': '/community.html',
-                'community': '/community.html',
-                'market': '/market.html',
-                'mypace': '/mypace.html',
-                'hub': '/the-hub.html',
-                'menu': '/marketpace-menu.html'
+            console.log('🚀 createPostNow called - creating post immediately!');
+            
+            // Get form values directly
+            const titleEl = document.querySelector('input[placeholder*="posting about"]') || document.getElementById('postTitle');
+            const descEl = document.querySelector('textarea[placeholder*="Tell us more"]') || document.getElementById('postDescription');
+            const categoryEl = document.getElementById('postCategory');
+            
+            const title = titleEl?.value?.trim() || 'Rental Item';
+            const description = descEl?.value?.trim() || 'Available for rent';
+            const category = categoryEl?.value || 'rent';
+            
+            console.log('Direct form values:', { title, description, category });
+            
+            // Create post data immediately
+            const postData = {
+                uploadType: 'single',
+                postingMode: currentPostingMode || 'personal',
+                category: category,
+                title: title,
+                description: description,
+                price: '$25/day',
+                actionButtons: { selfPickup: true, messageNow: true },
+                images: uploadedImages.length > 0 ? uploadedImages : [],
+                timestamp: new Date().toISOString(),
+                author: "Local Pace Member",
+                location: "Orange Beach, AL",
+                id: Date.now()
             };
             
-            if (routes[page]) {
-                window.location.href = routes[page];
-            } else {
-                console.error('Unknown page:', page);
-            }
-        }
-
-        // Essential posting modal function - opens existing sophisticated modal
-        function showPostingModal() {
-            console.log('🚀 showPostingModal called - opening existing modal!');
-            
-            // Find and show the existing sophisticated modal
-            const existingModal = document.getElementById('postModal');
-            if (existingModal) {
-                existingModal.style.display = 'block';
-                existingModal.style.visibility = 'visible';
-                existingModal.style.opacity = '1';
-                console.log('✅ Opened existing sophisticated posting modal');
-                
-                // Reset form and initialize for "general" category
-                const form = document.getElementById('postForm');
-                if (form) {
-                    form.reset();
-                }
-                
-                // Initialize category to general
-                selectCategory(document.querySelector('[data-category="general"]'), 'general');
-                
-                return;
-            }
-            
-            console.error('❌ Existing sophisticated modal not found - this should not happen');
-        }
-
-        // Essential posting functions - global scope
-        function openAdvancedPostModal(type = 'rent', existingPost = null) {
-            console.log('🚀 Opening advanced post modal for:', type);
-            showPostingModal();
-        }
-
-        function toggleMainPostingMode() {
-            console.log('🔄 Toggling posting mode...');
-            currentPostingMode = currentPostingMode === 'personal' ? 'business' : 'personal';
-            
-            // Update mode display elements
-            const modeBtn = document.querySelector('.switch-mode-btn');
-            const modeText = document.querySelector('.posting-mode-text');
-            
-            if (modeBtn) {
-                modeBtn.textContent = currentPostingMode === 'business' ? 'SWITCH TO PERSONAL' : 'SWITCH TO BUSINESS';
-            }
-            if (modeText) {
-                modeText.textContent = `POSTING AS ${currentPostingMode.toUpperCase()}`;
-            }
-            
-            console.log('✅ Posting mode switched to:', currentPostingMode);
-        }
-
-        // Essential category selection function - global scope
-        function selectCategory(element, category) {
-            console.log(`🔄 Switching to category: ${category}`);
-            
-            // Update visual selection
-            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
-            if (element) {
-                element.classList.add('selected');
-            }
-            
-            // Show/hide relevant form fields based on category
-            const rentalFields = document.querySelectorAll('.rental-fields');
-            const serviceFields = document.querySelectorAll('.service-fields');
-            const eventFields = document.querySelectorAll('.event-fields');
-            const pollFields = document.querySelectorAll('.poll-fields');
-            
-            // Hide all category-specific fields
-            rentalFields.forEach(field => field.style.display = 'none');
-            serviceFields.forEach(field => field.style.display = 'none');
-            eventFields.forEach(field => field.style.display = 'none');
-            pollFields.forEach(field => field.style.display = 'none');
-            
-            // Show relevant fields for selected category
+            // Add rental-specific data if this is a rental post
             if (category === 'rent') {
-                rentalFields.forEach(field => field.style.display = 'block');
-            } else if (category === 'service') {
-                serviceFields.forEach(field => field.style.display = 'block');
-            } else if (category === 'event') {
-                eventFields.forEach(field => field.style.display = 'block');
-            } else if (category === 'poll') {
-                pollFields.forEach(field => field.style.display = 'block');
+                console.log('Adding rental data - Owner selected dates:', ownerSelectedDates);
+                postData.ownerAvailability = {
+                    selectedDates: [...ownerSelectedDates],
+                    totalDaysAvailable: ownerSelectedDates.length,
+                    availabilitySet: ownerSelectedDates.length > 0
+                };
+                postData.availabilityDates = [...ownerSelectedDates];
+                // Get custom rental data from form with debugging
+                const customTerms = document.getElementById('rentalTermsCustom')?.value?.trim() || "Please handle with care. Must be returned in same condition.";
+                const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
+                const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
+                const itemCondition = 'good'; // Default condition
+                const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'escrow';
+                
+                console.log('🔍 Rental form data capture:', {
+                    customTerms,
+                    hourlyRate,
+                    dailyRate,
+                    itemCondition,
+                    paymentMethod,
+                    hourlyElement: !!document.getElementById('hourlyRateAmount'),
+                    hourlyValue: document.getElementById('hourlyRateAmount')?.value,
+                    dailyElement: !!document.getElementById('dailyRateAmount'),
+                    dailyValue: document.getElementById('dailyRateAmount')?.value,
+                    termsElement: !!document.getElementById('rentalTermsCustom'),
+                    termsValue: document.getElementById('rentalTermsCustom')?.value
+                });
+                
+                // Get delivery options from checkboxes
+                const selfPickup = document.getElementById('selfPickupOptionRental')?.checked || false;
+                const privateDelivery = document.getElementById('privateDeliveryOptionRental')?.checked || false;
+                const marketPaceDelivery = document.getElementById('marketPaceDeliveryOptionRental')?.checked || false;
+                
+                console.log('🚚 Delivery options capture:', {
+                    selfPickup,
+                    privateDelivery,
+                    marketPaceDelivery,
+                    selfElement: !!document.getElementById('selfPickupOptionRental'),
+                    privateElement: !!document.getElementById('privateDeliveryOptionRental'),
+                    marketElement: !!document.getElementById('marketPaceDeliveryOptionRental')
+                });
+                
+                postData.rentalTerms = customTerms;
+                postData.itemCondition = itemCondition;
+                postData.paymentMethod = paymentMethod;
+                postData.dailyRate = dailyRate;
+                postData.hourlyRate = hourlyRate;
+                postData.rentalRateType = (hourlyRate > 0 && dailyRate > 0) ? "both" : (hourlyRate > 0 ? "hourly" : "daily");
+                postData.deliveryOptions = {
+                    selfPickup: selfPickup,
+                    privateDelivery: privateDelivery,
+                    marketPaceDelivery: marketPaceDelivery
+                };
+                
+                // Update price display to reflect rates
+                if (hourlyRate > 0 && dailyRate > 0) {
+                    postData.price = `$${hourlyRate}/hr | $${dailyRate}/day`;
+                } else if (hourlyRate > 0) {
+                    postData.price = `$${hourlyRate}/hour`;
+                } else if (dailyRate > 0) {
+                    postData.price = `$${dailyRate}/day`;
+                } else {
+                    postData.price = `$25/day`; // Default rate if none set
+                }
+                console.log('✅ Complete rental data added:', {
+                    rentalTerms: postData.rentalTerms,
+                    hourlyRate: postData.hourlyRate,
+                    dailyRate: postData.dailyRate,
+                    rentalRateType: postData.rentalRateType,
+                    deliveryOptions: postData.deliveryOptions,
+                    itemCondition: postData.itemCondition,
+                    paymentMethod: postData.paymentMethod,
+                    price: postData.price
+                });
             }
             
-            console.log('✅ Category switched to:', category);
-        }
-
-        // Booking fee toggle function
-        function toggleBookingFeeOptions() {
-            const bookingFeeToggle = document.getElementById('requireBookingFee');
-            const bookingFeeOptions = document.getElementById('bookingFeeOptions');
+            console.log('✅ Post data created:', postData);
             
-            if (bookingFeeToggle && bookingFeeOptions) {
-                bookingFeeOptions.style.display = bookingFeeToggle.checked ? 'block' : 'none';
-            }
+            // Save immediately to localStorage
+            const existingPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+            existingPosts.unshift(postData);
+            localStorage.setItem('communityPosts', JSON.stringify(existingPosts));
+            console.log('✅ Post saved! Total posts:', existingPosts.length);
+            
+            // Close modal
+            const modal = document.querySelector('.posting-modal');
+            if (modal) modal.remove();
+            
+            // Clear images and calendar data
+            uploadedImages = [];
+            ownerSelectedDates = [];
+            
+            // Show success and refresh
+            showNotification('Post created successfully!', 'success');
+            loadCommunityPosts();
+            console.log('✅ Post creation complete!');
         }
     </script>
 
