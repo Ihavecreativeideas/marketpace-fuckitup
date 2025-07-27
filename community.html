@@ -8820,11 +8820,17 @@ Example:
                         priceField.style.display = 'none';
                         console.log('CRITICAL: priceField forcibly hidden for rental category');
                     }
-                    // CRITICAL FIX: Initialize calendar for rentals
+                    // CRITICAL FIX: Initialize calendar for rentals with proper scoping
                     setTimeout(() => {
                         console.log('CRITICAL: Initializing rental calendar...');
-                        generateOwnerAvailabilityCalendar();
-                        updateOwnerSelectedDatesDisplay();
+                        if (typeof generateOwnerAvailabilityCalendar === 'function') {
+                            generateOwnerAvailabilityCalendar();
+                            updateOwnerSelectedDatesDisplay();
+                        } else {
+                            console.error('generateOwnerAvailabilityCalendar function not found, calling window version');
+                            window.generateOwnerAvailabilityCalendar();
+                            window.updateOwnerSelectedDatesDisplay();
+                        }
                     }, 200);
                     if (deliveryMethodField) deliveryMethodField.style.display = 'block';
                     
@@ -8853,7 +8859,10 @@ Example:
                     
                 case 'sale':
                     console.log('Showing sale fields');
-                    if (priceField) priceField.style.display = 'block';
+                    if (priceField) {
+                        priceField.style.display = 'block';
+                        console.log('CRITICAL: priceField shown for sale category');
+                    }
                     if (deliveryMethodField) deliveryMethodField.style.display = 'block';
                     break;
                     
@@ -10792,6 +10801,9 @@ Example:
 
         // Owner Availability Calendar Functions (for rental posting modal)
         let ownerSelectedDates = [];
+        
+        // CRITICAL FIX: Make functions globally accessible
+        window.ownerSelectedDates = ownerSelectedDates;
 
         // PHASE 6 FIX: Make calendar fully interactive and clickable - FIXED CALENDAR ID CONNECTION
         function generateOwnerAvailabilityCalendar() {
@@ -10868,6 +10880,9 @@ Example:
                 calendar.appendChild(dayElement);
             }
         }
+        
+        // CRITICAL FIX: Make function globally accessible
+        window.generateOwnerAvailabilityCalendar = generateOwnerAvailabilityCalendar;
 
         function toggleOwnerDate(element, dateStr) {
             if (element.classList.contains('selected')) {
@@ -10914,6 +10929,9 @@ Example:
                 }
             }
         }
+        
+        // CRITICAL FIX: Make function globally accessible  
+        window.updateOwnerSelectedDatesDisplay = updateOwnerSelectedDatesDisplay;
 
         // Calendar preset functions (moved to global scope)
         window.selectWeekends = function() {
@@ -10967,6 +10985,10 @@ Example:
             updateOwnerSelectedDatesDisplay();
         }
         window.selectAllDays = selectAllDays;
+        
+        // CRITICAL FIX: Make all calendar functions globally accessible
+        window.selectWeekends = selectWeekends; 
+        window.selectWeekdays = selectWeekdays;
 
         // CRITICAL FIX: Make preset functions globally accessible
         function clearAllDates() {
