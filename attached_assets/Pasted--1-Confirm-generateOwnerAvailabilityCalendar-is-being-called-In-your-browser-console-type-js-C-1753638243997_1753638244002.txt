@@ -1,0 +1,118 @@
+ 1. Confirm generateOwnerAvailabilityCalendar() is being called
+In your browser console, type:
+
+js
+Copy
+Edit
+typeof window.generateOwnerAvailabilityCalendar
+It should return:
+
+js
+Copy
+Edit
+"function"
+If it returns undefined, the script defining the function is loading after the call.
+
+✅ FIX:
+Make sure the <script> block that contains this code:
+
+js
+Copy
+Edit
+window.generateOwnerAvailabilityCalendar = function() {
+   ...
+}
+is placed before the call to generateOwnerAvailabilityCalendar() or is in a script file included at the end of the HTML body, like:
+
+html
+Copy
+Edit
+<body>
+  ...
+  <script src="calendar.js"></script>
+</body>
+If it’s inline, wrap the call inside a safe DOM-ready check:
+
+js
+Copy
+Edit
+document.addEventListener('DOMContentLoaded', function () {
+  if (typeof window.generateOwnerAvailabilityCalendar === 'function') {
+    window.generateOwnerAvailabilityCalendar();
+    window.updateOwnerSelectedDatesDisplay();
+  } else {
+    console.error('generateOwnerAvailabilityCalendar is not defined');
+  }
+});
+✅ 2. Verify Calendar Container Exists
+In your console, type:
+
+js
+Copy
+Edit
+document.getElementById('ownerAvailabilityCalendar')
+It should return a valid div element. If it returns null, the modal or calendar is not mounted yet when the function runs.
+
+✅ FIX:
+Only call generateOwnerAvailabilityCalendar() after the modal is shown.
+
+If the modal is triggered with a button, attach a calendar init there:
+
+js
+Copy
+Edit
+document.getElementById('openRentalModalButton').addEventListener('click', function () {
+  window.generateOwnerAvailabilityCalendar();
+  window.updateOwnerSelectedDatesDisplay();
+});
+✅ 3. Manually Trigger and Inspect
+In console, manually trigger:
+
+js
+Copy
+Edit
+window.generateOwnerAvailabilityCalendar()
+Then check:
+
+Does the calendar grid render?
+
+Are 35 div.calendar-day children added?
+
+Do they have styles and click handlers?
+
+If not: something is interfering with the calendar.innerHTML or it's inside a hidden or non-rendered container.
+
+✅ 4. Debug Styling Issues
+Use Inspect Element and check if the calendar is being rendered but is invisible.
+
+Look for display: none or visibility: hidden
+
+Or check opacity: 0, z-index, etc.
+
+If it’s rendering but not visible, you can temporarily override styles in your CSS:
+
+css
+Copy
+Edit
+#ownerAvailabilityCalendar {
+  display: grid !important;
+  opacity: 1 !important;
+  height: auto !important;
+}
+✅ 5. Add a Visual Log
+As a test, add this line inside generateOwnerAvailabilityCalendar():
+
+js
+Copy
+Edit
+calendar.style.background = 'black';
+This ensures you can visually see if the calendar is being targeted at all.
+
+✅ Final Backup Option: Trigger from Button
+If none of the above work, simplify testing by adding a temp button:
+
+html
+Copy
+Edit
+<button onclick="window.generateOwnerAvailabilityCalendar()">Test Calendar</button>
+This ensures you control the timing, and you'll see if the function works when manually triggered.
