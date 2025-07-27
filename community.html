@@ -11951,6 +11951,124 @@ Example:
             }
         }
 
+        // Essential posting modal function - global scope  
+        function showPostingModal() {
+            console.log('🚀 showPostingModal called!');
+            
+            // Check if modal already exists and remove it
+            const existingModal = document.querySelector('.posting-modal');
+            if (existingModal) {
+                existingModal.remove();
+                console.log('Removed existing modal');
+            }
+            
+            // Create modal backdrop
+            const modalBackdrop = document.createElement('div');
+            modalBackdrop.className = 'modal-backdrop';
+            modalBackdrop.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                backdrop-filter: blur(4px);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            `;
+            
+            // Create modal container
+            const modalContainer = document.createElement('div');
+            modalContainer.className = 'posting-modal';
+            modalContainer.style.cssText = `
+                background: linear-gradient(135deg, #1a0b3d 0%, #2d1b69 30%, #4c2885 60%, #6b46c1 100%);
+                border-radius: 12px;
+                border: 1px solid rgba(0, 255, 255, 0.3);
+                width: 100%;
+                max-width: 500px;
+                max-height: 90vh;
+                overflow-y: auto;
+                color: #e2e8f0;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            `;
+            
+            // Modal content
+            modalContainer.innerHTML = `
+                <div style="padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 style="margin: 0; color: #00ffff; font-size: 20px;">Create Post</h2>
+                        <button class="close-modal-btn" style="background: none; border: none; color: #00ffff; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px;">&times;</button>
+                    </div>
+                    
+                    <form id="postingForm">
+                        <div style="margin-bottom: 15px;">
+                            <label for="postCategory" style="display: block; margin-bottom: 5px; color: #00ffff; font-weight: 600;">Category</label>
+                            <select id="postCategory" style="width: 100%; padding: 12px; border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: #e2e8f0; font-size: 16px;">
+                                <option value="general">General</option>
+                                <option value="sale">For Sale</option>
+                                <option value="rent">For Rent</option>
+                                <option value="service">Service</option>
+                                <option value="event">Event</option>
+                                <option value="job">Job/Hiring</option>
+                                <option value="iso">ISO (In Search Of)</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label for="postTitle" style="display: block; margin-bottom: 5px; color: #00ffff; font-weight: 600;">Title</label>
+                            <input type="text" id="postTitle" placeholder="What are you sharing?" style="width: 100%; padding: 12px; border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: #e2e8f0; font-size: 16px;">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label for="postDescription" style="display: block; margin-bottom: 5px; color: #00ffff; font-weight: 600;">Description</label>
+                            <textarea id="postDescription" placeholder="Tell everyone more details..." rows="4" style="width: 100%; padding: 12px; border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: #e2e8f0; font-size: 16px; resize: vertical;"></textarea>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label for="postPrice" style="display: block; margin-bottom: 5px; color: #00ffff; font-weight: 600;">Price (Optional)</label>
+                            <input type="text" id="postPrice" placeholder="$0.00" style="width: 100%; padding: 12px; border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: #e2e8f0; font-size: 16px;">
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label for="postImages" style="display: block; margin-bottom: 5px; color: #00ffff; font-weight: 600;">Images (Optional)</label>
+                            <input type="file" id="postImages" multiple accept="image/*" style="width: 100%; padding: 12px; border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: #e2e8f0; font-size: 16px;">
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" class="close-modal-btn" style="flex: 1; padding: 12px; border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; background: rgba(0, 0, 0, 0.3); color: #00ffff; font-size: 16px; font-weight: 600; cursor: pointer;">Cancel</button>
+                            <button type="button" onclick="createPostNow()" style="flex: 1; padding: 12px; border: none; border-radius: 8px; background: linear-gradient(45deg, #00ffff, #0080ff); color: white; font-size: 16px; font-weight: 600; cursor: pointer;">Create Post</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            // Add to page
+            modalBackdrop.appendChild(modalContainer);
+            document.body.appendChild(modalBackdrop);
+            
+            // Add close event listeners
+            const closeBtns = modalBackdrop.querySelectorAll('.close-modal-btn');
+            closeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    modalBackdrop.remove();
+                    console.log('Modal closed');
+                });
+            });
+            
+            // Close on backdrop click
+            modalBackdrop.addEventListener('click', (e) => {
+                if (e.target === modalBackdrop) {
+                    modalBackdrop.remove();
+                    console.log('Modal closed via backdrop');
+                }
+            });
+            
+            console.log('✅ Posting modal created and displayed');
+        }
+
         // Essential posting functions - global scope
         function openAdvancedPostModal(type = 'rent', existingPost = null) {
             console.log('🚀 Opening advanced post modal for:', type);
