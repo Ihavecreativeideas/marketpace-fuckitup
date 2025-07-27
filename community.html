@@ -4453,8 +4453,11 @@ Example:
             }
         }
 
-        // Notification system
+        // Notification system with cleanup
         function showNotification(message, type = 'info') {
+            // Clean up any existing notifications first
+            cleanupStuckNotifications();
+            
             const notification = document.createElement('div');
             const colors = {
                 success: 'linear-gradient(135deg, #10b981, #059669)',
@@ -4480,6 +4483,7 @@ Example:
                 animation: slideInDown 0.3s ease;
             `;
             notification.textContent = message;
+            notification.classList.add('marketplace-notification');
             document.body.appendChild(notification);
             
             setTimeout(() => {
@@ -4487,6 +4491,21 @@ Example:
                     document.body.removeChild(notification);
                 }
             }, 3000);
+        }
+        
+        // Clean up any stuck notification elements
+        function cleanupStuckNotifications() {
+            // Remove any existing marketplace notifications
+            document.querySelectorAll('.marketplace-notification').forEach(el => el.remove());
+            
+            // Remove any elements that might be stuck blue line notifications
+            document.querySelectorAll('div').forEach(el => {
+                if (el.textContent && el.textContent.trim().length === 1 && 
+                    el.textContent.trim() === 's' && 
+                    el.style.position === 'fixed') {
+                    el.remove();
+                }
+            });
         }
 
         // Condition Verification Function - Navigate to Rental Details
@@ -6516,7 +6535,7 @@ Example:
                 }
                 
                 displayUploadedImages(uploadedImages, inputId + '-preview');
-                showNotification(`${uploadedImages.length} product image(s) uploaded successfully!`, 'success');
+                console.log(`✅ ${uploadedImages.length} product image(s) uploaded successfully!`);
                 return uploadedImages;
             } catch (error) {
                 showNotification('Failed to upload product images: ' + error.message, 'error');
@@ -7627,6 +7646,9 @@ Example:
 
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Community page loaded, testing button functionality...');
+            
+            // Clean up any stuck notifications on page load
+            cleanupStuckNotifications();
             
             // Test essential functions on page load
             try {
