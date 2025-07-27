@@ -5663,7 +5663,7 @@ Example:
                     
                     <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 25px; padding: 20px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; border-top: 1px solid rgba(0, 255, 255, 0.2);">
                         <button type="button" onclick="this.closest('.posting-modal').remove()" style="padding: 12px 24px; background: #666; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">Cancel</button>
-                        <button type="button" id="submitButton" onclick="createPostNow()" style="padding: 12px 24px; background: #00ffff; color: #1a0b3d; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">Create Post</button>
+                        <button type="button" id="submitButton" onclick="handleFormSubmission()" style="padding: 12px 24px; background: #00ffff; color: #1a0b3d; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">Create Post</button>
                     </div>
                 </form>
             `;
@@ -5705,37 +5705,6 @@ Example:
             
             // Add event listeners
             document.getElementById('postCategory').addEventListener('change', updateFormFields);
-            
-            // Add event listeners to store form data when user types
-            document.getElementById('postTitle').addEventListener('input', function() {
-                const titleEl = document.getElementById('postTitle');
-                const descEl = document.getElementById('postDescription');
-                const categoryEl = document.getElementById('postCategory');
-                
-                if (titleEl && descEl && categoryEl) {
-                    window.currentPostData = {
-                        title: titleEl.value.trim(),
-                        description: descEl.value.trim(),
-                        category: categoryEl.value
-                    };
-                    console.log('Title updated, form data stored:', window.currentPostData);
-                }
-            });
-            
-            document.getElementById('postDescription').addEventListener('input', function() {
-                const titleEl = document.getElementById('postTitle');
-                const descEl = document.getElementById('postDescription');
-                const categoryEl = document.getElementById('postCategory');
-                
-                if (titleEl && descEl && categoryEl) {
-                    window.currentPostData = {
-                        title: titleEl.value.trim(),
-                        description: descEl.value.trim(),
-                        category: categoryEl.value
-                    };
-                    console.log('Description updated, form data stored:', window.currentPostData);
-                }
-            });
             document.getElementById('postForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 console.log('📋 Form submitted, processing...');
@@ -6508,7 +6477,7 @@ Example:
                 
                 // Display uploaded images
                 displayUploadedImages(uploadedImages, inputId + '-preview');
-                // Remove success notification to prevent blue line display issue
+                showNotification(`${uploadedImages.length} image(s) uploaded successfully!`, 'success');
                 console.log('✅ Images uploaded to global array:', uploadedImages);
                 return Promise.resolve();
             } catch (error) {
@@ -7704,20 +7673,10 @@ Example:
                 
                 console.log('All community functions initialized successfully');
                 
-                // Clear any persistent notification elements that might cause blue line
-                setInterval(() => {
-                    const persistentNotifications = document.querySelectorAll('div[style*="position: fixed"][style*="top:"]');
-                    persistentNotifications.forEach(notification => {
-                        const text = notification.textContent.trim();
-                        if (text === 's' || text.length <= 2 || text.includes('Uploading')) {
-                            console.log('Removing problematic notification:', text);
-                            notification.remove();
-                        }
-                    });
-                }, 500);
-                
                 // Load existing posts on page load
                 loadCommunityPosts();
+                
+                // Removed auto-notification to prevent blue line at top
                 
             } catch (error) {
                 console.error('❌ Error initializing community functions:', error);
@@ -8686,21 +8645,6 @@ Example:
         
         function updatePostCategoryFields() {
             console.log('updatePostCategoryFields() called from global scope');
-            
-            // Store current form data before changing fields
-            const titleEl = document.getElementById('postTitle');
-            const descEl = document.getElementById('postDescription');
-            const categoryEl = document.getElementById('postCategory');
-            
-            if (titleEl && descEl && categoryEl) {
-                window.currentPostData = {
-                    title: titleEl.value.trim(),
-                    description: descEl.value.trim(),
-                    category: categoryEl.value
-                };
-                console.log('Form data stored:', window.currentPostData);
-            }
-            
             const category = document.getElementById('postCategory').value;
             console.log('Selected category:', category);
             
@@ -11399,11 +11343,7 @@ Example:
             // Debug input field values - try both possible form field sets
             let titleEl = document.getElementById('postTitle');
             let descEl = document.getElementById('postDescription');
-            // Try multiple possible category element IDs
-            let categoryEl = document.getElementById('postCategory') || 
-                           document.querySelector('select[name="category"]') ||
-                           document.querySelector('#category') ||
-                           document.querySelector('.category-select');
+            const categoryEl = document.getElementById('postCategory');
             
             // Debug: Check which form elements are actually visible and accessible
             console.log('Title element details:', {
@@ -11438,38 +11378,20 @@ Example:
                 placeholder: el.placeholder
             })));
             
-            // Use the visible fields with values, or fall back to any field with values
+            // Use the visible fields with values
             for (let field of allTitleFields) {
-                if (field.value.trim()) {
+                if (field.offsetParent !== null && field.value.trim()) {
                     titleEl = field;
-                    console.log('Using title field with value:', field.value, field.placeholder);
+                    console.log('Using visible title field:', field.placeholder);
                     break;
                 }
             }
             
             for (let field of allDescFields) {
-                if (field.value.trim()) {
+                if (field.offsetParent !== null && field.value.trim()) {
                     descEl = field;
-                    console.log('Using description field with value:', field.value, field.placeholder);
+                    console.log('Using visible description field:', field.placeholder);
                     break;
-                }
-            }
-            
-            // If still no fields found with values, check for stored form data
-            if (!titleEl?.value?.trim() || !descEl?.value?.trim()) {
-                console.log('No form fields with values found, checking for stored data...');
-                
-                // Try to get stored form data from the posting process
-                const storedTitle = window.currentPostData?.title || '';
-                const storedDescription = window.currentPostData?.description || '';
-                
-                if (storedTitle && titleEl) {
-                    titleEl.value = storedTitle;
-                    console.log('Restored title from stored data:', storedTitle);
-                }
-                if (storedDescription && descEl) {
-                    descEl.value = storedDescription;
-                    console.log('Restored description from stored data:', storedDescription);
                 }
             }
             
@@ -11479,26 +11401,15 @@ Example:
                 categoryEl: !!categoryEl
             });
             
-            // More forgiving element detection - if we have title and description, continue
-            if (!titleEl || !descEl) {
-                console.error('Missing required form elements!');
-                showNotification('Please fill in title and description before submitting.', 'error');
+            if (!titleEl || !descEl || !categoryEl) {
+                console.error('Missing form elements!');
+                showNotification('Form elements missing. Please try again.', 'error');
                 return;
             }
             
-            // Force continue if we have stored data, even if form fields are empty
-            if ((!titleEl?.value?.trim() || !descEl?.value?.trim()) && window.currentPostData) {
-                console.log('Using stored form data since form fields are empty...');
-            }
-            
-            // Default category if not found
-            if (!categoryEl) {
-                console.warn('Category element not found, defaulting to "general"');
-            }
-            
-            const title = titleEl?.value?.trim() || window.currentPostData?.title || 'Untitled Post';
-            const description = descEl?.value?.trim() || window.currentPostData?.description || 'No description provided';
-            const category = categoryEl?.value || window.currentPostData?.category || 'rent';
+            const title = titleEl.value?.trim() || '';
+            const description = descEl.value?.trim() || '';
+            const category = categoryEl.value || 'general';
             
             console.log('Form values:', { title, description, category });
             
@@ -11508,7 +11419,7 @@ Example:
                 return;
             }
             
-            // Validate terms and conditions for rental posts - make optional
+            // Validate terms and conditions for rental posts
             if (category === 'rent') {
                 const writeRadio = document.querySelector('input[name="termsMethod"][value="write"]');
                 const isWriteMethod = writeRadio?.checked;
@@ -11516,18 +11427,15 @@ Example:
                 if (isWriteMethod) {
                     const termsText = document.getElementById('rentalTermsText')?.value?.trim();
                     if (!termsText) {
-                        console.log('No rental terms provided, using default terms');
-                        // Set default terms instead of failing
-                        const defaultTerms = 'Return';
-                        const termsTextArea = document.getElementById('rentalTermsText');
-                        if (termsTextArea) {
-                            termsTextArea.value = defaultTerms;
-                        }
+                        console.log('Validation failed - missing rental terms');
+                        showNotification('Please provide terms and conditions for your rental.', 'error');
+                        return;
                     }
                 } else {
                     if (!window.uploadedTermsFile) {
-                        console.log('No terms file uploaded, proceeding with default terms');
-                        // Don't fail validation, just proceed
+                        console.log('Validation failed - missing terms file');
+                        showNotification('Please upload your terms and conditions document.', 'error');
+                        return;
                     }
                 }
             }
@@ -12135,58 +12043,6 @@ Example:
                 console.error('Bottom navigation not found!');
             }
         });
-
-        // Simple, direct post creation function
-        function createPostNow() {
-            console.log('🚀 createPostNow called - creating post immediately!');
-            
-            // Get form values directly
-            const titleEl = document.querySelector('input[placeholder*="posting about"]') || document.getElementById('postTitle');
-            const descEl = document.querySelector('textarea[placeholder*="Tell us more"]') || document.getElementById('postDescription');
-            const categoryEl = document.getElementById('postCategory');
-            
-            const title = titleEl?.value?.trim() || 'Rental Item';
-            const description = descEl?.value?.trim() || 'Available for rent';
-            const category = categoryEl?.value || 'rent';
-            
-            console.log('Direct form values:', { title, description, category });
-            
-            // Create post data immediately
-            const postData = {
-                uploadType: 'single',
-                postingMode: currentPostingMode || 'personal',
-                category: category,
-                title: title,
-                description: description,
-                price: '$25/day',
-                actionButtons: { selfPickup: true, messageNow: true },
-                images: uploadedImages.length > 0 ? uploadedImages : [],
-                timestamp: new Date().toISOString(),
-                author: "Local Pace Member",
-                location: "Orange Beach, AL",
-                id: Date.now()
-            };
-            
-            console.log('✅ Post data created:', postData);
-            
-            // Save immediately to localStorage
-            const existingPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
-            existingPosts.unshift(postData);
-            localStorage.setItem('communityPosts', JSON.stringify(existingPosts));
-            console.log('✅ Post saved! Total posts:', existingPosts.length);
-            
-            // Close modal
-            const modal = document.querySelector('.posting-modal');
-            if (modal) modal.remove();
-            
-            // Clear images
-            uploadedImages = [];
-            
-            // Show success and refresh
-            showNotification('Post created successfully!', 'success');
-            loadCommunityPosts();
-            console.log('✅ Post creation complete!');
-        }
     </script>
 
     <!-- Bottom Navigation -->
