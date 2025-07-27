@@ -279,6 +279,8 @@ All features are designed to strengthen local communities by keeping commerce lo
 ✓ **PROFILE SYSTEM CLEANUP COMPLETED**: Removed redundant "My Profile" button, streamlined to only "Personal Account" and "Business Account" options
 ✓ **MODAL POPUP ELIMINATION**: Removed confusing profile modal popups, now direct navigation to profile pages
 ✓ **NAVIGATION STREAMLINED**: Profile picture click now goes directly to personal profile instead of showing popup
+✓ **REDIRECT LOOP FIXED**: Changed index.html to redirect to community.html instead of pitch-page.html to prevent infinite redirect loops
+✓ **CSS SYNTAX ERROR FIXED**: Corrected "justify-content: between" to "justify-content: space-between" in community.html calendar
 
 ✓ **RENTAL AVAILABILITY CALENDAR SYSTEM FULLY OPERATIONAL** (July 27, 2025)
 ✓ **CRITICAL SCRIPT EXECUTION ORDER FIX**: Moved calendar function definitions from line 10821 to line 8769, before function calls at line 9081, resolving "ReferenceError: Can't find variable" issues

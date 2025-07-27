@@ -3182,8 +3182,8 @@ async function fixCommunityButtonNavigation() {
     if (communityButtonMatch) {
       const currentHref = communityButtonMatch[1];
       
-      // Check if it's pointing to the wrong page
-      if (currentHref === '/' || currentHref === 'pitch-page.html' || currentHref.includes('pitch')) {
+      // Check if it's pointing to the wrong page - but don't redirect to pitch-page
+      if (currentHref === '/' || (currentHref === 'pitch-page.html' && !currentHref.includes('community'))) {
         // Fix the href to point to community.html
         const fixedContent = adminContent.replace(
           /(<a[^>]*href=")[^"]*("[^>]*community[^>]*>)/i,
