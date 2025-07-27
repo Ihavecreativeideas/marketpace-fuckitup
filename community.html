@@ -3438,7 +3438,10 @@ Example:
                     console.log('Showing rental rate group');
                     if (rentalRateGroup) rentalRateGroup.style.display = 'block';
                     // Initialize owner availability calendar
-                    initializeOwnerCalendar();
+                    setTimeout(() => {
+                        generateOwnerAvailabilityCalendar();
+                        updateOwnerSelectedDatesDisplay();
+                    }, 100);
                     break;
                 case 'service':
                     console.log('Showing service rate field');
@@ -10631,7 +10634,7 @@ Example:
         }
 
         // Preset functions
-        function setWeekends() {
+        function setDatesByType(type) {
             selectedDates = [];
             const startDate = new Date();
             const endDate = new Date();
@@ -10639,7 +10642,11 @@ Example:
             
             for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
                 const dayOfWeek = d.getDay();
-                if (dayOfWeek === 0 || dayOfWeek === 6) { // Sunday or Saturday
+                if (type === 'weekends' && (dayOfWeek === 0 || dayOfWeek === 6)) {
+                    selectedDates.push(d.toISOString().split('T')[0]);
+                } else if (type === 'weekdays' && (dayOfWeek >= 1 && dayOfWeek <= 5)) {
+                    selectedDates.push(d.toISOString().split('T')[0]);
+                } else if (type === 'all') {
                     selectedDates.push(d.toISOString().split('T')[0]);
                 }
             }
@@ -10647,34 +10654,9 @@ Example:
             updateSelectedDatesDisplay();
         }
 
-        function setWeekdays() {
-            selectedDates = [];
-            const startDate = new Date();
-            const endDate = new Date();
-            endDate.setDate(endDate.getDate() + 90); // Next 3 months
-            
-            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-                const dayOfWeek = d.getDay();
-                if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Monday to Friday
-                    selectedDates.push(d.toISOString().split('T')[0]);
-                }
-            }
-            generateCalendar();
-            updateSelectedDatesDisplay();
-        }
-
-        function setAllDays() {
-            selectedDates = [];
-            const startDate = new Date();
-            const endDate = new Date();
-            endDate.setDate(endDate.getDate() + 90); // Next 3 months
-            
-            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-                selectedDates.push(d.toISOString().split('T')[0]);
-            }
-            generateCalendar();
-            updateSelectedDatesDisplay();
-        }
+        function setWeekends() { setDatesByType('weekends'); }
+        function setWeekdays() { setDatesByType('weekdays'); }
+        function setAllDays() { setDatesByType('all'); }
 
         function clearAllDates() {
             selectedDates = [];
@@ -10701,7 +10683,6 @@ Example:
                 }
             };
             
-            console.log('💾 Rental availability saved:', window.rentalAvailability);
             showNotification(`Rental availability saved! ${selectedDates.length} days selected.`, 'success');
             closeRentalCalendar();
             
@@ -10709,9 +10690,9 @@ Example:
             const button = document.querySelector('#rentalBookingButton button');
             if (button) {
                 if (selectedDates.length > 10) {
-                    button.innerHTML = `✅ ${selectedDates.length} Days Selected`;
+                    button.innerHTML = `${selectedDates.length} Days Selected`;
                 } else {
-                    button.innerHTML = `✅ Dates Set (${selectedDates.length} days)`;
+                    button.innerHTML = `Dates Set (${selectedDates.length} days)`;
                 }
                 button.style.background = 'linear-gradient(135deg, #10b981, #059669)';
                 button.onclick = function(e) { 
@@ -10726,7 +10707,6 @@ Example:
             event.preventDefault();
             event.stopPropagation();
             
-            console.log('❌ Closing rental calendar modal');
             const modal = document.querySelector('.modal-overlay');
             if (modal) modal.remove();
         }
@@ -10808,7 +10788,7 @@ Example:
         }
 
         // Preset functions for owner calendar
-        function selectWeekends() {
+        function selectDatesByCondition(condition) {
             ownerSelectedDates = [];
             const today = new Date();
             
@@ -10817,7 +10797,11 @@ Example:
                 date.setDate(today.getDate() + i);
                 const dayOfWeek = date.getDay();
                 
-                if (dayOfWeek === 0 || dayOfWeek === 6) { // Sunday or Saturday
+                if (condition === 'weekends' && (dayOfWeek === 0 || dayOfWeek === 6)) {
+                    ownerSelectedDates.push(date.toISOString().split('T')[0]);
+                } else if (condition === 'weekdays' && (dayOfWeek >= 1 && dayOfWeek <= 5)) {
+                    ownerSelectedDates.push(date.toISOString().split('T')[0]);
+                } else if (condition === 'all') {
                     ownerSelectedDates.push(date.toISOString().split('T')[0]);
                 }
             }
@@ -10826,37 +10810,9 @@ Example:
             updateOwnerSelectedDatesDisplay();
         }
 
-        function selectWeekdays() {
-            ownerSelectedDates = [];
-            const today = new Date();
-            
-            for (let i = 0; i < 28; i++) {
-                const date = new Date(today);
-                date.setDate(today.getDate() + i);
-                const dayOfWeek = date.getDay();
-                
-                if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Monday to Friday
-                    ownerSelectedDates.push(date.toISOString().split('T')[0]);
-                }
-            }
-            
-            generateOwnerAvailabilityCalendar();
-            updateOwnerSelectedDatesDisplay();
-        }
-
-        function selectAllDays() {
-            ownerSelectedDates = [];
-            const today = new Date();
-            
-            for (let i = 0; i < 28; i++) {
-                const date = new Date(today);
-                date.setDate(today.getDate() + i);
-                ownerSelectedDates.push(date.toISOString().split('T')[0]);
-            }
-            
-            generateOwnerAvailabilityCalendar();
-            updateOwnerSelectedDatesDisplay();
-        }
+        function selectWeekends() { selectDatesByCondition('weekends'); }
+        function selectWeekdays() { selectDatesByCondition('weekdays'); }
+        function selectAllDays() { selectDatesByCondition('all'); }
 
         function clearAllDays() {
             ownerSelectedDates = [];
@@ -10864,13 +10820,6 @@ Example:
             updateOwnerSelectedDatesDisplay();
         }
 
-        // Initialize owner calendar when rental category is selected
-        function initializeOwnerCalendar() {
-            setTimeout(() => {
-                generateOwnerAvailabilityCalendar();
-                updateOwnerSelectedDatesDisplay();
-            }, 100);
-        }
 
         // Post interaction data storage
         let postInteractions = JSON.parse(localStorage.getItem('postInteractions') || '{}');
@@ -11527,8 +11476,7 @@ Example:
                 // Collect owner availability data
                 rentalExtras.ownerAvailability = {
                     selectedDates: [...ownerSelectedDates],
-                    totalDaysAvailable: ownerSelectedDates.length,
-                    availabilitySet: ownerSelectedDates.length > 0
+                    totalDaysAvailable: ownerSelectedDates.length
                 };
                 
                 // Collect other rental-specific data
