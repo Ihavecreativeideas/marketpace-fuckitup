@@ -1066,7 +1066,78 @@
             box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
         }
 
+        /* Advanced Post Modal */
+        .post-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+            padding-top: 15vh;
+            overflow-y: auto;
+            animation: modalFadeInSubtle 0.4s ease;
+        }
 
+        .post-modal-content {
+            background: linear-gradient(135deg, #1a0b3d, #2d1b69);
+            border-radius: 16px;
+            max-width: 360px;
+            width: 92%;
+            max-height: 85vh;
+            overflow-y: auto;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2), inset 0 0 15px rgba(0, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            margin-bottom: 15vh;
+            flex-shrink: 0;
+            position: relative;
+            transform: translateY(0);
+            animation: modalSlideInSubtle 0.4s ease;
+        }
+
+        /* Prevent mobile zoom and handle keyboard */
+        @media screen and (max-height: 700px) {
+            .post-modal {
+                padding-top: 5vh;
+            }
+            .post-modal-content {
+                max-height: 80vh;
+                margin-bottom: 5vh;
+            }
+        }
+
+        @media screen and (max-height: 600px) {
+            .post-modal {
+                padding-top: 3vh;
+            }
+            .post-modal-content {
+                max-height: 85vh;
+                margin-bottom: 3vh;
+            }
+        }
+
+        .post-modal-header {
+            padding: 15px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 255, 255, 0.05);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .post-modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
 
         /* Message Modal */
         .modal-overlay {
@@ -1600,7 +1671,17 @@
             transform: scale(1.05);
         }
 
-
+        .notification-dot {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 0, 0, 0.9);
+            animation: pulse 2s infinite;
+        }
 
         @keyframes pulse {
             0%, 100% { opacity: 1; }
@@ -1860,7 +1941,7 @@
                     </svg>
                     <span id="floating-mode-indicator" style="font-size: 8px; margin-left: 2px; color: #00ffff;">P</span>
                 </button>
-                <button class="floating-action-btn" onclick="console.log('Direct posting - modal removed')" title="Create Post">
+                <button class="floating-action-btn" onclick="showPostingModal()" title="Create Post">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                         <line x1="12" y1="5" x2="12" y2="19" stroke="#00ffff" stroke-width="2"/>
                         <line x1="5" y1="12" x2="19" y2="12" stroke="#00ffff" stroke-width="2"/>
@@ -1885,7 +1966,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                         <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="#00ffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-
+                    <div class="notification-dot"></div>
                 </button>
             </div>
         </div>
@@ -2132,7 +2213,7 @@
                 <div class="profile-pic" style="width: 35px; height: 35px; border-radius: 6px;">
                     <span id="userInitials2" style="font-size: 14px;">DU</span>
                 </div>
-                <input type="text" id="statusInput" name="status" class="status-input" placeholder="Share with your local pace!" onclick="createPostNow()" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(139, 92, 246, 0.3); font-size: 14px; padding: 8px 12px;">
+                <input type="text" id="statusInput" name="status" class="status-input" placeholder="Share with your local pace!" onclick="openAdvancedPostModal()" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(139, 92, 246, 0.3); font-size: 14px; padding: 8px 12px;">
             </div>
 
         </div>
@@ -2499,6 +2580,808 @@
             <button class="upload-btn" onclick="inviteFacebookFriends()">Invite Facebook Friends</button>
             <button class="upload-btn" onclick="inviteContacts()">Invite Contacts</button>
             <button class="upload-btn" style="background: #ef4444;" onclick="closeProfileModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Advanced Post Modal -->
+    <div id="postModal" class="post-modal" style="display: none;">
+        <div class="post-modal-content">
+            <div class="post-modal-header">
+                <h3 class="post-modal-title" id="modalTitle">Create Post</h3>
+                <button class="close-modal" onclick="closePostModal()">&times;</button>
+            </div>
+            <div class="post-modal-body">
+                <form id="postForm">
+                    <!-- Category Selection -->
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <div class="category-buttons" id="categoryButtons">
+                            <div class="category-btn selected" data-category="general" onclick="selectCategory(this, 'general')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/>
+                                    <path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                General
+                            </div>
+                            <div class="category-btn" data-category="sale" onclick="selectCategory(this, 'sale')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(239, 68, 68, 0.2)"/>
+                                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" stroke="currentColor" stroke-width="1.5"/>
+                                    <circle cx="7" cy="7" r="1" fill="currentColor"/>
+                                </svg>
+                                For Sale
+                            </div>
+                            <div class="category-btn" data-category="rent" onclick="selectCategory(this, 'rent')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.1)"/>
+                                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/>
+                                    <polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                For Rent
+                            </div>
+                            <div class="category-btn" data-category="service" onclick="selectCategory(this, 'service')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(245, 158, 11, 0.2)"/>
+                                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                Service
+                            </div>
+                            <div class="category-btn" data-category="event" onclick="selectCategory(this, 'event')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(139, 92, 246, 0.2)"/>
+                                    <path d="M9 9h6v6h-6z" stroke="currentColor" stroke-width="1.5" fill="rgba(139, 92, 246, 0.3)"/>
+                                    <path d="m9 1 0 4M15 1l0 4M1 9l22 0" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                Event
+                            </div>
+                            <div class="category-btn" data-category="job" onclick="selectCategory(this, 'job')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.2)"/>
+                                    <rect x="2" y="7" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                Job/Hiring
+                            </div>
+                            <div class="category-btn" data-category="iso" onclick="selectCategory(this, 'iso')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/>
+                                    <circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                ISO
+                            </div>
+                            <div class="category-btn" data-category="poll" onclick="selectCategory(this, 'poll')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="#00ffff" stroke-width="1.5" fill="rgba(0, 255, 255, 0.1)"/>
+                                    <rect x="3" y="8" width="3" height="8" fill="#00ffff"/>
+                                    <rect x="8" y="5" width="3" height="11" fill="#00ffff"/>
+                                    <rect x="13" y="10" width="3" height="6" fill="#00ffff"/>
+                                    <rect x="18" y="3" width="3" height="13" fill="#00ffff"/>
+                                </svg>
+                                Poll
+                            </div>
+                            <div class="category-btn" data-category="announcement" onclick="selectCategory(this, 'announcement')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(168, 85, 247, 0.2)"/>
+                                    <path d="M3 11l18-5v12L3 14v-3z" stroke="currentColor" stroke-width="1.5" fill="rgba(168, 85, 247, 0.1)"/>
+                                    <path d="M11.85 17.56a1.28 1.28 0 0 1-1.43-.25 1.37 1.37 0 0 1-.41-1A1.35 1.35 0 0 1 10.59 15h2.73A1.35 1.35 0 0 1 14.9 16.31a1.37 1.37 0 0 1-.41 1 1.28 1.28 0 0 1-1.43.25" stroke="currentColor" stroke-width="1"/>
+                                </svg>
+                                Announcement
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Title -->
+                    <div class="form-group">
+                        <label class="form-label" for="postTitle">Title</label>
+                        <input type="text" id="postTitle" class="form-input" placeholder="What are you sharing?">
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label class="form-label" for="postDescription">Description</label>
+                        <textarea id="postDescription" class="form-textarea" placeholder="Tell the local pace more details..."></textarea>
+                    </div>
+
+                    <!-- Price (for sale/rent/service) -->
+                    <div class="form-group" id="priceGroup" style="display: none;">
+                        <label class="form-label" for="postPrice">Price</label>
+                        <input type="text" id="postPrice" class="form-input" placeholder="$0 or price range">
+                    </div>
+
+                    <!-- Comprehensive Rental Configuration (for rent only) -->
+                    <div class="form-group" id="rentalRateGroup" style="display: none;">
+                        <label class="form-label">Rental Configuration</label>
+                        
+                        <!-- Item Condition -->
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label" style="font-size: 14px; margin-bottom: 8px;">Item Condition</label>
+                            <select id="itemCondition" class="form-input" style="padding: 10px;">
+                                <option value="">Select condition...</option>
+                                <option value="excellent">Excellent - Like new, no wear</option>
+                                <option value="good">Good - Minor wear, fully functional</option>
+                                <option value="used">Used - Visible wear but works well</option>
+                                <option value="fair">Fair - Heavy wear but functional</option>
+                            </select>
+                        </div>
+
+                        <!-- Rental Rates -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                            <div style="padding: 15px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px;">
+                                <label style="display: flex; align-items: center; margin-bottom: 10px; color: #10b981; font-weight: 500;">
+                                    <input type="radio" name="rentalRate" value="hourly" id="hourlyRate" style="margin-right: 8px;">
+                                    Hourly Rate
+                                </label>
+                                <input type="number" id="hourlyRateAmount" placeholder="$0.00" step="0.01" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px;">
+                            </div>
+                            <div style="padding: 15px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px;">
+                                <label style="display: flex; align-items: center; margin-bottom: 10px; color: #3b82f6; font-weight: 500;">
+                                    <input type="radio" name="rentalRate" value="daily" id="dailyRate" style="margin-right: 8px;" checked>
+                                    Daily Rate (Recommended)
+                                </label>
+                                <input type="number" id="dailyRateAmount" placeholder="$0.00" step="0.01" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(59, 130, 246, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px;">
+                            </div>
+                        </div>
+
+                        <!-- Payment Options -->
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label" style="font-size: 14px; margin-bottom: 12px;">Payment Method</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <label style="display: flex; align-items: center; padding: 12px; background: rgba(0, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; cursor: pointer;">
+                                    <input type="radio" name="paymentMethod" value="escrow" id="escrowPayment" style="margin-right: 8px;" checked>
+                                    <div>
+                                        <div style="color: #00ffff; font-weight: 500;">MarketPace Escrow</div>
+                                        <div style="color: #94a3b8; font-size: 12px;">Secure payment holding</div>
+                                    </div>
+                                </label>
+                                <label style="display: flex; align-items: center; padding: 12px; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; cursor: pointer;">
+                                    <input type="radio" name="paymentMethod" value="cash" id="cashPayment" style="margin-right: 8px;">
+                                    <div>
+                                        <div style="color: #22c55e; font-weight: 500;">Cash Meeting</div>
+                                        <div style="color: #94a3b8; font-size: 12px;">In-person exchange</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Booking Fee Section -->
+                        <div style="margin-bottom: 20px; padding: 15px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 10px;">
+                            <label style="display: flex; align-items: center; margin-bottom: 15px;">
+                                <input type="checkbox" id="enableBookingFee" onchange="toggleBookingFeeOptions()" style="margin-right: 8px; accent-color: #a855f7;">
+                                <span style="color: #a855f7; font-weight: 500;">Require Booking Fee (Optional)</span>
+                            </label>
+                            
+                            <div id="bookingFeeOptions" style="display: none;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                    <div>
+                                        <label style="color: #e2e8f0; font-size: 13px; margin-bottom: 5px; display: block;">Fee Amount</label>
+                                        <input type="number" id="bookingFeeAmount" placeholder="$0.00" step="0.01" min="0" style="width: 100%; padding: 8px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 6px; color: #e2e8f0;">
+                                    </div>
+                                    <div>
+                                        <label style="color: #e2e8f0; font-size: 13px; margin-bottom: 5px; display: block;">Refund Policy</label>
+                                        <select id="bookingFeeRefund" style="width: 100%; padding: 8px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 6px; color: #e2e8f0;">
+                                            <option value="full">Full Refund</option>
+                                            <option value="partial">Partial Refund (50%)</option>
+                                            <option value="nonrefundable">Non-Refundable</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div style="background: rgba(0, 0, 0, 0.3); padding: 12px; border-radius: 6px; margin-bottom: 15px;">
+                                    <div style="color: #f59e0b; font-size: 12px; font-weight: 500; margin-bottom: 8px;">🔒 Escrow Protection</div>
+                                    <div style="color: #94a3b8; font-size: 11px; line-height: 1.4;">
+                                        • Booking fee held in escrow until rental completion<br>
+                                        • Automatic refund if owner doesn't show up<br>
+                                        • QR check-in required for payment release
+                                    </div>
+                                </div>
+                                
+                                <div style="background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 6px;">
+                                    <label style="display: flex; align-items: center;">
+                                        <input type="checkbox" id="requireQRCheckin" checked style="margin-right: 8px; accent-color: #10b981;">
+                                        <span style="color: #10b981; font-size: 12px; font-weight: 500;">Enable QR Check-In System</span>
+                                    </label>
+                                    <div style="color: #94a3b8; font-size: 10px; margin-top: 5px; margin-left: 24px;">
+                                        Renter must scan QR code in person to confirm pickup and release payment
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Booking Fee (Optional) -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: flex; align-items: center; margin-bottom: 12px;">
+                                <input type="checkbox" id="enableBookingFee" style="margin-right: 8px;">
+                                <span class="form-label" style="font-size: 14px; margin: 0;">Optional Booking Fee</span>
+                            </label>
+                            <div id="bookingFeeOptions" style="display: none; padding: 15px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px;">
+                                <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-bottom: 10px;">
+                                    <input type="number" id="bookingFeeAmount" placeholder="$0.00" step="0.01" class="form-input" style="margin: 0;">
+                                    <select id="bookingFeeType" class="form-input" style="margin: 0; padding: 8px;">
+                                        <option value="refundable">Refundable</option>
+                                        <option value="non-refundable">Non-refundable</option>
+                                    </select>
+                                </div>
+                                <div style="color: #94a3b8; font-size: 12px;">Fee to secure booking date. Refundable fees are returned if rental completes successfully.</div>
+                            </div>
+                        </div>
+
+                        <!-- Terms and Conditions -->
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label" style="font-size: 14px; margin-bottom: 8px;">Terms & Conditions (Required)</label>
+                            <textarea id="rentalTerms" class="form-textarea" placeholder="Enter your rental terms and conditions...
+Example:
+- Item must be returned in same condition
+- Late returns incur $10/day fee  
+- Renter responsible for any damages
+- No smoking/pets allowed with this item
+- Must provide valid ID for rental" style="min-height: 120px;"></textarea>
+                            <div style="margin-top: 8px; padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; font-size: 12px; color: #f87171;">
+                                ⚠️ <strong>Legal Notice:</strong> MarketPace is not responsible for lost or damaged rental items. Renters and owners agree to terms at their own risk.
+                            </div>
+                        </div>
+
+                        <!-- Delivery Options for Rental -->
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label" style="font-size: 14px; margin-bottom: 12px;">Delivery Options Available to Renters</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                                <label style="display: flex; align-items: center; padding: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="selfPickupOptionRental" style="margin-right: 8px;" checked>
+                                    <div>
+                                        <div style="color: #10b981; font-weight: 500; font-size: 13px;">Self Pickup</div>
+                                        <div style="color: #94a3b8; font-size: 11px;">Free option</div>
+                                    </div>
+                                </label>
+                                <label style="display: flex; align-items: center; padding: 10px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="privateDeliveryOptionRental" style="margin-right: 8px;">
+                                    <div>
+                                        <div style="color: #f59e0b; font-weight: 500; font-size: 13px;">Private Delivery</div>
+                                        <div style="color: #94a3b8; font-size: 11px;">Your delivery</div>
+                                    </div>
+                                </label>
+                                <label style="display: flex; align-items: center; padding: 10px; background: rgba(0, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="marketPaceDeliveryOptionRental" style="margin-right: 8px;">
+                                    <div>
+                                        <div style="color: #00ffff; font-weight: 500; font-size: 13px;">MarketPace</div>
+                                        <div style="color: #94a3b8; font-size: 11px;">Platform delivery</div>
+                                    </div>
+                                </label>
+                            </div>
+                            <div style="color: #94a3b8; font-size: 12px; margin-top: 8px;">
+                                Select delivery methods you'll offer. Renters choose from your available options.
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 15px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; font-size: 13px; color: #94a3b8; text-align: center;">
+                            <strong>Tip:</strong> Clear terms and condition ratings help build trust with renters.
+                        </div>
+
+                        <!-- Rental Availability Calendar -->
+                        <div style="margin-top: 25px;">
+                            <label class="form-label" style="font-size: 16px; color: #00ffff; margin-bottom: 15px; display: block;">Available Rental Dates</label>
+                            <div style="background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 12px; padding: 20px;">
+                                
+                                <!-- Calendar Header -->
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <button type="button" onclick="navigateCalendarMonth(-1)" style="background: rgba(0, 255, 255, 0.2); border: 1px solid #00ffff; color: #00ffff; width: 35px; height: 35px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;">‹</button>
+                                    <h3 id="rentalCalendarMonth" style="color: #00ffff; margin: 0; font-size: 16px; font-weight: 600;"></h3>
+                                    <button type="button" onclick="navigateCalendarMonth(1)" style="background: rgba(0, 255, 255, 0.2); border: 1px solid #00ffff; color: #00ffff; width: 35px; height: 35px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;">›</button>
+                                </div>
+
+                                <!-- Calendar Grid -->
+                                <div id="rentalCalendarGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 15px;">
+                                    <!-- Calendar will be generated here -->
+                                </div>
+
+                                <!-- Quick Preset Buttons -->
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px;">
+                                    <button type="button" onclick="selectWeekends()" style="background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: #a855f7; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 12px;">Weekends Only</button>
+                                    <button type="button" onclick="selectWeekdays()" style="background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #22c55e; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 12px;">Weekdays Only</button>
+                                    <button type="button" onclick="selectAllDays()" style="background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; color: #3b82f6; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 12px;">All Days</button>
+                                    <button type="button" onclick="clearAllDates()" style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 12px;">Clear All</button>
+                                </div>
+
+                                <!-- Selected Dates Summary -->
+                                <div id="selectedDatesSummary" style="padding: 12px; background: rgba(0, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; font-size: 13px;">
+                                    <div style="color: #00ffff; font-weight: 600; margin-bottom: 8px;">Selected Dates: <span id="selectedDatesCount">0</span></div>
+                                    <div id="selectedDatesList" style="color: #94a3b8; line-height: 1.4;">
+                                        No dates selected. Click on calendar dates to select availability.
+                                    </div>
+                                </div>
+
+                                <div style="margin-top: 12px; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; font-size: 12px; color: #10b981; text-align: center;">
+                                    📅 <strong>Owner Availability:</strong> Select the dates when your item is available for rent. Customers will only be able to book from these available dates.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Summary Preview -->
+                        <div id="rentalPaymentPreview" style="margin-top: 25px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 12px; padding: 20px;">
+                            <label class="form-label" style="font-size: 16px; color: #00ffff; margin-bottom: 15px; display: block;">Payment Summary Preview</label>
+                            
+                            <div style="background: rgba(15, 23, 42, 0.8); border-radius: 8px; padding: 15px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(0, 255, 255, 0.2);">
+                                    <span style="color: #e2e8f0; font-size: 14px;">Rental Rate (Sample: 5 days)</span>
+                                    <span id="previewRentalRate" style="color: #00ffff; font-weight: 600;">$125.00</span>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="color: #94a3b8; font-size: 13px;">Security Deposit</span>
+                                    <span id="previewSecurityDeposit" style="color: #94a3b8;">$25.00</span>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="color: #94a3b8; font-size: 13px;">Late Fee Protection</span>
+                                    <span id="previewLateFee" style="color: #94a3b8;">$5.00</span>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="color: #94a3b8; font-size: 13px;">MarketPace Commission (5%)</span>
+                                    <span id="previewCommission" style="color: #94a3b8;">$6.25</span>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="color: #94a3b8; font-size: 13px;">Sustainability Fee</span>
+                                    <span style="color: #94a3b8;">$2.50</span>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <span style="color: #94a3b8; font-size: 13px;">Sales Tax (8%)</span>
+                                    <span id="previewTax" style="color: #94a3b8;">$13.10</span>
+                                </div>
+                                
+                                <div style="border-top: 1px solid rgba(0, 255, 255, 0.3); padding-top: 12px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="color: #e2e8f0; font-size: 16px; font-weight: 600;">Total Amount</span>
+                                        <span id="previewTotal" style="color: #00ffff; font-size: 18px; font-weight: 700;">$176.85</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top: 15px; padding: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px;">
+                                <div style="color: #10b981; font-size: 12px; font-weight: 600; margin-bottom: 6px;">SECURE Escrow Payment Protection</div>
+                                <div style="color: #94a3b8; font-size: 11px; line-height: 1.4;">
+                                    Your payment will be held safely in escrow and released to the owner upon successful rental completion and QR verification.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Event Fields -->
+                    <div class="form-group event-fields" id="eventFields" style="display: none;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div>
+                                <label class="form-label" for="eventStartTime">Start Time</label>
+                                <input type="datetime-local" id="eventStartTime" class="form-input">
+                            </div>
+                            <div>
+                                <label class="form-label" for="eventEndTime">End Time</label>
+                                <input type="datetime-local" id="eventEndTime" class="form-input">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="eventLocation">Location</label>
+                            <input type="text" id="eventLocation" class="form-input" placeholder="Event address or venue name">
+                            <div style="margin-top: 8px; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; font-size: 12px; color: #10b981;">
+                                📍 <strong>Auto Geo QR:</strong> When you add a location, a geo QR code will be automatically generated for event check-ins!
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="eventLink">Event Link (optional)</label>
+                            <input type="url" id="eventLink" class="form-input" placeholder="https://tickets.com or event website">
+                        </div>
+                    </div>
+
+                    <!-- Service Rate Options -->
+                    <div class="form-group" id="serviceRateField" style="display: none;">
+                        <label class="form-label">Service Rates</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                            <div style="padding: 15px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px;">
+                                <label style="display: flex; align-items: center; margin-bottom: 10px; color: #10b981; font-weight: 500;">
+                                    <input type="radio" name="serviceRate" value="hourly" id="serviceHourlyRate" style="margin-right: 8px;">
+                                    Hourly Rate
+                                </label>
+                                <input type="number" id="serviceHourlyAmount" placeholder="$0.00" step="0.01" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px;">
+                            </div>
+                            <div style="padding: 15px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 10px;">
+                                <label style="display: flex; align-items: center; margin-bottom: 10px; color: #a855f7; font-weight: 500;">
+                                    <input type="radio" name="serviceRate" value="per-job" id="servicePerJobRate" style="margin-right: 8px;" checked>
+                                    Per Job Rate
+                                </label>
+                                <input type="number" id="servicePerJobAmount" placeholder="$0.00" step="0.01" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(168, 85, 247, 0.5); border-radius: 6px; color: #e2e8f0; font-size: 16px;">
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; padding: 12px; background: rgba(168, 85, 247, 0.1); border-radius: 8px; font-size: 13px; color: #94a3b8; text-align: center;">
+                            💼 <strong>Tip:</strong> Per job rates work well for specific tasks. Use hourly for ongoing or unpredictable services.
+                        </div>
+                    </div>
+
+                    <!-- Delivery Methods (for items with prices) -->
+                    <div class="form-group" id="deliveryMethodGroup" style="display: none;">
+                        <label class="form-label">Delivery Methods (Select all that apply)</label>
+                        <div class="delivery-methods-grid" style="display: grid; gap: 10px; margin-top: 10px;">
+                            
+                            <!-- MarketPace Delivery -->
+                            <label class="delivery-checkbox" style="display: flex; align-items: center; padding: 12px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; cursor: pointer;">
+                                <input type="checkbox" name="deliveryMethods" value="marketpace" id="marketpaceDelivery" style="margin-right: 10px;" checked>
+                                <span style="color: #3b82f6; flex: 1;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 8px; vertical-align: middle;">
+                                        <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.2)"/>
+                                        <path d="M16 3h5v4h-5z" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.1)"/>
+                                        <path d="M2 21h20v-7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z" stroke="currentColor" stroke-width="1.5"/>
+                                        <circle cx="7" cy="17" r="2" stroke="currentColor" stroke-width="1.5"/>
+                                        <circle cx="17" cy="17" r="2" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                    <strong>MarketPace Delivery</strong><br>
+                                    <small style="color: #94a3b8;">Vetted drivers • Insured • Split delivery cost</small>
+                                </span>
+                            </label>
+
+                            <!-- Self Pickup -->
+                            <label class="delivery-checkbox" style="display: flex; align-items: center; padding: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; cursor: pointer;">
+                                <input type="checkbox" name="deliveryMethods" value="pickup" id="selfPickup" style="margin-right: 10px;" checked>
+                                <span style="color: #10b981; flex: 1;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 8px; vertical-align: middle;">
+                                        <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(34, 197, 94, 0.2)"/>
+                                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/>
+                                        <path d="M9 22V12h6v10" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                    <strong>Self Pickup</strong><br>
+                                    <small style="color: #94a3b8;">Buyer picks up directly • Free option</small>
+                                </span>
+                            </label>
+
+                            <!-- Private Party Delivery -->
+                            <label class="delivery-checkbox" style="display: flex; align-items: center; padding: 12px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; cursor: pointer;">
+                                <input type="checkbox" name="deliveryMethods" value="private" id="privateDelivery" style="margin-right: 10px;">
+                                <span style="color: #f59e0b; flex: 1;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 8px; vertical-align: middle;">
+                                        <rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(245, 158, 11, 0.2)"/>
+                                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" stroke-width="1"/>
+                                        <circle cx="8" cy="14" r="2" stroke="currentColor" stroke-width="1.5"/>
+                                        <circle cx="16" cy="14" r="2" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                    <strong>Private Party Delivery</strong><br>
+                                    <small style="color: #94a3b8;">You deliver • Set custom S&H fee</small>
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <!-- Private Party S&H Fee Input -->
+                        <div id="privateDeliveryFeeGroup" style="display: none; margin-top: 12px; padding: 12px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px;">
+                            <label class="form-label" for="privateDeliveryFee" style="color: #f59e0b; font-size: 14px;">Custom S&H Fee</label>
+                            <input type="text" id="privateDeliveryFee" class="form-input" placeholder="$0.00" style="margin-top: 6px;">
+                            <div style="margin-top: 8px; font-size: 12px; color: #94a3b8;">
+                                <strong>Note:</strong> MarketPace still collects 5% commission on item price. This fee covers your delivery service.
+                            </div>
+                        </div>
+
+                        <!-- Important Disclaimer -->
+                        <div style="margin-top: 12px; padding: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px;">
+                            <div style="color: #ef4444; font-size: 12px; line-height: 1.4;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M12 15.75h.007v.008H12v-.008z" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                                <strong>Private Party Delivery Disclaimer:</strong> Private party delivery is not a vetted MarketPace driver. This is a private party not associated with us. We are not responsible for any inconveniences by this private party delivery.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Job-specific fields -->
+                    <div class="form-group" id="jobCompanyGroup" style="display: none;">
+                        <label class="form-label" for="jobCompany">Company/Business Name</label>
+                        <input type="text" id="jobCompany" class="form-input" placeholder="Enter company name">
+                    </div>
+
+                    <div class="form-group" id="jobTypeGroup" style="display: none;">
+                        <label class="form-label" for="jobType">Job Type</label>
+                        <select id="jobType" class="form-input">
+                            <option value="">Select job type</option>
+                            <option value="full-time">Full Time</option>
+                            <option value="part-time">Part Time</option>
+                            <option value="contract">Contract</option>
+                            <option value="temporary">Temporary</option>
+                            <option value="internship">Internship</option>
+                            <option value="gig">Gig Work</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="jobSalaryGroup" style="display: none;">
+                        <label class="form-label" for="jobSalary">Salary/Pay</label>
+                        <input type="text" id="jobSalary" class="form-input" placeholder="e.g., $15/hour, $50k/year, $500/project">
+                    </div>
+
+                    <div class="form-group" id="jobRequirementsGroup" style="display: none;">
+                        <label class="form-label" for="jobRequirements">Requirements</label>
+                        <textarea id="jobRequirements" class="form-textarea" placeholder="List key requirements (experience, skills, certifications, etc.)"></textarea>
+                    </div>
+
+                    <div class="form-group" id="jobBenefitsGroup" style="display: none;">
+                        <label class="form-label" for="jobBenefits">Benefits (Optional)</label>
+                        <textarea id="jobBenefits" class="form-textarea" placeholder="Health insurance, paid time off, flexible hours, etc."></textarea>
+                    </div>
+
+                    <!-- Poll Options -->
+                    <div class="form-group poll-options" id="pollOptions">
+                        <label class="form-label">Poll Options</label>
+                        <div id="pollOptionsList">
+                            <div class="poll-option">
+                                <input type="text" class="form-input" placeholder="Option 1">
+                                <button type="button" class="remove-option" onclick="removePollOption(this)">×</button>
+                            </div>
+                            <div class="poll-option">
+                                <input type="text" class="form-input" placeholder="Option 2">
+                                <button type="button" class="remove-option" onclick="removePollOption(this)">×</button>
+                            </div>
+                        </div>
+                        <button type="button" class="add-option-btn" onclick="addPollOption()">+ Add Option</button>
+                    </div>
+
+                    <!-- Link -->
+                    <div class="form-group">
+                        <label class="form-label" for="postLink">Link (optional)</label>
+                        <input type="url" id="postLink" class="form-input" placeholder="https://...">
+                    </div>
+
+                    <!-- Image Upload -->
+                    <div class="form-group">
+                        <label class="form-label">Images</label>
+                        <div class="image-upload-area" onclick="document.getElementById('imageInput').click()">
+                            <p>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(0, 255, 255, 0.2)"/>
+                                    <circle cx="9" cy="9" r="2" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                Click to add photos
+                            </p>
+                            <input type="file" id="imageInput" multiple accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="form-group">
+                        <label class="form-label">Action Buttons</label>
+                        <div class="action-buttons-grid">
+                            <label class="action-checkbox">
+                                <input type="checkbox" id="deliverNow" value="deliver">
+                                <span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                        <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.2)"/>
+                                        <path d="M16 3h5v4h-5z" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.1)"/>
+                                        <path d="M2 21h20v-7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z" stroke="currentColor" stroke-width="1.5"/>
+                                        <circle cx="7" cy="17" r="2" stroke="currentColor" stroke-width="1.5"/>
+                                        <circle cx="17" cy="17" r="2" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                    Deliver Now
+                                </span>
+                            </label>
+                            <label class="action-checkbox">
+                                <input type="checkbox" id="bookNow" value="book">
+                                <span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                        <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(139, 92, 246, 0.2)"/>
+                                        <path d="M9 9h6v6h-6z" stroke="currentColor" stroke-width="1.5" fill="rgba(139, 92, 246, 0.3)"/>
+                                        <path d="m9 1 0 4M15 1l0 4M1 9l22 0" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                    Book Now
+                                </span>
+                            </label>
+
+                            <label class="action-checkbox">
+                                <input type="checkbox" id="contactSeller" value="contact">
+                                <span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                        <rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/>
+                                        <path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                    Contact Seller
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="post-submit-btn">Share with Local Pace</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+            <!-- Post 2 - Rental Item -->
+            <div class="feed-post post-rental">
+                <div class="post-header">
+                    <div class="post-author">
+                        <div class="profile-pic" style="width: 50px; height: 50px; border-radius: 8px; background: linear-gradient(135deg, #10b981, #06b6d4); display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                            <span style="color: white; font-weight: bold; font-size: 18px;">TM</span>
+                        </div>
+                        <div class="author-info">
+                            <h4>Tom's Tool Rentals</h4>
+                            <p>2 hours ago • Orange Beach, AL</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-content">
+                    <div class="post-text">Power washer for rent - perfect for driveways and decks! Flat daily rate recommended.</div>
+                    <div class="post-image">
+                        <img src="https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?w=400" alt="Power Washer" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
+                    </div>
+                    
+                    <div class="commerce-info">
+                        <div class="price-tag">$45.00/day (Recommended flat rate)</div>
+                        <div class="rental-schedule">
+                            <small style="color: #00ffff;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 4px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(139, 92, 246, 0.2)"/><path d="M9 9h6v6h-6z" stroke="currentColor" stroke-width="1.5" fill="rgba(139, 92, 246, 0.3)"/><path d="m9 1 0 4M15 1l0 4M1 9l22 0" stroke="currentColor" stroke-width="1.5"/></svg>Pickup: 9am-12pm • Dropoff: 6pm-9pm</small><br>
+                        </div>
+                        <div class="commerce-actions">
+                            <button class="commerce-btn" onclick="messageOwner('power washer rental', 'Power Washer', 'pw002')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/>
+                                    <path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                Message
+                            </button>
+                            <button class="commerce-btn" onclick="selfPickup('power washer')">Self Pickup</button>
+                            <button class="commerce-btn" onclick="openVerificationPage('Power Washer', 'Tom\'s Tool Rentals', 'rental', 45.00)" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 255, 255, 0.2)"/>
+                                    <circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                Verify Condition
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-interactions">
+                    <div class="interaction-buttons">
+                        <button class="interaction-btn" onclick="likePost(this)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(236, 72, 153, 0.1)"/><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7z" stroke="currentColor" stroke-width="1.5"/></svg>Like
+                        </button>
+                        <button class="interaction-btn" onclick="commentPost(this)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/><path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7" stroke="currentColor" stroke-width="1.5"/></svg>Comment
+                        </button>
+                        <button class="interaction-btn" onclick="favoritePost(this)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(245, 158, 11, 0.2)"/><path d="M12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2Z" stroke="currentColor" stroke-width="1.5"/></svg>Favorite
+                        </button>
+                        <button class="interaction-btn" onclick="sharePost()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.2)"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13" stroke="currentColor" stroke-width="1.5"/></svg>Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Post 3 - Service Post -->
+            <div class="feed-post post-service">
+                <div class="post-header">
+                    <div class="post-author">
+                        <div class="profile-pic" style="width: 50px; height: 50px; border-radius: 8px; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                            <span style="color: white; font-weight: bold; font-size: 18px;">MH</span>
+                        </div>
+                        <div class="author-info">
+                            <h4>Mike's Handyman Service</h4>
+                            <p>4 hours ago • Gulf Shores, AL</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-content">
+                    <div class="post-text">Professional home repairs - plumbing, electrical, painting. Licensed and insured!</div>
+                    
+                    <div class="commerce-info">
+                        <div class="price-tag">Starting at $50.00</div>
+                        <div class="commerce-actions">
+                            <button class="commerce-btn primary" onclick="bookService('handyman')">Book Service</button>
+                            <button class="commerce-btn" onclick="callService('handyman')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.1)"/><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="1.5"/></svg> Call Now</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-interactions">
+                    <div class="interaction-buttons">
+                        <button class="interaction-btn" onclick="likePost(this)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(236, 72, 153, 0.1)"/><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7z" stroke="currentColor" stroke-width="1.5"/></svg>Like
+                        </button>
+                        <button class="interaction-btn" onclick="commentPost(this)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/><path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7" stroke="currentColor" stroke-width="1.5"/></svg>Comment
+                        </button>
+                        <button class="interaction-btn" onclick="favoritePost(this)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(245, 158, 11, 0.2)"/><path d="M12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2Z" stroke="currentColor" stroke-width="1.5"/></svg>Favorite
+                        </button>
+                        <button class="interaction-btn" onclick="sharePost()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.2)"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13" stroke="currentColor" stroke-width="1.5"/></svg>Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Post 3 - Rental Item -->
+            <div class="feed-post post-rental">
+                <div class="post-header">
+                    <div class="post-author">
+                        <div class="profile-pic" style="width: 50px; height: 50px; border-radius: 8px; background: linear-gradient(135deg, #ef4444, #dc2626); display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                            <span style="color: white; font-weight: bold; font-size: 18px;">JM</span>
+                        </div>
+                        <div class="author-info">
+                            <h4>Jessica Martinez</h4>
+                            <p>6 hours ago • Orange Beach, AL</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-content">
+                    <div class="post-text">Beach umbrella and chairs set available for weekend rental. Perfect for beach days!</div>
+                    <div class="post-image">
+                        <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400" alt="Beach setup" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
+                    </div>
+                    
+                    <div class="commerce-info">
+                        <div class="price-tag">$25.00/day (Flat daily rate)</div>
+                        <div class="rental-schedule">
+                            <small style="color: #00ffff;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 4px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(139, 92, 246, 0.2)"/><path d="M9 9h6v6h-6z" stroke="currentColor" stroke-width="1.5" fill="rgba(139, 92, 246, 0.3)"/><path d="m9 1 0 4M15 1l0 4M1 9l22 0" stroke="currentColor" stroke-width="1.5"/></svg>Pickup: 9am-12pm • Dropoff: 6pm-9pm</small><br>
+                        </div>
+                        <div class="commerce-actions">
+                            <button class="commerce-btn primary" onclick="selectDeliveryAndCheckout('Beach Chairs Set', 25.00, 'Jessica Martinez')">Rent Now</button>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/>
+                                    <path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                Message
+                            </button>
+                            <button class="commerce-btn" onclick="selfPickup('beach chairs')">Self Pickup</button>
+                            <button class="commerce-btn" onclick="openVerificationPage('Beach Chairs Set', 'Jessica Martinez', 'rental', 25.00)" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(255, 255, 255, 0.2)"/><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5"/><path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="1.5"/></svg>Verify Condition</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-interactions">
+                    <div class="interaction-buttons">
+                        <button class="interaction-btn" onclick="likePost(this)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(236, 72, 153, 0.1)"/><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7z" stroke="currentColor" stroke-width="1.5"/></svg>Like
+                        </button>
+                        <button class="interaction-btn" onclick="commentPost(this)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(0, 255, 255, 0.2)"/><path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7" stroke="currentColor" stroke-width="1.5"/></svg>Comment
+                        </button>
+                        <button class="interaction-btn" onclick="favoritePost(this)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(245, 158, 11, 0.2)"/><path d="M12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2Z" stroke="currentColor" stroke-width="1.5"/></svg>Favorite
+                        </button>
+                        <button class="interaction-btn" onclick="sharePost()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.2)"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13" stroke="currentColor" stroke-width="1.5"/></svg>Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="profile-modal" style="display: none;">
+        <div class="profile-modal-content">
+            <div class="post-modal-header">
+                <h3 class="post-modal-title">Edit Profile</h3>
+                <button class="close-modal" onclick="closeProfileModal()">&times;</button>
+            </div>
+            <div class="profile-pic-preview" id="profilePicPreview">
+                <div class="profile-pic-placeholder" id="profilePlaceholder">MP</div>
+            </div>
+            <h4 style="color: #00ffff; margin-bottom: 20px;">Change Profile Picture</h4>
+            <input type="file" id="profilePicInput" accept="image/*" style="display: none;" onchange="previewProfilePic()">
+            <button class="upload-btn" onclick="document.getElementById('profilePicInput').click()">Choose Photo</button>
+            <button class="upload-btn" onclick="useFacebookProfilePic()">Use Facebook Photo</button>
+            <button class="upload-btn" onclick="saveProfilePic()">Save Changes</button>
+            <br>
+            <h4 style="color: #00ffff; margin: 20px 0;">Invite Friends</h4>
+            <button class="upload-btn" onclick="inviteFacebookFriends()">Invite Facebook Friends</button>
+            <button class="upload-btn" onclick="inviteContacts()">Invite Contacts</button>
+            <button class="upload-btn" style="background: #ef4444;" onclick="closeProfileModal()">Close</button>
+        </div>
+    </div>
+
+            </button>
         </div>
     </div>
 
@@ -2920,7 +3803,7 @@
             
             // Validation
             if (!deliveryAddress) {
-                console.log('❌ Please enter a delivery address');
+                showNotification('Please enter a delivery address', 'error');
                 return;
             }
             
@@ -2952,13 +3835,13 @@
                 ? 'Your order has been placed with private party delivery. The seller will handle delivery directly.'
                 : 'Your order has been placed! A MarketPace driver will handle delivery.';
                 
-            console.log(`✅ Order placed successfully! ${deliveryMessage}`);
+            showNotification(`✅ Order placed successfully! ${deliveryMessage}`, 'success');
             
             // Simulate payment processing (in real app, integrate with Stripe)
             setTimeout(() => {
-                console.log('💳 Payment processing...');
+                showNotification('💳 Payment processing...', 'info');
                 setTimeout(() => {
-                    console.log('✅ Payment confirmed! Seller and driver have been notified.');
+                    showNotification('✅ Payment confirmed! Seller and driver have been notified.', 'success');
                 }, 2000);
             }, 1000);
         }
@@ -3368,7 +4251,7 @@
                 localStorage.removeItem('currentUser');
                 localStorage.removeItem('cartItems');
                 localStorage.removeItem('favorites');
-                console.log('✅ Demo data cleared! You are now in live mode.');
+                showNotification('Demo data cleared! You are now in live mode.', 'success');
                 window.location.reload();
             }
         }
@@ -3471,7 +4354,7 @@
                 
                 // Check for admin credentials
                 if (username === 'admin' && password === 'admin') {
-                    console.log('✅ Driver login successful!');
+                    showNotification('Driver login successful!', 'success');
                     closeModal();
                     window.location.href = '/driver-dashboard';
                 } else {
@@ -3594,10 +4477,40 @@
             }
         }
 
-        // DISABLED: Notification system completely disabled to prevent blue line display issues
+        // Notification system
         function showNotification(message, type = 'info') {
-            console.log(`[${type.toUpperCase()}] ${message}`);
-            // All notification creation disabled to prevent blue line display
+            const notification = document.createElement('div');
+            const colors = {
+                success: 'linear-gradient(135deg, #10b981, #059669)',
+                error: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                info: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                warning: 'linear-gradient(135deg, #f59e0b, #d97706)'
+            };
+            
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: ${colors[type] || colors.info};
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                z-index: 10000;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                font-weight: bold;
+                text-align: center;
+                max-width: 400px;
+                animation: slideInDown 0.3s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    document.body.removeChild(notification);
+                }
+            }, 3000);
         }
 
         // Condition Verification Function - Navigate to Rental Details
@@ -4134,7 +5047,1089 @@
             }
         }
 
-        // Modal functions removed - using direct posting system
+        // Facebook Marketplace-style posting modal
+        function openAdvancedPostModal(type = 'rent', existingPost = null) {
+            console.log(`✅ Opening post modal for type: ${type}`);
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+            `;
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: #1a0b3d;
+                border: 2px solid #00ffff;
+                border-radius: 15px;
+                padding: 30px;
+                width: 90%;
+                max-width: 600px;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+                position: relative;
+                margin-top: 20px;
+            `;
+            
+            modalContent.innerHTML = `
+                <!-- Posting Mode Label -->
+                <div id="postingModeLabel" style="position: relative; top: 0px; margin: -8px auto 12px auto; background: #8b5cf6; color: #fff; padding: 8px 16px; border-radius: 12px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; z-index: 1; width: fit-content; text-align: center;">
+                    POSTING AS PERSONAL
+                </div>
+                
+                <!-- Mode Toggle Buttons -->
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; justify-content: center;">
+                    <button id="personalModeBtn" onclick="switchPostingMode('personal')" style="background: #8b5cf6; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer;">Personal</button>
+                    <button id="businessModeBtn" onclick="switchPostingMode('business')" style="background: rgba(255,255,255,0.2); color: #ccc; border: none; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer;">Business</button>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 id="modalTitle" style="color: #00ffff; margin: 0;">Create Post</h2>
+                    <button onclick="this.closest('.posting-modal').remove()" style="background: none; border: none; color: #00ffff; font-size: 24px; cursor: pointer;">&times;</button>
+                </div>
+                
+                <form id="postForm" style="color: #e2e8f0;">
+                    <!-- Upload Type Selection -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Upload Type:</label>
+                        <select id="uploadType" onchange="updateUploadFields()" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                            <option value="single">Single Item</option>
+                            <option value="bulk">Bulk Upload</option>
+                        </select>
+                    </div>
+
+                    <!-- Collection Label (for bulk uploads only) -->
+                    <div id="collectionLabelField" style="margin-bottom: 20px; display: none;">
+                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Collection Label:</label>
+                        <select id="collectionLabel" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                            <option value="">Choose a label (optional)</option>
+                            <option value="closet-clean-out">🧹 Closet Clean Out</option>
+                            <option value="garage-sale">🏠 Garage Sale</option>
+                            <option value="moving-sale">📦 Moving Sale</option>
+                            <option value="estate-sale">🏛️ Estate Sale</option>
+                            <option value="vintage-collection">💎 Vintage Collection</option>
+                            <option value="craft-sale">🎨 Craft Sale</option>
+                            <option value="book-collection">📚 Book Collection</option>
+                            <option value="custom">🏷️ Custom Label</option>
+                        </select>
+                        <input type="text" id="customLabelInput" placeholder="Enter custom label..." style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0; margin-top: 10px; display: none;">
+                    </div>
+                
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Post Category:</label>
+                        <select id="postCategory" onchange="updatePostCategoryFields()" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                            <option value="general">General</option>
+                            <option value="sale">For Sale</option>
+                            <option value="rent">For Rent</option>
+                            <option value="service">Service</option>
+                            <option value="poll">Poll</option>
+                            <option value="event">Event</option>
+                            <option value="job">Job/Hiring</option>
+                            <option value="iso">ISO (In Search Of)</option>
+                            <option value="announcement">Announcement</option>
+                            <option value="custom">+ Create Custom Category</option>
+                        </select>
+                        
+                        <!-- Custom Category Creation Fields -->
+                        <div id="customCategoryFields" style="display: none; margin-top: 15px; padding: 15px; background: rgba(0, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px;">
+                            <h4 style="color: #00ffff; margin: 0 0 15px 0; font-size: 14px;">Create New Category</h4>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; color: #00ffff; font-size: 13px;">Category Name:</label>
+                                <input type="text" id="customCategoryName" placeholder="e.g., Handmade Jewelry, Pet Supplies, Car Parts" style="width: 100%; padding: 8px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0; font-size: 13px;" maxlength="50">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; color: #00ffff; font-size: 13px;">Category Type:</label>
+                                <select id="customCategoryType" style="width: 100%; padding: 8px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0; font-size: 13px;">
+                                    <option value="marketplace">Marketplace (General Sales)</option>
+                                    <option value="services">Services & Gig Work</option>
+                                    <option value="rentals">Rentals & Equipment</option>
+                                    <option value="entertainment">Entertainment & Events</option>
+                                    <option value="food-drinks">Food & Drinks</option>
+                                    <option value="business-services">Business Services</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; color: #00ffff; font-size: 13px;">Description (Optional):</label>
+                                <input type="text" id="customCategoryDescription" placeholder="Brief description of what this category covers" style="width: 100%; padding: 8px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0; font-size: 13px;" maxlength="100">
+                            </div>
+                            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                                <button type="button" onclick="cancelCustomCategory()" style="padding: 8px 16px; background: rgba(107, 114, 128, 0.6); color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 12px;">Cancel</button>
+                                <button type="button" onclick="createCustomCategory()" style="padding: 8px 16px; background: linear-gradient(135deg, #00ffff, #0ea5e9); color: #1a0b3d; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;">Create Category</button>
+                            </div>
+                            <div style="margin-top: 10px; padding: 8px; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 5px;">
+                                <p style="margin: 0; font-size: 11px; color: #22c55e; line-height: 1.4;">
+                                    <strong>Note:</strong> Your custom category will be automatically added to the category search system across all MarketPace pages, making it available for other members to use when posting similar items.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Single Item Fields -->
+                    <div id="singleItemFields">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 5px; color: #00ffff;">Title:</label>
+                            <input type="text" id="postTitle" placeholder="What are you posting about?" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;" required>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 5px; color: #00ffff;">Description:</label>
+                            <textarea id="postDescription" placeholder="Tell us more about your post..." style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0; min-height: 100px;" required></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Bulk Upload Fields -->
+                    <div id="bulkItemFields" style="display: none;">
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; color: #00ffff;">Number of Items:</label>
+                            <input type="number" id="itemCount" min="2" max="20" value="2" onchange="generateBulkItemFields()" style="width: 100px; padding: 8px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                            <small style="color: #94a3b8; margin-left: 10px;">Maximum 20 items</small>
+                        </div>
+                        <div id="bulkItemContainer"></div>
+                    </div>
+                    
+                    <!-- Basic Price Field (hidden for rental posts) -->
+                    <div id="priceField" style="margin-bottom: 20px; display: none;">
+                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Price:</label>
+                        <input type="text" id="postPrice" placeholder="$0.00" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;" onchange="console.log('Price changed to:', this.value);">
+                    </div>
+
+                    <!-- Event-Specific Fields -->
+                    <div id="eventFields" style="margin-bottom: 20px; display: none;">
+                        <h4 style="color: #00ffff; margin-bottom: 15px;">Event Details</h4>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; color: #00ffff;">Start Time:</label>
+                                <input type="datetime-local" id="eventStartTime" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; color: #00ffff;">End Time (Optional):</label>
+                                <input type="datetime-local" id="eventEndTime" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; color: #00ffff;">Location:</label>
+                            <input type="text" id="eventLocation" placeholder="Enter event location (enables auto Geo QR check-ins)" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                            <small style="color: #10b981; font-size: 12px;">📍 Location enables automatic Geo QR code generation for event check-ins</small>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; color: #00ffff;">Event Link (Optional):</label>
+                            <input type="url" id="eventLink" placeholder="https://example.com/event-details" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                            <small style="color: #94a3b8; font-size: 12px;">Website, ticket link, or additional info</small>
+                        </div>
+                    </div>
+
+                    <!-- Poll-Specific Fields -->
+                    <div id="pollFields" style="margin-bottom: 20px; display: none;">
+                        <h4 style="color: #00ffff; margin-bottom: 15px;">Poll Options</h4>
+                        <div id="pollOptionsContainer">
+                            <div class="poll-option" style="background: rgba(0, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                                <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: start;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 5px; color: #00ffff; font-size: 13px;">Option 1:</label>
+                                        <input type="text" class="poll-option-text" placeholder="Enter poll option..." style="width: 100%; padding: 8px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0; margin-bottom: 10px;">
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                            <div>
+                                                <label style="display: block; margin-bottom: 3px; color: #94a3b8; font-size: 12px;">Price (Optional):</label>
+                                                <input type="number" class="poll-option-price" placeholder="0.00" step="0.01" style="width: 100%; padding: 6px; border: 1px solid rgba(0, 255, 255, 0.5); border-radius: 4px; background: #2d1b69; color: #e2e8f0; font-size: 12px;">
+                                            </div>
+                                            <div>
+                                                <label style="display: block; margin-bottom: 3px; color: #94a3b8; font-size: 12px;">Image (Optional):</label>
+                                                <input type="file" class="poll-option-image" accept="image/*" style="width: 100%; padding: 4px; border: 1px solid rgba(0, 255, 255, 0.5); border-radius: 4px; background: #2d1b69; color: #e2e8f0; font-size: 11px;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="poll-option" style="background: rgba(0, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                                <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: start;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 5px; color: #00ffff; font-size: 13px;">Option 2:</label>
+                                        <input type="text" class="poll-option-text" placeholder="Enter poll option..." style="width: 100%; padding: 8px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0; margin-bottom: 10px;">
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                            <div>
+                                                <label style="display: block; margin-bottom: 3px; color: #94a3b8; font-size: 12px;">Price (Optional):</label>
+                                                <input type="number" class="poll-option-price" placeholder="0.00" step="0.01" style="width: 100%; padding: 6px; border: 1px solid rgba(0, 255, 255, 0.5); border-radius: 4px; background: #2d1b69; color: #e2e8f0; font-size: 12px;">
+                                            </div>
+                                            <div>
+                                                <label style="display: block; margin-bottom: 3px; color: #94a3b8; font-size: 12px;">Image (Optional):</label>
+                                                <input type="file" class="poll-option-image" accept="image/*" style="width: 100%; padding: 4px; border: 1px solid rgba(0, 255, 255, 0.5); border-radius: 4px; background: #2d1b69; color: #e2e8f0; font-size: 11px;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="button" onclick="addPollOption()" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-size: 12px; margin-bottom: 10px;">
+                            + Add Another Option
+                        </button>
+                        <small style="display: block; color: #94a3b8; font-size: 12px;">You can add prices and images to poll options for product voting</small>
+                    </div>
+
+                    <!-- Service Rate Fields -->
+                    <div id="serviceFields" style="margin-bottom: 20px; display: none;">
+                        <h4 style="color: #00ffff; margin-bottom: 15px;">Service Rate Structure</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <label style="display: flex; align-items: center; padding: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; cursor: pointer; color: #10b981;">
+                                <input type="radio" name="serviceRate" value="hourly" style="margin-right: 8px;" checked>
+                                <span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                        <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Hourly Rate
+                                </span>
+                            </label>
+                            <label style="display: flex; align-items: center; padding: 12px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; cursor: pointer; color: #3b82f6;">
+                                <input type="radio" name="serviceRate" value="per-job" style="margin-right: 8px;">
+                                <span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                        <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2"/>
+                                        <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Per Job/Project
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; color: #00ffff;">Hourly Rate:</label>
+                                <input type="number" id="serviceHourlyAmount" placeholder="25.00" step="0.01" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; color: #00ffff;">Per Job Rate:</label>
+                                <input type="number" id="servicePerJobAmount" placeholder="100.00" step="0.01" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                            </div>
+                        </div>
+                        <small style="color: #94a3b8; font-size: 12px; margin-top: 8px; display: block;">Set both rates to give customers flexible pricing options</small>
+                    </div>
+
+                    <!-- Rental Rate Options (for rent only) -->
+                    <div id="rentalRateField" style="margin-bottom: 20px; display: none;">
+                        <h4 style="color: #00ffff; margin-bottom: 15px;">Rental Rate Structure</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <label style="display: flex; align-items: center; padding: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; cursor: pointer; color: #10b981;">
+                                <input type="radio" name="rentalRateModalType" value="hourly" id="hourlyRateModalRadio" style="margin-right: 8px;">
+                                <span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                        <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Hourly Rate
+                                </span>
+                            </label>
+                            <label style="display: flex; align-items: center; padding: 12px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; cursor: pointer; color: #3b82f6;">
+                                <input type="radio" name="rentalRateModalType" value="daily" id="dailyRateModalRadio" style="margin-right: 8px;" checked>
+                                <span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                                        <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2"/>
+                                        <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2"/>
+                                        <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/>
+                                    </svg>
+                                    Daily Rate (Recommended)
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; color: #00ffff;">Hourly Rate:</label>
+                                <input type="number" id="hourlyRateAmountModal" placeholder="15.00" step="0.01" min="0" inputmode="decimal" pattern="[0-9]*" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0; font-size: 16px; -webkit-appearance: none;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; color: #00ffff;">Daily Rate:</label>
+                                <input type="number" id="dailyRateAmountModal" placeholder="75.00" step="0.01" min="0" inputmode="decimal" pattern="[0-9]*" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0; font-size: 16px; -webkit-appearance: none;">
+                            </div>
+                        </div>
+                        <small style="color: #94a3b8; font-size: 12px; margin-top: 8px; display: block;">Set both rates to give customers flexible rental options</small>
+                        
+                        <!-- Owner Availability Calendar -->
+                        <div style="margin-top: 20px;">
+                            <h5 style="color: #00ffff; margin-bottom: 12px; display: flex; align-items: center;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-right: 8px;">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                                    <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2"/>
+                                    <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2"/>
+                                    <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                                Select Available Days
+                            </h5>
+                            <div id="ownerAvailabilityCalendar" style="
+                                display: grid; 
+                                grid-template-columns: repeat(7, 1fr); 
+                                gap: 4px; 
+                                background: rgba(15, 23, 42, 0.8); 
+                                padding: 12px; 
+                                border-radius: 8px; 
+                                border: 1px solid rgba(0, 255, 255, 0.2);
+                                max-width: 100%;
+                                min-height: 200px;
+                                overflow: hidden;
+                            ">
+                                <!-- Calendar will be populated by JavaScript -->
+                            </div>
+                            <div style="display: flex; gap: 8px; margin: 12px 0; flex-wrap: wrap;">
+                                <button type="button" onclick="selectWeekends()" style="background: rgba(0, 255, 255, 0.2); color: #00ffff; border: 1px solid rgba(0, 255, 255, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">Weekends Only</button>
+                                <button type="button" onclick="selectWeekdays()" style="background: rgba(0, 255, 255, 0.2); color: #00ffff; border: 1px solid rgba(0, 255, 255, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">Weekdays Only</button>
+                                <button type="button" onclick="selectAllDays()" style="background: rgba(0, 255, 255, 0.2); color: #00ffff; border: 1px solid rgba(0, 255, 255, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">All Days</button>
+                                <button type="button" onclick="clearAllDays()" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">Clear All</button>
+                            </div>
+                            <div id="selectedDatesDisplay" style="font-size: 12px; color: #94a3b8; line-height: 1.4;">
+                                <strong>Selected Dates:</strong> <span id="selectedDatesCount">0</span> days selected
+                                <div id="selectedDatesList" style="margin-top: 4px;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Methods (for rent/sale/service only) -->
+                    <div id="deliveryMethodField" style="margin-bottom: 20px; display: none;">
+                        <label style="display: block; margin-bottom: 10px; color: #00ffff;">Delivery Methods (Select all that apply):</label>
+                        <div style="display: grid; gap: 10px;">
+                            
+                            <!-- MarketPace Delivery -->
+                            <label style="display: flex; align-items: center; padding: 12px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; cursor: pointer;">
+                                <input type="checkbox" name="deliveryMethods" value="marketpace" id="marketpaceDeliveryModal" style="margin-right: 10px;" checked>
+                                <span style="color: #3b82f6; flex: 1;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 8px; vertical-align: middle;">
+                                        <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.2)"/>
+                                        <path d="M16 3h5v4h-5z" stroke="currentColor" stroke-width="1.5" fill="rgba(59, 130, 246, 0.1)"/>
+                                        <path d="M2 21h20v-7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z" stroke="currentColor" stroke-width="1.5"/>
+                                        <circle cx="7" cy="17" r="2" stroke="currentColor" stroke-width="1.5"/>
+                                        <circle cx="17" cy="17" r="2" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                    <strong>MarketPace Delivery</strong><br>
+                                    <small style="color: #94a3b8;">Vetted drivers • Insured • Split delivery cost</small>
+                                </span>
+                            </label>
+
+                            <!-- Self Pickup -->
+                            <label style="display: flex; align-items: center; padding: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; cursor: pointer;">
+                                <input type="checkbox" name="deliveryMethods" value="pickup" id="selfPickupModal" style="margin-right: 10px;" checked>
+                                <span style="color: #10b981; flex: 1;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 8px; vertical-align: middle;">
+                                        <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="rgba(34, 197, 94, 0.2)"/>
+                                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/>
+                                        <path d="M9 22V12h6v10" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                    <strong>Self Pickup</strong><br>
+                                    <small style="color: #94a3b8;">Buyer picks up directly • Free option</small>
+                                </span>
+                            </label>
+
+                            <!-- Private Party Delivery -->
+                            <label style="display: flex; align-items: center; padding: 12px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; cursor: pointer;">
+                                <input type="checkbox" name="deliveryMethods" value="private" id="privateDeliveryModal" style="margin-right: 10px;">
+                                <span style="color: #f59e0b; flex: 1;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline-block; margin-right: 8px; vertical-align: middle;">
+                                        <rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.5" fill="rgba(245, 158, 11, 0.2)"/>
+                                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" stroke-width="1"/>
+                                        <circle cx="8" cy="14" r="2" stroke="currentColor" stroke-width="1.5"/>
+                                        <circle cx="16" cy="14" r="2" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                    <strong>Private Party Delivery</strong><br>
+                                    <small style="color: #94a3b8;">You deliver • Set custom S&H fee</small>
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <!-- Private Delivery Fee Input -->
+                        <div id="privateDeliveryFeeGroupModal" style="margin-top: 15px; display: none;">
+                            <label style="display: block; margin-bottom: 5px; color: #f59e0b;">Private Delivery S&H Fee:</label>
+                            <input type="text" id="privateDeliveryFeeModal" placeholder="$0.00" style="width: 100%; padding: 10px; border: 1px solid #f59e0b; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                            <p style="font-size: 11px; color: #94a3b8; margin-top: 5px; line-height: 1.4;"><strong>Disclaimer:</strong> Private party delivery is not a vetted MarketPace driver, not associated with MarketPace, and we're not responsible for any inconveniences.</p>
+                        </div>
+
+                        <!-- Booking Fee (Security Fee) Section -->
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 8px;">
+                            <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                                <input type="checkbox" id="requireBookingFeeModal" style="margin-right: 10px;" onchange="toggleBookingFeeOptions()">
+                                <label for="requireBookingFeeModal" style="color: #8b5cf6; font-weight: 600; cursor: pointer;">Require Booking Fee (Security Fee)</label>
+                            </div>
+                            
+                            <div id="bookingFeeOptionsModal" style="display: none;">
+                                <!-- Fee Type Selection -->
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display: block; margin-bottom: 8px; color: #e2e8f0; font-size: 13px;">Fee Type:</label>
+                                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                        <label style="display: flex; align-items: center; color: #e2e8f0; cursor: pointer;">
+                                            <input type="radio" name="bookingFeeType" value="percentage" style="margin-right: 8px;" checked onchange="toggleFeeType()"> Percentage of rental
+                                        </label>
+                                        <label style="display: flex; align-items: center; color: #e2e8f0; cursor: pointer;">
+                                            <input type="radio" name="bookingFeeType" value="flat" style="margin-right: 8px;" onchange="toggleFeeType()"> Flat rate amount
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Fee Amount Input -->
+                                <div style="margin-bottom: 15px;">
+                                    <div id="percentageFeeInput" style="display: block;">
+                                        <label style="display: block; margin-bottom: 5px; color: #8b5cf6;">Booking Fee Percentage:</label>
+                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                            <input type="number" id="bookingFeePercentageModal" placeholder="20" min="5" max="50" style="width: 80px; padding: 10px; border: 1px solid #8b5cf6; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                                            <span style="color: #e2e8f0;">% of rental cost</span>
+                                        </div>
+                                        <p style="font-size: 11px; color: #94a3b8; margin-top: 5px;">Recommended: 15-25% of total rental amount</p>
+                                    </div>
+                                    
+                                    <div id="flatFeeInput" style="display: none;">
+                                        <label style="display: block; margin-bottom: 5px; color: #8b5cf6;">Flat Booking Fee Amount:</label>
+                                        <input type="text" id="bookingFeeFlatModal" placeholder="$25.00" style="width: 120px; padding: 10px; border: 1px solid #8b5cf6; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                                        <p style="font-size: 11px; color: #94a3b8; margin-top: 5px;">Fixed amount regardless of rental cost</p>
+                                    </div>
+                                </div>
+
+                                <!-- Refund Policy -->
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display: block; margin-bottom: 8px; color: #e2e8f0; font-size: 13px;">Refund Policy:</label>
+                                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                                        <label style="display: flex; align-items: center; color: #e2e8f0; cursor: pointer;">
+                                            <input type="radio" name="bookingFeeRefund" value="full" style="margin-right: 8px;" checked> Fully Refundable
+                                            <span style="margin-left: 8px; color: #10b981; font-size: 11px;">(100% refund if rental cancelled)</span>
+                                        </label>
+                                        <label style="display: flex; align-items: center; color: #e2e8f0; cursor: pointer;">
+                                            <input type="radio" name="bookingFeeRefund" value="partial" style="margin-right: 8px;"> Partial Refund (50%)
+                                            <span style="margin-left: 8px; color: #f59e0b; font-size: 11px;">(50% refund if rental cancelled)</span>
+                                        </label>
+                                        <label style="display: flex; align-items: center; color: #e2e8f0; cursor: pointer;">
+                                            <input type="radio" name="bookingFeeRefund" value="none" style="margin-right: 8px;"> Non-Refundable
+                                            <span style="margin-left: 8px; color: #ef4444; font-size: 11px;">(No refund if rental cancelled)</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- QR Check-in/Check-out System -->
+                                <div style="margin-bottom: 15px;">
+                                    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                                        <input type="checkbox" id="requireQRCheckinModal" style="margin-right: 10px;" onchange="toggleQROptions()">
+                                        <label for="requireQRCheckinModal" style="color: #e2e8f0; cursor: pointer;">Require QR Check-in & Check-out Verification</label>
+                                    </div>
+                                    <p style="font-size: 11px; color: #94a3b8; margin-left: 20px;">Dual QR system: Check-in at pickup, Check-out at return with late fee protection</p>
+                                    
+                                    <div id="qrOptionsModal" style="display: none; margin-top: 12px; margin-left: 20px; padding: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 6px;">
+                                        <!-- Grace Period Settings -->
+                                        <div style="margin-bottom: 12px;">
+                                            <label style="display: block; margin-bottom: 5px; color: #10b981; font-size: 12px; font-weight: 500;">Late Return Grace Period:</label>
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                <input type="number" id="gracePeriodModal" value="15" min="0" max="120" style="width: 60px; padding: 6px; border: 1px solid #10b981; border-radius: 4px; background: #2d1b69; color: #e2e8f0; font-size: 12px;">
+                                                <span style="color: #e2e8f0; font-size: 12px;">minutes after scheduled return</span>
+                                            </div>
+                                            <p style="font-size: 10px; color: #6ee7b7; margin-top: 4px;">Grace period before late fees are charged</p>
+                                        </div>
+                                        
+                                        <!-- Late Fee Settings -->
+                                        <div style="margin-bottom: 12px;">
+                                            <label style="display: block; margin-bottom: 5px; color: #10b981; font-size: 12px; font-weight: 500;">Late Fee Structure:</label>
+                                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                                <label style="display: flex; align-items: center; color: #e2e8f0; cursor: pointer; font-size: 11px;">
+                                                    <input type="radio" name="lateFeeType" value="hourly" style="margin-right: 8px;" checked> 
+                                                    Hourly late fee: $<input type="number" id="hourlyLateFeeModal" value="5" min="1" max="50" style="width: 40px; padding: 2px 4px; margin: 0 4px; border: 1px solid #10b981; border-radius: 3px; background: #2d1b69; color: #e2e8f0; font-size: 11px;"> per hour
+                                                </label>
+                                                <label style="display: flex; align-items: center; color: #e2e8f0; cursor: pointer; font-size: 11px;">
+                                                    <input type="radio" name="lateFeeType" value="daily" style="margin-right: 8px;"> 
+                                                    Daily late fee: $<input type="number" id="dailyLateFeeModal" value="25" min="5" max="200" style="width: 50px; padding: 2px 4px; margin: 0 4px; border: 1px solid #10b981; border-radius: 3px; background: #2d1b69; color: #e2e8f0; font-size: 11px;"> per day
+                                                </label>
+                                                <label style="display: flex; align-items: center; color: #e2e8f0; cursor: pointer; font-size: 11px;">
+                                                    <input type="radio" name="lateFeeType" value="flat" style="margin-right: 8px;"> 
+                                                    Flat late fee: $<input type="number" id="flatLateFeeModal" value="50" min="10" max="500" style="width: 50px; padding: 2px 4px; margin: 0 4px; border: 1px solid #10b981; border-radius: 3px; background: #2d1b69; color: #e2e8f0; font-size: 11px;"> one-time charge
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- QR Check-out Requirements -->
+                                        <div style="background: rgba(16, 185, 129, 0.05); padding: 8px; border-radius: 4px; border-left: 2px solid #10b981;">
+                                            <div style="color: #10b981; font-size: 11px; font-weight: 500; margin-bottom: 3px;">DUAL QR VERIFICATION</div>
+                                            <div style="color: #e2e8f0; font-size: 10px; line-height: 1.3;">
+                                                • Check-in QR: Scanned at pickup to release payment from escrow<br>
+                                                • Check-out QR: Scanned at return to finalize rental and avoid late fees<br>
+                                                • Late fees automatically charged if check-out exceeds grace period
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Booking Fee Info -->
+                                <div style="background: rgba(139, 92, 246, 0.05); padding: 10px; border-radius: 6px; border-left: 3px solid #8b5cf6;">
+                                    <div style="color: #8b5cf6; font-size: 12px; font-weight: 500; margin-bottom: 4px;">SECURE Booking Fee Protection</div>
+                                    <div style="color: #e2e8f0; font-size: 11px; line-height: 1.4;">
+                                        Booking fees are held in escrow until rental completion. If you fail to deliver the rental as promised, the member automatically receives a full refund regardless of your refund policy.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Images:</label>
+                        <input type="file" id="postImages" multiple accept="image/*" onchange="handlePostImageUpload('postImages')" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                        <div id="postImages-preview" style="margin-top: 10px;"></div>
+                    </div>
+                    
+                    <!-- Delivery Options (Owner Setup) -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 10px; color: #00ffff;">Delivery Options Available to Renters:</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" id="selfPickupOption" style="margin-right: 5px;" checked> Self Pickup
+                            </label>
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" id="privateDeliveryOption" style="margin-right: 5px;"> Private Delivery
+                            </label>
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" id="marketPaceDeliveryOption" style="margin-right: 5px;"> MarketPace Delivery
+                            </label>
+                        </div>
+                        <div style="color: #94a3b8; font-size: 12px; margin-top: 8px;">
+                            Select which delivery methods you'll offer. Renters will choose from your available options.
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons (For Renters) -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 10px; color: #00ffff;">Action Buttons:</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" id="messageNow" style="margin-right: 5px;" checked> Message Now
+                            </label>
+                            <label style="display: flex; align-items: center; color: #e2e8f0;">
+                                <input type="checkbox" id="rentNow" style="margin-right: 5px;" checked> Rent Now
+                            </label>
+                        </div>
+                        <div style="color: #94a3b8; font-size: 12px; margin-top: 8px;">
+                            These buttons appear on your rental post for renters to interact.
+                        </div>
+                    </div>
+
+                    <!-- Terms and Conditions Section -->
+                    <div style="margin-bottom: 20px; padding: 15px; background: rgba(255, 107, 53, 0.1); border: 1px solid rgba(255, 107, 53, 0.3); border-radius: 8px;">
+                        <label style="display: block; margin-bottom: 12px; color: #ff6b35; font-weight: 600;">Terms & Conditions</label>
+                        
+                        <div style="background: rgba(255, 107, 53, 0.05); padding: 10px; border-radius: 6px; margin-bottom: 12px; border-left: 3px solid #ff6b35;">
+                            <div style="color: #ff6b35; font-size: 12px; font-weight: 500; margin-bottom: 4px;">⚠️ Important Disclaimer</div>
+                            <div style="color: #e2e8f0; font-size: 11px; line-height: 1.4;">
+                                MarketPace is not responsible for lost, damaged, or stolen rental items. You must provide your own terms and conditions for renters to agree to before completing any rental transaction.
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 12px;">
+                            <label style="display: block; margin-bottom: 8px; color: #e2e8f0; font-size: 13px;">Provide your rental terms:</label>
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: flex; align-items: center; color: #e2e8f0; margin-bottom: 8px; cursor: pointer;">
+                                    <input type="radio" name="termsMethod" value="write" style="margin-right: 8px;" checked onchange="toggleTermsMethod()"> Write terms directly
+                                </label>
+                                <label style="display: flex; align-items: center; color: #e2e8f0; cursor: pointer;">
+                                    <input type="radio" name="termsMethod" value="upload" style="margin-right: 8px;" onchange="toggleTermsMethod()"> Upload terms document
+                                </label>
+                            </div>
+                            
+                            <div id="writeTermsSection" style="display: block;">
+                                <textarea id="rentalTermsText" placeholder="Enter your rental terms and conditions here. Include policies for damage, late returns, security deposits, usage restrictions, etc." style="width: 100%; height: 120px; padding: 10px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(100, 116, 139, 0.4); border-radius: 6px; color: #e2e8f0; font-size: 12px; resize: vertical;" maxlength="2000" oninput="updateCharCount()"></textarea>
+                                <div style="text-align: right; color: #94a3b8; font-size: 10px; margin-top: 4px;">
+                                    <span id="termsCharCount">0</span>/2000 characters
+                                </div>
+                            </div>
+                            
+                            <div id="uploadTermsSection" style="display: none;">
+                                <input type="file" id="termsFileUpload" accept=".pdf,.doc,.docx,.txt" style="display: none;" onchange="handleTermsFileUpload(event)">
+                                <button type="button" onclick="document.getElementById('termsFileUpload').click()" style="width: 100%; padding: 12px; background: rgba(59, 130, 246, 0.2); border: 1px dashed rgba(59, 130, 246, 0.4); border-radius: 6px; color: #93c5fd; cursor: pointer; font-size: 12px;">
+                                    📄 Choose Terms Document (PDF, DOC, TXT)
+                                </button>
+                                <div id="uploadedFileName" style="color: #10b981; font-size: 11px; margin-top: 6px; display: none;"></div>
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(16, 185, 129, 0.1); padding: 8px; border-radius: 6px; border-left: 3px solid #10b981;">
+                            <div style="color: #10b981; font-size: 11px; font-weight: 500; margin-bottom: 3px;">✓ Renter Agreement Required</div>
+                            <div style="color: #94a3b8; font-size: 10px;">
+                                Renters must check "I have read and agree to the terms" before completing any rental transaction.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 25px; padding: 20px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; border-top: 1px solid rgba(0, 255, 255, 0.2);">
+                        <button type="button" onclick="this.closest('.posting-modal').remove()" style="padding: 12px 24px; background: #666; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">Cancel</button>
+                        <button type="button" id="submitButton" onclick="createPostNow()" style="padding: 12px 24px; background: #00ffff; color: #1a0b3d; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">Create Post</button>
+                    </div>
+                </form>
+            `;
+            
+            modal.className = 'posting-modal';
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Pre-populate fields if editing an existing post
+            if (existingPost) {
+                populateEditForm(existingPost);
+                // Update header and button text to show editing mode
+                const headerTitle = modalContent.querySelector('#modalTitle');
+                const submitButton = modalContent.querySelector('#submitButton');
+                if (headerTitle) {
+                    headerTitle.textContent = 'Edit Post';
+                }
+                if (submitButton) {
+                    submitButton.textContent = 'Save Changes';
+                }
+            }
+            
+            // Initialize modal with current posting mode
+            setTimeout(() => {
+                switchPostingMode(currentPostingMode);
+            }, 50);
+            
+            // Set initial category to "general" and update fields
+            document.getElementById('postCategory').value = type || 'general';
+            updatePostCategoryFields(); // Use the global function to ensure proper field visibility
+            updateUploadFields();
+            
+            // Ensure the correct form fields are visible
+            const singleItemFields = document.getElementById('singleItemFields');
+            if (singleItemFields) {
+                singleItemFields.style.display = 'block';
+                console.log('✅ Single item fields made visible');
+            }
+            
+            // Add event listeners
+            document.getElementById('postCategory').addEventListener('change', updateFormFields);
+            
+            // Add event listeners to store form data when user types
+            document.getElementById('postTitle').addEventListener('input', function() {
+                const titleEl = document.getElementById('postTitle');
+                const descEl = document.getElementById('postDescription');
+                const categoryEl = document.getElementById('postCategory');
+                
+                if (titleEl && descEl && categoryEl) {
+                    window.currentPostData = {
+                        title: titleEl.value.trim(),
+                        description: descEl.value.trim(),
+                        category: categoryEl.value
+                    };
+                    console.log('Title updated, form data stored:', window.currentPostData);
+                }
+            });
+            
+            document.getElementById('postDescription').addEventListener('input', function() {
+                const titleEl = document.getElementById('postTitle');
+                const descEl = document.getElementById('postDescription');
+                const categoryEl = document.getElementById('postCategory');
+                
+                if (titleEl && descEl && categoryEl) {
+                    window.currentPostData = {
+                        title: titleEl.value.trim(),
+                        description: descEl.value.trim(),
+                        category: categoryEl.value
+                    };
+                    console.log('Description updated, form data stored:', window.currentPostData);
+                }
+            });
+            document.getElementById('postForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                console.log('📋 Form submitted, processing...');
+                
+                const uploadType = document.getElementById('uploadType')?.value || 'single';
+                if (uploadType === 'bulk') {
+                    submitBulkPost();
+                } else {
+                    submitSinglePost();
+                }
+            });
+            
+            // Add listener for private delivery checkbox
+            const privateDeliveryCheckbox = document.getElementById('privateDeliveryModal');
+            if (privateDeliveryCheckbox) {
+                privateDeliveryCheckbox.addEventListener('change', function() {
+                    const feeGroup = document.getElementById('privateDeliveryFeeGroupModal');
+                    if (feeGroup) {
+                        feeGroup.style.display = this.checked ? 'block' : 'none';
+                    }
+                });
+            }
+            
+            // Add category click listeners for the advanced modal
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
+                    // Add active class to clicked button
+                    this.classList.add('selected');
+                    // Update form fields based on selection
+                    const category = this.getAttribute('data-category');
+                    toggleFieldsForCategory(category);
+                });
+            });
+            
+            // Function moved to global scope - see global updatePostCategoryFields function
+            
+            function handlePostSubmit(e) {
+                e.preventDefault();
+                
+                const uploadType = document.getElementById('uploadType').value;
+                
+                if (uploadType === 'bulk') {
+                    submitBulkPost();
+                } else {
+                    submitSinglePost();
+                }
+            }
+
+            // Submit single item post
+            function submitSinglePost() {
+                // Debug input field values
+                const titleEl = document.getElementById('postTitle');
+                const descEl = document.getElementById('postDescription');
+                const categoryEl = document.getElementById('postCategory');
+                
+                console.log('Form elements found:', {
+                    titleEl: !!titleEl,
+                    descEl: !!descEl,
+                    categoryEl: !!categoryEl
+                });
+                
+                console.log('Form values:', {
+                    title: titleEl?.value,
+                    description: descEl?.value,
+                    category: categoryEl?.value
+                });
+                
+                // Get price based on category
+                let priceValue = '';
+                const category = categoryEl?.value || 'general';
+                
+                if (category === 'rent') {
+                    // For rentals, get price from rental rate fields
+                    const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
+                    const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
+                    const selectedRate = document.querySelector('input[name="rentalRate"]:checked')?.value || 'daily';
+                    
+                    if (selectedRate === 'hourly' && hourlyRate > 0) {
+                        priceValue = `$${hourlyRate}/hour`;
+                    } else if (selectedRate === 'daily' && dailyRate > 0) {
+                        priceValue = `$${dailyRate}/day`;
+                    }
+                } else if (category === 'service') {
+                    // For services, get price from service rate fields
+                    const hourlyAmount = parseFloat(document.getElementById('serviceHourlyAmount')?.value) || 0;
+                    const perJobAmount = parseFloat(document.getElementById('servicePerJobAmount')?.value) || 0;
+                    const selectedServiceRate = document.querySelector('input[name="serviceRate"]:checked')?.value || 'per-job';
+                    
+                    if (selectedServiceRate === 'hourly' && hourlyAmount > 0) {
+                        priceValue = `$${hourlyAmount}/hour`;
+                    } else if (selectedServiceRate === 'per-job' && perJobAmount > 0) {
+                        priceValue = `$${perJobAmount}/job`;
+                    }
+                } else {
+                    // For all other categories, get price from general price field
+                    const activePriceField = document.getElementById('postPrice');
+                    priceValue = activePriceField ? activePriceField.value.trim() : '';
+                }
+                
+                console.log('Price value determined:', priceValue, 'for category:', category);
+                
+                const formData = {
+                    uploadType: 'single',
+                    postingMode: currentPostingMode,
+                    category: category,
+                    title: titleEl?.value?.trim() || '',
+                    description: descEl?.value?.trim() || '',
+                    price: priceValue,
+                    eventDate: document.getElementById('eventDate')?.value,
+                    eventTime: document.getElementById('eventTime')?.value,
+                    eventLocation: document.getElementById('eventLocation')?.value,
+                    pollOption1: document.getElementById('pollOption1')?.value,
+                    pollOption2: document.getElementById('pollOption2')?.value,
+                    rentalRate: document.querySelector('input[name="rentalRate"]:checked')?.value,
+                    deliveryMethod: {
+                        marketpace: document.getElementById('marketpaceDelivery')?.checked,
+                        private: document.getElementById('privateDelivery')?.checked,
+                        privateFee: document.getElementById('privateDeliveryFee')?.value
+                    },
+                    actionButtons: {
+                        deliverNow: document.getElementById('deliverNow')?.checked,
+                        selfPickup: document.getElementById('selfPickup')?.checked,
+                        bookNow: document.getElementById('bookNow')?.checked,
+                        callNow: document.getElementById('callNow')?.checked,
+                        messageNow: document.getElementById('messageNow')?.checked
+                    },
+                    timestamp: new Date().toISOString(),
+                    author: currentPostingMode === 'business' ? "MarketPace Pro Business" : "Local Pace Member",
+                    location: "Orange Beach, AL",
+                    id: Date.now()
+                };
+                
+                // Handle rental posts - collect comprehensive rental data
+                if (formData.category === 'rent') {
+                    const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
+                    const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
+                    const itemCondition = document.getElementById('itemCondition')?.value;
+                    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+                    const rentalTerms = document.getElementById('rentalTerms')?.value;
+                    // New booking fee system
+                    const enableBookingFee = document.getElementById('requireBookingFeeModal')?.checked;
+                    const bookingFeeType = document.querySelector('input[name="bookingFeeType"]:checked')?.value || 'percentage';
+                    const bookingFeePercentage = parseFloat(document.getElementById('bookingFeePercentageModal')?.value) || 20;
+                    const bookingFeeFlat = parseFloat(document.getElementById('bookingFeeFlatModal')?.value.replace('$', '')) || 0;
+                    const bookingFeeRefund = document.querySelector('input[name="bookingFeeRefund"]:checked')?.value || 'full';
+                    const requireQRCheckin = document.getElementById('requireQRCheckinModal')?.checked;
+                    
+                    console.log('Comprehensive rental data:', { 
+                        hourlyRate, dailyRate, itemCondition, paymentMethod, 
+                        rentalTerms, enableBookingFee, bookingFeeType, bookingFeePercentage, 
+                        bookingFeeFlat, bookingFeeRefund, requireQRCheckin 
+                    });
+                    
+                    // Validate required rental fields
+                    if (hourlyRate === 0 && dailyRate === 0) {
+                        showNotification('Please set at least one rental rate (hourly or daily).', 'error');
+                        return;
+                    }
+                    if (!itemCondition) {
+                        showNotification('Please select the item condition.', 'error');
+                        return;
+                    }
+                    if (!rentalTerms || rentalTerms.trim().length < 20) {
+                        showNotification('Please provide detailed terms and conditions (minimum 20 characters).', 'error');
+                        return;
+                    }
+                    
+                    // Store comprehensive rental data in formData
+                    formData.hourlyRate = hourlyRate;
+                    formData.dailyRate = dailyRate;
+                    formData.rentalHourlyRate = hourlyRate;  // Alternative field name
+                    formData.rentalDailyRate = dailyRate;    // Alternative field name
+                    formData.rentalRateType = document.querySelector('input[name="rentalRate"]:checked')?.value || 'daily';
+                    formData.itemCondition = itemCondition;
+                    formData.paymentMethod = paymentMethod || 'escrow';
+                    formData.rentalTerms = rentalTerms.trim();
+                    formData.availabilityDates = selectedRentalDates || []; // Add selected availability dates
+                    formData.bookingFee = enableBookingFee ? {
+                        enabled: true,
+                        type: bookingFeeType,
+                        percentage: bookingFeeType === 'percentage' ? bookingFeePercentage : null,
+                        flatAmount: bookingFeeType === 'flat' ? bookingFeeFlat : null,
+                        refundPolicy: bookingFeeRefund,
+                        requireQRCheckin: requireQRCheckin
+                    } : { enabled: false };
+                    
+                    // Collect delivery options for rental
+                    formData.deliveryOptions = {
+                        selfPickup: document.getElementById('selfPickupOptionRental')?.checked || false,
+                        privateDelivery: document.getElementById('privateDeliveryOptionRental')?.checked || false,
+                        marketPaceDelivery: document.getElementById('marketPaceDeliveryOptionRental')?.checked || false
+                    };
+                }
+
+                // Handle category-specific data collection
+                if (formData.category === 'poll') {
+                    // Collect poll options with prices and images
+                    const pollOptions = [];
+                    document.querySelectorAll('.poll-option').forEach((option, index) => {
+                        const text = option.querySelector('.poll-option-text')?.value;
+                        const price = option.querySelector('.poll-option-price')?.value;
+                        const imageFile = option.querySelector('.poll-option-image')?.files[0];
+                        
+                        if (text && text.trim()) {
+                            pollOptions.push({
+                                id: index,
+                                text: text.trim(),
+                                price: price ? parseFloat(price) : null,
+                                image: imageFile ? URL.createObjectURL(imageFile) : null,
+                                votes: 0,
+                                voters: []
+                            });
+                        }
+                    });
+                    
+                    if (pollOptions.length < 2) {
+                        showNotification('Please add at least 2 poll options.', 'error');
+                        return;
+                    }
+                    
+                    formData.pollOptions = pollOptions;
+                    formData.pollType = 'community-poll';
+                }
+
+                if (formData.category === 'event') {
+                    // Collect event-specific data
+                    formData.startTime = document.getElementById('eventStartTime')?.value;
+                    formData.endTime = document.getElementById('eventEndTime')?.value;
+                    formData.location = document.getElementById('eventLocation')?.value;
+                    formData.eventLink = document.getElementById('eventLink')?.value;
+                    
+                    // Auto-generate geo QR if location is provided
+                    if (formData.location && formData.location.trim()) {
+                        formData.hasGeoQR = true;
+                        formData.geoQRRadius = 150; // 150 meter radius for event check-ins
+                    }
+                }
+
+                if (formData.category === 'service') {
+                    // Collect service rate information
+                    const selectedServiceRate = document.querySelector('input[name="serviceRate"]:checked')?.value || 'per-job';
+                    const hourlyAmount = parseFloat(document.getElementById('serviceHourlyAmount')?.value) || 0;
+                    const perJobAmount = parseFloat(document.getElementById('servicePerJobAmount')?.value) || 0;
+                    
+                    // Validate that a rate is set
+                    if (hourlyAmount === 0 && perJobAmount === 0) {
+                        showNotification('Please set at least one service rate (hourly or per job).', 'error');
+                        return;
+                    }
+                    
+                    formData.serviceRateType = selectedServiceRate;
+                    formData.serviceHourlyRate = hourlyAmount;
+                    formData.servicePerJobRate = perJobAmount;
+                }
+                
+                console.log('Final formData for validation:', formData);
+                
+                if (!formData.title || !formData.description) {
+                    console.log('Validation failed - missing title or description:', {
+                        title: formData.title,
+                        description: formData.description
+                    });
+                    showNotification('Please fill in title and description.', 'error');
+                    return;
+                }
+                
+                console.log('✅ Post validation passed, saving to localStorage and profile...');
+                
+                // Save to localStorage (community feed)
+                const existingPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+                existingPosts.unshift(formData);
+                localStorage.setItem('communityPosts', JSON.stringify(existingPosts));
+                console.log('✅ Post saved to community feed. Total posts:', existingPosts.length);
+
+                // Add to profile based on posting mode
+                addPostToProfile(formData, currentPostingMode);
+                console.log('✅ Post added to profile for mode:', currentPostingMode);
+                
+                // Close modal and show success
+                closePostModal();
+                showNotification(`${formData.category.charAt(0).toUpperCase() + formData.category.slice(1)} post "${formData.title}" shared successfully!`, 'success');
+                
+                // Refresh the community feed to show the new post
+                loadCommunityPosts();
+                console.log('✅ Community feed refreshed');
+            }
+
+            // Submit bulk upload post
+            function submitBulkPost() {
+                const itemCount = parseInt(document.getElementById('itemCount').value);
+                const category = document.getElementById('postCategory').value;
+                const collectionLabel = getCollectionLabel();
+                
+                const bulkItems = [];
+                let hasErrors = false;
+                
+                // Validate and collect all bulk items
+                for (let i = 1; i <= itemCount; i++) {
+                    const nameEl = document.getElementById(`bulkItemName${i}`);
+                    const descEl = document.getElementById(`bulkItemDesc${i}`);
+                    const priceEl = document.getElementById(`bulkItemPrice${i}`);
+                    
+                    if (!nameEl || !descEl || !nameEl.value || !descEl.value) {
+                        showNotification(`Please fill in all fields for Item ${i}`, 'error');
+                        hasErrors = true;
+                        break;
+                    }
+                    
+                    const itemData = {
+                        name: nameEl.value,
+                        description: descEl.value,
+                        price: priceEl.value,
+                        rateType: getRateType(category, i),
+                        photos: [] // Would handle file uploads here
+                    };
+                    
+                    bulkItems.push(itemData);
+                }
+                
+                if (hasErrors) return;
+                
+                // Create the bulk post
+                const bulkPostData = {
+                    uploadType: 'bulk',
+                    postingMode: currentPostingMode,
+                    category: category,
+                    collectionLabel: collectionLabel,
+                    title: collectionLabel || `${category.charAt(0).toUpperCase() + category.slice(1)} Collection`,
+                    description: `Bulk collection of ${itemCount} ${category} items`,
+                    items: bulkItems,
+                    itemCount: itemCount,
+                    timestamp: new Date().toISOString(),
+                    author: currentPostingMode === 'business' ? "MarketPace Pro Business" : "Local Pace Member",
+                    location: "Orange Beach, AL",
+                    id: Date.now()
+                };
+                
+                // Store in localStorage
+                const existingPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+                existingPosts.unshift(bulkPostData);
+                localStorage.setItem('communityPosts', JSON.stringify(existingPosts));
+
+                // Add to profile based on posting mode
+                addPostToProfile(bulkPostData, currentPostingMode);
+                
+                // Close modal and show success
+                closeModalAndShowSuccess(category, `${itemCount}-item collection`);
+                
+                // Refresh the community feed to show the new post
+                loadCommunityPosts();
+            }
+
+            // Helper functions
+            function getCollectionLabel() {
+                const labelSelect = document.getElementById('collectionLabel');
+                if (labelSelect.value === 'custom') {
+                    return document.getElementById('customLabelInput').value;
+                }
+                return labelSelect.options[labelSelect.selectedIndex].text.replace(/^\S+\s/, ''); // Remove emoji
+            }
+
+            function getRateType(category, itemNumber) {
+                if (category === 'rent') {
+                    const rateSelect = document.getElementById(`bulkRentalRate${itemNumber}`);
+                    return rateSelect ? rateSelect.value : 'day';
+                } else if (category === 'service') {
+                    const rateSelect = document.getElementById(`bulkServiceRate${itemNumber}`);
+                    return rateSelect ? rateSelect.value : 'job';
+                }
+                return null;
+            }
+
+            function addPostToProfile(postData, mode) {
+                // Add post to appropriate profile storage
+                const storageKey = mode === 'business' ? 'businessProfilePosts' : 'personalProfilePosts';
+                const existingProfilePosts = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                existingProfilePosts.unshift(postData);
+                localStorage.setItem(storageKey, JSON.stringify(existingProfilePosts));
+                
+                console.log(`Post added to ${mode} profile:`, postData);
+            }
+
+            function closeModalAndShowSuccess(category, title) {
+                modal.remove();
+                
+                showNotification(`${category.charAt(0).toUpperCase() + category.slice(1)} post "${title}" created successfully!`, 'success');
+                
+                // Refresh page to show new post
+                setTimeout(() => location.reload(), 1000);
+            }
+        }
+
         // Global posting mode state
         let currentPostingMode = 'personal';
 
@@ -4381,7 +6376,7 @@
 
         // Post creation
         function createPost(type = 'general') {
-            createPostNow(type);
+            openAdvancedPostModal(type);
         }
 
         // Commerce functions
@@ -4411,7 +6406,7 @@
             updateCartBadge();
             
             // Show notification
-            console.log(`✅ "${itemName}" added to cart!`);
+            showNotification(`"${itemName}" added to cart!`, 'success');
         }
         
         // Update cart badge
@@ -4465,7 +6460,7 @@
         
         async function handleProfilePicUpload(file) {
             try {
-                console.log('📤 Uploading profile picture...');
+                showUploadProgress('Uploading profile picture...');
                 const result = await uploadToCloudinary(file, '/api/upload/profile');
                 
                 // Update profile picture display
@@ -4474,7 +6469,7 @@
                     profileImg.src = result.responsiveUrls?.medium || result.imageUrl || result.url;
                 }
                 
-                console.log('✅ Profile picture updated successfully!');
+                showNotification('Profile picture updated successfully!', 'success');
                 return result;
             } catch (error) {
                 showNotification('Failed to upload profile picture: ' + error.message, 'error');
@@ -4493,7 +6488,7 @@
             }
             
             try {
-                console.log(`📤 Uploading ${files.length} image(s)...`);
+                showUploadProgress(`Uploading ${files.length} image(s)...`);
                 
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
@@ -4536,7 +6531,7 @@
             const uploadedImages = [];
             
             try {
-                console.log(`📤 Uploading ${files.length} product image(s)...`);
+                showUploadProgress(`Uploading ${files.length} product image(s)...`);
                 
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
@@ -4613,20 +6608,64 @@
                 
                 if (response.ok) {
                     element.remove();
-                    console.log('✅ Image removed successfully');
+                    showNotification('Image removed successfully', 'success');
                 } else {
-                    console.log('❌ Failed to remove image');
+                    showNotification('Failed to remove image', 'error');
                 }
             } catch (error) {
-                console.log('❌ Error removing image:', error);
+                showNotification('Error removing image', 'error');
             }
         }
         
-        // Show upload progress - DISABLED to prevent blue line display issues
+        // Show upload progress
         function showUploadProgress(message) {
-            console.log('📤 Upload progress:', message);
-            // Notification creation disabled to prevent blue line display
-            return null;
+            const notification = document.createElement('div');
+            notification.className = 'upload-progress';
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 20px; height: 20px; border: 2px solid #00ffff; 
+                                border-top: 2px solid transparent; border-radius: 50%; 
+                                animation: spin 1s linear infinite;"></div>
+                    <span>${message}</span>
+                </div>
+            `;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0, 0, 0, 0.9);
+                color: #00ffff;
+                padding: 15px 25px;
+                border-radius: 8px;
+                z-index: 1001;
+                font-weight: bold;
+                border: 1px solid rgba(0, 255, 255, 0.3);
+            `;
+            
+            // Add spinning animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            `;
+            if (!document.querySelector('style[data-upload-styles]')) {
+                style.setAttribute('data-upload-styles', 'true');
+                document.head.appendChild(style);
+            }
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 10 seconds
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
+            }, 10000);
+            
+            return notification;
         }
 
         // Duplicate showNotification function removed to prevent conflicts
@@ -4651,7 +6690,7 @@
         }
 
         function deliverNow(item) {
-            console.log(`✅ Arranging delivery for "${item}"`);
+            showNotification(`Arranging delivery for "${item}"`, 'success');
         }
 
         function bookNow(itemName) {
@@ -5098,7 +7137,7 @@
             }
         }
 
-        // Note: Modal posting functions removed - using direct posting system
+        // Note: Primary openAdvancedPostModal function is defined above
 
         function closePostModal() {
             document.getElementById('postModal').style.display = 'none';
@@ -5270,7 +7309,7 @@
                     const profileButton = document.querySelector('.profile-button');
                     profileButton.innerHTML = `<img src="${e.target.result}" class="profile-avatar">`;
                     
-                    console.log('✅ Profile picture updated successfully!');
+                    showNotification('Profile picture updated successfully!', 'success');
                     closeProfileModal();
                 };
                 reader.readAsDataURL(file);
@@ -5437,7 +7476,33 @@
                 });
             });
 
-            // Form submission removed - modal deleted
+            // Form submission
+            document.getElementById('postForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    category: document.querySelector('.category-btn.selected')?.getAttribute('data-category') || 'general',
+                    title: document.getElementById('postTitle').value,
+                    description: document.getElementById('postDescription').value,
+                    price: document.getElementById('postPrice').value,
+                    link: document.getElementById('postLink').value,
+                    actions: {
+                        deliverNow: document.getElementById('deliverNow').checked,
+                        bookNow: document.getElementById('bookNow').checked,
+                        counterOffer: document.getElementById('counterOffer').checked,
+                        contactSeller: document.getElementById('contactSeller').checked
+                    }
+                };
+
+                // Add poll options if poll category
+                if (formData.category === 'poll') {
+                    formData.pollOptions = Array.from(document.querySelectorAll('#pollOptionsList input')).map(input => input.value).filter(value => value.trim());
+                }
+
+                console.log('Creating post:', formData);
+                showNotification('Post created successfully!', 'success');
+                closePostModal();
+            });
         });
 
         // New function for main menu toggle
@@ -5584,42 +7649,7 @@
             }
         }
 
-        // Aggressive cleanup of any stuck notification elements that might cause blue lines
-        function cleanupStuckNotifications() {
-            // Target common notification patterns that create the blue "s" line
-            const notifications = document.querySelectorAll('.upload-progress, .notification, [class*="notification"], div[style*="position: fixed"][style*="top:"], div[style*="background"][style*="#00ffff"], div[style*="background"][style*="cyan"]');
-            notifications.forEach(el => {
-                const text = el.textContent?.trim() || '';
-                if (text.length <= 3 || text === 's' || text === 'S' || text.includes('Uploading') || text === '') {
-                    console.log('🧹 Removing stuck notification element:', text);
-                    el.remove();
-                }
-            });
-            
-            // Also remove any divs that are positioned at the top with cyan backgrounds
-            const fixedDivs = document.querySelectorAll('div[style*="position: fixed"][style*="top: 0"], div[style*="position:fixed"][style*="top:0"]');
-            fixedDivs.forEach(el => {
-                const styles = el.getAttribute('style') || '';
-                if (styles.includes('00ffff') || styles.includes('cyan')) {
-                    console.log('🧹 Removing fixed cyan element:', el.textContent);
-                    el.remove();
-                }
-            });
-        }
-
         document.addEventListener('DOMContentLoaded', function() {
-            cleanupStuckNotifications(); // Clean up immediately on page load
-            
-            // Run aggressive cleanup every 1 second to catch any blue elements
-            setInterval(cleanupStuckNotifications, 1000);
-            
-            // Also run cleanup when page becomes visible
-            document.addEventListener('visibilitychange', function() {
-                if (!document.hidden) {
-                    cleanupStuckNotifications();
-                }
-            });
-            
             console.log('Community page loaded, testing button functionality...');
             
             // Test essential functions on page load
@@ -6597,7 +8627,28 @@
             }
         }
 
-        // Modal functions removed - using direct posting system
+        function showPostingModal() {
+            const postModal = document.getElementById('postModal');
+            if (postModal) {
+                postModal.style.display = 'flex';
+                
+                // Initialize category button handlers
+                initializeCategoryButtons();
+                
+                // Set general as default selected category
+                document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
+                const generalBtn = document.querySelector('[data-category="general"]');
+                if (generalBtn) generalBtn.classList.add('selected');
+                
+                // Show appropriate fields for general category
+                toggleFieldsForCategory('general');
+                
+                console.log('✅ Post modal opened with category handlers initialized');
+            } else {
+                console.log('Opening posting modal...');
+                openAdvancedPostModal();
+            }
+        }
 
         function toggleAccountMode() {
             const currentMode = localStorage.getItem('accountMode') || 'personal';
@@ -9074,10 +11125,9 @@
                 return;
             }
             
-            // Set editing mode and populate direct posting with existing data
+            // Set editing mode and populate modal with existing data
             currentEditingPostId = postId;
-            console.log('Direct posting edit mode not yet implemented - using simplified approach');
-            showNotification('Edit mode temporarily simplified - please create new post', 'info');
+            openAdvancedPostModal(post.category, post);
         }
 
         // Delete post function
@@ -9736,7 +11786,7 @@
             if (modal) {
                 modal.remove();
             }
-            console.log(`✅ Bulk ${category} collection shared successfully!`);
+            showNotification(`Bulk ${category} collection shared successfully!`, 'success');
             
             // Refresh the community feed
             loadCommunityPosts();
@@ -9784,7 +11834,7 @@
             // Navigate to rental booking page
             window.location.href = '/customer-booking.html';
             
-            console.log(`✅ Opening rental booking for: ${itemTitle}`);
+            showNotification(`Opening rental booking for: ${itemTitle}`, 'info');
         }
 
         // Handle booking fee toggle
@@ -10033,7 +12083,27 @@
             }, 100);
         };
 
-        // Payment preview removed - modal deleted
+        // Update payment preview when rates change
+        function updatePaymentPreview() {
+            const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
+            const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
+            const selectedRate = document.querySelector('input[name="rentalRate"]:checked')?.value || 'daily';
+            
+            let baseRate = selectedRate === 'hourly' ? hourlyRate * 24 * 5 : dailyRate * 5; // 5-day sample
+            const securityDeposit = baseRate * 0.2; // 20% security deposit
+            const lateFee = 5.00;
+            const commission = baseRate * 0.05; // 5% commission
+            const sustainabilityFee = 2.50;
+            const tax = (baseRate + securityDeposit + lateFee + commission + sustainabilityFee) * 0.08;
+            const total = baseRate + securityDeposit + lateFee + commission + sustainabilityFee + tax;
+            
+            document.getElementById('previewRentalRate').textContent = `$${baseRate.toFixed(2)}`;
+            document.getElementById('previewSecurityDeposit').textContent = `$${securityDeposit.toFixed(2)}`;
+            document.getElementById('previewLateFee').textContent = `$${lateFee.toFixed(2)}`;
+            document.getElementById('previewCommission').textContent = `$${commission.toFixed(2)}`;
+            document.getElementById('previewTax').textContent = `$${tax.toFixed(2)}`;
+            document.getElementById('previewTotal').textContent = `$${total.toFixed(2)}`;
+        }
 
         // Add event listeners to rate inputs
         document.addEventListener('input', function(e) {
@@ -10108,19 +12178,12 @@
                     availabilitySet: ownerSelectedDates.length > 0
                 };
                 postData.availabilityDates = [...ownerSelectedDates];
-                // Get custom rental data from form
-                const customTerms = document.getElementById('rentalTermsCustom')?.value?.trim() || "Please handle with care. Must be returned in same condition.";
-                const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
-                const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 25;
-                const itemCondition = document.getElementById('itemCondition')?.value || 'good';
-                const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'escrow';
-                
-                postData.rentalTerms = customTerms;
-                postData.itemCondition = itemCondition;
-                postData.paymentMethod = paymentMethod;
-                postData.dailyRate = dailyRate;
-                postData.hourlyRate = hourlyRate;
-                postData.rentalRateType = "both"; // Allow both rates
+                postData.rentalTerms = "Please handle with care. Must be returned in same condition.";
+                postData.itemCondition = "good";
+                postData.paymentMethod = "escrow";
+                postData.dailyRate = 25;
+                postData.hourlyRate = 0;
+                postData.rentalRateType = "daily";
                 postData.deliveryOptions = {
                     selfPickup: true,
                     privateDelivery: false,
@@ -10146,7 +12209,7 @@
             ownerSelectedDates = [];
             
             // Show success and refresh
-            console.log('✅ Post created successfully!');
+            showNotification('Post created successfully!', 'success');
             loadCommunityPosts();
             console.log('✅ Post creation complete!');
         }

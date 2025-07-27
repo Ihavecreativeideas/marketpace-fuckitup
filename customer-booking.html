@@ -394,6 +394,11 @@
                     </div>
                     
                     <div class="cost-item">
+                        <span class="cost-label">MarketPace Commission (5%)</span>
+                        <span class="cost-value" id="commission">$0.00</span>
+                    </div>
+                    
+                    <div class="cost-item">
                         <span class="cost-label">Sustainability Fee</span>
                         <span class="cost-value" id="sustainabilityFee">$2.50</span>
                     </div>
@@ -473,19 +478,13 @@
                     hourlyRate = parseFloat(rentalData.hourlyRate) || 0;
                     currentRateType = rentalData.rentalRateType || 'daily';
                     
-                    // Display both rates if available, or show the available one
-                    if (dailyRate > 0 && hourlyRate > 0) {
-                        document.getElementById('rateAmount').textContent = `$${dailyRate} daily | $${hourlyRate} hourly`;
-                        document.getElementById('ratePeriod').textContent = 'flexible rates available';
-                        currentRateType = 'both';
-                    } else if (dailyRate > 0) {
+                    // Display current rate
+                    if (currentRateType === 'daily' && dailyRate > 0) {
                         document.getElementById('rateAmount').textContent = `$${dailyRate}`;
                         document.getElementById('ratePeriod').textContent = 'per day';
-                        currentRateType = 'daily';
-                    } else if (hourlyRate > 0) {
+                    } else if (currentRateType === 'hourly' && hourlyRate > 0) {
                         document.getElementById('rateAmount').textContent = `$${hourlyRate}`;
                         document.getElementById('ratePeriod').textContent = 'per hour';
-                        currentRateType = 'hourly';
                     }
                     
                     // Show delivery fee if delivery is selected
@@ -538,8 +537,7 @@
                 }
             } else {
                 // Fallback to any terms data available
-                const customTerms = rentalData.rentalTerms || rentalData.rentalTermsCustom;
-                termsDisplay.textContent = customTerms || 'Please handle with care. Must be returned in same condition.';
+                termsDisplay.textContent = rentalData.rentalTerms || 'Please handle with care. Must be returned in same condition.';
             }
         }
 
@@ -643,23 +641,14 @@
 
         function updatePaymentSummary() {
             const days = selectedDates.length;
-            let baseAmount = 0;
-            
-            // Calculate based on available rates
-            if (currentRateType === 'both') {
-                // Use daily rate for multi-day rentals, hourly for short-term
-                baseAmount = days >= 3 ? dailyRate * days : hourlyRate * days * 8; // 8 hours per day
-            } else if (currentRateType === 'daily') {
-                baseAmount = dailyRate * days;
-            } else if (currentRateType === 'hourly') {
-                baseAmount = hourlyRate * days * 8; // Assume 8 hours per day for hourly
-            }
+            const baseAmount = currentRateType === 'daily' ? dailyRate * days : hourlyRate * days * 8; // Assume 8 hours per day for hourly
             
             document.getElementById('rentalDays').textContent = days;
             document.getElementById('rentalCost').textContent = `$${baseAmount.toFixed(2)}`;
             
             // Calculate fees
             const securityDeposit = Math.max(baseAmount * 0.2, 25); // 20% of rental or minimum $25
+            const commission = baseAmount * 0.05; // 5% MarketPace commission
             const sustainabilityFee = 2.50;
             const lateFee = 5.00;
             
@@ -692,13 +681,14 @@
                 deliveryFee = 15.00;
             }
             
-            const subtotal = baseAmount + securityDeposit + bookingFee + sustainabilityFee + lateFee + deliveryFee;
+            const subtotal = baseAmount + securityDeposit + bookingFee + commission + sustainabilityFee + lateFee + deliveryFee;
             const salesTax = subtotal * 0.08; // 8% sales tax
             const total = subtotal + salesTax;
             
             // Update display
             document.getElementById('securityDeposit').textContent = `$${securityDeposit.toFixed(2)}`;
             document.getElementById('bookingFee').textContent = `$${bookingFee.toFixed(2)}`;
+            document.getElementById('commission').textContent = `$${commission.toFixed(2)}`;
             document.getElementById('salesTax').textContent = `$${salesTax.toFixed(2)}`;
             document.getElementById('totalAmount').textContent = `$${total.toFixed(2)}`;
         }
@@ -722,7 +712,7 @@
                     rentalCost: document.getElementById('rentalCost').textContent,
                     securityDeposit: document.getElementById('securityDeposit').textContent,
                     bookingFee: document.getElementById('bookingFee').textContent,
-
+                    commission: document.getElementById('commission').textContent,
                     sustainabilityFee: document.getElementById('sustainabilityFee').textContent,
                     lateFee: document.getElementById('lateFee').textContent,
                     salesTax: document.getElementById('salesTax').textContent,
