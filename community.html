@@ -8615,27 +8615,279 @@ Example:
             }
         }
 
+        // COMPLETELY REBUILT POSTING MODAL SYSTEM
         function showPostingModal() {
-            const postModal = document.getElementById('postModal');
-            if (postModal) {
-                postModal.style.display = 'flex';
-                
-                // Initialize category button handlers
-                initializeCategoryButtons();
-                
-                // Set general as default selected category
-                document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
-                const generalBtn = document.querySelector('[data-category="general"]');
-                if (generalBtn) generalBtn.classList.add('selected');
-                
-                // Show appropriate fields for general category
-                toggleFieldsForCategory('general');
-                
-                console.log('✅ Post modal opened with category handlers initialized');
-            } else {
-                console.log('Opening posting modal...');
-                openAdvancedPostModal();
+            console.log('🚀 Opening brand new posting modal...');
+            
+            // Remove any existing modal
+            const existingModal = document.querySelector('.posting-modal');
+            if (existingModal) {
+                existingModal.remove();
             }
+            
+            // Create new modal container
+            const modal = document.createElement('div');
+            modal.className = 'posting-modal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.85);
+                z-index: 100000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                overflow-y: auto;
+            `;
+            
+            // Create modal content
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: #0a0e27;
+                border: 2px solid #00ffff;
+                border-radius: 16px;
+                max-width: 700px;
+                width: 100%;
+                max-height: 90vh;
+                overflow-y: auto;
+                box-shadow: 0 0 40px rgba(0, 255, 255, 0.5);
+            `;
+            
+            // Build the modal HTML
+            modalContent.innerHTML = `
+                <div class="modal-header" style="padding: 24px; border-bottom: 1px solid rgba(0, 255, 255, 0.2); display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="margin: 0; color: #00ffff; font-size: 24px; font-weight: 600;">Create New Post</h2>
+                    <button onclick="closeModal()" style="background: none; border: none; color: #00ffff; font-size: 32px; cursor: pointer; line-height: 1;">&times;</button>
+                </div>
+                
+                <div class="modal-body" style="padding: 24px;">
+                    <!-- Category Selection -->
+                    <div style="margin-bottom: 24px;">
+                        <label style="display: block; color: #00ffff; margin-bottom: 8px; font-weight: 500;">Category</label>
+                        <select id="postCategory" onchange="updateCategoryFields()" style="width: 100%; padding: 12px; background: rgba(0, 255, 255, 0.05); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; color: white; font-size: 16px;">
+                            <option value="general">General</option>
+                            <option value="sale">For Sale</option>
+                            <option value="rent">For Rent</option>
+                            <option value="service">Service</option>
+                            <option value="event">Event</option>
+                            <option value="job">Job/Hiring</option>
+                            <option value="iso">ISO (In Search Of)</option>
+                            <option value="announcement">Announcement</option>
+                            <option value="poll">Poll</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Title -->
+                    <div style="margin-bottom: 24px;">
+                        <label style="display: block; color: #00ffff; margin-bottom: 8px; font-weight: 500;">Title</label>
+                        <input type="text" id="postTitle" placeholder="What are you posting?" style="width: 100%; padding: 12px; background: rgba(0, 255, 255, 0.05); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; color: white; font-size: 16px;">
+                    </div>
+                    
+                    <!-- Description -->
+                    <div style="margin-bottom: 24px;">
+                        <label style="display: block; color: #00ffff; margin-bottom: 8px; font-weight: 500;">Description</label>
+                        <textarea id="postDescription" rows="4" placeholder="Add details..." style="width: 100%; padding: 12px; background: rgba(0, 255, 255, 0.05); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; color: white; font-size: 16px; resize: vertical;"></textarea>
+                    </div>
+                    
+                    <!-- Dynamic Category Fields Container -->
+                    <div id="categorySpecificFields"></div>
+                    
+                    <!-- Submit Button -->
+                    <button onclick="submitNewPost()" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #00ffff, #0099cc); color: #0a0e27; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                        Create Post
+                    </button>
+                </div>
+            `;
+            
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Initialize with general category
+            updateCategoryFields();
+        }
+
+        // Update fields based on selected category
+        function updateCategoryFields() {
+            const category = document.getElementById('postCategory').value;
+            const container = document.getElementById('categorySpecificFields');
+            container.innerHTML = '';
+            
+            console.log('📋 Updating fields for category:', category);
+            
+            if (category === 'rent') {
+                container.innerHTML = `
+                    <div style="background: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 12px; margin-bottom: 24px;">
+                        <h3 style="color: #10b981; margin: 0 0 16px 0;">Rental Configuration</h3>
+                        
+                        <!-- Rental Rates -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                            <div>
+                                <label style="display: block; color: #10b981; margin-bottom: 6px; font-size: 14px;">Hourly Rate ($)</label>
+                                <input type="number" id="hourlyRate" step="0.01" placeholder="15.00" style="width: 100%; padding: 10px; background: rgba(0, 0, 0, 0.3); border: 1px solid #10b981; border-radius: 6px; color: white;">
+                            </div>
+                            <div>
+                                <label style="display: block; color: #3b82f6; margin-bottom: 6px; font-size: 14px;">Daily Rate ($)</label>
+                                <input type="number" id="dailyRate" step="0.01" placeholder="75.00" style="width: 100%; padding: 10px; background: rgba(0, 0, 0, 0.3); border: 1px solid #3b82f6; border-radius: 6px; color: white;">
+                            </div>
+                        </div>
+                        
+                        <!-- Terms -->
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; color: #00ffff; margin-bottom: 6px;">Rental Terms & Conditions</label>
+                            <textarea id="rentalTerms" rows="3" placeholder="Enter your rental terms..." style="width: 100%; padding: 10px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(0, 255, 255, 0.5); border-radius: 6px; color: white;"></textarea>
+                        </div>
+                        
+                        <!-- Delivery Options -->
+                        <div>
+                            <label style="display: block; color: #00ffff; margin-bottom: 8px;">Delivery Options</label>
+                            <label style="display: flex; align-items: center; margin-bottom: 8px; cursor: pointer;">
+                                <input type="checkbox" id="selfPickup" checked style="margin-right: 8px;">
+                                <span style="color: #e2e8f0;">Self Pickup Available</span>
+                            </label>
+                            <label style="display: flex; align-items: center; margin-bottom: 8px; cursor: pointer;">
+                                <input type="checkbox" id="privateDelivery" style="margin-right: 8px;">
+                                <span style="color: #e2e8f0;">Private Delivery</span>
+                            </label>
+                            <label style="display: flex; align-items: center; cursor: pointer;">
+                                <input type="checkbox" id="marketplaceDelivery" checked style="margin-right: 8px;">
+                                <span style="color: #e2e8f0;">MarketPace Delivery</span>
+                            </label>
+                        </div>
+                    </div>
+                `;
+            } else if (category === 'sale') {
+                container.innerHTML = `
+                    <div style="margin-bottom: 24px;">
+                        <label style="display: block; color: #00ffff; margin-bottom: 8px;">Price ($)</label>
+                        <input type="number" id="salePrice" step="0.01" placeholder="0.00" style="width: 100%; padding: 12px; background: rgba(0, 255, 255, 0.05); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; color: white;">
+                    </div>
+                `;
+            } else if (category === 'service') {
+                container.innerHTML = `
+                    <div style="background: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 12px; margin-bottom: 24px;">
+                        <h3 style="color: #3b82f6; margin: 0 0 16px 0;">Service Rates</h3>
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: flex; align-items: center; margin-bottom: 12px;">
+                                <input type="radio" name="serviceType" value="hourly" checked style="margin-right: 8px;">
+                                <span style="color: #e2e8f0;">Hourly Rate</span>
+                            </label>
+                            <label style="display: flex; align-items: center;">
+                                <input type="radio" name="serviceType" value="fixed" style="margin-right: 8px;">
+                                <span style="color: #e2e8f0;">Fixed Price</span>
+                            </label>
+                        </div>
+                        <input type="number" id="serviceRate" step="0.01" placeholder="Enter rate..." style="width: 100%; padding: 10px; background: rgba(0, 0, 0, 0.3); border: 1px solid #3b82f6; border-radius: 6px; color: white;">
+                    </div>
+                `;
+            } else if (category === 'event') {
+                container.innerHTML = `
+                    <div style="background: rgba(168, 85, 247, 0.1); padding: 20px; border-radius: 12px; margin-bottom: 24px;">
+                        <h3 style="color: #a855f7; margin: 0 0 16px 0;">Event Details</h3>
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; color: #a855f7; margin-bottom: 6px;">Event Date & Time</label>
+                            <input type="datetime-local" id="eventDateTime" style="width: 100%; padding: 10px; background: rgba(0, 0, 0, 0.3); border: 1px solid #a855f7; border-radius: 6px; color: white;">
+                        </div>
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; color: #a855f7; margin-bottom: 6px;">Location</label>
+                            <input type="text" id="eventLocation" placeholder="Event location..." style="width: 100%; padding: 10px; background: rgba(0, 0, 0, 0.3); border: 1px solid #a855f7; border-radius: 6px; color: white;">
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Close modal function
+        function closeModal() {
+            const modal = document.querySelector('.posting-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        // Submit new post
+        function submitNewPost() {
+            const category = document.getElementById('postCategory').value;
+            const title = document.getElementById('postTitle').value.trim();
+            const description = document.getElementById('postDescription').value.trim();
+            
+            if (!title) {
+                showNotification('Please enter a title', 'error');
+                return;
+            }
+            
+            // Create post data
+            const postData = {
+                id: Date.now().toString(),
+                category: category,
+                title: title,
+                description: description,
+                timestamp: new Date().toISOString(),
+                author: currentUser?.name || 'MarketPace Member',
+                location: 'Orange Beach, AL',
+                likes: 0,
+                comments: 0,
+                shares: 0
+            };
+            
+            // Add category-specific data
+            if (category === 'rent') {
+                const hourlyRate = parseFloat(document.getElementById('hourlyRate')?.value) || 0;
+                const dailyRate = parseFloat(document.getElementById('dailyRate')?.value) || 0;
+                const terms = document.getElementById('rentalTerms')?.value || '';
+                
+                postData.hourlyRate = hourlyRate;
+                postData.dailyRate = dailyRate;
+                postData.rentalTerms = terms;
+                postData.deliveryOptions = {
+                    selfPickup: document.getElementById('selfPickup')?.checked || false,
+                    privateDelivery: document.getElementById('privateDelivery')?.checked || false,
+                    marketPaceDelivery: document.getElementById('marketplaceDelivery')?.checked || false
+                };
+                
+                // Set display price
+                if (hourlyRate > 0 && dailyRate > 0) {
+                    postData.price = `$${hourlyRate}/hr | $${dailyRate}/day`;
+                } else if (hourlyRate > 0) {
+                    postData.price = `$${hourlyRate}/hour`;
+                } else if (dailyRate > 0) {
+                    postData.price = `$${dailyRate}/day`;
+                } else {
+                    postData.price = 'Contact for price';
+                }
+                
+                console.log('✅ Rental post created with rates:', {
+                    hourly: hourlyRate,
+                    daily: dailyRate,
+                    terms: terms
+                });
+            } else if (category === 'sale') {
+                const price = parseFloat(document.getElementById('salePrice')?.value) || 0;
+                postData.price = price > 0 ? `$${price}` : 'Contact for price';
+            } else if (category === 'service') {
+                const rate = parseFloat(document.getElementById('serviceRate')?.value) || 0;
+                const type = document.querySelector('input[name="serviceType"]:checked')?.value || 'hourly';
+                postData.serviceRate = rate;
+                postData.serviceType = type;
+                postData.price = rate > 0 ? `$${rate}/${type === 'hourly' ? 'hr' : 'job'}` : 'Contact for price';
+            } else if (category === 'event') {
+                postData.eventDateTime = document.getElementById('eventDateTime')?.value || '';
+                postData.eventLocation = document.getElementById('eventLocation')?.value || '';
+            }
+            
+            // Save to localStorage
+            let posts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+            posts.unshift(postData);
+            localStorage.setItem('communityPosts', JSON.stringify(posts));
+            
+            console.log('💾 Post saved successfully:', postData);
+            
+            // Close modal and refresh
+            closeModal();
+            showNotification('Post created successfully!', 'success');
+            loadCommunityPosts();
         }
 
         function toggleAccountMode() {
