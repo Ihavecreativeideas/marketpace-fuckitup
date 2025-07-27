@@ -281,8 +281,6 @@ All features are designed to strengthen local communities by keeping commerce lo
 ✓ **FORM INTEGRATION**: Owner availability data automatically collected during rental post submission and stored with rental metadata
 ✓ **CALENDAR CSS STYLING**: Professional calendar styling with selected/hover states, past date disabling, and responsive grid layout
 ✓ **JAVASCRIPT FUNCTIONS**: Complete calendar generation, date selection/deselection, preset functionality, and real-time display updates
-✓ **CALENDAR GRID FIX**: Fixed calendar grid layout with proper cell sizing (35px height), preventing CSS grid collapse and ensuring proper 7-column display
-✓ **CSS OPTIMIZATION**: Updated calendar container with min-height and fixed cell dimensions for consistent visual appearance across devices
 
 ✓ **COMPLETE DUAL QR CHECK-IN/CHECK-OUT SYSTEM INTEGRATION FOR RENTAL TRANSACTIONS FULLY IMPLEMENTED** (July 26, 2025)
 ✓ **CUSTOMER BOOKING INTEGRATION**: Enhanced customer-booking.html to automatically create dual QR transaction data during rental confirmation with proper grace period and late fee configuration
