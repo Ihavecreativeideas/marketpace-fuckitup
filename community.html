@@ -8787,7 +8787,9 @@ Example:
         
         // Step 1: Build and Display the Calendar Grid
         window.generateOwnerAvailabilityCalendar = async function(rentalItemId) {
-            console.log('✅ Generating owner availability calendar...');
+            // STEP 3: Use Real Rental ID (no demo fallbacks)
+            const realRentalId = rentalItemId || window.getCurrentRentalId();
+            console.log('✅ Generating calendar for rental ID:', realRentalId);
             
             const calendar = document.getElementById('ownerAvailabilityCalendar');
             if (!calendar) {
@@ -8823,8 +8825,9 @@ Example:
             // Generate 28 clickable date buttons (4 weeks)
             const today = new Date();
             
-            // Live system: Check for real unavailable dates
-            const unavailableDates = rentalItemId ? await window.getUnavailableDates(rentalItemId) : [];
+            // STEP 4: Load Real Unavailable Dates (no demo mode)
+            const unavailableDates = await window.getUnavailableDates(realRentalId);
+            console.log('📅 Real unavailable dates for', realRentalId, ':', unavailableDates);
             
             for (let i = 0; i < 28; i++) {
                 const date = new Date(today);
@@ -11758,6 +11761,22 @@ Example:
             const timestamp = Date.now();
             const random = Math.random().toString(36).substring(2, 8);
             return `rental_${timestamp}_${random}`;
+        };
+
+        // STEP 2: Connect to Real Rental Data
+        window.getCurrentRentalId = function() {
+            // Get rental ID from current post being created/edited
+            const postModal = document.querySelector('[data-rental-id]');
+            if (postModal) {
+                return postModal.getAttribute('data-rental-id');
+            }
+            
+            // For new rentals, generate a new ID
+            if (!window.currentRentalId) {
+                window.currentRentalId = window.generateRentalItemId();
+                console.log('📝 Generated new rental ID:', window.currentRentalId);
+            }
+            return window.currentRentalId;
         };
 
         // Save rental item data when creating rental post

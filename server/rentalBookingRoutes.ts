@@ -8,11 +8,11 @@ const router = express.Router();
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2024-10-28.acacia',
+  apiVersion: '2025-06-30.basil',
 });
 
 // STEP 1: Get unavailable dates for a rental item
-router.get('/api/rentals/:itemId/unavailable-dates', async (req, res) => {
+router.get('/rentals/:itemId/unavailable-dates', async (req, res) => {
   try {
     const { itemId } = req.params;
     
@@ -36,7 +36,7 @@ router.get('/api/rentals/:itemId/unavailable-dates', async (req, res) => {
 });
 
 // STEP 2: Create rental booking with escrow
-router.post('/api/rentals/:itemId/book', async (req, res) => {
+router.post('/rentals/:itemId/book', async (req, res) => {
   try {
     const { itemId } = req.params;
     const { renterId, selectedDates, totalAmount, securityDeposit, cancellationFee, renterNotes } = req.body;

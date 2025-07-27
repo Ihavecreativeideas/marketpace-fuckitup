@@ -1,0 +1,132 @@
+step-by-step real fix to completely remove “demo mode” and ensure your rental calendar system runs on live, working data.
+
+✅ STEP 1: Purge All demo_ References (Clean the Fake Stuff)
+🔍 In Replit:
+Open the Shell tab (or use Cmd/Ctrl + Shift + F for full project search).
+
+Search for:
+
+bash
+Copy
+Edit
+demo_
+Look for anything like:
+
+demo_rental_item_123
+
+demo_mode = true
+
+useDemoCalendar()
+
+Hardcoded arrays like ["2025-07-30", "2025-08-03"] with the comment // demo dates
+
+Delete or replace all those lines. If it's being used in an API call like:
+
+js
+Copy
+Edit
+fetch(`/api/rentals/demo_rental_item_123/unavailable-dates`)
+— replace demo_rental_item_123 with the actual rental item ID (e.g., rental._id or rental.id).
+
+✅ STEP 2: Connect to Real Rental Data
+Make sure the calendar is tied to the real post object (not a placeholder). Look in your JavaScript for where this is happening:
+
+js
+Copy
+Edit
+fetch(`/api/rentals/${rentalId}/unavailable-dates`)
+If you see a hardcoded value like:
+
+js
+Copy
+Edit
+const rentalId = "demo_rental_item_123";
+➡️ Replace it with the actual dynamic value from the current post. Example:
+
+js
+Copy
+Edit
+const rentalId = document.getElementById("rentalIdInput").value;
+Or if you’re using a rendering system:
+
+js
+Copy
+Edit
+const rentalId = currentRental.id; // pulled from your database object
+✅ STEP 3: Check the Backend Endpoint
+You need to verify that your backend route (/api/rentals/:id/unavailable-dates) is:
+
+Receiving a real rental ID
+
+Querying your actual database (not returning dummy arrays)
+
+Example Fix (Node.js + Supabase):
+ts
+Copy
+Edit
+app.get('/api/rentals/:id/unavailable-dates', async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await supabase
+    .from('rentalBookings')
+    .select('date')
+    .eq('rental_id', id);
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  const unavailableDates = data.map(item => item.date);
+  res.json(unavailableDates);
+});
+✅ STEP 4: Add rental_id to Form When Creating New Rentals
+If rental posts aren’t being saved with an ID that the calendar can use later, then nothing works live. Make sure when a post is submitted, the server saves:
+
+rental_id
+
+Available dates (selectedDatesInput)
+
+Cancellation fee
+
+Hourly/daily pricing
+
+✅ STEP 5: Confirm Calendar Loads from Real ID
+In the calendar init function, ensure you’re calling:
+
+js
+Copy
+Edit
+fetch(`/api/rentals/${realRentalId}/unavailable-dates`)
+And NOT:
+
+js
+Copy
+Edit
+fetch('/api/rentals/demo_rental_item_123/unavailable-dates')
+🔄 TEST EVERYTHING
+Once all the above is done:
+
+Create a real rental post.
+
+Open the modal to edit it.
+
+Ensure the calendar loads actual booked dates.
+
+Try selecting new dates.
+
+Submit and re-open to confirm your selected dates are now blocked.
+
+✳️ Bonus Tip: Add a Console Log
+Inside your calendar loader:
+
+js
+Copy
+Edit
+console.log("Rental ID:", rentalId);
+That way, you can confirm the system is using real IDs and not falling back to demo_* values silently.
+
+✅ End Result
+❌ No more demo fallbacks
+
+✅ Real rental data with accurate bookings
+
+✅ Calendar system connected live to your database
+
+✅ Peace of mind and trust that what users see is real
