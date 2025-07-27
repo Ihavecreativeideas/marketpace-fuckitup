@@ -5423,8 +5423,26 @@ Example:
                                 <button type="button" onclick="clearAllDays()" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">Clear All</button>
                             </div>
                             <div id="selectedDatesDisplay" style="font-size: 12px; color: #94a3b8; line-height: 1.4;">
-                                <strong>Selected Dates:</strong> <span id="selectedDatesCount">0</span> days selected
-                                <div id="selectedDatesList" style="margin-top: 4px;"></div>
+                                <strong>Selected Dates:</strong> <span id="ownerSelectedDatesCount">0</span> days selected
+                                <div id="ownerSelectedDatesList" style="margin-top: 4px;"></div>
+                            </div>
+                            <!-- Step 3: Hidden input field for form submission -->
+                            <input type="hidden" id="selectedDatesInput" name="selectedDates" value="">
+                        </div>
+                        
+                        <!-- Step 5: Cancellation Fee -->
+                        <div style="margin-top: 20px;">
+                            <h5 style="color: #00ffff; margin-bottom: 12px; display: flex; align-items: center;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-right: 8px;">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                                Cancellation Policy
+                            </h5>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; color: #00ffff;">Non-Refundable Cancellation Fee (Optional):</label>
+                                <input type="number" id="cancellationFee" placeholder="0.00" step="0.01" min="0" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                                <small style="color: #94a3b8; font-size: 12px; margin-top: 4px; display: block;">If set, this amount will be deducted from escrow if a renter cancels their booking. Leave blank for no cancellation fee.</small>
                             </div>
                         </div>
                     </div>
@@ -10797,25 +10815,24 @@ Example:
         // Owner Availability Calendar Functions (for rental posting modal)
         let ownerSelectedDates = [];
         
-        // CRITICAL FIX: Make functions globally accessible
-        window.ownerSelectedDates = ownerSelectedDates;
+        // CRITICAL FIX: Global calendar system for rental availability
+        window.ownerSelectedDates = [];
         
-        // IMMEDIATE FIX: Define all functions globally FIRST
+        // Step 1: Build and Display the Calendar Grid
         window.generateOwnerAvailabilityCalendar = function() {
-            console.log('✅ PHASE 6: generateOwnerAvailabilityCalendar called from window');
+            console.log('✅ Generating owner availability calendar...');
             
             const calendar = document.getElementById('ownerAvailabilityCalendar');
             if (!calendar) {
-                console.error('❌ PHASE 6: Calendar element not found');
+                console.error('❌ Calendar container not found');
                 return;
             }
             
-            console.log('✅ PHASE 6: Calendar element found:', calendar.id);
-
+            // Clear existing content
             calendar.innerHTML = '';
             
-            // Add day headers - CRITICAL FIX
-            const dayHeaders = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+            // Add day headers (Sun - Sat)
+            const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             dayHeaders.forEach(day => {
                 const header = document.createElement('div');
                 header.className = 'calendar-day header';
@@ -10831,12 +10848,23 @@ Example:
                     justify-content: center;
                     height: 40px;
                     font-size: 12px;
+                    border-radius: 6px;
                 `;
                 calendar.appendChild(header);
             });
 
-            // Generate calendar days
+            // Generate 28 clickable date buttons (4 weeks)
             const today = new Date();
+            
+            // Step 4: Simulate some unavailable dates (already booked)
+            const unavailableDates = [
+                // Simulate some random bookings in the next 4 weeks
+                new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                new Date(today.getTime() + 12 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                new Date(today.getTime() + 19 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+            ];
+            
             for (let i = 0; i < 28; i++) {
                 const date = new Date(today);
                 date.setDate(today.getDate() + i);
@@ -10845,95 +10873,136 @@ Example:
                 dayElement.className = 'calendar-day';
                 dayElement.textContent = date.getDate();
                 dayElement.dataset.date = date.toISOString().split('T')[0];
+                dayElement.dataset.fullDate = date.toDateString();
                 
-                // CRITICAL FIX: Add inline styles to ensure calendar renders
+                const isUnavailable = unavailableDates.includes(dayElement.dataset.date);
+                const isSelected = window.ownerSelectedDates.includes(dayElement.dataset.date);
+                
+                // Base styles for all date buttons
                 dayElement.style.cssText = `
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     height: 40px;
-                    cursor: pointer;
                     border: 1px solid rgba(0, 255, 255, 0.3);
                     background: rgba(15, 23, 42, 0.8);
                     color: #e2e8f0;
                     font-size: 12px;
                     font-weight: 500;
-                    border-radius: 4px;
+                    border-radius: 6px;
                     transition: all 0.2s ease;
+                    cursor: pointer;
                 `;
                 
-                if (ownerSelectedDates.includes(dayElement.dataset.date)) {
+                if (isUnavailable) {
+                    // Step 4: Mark unavailable dates (already booked)
+                    dayElement.classList.add('unavailable');
+                    dayElement.style.background = 'rgba(239, 68, 68, 0.2)';
+                    dayElement.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+                    dayElement.style.color = '#ef4444';
+                    dayElement.style.cursor = 'not-allowed';
+                    dayElement.textContent = date.getDate() + ' ✗';
+                    dayElement.title = 'This date is already booked and unavailable';
+                } else if (isSelected) {
+                    // Selected dates
                     dayElement.classList.add('selected');
-                    dayElement.style.background = 'rgba(16, 185, 129, 0.3)';
+                    dayElement.style.background = 'linear-gradient(135deg, #10b981, #059669)';
                     dayElement.style.borderColor = '#10b981';
-                    dayElement.style.color = '#10b981';
+                    dayElement.style.color = 'white';
+                    dayElement.style.fontWeight = '600';
+                } else {
+                    // Available dates - add hover effects
+                    dayElement.addEventListener('mouseenter', function() {
+                        dayElement.style.background = 'rgba(0, 255, 255, 0.1)';
+                        dayElement.style.borderColor = '#00ffff';
+                        dayElement.style.transform = 'scale(1.05)';
+                    });
+                    
+                    dayElement.addEventListener('mouseleave', function() {
+                        dayElement.style.background = 'rgba(15, 23, 42, 0.8)';
+                        dayElement.style.borderColor = 'rgba(0, 255, 255, 0.3)';
+                        dayElement.style.transform = 'scale(1)';
+                    });
                 }
                 
-                dayElement.addEventListener('hover', function() {
-                    if (!ownerSelectedDates.includes(dayElement.dataset.date)) {
-                        dayElement.style.background = 'rgba(0, 255, 255, 0.2)';
-                    }
-                });
-                
-                dayElement.addEventListener('click', function() {
-                    window.toggleOwnerDate(this, dayElement.dataset.date);
-                });
+                // Add click handler only for available dates
+                if (!isUnavailable) {
+                    dayElement.addEventListener('click', function() {
+                        window.toggleOwnerDate(this, dayElement.dataset.date);
+                    });
+                }
                 
                 calendar.appendChild(dayElement);
             }
+            
+            // Update the display counter
+            window.updateOwnerSelectedDatesDisplay();
         };
         
+        // Update the "Selected Dates: X days selected" counter and display
         window.updateOwnerSelectedDatesDisplay = function() {
             const countElement = document.getElementById('ownerSelectedDatesCount');
             const listElement = document.getElementById('ownerSelectedDatesList');
             
             if (countElement) {
-                countElement.textContent = ownerSelectedDates.length;
+                countElement.textContent = window.ownerSelectedDates.length;
             }
             
             if (listElement) {
-                if (ownerSelectedDates.length === 0) {
-                    listElement.innerHTML = 'No dates selected';
+                if (window.ownerSelectedDates.length === 0) {
+                    listElement.innerHTML = '<span style="color: #94a3b8;">No dates selected</span>';
                 } else {
-                    listElement.innerHTML = ownerSelectedDates.slice(0, 5).map(date => {
+                    listElement.innerHTML = window.ownerSelectedDates.slice(0, 5).map(date => {
                         const dateObj = new Date(date);
-                        return `<span style="background: rgba(0, 255, 255, 0.2); padding: 2px 6px; border-radius: 4px; margin: 2px; display: inline-block; font-size: 11px;">
+                        return `<span style="background: rgba(0, 255, 255, 0.2); padding: 2px 6px; border-radius: 4px; margin: 2px; display: inline-block; font-size: 11px; color: #00ffff;">
                             ${dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                         </span>`;
-                    }).join('') + (ownerSelectedDates.length > 5 ? `<span style="color: #00ffff;">... +${ownerSelectedDates.length - 5} more</span>` : '');
+                    }).join('') + (window.ownerSelectedDates.length > 5 ? `<span style="color: #00ffff; margin-left: 4px;">... +${window.ownerSelectedDates.length - 5} more</span>` : '');
                 }
+            }
+            
+            // Step 3: Save selected dates to hidden form field
+            const hiddenInput = document.getElementById('selectedDatesInput');
+            if (hiddenInput) {
+                hiddenInput.value = window.ownerSelectedDates.join(',');
             }
         };
         
+        // Toggle individual date selection
         window.toggleOwnerDate = function(element, dateStr) {
             console.log('Toggling date:', dateStr);
             
-            if (ownerSelectedDates.includes(dateStr)) {
-                ownerSelectedDates = ownerSelectedDates.filter(d => d !== dateStr);
+            if (window.ownerSelectedDates.includes(dateStr)) {
+                // Deselect date
+                window.ownerSelectedDates = window.ownerSelectedDates.filter(d => d !== dateStr);
                 element.classList.remove('selected');
                 element.style.background = 'rgba(15, 23, 42, 0.8)';
                 element.style.borderColor = 'rgba(0, 255, 255, 0.3)';
                 element.style.color = '#e2e8f0';
+                element.style.fontWeight = '500';
             } else {
-                ownerSelectedDates.push(dateStr);
+                // Select date
+                window.ownerSelectedDates.push(dateStr);
                 element.classList.add('selected');
-                element.style.background = 'rgba(16, 185, 129, 0.3)';
+                element.style.background = 'linear-gradient(135deg, #10b981, #059669)';
                 element.style.borderColor = '#10b981';
-                element.style.color = '#10b981';
+                element.style.color = 'white';
+                element.style.fontWeight = '600';
             }
             
             window.updateOwnerSelectedDatesDisplay();
         };
         
-        // Preset functions
+        // Step 2: Make the Preset Buttons Work
         window.selectAllDays = function() {
-            ownerSelectedDates = [];
+            console.log('Selecting all days...');
+            window.ownerSelectedDates = [];
             const today = new Date();
             
             for (let i = 0; i < 28; i++) {
                 const date = new Date(today);
                 date.setDate(today.getDate() + i);
-                ownerSelectedDates.push(date.toISOString().split('T')[0]);
+                window.ownerSelectedDates.push(date.toISOString().split('T')[0]);
             }
             
             window.generateOwnerAvailabilityCalendar();
@@ -10941,14 +11010,16 @@ Example:
         };
         
         window.selectWeekends = function() {
-            ownerSelectedDates = [];
+            console.log('Selecting weekends only...');
+            window.ownerSelectedDates = [];
             const today = new Date();
             
             for (let i = 0; i < 28; i++) {
                 const date = new Date(today);
                 date.setDate(today.getDate() + i);
+                // Sunday = 0, Saturday = 6
                 if (date.getDay() === 0 || date.getDay() === 6) {
-                    ownerSelectedDates.push(date.toISOString().split('T')[0]);
+                    window.ownerSelectedDates.push(date.toISOString().split('T')[0]);
                 }
             }
             
@@ -10957,14 +11028,16 @@ Example:
         };
         
         window.selectWeekdays = function() {
-            ownerSelectedDates = [];
+            console.log('Selecting weekdays only...');
+            window.ownerSelectedDates = [];
             const today = new Date();
             
             for (let i = 0; i < 28; i++) {
                 const date = new Date(today);
                 date.setDate(today.getDate() + i);
-                if (date.getDay() !== 0 && date.getDay() !== 6) {
-                    ownerSelectedDates.push(date.toISOString().split('T')[0]);
+                // Monday = 1, Friday = 5
+                if (date.getDay() >= 1 && date.getDay() <= 5) {
+                    window.ownerSelectedDates.push(date.toISOString().split('T')[0]);
                 }
             }
             
@@ -10973,16 +11046,17 @@ Example:
         };
         
         window.clearAllDays = function() {
-            ownerSelectedDates = [];
+            console.log('Clearing all selected dates...');
+            window.ownerSelectedDates = [];
             window.generateOwnerAvailabilityCalendar();
             window.updateOwnerSelectedDatesDisplay();
         };
+        
+        // Global aliases for backward compatibility
+        window.selectAllDates = window.selectAllDays;
+        window.clearAllDates = window.clearAllDays;
 
-        // DUPLICATE REMOVED - Function now defined globally above
 
-        // DUPLICATE REMOVED - Functions now defined globally above
-
-        // DUPLICATE REMOVED - Preset functions now defined globally above
 
         // Calendar month navigation functions
         let currentOwnerCalendarMonth = new Date();
@@ -11016,47 +11090,9 @@ Example:
             }
         }
 
-        // Preset functions for owner calendar
-        function selectDatesByCondition(condition) {
-            ownerSelectedDates = [];
-            const today = new Date();
-            
-            for (let i = 0; i < 28; i++) {
-                const date = new Date(today);
-                date.setDate(today.getDate() + i);
-                const dayOfWeek = date.getDay();
-                
-                if (condition === 'weekends' && (dayOfWeek === 0 || dayOfWeek === 6)) {
-                    ownerSelectedDates.push(date.toISOString().split('T')[0]);
-                } else if (condition === 'weekdays' && (dayOfWeek >= 1 && dayOfWeek <= 5)) {
-                    ownerSelectedDates.push(date.toISOString().split('T')[0]);
-                } else if (condition === 'all') {
-                    ownerSelectedDates.push(date.toISOString().split('T')[0]);
-                }
-            }
-            
-            generateOwnerAvailabilityCalendar();
-            updateOwnerSelectedDatesDisplay();
-        }
 
-        // CRITICAL FIX: Global preset functions for calendar
-        function selectWeekends() { selectDatesByCondition('weekends'); }
-        function selectWeekdays() { selectDatesByCondition('weekdays'); }
-        
-        window.selectWeekends = selectWeekends;
-        window.selectWeekdays = selectWeekdays;
 
-        function clearAllDays() {
-            ownerSelectedDates = [];
-            generateOwnerAvailabilityCalendar();
-            updateOwnerSelectedDatesDisplay();
-        }
-        
-        // CRITICAL FIX: Add missing clearAllDates function that was being called
-        function clearAllDates() {
-            clearAllDays(); // Just call the existing function
-        }
-        window.clearAllDates = clearAllDates;
+
 
 
         // Post interaction data storage
