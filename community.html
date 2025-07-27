@@ -8823,8 +8823,8 @@ Example:
             // Generate 28 clickable date buttons (4 weeks)
             const today = new Date();
             
-            // Live system: Check for real unavailable dates (no demo mode)
-            const unavailableDates = await window.getUnavailableDates(rentalItemId || "demo_rental_item_123");
+            // Live system: Check for real unavailable dates
+            const unavailableDates = rentalItemId ? await window.getUnavailableDates(rentalItemId) : [];
             
             for (let i = 0; i < 28; i++) {
                 const date = new Date(today);
@@ -11654,6 +11654,18 @@ Example:
                 if (currentEditingPostId) {
                     updateExistingPost();
                 } else {
+                    // For rental posts, save rental item data first
+                    if (category === 'rent') {
+                        const title = document.getElementById('postTitle')?.value || '';
+                        const description = document.getElementById('postDescription')?.value || '';
+                        const rentalId = window.saveRentalItem({
+                            title: title,
+                            description: description,
+                            dailyRate: window.rentalRateData?.dailyRate || 0,
+                            hourlyRate: window.rentalRateData?.hourlyRate || 0
+                        });
+                        console.log('✅ Rental item created with ID:', rentalId);
+                    }
                     submitSinglePost();
                 }
             }
@@ -11741,30 +11753,34 @@ Example:
             }
         };
 
-        // Demo booking function for testing
-        window.demoBookRental = async function() {
-            const selectedDates = window.ownerSelectedDates || [];
-            if (selectedDates.length === 0) {
-                alert('Please select at least one date');
-                return;
-            }
+        // Generate unique rental item ID for new postings
+        window.generateRentalItemId = function() {
+            const timestamp = Date.now();
+            const random = Math.random().toString(36).substring(2, 8);
+            return `rental_${timestamp}_${random}`;
+        };
 
-            const dailyRate = 50; // $50 per day demo
-            const totalAmount = selectedDates.length * dailyRate;
-            const securityDeposit = 100; // $100 security deposit
-
-            try {
-                await window.createRentalBooking(
-                    'demo_rental_item_123',
-                    selectedDates,
-                    totalAmount,
-                    securityDeposit,
-                    0,
-                    'Demo booking from calendar'
-                );
-            } catch (error) {
-                console.error('Demo booking failed:', error);
-            }
+        // Save rental item data when creating rental post
+        window.saveRentalItem = function(rentalData) {
+            const rentalId = window.generateRentalItemId();
+            
+            // Store rental item data
+            const rentalItem = {
+                id: rentalId,
+                ownerId: window.currentUser?.id || 'user_' + Date.now(),
+                title: rentalData.title || 'Rental Item',
+                description: rentalData.description || '',
+                dailyRate: rentalData.dailyRate || 0,
+                hourlyRate: rentalData.hourlyRate || 0,
+                availableDates: window.ownerSelectedDates || [],
+                createdAt: new Date().toISOString()
+            };
+            
+            // Store in localStorage (in production this would go to database)
+            localStorage.setItem(`rental_${rentalId}`, JSON.stringify(rentalItem));
+            
+            console.log('✅ Rental item saved:', rentalItem);
+            return rentalId;
         };
 
         // Global submitSinglePost function

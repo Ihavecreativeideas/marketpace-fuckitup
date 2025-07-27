@@ -374,22 +374,6 @@ export const schedules = pgTable("schedules", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Rental bookings table for managing rental reservations
-export const rentalBookings = pgTable("rental_bookings", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  rentalItemId: varchar("rental_item_id").notNull(),
-  renterId: varchar("renter_id").notNull().references(() => users.id),
-  bookingDate: date("booking_date").notNull(),
-  totalAmount: integer("total_amount").notNull().default(0),
-  securityDeposit: integer("security_deposit").notNull().default(0),
-  cancellationFee: integer("cancellation_fee").notNull().default(0),
-  bookingStatus: varchar("booking_status").notNull().default("pending"),
-  escrowStatus: varchar("escrow_status").notNull().default("pending"),
-  renterNotes: text("renter_notes"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
 // Tips and payments table
 export const tips = pgTable("tips", {
   id: uuid("id").primaryKey().defaultRandom(),
