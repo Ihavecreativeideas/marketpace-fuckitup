@@ -67,6 +67,47 @@
             100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
         }
 
+        /* Owner Availability Calendar Styles */
+        .calendar-day {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            cursor: pointer;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            background: rgba(15, 23, 42, 0.8);
+            color: #e2e8f0;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border-radius: 6px;
+        }
+        
+        .calendar-day.header {
+            background: rgba(0, 255, 255, 0.2);
+            color: #00ffff;
+            font-weight: 600;
+            cursor: default;
+            border: 1px solid rgba(0, 255, 255, 0.5);
+        }
+        
+        .calendar-day:hover:not(.header) {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: #00ffff;
+            transform: scale(1.05);
+        }
+        
+        .calendar-day.selected {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: #10b981;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .calendar-day.selected:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+
         @keyframes mypaceRadarSweep {
             0% { 
                 transform: rotate(0deg);
@@ -3437,8 +3478,11 @@ Example:
                 case 'rent':
                     console.log('Showing rental rate group');
                     if (rentalRateGroup) rentalRateGroup.style.display = 'block';
+                    if (priceGroup) priceGroup.style.display = 'none'; // Hide general price field for rentals
                     // Initialize owner availability calendar
                     setTimeout(() => {
+                        currentOwnerCalendarMonth = new Date(); // Reset to current month
+                        updateCalendarMonth();
                         generateOwnerAvailabilityCalendar();
                         updateOwnerSelectedDatesDisplay();
                     }, 100);
@@ -10775,6 +10819,106 @@ Example:
             
             if (listElement) {
                 if (ownerSelectedDates.length === 0) {
+                    listElement.innerHTML = 'No dates selected. Click on calendar dates to select availability.';
+                } else {
+                    const sortedDates = ownerSelectedDates.sort();
+                    const displayDates = sortedDates.slice(0, 5);
+                    const remainingCount = sortedDates.length - 5;
+                    
+                    let datesList = displayDates.map(date => {
+                        const dateObj = new Date(date + 'T00:00:00');
+                        return dateObj.toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric' 
+                        });
+                    }).join(', ');
+                    
+                    if (remainingCount > 0) {
+                        datesList += ` and ${remainingCount} more`;
+                    }
+                    
+                    listElement.innerHTML = datesList;
+                }
+            }
+        }
+
+        // Calendar preset functions
+        function selectWeekends() {
+            ownerSelectedDates = [];
+            const today = new Date();
+            
+            for (let i = 0; i < 28; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                const dayOfWeek = date.getDay();
+                
+                if (dayOfWeek === 0 || dayOfWeek === 6) { // Sunday or Saturday
+                    ownerSelectedDates.push(date.toISOString().split('T')[0]);
+                }
+            }
+            
+            generateOwnerAvailabilityCalendar();
+            updateOwnerSelectedDatesDisplay();
+        }
+
+        function selectWeekdays() {
+            ownerSelectedDates = [];
+            const today = new Date();
+            
+            for (let i = 0; i < 28; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                const dayOfWeek = date.getDay();
+                
+                if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Monday to Friday
+                    ownerSelectedDates.push(date.toISOString().split('T')[0]);
+                }
+            }
+            
+            generateOwnerAvailabilityCalendar();
+            updateOwnerSelectedDatesDisplay();
+        }
+
+        function selectAllDays() {
+            ownerSelectedDates = [];
+            const today = new Date();
+            
+            for (let i = 0; i < 28; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                ownerSelectedDates.push(date.toISOString().split('T')[0]);
+            }
+            
+            generateOwnerAvailabilityCalendar();
+            updateOwnerSelectedDatesDisplay();
+        }
+
+        function clearAllDates() {
+            ownerSelectedDates = [];
+            generateOwnerAvailabilityCalendar();
+            updateOwnerSelectedDatesDisplay();
+        }
+
+        // Calendar month navigation functions
+        let currentOwnerCalendarMonth = new Date();
+
+        function navigateCalendarMonth(direction) {
+            currentOwnerCalendarMonth.setMonth(currentOwnerCalendarMonth.getMonth() + direction);
+            updateCalendarMonth();
+            generateOwnerAvailabilityCalendar();
+        }
+
+        function updateCalendarMonth() {
+            const monthElement = document.getElementById('rentalCalendarMonth');
+            if (monthElement) {
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+                monthElement.textContent = `${monthNames[currentOwnerCalendarMonth.getMonth()]} ${currentOwnerCalendarMonth.getFullYear()}`;
+            }
+        }
+            
+            if (listElement) {
+                if (ownerSelectedDates.length === 0) {
                     listElement.innerHTML = 'No dates selected';
                 } else {
                     listElement.innerHTML = ownerSelectedDates.slice(0, 5).map(date => {
@@ -11362,14 +11506,29 @@ Example:
             
             // Get price based on category
             let priceValue = '';
+            let rentalRateData = null;
             if (category === 'rent') {
                 const hourlyRate = parseFloat(document.getElementById('hourlyRateAmount')?.value) || 0;
                 const dailyRate = parseFloat(document.getElementById('dailyRateAmount')?.value) || 0;
                 const selectedRate = document.querySelector('input[name="rentalRate"]:checked')?.value || 'daily';
                 
+                // Store both rates for rental posts
+                rentalRateData = {
+                    hourlyRate: hourlyRate,
+                    dailyRate: dailyRate,
+                    selectedType: selectedRate
+                };
+                
+                // Set display price based on selection
                 if (selectedRate === 'hourly' && hourlyRate > 0) {
                     priceValue = `$${hourlyRate}/hour`;
                 } else if (selectedRate === 'daily' && dailyRate > 0) {
+                    priceValue = `$${dailyRate}/day`;
+                } else if (hourlyRate > 0 && dailyRate > 0) {
+                    priceValue = `$${hourlyRate}/hour • $${dailyRate}/day`;
+                } else if (hourlyRate > 0) {
+                    priceValue = `$${hourlyRate}/hour`;
+                } else if (dailyRate > 0) {
                     priceValue = `$${dailyRate}/day`;
                 }
             } else if (category === 'service') {
@@ -11479,6 +11638,9 @@ Example:
                     totalDaysAvailable: ownerSelectedDates.length
                 };
                 
+                // Store rental rate data
+                rentalExtras.rentalRates = rentalRateData;
+                
                 // Collect other rental-specific data
                 rentalExtras = {
                     itemCondition: document.getElementById('itemCondition')?.value || '',
@@ -11486,7 +11648,7 @@ Example:
                     hourlyRate: hourlyRate,
                     dailyRate: dailyRate,
                     rentalRateType: selectedRate,
-                    availabilityDates: selectedRentalDates || [], // Add selected availability dates
+                    availabilityDates: ownerSelectedDates || [], // Use actual owner selected dates
                     deliveryOptions: {
                         selfPickup: document.getElementById('selfPickupOptionRental')?.checked || false,
                         privateDelivery: document.getElementById('privateDeliveryOptionRental')?.checked || false,
@@ -11503,7 +11665,11 @@ Example:
                 description: description,
                 price: priceValue,
                 actionButtons: actionButtons,
-                images: uploadedImages.map(img => ({ url: img.url, name: img.name })), // Include uploaded images
+                images: uploadedImages && uploadedImages.length > 0 ? uploadedImages.map(img => ({ 
+                    url: img.url || img.data, 
+                    name: img.name || `image_${Date.now()}`,
+                    id: img.id || Date.now()
+                })) : [], // Properly format uploaded images
                 termsAndConditions: termsData, // Add terms data
                 bookingFee: bookingFeeData, // Add booking fee data
                 ...rentalExtras, // Add rental-specific data
@@ -11525,8 +11691,9 @@ Example:
             addPostToProfile(formData, currentPostingMode);
             console.log('✅ Post added to profile for mode:', currentPostingMode);
             
-            // Clear uploaded images after successful post
+            // Clear uploaded images and rental data after successful post
             uploadedImages = [];
+            ownerSelectedDates = []; // Clear calendar selection
             
             // Close modal and show success
             const modal = document.querySelector('.posting-modal');
