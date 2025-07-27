@@ -8766,14 +8766,27 @@ Example:
         window.ownerSelectedDates = [];
         
         // Live system: Function to get real unavailable dates from bookings
-        window.getUnavailableDates = function() {
-            // This will integrate with real booking data
-            // For now returns empty array (all dates available)
-            return [];
+        window.getUnavailableDates = async function(rentalItemId) {
+            try {
+                if (!rentalItemId) return [];
+                
+                const response = await fetch(`/api/rentals/${rentalItemId}/unavailable-dates`);
+                if (!response.ok) {
+                    console.error('Failed to fetch unavailable dates');
+                    return [];
+                }
+                
+                const data = await response.json();
+                console.log('📅 Loaded unavailable dates:', data.unavailableDates);
+                return data.unavailableDates || [];
+            } catch (error) {
+                console.error('Error fetching unavailable dates:', error);
+                return [];
+            }
         };
         
         // Step 1: Build and Display the Calendar Grid
-        window.generateOwnerAvailabilityCalendar = function() {
+        window.generateOwnerAvailabilityCalendar = async function(rentalItemId) {
             console.log('✅ Generating owner availability calendar...');
             
             const calendar = document.getElementById('ownerAvailabilityCalendar');
@@ -8811,7 +8824,7 @@ Example:
             const today = new Date();
             
             // Live system: Check for real unavailable dates (no demo mode)
-            const unavailableDates = window.getUnavailableDates ? window.getUnavailableDates() : [];
+            const unavailableDates = await window.getUnavailableDates(rentalItemId);
             
             for (let i = 0; i < 28; i++) {
                 const date = new Date(today);
@@ -8946,7 +8959,7 @@ Example:
         };
         
         // Step 2: Make the Preset Buttons Work
-        window.selectAllDays = function() {
+        window.selectAllDays = async function() {
             console.log('Selecting all days...');
             window.ownerSelectedDates = [];
             const today = new Date();
@@ -8957,11 +8970,11 @@ Example:
                 window.ownerSelectedDates.push(date.toISOString().split('T')[0]);
             }
             
-            window.generateOwnerAvailabilityCalendar();
+            await window.generateOwnerAvailabilityCalendar();
             window.updateOwnerSelectedDatesDisplay();
         };
         
-        window.selectWeekends = function() {
+        window.selectWeekends = async function() {
             console.log('Selecting weekends only...');
             window.ownerSelectedDates = [];
             const today = new Date();
@@ -8975,11 +8988,11 @@ Example:
                 }
             }
             
-            window.generateOwnerAvailabilityCalendar();
+            await window.generateOwnerAvailabilityCalendar();
             window.updateOwnerSelectedDatesDisplay();
         };
         
-        window.selectWeekdays = function() {
+        window.selectWeekdays = async function() {
             console.log('Selecting weekdays only...');
             window.ownerSelectedDates = [];
             const today = new Date();
@@ -8993,14 +9006,14 @@ Example:
                 }
             }
             
-            window.generateOwnerAvailabilityCalendar();
+            await window.generateOwnerAvailabilityCalendar();
             window.updateOwnerSelectedDatesDisplay();
         };
         
-        window.clearAllDays = function() {
+        window.clearAllDays = async function() {
             console.log('Clearing all selected dates...');
             window.ownerSelectedDates = [];
-            window.generateOwnerAvailabilityCalendar();
+            await window.generateOwnerAvailabilityCalendar();
             window.updateOwnerSelectedDatesDisplay();
         };
         
@@ -11671,6 +11684,80 @@ Example:
             
             console.log('CRITICAL: Rental rate data captured:', window.rentalRateData);
         }
+
+        // BOOKING FUNCTIONALITY: Create rental booking with escrow
+        window.createRentalBooking = async function(rentalItemId, selectedDates, totalAmount, securityDeposit = 0, cancellationFee = 0, renterNotes = '') {
+            try {
+                console.log('🔄 Creating rental booking...');
+                
+                const renterId = window.currentUser?.id || 'demo_user_' + Date.now();
+                
+                const response = await fetch(`/api/rentals/${rentalItemId}/book`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        renterId,
+                        selectedDates,
+                        totalAmount: Math.round(totalAmount * 100), // Convert to cents
+                        securityDeposit: Math.round(securityDeposit * 100),
+                        cancellationFee: Math.round(cancellationFee * 100),
+                        renterNotes
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to create booking');
+                }
+
+                const data = await response.json();
+                console.log('✅ Booking created successfully:', data);
+
+                // Store booking details for confirmation page
+                const bookingId = data.bookings[0]?.id || 'N/A';
+                localStorage.setItem('lastBookingId', bookingId);
+                localStorage.setItem('lastBookingAmount', String(totalAmount * 100));
+                localStorage.setItem('lastBookingDeposit', String(securityDeposit * 100));
+                localStorage.setItem('lastBookingDates', selectedDates.join(', '));
+
+                // Navigate to confirmation page
+                window.location.href = `/rental-booking-confirmation.html?bookingId=${bookingId}&amount=${totalAmount * 100}&deposit=${securityDeposit * 100}&dates=${encodeURIComponent(selectedDates.join(', '))}`;
+
+                return data;
+            } catch (error) {
+                console.error('❌ Error creating booking:', error);
+                alert('Failed to create booking: ' + error.message);
+                throw error;
+            }
+        };
+
+        // Demo booking function for testing
+        window.demoBookRental = async function() {
+            const selectedDates = window.ownerSelectedDates || [];
+            if (selectedDates.length === 0) {
+                alert('Please select at least one date');
+                return;
+            }
+
+            const dailyRate = 50; // $50 per day demo
+            const totalAmount = selectedDates.length * dailyRate;
+            const securityDeposit = 100; // $100 security deposit
+
+            try {
+                await window.createRentalBooking(
+                    'demo_rental_item_123',
+                    selectedDates,
+                    totalAmount,
+                    securityDeposit,
+                    0,
+                    'Demo booking from calendar'
+                );
+            } catch (error) {
+                console.error('Demo booking failed:', error);
+            }
+        };
 
         // Global submitSinglePost function
         function submitSinglePost() {

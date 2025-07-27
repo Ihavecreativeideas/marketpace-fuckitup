@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import express from 'express';
+import rentalBookingRoutes from './rentalBookingRoutes';
 import cors from 'cors';
 import path from 'path';
 import session from 'express-session';
@@ -6800,6 +6801,7 @@ registerSponsorshipRoutes(app);
 app.use('/', tipRoutes);
 app.use('/', subscriptionRoutes);
 app.use('/', sponsorManagementRoutes);
+app.use(rentalBookingRoutes);
 
 // Setup Marketplace Routes with Notifications
 registerMarketplaceRoutes(app);

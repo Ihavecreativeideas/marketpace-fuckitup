@@ -2,7 +2,6 @@ import {
   users,
   events,
   rentalItems,
-  rentalAvailability,
   rentalBookings,
   communityPosts,
 } from "../shared/schema";
@@ -14,8 +13,7 @@ type User = InferSelectModel<typeof users>;
 type UpsertUser = InferInsertModel<typeof users>;
 type RentalItem = InferSelectModel<typeof rentalItems>;
 type InsertRentalItem = InferInsertModel<typeof rentalItems>;
-type RentalAvailability = InferSelectModel<typeof rentalAvailability>;
-type InsertRentalAvailability = InferInsertModel<typeof rentalAvailability>;
+
 type RentalBooking = InferSelectModel<typeof rentalBookings>;
 type InsertRentalBooking = InferInsertModel<typeof rentalBookings>;
 type CommunityPost = InferSelectModel<typeof communityPosts>;
@@ -35,9 +33,7 @@ export interface IStorage {
   getRentalItemsByOwner(ownerId: string): Promise<RentalItem[]>;
   updateRentalItem(id: string, updates: Partial<RentalItem>): Promise<RentalItem>;
   
-  // Rental availability
-  setRentalAvailability(availability: InsertRentalAvailability[]): Promise<RentalAvailability[]>;
-  getRentalAvailability(rentalItemId: string, startDate: Date, endDate: Date): Promise<RentalAvailability[]>;
+
   
   // Rental bookings
   createRentalBooking(booking: InsertRentalBooking): Promise<RentalBooking>;

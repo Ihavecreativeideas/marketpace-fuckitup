@@ -73,53 +73,31 @@ export const rentalItems = pgTable("rental_items", {
   cancellationFee: integer("cancellation_fee"), // in cents, non-refundable
   isRefundableCancellation: boolean("is_refundable_cancellation").default(false),
   cancellationPolicy: text("cancellation_policy"),
-  minRentalDuration: integer("min_rental_duration").default(1), // hours
-  maxRentalDuration: integer("max_rental_duration"), // hours
-  location: varchar("location"),
-  address: text("address"),
-  latitude: real("latitude"),
-  longitude: real("longitude"),
-  images: jsonb("images"), // array of cloudinary URLs
+  condition: varchar("condition"), // excellent, good, used, fair
+  availableDates: jsonb("available_dates"), // owner-selected available dates
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Rental availability calendar
-export const rentalAvailability = pgTable("rental_availability", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  rentalItemId: uuid("rental_item_id").notNull().references(() => rentalItems.id),
-  date: timestamp("date").notNull(),
-  startTime: varchar("start_time"), // "09:00" format
-  endTime: varchar("end_time"), // "17:00" format
-  isAvailable: boolean("is_available").default(true),
-  customRate: integer("custom_rate"), // in cents, overrides default rates for special dates
-  notes: text("notes"),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-// Rental bookings with escrow
+// Rental bookings table
 export const rentalBookings = pgTable("rental_bookings", {
   id: uuid("id").primaryKey().defaultRandom(),
   rentalItemId: uuid("rental_item_id").notNull().references(() => rentalItems.id),
   renterId: varchar("renter_id").notNull().references(() => users.id),
   ownerId: varchar("owner_id").notNull().references(() => users.id),
-  startDate: timestamp("start_date").notNull(),
-  endDate: timestamp("end_date").notNull(),
-  startTime: varchar("start_time"),
-  endTime: varchar("end_time"),
+  bookingDate: varchar("booking_date").notNull(), // YYYY-MM-DD format
+  startTime: varchar("start_time"), // HH:MM format for hourly bookings
+  endTime: varchar("end_time"), // HH:MM format for hourly bookings
   totalAmount: integer("total_amount").notNull(), // in cents
   securityDeposit: integer("security_deposit"), // in cents
   cancellationFee: integer("cancellation_fee"), // in cents
-  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
-  escrowStatus: varchar("escrow_status").default('pending'), // pending, held, released, refunded
-  bookingStatus: varchar("booking_status").default('confirmed'), // confirmed, in_progress, completed, cancelled
-  cancellationReason: text("cancellation_reason"),
-  cancelledAt: timestamp("cancelled_at"),
-  cancelledBy: varchar("cancelled_by"), // renter or owner
-  specialInstructions: text("special_instructions"),
-  pickupMethod: varchar("pickup_method").default('pickup'), // pickup, delivery
-  deliveryAddress: text("delivery_address"),
+  escrowStatus: varchar("escrow_status").notNull().default("pending"), // pending, released, refunded
+  bookingStatus: varchar("booking_status").notNull().default("confirmed"), // confirmed, cancelled, completed
+  paymentIntentId: varchar("payment_intent_id"), // Stripe payment intent ID
+  isRefundable: boolean("is_refundable").default(true),
+  renterNotes: text("renter_notes"),
+  ownerNotes: text("owner_notes"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
