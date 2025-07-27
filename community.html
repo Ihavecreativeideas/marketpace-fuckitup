@@ -6406,7 +6406,7 @@ Example:
         
         async function handleProfilePicUpload(file) {
             try {
-                showUploadProgress('Uploading profile picture...');
+                console.log('📤 Uploading profile picture...');
                 const result = await uploadToCloudinary(file, '/api/upload/profile');
                 
                 // Update profile picture display
@@ -6434,7 +6434,7 @@ Example:
             }
             
             try {
-                showUploadProgress(`Uploading ${files.length} image(s)...`);
+                console.log(`📤 Uploading ${files.length} image(s)...`);
                 
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
@@ -6477,7 +6477,7 @@ Example:
             const uploadedImages = [];
             
             try {
-                showUploadProgress(`Uploading ${files.length} product image(s)...`);
+                console.log(`📤 Uploading ${files.length} product image(s)...`);
                 
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
@@ -7551,12 +7551,24 @@ Example:
             }
         }
 
-        // Clean up any stuck notification elements that might cause blue lines
+        // Aggressive cleanup of any stuck notification elements that might cause blue lines
         function cleanupStuckNotifications() {
-            const notifications = document.querySelectorAll('.upload-progress, .notification, [class*="notification"], div[style*="position: fixed"][style*="top:"]');
+            // Target common notification patterns that create the blue "s" line
+            const notifications = document.querySelectorAll('.upload-progress, .notification, [class*="notification"], div[style*="position: fixed"][style*="top:"], div[style*="background"][style*="#00ffff"], div[style*="background"][style*="cyan"]');
             notifications.forEach(el => {
-                if (el.textContent.length <= 3 || el.textContent.trim() === 's' || el.textContent.trim() === '') {
-                    console.log('🧹 Removing stuck notification element:', el.textContent);
+                const text = el.textContent?.trim() || '';
+                if (text.length <= 3 || text === 's' || text === 'S' || text.includes('Uploading') || text === '') {
+                    console.log('🧹 Removing stuck notification element:', text);
+                    el.remove();
+                }
+            });
+            
+            // Also remove any divs that are positioned at the top with cyan backgrounds
+            const fixedDivs = document.querySelectorAll('div[style*="position: fixed"][style*="top: 0"], div[style*="position:fixed"][style*="top:0"]');
+            fixedDivs.forEach(el => {
+                const styles = el.getAttribute('style') || '';
+                if (styles.includes('00ffff') || styles.includes('cyan')) {
+                    console.log('🧹 Removing fixed cyan element:', el.textContent);
                     el.remove();
                 }
             });
@@ -7564,6 +7576,17 @@ Example:
 
         document.addEventListener('DOMContentLoaded', function() {
             cleanupStuckNotifications(); // Clean up immediately on page load
+            
+            // Run aggressive cleanup every 1 second to catch any blue elements
+            setInterval(cleanupStuckNotifications, 1000);
+            
+            // Also run cleanup when page becomes visible
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    cleanupStuckNotifications();
+                }
+            });
+            
             console.log('Community page loaded, testing button functionality...');
             
             // Test essential functions on page load
