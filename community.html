@@ -5417,10 +5417,10 @@ Example:
                                 <!-- Calendar will be populated by JavaScript -->
                             </div>
                             <div style="display: flex; gap: 8px; margin: 12px 0; flex-wrap: wrap;">
-                                <button type="button" onclick="selectWeekends()" style="background: rgba(0, 255, 255, 0.2); color: #00ffff; border: 1px solid rgba(0, 255, 255, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">Weekends Only</button>
-                                <button type="button" onclick="selectWeekdays()" style="background: rgba(0, 255, 255, 0.2); color: #00ffff; border: 1px solid rgba(0, 255, 255, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">Weekdays Only</button>
-                                <button type="button" onclick="selectAllDays()" style="background: rgba(0, 255, 255, 0.2); color: #00ffff; border: 1px solid rgba(0, 255, 255, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">All Days</button>
-                                <button type="button" onclick="clearAllDays()" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">Clear All</button>
+                                <button type="button" onclick="window.selectWeekends()" style="background: rgba(0, 255, 255, 0.2); color: #00ffff; border: 1px solid rgba(0, 255, 255, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">Weekends Only</button>
+                                <button type="button" onclick="window.selectWeekdays()" style="background: rgba(0, 255, 255, 0.2); color: #00ffff; border: 1px solid rgba(0, 255, 255, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">Weekdays Only</button>
+                                <button type="button" onclick="window.selectAllDays()" style="background: rgba(0, 255, 255, 0.2); color: #00ffff; border: 1px solid rgba(0, 255, 255, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">All Days</button>
+                                <button type="button" onclick="window.clearAllDays()" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">Clear All</button>
                             </div>
                             <div id="selectedDatesDisplay" style="font-size: 12px; color: #94a3b8; line-height: 1.4;">
                                 <strong>Selected Dates:</strong> <span id="ownerSelectedDatesCount">0</span> days selected
@@ -8826,18 +8826,17 @@ Example:
                 case 'rent':
                     console.log('Showing rental fields');
                     if (rentalRateField) rentalRateField.style.display = 'block';
-                    // CRITICAL FIX: Initialize calendar for rentals with proper scoping
-                    setTimeout(() => {
-                        console.log('CRITICAL: Initializing rental calendar...');
-                        if (typeof generateOwnerAvailabilityCalendar === 'function') {
-                            generateOwnerAvailabilityCalendar();
-                            updateOwnerSelectedDatesDisplay();
-                        } else {
-                            console.error('generateOwnerAvailabilityCalendar function not found, calling window version');
+                    // CRITICAL FIX: Use DOMContentLoaded instead of setTimeout for proper timing
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', function() {
+                            console.log('CRITICAL: Initializing rental calendar after DOM loaded...');
                             window.generateOwnerAvailabilityCalendar();
-                            window.updateOwnerSelectedDatesDisplay();
-                        }
-                    }, 200);
+                        });
+                    } else {
+                        // DOM is already loaded, call directly
+                        console.log('CRITICAL: DOM already loaded, initializing rental calendar...');
+                        window.generateOwnerAvailabilityCalendar();
+                    }
                     if (deliveryMethodField) deliveryMethodField.style.display = 'block';
                     
                     // Embedded calendar disabled to prevent glitching
