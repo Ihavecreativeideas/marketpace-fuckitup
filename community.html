@@ -1089,7 +1089,7 @@
             border-radius: 16px;
             max-width: 360px;
             width: 92%;
-            max-height: 85vh;
+            max-height: 65vh;
             overflow-y: auto;
             border: 1px solid rgba(0, 255, 255, 0.3);
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.2), inset 0 0 15px rgba(0, 255, 255, 0.05);
@@ -1104,21 +1104,21 @@
         /* Prevent mobile zoom and handle keyboard */
         @media screen and (max-height: 700px) {
             .post-modal {
-                padding-top: 5vh;
+                padding-top: 10vh;
             }
             .post-modal-content {
-                max-height: 80vh;
-                margin-bottom: 5vh;
+                max-height: 55vh;
+                margin-bottom: 10vh;
             }
         }
 
         @media screen and (max-height: 600px) {
             .post-modal {
-                padding-top: 3vh;
+                padding-top: 8vh;
             }
             .post-modal-content {
-                max-height: 85vh;
-                margin-bottom: 3vh;
+                max-height: 50vh;
+                margin-bottom: 8vh;
             }
         }
 
@@ -5195,8 +5195,8 @@ Example:
                         <div id="bulkItemContainer"></div>
                     </div>
                     
-                    <!-- Basic Price Field (hidden for rental posts) -->
-                    <div id="priceField" style="margin-bottom: 20px; display: none;">
+                    <!-- Basic Price Field -->
+                    <div id="priceField" style="margin-bottom: 20px; display: block;">
                         <label style="display: block; margin-bottom: 5px; color: #00ffff;">Price:</label>
                         <input type="text" id="postPrice" placeholder="$0.00" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;" onchange="console.log('Price changed to:', this.value);">
                     </div>
@@ -5661,9 +5661,9 @@ Example:
                         </div>
                     </div>
                     
-                    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 25px; padding: 20px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; border-top: 1px solid rgba(0, 255, 255, 0.2);">
-                        <button type="button" onclick="this.closest('.posting-modal').remove()" style="padding: 12px 24px; background: #666; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">Cancel</button>
-                        <button type="button" id="submitButton" onclick="handleFormSubmission()" style="padding: 12px 24px; background: #00ffff; color: #1a0b3d; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">Create Post</button>
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button type="button" onclick="this.closest('.posting-modal').remove()" style="padding: 10px 20px; background: #666; color: white; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
+                        <button type="button" id="submitButton" onclick="handleFormSubmission()" style="padding: 10px 20px; background: #00ffff; color: #1a0b3d; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Create Post</button>
                     </div>
                 </form>
             `;
@@ -6159,8 +6159,7 @@ Example:
                 singleFields.style.display = 'block';
                 bulkFields.style.display = 'none';
                 collectionField.style.display = 'none';
-                // Don't force price field to show - let category switching handle it
-                if (priceField) priceField.style.display = 'none';
+                priceField.style.display = 'block';
             }
         }
 
@@ -7721,7 +7720,12 @@ Example:
                 // Load existing posts on page load
                 loadCommunityPosts();
                 
-                // Removed auto-notification to prevent blue line at top
+                // Show a subtle notification that buttons are working (with null check)
+                setTimeout(() => {
+                    if (typeof showNotification === 'function') {
+                        showNotification('Community feed loaded successfully! All buttons active.', 'success');
+                    }
+                }, 500);
                 
             } catch (error) {
                 console.error('❌ Error initializing community functions:', error);
@@ -11485,8 +11489,6 @@ Example:
                 }
             }
             
-            console.log('✅ Terms validation passed, continuing with post creation...');
-            
             // Get price based on category
             let priceValue = '';
             if (category === 'rent') {
@@ -11660,16 +11662,12 @@ Example:
             const modal = document.querySelector('.posting-modal');
             if (modal) {
                 modal.remove();
-                console.log('✅ Modal closed successfully');
             }
             showNotification(`${category.charAt(0).toUpperCase() + category.slice(1)} post "${title}" shared successfully!`, 'success');
             
             // Refresh the community feed to show the new post
-            console.log('🔄 Refreshing community feed...');
-            setTimeout(() => {
-                loadCommunityPosts();
-                console.log('✅ Community feed refreshed');
-            }, 500);
+            loadCommunityPosts();
+            console.log('✅ Community feed refreshed');
         }
 
         // Global submitBulkPost function  
