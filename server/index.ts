@@ -9,7 +9,7 @@ import session from 'express-session';
 import crypto from 'crypto';
 import Stripe from 'stripe';
 import { BusinessSchedulingService } from './business-scheduling';
-import { setupRealIntegrationRoutes } from './realIntegrationTester';
+// import { setupRealIntegrationRoutes } from './realIntegrationTester'; // File missing - commented out
 import { setupShopifyBusinessRoutes } from './shopifyBusinessIntegration';
 import { registerFacebookShopRoutes } from './facebookShopIntegration';
 import { registerAdminRoutes } from './adminRoutes';
@@ -6311,7 +6311,7 @@ app.post('/api/qr/generate-employee', async (req, res) => {
 });
 
 // Setup real integration testing routes
-setupRealIntegrationRoutes(app);
+// setupRealIntegrationRoutes(app); // Function commented out - missing import file
 
 // Setup Shopify business integration routes
 setupShopifyBusinessRoutes(app);
