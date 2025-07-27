@@ -4753,13 +4753,19 @@
             }
         }
 
-        // Posting Modal System
+        // CLEAN POSTING MODAL SYSTEM - REBUILT FROM SCRATCH
         let currentPostingMode = 'personal';
-        let currentEditingPostId = null;
+        let isEditingPost = false;
+        let editingPostId = null;
 
-        // Open posting modal
-        function openPostModal(type = 'general', existingPost = null) {
-            currentEditingPostId = existingPost ? existingPost.id : null;
+        // Main function to open posting modal
+        function openPostModal(category = 'general', existingPost = null) {
+            // Remove any existing modal
+            const existingModal = document.getElementById('postingModal');
+            if (existingModal) existingModal.remove();
+            
+            isEditingPost = !!existingPost;
+            editingPostId = existingPost ? existingPost.id : null;
             
             const modal = document.createElement('div');
             modal.id = 'postingModal';
@@ -4767,41 +4773,706 @@
             modal.innerHTML = `
                 <div class="posting-modal-content">
                     <div class="modal-header">
-                        <h2>${existingPost ? 'Edit Post' : 'Create Post'}</h2>
+                        <h2>${isEditingPost ? 'Edit Post' : 'Create Post'}</h2>
                         <button onclick="closePostModal()" class="close-btn">&times;</button>
                     </div>
                     
-                    <div class="posting-mode-selector">
-                        <div id="postingModeLabel" class="mode-label">POSTING AS PERSONAL</div>
-                        <div class="mode-buttons">
-                            <button id="personalModeBtn" onclick="switchPostingMode('personal')" class="mode-btn active">Personal</button>
-                            <button id="businessModeBtn" onclick="switchPostingMode('business')" class="mode-btn">Business</button>
+                    <form id="postForm" onsubmit="submitPost(event)">
+                        <!-- Posting Mode Selector -->
+                        <div class="posting-mode-selector">
+                            <div class="mode-label">${currentPostingMode === 'personal' ? 'POSTING AS PERSONAL' : 'POSTING AS BUSINESS'}</div>
+                            <div class="mode-buttons">
+                                <button type="button" class="mode-btn ${currentPostingMode === 'personal' ? 'active' : ''}" onclick="setPostingMode('personal')">Personal</button>
+                                <button type="button" class="mode-btn ${currentPostingMode === 'business' ? 'active' : ''}" onclick="setPostingMode('business')">Business</button>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <form id="postForm">
+                        
+                        <!-- Category Selection -->
                         <div class="form-group">
                             <label>Category</label>
-                            <select id="postCategory" onchange="updateCategoryFields()">
-                                <option value="general">General</option>
-                                <option value="sale">For Sale</option>
-                                <option value="service">Service</option>
-                                <option value="rent">For Rent</option>
-                                <option value="poll">Poll</option>
-                                <option value="iso">ISO (In Search Of)</option>
-                                <option value="job">Job/Hiring</option>
+                            <select id="postCategory" onchange="updateFormFields()" required>
+                                <option value="general" ${category === 'general' ? 'selected' : ''}>General</option>
+                                <option value="sale" ${category === 'sale' ? 'selected' : ''}>For Sale</option>
+                                <option value="service" ${category === 'service' ? 'selected' : ''}>Service</option>
+                                <option value="rent" ${category === 'rent' ? 'selected' : ''}>For Rent</option>
+                                <option value="poll" ${category === 'poll' ? 'selected' : ''}>Poll</option>
+                                <option value="iso" ${category === 'iso' ? 'selected' : ''}>ISO (In Search Of)</option>
+                                <option value="job" ${category === 'job' ? 'selected' : ''}>Job/Hiring</option>
+                                <option value="event" ${category === 'event' ? 'selected' : ''}>Event</option>
+                                <option value="announcement" ${category === 'announcement' ? 'selected' : ''}>Announcement</option>
                             </select>
                         </div>
                         
+                        <!-- Title -->
                         <div class="form-group">
                             <label>Title</label>
-                            <input type="text" id="postTitle" placeholder="What's this about?" required>
+                            <input type="text" id="postTitle" placeholder="What's this about?" required value="${existingPost?.title || ''}">
                         </div>
                         
+                        <!-- Description -->
                         <div class="form-group">
                             <label>Description</label>
-                            <textarea id="postDescription" placeholder="Tell us more..." rows="3"></textarea>
+                            <textarea id="postDescription" placeholder="Tell us more..." rows="4" required>${existingPost?.description || ''}</textarea>
                         </div>
+                        
+                        <!-- Category-Specific Fields Container -->
+                        <div id="categoryFields"></div>
+                        
+                        <!-- Image Upload -->
+                        <div class="form-group">
+                            <label>Images (Optional)</label>
+                            <input type="file" id="postImages" multiple accept="image/*" onchange="handleImageUpload(event)">
+                            <div id="imagePreview" class="image-preview"></div>
+                        </div>
+                        
+                        <!-- Form Actions -->
+                        <div class="modal-actions">
+                            <button type="button" onclick="closePostModal()" class="cancel-btn">Cancel</button>
+                            <button type="submit" class="submit-btn">${isEditingPost ? 'Update Post' : 'Create Post'}</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Initialize form fields based on category
+            setTimeout(() => {
+                updateFormFields();
+                if (existingPost) {
+                    populateExistingPostData(existingPost);
+                }
+            }, 100);
+        }
+
+        // Close modal function
+        function closePostModal() {
+            const modal = document.getElementById('postingModal');
+            if (modal) {
+                modal.remove();
+            }
+            isEditingPost = false;
+            editingPostId = null;
+        }
+
+        // Set posting mode
+        function setPostingMode(mode) {
+            currentPostingMode = mode;
+            const label = document.querySelector('.mode-label');
+            const personalBtn = document.querySelector('.mode-btn:first-child');
+            const businessBtn = document.querySelector('.mode-btn:last-child');
+            
+            if (label) {
+                label.textContent = mode === 'personal' ? 'POSTING AS PERSONAL' : 'POSTING AS BUSINESS';
+            }
+            
+            if (personalBtn && businessBtn) {
+                personalBtn.classList.toggle('active', mode === 'personal');
+                businessBtn.classList.toggle('active', mode === 'business');
+            }
+        }
+
+        // Update form fields based on category
+        function updateFormFields() {
+            const category = document.getElementById('postCategory').value;
+            const fieldsContainer = document.getElementById('categoryFields');
+            
+            if (!fieldsContainer) return;
+            
+            let categoryHTML = '';
+            
+            switch (category) {
+                case 'sale':
+                    categoryHTML = `
+                        <div class="form-group">
+                            <label>Price</label>
+                            <input type="number" id="price" placeholder="0.00" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Condition</label>
+                            <select id="condition">
+                                <option value="new">New</option>
+                                <option value="like-new">Like New</option>
+                                <option value="good">Good</option>
+                                <option value="fair">Fair</option>
+                                <option value="poor">Poor</option>
+                            </select>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'service':
+                    categoryHTML = `
+                        <div class="form-group">
+                            <label>Service Type</label>
+                            <select id="serviceType">
+                                <option value="hourly">Hourly Rate</option>
+                                <option value="fixed">Fixed Price</option>
+                                <option value="estimate">Free Estimate</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Rate/Price</label>
+                            <input type="number" id="serviceRate" placeholder="0.00" step="0.01" min="0">
+                        </div>
+                    `;
+                    break;
+                    
+                case 'rent':
+                    categoryHTML = `
+                        <div class="form-group">
+                            <label>Rental Rate Options</label>
+                            <div class="rate-options">
+                                <div class="rate-option">
+                                    <label><input type="checkbox" id="hourlyRateEnabled"> Hourly Rate</label>
+                                    <input type="number" id="hourlyRate" placeholder="0.00" step="0.01" min="0" disabled>
+                                </div>
+                                <div class="rate-option">
+                                    <label><input type="checkbox" id="dailyRateEnabled"> Daily Rate</label>
+                                    <input type="number" id="dailyRate" placeholder="0.00" step="0.01" min="0" disabled>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Item Condition</label>
+                            <select id="itemCondition">
+                                <option value="excellent">Excellent</option>
+                                <option value="good">Good</option>
+                                <option value="used">Used</option>
+                                <option value="fair">Fair</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Security Deposit</label>
+                            <input type="number" id="securityDeposit" placeholder="0.00" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Terms & Conditions</label>
+                            <textarea id="rentalTerms" placeholder="Enter your rental terms and conditions..." rows="3"></textarea>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'poll':
+                    categoryHTML = `
+                        <div class="form-group">
+                            <label>Poll Options</label>
+                            <div id="pollOptions">
+                                <input type="text" class="poll-option" placeholder="Option 1" required>
+                                <input type="text" class="poll-option" placeholder="Option 2" required>
+                            </div>
+                            <button type="button" onclick="addPollOption()" class="add-option-btn">Add Option</button>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'iso':
+                    categoryHTML = `
+                        <div class="form-group">
+                            <label>Looking For</label>
+                            <input type="text" id="lookingFor" placeholder="What are you searching for?" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Budget Range</label>
+                            <div class="budget-range">
+                                <input type="number" id="budgetMin" placeholder="Min" step="0.01" min="0">
+                                <span>to</span>
+                                <input type="number" id="budgetMax" placeholder="Max" step="0.01" min="0">
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'job':
+                    categoryHTML = `
+                        <div class="form-group">
+                            <label>Job Type</label>
+                            <select id="jobType">
+                                <option value="full-time">Full-time</option>
+                                <option value="part-time">Part-time</option>
+                                <option value="contract">Contract</option>
+                                <option value="temporary">Temporary</option>
+                                <option value="internship">Internship</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Pay Rate</label>
+                            <input type="number" id="payRate" placeholder="0.00" step="0.01" min="0">
+                            <select id="payPeriod">
+                                <option value="hour">per hour</option>
+                                <option value="day">per day</option>
+                                <option value="week">per week</option>
+                                <option value="month">per month</option>
+                                <option value="year">per year</option>
+                            </select>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'event':
+                    categoryHTML = `
+                        <div class="form-group">
+                            <label>Event Date & Time</label>
+                            <input type="datetime-local" id="eventDateTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" id="eventLocation" placeholder="Event location" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Ticket Price (Optional)</label>
+                            <input type="number" id="ticketPrice" placeholder="0.00" step="0.01" min="0">
+                        </div>
+                    `;
+                    break;
+            }
+            
+            fieldsContainer.innerHTML = categoryHTML;
+            
+            // Add event listeners for rental rate checkboxes
+            if (category === 'rent') {
+                const hourlyCheckbox = document.getElementById('hourlyRateEnabled');
+                const dailyCheckbox = document.getElementById('dailyRateEnabled');
+                const hourlyInput = document.getElementById('hourlyRate');
+                const dailyInput = document.getElementById('dailyRate');
+                
+                if (hourlyCheckbox && hourlyInput) {
+                    hourlyCheckbox.addEventListener('change', () => {
+                        hourlyInput.disabled = !hourlyCheckbox.checked;
+                        if (!hourlyCheckbox.checked) hourlyInput.value = '';
+                    });
+                }
+                
+                if (dailyCheckbox && dailyInput) {
+                    dailyCheckbox.addEventListener('change', () => {
+                        dailyInput.disabled = !dailyCheckbox.checked;
+                        if (!dailyCheckbox.checked) dailyInput.value = '';
+                    });
+                }
+            }
+        }
+
+        // Add poll option
+        function addPollOption() {
+            const pollOptions = document.getElementById('pollOptions');
+            const optionCount = pollOptions.children.length + 1;
+            const newOption = document.createElement('input');
+            newOption.type = 'text';
+            newOption.className = 'poll-option';
+            newOption.placeholder = `Option ${optionCount}`;
+            pollOptions.appendChild(newOption);
+        }
+
+        // Handle image upload
+        function handleImageUpload(event) {
+            const files = event.target.files;
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+            
+            Array.from(files).forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imgContainer = document.createElement('div');
+                    imgContainer.className = 'image-preview-item';
+                    imgContainer.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview ${index + 1}">
+                        <button type="button" onclick="removeImage(${index})" class="remove-image">×</button>
+                    `;
+                    preview.appendChild(imgContainer);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Remove image
+        function removeImage(index) {
+            const preview = document.getElementById('imagePreview');
+            const items = preview.children;
+            if (items[index]) {
+                items[index].remove();
+            }
+        }
+
+        // Main post submission function
+        function submitPost(event) {
+            event.preventDefault();
+            
+            try {
+                // Get form data
+                const category = document.getElementById('postCategory').value;
+                const title = document.getElementById('postTitle').value;
+                const description = document.getElementById('postDescription').value;
+                
+                if (!title || !description) {
+                    alert('Please fill in title and description');
+                    return;
+                }
+                
+                // Create post object
+                const postData = {
+                    id: isEditingPost ? editingPostId : Date.now() + Math.random(),
+                    title: title,
+                    description: description,
+                    category: category,
+                    postingMode: currentPostingMode,
+                    timestamp: new Date().toISOString(),
+                    author: 'Current User',
+                    images: []
+                };
+                
+                // Add category-specific data
+                switch (category) {
+                    case 'sale':
+                        const price = document.getElementById('price')?.value;
+                        const condition = document.getElementById('condition')?.value;
+                        if (price) postData.price = parseFloat(price);
+                        if (condition) postData.condition = condition;
+                        break;
+                        
+                    case 'service':
+                        const serviceType = document.getElementById('serviceType')?.value;
+                        const serviceRate = document.getElementById('serviceRate')?.value;
+                        if (serviceType) postData.serviceType = serviceType;
+                        if (serviceRate) postData.serviceRate = parseFloat(serviceRate);
+                        break;
+                        
+                    case 'rent':
+                        const hourlyRateEnabled = document.getElementById('hourlyRateEnabled')?.checked;
+                        const dailyRateEnabled = document.getElementById('dailyRateEnabled')?.checked;
+                        const hourlyRate = document.getElementById('hourlyRate')?.value;
+                        const dailyRate = document.getElementById('dailyRate')?.value;
+                        const itemCondition = document.getElementById('itemCondition')?.value;
+                        const securityDeposit = document.getElementById('securityDeposit')?.value;
+                        const rentalTerms = document.getElementById('rentalTerms')?.value;
+                        
+                        postData.rentalRates = {};
+                        if (hourlyRateEnabled && hourlyRate) {
+                            postData.rentalRates.hourly = parseFloat(hourlyRate);
+                        }
+                        if (dailyRateEnabled && dailyRate) {
+                            postData.rentalRates.daily = parseFloat(dailyRate);
+                        }
+                        if (itemCondition) postData.itemCondition = itemCondition;
+                        if (securityDeposit) postData.securityDeposit = parseFloat(securityDeposit);
+                        if (rentalTerms) postData.rentalTerms = rentalTerms;
+                        break;
+                        
+                    case 'poll':
+                        const pollOptions = Array.from(document.querySelectorAll('.poll-option'))
+                            .map(input => input.value)
+                            .filter(value => value.trim() !== '');
+                        postData.pollOptions = pollOptions;
+                        postData.votes = {}; // Initialize empty votes
+                        break;
+                        
+                    case 'iso':
+                        const lookingFor = document.getElementById('lookingFor')?.value;
+                        const budgetMin = document.getElementById('budgetMin')?.value;
+                        const budgetMax = document.getElementById('budgetMax')?.value;
+                        if (lookingFor) postData.lookingFor = lookingFor;
+                        if (budgetMin) postData.budgetMin = parseFloat(budgetMin);
+                        if (budgetMax) postData.budgetMax = parseFloat(budgetMax);
+                        break;
+                        
+                    case 'job':
+                        const jobType = document.getElementById('jobType')?.value;
+                        const payRate = document.getElementById('payRate')?.value;
+                        const payPeriod = document.getElementById('payPeriod')?.value;
+                        if (jobType) postData.jobType = jobType;
+                        if (payRate) postData.payRate = parseFloat(payRate);
+                        if (payPeriod) postData.payPeriod = payPeriod;
+                        break;
+                        
+                    case 'event':
+                        const eventDateTime = document.getElementById('eventDateTime')?.value;
+                        const eventLocation = document.getElementById('eventLocation')?.value;
+                        const ticketPrice = document.getElementById('ticketPrice')?.value;
+                        if (eventDateTime) postData.eventDateTime = eventDateTime;
+                        if (eventLocation) postData.eventLocation = eventLocation;
+                        if (ticketPrice) postData.ticketPrice = parseFloat(ticketPrice);
+                        break;
+                }
+                
+                // Save post to localStorage
+                let posts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+                
+                if (isEditingPost) {
+                    // Update existing post
+                    const index = posts.findIndex(p => p.id == editingPostId);
+                    if (index !== -1) {
+                        posts[index] = postData;
+                    }
+                } else {
+                    // Add new post
+                    posts.unshift(postData); // Add to beginning
+                }
+                
+                localStorage.setItem('communityPosts', JSON.stringify(posts));
+                
+                // Also save to profile posts
+                const profileKey = currentPostingMode === 'personal' ? 'personalProfilePosts' : 'businessProfilePosts';
+                let profilePosts = JSON.parse(localStorage.getItem(profileKey) || '[]');
+                
+                if (isEditingPost) {
+                    const profileIndex = profilePosts.findIndex(p => p.id == editingPostId);
+                    if (profileIndex !== -1) {
+                        profilePosts[profileIndex] = postData;
+                    }
+                } else {
+                    profilePosts.unshift(postData);
+                }
+                
+                localStorage.setItem(profileKey, JSON.stringify(profilePosts));
+                
+                // Close modal
+                closePostModal();
+                
+                // Refresh the community feed
+                refreshCommunityFeed();
+                
+                // Show success message
+                console.log(isEditingPost ? 'Post updated successfully!' : 'Post created successfully!');
+                
+            } catch (error) {
+                console.error('Error saving post:', error);
+                alert('Error saving post. Please try again.');
+            }
+        }
+
+        // Refresh community feed
+        function refreshCommunityFeed() {
+            const communityFeed = document.getElementById('communityFeed');
+            if (!communityFeed) return;
+            
+            const posts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+            
+            if (posts.length === 0) {
+                communityFeed.innerHTML = '<div style="text-align: center; color: rgba(255, 255, 255, 0.6); padding: 40px;">No posts yet. Be the first to share something!</div>';
+            } else {
+                communityFeed.innerHTML = '';
+                posts.forEach(post => {
+                    const postElement = createDetailedPostElement(post);
+                    postElement.setAttribute('data-post-id', post.id);
+                    communityFeed.appendChild(postElement);
+                });
+            }
+        }
+
+        // Create detailed post element
+        function createDetailedPostElement(post) {
+            const postDiv = document.createElement('div');
+            postDiv.className = 'post-card';
+            
+            let categorySpecificHTML = '';
+            let actionButtons = '';
+            
+            // Category-specific content
+            switch (post.category) {
+                case 'sale':
+                    if (post.price) {
+                        categorySpecificHTML = `<div class="post-price">$${post.price.toFixed(2)}</div>`;
+                    }
+                    if (post.condition) {
+                        categorySpecificHTML += `<div class="post-condition">Condition: ${post.condition}</div>`;
+                    }
+                    actionButtons = '<button class="action-btn buy-btn">Buy Now</button><button class="action-btn message-btn">Message</button>';
+                    break;
+                    
+                case 'service':
+                    if (post.serviceRate && post.serviceType) {
+                        const rateText = post.serviceType === 'hourly' ? `$${post.serviceRate}/hour` : 
+                                       post.serviceType === 'fixed' ? `$${post.serviceRate}` : 'Free Estimate';
+                        categorySpecificHTML = `<div class="post-rate">${rateText}</div>`;
+                    }
+                    actionButtons = '<button class="action-btn hire-btn">Hire</button><button class="action-btn message-btn">Message</button>';
+                    break;
+                    
+                case 'rent':
+                    if (post.rentalRates) {
+                        let rateText = '';
+                        if (post.rentalRates.hourly) rateText += `$${post.rentalRates.hourly}/hour `;
+                        if (post.rentalRates.daily) rateText += `$${post.rentalRates.daily}/day`;
+                        if (rateText) categorySpecificHTML = `<div class="post-rate">${rateText}</div>`;
+                    }
+                    if (post.itemCondition) {
+                        categorySpecificHTML += `<div class="post-condition">Condition: ${post.itemCondition}</div>`;
+                    }
+                    if (post.securityDeposit) {
+                        categorySpecificHTML += `<div class="post-deposit">Security Deposit: $${post.securityDeposit}</div>`;
+                    }
+                    actionButtons = '<button class="action-btn rent-btn">Rent Now</button><button class="action-btn message-btn">Message</button>';
+                    break;
+                    
+                case 'poll':
+                    if (post.pollOptions) {
+                        categorySpecificHTML = '<div class="poll-options">';
+                        post.pollOptions.forEach((option, index) => {
+                            const voteCount = post.votes[index] || 0;
+                            categorySpecificHTML += `
+                                <div class="poll-option" onclick="voteOnPoll('${post.id}', ${index})">
+                                    <span>${option}</span>
+                                    <span class="vote-count">${voteCount} votes</span>
+                                </div>
+                            `;
+                        });
+                        categorySpecificHTML += '</div>';
+                    }
+                    break;
+                    
+                case 'iso':
+                    if (post.lookingFor) {
+                        categorySpecificHTML = `<div class="post-looking-for">Looking for: ${post.lookingFor}</div>`;
+                    }
+                    if (post.budgetMin || post.budgetMax) {
+                        const budgetText = post.budgetMin && post.budgetMax ? 
+                            `$${post.budgetMin} - $${post.budgetMax}` :
+                            post.budgetMin ? `$${post.budgetMin}+` : `Up to $${post.budgetMax}`;
+                        categorySpecificHTML += `<div class="post-budget">Budget: ${budgetText}</div>`;
+                    }
+                    actionButtons = '<button class="action-btn offer-btn">Make Offer</button><button class="action-btn message-btn">Message</button>';
+                    break;
+                    
+                case 'job':
+                    if (post.payRate && post.payPeriod) {
+                        categorySpecificHTML = `<div class="post-pay">$${post.payRate} per ${post.payPeriod}</div>`;
+                    }
+                    if (post.jobType) {
+                        categorySpecificHTML += `<div class="post-job-type">${post.jobType}</div>`;
+                    }
+                    actionButtons = '<button class="action-btn apply-btn">Apply</button><button class="action-btn message-btn">Message</button>';
+                    break;
+                    
+                case 'event':
+                    if (post.eventDateTime) {
+                        const eventDate = new Date(post.eventDateTime).toLocaleString();
+                        categorySpecificHTML = `<div class="post-event-time">${eventDate}</div>`;
+                    }
+                    if (post.eventLocation) {
+                        categorySpecificHTML += `<div class="post-event-location">${post.eventLocation}</div>`;
+                    }
+                    if (post.ticketPrice) {
+                        categorySpecificHTML += `<div class="post-ticket-price">Tickets: $${post.ticketPrice}</div>`;
+                    }
+                    actionButtons = '<button class="action-btn attend-btn">Attend</button><button class="action-btn message-btn">Message</button>';
+                    break;
+            }
+            
+            // Edit/delete buttons for post creator
+            const isOwner = post.postingMode === currentPostingMode; // Simplified ownership check
+            const ownerButtons = isOwner ? `
+                <button class="edit-btn" onclick="editPost('${post.id}')">EDIT</button>
+                <button class="delete-btn" onclick="deletePost('${post.id}')">DELETE</button>
+            ` : '';
+            
+            postDiv.innerHTML = `
+                <div style="background: rgba(0, 255, 255, 0.05); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                    <div class="post-header" style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        <div>
+                            <h3 style="color: #00ffff; margin: 0 0 5px 0;">${post.title}</h3>
+                            <div style="font-size: 12px; color: #94a3b8;">
+                                ${post.category.toUpperCase()} • ${post.postingMode.toUpperCase()} • ${new Date(post.timestamp).toLocaleDateString()}
+                            </div>
+                        </div>
+                        <div class="post-actions">
+                            ${ownerButtons}
+                        </div>
+                    </div>
+                    
+                    <p style="color: #e2e8f0; margin: 0 0 15px 0;">${post.description}</p>
+                    
+                    ${categorySpecificHTML}
+                    
+                    <div class="post-buttons" style="margin-top: 15px; display: flex; gap: 10px;">
+                        ${actionButtons}
+                    </div>
+                    
+                    <div class="social-buttons" style="margin-top: 15px; display: flex; gap: 15px; padding-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                        <button class="social-btn">LIKE</button>
+                        <button class="social-btn">REPLY</button>
+                        <button class="social-btn">SHARE</button>
+                    </div>
+                </div>
+            `;
+            
+            return postDiv;
+        }
+
+        // Populate existing post data for editing
+        function populateExistingPostData(post) {
+            // Basic fields
+            document.getElementById('postTitle').value = post.title || '';
+            document.getElementById('postDescription').value = post.description || '';
+            document.getElementById('postCategory').value = post.category || 'general';
+            
+            // Update category fields
+            updateFormFields();
+            
+            // Wait for category fields to load, then populate them
+            setTimeout(() => {
+                switch (post.category) {
+                    case 'sale':
+                        if (post.price) document.getElementById('price').value = post.price;
+                        if (post.condition) document.getElementById('condition').value = post.condition;
+                        break;
+                        
+                    case 'service':
+                        if (post.serviceType) document.getElementById('serviceType').value = post.serviceType;
+                        if (post.serviceRate) document.getElementById('serviceRate').value = post.serviceRate;
+                        break;
+                        
+                    case 'rent':
+                        if (post.rentalRates) {
+                            if (post.rentalRates.hourly) {
+                                document.getElementById('hourlyRateEnabled').checked = true;
+                                document.getElementById('hourlyRate').disabled = false;
+                                document.getElementById('hourlyRate').value = post.rentalRates.hourly;
+                            }
+                            if (post.rentalRates.daily) {
+                                document.getElementById('dailyRateEnabled').checked = true;
+                                document.getElementById('dailyRate').disabled = false;
+                                document.getElementById('dailyRate').value = post.rentalRates.daily;
+                            }
+                        }
+                        if (post.itemCondition) document.getElementById('itemCondition').value = post.itemCondition;
+                        if (post.securityDeposit) document.getElementById('securityDeposit').value = post.securityDeposit;
+                        if (post.rentalTerms) document.getElementById('rentalTerms').value = post.rentalTerms;
+                        break;
+                        
+                    case 'poll':
+                        if (post.pollOptions) {
+                            const pollContainer = document.getElementById('pollOptions');
+                            pollContainer.innerHTML = '';
+                            post.pollOptions.forEach((option, index) => {
+                                const input = document.createElement('input');
+                                input.type = 'text';
+                                input.className = 'poll-option';
+                                input.placeholder = `Option ${index + 1}`;
+                                input.value = option;
+                                pollContainer.appendChild(input);
+                            });
+                        }
+                        break;
+                        
+                    case 'iso':
+                        if (post.lookingFor) document.getElementById('lookingFor').value = post.lookingFor;
+                        if (post.budgetMin) document.getElementById('budgetMin').value = post.budgetMin;
+                        if (post.budgetMax) document.getElementById('budgetMax').value = post.budgetMax;
+                        break;
+                        
+                    case 'job':
+                        if (post.jobType) document.getElementById('jobType').value = post.jobType;
+                        if (post.payRate) document.getElementById('payRate').value = post.payRate;
+                        if (post.payPeriod) document.getElementById('payPeriod').value = post.payPeriod;
+                        break;
+                        
+                    case 'event':
+                        if (post.eventDateTime) document.getElementById('eventDateTime').value = post.eventDateTime;
+                        if (post.eventLocation) document.getElementById('eventLocation').value = post.eventLocation;
+                        if (post.ticketPrice) document.getElementById('ticketPrice').value = post.ticketPrice;
+                        break;
+                }
+            }, 200);
+        }
                         
                         <!-- Category-specific fields -->
                         <div id="categoryFields"></div>
@@ -4835,34 +5506,7 @@
             document.getElementById('postForm').addEventListener('submit', handlePostSubmit);
         }
 
-        // Close posting modal
-        function closePostModal() {
-            const modal = document.getElementById('postingModal');
-            if (modal) {
-                modal.remove();
-            }
-            currentEditingPostId = null;
-        }
-
-        // Switch posting mode
-        function switchPostingMode(mode) {
-            currentPostingMode = mode;
-            const label = document.getElementById('postingModeLabel');
-            const personalBtn = document.getElementById('personalModeBtn');
-            const businessBtn = document.getElementById('businessModeBtn');
-            
-            if (mode === 'personal') {
-                label.textContent = 'POSTING AS PERSONAL';
-                label.className = 'mode-label personal';
-                personalBtn.classList.add('active');
-                businessBtn.classList.remove('active');
-            } else {
-                label.textContent = 'POSTING AS BUSINESS';
-                label.className = 'mode-label business';
-                businessBtn.classList.add('active');
-                personalBtn.classList.remove('active');
-            }
-        }
+        // DUPLICATE FUNCTIONS REMOVED - USING NEW CLEAN MODAL SYSTEM ABOVE
 
         // Update category-specific fields
         function updateCategoryFields() {
@@ -6237,11 +6881,7 @@
 
         // Note: Modal posting functions removed - using direct posting system
 
-        function closePostModal() {
-            document.getElementById('postModal').style.display = 'none';
-            document.getElementById('postForm').reset();
-            clearCategorySelection();
-        }
+        // DUPLICATE FUNCTION REMOVED - USING NEW CLEAN MODAL SYSTEM
 
 
 
@@ -9089,101 +9729,7 @@
             }
         }
 
-        // Open posting modal
-        function openPostModal(category = 'general', existingPost = null) {
-            const modalOverlay = document.createElement('div');
-            modalOverlay.className = 'posting-modal-overlay';
-            modalOverlay.id = 'postModal';
-            
-            const isEditing = !!existingPost;
-            const selectedCategory = existingPost?.category || category;
-            
-            modalOverlay.innerHTML = `
-                <div class="posting-modal-content">
-                    <div class="modal-header">
-                        <h2>${isEditing ? 'Edit Post' : 'Create Post'}</h2>
-                        <button class="close-btn" onclick="closePostModal()">&times;</button>
-                    </div>
-                    
-                    <form id="postForm" onsubmit="handlePostSubmission(event)">
-                        <!-- Posting Mode Selector -->
-                        <div class="posting-mode-selector">
-                            <div class="mode-label ${currentPostingMode}">${currentPostingMode === 'personal' ? 'POSTING AS PERSONAL' : 'POSTING AS BUSINESS'}</div>
-                            <div class="mode-buttons">
-                                <button type="button" class="mode-btn ${currentPostingMode === 'personal' ? 'active' : ''}" onclick="switchModalPostingMode('personal')">Personal</button>
-                                <button type="button" class="mode-btn ${currentPostingMode === 'business' ? 'active' : ''}" onclick="switchModalPostingMode('business')">Business</button>
-                            </div>
-                        </div>
-                        
-                        <!-- Category Selection -->
-                        <div class="form-group">
-                            <label for="postCategory">Category</label>
-                            <select id="postCategory" name="category" required onchange="updateCategoryFields()">
-                                <option value="general" ${selectedCategory === 'general' ? 'selected' : ''}>General</option>
-                                <option value="sale" ${selectedCategory === 'sale' ? 'selected' : ''}>For Sale</option>
-                                <option value="service" ${selectedCategory === 'service' ? 'selected' : ''}>Service</option>
-                                <option value="rent" ${selectedCategory === 'rent' ? 'selected' : ''}>For Rent</option>
-                                <option value="poll" ${selectedCategory === 'poll' ? 'selected' : ''}>Poll</option>
-                                <option value="iso" ${selectedCategory === 'iso' ? 'selected' : ''}>ISO (In Search Of)</option>
-                                <option value="job" ${selectedCategory === 'job' ? 'selected' : ''}>Job/Hiring</option>
-                                <option value="event" ${selectedCategory === 'event' ? 'selected' : ''}>Event</option>
-                                <option value="announcement" ${selectedCategory === 'announcement' ? 'selected' : ''}>Announcement</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Title -->
-                        <div class="form-group">
-                            <label for="postTitle">Title</label>
-                            <input type="text" id="postTitle" name="title" value="${existingPost?.title || ''}" required placeholder="Enter your post title...">
-                        </div>
-                        
-                        <!-- Description -->
-                        <div class="form-group">
-                            <label for="postDescription">Description</label>
-                            <textarea id="postDescription" name="description" rows="4" required placeholder="Describe your post...">${existingPost?.description || ''}</textarea>
-                        </div>
-                        
-                        <!-- Dynamic category-specific fields will be inserted here -->
-                        <div id="categorySpecificFields">
-                            ${generateCategoryFields(selectedCategory, existingPost)}
-                        </div>
-                        
-                        <!-- Image Upload -->
-                        <div class="form-group">
-                            <label for="postImages">Images (optional)</label>
-                            <input type="file" id="postImages" name="images" multiple accept="image/*">
-                            <div id="imagePreview"></div>
-                        </div>
-                        
-                        <!-- Modal Actions -->
-                        <div class="modal-actions">
-                            <button type="button" class="cancel-btn" onclick="closePostModal()">Cancel</button>
-                            <button type="submit" class="submit-btn">${isEditing ? 'Update Post' : 'Create Post'}</button>
-                        </div>
-                        
-                        <!-- Store editing post ID if editing -->
-                        ${isEditing ? `<input type="hidden" id="editingPostId" value="${existingPost.id}">` : ''}
-                    </form>
-                </div>
-            `;
-            
-            document.body.appendChild(modalOverlay);
-            
-            // Initialize category fields
-            updateCategoryFields();
-            
-            // Handle image preview
-            const imageInput = document.getElementById('postImages');
-            imageInput.addEventListener('change', handleImagePreview);
-        }
-
-        // Close posting modal
-        function closePostModal() {
-            const modal = document.getElementById('postModal');
-            if (modal) {
-                modal.remove();
-            }
-        }
+        // ALL DUPLICATE MODAL FRAGMENTS REMOVED - USING CLEAN SYSTEM FROM LINES 4760-5600
 
         // Generate category-specific fields
         function generateCategoryFields(category, existingPost = null) {
