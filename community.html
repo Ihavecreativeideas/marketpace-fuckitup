@@ -5244,11 +5244,7 @@ Example:
                         <div id="bulkItemContainer"></div>
                     </div>
                     
-                    <!-- Basic Price Field -->
-                    <div id="priceField" style="margin-bottom: 20px; display: none;">
-                        <label style="display: block; margin-bottom: 5px; color: #00ffff;">Price:</label>
-                        <input type="text" id="postPrice" placeholder="$0.00" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;" onchange="console.log('Price changed to:', this.value);">
-                    </div>
+
 
                     <!-- Event-Specific Fields -->
                     <div id="eventFields" style="margin-bottom: 20px; display: none;">
@@ -6195,19 +6191,16 @@ Example:
             const singleFields = document.getElementById('singleItemFields');
             const bulkFields = document.getElementById('bulkItemFields');
             const collectionField = document.getElementById('collectionLabelField');
-            const priceField = document.getElementById('priceField');
             
             if (uploadType === 'bulk') {
                 singleFields.style.display = 'none';
                 bulkFields.style.display = 'block';
                 collectionField.style.display = 'block';
-                priceField.style.display = 'none';
                 generateBulkItemFields();
             } else {
                 singleFields.style.display = 'block';
                 bulkFields.style.display = 'none';
                 collectionField.style.display = 'none';
-                priceField.style.display = 'block';
             }
         }
 
@@ -8754,7 +8747,6 @@ Example:
             console.log('Selected category:', category);
             
             // Get all field elements
-            const priceField = document.getElementById('priceField');
             const rentalRateField = document.getElementById('rentalRateField');
             const deliveryMethodField = document.getElementById('deliveryMethodField');
             const eventFields = document.getElementById('eventFields');
@@ -8763,7 +8755,6 @@ Example:
             const customCategoryFields = document.getElementById('customCategoryFields');
             
             console.log('Field elements found:', {
-                priceField: !!priceField,
                 rentalRateField: !!rentalRateField,
                 deliveryMethodField: !!deliveryMethodField,
                 eventFields: !!eventFields,
@@ -8772,16 +8763,18 @@ Example:
                 customCategoryFields: !!customCategoryFields
             });
             
-            // Hide all conditional fields first - CRITICAL FIX FOR PRICE DUPLICATION
-            if (priceField) {
-                priceField.style.display = 'none';
-                console.log('CRITICAL: priceField hidden for all categories initially');
-            }
+            // Hide all conditional fields first
             if (rentalRateField) rentalRateField.style.display = 'none';
             if (deliveryMethodField) deliveryMethodField.style.display = 'none';
             if (eventFields) eventFields.style.display = 'none';
             if (pollFields) pollFields.style.display = 'none';
             if (serviceFields) serviceFields.style.display = 'none';
+            
+            // Remove any dynamically created sale price field from previous selections
+            const existingSalePriceField = document.getElementById('salePriceField');
+            if (existingSalePriceField) {
+                existingSalePriceField.remove();
+            }
             
             // Handle custom category creation
             if (category === 'custom') {
@@ -8815,11 +8808,6 @@ Example:
                 case 'rent':
                     console.log('Showing rental fields');
                     if (rentalRateField) rentalRateField.style.display = 'block';
-                    // CRITICAL FIX: Ensure price field stays hidden for rentals
-                    if (priceField) {
-                        priceField.style.display = 'none';
-                        console.log('CRITICAL: priceField forcibly hidden for rental category');
-                    }
                     // CRITICAL FIX: Initialize calendar for rentals with proper scoping
                     setTimeout(() => {
                         console.log('CRITICAL: Initializing rental calendar...');
@@ -8859,9 +8847,16 @@ Example:
                     
                 case 'sale':
                     console.log('Showing sale fields');
-                    if (priceField) {
-                        priceField.style.display = 'block';
-                        console.log('CRITICAL: priceField shown for sale category');
+                    // Create price field dynamically for sale category only
+                    const singleItemFields = document.getElementById('singleItemFields');
+                    if (singleItemFields && !document.getElementById('salePriceField')) {
+                        const priceFieldHTML = `
+                            <div id="salePriceField" style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 5px; color: #00ffff;">Price:</label>
+                                <input type="text" id="postPrice" placeholder="$0.00" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;">
+                            </div>
+                        `;
+                        singleItemFields.insertAdjacentHTML('beforeend', priceFieldHTML);
                     }
                     if (deliveryMethodField) deliveryMethodField.style.display = 'block';
                     break;
