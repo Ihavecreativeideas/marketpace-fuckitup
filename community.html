@@ -4451,8 +4451,22 @@ Example:
             }
         }
 
-        // Notification system
+        // Notification system - FIXED TO PREVENT BLUE "s" LINES
         function showNotification(message, type = 'info') {
+            // BLOCK PROBLEMATIC SINGLE CHARACTER NOTIFICATIONS
+            if (!message || typeof message !== 'string' || message.trim().length <= 1) {
+                console.log('🚫 BLOCKED problematic notification:', message);
+                return;
+            }
+            
+            // REMOVE ANY EXISTING SINGLE CHARACTER NOTIFICATIONS FIRST
+            document.querySelectorAll('div').forEach(div => {
+                if (div.textContent && div.textContent.trim().length === 1 && div.style.position === 'fixed') {
+                    console.log('🧹 CLEANING UP single character notification:', div.textContent);
+                    div.remove();
+                }
+            });
+            
             const notification = document.createElement('div');
             const colors = {
                 success: 'linear-gradient(135deg, #10b981, #059669)',
@@ -4477,7 +4491,7 @@ Example:
                 max-width: 400px;
                 animation: slideInDown 0.3s ease;
             `;
-            notification.textContent = message;
+            notification.textContent = message.trim();
             document.body.appendChild(notification);
             
             setTimeout(() => {
