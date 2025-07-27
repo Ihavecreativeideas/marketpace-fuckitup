@@ -10804,15 +10804,17 @@ Example:
         
         // CRITICAL FIX: Make functions globally accessible
         window.ownerSelectedDates = ownerSelectedDates;
-
-        // PHASE 6 FIX: Make calendar fully interactive and clickable - FIXED CALENDAR ID CONNECTION
-        function generateOwnerAvailabilityCalendar() {
-            // PHASE 6: Connect to the correct calendar grid in rental modal
-            const calendar = document.getElementById('rentalCalendarGrid') || document.getElementById('ownerAvailabilityCalendar');
+        
+        // IMMEDIATE FIX: Define all functions globally FIRST
+        window.generateOwnerAvailabilityCalendar = function() {
+            console.log('✅ PHASE 6: generateOwnerAvailabilityCalendar called from window');
+            
+            const calendar = document.getElementById('ownerAvailabilityCalendar');
             if (!calendar) {
-                console.log('❌ PHASE 6: Calendar element not found');
+                console.error('❌ PHASE 6: Calendar element not found');
                 return;
             }
+            
             console.log('✅ PHASE 6: Calendar element found:', calendar.id);
 
             calendar.innerHTML = '';
@@ -10838,7 +10840,7 @@ Example:
                 calendar.appendChild(header);
             });
 
-            // Generate next 28 days (4 weeks)
+            // Generate calendar days
             const today = new Date();
             for (let i = 0; i < 28; i++) {
                 const date = new Date(today);
@@ -10872,34 +10874,23 @@ Example:
                     dayElement.style.color = '#10b981';
                 }
                 
+                dayElement.addEventListener('hover', function() {
+                    if (!ownerSelectedDates.includes(dayElement.dataset.date)) {
+                        dayElement.style.background = 'rgba(0, 255, 255, 0.2)';
+                    }
+                });
+                
                 dayElement.addEventListener('click', function() {
-                    console.log('✅ PHASE 6: Calendar date clicked:', dayElement.dataset.date);
-                    toggleOwnerDate(this, dayElement.dataset.date);
+                    window.toggleOwnerDate(this, dayElement.dataset.date);
                 });
                 
                 calendar.appendChild(dayElement);
             }
-        }
+        };
         
-        // CRITICAL FIX: Make function globally accessible
-        window.generateOwnerAvailabilityCalendar = generateOwnerAvailabilityCalendar;
-
-        function toggleOwnerDate(element, dateStr) {
-            if (element.classList.contains('selected')) {
-                element.classList.remove('selected');
-                ownerSelectedDates = ownerSelectedDates.filter(d => d !== dateStr);
-            } else {
-                element.classList.add('selected');
-                ownerSelectedDates.push(dateStr);
-            }
-            
-            ownerSelectedDates.sort();
-            updateOwnerSelectedDatesDisplay();
-        }
-
-        function updateOwnerSelectedDatesDisplay() {
-            const countElement = document.getElementById('selectedDatesCount');
-            const listElement = document.getElementById('selectedDatesList');
+        window.updateOwnerSelectedDatesDisplay = function() {
+            const countElement = document.getElementById('ownerSelectedDatesCount');
+            const listElement = document.getElementById('ownerSelectedDatesList');
             
             if (countElement) {
                 countElement.textContent = ownerSelectedDates.length;
@@ -10907,71 +10898,40 @@ Example:
             
             if (listElement) {
                 if (ownerSelectedDates.length === 0) {
-                    listElement.innerHTML = 'No dates selected. Click on calendar dates to select availability.';
+                    listElement.innerHTML = 'No dates selected';
                 } else {
-                    const sortedDates = ownerSelectedDates.sort();
-                    const displayDates = sortedDates.slice(0, 5);
-                    const remainingCount = sortedDates.length - 5;
-                    
-                    let datesList = displayDates.map(date => {
-                        const dateObj = new Date(date + 'T00:00:00');
-                        return dateObj.toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric' 
-                        });
-                    }).join(', ');
-                    
-                    if (remainingCount > 0) {
-                        datesList += ` and ${remainingCount} more`;
-                    }
-                    
-                    listElement.innerHTML = datesList;
+                    listElement.innerHTML = ownerSelectedDates.slice(0, 5).map(date => {
+                        const dateObj = new Date(date);
+                        return `<span style="background: rgba(0, 255, 255, 0.2); padding: 2px 6px; border-radius: 4px; margin: 2px; display: inline-block; font-size: 11px;">
+                            ${dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </span>`;
+                    }).join('') + (ownerSelectedDates.length > 5 ? `<span style="color: #00ffff;">... +${ownerSelectedDates.length - 5} more</span>` : '');
                 }
             }
-        }
-        
-        // CRITICAL FIX: Make function globally accessible  
-        window.updateOwnerSelectedDatesDisplay = updateOwnerSelectedDatesDisplay;
-
-        // Calendar preset functions (moved to global scope)
-        window.selectWeekends = function() {
-            ownerSelectedDates = [];
-            const today = new Date();
-            
-            for (let i = 0; i < 28; i++) {
-                const date = new Date(today);
-                date.setDate(today.getDate() + i);
-                const dayOfWeek = date.getDay();
-                
-                if (dayOfWeek === 0 || dayOfWeek === 6) { // Sunday or Saturday
-                    ownerSelectedDates.push(date.toISOString().split('T')[0]);
-                }
-            }
-            
-            generateOwnerAvailabilityCalendar();
-            updateOwnerSelectedDatesDisplay();
-        }
-
-        window.selectWeekdays = function() {
-            ownerSelectedDates = [];
-            const today = new Date();
-            
-            for (let i = 0; i < 28; i++) {
-                const date = new Date(today);
-                date.setDate(today.getDate() + i);
-                const dayOfWeek = date.getDay();
-                
-                if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Monday to Friday
-                    ownerSelectedDates.push(date.toISOString().split('T')[0]);
-                }
-            }
-            
-            generateOwnerAvailabilityCalendar();
-            updateOwnerSelectedDatesDisplay();
         };
-
-        // CRITICAL FIX: Make preset functions globally accessible
-        function selectAllDays() {
+        
+        window.toggleOwnerDate = function(element, dateStr) {
+            console.log('Toggling date:', dateStr);
+            
+            if (ownerSelectedDates.includes(dateStr)) {
+                ownerSelectedDates = ownerSelectedDates.filter(d => d !== dateStr);
+                element.classList.remove('selected');
+                element.style.background = 'rgba(15, 23, 42, 0.8)';
+                element.style.borderColor = 'rgba(0, 255, 255, 0.3)';
+                element.style.color = '#e2e8f0';
+            } else {
+                ownerSelectedDates.push(dateStr);
+                element.classList.add('selected');
+                element.style.background = 'rgba(16, 185, 129, 0.3)';
+                element.style.borderColor = '#10b981';
+                element.style.color = '#10b981';
+            }
+            
+            window.updateOwnerSelectedDatesDisplay();
+        };
+        
+        // Preset functions
+        window.selectAllDays = function() {
             ownerSelectedDates = [];
             const today = new Date();
             
@@ -10981,22 +10941,53 @@ Example:
                 ownerSelectedDates.push(date.toISOString().split('T')[0]);
             }
             
-            generateOwnerAvailabilityCalendar();
-            updateOwnerSelectedDatesDisplay();
-        }
-        window.selectAllDays = selectAllDays;
+            window.generateOwnerAvailabilityCalendar();
+            window.updateOwnerSelectedDatesDisplay();
+        };
         
-        // CRITICAL FIX: Make all calendar functions globally accessible
-        window.selectWeekends = selectWeekends; 
-        window.selectWeekdays = selectWeekdays;
-
-        // CRITICAL FIX: Make preset functions globally accessible
-        function clearAllDates() {
+        window.selectWeekends = function() {
             ownerSelectedDates = [];
-            generateOwnerAvailabilityCalendar();
-            updateOwnerSelectedDatesDisplay();
-        }
-        window.clearAllDates = clearAllDates;
+            const today = new Date();
+            
+            for (let i = 0; i < 28; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                if (date.getDay() === 0 || date.getDay() === 6) {
+                    ownerSelectedDates.push(date.toISOString().split('T')[0]);
+                }
+            }
+            
+            window.generateOwnerAvailabilityCalendar();
+            window.updateOwnerSelectedDatesDisplay();
+        };
+        
+        window.selectWeekdays = function() {
+            ownerSelectedDates = [];
+            const today = new Date();
+            
+            for (let i = 0; i < 28; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                if (date.getDay() !== 0 && date.getDay() !== 6) {
+                    ownerSelectedDates.push(date.toISOString().split('T')[0]);
+                }
+            }
+            
+            window.generateOwnerAvailabilityCalendar();
+            window.updateOwnerSelectedDatesDisplay();
+        };
+        
+        window.clearAllDays = function() {
+            ownerSelectedDates = [];
+            window.generateOwnerAvailabilityCalendar();
+            window.updateOwnerSelectedDatesDisplay();
+        };
+
+        // DUPLICATE REMOVED - Function now defined globally above
+
+        // DUPLICATE REMOVED - Functions now defined globally above
+
+        // DUPLICATE REMOVED - Preset functions now defined globally above
 
         // Calendar month navigation functions
         let currentOwnerCalendarMonth = new Date();
