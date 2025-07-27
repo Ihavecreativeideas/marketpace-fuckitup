@@ -1671,17 +1671,7 @@
             transform: scale(1.05);
         }
 
-        .notification-dot {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            width: 8px;
-            height: 8px;
-            background: #ef4444;
-            border-radius: 50%;
-            border: 2px solid rgba(0, 0, 0, 0.9);
-            animation: pulse 2s infinite;
-        }
+
 
         @keyframes pulse {
             0%, 100% { opacity: 1; }
@@ -1966,7 +1956,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                         <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="#00ffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    <div class="notification-dot"></div>
+
                 </button>
             </div>
         </div>
@@ -3789,7 +3779,7 @@ Example:
             
             // Validation
             if (!deliveryAddress) {
-                showNotification('Please enter a delivery address', 'error');
+                console.log('❌ Please enter a delivery address');
                 return;
             }
             
@@ -3821,13 +3811,13 @@ Example:
                 ? 'Your order has been placed with private party delivery. The seller will handle delivery directly.'
                 : 'Your order has been placed! A MarketPace driver will handle delivery.';
                 
-            showNotification(`✅ Order placed successfully! ${deliveryMessage}`, 'success');
+            console.log(`✅ Order placed successfully! ${deliveryMessage}`);
             
             // Simulate payment processing (in real app, integrate with Stripe)
             setTimeout(() => {
-                showNotification('💳 Payment processing...', 'info');
+                console.log('💳 Payment processing...');
                 setTimeout(() => {
-                    showNotification('✅ Payment confirmed! Seller and driver have been notified.', 'success');
+                    console.log('✅ Payment confirmed! Seller and driver have been notified.');
                 }, 2000);
             }, 1000);
         }
@@ -4237,7 +4227,7 @@ Example:
                 localStorage.removeItem('currentUser');
                 localStorage.removeItem('cartItems');
                 localStorage.removeItem('favorites');
-                showNotification('Demo data cleared! You are now in live mode.', 'success');
+                console.log('✅ Demo data cleared! You are now in live mode.');
                 window.location.reload();
             }
         }
@@ -4340,7 +4330,7 @@ Example:
                 
                 // Check for admin credentials
                 if (username === 'admin' && password === 'admin') {
-                    showNotification('Driver login successful!', 'success');
+                    console.log('✅ Driver login successful!');
                     closeModal();
                     window.location.href = '/driver-dashboard';
                 } else {
@@ -4463,40 +4453,10 @@ Example:
             }
         }
 
-        // Notification system
+        // DISABLED: Notification system completely disabled to prevent blue line display issues
         function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            const colors = {
-                success: 'linear-gradient(135deg, #10b981, #059669)',
-                error: 'linear-gradient(135deg, #ef4444, #dc2626)',
-                info: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-                warning: 'linear-gradient(135deg, #f59e0b, #d97706)'
-            };
-            
-            notification.style.cssText = `
-                position: fixed;
-                top: 100px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: ${colors[type] || colors.info};
-                color: white;
-                padding: 15px 25px;
-                border-radius: 10px;
-                z-index: 10000;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-                font-weight: bold;
-                text-align: center;
-                max-width: 400px;
-                animation: slideInDown 0.3s ease;
-            `;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    document.body.removeChild(notification);
-                }
-            }, 3000);
+            console.log(`[${type.toUpperCase()}] ${message}`);
+            // All notification creation disabled to prevent blue line display
         }
 
         // Condition Verification Function - Navigate to Rental Details
@@ -6392,7 +6352,7 @@ Example:
             updateCartBadge();
             
             // Show notification
-            showNotification(`"${itemName}" added to cart!`, 'success');
+            console.log(`✅ "${itemName}" added to cart!`);
         }
         
         // Update cart badge
@@ -6455,7 +6415,7 @@ Example:
                     profileImg.src = result.responsiveUrls?.medium || result.imageUrl || result.url;
                 }
                 
-                showNotification('Profile picture updated successfully!', 'success');
+                console.log('✅ Profile picture updated successfully!');
                 return result;
             } catch (error) {
                 showNotification('Failed to upload profile picture: ' + error.message, 'error');
@@ -6594,64 +6554,20 @@ Example:
                 
                 if (response.ok) {
                     element.remove();
-                    showNotification('Image removed successfully', 'success');
+                    console.log('✅ Image removed successfully');
                 } else {
-                    showNotification('Failed to remove image', 'error');
+                    console.log('❌ Failed to remove image');
                 }
             } catch (error) {
-                showNotification('Error removing image', 'error');
+                console.log('❌ Error removing image:', error);
             }
         }
         
-        // Show upload progress
+        // Show upload progress - DISABLED to prevent blue line display issues
         function showUploadProgress(message) {
-            const notification = document.createElement('div');
-            notification.className = 'upload-progress';
-            notification.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 20px; height: 20px; border: 2px solid #00ffff; 
-                                border-top: 2px solid transparent; border-radius: 50%; 
-                                animation: spin 1s linear infinite;"></div>
-                    <span>${message}</span>
-                </div>
-            `;
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: rgba(0, 0, 0, 0.9);
-                color: #00ffff;
-                padding: 15px 25px;
-                border-radius: 8px;
-                z-index: 1001;
-                font-weight: bold;
-                border: 1px solid rgba(0, 255, 255, 0.3);
-            `;
-            
-            // Add spinning animation
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-            `;
-            if (!document.querySelector('style[data-upload-styles]')) {
-                style.setAttribute('data-upload-styles', 'true');
-                document.head.appendChild(style);
-            }
-            
-            document.body.appendChild(notification);
-            
-            // Auto-remove after 10 seconds
-            setTimeout(() => {
-                if (document.body.contains(notification)) {
-                    document.body.removeChild(notification);
-                }
-            }, 10000);
-            
-            return notification;
+            console.log('📤 Upload progress:', message);
+            // Notification creation disabled to prevent blue line display
+            return null;
         }
 
         // Duplicate showNotification function removed to prevent conflicts
@@ -6676,7 +6592,7 @@ Example:
         }
 
         function deliverNow(item) {
-            showNotification(`Arranging delivery for "${item}"`, 'success');
+            console.log(`✅ Arranging delivery for "${item}"`);
         }
 
         function bookNow(itemName) {
@@ -7295,7 +7211,7 @@ Example:
                     const profileButton = document.querySelector('.profile-button');
                     profileButton.innerHTML = `<img src="${e.target.result}" class="profile-avatar">`;
                     
-                    showNotification('Profile picture updated successfully!', 'success');
+                    console.log('✅ Profile picture updated successfully!');
                     closeProfileModal();
                 };
                 reader.readAsDataURL(file);
@@ -7486,7 +7402,7 @@ Example:
                 }
 
                 console.log('Creating post:', formData);
-                showNotification('Post created successfully!', 'success');
+                console.log('✅ Post created successfully!');
                 closePostModal();
             });
         });
@@ -7635,7 +7551,19 @@ Example:
             }
         }
 
+        // Clean up any stuck notification elements that might cause blue lines
+        function cleanupStuckNotifications() {
+            const notifications = document.querySelectorAll('.upload-progress, .notification, [class*="notification"], div[style*="position: fixed"][style*="top:"]');
+            notifications.forEach(el => {
+                if (el.textContent.length <= 3 || el.textContent.trim() === 's' || el.textContent.trim() === '') {
+                    console.log('🧹 Removing stuck notification element:', el.textContent);
+                    el.remove();
+                }
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
+            cleanupStuckNotifications(); // Clean up immediately on page load
             console.log('Community page loaded, testing button functionality...');
             
             // Test essential functions on page load
@@ -11772,7 +11700,7 @@ Example:
             if (modal) {
                 modal.remove();
             }
-            showNotification(`Bulk ${category} collection shared successfully!`, 'success');
+            console.log(`✅ Bulk ${category} collection shared successfully!`);
             
             // Refresh the community feed
             loadCommunityPosts();
@@ -11820,7 +11748,7 @@ Example:
             // Navigate to rental booking page
             window.location.href = '/customer-booking.html';
             
-            showNotification(`Opening rental booking for: ${itemTitle}`, 'info');
+            console.log(`✅ Opening rental booking for: ${itemTitle}`);
         }
 
         // Handle booking fee toggle
@@ -12202,7 +12130,7 @@ Example:
             ownerSelectedDates = [];
             
             // Show success and refresh
-            showNotification('Post created successfully!', 'success');
+            console.log('✅ Post created successfully!');
             loadCommunityPosts();
             console.log('✅ Post creation complete!');
         }
