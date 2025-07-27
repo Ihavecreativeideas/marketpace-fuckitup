@@ -114,4 +114,4 @@ Private project - All rights reserved
 
 ## Support
 
-For technical support or questions, contact through the admin dashboard or repository issues.
+For technical support or questions, contact through the admin dashboard or repository issues.# Trigger Vercel deploy - Sun Jul 27 11:12:48 PM UTC 2025
