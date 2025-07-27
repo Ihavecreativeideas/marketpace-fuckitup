@@ -6825,17 +6825,28 @@
                 
                 // Load existing posts on page load
                 const communityFeed = document.getElementById('communityFeed');
-                const existingPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
-                
-                if (existingPosts.length === 0) {
-                    communityFeed.innerHTML = '<div style="text-align: center; color: rgba(255, 255, 255, 0.6); padding: 40px;">No posts yet. Be the first to share something!</div>';
-                } else {
-                    communityFeed.innerHTML = '';
-                    existingPosts.forEach(post => {
-                        const postElement = createPostElement(post);
-                        postElement.setAttribute('data-post-id', post.id);
-                        communityFeed.appendChild(postElement);
-                    });
+                if (communityFeed) {
+                    const existingPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+                    
+                    if (existingPosts.length === 0) {
+                        communityFeed.innerHTML = '<div style="text-align: center; color: rgba(255, 255, 255, 0.6); padding: 40px;">No posts yet. Be the first to share something!</div>';
+                    } else {
+                        communityFeed.innerHTML = '';
+                        existingPosts.forEach(post => {
+                            // Use simplified post display for initialization
+                            const postDiv = document.createElement('div');
+                            postDiv.className = 'post-card';
+                            postDiv.setAttribute('data-post-id', post.id);
+                            postDiv.innerHTML = `
+                                <div style="background: rgba(0, 255, 255, 0.05); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 15px; margin-bottom: 15px;">
+                                    <h3 style="color: #00ffff; margin: 0 0 10px 0;">${post.title || 'Post'}</h3>
+                                    <p style="color: #e2e8f0; margin: 0;">${post.description || post.content || ''}</p>
+                                    <div style="margin-top: 10px; font-size: 12px; color: #94a3b8;">Category: ${post.category || 'general'}</div>
+                                </div>
+                            `;
+                            communityFeed.appendChild(postDiv);
+                        });
+                    }
                 }
                 
             } catch (error) {
