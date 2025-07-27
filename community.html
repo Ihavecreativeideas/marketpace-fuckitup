@@ -3478,7 +3478,8 @@ Example:
                 case 'rent':
                     console.log('Showing rental rate group');
                     if (rentalRateGroup) rentalRateGroup.style.display = 'block';
-                    if (priceGroup) priceGroup.style.display = 'none'; // Hide general price field for rentals - FIXED: No duplicate price sections
+                    if (priceGroup) priceGroup.style.display = 'none'; // CRITICAL FIX: Hide general price field for rentals
+                    console.log('PRICE FIELD HIDDEN:', priceGroup ? priceGroup.style.display : 'not found');
                     // PHASE 3 FIX: Initialize owner availability calendar - FULLY INTERACTIVE
                     setTimeout(() => {
                         currentOwnerCalendarMonth = new Date(); // Reset to current month
@@ -5244,7 +5245,7 @@ Example:
                     </div>
                     
                     <!-- Basic Price Field -->
-                    <div id="priceField" style="margin-bottom: 20px; display: block;">
+                    <div id="priceField" style="margin-bottom: 20px; display: none;">
                         <label style="display: block; margin-bottom: 5px; color: #00ffff;">Price:</label>
                         <input type="text" id="postPrice" placeholder="$0.00" style="width: 100%; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; background: #2d1b69; color: #e2e8f0;" onchange="console.log('Price changed to:', this.value);">
                     </div>
@@ -8771,8 +8772,11 @@ Example:
                 customCategoryFields: !!customCategoryFields
             });
             
-            // Hide all conditional fields first
-            if (priceField) priceField.style.display = 'none';
+            // Hide all conditional fields first - CRITICAL FIX FOR PRICE DUPLICATION
+            if (priceField) {
+                priceField.style.display = 'none';
+                console.log('CRITICAL: priceField hidden for all categories initially');
+            }
             if (rentalRateField) rentalRateField.style.display = 'none';
             if (deliveryMethodField) deliveryMethodField.style.display = 'none';
             if (eventFields) eventFields.style.display = 'none';
@@ -8811,6 +8815,17 @@ Example:
                 case 'rent':
                     console.log('Showing rental fields');
                     if (rentalRateField) rentalRateField.style.display = 'block';
+                    // CRITICAL FIX: Ensure price field stays hidden for rentals
+                    if (priceField) {
+                        priceField.style.display = 'none';
+                        console.log('CRITICAL: priceField forcibly hidden for rental category');
+                    }
+                    // CRITICAL FIX: Initialize calendar for rentals
+                    setTimeout(() => {
+                        console.log('CRITICAL: Initializing rental calendar...');
+                        generateOwnerAvailabilityCalendar();
+                        updateOwnerSelectedDatesDisplay();
+                    }, 200);
                     if (deliveryMethodField) deliveryMethodField.style.display = 'block';
                     
                     // Embedded calendar disabled to prevent glitching
@@ -10790,12 +10805,24 @@ Example:
 
             calendar.innerHTML = '';
             
-            // Add day headers
+            // Add day headers - CRITICAL FIX
             const dayHeaders = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
             dayHeaders.forEach(day => {
                 const header = document.createElement('div');
                 header.className = 'calendar-day header';
                 header.textContent = day;
+                header.style.cssText = `
+                    background: rgba(0, 255, 255, 0.2);
+                    color: #00ffff;
+                    font-weight: 600;
+                    cursor: default;
+                    border: 1px solid rgba(0, 255, 255, 0.5);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 40px;
+                    font-size: 12px;
+                `;
                 calendar.appendChild(header);
             });
 
@@ -10810,11 +10837,31 @@ Example:
                 dayElement.textContent = date.getDate();
                 dayElement.dataset.date = date.toISOString().split('T')[0];
                 
+                // CRITICAL FIX: Add inline styles to ensure calendar renders
+                dayElement.style.cssText = `
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 40px;
+                    cursor: pointer;
+                    border: 1px solid rgba(0, 255, 255, 0.3);
+                    background: rgba(15, 23, 42, 0.8);
+                    color: #e2e8f0;
+                    font-size: 12px;
+                    font-weight: 500;
+                    border-radius: 4px;
+                    transition: all 0.2s ease;
+                `;
+                
                 if (ownerSelectedDates.includes(dayElement.dataset.date)) {
                     dayElement.classList.add('selected');
+                    dayElement.style.background = 'rgba(16, 185, 129, 0.3)';
+                    dayElement.style.borderColor = '#10b981';
+                    dayElement.style.color = '#10b981';
                 }
                 
                 dayElement.addEventListener('click', function() {
+                    console.log('✅ PHASE 6: Calendar date clicked:', dayElement.dataset.date);
                     toggleOwnerDate(this, dayElement.dataset.date);
                 });
                 
@@ -10905,7 +10952,8 @@ Example:
             updateOwnerSelectedDatesDisplay();
         };
 
-        window.selectAllDays = function() {
+        // CRITICAL FIX: Make preset functions globally accessible
+        function selectAllDays() {
             ownerSelectedDates = [];
             const today = new Date();
             
@@ -10917,13 +10965,16 @@ Example:
             
             generateOwnerAvailabilityCalendar();
             updateOwnerSelectedDatesDisplay();
-        };
+        }
+        window.selectAllDays = selectAllDays;
 
-        window.clearAllDates = function() {
+        // CRITICAL FIX: Make preset functions globally accessible
+        function clearAllDates() {
             ownerSelectedDates = [];
             generateOwnerAvailabilityCalendar();
             updateOwnerSelectedDatesDisplay();
-        };
+        }
+        window.clearAllDates = clearAllDates;
 
         // Calendar month navigation functions
         let currentOwnerCalendarMonth = new Date();
@@ -10980,15 +11031,24 @@ Example:
             updateOwnerSelectedDatesDisplay();
         }
 
+        // CRITICAL FIX: Global preset functions for calendar
         function selectWeekends() { selectDatesByCondition('weekends'); }
         function selectWeekdays() { selectDatesByCondition('weekdays'); }
-        function selectAllDays() { selectDatesByCondition('all'); }
+        
+        window.selectWeekends = selectWeekends;
+        window.selectWeekdays = selectWeekdays;
 
         function clearAllDays() {
             ownerSelectedDates = [];
             generateOwnerAvailabilityCalendar();
             updateOwnerSelectedDatesDisplay();
         }
+        
+        // CRITICAL FIX: Add missing clearAllDates function that was being called
+        function clearAllDates() {
+            clearAllDays(); // Just call the existing function
+        }
+        window.clearAllDates = clearAllDates;
 
 
         // Post interaction data storage
@@ -11418,6 +11478,13 @@ Example:
             } else {
                 console.log('Calling submitSinglePost()');
                 
+                // CRITICAL FIX: Ensure rental data is captured before submission
+                const category = document.getElementById('postCategory')?.value;
+                if (category === 'rent') {
+                    console.log('CRITICAL: Capturing rental rate data before submission');
+                    captureRentalData();
+                }
+                
                 // If editing, call update function instead
                 if (currentEditingPostId) {
                     updateExistingPost();
@@ -11425,6 +11492,40 @@ Example:
                     submitSinglePost();
                 }
             }
+        }
+
+        // CRITICAL FIX: Function to capture rental data before submission
+        function captureRentalData() {
+            console.log('CRITICAL: captureRentalData() called');
+            
+            // Capture hourly and daily rates
+            const hourlyRate = document.getElementById('hourlyRateAmountModal')?.value || 
+                               document.getElementById('hourlyRateAmount')?.value || '';
+            const dailyRate = document.getElementById('dailyRateAmountModal')?.value || 
+                              document.getElementById('dailyRateAmount')?.value || '';
+            
+            // Capture selected rate type
+            const hourlyRadio1 = document.getElementById('hourlyRateModalRadio');
+            const dailyRadio1 = document.getElementById('dailyRateModalRadio');
+            const hourlyRadio2 = document.getElementById('hourlyRateRadioModal');
+            const dailyRadio2 = document.getElementById('dailyRateRadioModal');
+            
+            let selectedRateType = 'daily'; // default
+            if (hourlyRadio1?.checked || hourlyRadio2?.checked) {
+                selectedRateType = 'hourly';
+            } else if (dailyRadio1?.checked || dailyRadio2?.checked) {
+                selectedRateType = 'daily';
+            }
+            
+            // Store the data globally for form submission
+            window.rentalRateData = {
+                hourlyRate: hourlyRate,
+                dailyRate: dailyRate,
+                selectedRateType: selectedRateType,
+                availabilityDates: ownerSelectedDates || []
+            };
+            
+            console.log('CRITICAL: Rental rate data captured:', window.rentalRateData);
         }
 
         // Global submitSinglePost function
