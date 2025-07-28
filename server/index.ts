@@ -262,7 +262,7 @@ app.use(cors({
 }));
 app.use(express.json());
 // Serve static files from client directory for Vercel deployment
-app.use(express.static(path.join(process.cwd(), 'client')));
+app.use(express.static(path.join(__dirname, '../client')));
 
 // Enhanced MarketPace Integration API Endpoints
 
@@ -5758,7 +5758,7 @@ app.post('/api/booking/submit-review', async (req, res) => {
 
 // Root route - serve index.html directly from client folder
 app.get('/', (req, res) => {
-  res.sendFile(path.join(process.cwd(), 'client', 'index.html'), (err) => {
+  res.sendFile(path.join(__dirname, '../client/index.html'), (err) => {
     if (err && !res.headersSent) {
       console.error('Index.html not found, redirecting to community');
       res.redirect('/community');
@@ -5790,7 +5790,7 @@ htmlRoutes.forEach(route => {
     if (route === '/menu') fileName = 'marketpace-menu.html';
     
     // CRITICAL FIX: Serve from client/ directory for Vercel deployment
-    res.sendFile(path.join(process.cwd(), 'client', fileName), (err) => {
+    res.sendFile(path.join(__dirname, '../client', fileName), (err) => {
       if (err && !res.headersSent) {
         console.error(`File not found: client/${fileName}, redirecting to community`);
         res.redirect('/community');
@@ -9406,6 +9406,17 @@ app.get("/signup-login.html", (req: any, res: any) => {
 
 app.get("/pitch-page.html", (req: any, res: any) => {
   res.sendFile(path.join(__dirname, "../client/pitch-page.html"));
+});
+
+// Catch-all handler: this should be LAST  
+// For any requests that don't match above routes, serve index.html
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, '../client/index.html'), (err) => {
+    if (err) {
+      console.error('Fallback index.html error:', err);
+      res.status(404).send('Page not found');
+    }
+  });
 });
 
 
