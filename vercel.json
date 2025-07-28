@@ -1,14 +1,26 @@
 {
   "version": 2,
-  "functions": {
-    "api/index.js": {
-      "runtime": "@vercel/node"
+  "builds": [
+    {
+      "src": "client/**/*",
+      "use": "@vercel/static"
     }
-  },
+  ],
   "routes": [
     {
+      "src": "/((?!api).*)",
+      "dest": "/client/$1"
+    },
+    {
+      "src": "/",
+      "dest": "/client/index.html"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/api/index.js"
+      "dest": "/client/index.html"
     }
   ]
 }
