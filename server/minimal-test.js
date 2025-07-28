@@ -12,8 +12,6 @@ app.use((req, res) => {
   res.sendFile(path.join(__dirname, '../client/index.html'));
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`✅ MarketPace Server running on port ${PORT}`);
-  console.log(`🌐 Serving static files from client/ directory`);
-  console.log(`📄 Fallback to index.html for SPA routing`);
+app.listen(PORT, () => {
+  console.log(`Minimal server running on port ${PORT}`);
 });
