@@ -9371,49 +9371,17 @@ app.get("/cloudinary-demo.html", (req: any, res: any) => {
   res.sendFile(path.join(__dirname, "../cloudinary-demo.html"));
 });
 
-// Add route handlers for all main HTML files (they're in client/ folder)
-app.get("/", (req: any, res: any) => {
-  res.sendFile(path.join(__dirname, "../client/index.html"));
+// Root route handler
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/index.html'));
 });
 
-app.get("/community.html", (req: any, res: any) => {
-  res.sendFile(path.join(__dirname, "../client/community.html"));
-});
-
-app.get("/market.html", (req: any, res: any) => {
-  res.sendFile(path.join(__dirname, "../client/market.html"));
-});
-
-app.get("/profile.html", (req: any, res: any) => {
-  res.sendFile(path.join(__dirname, "../client/profile.html"));
-});
-
-app.get("/the-hub.html", (req: any, res: any) => {
-  res.sendFile(path.join(__dirname, "../client/the-hub.html"));
-});
-
-app.get("/mypace.html", (req: any, res: any) => {
-  res.sendFile(path.join(__dirname, "../client/mypace.html"));
-});
-
-app.get("/marketpace-menu.html", (req: any, res: any) => {
-  res.sendFile(path.join(__dirname, "../client/marketpace-menu.html"));
-});
-
-app.get("/signup-login.html", (req: any, res: any) => {
-  res.sendFile(path.join(__dirname, "../client/signup-login.html"));
-});
-
-app.get("/pitch-page.html", (req: any, res: any) => {
-  res.sendFile(path.join(__dirname, "../client/pitch-page.html"));
-});
-
-// Catch-all handler: this should be LAST  
-// For any requests that don't match above routes, serve index.html
+// Fallback middleware for unmatched routes (must be last)
 app.use((req, res) => {
+  // Serve index.html for any unmatched routes
   res.sendFile(path.join(__dirname, '../client/index.html'), (err) => {
     if (err) {
-      console.error('Fallback index.html error:', err);
+      console.error('Error serving fallback index.html:', err);
       res.status(404).send('Page not found');
     }
   });
