@@ -273,6 +273,12 @@ All features are designed to strengthen local communities by keeping commerce lo
 
 ## Recent Changes
 
+✓ **LOGO BUTTON NAVIGATION FIX COMPLETED** (July 28, 2025)
+✓ **LOGO REDIRECTS TO HOME**: Changed MarketPace logo click behavior from profile redirect to community page redirect across all platform pages
+✓ **CONSISTENT LOGO BEHAVIOR**: Updated logo onclick functions from goToProfile() to goToHome() in community.html, market.html, the-hub.html, and mypace.html
+✓ **IMPROVED USER EXPERIENCE**: Logo now acts as expected home button, taking users to community feed (main page) instead of profile
+✓ **PLATFORM-WIDE LOGO CONSISTENCY**: All logo buttons now provide consistent navigation behavior across the entire MarketPace ecosystem
+
 ✓ **NAVIGATION UPDATE: "MYPACE" TO "CHECK-IN" COMPLETED** (July 28, 2025)
 ✓ **COMPREHENSIVE NAVIGATION LABEL UPDATE**: Changed "MyPace" to "Check-In" across all platform pages including community.html, market.html, the-hub.html, mypace.html, public-profile.html, mypace-discover.html, and community_backup.html
 ✓ **CONSISTENT USER EXPERIENCE**: Updated bottom navigation labels to use "Check-In" terminology while maintaining all existing functionality and radar icons
