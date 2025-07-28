@@ -11102,7 +11102,25 @@ Example:
                     'July', 'August', 'September', 'October', 'November', 'December'];
                 monthElement.textContent = `${monthNames[currentOwnerCalendarMonth.getMonth()]} ${currentOwnerCalendarMonth.getFullYear()}`;
             }
-        }
+        };
+            
+        // Generate owner availability calendar (continuation of broken function)
+        window.generateOwnerAvailabilityCalendar = async function(rentalItemId) {
+            const realRentalId = rentalItemId || window.getCurrentRentalId();
+            console.log('✅ Generating calendar for rental ID:', realRentalId);
+            
+            const calendar = document.getElementById('ownerAvailabilityCalendar');
+            if (!calendar) {
+                console.error('❌ Calendar container not found');
+                return;
+            }
+            
+            // Clear existing content
+            calendar.innerHTML = '';
+            
+            // Create calendar structure
+            const today = new Date();
+            const unavailableDates = await window.getUnavailableDates(realRentalId);
             
             for (let i = 0; i < 28; i++) {
                 const date = new Date(today);
