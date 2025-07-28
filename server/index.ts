@@ -261,7 +261,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-app.use(express.static('.'));
+app.use(express.static('./client'));
 
 // Enhanced MarketPace Integration API Endpoints
 
@@ -9348,3 +9348,42 @@ app.get("/cloudinary-demo", (req: any, res: any) => {
 app.get("/cloudinary-demo.html", (req: any, res: any) => {
   res.sendFile(path.join(__dirname, "../cloudinary-demo.html"));
 });
+
+// Add route handlers for all main HTML files (they're in client/ folder)
+app.get("/", (req: any, res: any) => {
+  res.sendFile(path.join(__dirname, "../client/index.html"));
+});
+
+app.get("/community.html", (req: any, res: any) => {
+  res.sendFile(path.join(__dirname, "../client/community.html"));
+});
+
+app.get("/market.html", (req: any, res: any) => {
+  res.sendFile(path.join(__dirname, "../client/market.html"));
+});
+
+app.get("/profile.html", (req: any, res: any) => {
+  res.sendFile(path.join(__dirname, "../client/profile.html"));
+});
+
+app.get("/the-hub.html", (req: any, res: any) => {
+  res.sendFile(path.join(__dirname, "../client/the-hub.html"));
+});
+
+app.get("/mypace.html", (req: any, res: any) => {
+  res.sendFile(path.join(__dirname, "../client/mypace.html"));
+});
+
+app.get("/marketpace-menu.html", (req: any, res: any) => {
+  res.sendFile(path.join(__dirname, "../client/marketpace-menu.html"));
+});
+
+app.get("/signup-login.html", (req: any, res: any) => {
+  res.sendFile(path.join(__dirname, "../client/signup-login.html"));
+});
+
+app.get("/pitch-page.html", (req: any, res: any) => {
+  res.sendFile(path.join(__dirname, "../client/pitch-page.html"));
+});
+
+
