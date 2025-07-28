@@ -9347,6 +9347,8 @@ app.listen(port, '0.0.0.0', () => {
   console.error(`❌ Failed to start on port ${port}:`, err.message);
 });
 
+// Export the app for Vercel
+module.exports = app;
 export default app;
 app.get("/independent-contractor-tax-tracker", (req: any, res: any) => {
   res.sendFile(path.join(__dirname, "../independent-contractor-tax-tracker.html"));
