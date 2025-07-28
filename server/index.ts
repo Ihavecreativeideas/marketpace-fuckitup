@@ -9304,6 +9304,19 @@ app.post('/api/mypace/rewards/redeem', (req, res) => {
   }
 });
 
+// CRITICAL: Catch-all route for Vercel deployment - serve index.html for unmatched routes
+app.use((req, res, next) => {
+  // If no other route handled this request, serve index.html
+  if (!res.headersSent) {
+    res.sendFile(path.join(process.cwd(), 'client', 'index.html'), (err) => {
+      if (err) {
+        console.error('Failed to serve index.html:', err);
+        res.status(404).send('Page not found');
+      }
+    });
+  }
+});
+
 app.listen(port, '0.0.0.0', () => {
   console.log(`✅ MarketPace Full Server running on port ${port}`);
   console.log(`🌐 Binding to 0.0.0.0:${port} for external access`);
