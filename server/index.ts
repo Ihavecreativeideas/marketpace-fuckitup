@@ -261,7 +261,8 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-app.use(express.static('./client'));
+// Serve static files from client directory for Vercel deployment
+app.use(express.static(path.join(process.cwd(), 'client')));
 
 // Enhanced MarketPace Integration API Endpoints
 
@@ -5755,9 +5756,14 @@ app.post('/api/booking/submit-review', async (req, res) => {
   }
 });
 
-// Root redirect route
+// Root route - serve index.html directly from client folder
 app.get('/', (req, res) => {
-  res.redirect('/community');
+  res.sendFile(path.join(process.cwd(), 'client', 'index.html'), (err) => {
+    if (err && !res.headersSent) {
+      console.error('Index.html not found, redirecting to community');
+      res.redirect('/community');
+    }
+  });
 });
 
 // Static file routes for all HTML pages
@@ -5783,9 +5789,10 @@ htmlRoutes.forEach(route => {
     let fileName = route.slice(1) + '.html';
     if (route === '/menu') fileName = 'marketpace-menu.html';
     
-    res.sendFile(path.join(process.cwd(), fileName), (err) => {
+    // CRITICAL FIX: Serve from client/ directory for Vercel deployment
+    res.sendFile(path.join(process.cwd(), 'client', fileName), (err) => {
       if (err && !res.headersSent) {
-        console.error(`File not found: ${fileName}, redirecting to community`);
+        console.error(`File not found: client/${fileName}, redirecting to community`);
         res.redirect('/community');
       }
     });
@@ -5861,12 +5868,12 @@ app.post('/api/employee/send-invitation', async (req, res) => {
 
 // Employee Dashboard Route
 app.get('/employee-dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, '../employee-dashboard.html'));
+  res.sendFile(path.join(process.cwd(), 'client', 'employee-dashboard.html'));
 });
 
 // Pro Business Setup Route
 app.get('/pro-business-setup', (req, res) => {
-  res.sendFile(path.join(__dirname, '../pro-business-setup.html'));
+  res.sendFile(path.join(process.cwd(), 'client', 'pro-business-setup.html'));
 });
 
 // Driver Application Approval and Invitation API
@@ -5907,17 +5914,17 @@ app.post('/api/driver/approve-and-invite', async (req, res) => {
 
 // Driver Dashboard Route
 app.get('/driver-dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, '../driver-dashboard.html'));
+  res.sendFile(path.join(process.cwd(), 'client', 'driver-dashboard.html'));
 });
 
 // Driver QR Scanner Route  
 app.get('/driver-qr-scanner', (req, res) => {
-  res.sendFile(path.join(__dirname, '../driver-qr-scanner.html'));
+  res.sendFile(path.join(process.cwd(), 'client', 'driver-qr-scanner.html'));
 });
 
 // Driver Application Route (for members to apply)
 app.get('/driver-application', (req, res) => {
-  res.sendFile(path.join(__dirname, '../driver-application.html'));
+  res.sendFile(path.join(process.cwd(), 'client', 'driver-application.html'));
 });
 
 // Unified Portal System Demo Route
